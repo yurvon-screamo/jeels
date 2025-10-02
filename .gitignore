@@ -1,0 +1,46 @@
+# Rust
+/target/
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config files with sensitive data
+config.toml
+
+# Output directory
+output/
+
+# Temporary files
+*.tmp
+*.temp
+temp_*
+tokens_*
+output_*
+trimmed_*
+concatenated_*
+video_list_*
+audio_*.wav
+audio_*.npy
+video_*.mp4
+video_*.txt
+video_*.txt
+
+# Logs
+*.log
+
+# Cache
+.cache/
+
+vocoder
+vocoder.exe
+llama_generate
+llama_generate.exe
