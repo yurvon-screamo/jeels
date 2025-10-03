@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use colored::*;
 use indicatif::{ProgressBar, ProgressStyle};
+use std::path::PathBuf;
 
 use serde::Deserialize;
 
@@ -45,6 +46,32 @@ impl ProgressTracker {
     }
 }
 
+fn create_output_structure(user_input: &str, config: &AppConfig) -> Result<PathBuf> {
+    let now = chrono::Utc::now();
+    let datetime_str = now.format("%Y%m%d_%H%M%S").to_string();
+
+    let sanitized_input = user_input
+        .chars()
+        .map(|c| {
+            if c.is_alphanumeric() || c == ' ' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect::<String>()
+        .replace(' ', "_");
+
+    let folder_name = format!("{}_{}", datetime_str, sanitized_input);
+    let output_path = PathBuf::from(&config.output_dir)
+        .join("words")
+        .join(folder_name);
+
+    std::fs::create_dir_all(&output_path)?;
+
+    Ok(output_path)
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     println!(
@@ -63,13 +90,16 @@ async fn main() -> Result<()> {
         Commands::Grammar { .. } => todo!(),
     };
 
+    let output_dir = create_output_structure(&topic, &config)?;
+
     let handles: Vec<_> = (0..config.concurrent_videos)
         .map(|i| {
             let config = config.clone();
             let topic = topic.clone();
+            let output_dir = output_dir.clone();
             tokio::spawn(async move {
                 let progress = ProgressTracker::new();
-                generate(i + 1, topic, config, progress).await
+                generate(i + 1, topic, config, progress, output_dir).await
             })
         })
         .collect();
@@ -117,6 +147,7 @@ async fn generate(
     topic: String,
     config: AppConfig,
     progress: ProgressTracker,
+    output_dir: PathBuf,
 ) -> Result<String> {
     // Step 1: Generate content plan
     progress.step(
@@ -165,11 +196,33 @@ async fn generate(
         3,
         &format!("\n🎬 Создаем финальное видео {}...", video_number),
     );
-    let output_path = concat_videos_and_audio(videos, audio, &config).await?;
+    let output_path = concat_videos_and_audio(videos, audio, &output_dir).await?;
+
+    create_readme(&output_dir, &topic, &video_content).await?;
 
     progress.finish(&format!("\n🎉 Видео {} готово!", video_number));
 
     Ok(output_path)
+}
+
+async fn create_readme(output_dir: &std::path::Path, topic: &str, content: &str) -> Result<()> {
+    let readme_content = format!(
+        "# Обучение японскому языку: {}\n\n{}\n\n## Содержание урока\n\n{}\n\n## Файлы\n\n- `video.mp4` - Финальное видео\n- `audio.wav` - Аудио файл\n",
+        chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC"),
+        topic,
+        content,
+    );
+
+    let readme_path = output_dir.join("README.md");
+    tokio::fs::write(&readme_path, readme_content).await?;
+
+    Ok(())
+}
+
+#[derive(Clone, Deserialize)]
+struct FishSpeechPrompt {
+    tokens: String,
+    text: String,
 }
 
 #[derive(Clone, Deserialize)]
@@ -184,6 +237,7 @@ struct AppConfig {
     pexels_total: usize,
 
     fish_speech_checkpoint: String,
+    fish_speech_prompts: Vec<FishSpeechPrompt>,
 
     concurrent_videos: usize,
     output_dir: String,

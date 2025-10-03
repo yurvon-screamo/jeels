@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::audio_content::AudioContent;
-use crate::{AppConfig, background::BackgroundVideo, pexels::PexelsVideo};
+use crate::{background::BackgroundVideo, pexels::PexelsVideo};
 
 pub trait VideoContent {
     fn content(&self) -> &[u8];
@@ -22,39 +22,52 @@ impl VideoContent for BackgroundVideo {
 pub async fn concat_videos_and_audio<T: VideoContent>(
     video: T,
     audio: AudioContent,
-    config: &AppConfig,
+    output_dir: &std::path::Path,
 ) -> Result<String> {
-    tokio::fs::create_dir_all(&config.output_dir).await?;
-
     let t_id = ulid::Ulid::new();
-    let audio_path = format!("audio_{}.wav", t_id);
-    let output_path = format!("{}/{}.mp4", config.output_dir, t_id);
+    let audio_path = output_dir.join("audio.wav");
+    let output_path = output_dir.join("video.mp4");
 
     tokio::fs::write(&audio_path, audio.content).await?;
 
-    let video_path = format!("video_{}.mp4", t_id);
+    let video_path = output_dir.join(format!("temp_video_{}.mp4", t_id));
     tokio::fs::write(&video_path, video.content()).await?;
 
-    let used_video_path: String;
+    let used_video_path: std::path::PathBuf;
 
-    let video_duration = get_duration(&video_path).await?;
+    let video_duration = get_duration(&video_path.to_string_lossy()).await?;
     if video_duration >= audio.duration {
-        let trimmed = format!("trimmed_{}.mp4", t_id);
-        trim_video(&video_path, &trimmed, audio.duration).await?;
+        let trimmed = output_dir.join(format!("trimmed_{}.mp4", t_id));
+        trim_video(
+            &video_path.to_string_lossy(),
+            &trimmed.to_string_lossy(),
+            audio.duration,
+        )
+        .await?;
         used_video_path = trimmed;
     } else {
         used_video_path = video_path.clone();
     }
 
-    add_audio_to_video(&used_video_path, &audio_path, &output_path).await?;
+    add_audio_to_video(
+        &used_video_path.to_string_lossy(),
+        &audio_path.to_string_lossy(),
+        &output_path.to_string_lossy(),
+    )
+    .await?;
 
     tokio::fs::remove_file(&audio_path).await?;
     tokio::fs::remove_file(&video_path).await?;
-    if used_video_path.starts_with("trimmed_") {
+    if used_video_path
+        .file_name()
+        .unwrap()
+        .to_string_lossy()
+        .starts_with("trimmed_")
+    {
         tokio::fs::remove_file(&used_video_path).await?;
     }
 
-    Ok(output_path)
+    Ok(output_path.to_string_lossy().to_string())
 }
 
 pub async fn get_duration(file: &str) -> Result<f64> {

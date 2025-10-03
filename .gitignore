@@ -42,6 +42,8 @@ video_*.txt
 
 vocoder
 vocoder.exe
+encoder
+encoder.exe
 llama_generate
 llama_generate.exe
 

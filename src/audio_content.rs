@@ -67,7 +67,7 @@ async fn merge_audio_chunks(audio_chunks: Vec<Vec<u8>>) -> Result<Vec<u8>> {
 
     tokio::fs::write(&concat_list_path, concat_list).await?;
 
-    let ffmpeg_output = tokio::process::Command::new("ffmpeg")
+    let mut ffmpeg_process = tokio::process::Command::new("ffmpeg")
         .arg("-f")
         .arg("concat")
         .arg("-safe")
@@ -78,13 +78,16 @@ async fn merge_audio_chunks(audio_chunks: Vec<Vec<u8>>) -> Result<Vec<u8>> {
         .arg("copy")
         .arg(&output_path)
         .arg("-y")
-        .output()
-        .await?;
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        .spawn()?;
 
-    if !ffmpeg_output.status.success() {
+    let ffmpeg_status = ffmpeg_process.wait().await?;
+
+    if !ffmpeg_status.success() {
         return Err(anyhow::anyhow!(
-            "FFmpeg concatenation failed: {}",
-            String::from_utf8_lossy(&ffmpeg_output.stderr)
+            "FFmpeg concatenation failed with exit code: {:?}",
+            ffmpeg_status.code()
         ));
     }
 
@@ -105,43 +108,58 @@ async fn generate_audio_chunk(text: &str, config: &AppConfig) -> Result<AudioCon
     let tokens_path = format!("tokens_{}.npy", t_id);
     let output_path = format!("output_{}.wav", t_id);
 
-    let llama_output = tokio::process::Command::new("./llama_generate")
+    let prompt = if config.fish_speech_prompts.is_empty() {
+        return Err(anyhow::anyhow!("No fish speech prompts configured"));
+    } else {
+        let index = fastrand::usize(..config.fish_speech_prompts.len());
+        &config.fish_speech_prompts[index]
+    };
+
+    let mut llama_process = tokio::process::Command::new("./llama_generate")
         .arg("--text")
         .arg(text)
         .arg("--out-path")
         .arg(&tokens_path)
         .arg("--checkpoint")
         .arg(&config.fish_speech_checkpoint)
-        .output()
-        .await?;
+        .arg("--max-new-tokens")
+        .arg("4096")
+        .arg("--prompt-tokens")
+        .arg(&prompt.tokens)
+        .arg("--prompt-text")
+        .arg(&prompt.text)
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        .spawn()?;
 
-    llama_output
-        .status
-        .success()
-        .then_some(t_id)
-        .ok_or(anyhow::anyhow!(
-            "Llama generate failed {}",
-            String::from_utf8_lossy(&llama_output.stderr)
-        ))?;
+    let llama_status = llama_process.wait().await?;
 
-    let vocoder_output = tokio::process::Command::new("./vocoder")
+    if !llama_status.success() {
+        return Err(anyhow::anyhow!(
+            "Llama generate failed with exit code: {:?}",
+            llama_status.code()
+        ));
+    }
+
+    let mut vocoder_process = tokio::process::Command::new("./vocoder")
         .arg("-i")
         .arg(&tokens_path)
         .arg("-o")
         .arg(&output_path)
         .arg("--checkpoint")
         .arg(&config.fish_speech_checkpoint)
-        .output()
-        .await?;
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        .spawn()?;
 
-    vocoder_output
-        .status
-        .success()
-        .then_some(t_id)
-        .ok_or(anyhow::anyhow!(
-            "Vocoder failed {}",
-            String::from_utf8_lossy(&vocoder_output.stderr)
-        ))?;
+    let vocoder_status = vocoder_process.wait().await?;
+
+    if !vocoder_status.success() {
+        return Err(anyhow::anyhow!(
+            "Vocoder failed with exit code: {:?}",
+            vocoder_status.code()
+        ));
+    }
 
     let audio = tokio::fs::read(&output_path).await?;
 
