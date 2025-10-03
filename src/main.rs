@@ -6,11 +6,12 @@ use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 
 use crate::{
-    audio_content::generate_audio, ffprobe::concat_videos_and_audio,
-    pexels::pick_video_from_pexels, video_content::generate_video_content,
+    audio_content::generate_audio, background::pick_video_from_background,
+    ffprobe::concat_videos_and_audio, video_content::generate_video_content,
 };
 
 mod audio_content;
+mod background;
 mod ffprobe;
 mod pexels;
 mod video_content;
@@ -56,12 +57,10 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     let topic = match &args.command {
-        Commands::Word { word } => {
-            format!("New word for learning: {}", word)
+        Commands::Words { words } => {
+            format!("{}", words.join(", "))
         }
-        Commands::Grammar { grammar } => {
-            format!("New grammar topic for learning: {}", grammar)
-        }
+        Commands::Grammar { .. } => todo!(),
     };
 
     let handles: Vec<_> = (0..config.concurrent_videos)
@@ -150,17 +149,15 @@ async fn generate(
     // Step 3: Pick videos
     progress.step(
         2,
-        &format!("\n🎥 Ищем видео на Pexels для видео {}...", video_number),
+        &format!(
+            "\n🎥 Ищем видео в папке background для видео {}...",
+            video_number
+        ),
     );
-    let videos = pick_video_from_pexels(&config, audio.duration as usize).await?;
+    let videos = pick_video_from_background(&config).await?;
     println!(
         "\n{}",
-        format!(
-            "✅ Найдено {} видео для видео {}",
-            videos.len(),
-            video_number
-        )
-        .bright_green()
+        format!("✅ Найдено видео для видео {}", video_number).bright_green()
     );
 
     // Step 4: Concatenate videos and audio
@@ -168,7 +165,7 @@ async fn generate(
         3,
         &format!("\n🎬 Создаем финальное видео {}...", video_number),
     );
-    let output_path = concat_videos_and_audio(videos, audio, &video_content, &config).await?;
+    let output_path = concat_videos_and_audio(videos, audio, &config).await?;
 
     progress.finish(&format!("\n🎉 Видео {} готово!", video_number));
 
@@ -190,6 +187,7 @@ struct AppConfig {
 
     concurrent_videos: usize,
     output_dir: String,
+    background_dir: String,
 }
 
 impl AppConfig {
@@ -215,10 +213,10 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Generate video for learning a new word
-    Word {
-        /// The word to learn
-        word: String,
+    /// Generate video for learning a new words
+    Words {
+        /// The words to learn
+        words: Vec<String>,
     },
     /// Generate video for learning grammar
     Grammar {

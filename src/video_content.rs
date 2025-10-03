@@ -11,45 +11,70 @@ pub async fn generate_video_content(topic: &str, config: &AppConfig) -> Result<S
         config.openai_api_key.clone(),
         config.openai_api_base.clone(),
     );
-    let messages = vec![
-        ChatCompletionMessage {
-            role: ChatCompletionMessageRole::System,
-            content: Some(
-                "You are a helpful assistant.
-Your task is to generate text for the audio of the video that will be used to teach Russian-speaking students to the N5 level of Japanese.
-The video will be from 15 to 40 seconds. 
+    let messages = vec![ChatCompletionMessage {
+        role: ChatCompletionMessageRole::User,
+        content: Some(format!(
+            r#"Ты — учитель японского языка. Создай сценарий для короткого обучающего видео (30–60 секунд) на русском языке, посвящённого изучению новых для зрителя слов: {}.
 
-THE CONTENT MUST BE IN RUSSIAN.
+Требования:
+- Аудитория: русскоязычный студент уровня JLPT N5, уже знакомый с базовой грамматикой N5 (например, частицами に, へ, から, простыми существительными, временем ます-формы и т.п.).
+- Язык сценария: только русский.
+- Не включай приветствия, пожелания удачи, призывы к действию («попробуйте сами», «повторите вслед» и т.д.).
+- Не указывай транскрипцию или произношение — текст будет озвучен профессиональным диктором.
+- Используй простые, но естественные, повседневные примеры с лексикой и грамматикой уровня N5.
+- Общий объём: достаточно для озвучки за 50–100 секунд (примерно 300–500 слов).
+- Отдавай только текст для озвучки, без подписей.
+- Раздели текст на логически группы, используя '---', каждая группа будет озвучена отдельно.
 
-You need to create a live and interesting content that should interest the student.
+Используй шаблон «слова → определение → пример → повтор» для начала видео:
 
-Only text, no headers, notes, transliteration, or greetings like 'welcome to the lesson'.
+```example
+Изучим группу глаголов описывающих движение - 来ます, 行きます и 帰ります. Изучим каждый глагол отдельно.
+来ます означает «приходить» к говорящему или к месту, где он находится. Так например можно сказать «Друг приходит ко мне в гости» — 友達がうちに来ます。  
+行きます означает «идти» или «ехать» от говорящего в другое место. С его помощью можно сказать «Я иду в школу» — わたしは学校に行きます。  
+帰ります означает «возвращаться домой». И пример использования - «После работы я возвращаюсь домой» — 仕事のあと、うちに帰ります。  
+---
+Обратите внимание: 帰ります почти всегда относится к возвращению домой, а не просто в любое место.
+Закрепим: 来ます - «приходить», 行きます - «идти», 帰ります - «возвращаться домой». И еще раз: 来ます - «приходить», 行きます - «идти», 帰ります - «возвращаться домой».
+```
 
-DON'T WRITE THE TRANSLITERATION WORDS, IT WILL SOUND BAD IN AUDIO. For example not write: 'Глагол 助ける (тасукэру)', insted write: 'Глагол 助ける'.
+А для завершения выбери **один из подходящих нарративных форматов**:  
+— мини-диалог в кафе или магазине,  
+— рассказ о дегустации блюд,  
+— сравнение реакций на разную еду,  
+— история с неожиданной путаницей вкусов,  
+— или любой другой естественный контекст, где эти слова возникают органично.
 
-Don't use common phrases that clutter the content, such as good luck in learning, welcome to the lesson, create your own example and etc. Such phrases simply take time from the viewer.
+Цель — помочь зрителю **почувствовать разницу между словами через ситуацию**, а не просто запомнить определения.  
 
-Don't suggest the user to do something themselves, don't give any tasks.
+В конце можно еще раз повторить пройденные слова:
 
-We assume that the viewer already knows the basic words and grammar, so use simple words and grammar in examples.
-"
+```example
+Сегодня разберём три прилагательных, которые описывают вкус: 甘い, 辛い и 塩辛い.  
+甘い означает «сладкий». Например: «Этот торт сладкий» — このケーキは甘いです。  
+辛い — это «острый» или «пряный». Так говорят о еде с перцем или васаби: «Этот суп острый» — このスープは辛いです。  
+塩辛い — «солёный», часто с оттенком «слишком солёный». Например: «Эта рыба слишком солёная» — この魚は塩辛いです。  
+---
+Возможно вам поможет в запоминании, что 塩辛い, это 辛い с приставкой 'しお'.
+Запомните: 甘い — сладкий, 辛い — острый, 塩辛い — солёный.
+И повторим еще разок: 甘い — сладкий, 辛い — острый, 塩辛い — солёный.
+---
+Представьте: вы с другом пробуете блюда в японском ресторане. Вы берёте кусочек торта — и говорите: «Вау, он очень сладкий!» — 甘い！  
+Потом ваш друг ест карри и морщится: «Ого, как остро!» — 辛い！  
+А когда вы пробуете маринованную рыбу, то сразу пьёте воду и говорите: «Это слишком солёно!» — 塩辛い！  
+---
+Обратите внимание: 辛い может означать не только «острый», но и «трудный» в других контекстах, но сейчас мы говорим именно о вкусе. А 塩辛い почти всегда относится к солёному вкусу, особенно когда соли слишком много.  
+Таким образом: 甘い — сладкий, 辛い — острый, 塩辛い — солёный.
+```
 
-                    .to_string(),
-            ),
-            name: None,
-            function_call: None,
-            tool_call_id: None,
-            tool_calls: None,
-        },
-        ChatCompletionMessage {
-            role: ChatCompletionMessageRole::User,
-            content: Some(topic.to_string()),
-            name: None,
-            function_call: None,
-            tool_call_id: None,
-            tool_calls: None,
-        },
-    ];
+Результат: готовый, связный текст сценария, пригодный для озвучки."#,
+            topic
+        )),
+        name: None,
+        function_call: None,
+        tool_call_id: None,
+        tool_calls: None,
+    }];
 
     let chat_completion = ChatCompletion::builder(config.openai_model.as_str(), messages.clone())
         .credentials(credentials.clone())
@@ -71,6 +96,8 @@ We assume that the viewer already knows the basic words and grammar, so use simp
         .unwrap_or(returned_message.as_str())
         .trim()
         .replace("\\n", "\n")
+        .replace("```text", "")
+        .replace("```", "")
         .to_string();
 
     if returned_message.is_empty() {
