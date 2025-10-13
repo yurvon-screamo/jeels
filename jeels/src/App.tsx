@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import { Layout } from "./components/Layout";
 import { Router } from "./components/Router";
+import { LessonsView } from "./components/LessonsView";
 
 type Page = "feed" | "lessons" | "translate" | "profile";
 
@@ -14,9 +15,7 @@ const views: Record<Page, React.ReactNode> = {
     </Fieldset>
   ),
   lessons: (
-    <Fieldset legend="Lessons">
-      <p>Дерево уроков, выбор и поиск.</p>
-    </Fieldset>
+    <LessonsView />
   ),
   translate: (
     <Fieldset legend="Translate">
@@ -50,26 +49,6 @@ function App() {
     <Layout title={current.title} startMenu={menu}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {current.node}
-
-        <Fieldset legend="Greet Function">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Input
-              value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-              placeholder="Enter a name..."
-            />
-            <Button onClick={greet} disabled={!name.trim()}>Greet</Button>
-            {greetMsg && (
-              <div style={{
-                padding: 10,
-                background: 'var(--message-bg)',
-                border: '1px solid var(--message-border)'
-              }}>
-                {greetMsg}
-              </div>
-            )}
-          </div>
-        </Fieldset>
       </div>
     </Layout>
   );

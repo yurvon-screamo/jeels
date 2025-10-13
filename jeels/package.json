@@ -14,6 +14,7 @@
     "@react95/icons": "^2.2.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
+    "yaml": "^2.5.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
