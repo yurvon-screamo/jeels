@@ -13,12 +13,15 @@
   --link-visited: #800080;
 }
 
+html,
 body,
 #root {
   margin: 0;
   padding: 0;
   background: var(--background) !important;
   font-family: 'MS Sans Serif', sans-serif;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Ensure proper styling for React95 components */

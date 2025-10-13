@@ -21,8 +21,7 @@ export function LessonsView() {
     const [selected, setSelected] = useState<{ group: string; topic: string } | null>(null);
 
     useEffect(() => {
-        // Build index at runtime from YAML indexes
-        LessonStore.loadIndexFromYaml();
+        LessonStore.ensureIndexLoaded();
     }, []);
 
     // Build grouped view with filtering
@@ -73,24 +72,24 @@ export function LessonsView() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <Fieldset legend="Поиск">
+            <Fieldset legend="検索">
                 <Input
                     value={query}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                    placeholder="Найти урок..."
+                    placeholder="レッスンを検索…"
                 />
             </Fieldset>
 
             <div style={{ display: 'flex', gap: 12 }}>
                 {/* Left: Tree */}
-                <Fieldset legend="Дерево" style={{ minWidth: 260, width: 320 }}>
+                <Fieldset legend="ツリー" style={{ minWidth: 260, width: 320 }}>
                     <Tree data={treeData as any} />
                 </Fieldset>
 
                 {/* Right: Preview */}
-                <Fieldset legend="Просмотр" style={{ flex: 1 }}>
+                <Fieldset legend="プレビュー" style={{ flex: 1 }}>
                     {!selected && (
-                        <div style={{ color: '#555' }}>Выберите тему слева.</div>
+                        <div style={{ color: '#555' }}>左のテーマを選択してください。</div>
                     )}
 
                     {selected && (
@@ -102,19 +101,19 @@ export function LessonsView() {
                                 </div>
                                 <div style={{ display: 'flex', gap: 8 }}>
                                     {!selectedInUser ? (
-                                        <Button onClick={() => UserStore.addLesson(selectedKey)}>Добавить в обучение</Button>
+                                        <Button onClick={() => UserStore.addLesson(selectedKey)}>学習に追加</Button>
                                     ) : (
-                                        <Button onClick={() => UserStore.removeLesson(selectedKey)}>Убрать из обучения</Button>
+                                        <Button onClick={() => UserStore.removeLesson(selectedKey)}>学習から削除</Button>
                                     )}
                                 </div>
                             </div>
 
-                            {loadingSelected && <div>Загрузка...</div>}
-                            {errorSelected && <div style={{ color: 'crimson' }}>Ошибка: {errorSelected}</div>}
+                            {loadingSelected && <div>読み込み中...</div>}
+                            {errorSelected && <div style={{ color: 'crimson' }}>エラー: {errorSelected}</div>}
 
                             {contentSelected && (
                                 <Tabs style={{ marginTop: 4 }}>
-                                    <Tab title="Тема">
+                                    <Tab title="テーマ">
                                         <Frame variant="window" style={{ padding: 8, marginTop: 8 }}>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, alignItems: 'start' }}>
                                                 <div>
@@ -126,7 +125,7 @@ export function LessonsView() {
                                             </div>
                                         </Frame>
                                     </Tab>
-                                    <Tab title="Практика">
+                                    <Tab title="練習">
                                         <Frame variant="window" style={{ padding: 8, marginTop: 8 }}>
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, alignItems: 'start' }}>
                                                 <div>

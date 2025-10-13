@@ -13,6 +13,8 @@ class LessonStoreImpl {
     };
 
     private listeners: Set<Listener> = new Set();
+    private indexLoaded = false;
+    private indexLoading: Promise<LessonMeta[]> | null = null;
 
     subscribe(listener: Listener): () => void {
         this.listeners.add(listener);
@@ -55,10 +57,14 @@ class LessonStoreImpl {
         const metas: LessonMeta[] = [];
         // 1) Top-level
         const topUrl = `/content/index.yaml`;
-        const topText = await fetchText(topUrl);
-        const top = parse(topText) as TopIndexYaml;
+        let top: TopIndexYaml = {};
+        try {
+            const topText = await fetchText(topUrl);
+            top = parse(topText) as TopIndexYaml;
+        } catch (e) {
+            top = {} as TopIndexYaml;
+        }
 
-        // either lessons[] provided fully or groups[] then per-group index
         if (Array.isArray(top.lessons) && top.lessons.length > 0) {
             for (const l of top.lessons) {
                 metas.push({ group: String(l.group), topic: String(l.topic) });
@@ -83,7 +89,6 @@ class LessonStoreImpl {
             }
         }
 
-        // Deduplicate and sort
         const seen = new Set<string>();
         const list = metas
             .filter((m) => {
@@ -96,7 +101,19 @@ class LessonStoreImpl {
 
         this.state.index = list;
         this.notify();
+        this.indexLoaded = true;
         return list;
+    }
+
+    async ensureIndexLoaded(): Promise<LessonMeta[]> {
+        if (this.indexLoaded) return this.state.index;
+        if (this.indexLoading) return this.indexLoading;
+        this.indexLoading = this.loadIndexFromYaml()
+            .catch(() => [])
+            .finally(() => {
+                this.indexLoading = null;
+            });
+        return this.indexLoading;
     }
 
     async ensureLoaded(meta: LessonMeta): Promise<LessonContent | undefined> {
