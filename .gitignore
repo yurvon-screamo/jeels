@@ -12,6 +12,7 @@ Cargo.lock
 # OS
 .DS_Store
 Thumbs.db
+.legacy
 
 # Config files with sensitive data
 config.toml

@@ -1,0 +1,45 @@
+/* React95 styles are handled by the library's global styles */
+/* Custom styles for the application */
+
+:root {
+  --background: rgb(85, 170, 170);
+  --foreground: #171717;
+  --window-bg: #c0c0c0;
+  --window-border: #c0c0c0;
+  --message-bg: #f0f0f0;
+  --message-border: #999;
+  --link-color: #0000ff;
+  --link-hover: #ff0000;
+  --link-visited: #800080;
+}
+
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  background: var(--background) !important;
+  font-family: 'MS Sans Serif', sans-serif;
+}
+
+/* Ensure proper styling for React95 components */
+.w-4 {
+  width: 1rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+/* Custom link styling to match Windows 95 theme */
+a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+a:visited {
+  color: var(--link-visited);
+}
