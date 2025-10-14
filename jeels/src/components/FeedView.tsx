@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Button, Fieldset, Frame, ProgressBar } from '@react95/core';
+import { useClippy } from '@react95/clippy';
 import { LessonStore, UserStore, lessonKey, LessonContent, LessonMeta } from '../store';
 
 function useLessonState() {
@@ -42,8 +43,8 @@ export function FeedView() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentPart, setCurrentPart] = useState<'general' | 'practice'>('general');
-    const [durGeneral] = useState(0);
-    const [durPractice] = useState(0);
+    const [durGeneral, setDurGeneral] = useState(0);
+    const [durPractice, setDurPractice] = useState(0);
     const audioGeneralRef = useRef<HTMLAudioElement | null>(null);
     const audioPracticeRef = useRef<HTMLAudioElement | null>(null);
     const linesRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -82,7 +83,7 @@ export function FeedView() {
         const ratio = Math.max(0, Math.min(1, current / duration));
         const idx = Math.min(generalSentences.length - 1, Math.floor(ratio * generalSentences.length));
         const globalIdx = idx;
-        if (globalIdx !== activeIdx) setActiveIdx(globalIdx);
+        setActiveIdx(globalIdx);
         const practiceDur = durPractice || (audioPracticeRef.current?.duration || 0);
         const totalDur = duration + practiceDur;
         const percent = totalDur > 0 ? Math.round((current / totalDur) * 100) : Math.round(ratio * 100);
@@ -99,7 +100,7 @@ export function FeedView() {
         const ratio = Math.max(0, Math.min(1, current / duration));
         const idx = Math.min(practiceSentences.length - 1, Math.floor(ratio * practiceSentences.length));
         const globalIdx = generalSentences.length + idx;
-        if (globalIdx !== activeIdx) setActiveIdx(globalIdx);
+        setActiveIdx(globalIdx);
         const generalDur = durGeneral || (audioGeneralRef.current?.duration || 0);
         const totalDur = generalDur + duration;
         const percent = totalDur > 0 ? Math.round(((generalDur + current) / totalDur) * 100) : Math.round(ratio * 100);
@@ -160,6 +161,34 @@ export function FeedView() {
         setActiveIdx(0);
     };
 
+    const { clippy } = useClippy();
+    const lastSpokenIdxRef = useRef<number>(-1);
+    useEffect(() => {
+        if (!clippy || sentences.length === 0) {
+            return;
+        }
+
+        if (!isPlaying) {
+            lastSpokenIdxRef.current = -1;
+            return;
+        }
+
+        if (activeIdx === lastSpokenIdxRef.current) {
+            return;
+        }
+
+        lastSpokenIdxRef.current = activeIdx;
+        const text = sentences[activeIdx] ?? '';
+
+        if (!text) {
+            return;
+        }
+        try {
+            clippy.stopCurrent?.();
+            clippy.speak?.(text, false);
+        } catch { }
+    }, [activeIdx, sentences, clippy, isPlaying]);
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {!content && (
@@ -180,6 +209,7 @@ export function FeedView() {
                                 src={content.general_audio_path}
                                 style={{ display: 'none' }}
                                 onTimeUpdate={onTimeUpdateGeneral}
+                                onLoadedMetadata={(e) => setDurGeneral((e.target as HTMLAudioElement).duration || 0)}
                                 onPlay={() => setIsPlaying(true)}
                                 onPause={() => setIsPlaying(false)}
                                 onLoadedData={() => { audioGeneralRef.current?.play().catch(() => { }); setCurrentPart('general'); }}
@@ -190,6 +220,7 @@ export function FeedView() {
                                 src={content.practic_audio_path}
                                 style={{ display: 'none' }}
                                 onTimeUpdate={onTimeUpdatePractice}
+                                onLoadedMetadata={(e) => setDurPractice((e.target as HTMLAudioElement).duration || 0)}
                                 onPlay={() => setIsPlaying(true)}
                                 onPause={() => setIsPlaying(false)}
                             />
@@ -243,6 +274,7 @@ export function FeedView() {
                     </Fieldset>
                 </div>
             )}
+
         </div>
     );
 }
