@@ -6,6 +6,7 @@ import { Layout } from "./components/Layout";
 import { useStartMenu, Page } from "./components/Router";
 import { FeedView } from "./components/FeedView";
 import { LessonsView } from "./components/LessonsView";
+import { TranslateView } from "./components/TranslateView";
 import { LessonStore } from "./store";
 
 const views: Record<Page, { title: string; node: React.ReactNode }> = {
@@ -13,9 +14,7 @@ const views: Record<Page, { title: string; node: React.ReactNode }> = {
   lessons: { title: "レッスン", node: <LessonsView /> },
   translate: {
     title: "翻訳", node: (
-      <Fieldset legend="翻訳">
-        <p>双方向翻訳（露⇄日）。</p>
-      </Fieldset>
+      <TranslateView />
     )
   },
   profile: {

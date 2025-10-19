@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.7.5",
     "@react95/clippy": "^2.0.2",
     "@react95/core": "^9.6.2",
     "@react95/icons": "^2.2.0",

@@ -15,24 +15,21 @@
 
 ## Реализация
 
-Для реализации используем `Transformers.js` и `LLM: Qwen/Qwen3-0.6B`.
+Для реализации используем `Transformers.js` и `Xenova/nllb-200-distilled-600M`.
 
-Промт:
+Usage:
 
-```promt
-You are a precise and neutral translator between Russian and Japanese.  
-- If the input text is in Russian, translate it into Japanese.  
-- If the input text is in Japanese, translate it into Russian.  
+```js
+import { pipeline } from '@huggingface/transformers';
 
-Do not add any explanations, comments, headings, formatting, or extra characters.  
-Return only the clean translation.  
+// Create a translation pipeline
+const translator = await pipeline('translation', 'Xenova/nllb-200-distilled-600M');
 
-Examples:  
-Input: こんにちは  
-Output: Привет  
-
-Input: Как дела?  
-Output: お元気ですか？
-
-Now translate the following text:
+// Translate text from Hindi to French
+const output = await translator('जीवन एक चॉकलेट बॉक्स की तरह है।', {
+  src_lang: 'hin_Deva', // Hindi
+  tgt_lang: 'fra_Latn', // French
+});
+console.log(output);
+// [{ translation_text: 'La vie est comme une boîte à chocolat.' }]
 ```
