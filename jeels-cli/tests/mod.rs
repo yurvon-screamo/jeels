@@ -1,11 +1,11 @@
 use jeels_cli::application::UserRepository;
 use jeels_cli::domain::User;
-use jeels_cli::infrastructure::SurrealUserRepository;
+use jeels_cli::infrastructure::PoloDbUserRepository;
 use jeels_cli::settings::{AuthSettings, DatabaseSettings, LlmSettings, Settings};
 use tempfile::TempDir;
 
 pub struct TestContext {
-    pub repository: SurrealUserRepository,
+    pub repository: PoloDbUserRepository,
     pub _temp_dir: TempDir,
 }
 
@@ -28,7 +28,7 @@ pub async fn create_test_repository() -> TestContext {
         },
     };
 
-    let repository = SurrealUserRepository::new(&settings).await.unwrap();
+    let repository = PoloDbUserRepository::new(&settings).await.unwrap();
 
     TestContext {
         repository,
@@ -36,7 +36,7 @@ pub async fn create_test_repository() -> TestContext {
     }
 }
 
-pub async fn create_test_user(repository: &SurrealUserRepository) -> User {
+pub async fn create_test_user(repository: &PoloDbUserRepository) -> User {
     let user = User::new("test_user".to_string());
     repository.save(&user).await.unwrap();
     user

@@ -14,20 +14,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ulid::Ulid;
 
-fn thing_to_ulid<'de, D>(deserializer: D) -> Result<Ulid, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    surrealdb::sql::Thing::deserialize(deserializer)?
-        .id
-        .to_raw()
-        .parse::<Ulid>()
-        .map_err(|e| serde::de::Error::custom(e.to_string()))
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
-    #[serde(deserialize_with = "thing_to_ulid")]
     id: Ulid,
     username: String,
     cards: HashMap<Ulid, Card>,

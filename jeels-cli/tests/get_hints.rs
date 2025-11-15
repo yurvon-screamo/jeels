@@ -114,16 +114,24 @@ async fn get_hints_use_case_should_respect_limit() {
         .await
         .unwrap();
 
-    // Create multiple cards
-    for i in 1..=5 {
+    // Create multiple cards with distinct questions
+    let questions = vec![
+        "What is Python?",
+        "What is JavaScript?",
+        "What is Java?",
+        "What is C++?",
+        "What is Go?",
+    ];
+
+    for question in questions {
         let mut embedding_generator = EmbeddingGenerator::new().unwrap();
         let create_use_case = CreateCardUseCase::new(&ctx.repository);
         create_use_case
             .execute(
                 &mut embedding_generator,
                 user.id(),
-                format!("Question {}", i),
-                format!("Answer {}", i),
+                question.to_string(),
+                "Some answer".to_string(),
             )
             .await
             .unwrap();

@@ -1,7 +1,7 @@
 use jeels_cli::application::UserRepository;
 use jeels_cli::domain::User;
 use jeels_cli::infrastructure::{
-    EmbeddingGenerator, FsrsSrsService, QwenLlm, SurrealUserRepository,
+    EmbeddingGenerator, FsrsSrsService, PoloDbUserRepository, QwenLlm,
 };
 use jeels_cli::settings::Settings;
 use ulid::Ulid;
@@ -11,7 +11,7 @@ const DEFAULT_USERNAME: &str = "default";
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = Settings::load().map_err(|e| format!("Failed to load settings: {}", e))?;
-    let repository = SurrealUserRepository::new(&settings)
+    let repository = PoloDbUserRepository::new(&settings)
         .await
         .map_err(|e| format!("Failed to initialize repository: {}", e))?;
     let srs_service =
@@ -21,22 +21,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let model_path = settings.llm.model_path.to_string_lossy().to_string();
 
-    let llm_service = if settings.llm.model_path.exists() {
-        QwenLlm::new(&model_path).map_err(|e| format!("Failed to initialize LLM service: {}", e))?
-    } else {
-        eprintln!(
-            "Warning: LLM model file not found at '{}'. Generation feature will be disabled.",
-            model_path
-        );
-        eprintln!(
-            "Please download the model from https://huggingface.co/MaziyarPanahi/Qwen3-0.6B-GGUF"
-        );
-        eprintln!("And update the model_path in config.toml file.");
-        return Err(format!(
-            "LLM model not found. Please download the model and update config.toml."
-        )
-        .into());
-    };
+    let llm_service = QwenLlm::new(&model_path)
+        .map_err(|e| format!("Failed to initialize LLM service: {}", e))?;
 
     let user_id = ensure_user_exists(&repository, DEFAULT_USERNAME)
         .await
