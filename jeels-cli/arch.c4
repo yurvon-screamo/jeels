@@ -1,0 +1,93 @@
+specification {
+    element system {
+        style {
+            shape rectangle
+            color blue
+        }
+    }
+    element layer {
+        style {
+            shape rectangle
+            color secondary
+        }
+    }
+    element component {
+        style {
+            shape rectangle
+            color gray
+        }
+    }
+}
+
+model {
+    jeersSystem = system 'Jeers' 'Минималистичный аналог Anki с FSRS на Rust и SurrealDB' {
+
+        domainLayer = layer 'Domain Layer' 'Домен: Сущности и бизнес-логика' {
+            userAggregate = component 'User Aggregate' 'Агрегатный корень User с карточками'
+            cardEntity = component 'Card Entity' 'Дочерняя сущность Card'
+            reviewEntity = component 'Review Entity' 'Дочерняя сущность Review'
+            valueObjects = component 'Value Objects' 'Question, Answer, Rating, Interval, Stability, MemoryState'
+
+            userAggregate -> cardEntity 'владеет'
+            cardEntity -> reviewEntity 'хранит историю'
+            cardEntity -> valueObjects 'использует'
+        }
+
+        applicationLayer = layer 'Application Layer' 'Прикладной слой: Use Cases и сервисы' {
+            createCardUseCase = component 'CreateCardUseCase' 'Use Case для создания карточки'
+            editCardUseCase = component 'EditCardUseCase' 'Use Case для редактирования карточки'
+            deleteCardUseCase = component 'DeleteCardUseCase' 'Use Case для удаления карточки'
+            viewCardUseCase = component 'ViewCardUseCase' 'Use Case для просмотра карточки'
+            startStudySessionUseCase = component 'StartStudySessionUseCase' 'Use Case для начала сессии изучения'
+            rateCardUseCase = component 'RateCardUseCase' 'Use Case для оценки ответа с автоматическим планированием'
+            scheduleReviewUseCase = component 'ScheduleReviewUseCase' 'Use Case для планирования повторений (интеграция с FSRS)'
+            srsService = component 'SRS Service' 'Трейт для алгоритма FSRS (интерфейс)'
+
+            createCardUseCase -> userAggregate 'использует'
+            editCardUseCase -> userAggregate 'изменяет через'
+            deleteCardUseCase -> userAggregate 'удаляет из коллекции'
+            viewCardUseCase -> userAggregate 'получает карточку через'
+            startStudySessionUseCase -> userAggregate 'получает карточки через'
+            rateCardUseCase -> userAggregate 'обновляет через'
+            rateCardUseCase -> srsService 'использует для расчета'
+            scheduleReviewUseCase -> userAggregate 'обновляет через'
+            scheduleReviewUseCase -> srsService 'использует для расчета'
+            srsService -> valueObjects 'работает с MemoryState'
+        }
+
+        infrastructureLayer = layer 'Infrastructure Layer' 'Слой инфраструктуры: Адаптеры и внешние интерфейсы' {
+            userRepository = component 'SurrealUserRepository' 'Реализация UserRepository для SurrealDB (локальное хранилище на RocksDB, async)'
+            srsAdapter = component 'FsrsSrsService' 'Реализация SRS Service для FSRS (fsrs crate 5.2 для расчёта интервалов, stability и memory_state)'
+
+            userRepository -> userAggregate 'хранит/загружает (как документы в SurrealDB)'
+            srsAdapter -> srsService 'реализует (fsrs Rust library)'
+        }
+
+        applicationLayer -> domainLayer 'зависит от'
+        infrastructureLayer -> applicationLayer 'зависит от'
+        infrastructureLayer -> domainLayer 'зависит от (через интерфейсы)'
+    }
+}
+
+
+views {
+    view componentView of jeersSystem {
+        title 'Компонентная диаграмма'
+        include *
+    }
+
+    view domainView of jeersSystem.domainLayer {
+        title 'Доменная диаграмма'
+        include *
+    }
+
+    view applicationView of jeersSystem.applicationLayer {
+        title 'Прикладная диаграмма'
+        include *
+    }
+
+    view infrastructureView of jeersSystem.infrastructureLayer {
+        title 'Инфраструктурная диаграмма'
+        include *
+    }
+}

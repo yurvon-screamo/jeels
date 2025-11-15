@@ -1,0 +1,35 @@
+[package]
+name = "jeels_cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+# System
+tokio = { version = "1.48", features = ["full"] }
+async-trait = "0.1"
+toml = "0.9"
+tempfile = "3.23"
+serde_json = "1.0"
+
+# Domain
+ulid = { version = "1.2", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+chrono = { version = "0.4", features = ["std", "clock", "serde"] }
+
+# Japan
+fsrs = "5.2"
+
+# Database
+surrealdb = { version = "2.3", features = ["kv-rocksdb"] }
+
+# Machine Learning
+fastembed = "5.2"
+candle-transformers = "0.9"
+candle-core = "0.9"
+candle-nn = "0.9"
+tokenizers = "0.22"
+
+# TUI
+ratatui = "0.29"
+crossterm = "0.29"

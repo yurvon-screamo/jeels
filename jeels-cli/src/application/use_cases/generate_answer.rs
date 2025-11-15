@@ -1,0 +1,24 @@
+use crate::application::LlmService;
+
+pub struct GenerateAnswerUseCase;
+
+impl GenerateAnswerUseCase {
+    pub fn new() -> Self {
+        Self
+    }
+
+    pub fn execute<L: LlmService>(
+        &self,
+        llm_service: &mut L,
+        question: String,
+    ) -> Result<String, crate::domain::error::JeersError> {
+        if question.trim().is_empty() {
+            return Err(crate::domain::error::JeersError::InvalidQuestion {
+                reason: "Question cannot be empty".to_string(),
+            });
+        }
+
+        llm_service.generate_answer(&question)
+    }
+}
+
