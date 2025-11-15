@@ -136,7 +136,6 @@ impl EmbeddingService for EmbeddingGenerator {
                 reason: format!("Failed to generate embeddings: {}", e),
             })?;
 
-        // Mean pooling with attention mask
         let attention_mask_for_pooling =
             attention_mask
                 .to_dtype(DTYPE)

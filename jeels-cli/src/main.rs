@@ -34,7 +34,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         llm_service,
         srs_service,
         embedding_generator,
-    )?;
+    )
+    .await?;
 
     Ok(())
 }

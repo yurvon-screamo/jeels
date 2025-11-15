@@ -13,7 +13,7 @@ pub struct QwenLlm {
 }
 
 impl QwenLlm {
-    pub fn new(model_path: &str) -> Result<Self, JeersError> {
+    pub fn new(_model_path: &str) -> Result<Self, JeersError> {
         // Verify file exists
         // if !std::path::Path::new(model_path).exists() {
         //     return Err(JeersError::LlmError {
@@ -26,7 +26,7 @@ impl QwenLlm {
 }
 
 impl LlmService for QwenLlm {
-    fn generate_answer(&mut self, question: &str) -> Result<String, JeersError> {
+    fn generate_answer(&mut self, _question: &str) -> Result<String, JeersError> {
         Err(JeersError::LlmError {
             reason: "LLM generation is not yet fully implemented. Please check the model path and ensure candle-transformers 0.9 has quantized_qwen3 module available.".to_string(),
         })
