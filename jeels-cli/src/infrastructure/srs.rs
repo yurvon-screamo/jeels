@@ -3,7 +3,8 @@ use crate::domain::error::JeersError;
 use crate::domain::review::Review;
 use crate::domain::value_objects::{Interval, MemoryState, Rating, Stability};
 use chrono::{DateTime, Utc};
-use fsrs::{FSRSItem, FSRSReview, FSRS};
+use fsrs::{FSRS, FSRSItem, FSRSReview};
+use std::sync::{Arc, Mutex};
 
 // Default FSRS parameters (from fsrs crate)
 // TODO: KILME
@@ -13,29 +14,29 @@ const DEFAULT_PARAMETERS: [f32; 21] = [
 ];
 
 pub struct FsrsSrsService {
-    fsrs: FSRS,
+    fsrs: Arc<Mutex<FSRS>>,
     desired_retention: f64,
 }
 
 impl FsrsSrsService {
     pub fn new() -> Result<Self, JeersError> {
         Ok(Self {
-            fsrs: FSRS::new(Some(&DEFAULT_PARAMETERS)).map_err(|e| {
-                JeersError::SrsCalculationFailed {
+            fsrs: Arc::new(Mutex::new(FSRS::new(Some(&DEFAULT_PARAMETERS)).map_err(
+                |e| JeersError::SrsCalculationFailed {
                     reason: format!("Failed to create FSRS: {:?}", e),
-                }
-            })?,
+                },
+            )?)),
             desired_retention: 0.9,
         })
     }
 
     pub fn with_retention(desired_retention: f64) -> Result<Self, JeersError> {
         Ok(Self {
-            fsrs: FSRS::new(Some(&DEFAULT_PARAMETERS)).map_err(|e| {
-                JeersError::SrsCalculationFailed {
+            fsrs: Arc::new(Mutex::new(FSRS::new(Some(&DEFAULT_PARAMETERS)).map_err(
+                |e| JeersError::SrsCalculationFailed {
                     reason: format!("Failed to create FSRS: {:?}", e),
-                }
-            })?,
+                },
+            )?)),
             desired_retention,
         })
     }
@@ -107,17 +108,19 @@ impl SrsService for FsrsSrsService {
             Some(Self::to_fsrs_memory_state(state))
         } else if !reviews.is_empty() {
             let item = Self::build_fsrs_item(reviews);
-            Some(self.fsrs.memory_state(item, None).map_err(|e| {
-                JeersError::SrsCalculationFailed {
-                    reason: format!("Failed to calculate memory state from reviews: {:?}", e),
-                }
-            })?)
+            let fsrs = self.fsrs.lock().unwrap();
+            Some(
+                fsrs.memory_state(item, None)
+                    .map_err(|e| JeersError::SrsCalculationFailed {
+                        reason: format!("Failed to calculate memory state from reviews: {:?}", e),
+                    })?,
+            )
         } else {
             None
         };
 
-        let next_states = self
-            .fsrs
+        let fsrs = self.fsrs.lock().unwrap();
+        let next_states = fsrs
             .next_states(
                 current_memory_state,
                 self.desired_retention as f32,
@@ -135,7 +138,7 @@ impl SrsService for FsrsSrsService {
             _ => {
                 return Err(JeersError::SrsCalculationFailed {
                     reason: format!("Invalid rating: {}", fsrs_rating),
-                })
+                });
             }
         };
 

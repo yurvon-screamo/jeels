@@ -1,20 +1,23 @@
 #[path = "mod.rs"]
 mod tests;
 
-use jeels_cli::application::use_cases::{CreateCardUseCase, StartStudySessionUseCase};
-use jeels_cli::infrastructure::EmbeddingGenerator;
+use jeels_cli::{
+    application::use_cases::{CreateCardUseCase, StartStudySessionUseCase},
+    settings::Settings,
+};
 use tests::*;
 
 #[tokio::test]
 async fn start_study_session_use_case_should_return_due_cards() {
     // Arrange
-    let ctx = create_test_repository().await;
-    let user = create_test_user(&ctx.repository).await;
-    let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-    let create_use_case = CreateCardUseCase::new(&ctx.repository);
+    create_test_repository().await;
+    let settings = Settings::get();
+    let repository = settings.get_repository();
+    let user = create_test_user().await;
+    let embedding_generator = settings.get_embedding_generator();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
     create_use_case
         .execute(
-            &mut embedding_generator,
             user.id(),
             "What is Rust?".to_string(),
             "A systems programming language".to_string(),
@@ -22,7 +25,7 @@ async fn start_study_session_use_case_should_return_due_cards() {
         .await
         .unwrap();
 
-    let start_session_use_case = StartStudySessionUseCase::new(&ctx.repository);
+    let start_session_use_case = StartStudySessionUseCase::new(repository);
 
     // Act
     let cards = start_session_use_case.execute(user.id()).await.unwrap();

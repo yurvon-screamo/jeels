@@ -5,23 +5,26 @@ use crate::domain::value_objects::{Answer, Question};
 use ulid::Ulid;
 
 #[derive(Clone)]
-pub struct CreateCardUseCase<'a, R: UserRepository> {
+pub struct CreateCardUseCase<'a, R: UserRepository, E: EmbeddingService> {
     repository: &'a R,
+    embedding_service: &'a E,
 }
 
-impl<'a, R: UserRepository> CreateCardUseCase<'a, R> {
-    pub fn new(repository: &'a R) -> Self {
-        Self { repository }
+impl<'a, R: UserRepository, E: EmbeddingService> CreateCardUseCase<'a, R, E> {
+    pub fn new(repository: &'a R, embedding_service: &'a E) -> Self {
+        Self {
+            repository,
+            embedding_service,
+        }
     }
 
-    pub async fn execute<E: EmbeddingService>(
+    pub async fn execute(
         &self,
-        embedding_service: &mut E,
         user_id: Ulid,
         question_text: String,
         answer_text: String,
     ) -> Result<Card, JeersError> {
-        let embedding = embedding_service.embed(&question_text)?;
+        let embedding = self.embedding_service.embed(&question_text)?;
 
         let question = Question::new(question_text.clone(), embedding)?;
         let answer = Answer::new(answer_text)?;

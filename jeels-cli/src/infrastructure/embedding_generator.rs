@@ -81,7 +81,7 @@ impl EmbeddingGenerator {
 }
 
 impl EmbeddingService for EmbeddingGenerator {
-    fn embed(&mut self, text: &str) -> Result<Vec<f32>, JeersError> {
+    fn embed(&self, text: &str) -> Result<Vec<f32>, JeersError> {
         let mut tokenizer = self.tokenizer.clone();
         let tokenizer = tokenizer
             .with_padding(None)

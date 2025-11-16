@@ -31,5 +31,6 @@ tokenizers = "0.22"
 hf-hub = "0.4"
 
 # TUI
-ratatui = "0.29"
-crossterm = "0.29"
+clap = { version = "4.5", features = ["derive"] }
+iocraft = "0.7"
+smol = "2.0"

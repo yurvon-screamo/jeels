@@ -1,14 +1,18 @@
 #[cfg(test)]
 mod tests {
-    use crate::domain::User;
     use crate::domain::error::JeersError;
     use crate::domain::value_objects::{
         Answer, Interval, MemoryState, Question, Rating, Stability,
     };
+    use crate::domain::{JapaneseLevel, NativeLanguage, User};
     use chrono::{Duration, Utc};
 
     fn create_test_user() -> User {
-        User::new("test_user".to_string())
+        User::new(
+            "test_user".to_string(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+        )
     }
 
     fn create_test_question() -> Question {
@@ -50,7 +54,7 @@ mod tests {
         let username = "test_user".to_string();
 
         // Act
-        let user = User::new(username);
+        let user = User::new(username, JapaneseLevel::N5, NativeLanguage::Russian);
 
         // Assert
         assert_eq!(user.username(), "test_user");
@@ -74,11 +78,33 @@ mod tests {
 
         for username in test_cases {
             // Act
-            let user = User::new(username.to_string());
+            let user = User::new(
+                username.to_string(),
+                JapaneseLevel::N5,
+                NativeLanguage::Russian,
+            );
 
             // Assert
             assert_eq!(user.username(), username);
         }
+    }
+
+    #[test]
+    fn user_current_japanese_level_should_return_correct_level() {
+        // Arrange
+        let user = create_test_user();
+
+        // Assert
+        assert_eq!(user.current_japanese_level(), &JapaneseLevel::N5);
+    }
+
+    #[test]
+    fn user_native_language_should_return_correct_language() {
+        // Arrange
+        let user = create_test_user();
+
+        // Assert
+        assert_eq!(user.native_language(), &NativeLanguage::Russian);
     }
 
     #[test]

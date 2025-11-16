@@ -1,5 +1,5 @@
 use crate::domain::error::JeersError;
 
-pub trait EmbeddingService {
-    fn embed(&mut self, text: &str) -> Result<Vec<f32>, JeersError>;
+pub trait EmbeddingService: Send + Sync {
+    fn embed(&self, text: &str) -> Result<Vec<f32>, JeersError>;
 }

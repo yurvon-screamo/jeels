@@ -19,14 +19,37 @@ pub struct User {
     id: Ulid,
     username: String,
     cards: HashMap<Ulid, Card>,
+    current_japanese_level: JapaneseLevel,
+    native_language: NativeLanguage,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum JapaneseLevel {
+    N5,
+    N4,
+    N3,
+    N2,
+    N1,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum NativeLanguage {
+    English,
+    Russian,
 }
 
 impl User {
-    pub fn new(username: String) -> Self {
+    pub fn new(
+        username: String,
+        current_japanese_level: JapaneseLevel,
+        native_language: NativeLanguage,
+    ) -> Self {
         Self {
             id: Ulid::new(),
             username,
             cards: HashMap::new(),
+            current_japanese_level,
+            native_language,
         }
     }
 
@@ -36,6 +59,14 @@ impl User {
 
     pub fn username(&self) -> &str {
         &self.username
+    }
+
+    pub fn current_japanese_level(&self) -> &JapaneseLevel {
+        &self.current_japanese_level
+    }
+
+    pub fn native_language(&self) -> &NativeLanguage {
+        &self.native_language
     }
 
     pub fn cards(&self) -> &HashMap<Ulid, Card> {
@@ -48,7 +79,7 @@ impl User {
 
     fn has_card_with_question(&self, question: &Question, exclude_card_id: Option<Ulid>) -> bool {
         let query_embedding = question.embedding();
-        const SIMILARITY_THRESHOLD: f32 = 0.99;
+        const SIMILARITY_THRESHOLD: f32 = 0.9999;
 
         self.cards.iter().any(|(id, card)| {
             if let Some(exclude_id) = exclude_card_id {
@@ -59,6 +90,7 @@ impl User {
 
             let card_embedding = card.question().embedding();
             let similarity = cosine_similarity(query_embedding, card_embedding);
+
             similarity >= SIMILARITY_THRESHOLD
         })
     }
@@ -105,11 +137,13 @@ impl User {
         Ok(())
     }
 
-    pub fn delete_card(&mut self, card_id: Ulid) -> Result<(), JeersError> {
-        self.cards
+    pub fn delete_card(&mut self, card_id: Ulid) -> Result<Card, JeersError> {
+        let card = self
+            .cards
             .remove(&card_id)
-            .ok_or(JeersError::CardNotFound { card_id })
-            .map(|_| ())
+            .ok_or(JeersError::CardNotFound { card_id })?;
+
+        Ok(card)
     }
 
     pub fn start_study_session(&self) -> Vec<Card> {

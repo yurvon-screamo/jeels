@@ -1,21 +1,24 @@
 #[path = "mod.rs"]
 mod tests;
 
-use jeels_cli::application::use_cases::{CreateCardUseCase, GetHintsUseCase};
-use jeels_cli::infrastructure::EmbeddingGenerator;
+use jeels_cli::{
+    application::use_cases::{CreateCardUseCase, GetHintsUseCase},
+    settings::Settings,
+};
 use tests::*;
 
 #[tokio::test]
 async fn get_hints_use_case_should_return_similar_cards() {
     // Arrange
-    let ctx = create_test_repository().await;
-    let user = create_test_user(&ctx.repository).await;
-    let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-    let create_use_case = CreateCardUseCase::new(&ctx.repository);
+    create_test_repository().await;
+    let settings = Settings::get();
+    let repository = settings.get_repository();
+    let user = create_test_user().await;
+    let embedding_generator = settings.get_embedding_generator();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
 
     let card1 = create_use_case
         .execute(
-            &mut embedding_generator,
             user.id(),
             "What is Rust?".to_string(),
             "A systems programming language".to_string(),
@@ -23,11 +26,9 @@ async fn get_hints_use_case_should_return_similar_cards() {
         .await
         .unwrap();
 
-    let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-    let create_use_case = CreateCardUseCase::new(&ctx.repository);
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
     create_use_case
         .execute(
-            &mut embedding_generator,
             user.id(),
             "What is Python?".to_string(),
             "A high-level programming language".to_string(),
@@ -35,11 +36,9 @@ async fn get_hints_use_case_should_return_similar_cards() {
         .await
         .unwrap();
 
-    let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-    let create_use_case = CreateCardUseCase::new(&ctx.repository);
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
     create_use_case
         .execute(
-            &mut embedding_generator,
             user.id(),
             "What is JavaScript?".to_string(),
             "A scripting language".to_string(),
@@ -47,7 +46,7 @@ async fn get_hints_use_case_should_return_similar_cards() {
         .await
         .unwrap();
 
-    let get_hints_use_case = GetHintsUseCase::new(&ctx.repository);
+    let get_hints_use_case = GetHintsUseCase::new(repository);
 
     // Act
     let hints = get_hints_use_case
@@ -69,14 +68,15 @@ async fn get_hints_use_case_should_return_similar_cards() {
 #[tokio::test]
 async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
     // Arrange
-    let ctx = create_test_repository().await;
-    let user = create_test_user(&ctx.repository).await;
-    let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-    let create_use_case = CreateCardUseCase::new(&ctx.repository);
+    create_test_repository().await;
+    let settings = Settings::get();
+    let repository = settings.get_repository();
+    let user = create_test_user().await;
+    let embedding_generator = settings.get_embedding_generator();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
 
     let card = create_use_case
         .execute(
-            &mut embedding_generator,
             user.id(),
             "What is Rust?".to_string(),
             "A systems programming language".to_string(),
@@ -84,7 +84,7 @@ async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
         .await
         .unwrap();
 
-    let get_hints_use_case = GetHintsUseCase::new(&ctx.repository);
+    let get_hints_use_case = GetHintsUseCase::new(repository);
 
     // Act
     let hints = get_hints_use_case
@@ -100,13 +100,14 @@ async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
 async fn get_hints_use_case_should_respect_limit() {
     // Arrange
     let ctx = create_test_repository().await;
-    let user = create_test_user(&ctx.repository).await;
-    let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-    let create_use_case = CreateCardUseCase::new(&ctx.repository);
+    let settings = Settings::get();
+    let repository = settings.get_repository();
+    let user = create_test_user().await;
+    let embedding_generator = settings.get_embedding_generator();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
 
     let query_card = create_use_case
         .execute(
-            &mut embedding_generator,
             user.id(),
             "What is Rust?".to_string(),
             "A systems programming language".to_string(),
@@ -124,20 +125,14 @@ async fn get_hints_use_case_should_respect_limit() {
     ];
 
     for question in questions {
-        let mut embedding_generator = EmbeddingGenerator::new().unwrap();
-        let create_use_case = CreateCardUseCase::new(&ctx.repository);
+        let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
         create_use_case
-            .execute(
-                &mut embedding_generator,
-                user.id(),
-                question.to_string(),
-                "Some answer".to_string(),
-            )
+            .execute(user.id(), question.to_string(), "Some answer".to_string())
             .await
             .unwrap();
     }
 
-    let get_hints_use_case = GetHintsUseCase::new(&ctx.repository);
+    let get_hints_use_case = GetHintsUseCase::new(repository);
 
     // Act
     let hints = get_hints_use_case

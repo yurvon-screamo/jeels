@@ -1,12 +1,12 @@
-use crate::application::user_repository::UserRepository;
 use crate::application::SrsService;
+use crate::application::user_repository::UserRepository;
 use crate::domain::error::JeersError;
 use crate::domain::review::Review;
 use crate::domain::value_objects::Rating;
 use chrono::Utc;
 use ulid::Ulid;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct RateCardUseCase<'a, R: UserRepository, S: SrsService> {
     repository: &'a R,
     srs_service: &'a S,
