@@ -34,7 +34,7 @@ pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
     }
 
     for card in cards {
-        let user_id = user_id.clone();
+        let user_id = user_id;
         smol::block_on(
             element!(
                 ContextProvider(value: Context::owned(card))
@@ -90,7 +90,7 @@ fn LearnCard<'a>(mut hooks: Hooks) -> impl Into<AnyElement<'a>> {
 
     if let Some(current_rate) = rate.get() {
         let card_id = card.id();
-        let user_id = user_id.clone();
+        let user_id = *user_id;
 
         if let Err(e) = smol::block_on(rate_usecase.execute(user_id, card_id, current_rate)) {
             eprintln!("Error rating card: {:?}", e);

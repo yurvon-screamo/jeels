@@ -82,11 +82,10 @@ impl User {
         const SIMILARITY_THRESHOLD: f32 = 0.9999;
 
         self.cards.iter().any(|(id, card)| {
-            if let Some(exclude_id) = exclude_card_id {
-                if *id == exclude_id {
+            if let Some(exclude_id) = exclude_card_id
+                && *id == exclude_id {
                     return false;
                 }
-            }
 
             let card_embedding = card.question().embedding();
             let similarity = cosine_similarity(query_embedding, card_embedding);

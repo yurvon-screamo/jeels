@@ -86,7 +86,7 @@ impl QwenLlm {
         path: &std::path::Path,
     ) -> Result<gguf_file::Content, JeersError> {
         gguf_file::Content::read(file)
-            .map_err(|e| e.with_path(path.to_path_buf()))
+            .map_err(|e| e.with_path(path))
             .map_err(|e| JeersError::LlmError {
                 reason: format!("Failed to read model file: {}", e),
             })

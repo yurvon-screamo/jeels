@@ -2,6 +2,12 @@ use crate::application::LlmService;
 
 pub struct GenerateAnswerUseCase;
 
+impl Default for GenerateAnswerUseCase {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GenerateAnswerUseCase {
     pub fn new() -> Self {
         Self
