@@ -9,7 +9,7 @@ use tests::*;
 #[tokio::test]
 async fn edit_card_use_case_should_update_card_in_database() {
     // Arrange
-    let ctx = create_test_repository().await;
+    create_test_repository().await;
     let settings = Settings::get();
     let repository = settings.get_repository();
     let user = create_test_user().await;

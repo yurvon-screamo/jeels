@@ -99,7 +99,7 @@ async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
 #[tokio::test]
 async fn get_hints_use_case_should_respect_limit() {
     // Arrange
-    let ctx = create_test_repository().await;
+    create_test_repository().await;
     let settings = Settings::get();
     let repository = settings.get_repository();
     let user = create_test_user().await;

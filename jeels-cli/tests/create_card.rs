@@ -34,7 +34,7 @@ async fn create_card_use_case_should_create_card_and_save_to_database() {
 #[tokio::test]
 async fn create_card_use_case_should_persist_card_in_database() {
     // Arrange
-    let ctx = create_test_repository().await;
+    create_test_repository().await;
     let settings = Settings::get();
     let repository = settings.get_repository();
     let user = create_test_user().await;
