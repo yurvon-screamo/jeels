@@ -207,10 +207,10 @@ impl User {
             .cards
             .values()
             .filter(|card| card.id() != card_id)
-            .filter_map(|card| {
+            .map(|card| {
                 let card_embedding = card.question().embedding();
                 let similarity = cosine_similarity(query_embedding, card_embedding);
-                Some((card.clone(), similarity))
+                (card.clone(), similarity)
             })
             .collect();
 

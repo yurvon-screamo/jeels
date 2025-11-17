@@ -34,7 +34,6 @@ pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
     }
 
     for card in cards {
-        let user_id = user_id;
         smol::block_on(
             element!(
                 ContextProvider(value: Context::owned(card))
