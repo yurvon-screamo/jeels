@@ -1,34 +1,252 @@
+use std::sync::Arc;
+
 use crate::application::LlmService;
 use crate::domain::error::JeersError;
-// use candle_core::Device;0
+use crate::settings::LlmSettings;
 
-// Note: This is a simplified implementation.
-// For full Qwen3 support, you may need to check the exact module path in candle-transformers 0.9
-// The model loading code below is a placeholder that needs to be adjusted based on actual API
+use tokenizers::Tokenizer;
+
+use candle_core::quantized::gguf_file;
+use candle_core::{Device, Tensor};
+use candle_transformers::generation::{LogitsProcessor, Sampling};
+
+use candle_transformers::models::quantized_qwen3::ModelWeights as Qwen3;
+use tokio::sync::Mutex;
 
 pub struct QwenLlm {
-    // model_path: String,
-    // device: Device,
-    // initialized: bool,
+    model: Arc<Mutex<Qwen3>>,
+    tokenizer: Tokenizer,
+    device: Device,
+    logits_processor: Arc<Mutex<LogitsProcessor>>,
+    eos_token: u32,
+    max_sample_len: usize,
 }
 
 impl QwenLlm {
-    pub fn new(_model_path: &str) -> Result<Self, JeersError> {
-        // Verify file exists
-        // if !std::path::Path::new(model_path).exists() {
-        //     return Err(JeersError::LlmError {
-        //         reason: format!("Model file not found: {}", model_path),
-        //     });
-        // }
+    pub fn new(settings: &LlmSettings) -> Result<Self, JeersError> {
+        let device = Device::Cpu;
+        let model = Self::load_model(&device, settings)?;
+        let tokenizer = Self::load_tokenizer(settings)?;
+        let logits_processor = Self::create_logits_processor(settings)?;
+        let eos_token = Self::extract_eos_token(&tokenizer)?;
 
-        Ok(Self {})
+        Ok(Self {
+            model: Arc::new(Mutex::new(model)),
+            tokenizer,
+            device,
+            logits_processor: Arc::new(Mutex::new(logits_processor)),
+            eos_token,
+            max_sample_len: settings.max_sample_len,
+        })
+    }
+
+    fn extract_eos_token(tokenizer: &Tokenizer) -> Result<u32, JeersError> {
+        let vocab = tokenizer.get_vocab(true);
+        let eos_token = vocab.get("<|im_end|>").ok_or(JeersError::LlmError {
+            reason: "EOS token not found".to_string(),
+        })?;
+        Ok(*eos_token)
+    }
+
+    fn load_model(device: &Device, settings: &LlmSettings) -> Result<Qwen3, JeersError> {
+        let model_path = Self::download_model_path(settings)?;
+        let mut file = Self::open_model_file(&model_path)?;
+        let gguf_content = Self::read_gguf_content(&mut file, &model_path)?;
+        Self::load_model_from_gguf(gguf_content, &mut file, device)
+    }
+
+    fn download_model_path(settings: &LlmSettings) -> Result<std::path::PathBuf, JeersError> {
+        let api = Self::create_hf_hub_api()?;
+        let repo = hf_hub::Repo::with_revision(
+            settings.model_repo.clone(),
+            hf_hub::RepoType::Model,
+            settings.model_revision.clone(),
+        );
+        api.repo(repo)
+            .get(&settings.model_filename)
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to get model: {}", e),
+            })
+    }
+
+    fn create_hf_hub_api() -> Result<hf_hub::api::sync::Api, JeersError> {
+        hf_hub::api::sync::Api::new().map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to create HF Hub API: {}", e),
+        })
+    }
+
+    fn open_model_file(path: &std::path::Path) -> Result<std::fs::File, JeersError> {
+        std::fs::File::open(path).map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to open model file: {}", e),
+        })
+    }
+
+    fn read_gguf_content(
+        file: &mut std::fs::File,
+        path: &std::path::Path,
+    ) -> Result<gguf_file::Content, JeersError> {
+        gguf_file::Content::read(file)
+            .map_err(|e| e.with_path(path.to_path_buf()))
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to read model file: {}", e),
+            })
+    }
+
+    fn load_model_from_gguf(
+        content: gguf_file::Content,
+        file: &mut std::fs::File,
+        device: &Device,
+    ) -> Result<Qwen3, JeersError> {
+        Qwen3::from_gguf(content, file, device).map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to load model: {}", e),
+        })
+    }
+
+    fn load_tokenizer(settings: &LlmSettings) -> Result<Tokenizer, JeersError> {
+        let tokenizer_path = Self::download_tokenizer_path(settings)?;
+        Self::load_tokenizer_from_file(tokenizer_path)
+    }
+
+    fn download_tokenizer_path(settings: &LlmSettings) -> Result<std::path::PathBuf, JeersError> {
+        let api = Self::create_hf_hub_api()?;
+        api.model(settings.tokenizer_repo.clone())
+            .get(&settings.tokenizer_filename)
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to get tokenizer: {}", e),
+            })
+    }
+
+    fn load_tokenizer_from_file(path: std::path::PathBuf) -> Result<Tokenizer, JeersError> {
+        Tokenizer::from_file(path).map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to load tokenizer: {}", e),
+        })
+    }
+
+    fn create_logits_processor(settings: &LlmSettings) -> Result<LogitsProcessor, JeersError> {
+        Ok(LogitsProcessor::from_sampling(
+            settings.seed,
+            Sampling::All {
+                temperature: settings.temperature,
+            },
+        ))
     }
 }
 
 impl LlmService for QwenLlm {
-    fn generate_answer(&mut self, _question: &str) -> Result<String, JeersError> {
-        Err(JeersError::LlmError {
-            reason: "LLM generation is not yet fully implemented. Please check the model path and ensure candle-transformers 0.9 has quantized_qwen3 module available.".to_string(),
+    async fn generate_answer(&self, question: &str) -> Result<String, JeersError> {
+        let prompt = Self::format_prompt(question);
+        let input_tokens = Self::encode_prompt(&self.tokenizer, &prompt)?;
+        let first_token = Self::generate_first_token(self, &input_tokens).await?;
+        let all_tokens = Self::generate_remaining_tokens(self, &input_tokens, first_token).await?;
+        let raw_response = Self::decode_tokens(&self.tokenizer, &all_tokens)?;
+        let response = Self::clean_think_tag(&raw_response)?;
+        Ok(response)
+    }
+}
+
+impl QwenLlm {
+    fn format_prompt(question: &str) -> String {
+        format!("<|im_start|>user\n{question}/no_think<|im_end|>\n<|im_start|>assistant\n")
+    }
+
+    fn encode_prompt(tokenizer: &Tokenizer, prompt: &str) -> Result<Vec<u32>, JeersError> {
+        let encoding = tokenizer
+            .encode(prompt, true)
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to encode prompt: {}", e),
+            })?;
+        Ok(encoding.get_ids().to_vec())
+    }
+
+    fn create_input_tensor(tokens: &[u32], device: &Device) -> Result<Tensor, JeersError> {
+        Tensor::new(tokens, device)
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to create input tensor: {}", e),
+            })?
+            .unsqueeze(0)
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to unsqueeze input tensor: {}", e),
+            })
+    }
+
+    async fn forward_model(
+        model: &Arc<Mutex<Qwen3>>,
+        input: &Tensor,
+        pos: usize,
+    ) -> Result<Tensor, JeersError> {
+        let mut model = model.lock().await;
+        model.forward(input, pos).map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to forward input tensor: {}", e),
         })
+    }
+
+    fn squeeze_logits(logits: Tensor) -> Result<Tensor, JeersError> {
+        logits.squeeze(0).map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to squeeze logits tensor: {}", e),
+        })
+    }
+
+    async fn sample_token(
+        logits_processor: &Arc<Mutex<LogitsProcessor>>,
+        logits: &Tensor,
+    ) -> Result<u32, JeersError> {
+        let mut processor = logits_processor.lock().await;
+        processor.sample(logits).map_err(|e| JeersError::LlmError {
+            reason: format!("Failed to sample logits: {}", e),
+        })
+    }
+
+    async fn generate_first_token(&self, input_tokens: &[u32]) -> Result<u32, JeersError> {
+        let input = Self::create_input_tensor(input_tokens, &self.device)?;
+        let logits = Self::forward_model(&self.model, &input, 0).await?;
+        let logits = Self::squeeze_logits(logits)?;
+        Self::sample_token(&self.logits_processor, &logits).await
+    }
+
+    async fn generate_next_token(&self, token: u32, position: usize) -> Result<u32, JeersError> {
+        let input = Self::create_input_tensor(&[token], &self.device)?;
+        let logits = Self::forward_model(&self.model, &input, position).await?;
+        let logits = Self::squeeze_logits(logits)?;
+        Self::sample_token(&self.logits_processor, &logits).await
+    }
+
+    async fn generate_remaining_tokens(
+        &self,
+        input_tokens: &[u32],
+        first_token: u32,
+    ) -> Result<Vec<u32>, JeersError> {
+        let mut all_tokens = vec![first_token];
+        let to_sample = self.max_sample_len.saturating_sub(1);
+
+        for index in 0..to_sample {
+            let position = input_tokens.len() + index;
+            let next_token =
+                Self::generate_next_token(self, all_tokens[all_tokens.len() - 1], position).await?;
+            all_tokens.push(next_token);
+
+            if next_token == self.eos_token {
+                break;
+            }
+        }
+
+        Ok(all_tokens)
+    }
+
+    fn decode_tokens(tokenizer: &Tokenizer, tokens: &[u32]) -> Result<String, JeersError> {
+        tokenizer
+            .decode(tokens, true)
+            .map_err(|e| JeersError::LlmError {
+                reason: format!("Failed to decode tokens: {}", e),
+            })
+    }
+
+    fn clean_think_tag(response: &str) -> Result<String, JeersError> {
+        let response = response
+            .split_once("</think>")
+            .ok_or(JeersError::LlmError {
+                reason: "Response does not contain think tag".to_string(),
+            })?;
+
+        Ok(response.1.trim().trim_end_matches('.').to_string())
     }
 }

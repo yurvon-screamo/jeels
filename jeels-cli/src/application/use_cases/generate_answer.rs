@@ -7,9 +7,9 @@ impl GenerateAnswerUseCase {
         Self
     }
 
-    pub fn execute<L: LlmService>(
+    pub async fn execute<L: LlmService>(
         &self,
-        llm_service: &mut L,
+        llm_service: &L,
         question: String,
     ) -> Result<String, crate::domain::error::JeersError> {
         if question.trim().is_empty() {
@@ -18,7 +18,6 @@ impl GenerateAnswerUseCase {
             });
         }
 
-        llm_service.generate_answer(&question)
+        llm_service.generate_answer(&question).await
     }
 }
-

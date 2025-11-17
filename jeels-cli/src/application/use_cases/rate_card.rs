@@ -46,12 +46,10 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
             0
         };
 
-        let (interval, new_stability, memory_state) = self.srs_service.calculate_next_review(
-            rating,
-            previous_memory_state,
-            &reviews,
-            elapsed_days,
-        )?;
+        let (interval, new_stability, memory_state) = self
+            .srs_service
+            .calculate_next_review(rating, previous_memory_state, &reviews, elapsed_days)
+            .await?;
 
         let next_review_date = Utc::now() + chrono::Duration::days(interval.days() as i64);
 

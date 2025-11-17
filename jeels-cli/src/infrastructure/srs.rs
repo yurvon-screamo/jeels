@@ -4,7 +4,8 @@ use crate::domain::review::Review;
 use crate::domain::value_objects::{Interval, MemoryState, Rating, Stability};
 use chrono::{DateTime, Utc};
 use fsrs::{FSRS, FSRSItem, FSRSReview};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 // Default FSRS parameters (from fsrs crate)
 // TODO: KILME
@@ -91,7 +92,7 @@ impl FsrsSrsService {
 }
 
 impl SrsService for FsrsSrsService {
-    fn calculate_next_review(
+    async fn calculate_next_review(
         &self,
         rating: Rating,
         previous_state: Option<MemoryState>,
@@ -108,7 +109,7 @@ impl SrsService for FsrsSrsService {
             Some(Self::to_fsrs_memory_state(state))
         } else if !reviews.is_empty() {
             let item = Self::build_fsrs_item(reviews);
-            let fsrs = self.fsrs.lock().unwrap();
+            let fsrs = self.fsrs.lock().await;
             Some(
                 fsrs.memory_state(item, None)
                     .map_err(|e| JeersError::SrsCalculationFailed {
@@ -119,7 +120,7 @@ impl SrsService for FsrsSrsService {
             None
         };
 
-        let fsrs = self.fsrs.lock().unwrap();
+        let fsrs = self.fsrs.lock().await;
         let next_states = fsrs
             .next_states(
                 current_memory_state,

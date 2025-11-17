@@ -37,7 +37,14 @@ pub struct AuthSettings {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LlmSettings {
-    pub model_path: PathBuf,
+    pub max_sample_len: usize,
+    pub temperature: f64,
+    pub seed: u64,
+    pub model_repo: String,
+    pub model_filename: String,
+    pub model_revision: String,
+    pub tokenizer_repo: String,
+    pub tokenizer_filename: String,
 }
 
 impl Settings {
@@ -53,7 +60,14 @@ impl Settings {
                 },
             },
             llm: LlmSettings {
-                model_path: PathBuf::from("qwen3-0.6b.gguf"),
+                max_sample_len: 8192,
+                temperature: 0.7,
+                seed: 299792458,
+                model_repo: "unsloth/Qwen3-1.7B-GGUF".to_string(),
+                model_filename: "Qwen3-1.7B-Q4_K_M.gguf".to_string(),
+                model_revision: "main".to_string(),
+                tokenizer_repo: "Qwen/Qwen3-1.7B".to_string(),
+                tokenizer_filename: "tokenizer.json".to_string(),
             },
             lazy_repository: None,
             lazy_embedding_generator: None,
@@ -71,9 +85,7 @@ impl Settings {
 
         settings.lazy_repository = Some(PoloDbUserRepository::new(&settings).await?);
         settings.lazy_embedding_generator = Some(EmbeddingGenerator::new()?);
-        settings.lazy_qwen_llm = Some(QwenLlm::new(
-            &settings.llm.model_path.to_string_lossy().to_string(),
-        )?);
+        settings.lazy_qwen_llm = Some(QwenLlm::new(&settings.llm)?);
         settings.lazy_srs_service = Some(FsrsSrsService::new()?);
 
         Ok(settings)
