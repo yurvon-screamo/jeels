@@ -2,10 +2,7 @@ use iocraft::prelude::*;
 use ulid::Ulid;
 
 use crate::{
-    application::{
-        RateCardUseCase,
-        StartStudySessionUseCase,
-    },
+    application::{RateCardUseCase, StartStudySessionUseCase},
     domain::{Card, JeersError, Rating},
     settings::Settings,
 };

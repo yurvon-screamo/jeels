@@ -8,10 +8,7 @@ pub struct TestContext {}
 pub async fn create_test_repository() -> TestContext {
     let temp_dir = TempDir::new().unwrap();
     let db_path = temp_dir.path().join("test_db");
-
-    let settings = Settings::from_database_path(db_path);
-    Settings::init(settings).unwrap();
-
+    Settings::from_database_path(db_path).unwrap();
     TestContext {}
 }
 

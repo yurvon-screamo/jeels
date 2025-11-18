@@ -133,7 +133,7 @@ impl QwenLlm {
 }
 
 impl LlmService for QwenLlm {
-    async fn generate_answer(&self, question: &str) -> Result<String, JeersError> {
+    async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
         let prompt = Self::format_prompt(question);
         let input_tokens = Self::encode_prompt(&self.tokenizer, &prompt)?;
         let first_token = Self::generate_first_token(self, &input_tokens).await?;

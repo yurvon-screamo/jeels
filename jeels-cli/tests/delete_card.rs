@@ -14,12 +14,13 @@ async fn delete_card_use_case_should_remove_card_from_database() {
     let repository = settings.get_repository();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator();
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
+    let llm_service = settings.get_llm_service();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     let card = create_use_case
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            "A systems programming language".to_string(),
+            Some("A systems programming language".to_string()),
         )
         .await
         .unwrap();

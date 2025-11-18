@@ -15,33 +15,32 @@ async fn get_hints_use_case_should_return_similar_cards() {
     let repository = settings.get_repository();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator();
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
+    let llm_service = settings.get_llm_service();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let card1 = create_use_case
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            "A systems programming language".to_string(),
+            Some("A systems programming language".to_string()),
         )
         .await
         .unwrap();
 
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
     create_use_case
         .execute(
             user.id(),
             "What is Python?".to_string(),
-            "A high-level programming language".to_string(),
+            Some("A high-level programming language".to_string()),
         )
         .await
         .unwrap();
 
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
     create_use_case
         .execute(
             user.id(),
             "What is JavaScript?".to_string(),
-            "A scripting language".to_string(),
+            Some("A scripting language".to_string()),
         )
         .await
         .unwrap();
@@ -73,13 +72,14 @@ async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
     let repository = settings.get_repository();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator();
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
+    let llm_service = settings.get_llm_service();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let card = create_use_case
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            "A systems programming language".to_string(),
+            Some("A systems programming language".to_string()),
         )
         .await
         .unwrap();
@@ -104,13 +104,14 @@ async fn get_hints_use_case_should_respect_limit() {
     let repository = settings.get_repository();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator();
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
+    let llm_service = settings.get_llm_service();
+    let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let query_card = create_use_case
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            "A systems programming language".to_string(),
+            Some("A systems programming language".to_string()),
         )
         .await
         .unwrap();
@@ -125,9 +126,12 @@ async fn get_hints_use_case_should_respect_limit() {
     ];
 
     for question in questions {
-        let create_use_case = CreateCardUseCase::new(repository, embedding_generator);
         create_use_case
-            .execute(user.id(), question.to_string(), "Some answer".to_string())
+            .execute(
+                user.id(),
+                question.to_string(),
+                Some("Some answer".to_string()),
+            )
             .await
             .unwrap();
     }

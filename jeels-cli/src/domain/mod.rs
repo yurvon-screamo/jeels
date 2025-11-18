@@ -83,9 +83,10 @@ impl User {
 
         self.cards.iter().any(|(id, card)| {
             if let Some(exclude_id) = exclude_card_id
-                && *id == exclude_id {
-                    return false;
-                }
+                && *id == exclude_id
+            {
+                return false;
+            }
 
             let card_embedding = card.question().embedding();
             let similarity = cosine_similarity(query_embedding, card_embedding);

@@ -30,12 +30,13 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
 pub async fn handle_create_card(
     user_id: Ulid,
     question: String,
-    answer: String,
+    answer: Option<String>,
 ) -> Result<(), JeersError> {
     let settings = Settings::get();
     let card = CreateCardUseCase::new(
         settings.get_repository(),
         settings.get_embedding_generator(),
+        settings.get_llm_service(),
     )
     .execute(user_id, question, answer)
     .await?;

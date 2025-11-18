@@ -24,6 +24,6 @@ impl GenerateAnswerUseCase {
             });
         }
 
-        llm_service.generate_answer(&question).await
+        llm_service.generate_text(&question).await
     }
 }

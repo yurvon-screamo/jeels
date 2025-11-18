@@ -38,10 +38,14 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
 
         let reviews: Vec<Review> = card.reviews().iter().cloned().collect();
         let previous_memory_state = card.memory_state();
-        let last_review_date = card.last_review_date().unwrap_or(card.next_review_date());
-        let elapsed_days = if last_review_date <= Utc::now() {
-            let duration = Utc::now().signed_duration_since(last_review_date);
-            duration.num_days().max(0) as u32
+
+        let elapsed_days = if let Some(last_review_date) = card.last_review_date() {
+            if last_review_date <= Utc::now() {
+                let duration = Utc::now().signed_duration_since(last_review_date);
+                duration.num_days().max(0) as u32
+            } else {
+                0
+            }
         } else {
             0
         };

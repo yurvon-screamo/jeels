@@ -1,20 +1,22 @@
-use crate::application::{EmbeddingService, UserRepository};
+use crate::application::{EmbeddingService, LlmService, UserRepository};
 use crate::domain::Card;
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Answer, Question};
 use ulid::Ulid;
 
 #[derive(Clone)]
-pub struct CreateCardUseCase<'a, R: UserRepository, E: EmbeddingService> {
+pub struct CreateCardUseCase<'a, R: UserRepository, E: EmbeddingService, L: LlmService> {
     repository: &'a R,
     embedding_service: &'a E,
+    llm_service: &'a L,
 }
 
-impl<'a, R: UserRepository, E: EmbeddingService> CreateCardUseCase<'a, R, E> {
-    pub fn new(repository: &'a R, embedding_service: &'a E) -> Self {
+impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCase<'a, R, E, L> {
+    pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
         Self {
             repository,
             embedding_service,
+            llm_service,
         }
     }
 
@@ -22,11 +24,22 @@ impl<'a, R: UserRepository, E: EmbeddingService> CreateCardUseCase<'a, R, E> {
         &self,
         user_id: Ulid,
         question_text: String,
-        answer_text: String,
+        answer_text: Option<String>,
     ) -> Result<Card, JeersError> {
         let embedding = self.embedding_service.embed(&question_text)?;
 
         let question = Question::new(question_text.clone(), embedding)?;
+
+        let answer_text =
+            if let Some(answer_text) = answer_text {
+                answer_text
+            } else {
+                self.llm_service.generate_text(&format!(
+                "Translate the following text to Russian: '{}'. Answer briefly and clearly.",
+                question_text
+            )).await?
+            };
+
         let answer = Answer::new(answer_text)?;
 
         let mut user = self

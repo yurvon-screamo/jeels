@@ -48,8 +48,8 @@ pub struct LlmSettings {
 }
 
 impl Settings {
-    pub fn from_database_path(database_path: PathBuf) -> Self {
-        Self {
+    pub fn from_database_path(database_path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        let settings = Self {
             database: DatabaseSettings {
                 path: database_path,
                 namespace: "default".to_string(),
@@ -73,12 +73,13 @@ impl Settings {
             lazy_embedding_generator: None,
             lazy_qwen_llm: None,
             lazy_srs_service: None,
-        }
-    }
-}
+        };
 
-impl Settings {
-    pub async fn load() -> Result<Self, Box<dyn std::error::Error>> {
+        Self::init(settings)?;
+        Ok(())
+    }
+
+    pub async fn load() -> Result<(), Box<dyn std::error::Error>> {
         let config_path = Self::find_config_file()?;
         let contents = std::fs::read_to_string(&config_path)?;
         let mut settings: Settings = toml::from_str(&contents)?;
@@ -88,7 +89,8 @@ impl Settings {
         settings.lazy_qwen_llm = Some(QwenLlm::new(&settings.llm)?);
         settings.lazy_srs_service = Some(FsrsSrsService::new()?);
 
-        Ok(settings)
+        Self::init(settings)?;
+        Ok(())
     }
 
     pub fn get_repository(&self) -> &PoloDbUserRepository {
@@ -101,7 +103,7 @@ impl Settings {
             .expect("Embedding generator not built")
     }
 
-    pub fn get_llm(&self) -> &QwenLlm {
+    pub fn get_llm_service(&self) -> &QwenLlm {
         self.lazy_qwen_llm.as_ref().expect("LLM not built")
     }
 
@@ -123,7 +125,7 @@ impl Settings {
         Err("config.toml not found in current directory".into())
     }
 
-    pub fn init(settings: Settings) -> Result<(), Box<dyn std::error::Error>> {
+    fn init(settings: Settings) -> Result<(), Box<dyn std::error::Error>> {
         SETTINGS
             .set(settings)
             .map_err(|_| "Settings already initialized".into())

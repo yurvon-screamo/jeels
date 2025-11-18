@@ -14,14 +14,15 @@ async fn create_card_use_case_should_create_card_and_save_to_database() {
     let repository = settings.get_repository();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator();
-    let use_case = CreateCardUseCase::new(repository, embedding_generator);
+    let llm_service = settings.get_llm_service();
+    let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     // Act
     let card = use_case
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            "A systems programming language".to_string(),
+            Some("A systems programming language".to_string()),
         )
         .await
         .unwrap();
@@ -39,12 +40,13 @@ async fn create_card_use_case_should_persist_card_in_database() {
     let repository = settings.get_repository();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator();
-    let use_case = CreateCardUseCase::new(repository, embedding_generator);
+    let llm_service = settings.get_llm_service();
+    let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     let card = use_case
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            "A systems programming language".to_string(),
+            Some("A systems programming language".to_string()),
         )
         .await
         .unwrap();
@@ -59,4 +61,23 @@ async fn create_card_use_case_should_persist_card_in_database() {
         loaded_card.answer().text(),
         "A systems programming language"
     );
+}
+
+#[tokio::test]
+async fn create_card_use_case_should_generate_answer_if_not_provided() {
+    // Arrange
+    create_test_repository().await;
+    let settings = Settings::get();
+    let repository = settings.get_repository();
+    let user = create_test_user().await;
+    let embedding_generator = settings.get_embedding_generator();
+    let llm_service = settings.get_llm_service();
+    let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
+
+    let card = use_case
+        .execute(user.id(), "食べます".to_string(), None)
+        .await
+        .unwrap();
+
+    assert_eq!(card.answer().text(), "Есть");
 }

@@ -34,7 +34,7 @@ enum Command {
     Cards {},
     Create {
         question: String,
-        answer: String,
+        answer: Option<String>,
     },
     Edit {
         card_id: Ulid,

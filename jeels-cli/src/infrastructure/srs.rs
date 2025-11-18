@@ -42,15 +42,6 @@ impl FsrsSrsService {
         })
     }
 
-    fn rating_to_fsrs_rating(rating: Rating) -> u32 {
-        match rating {
-            Rating::Again => 1,
-            Rating::Hard => 2,
-            Rating::Good => 3,
-            Rating::Easy => 4,
-        }
-    }
-
     fn build_fsrs_item(reviews: &[Review]) -> FSRSItem {
         let mut fsrs_reviews = Vec::new();
         let mut last_timestamp: Option<DateTime<Utc>> = None;
@@ -64,7 +55,13 @@ impl FsrsSrsService {
             };
 
             fsrs_reviews.push(FSRSReview {
-                rating: Self::rating_to_fsrs_rating(review.rating()),
+                // FSRS rating mapping: 1=Again, 2=Hard, 3=Good, 4=Easy
+                rating: match review.rating() {
+                    Rating::Again => 1,
+                    Rating::Hard => 2,
+                    Rating::Good => 3,
+                    Rating::Easy => 4,
+                },
                 delta_t,
             });
 
@@ -99,28 +96,24 @@ impl SrsService for FsrsSrsService {
         reviews: &[Review],
         elapsed_days: u32,
     ) -> Result<(Interval, Stability, MemoryState), JeersError> {
-        let fsrs_rating = Self::rating_to_fsrs_rating(rating);
+        let fsrs = self.fsrs.lock().await;
 
-        // Determine current memory state:
-        // 1. Use previous_state if available (most reliable)
-        // 2. Otherwise, calculate from reviews if available
-        // 3. Otherwise, use None for first review (no history)
-        let current_memory_state = if let Some(state) = previous_state {
-            Some(Self::to_fsrs_memory_state(state))
-        } else if !reviews.is_empty() {
+        // Prefer calculating from reviews if available, as it's more accurate
+        // Only use previous_state if reviews are empty (new card scenario)
+        let current_memory_state = if !reviews.is_empty() {
             let item = Self::build_fsrs_item(reviews);
-            let fsrs = self.fsrs.lock().await;
             Some(
                 fsrs.memory_state(item, None)
                     .map_err(|e| JeersError::SrsCalculationFailed {
                         reason: format!("Failed to calculate memory state from reviews: {:?}", e),
                     })?,
             )
+        } else if let Some(state) = previous_state {
+            Some(Self::to_fsrs_memory_state(state))
         } else {
             None
         };
 
-        let fsrs = self.fsrs.lock().await;
         let next_states = fsrs
             .next_states(
                 current_memory_state,
@@ -131,16 +124,11 @@ impl SrsService for FsrsSrsService {
                 reason: format!("Failed to calculate next states: {:?}", e),
             })?;
 
-        let review_state = match fsrs_rating {
-            1 => next_states.again,
-            2 => next_states.hard,
-            3 => next_states.good,
-            4 => next_states.easy,
-            _ => {
-                return Err(JeersError::SrsCalculationFailed {
-                    reason: format!("Invalid rating: {}", fsrs_rating),
-                });
-            }
+        let review_state = match rating {
+            Rating::Again => next_states.again,
+            Rating::Hard => next_states.hard,
+            Rating::Good => next_states.good,
+            Rating::Easy => next_states.easy,
         };
 
         let interval_days = review_state.interval.round().max(1.0) as u32;
