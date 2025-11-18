@@ -98,8 +98,6 @@ impl SrsService for FsrsSrsService {
     ) -> Result<(Interval, Stability, MemoryState), JeersError> {
         let fsrs = self.fsrs.lock().await;
 
-        // Prefer calculating from reviews if available, as it's more accurate
-        // Only use previous_state if reviews are empty (new card scenario)
         let current_memory_state = if !reviews.is_empty() {
             let item = Self::build_fsrs_item(reviews);
             Some(
@@ -131,8 +129,8 @@ impl SrsService for FsrsSrsService {
             Rating::Easy => next_states.easy,
         };
 
-        let interval_days = review_state.interval.round().max(1.0) as u32;
-        let interval = Interval::new(interval_days);
+        let days = review_state.interval.floor() as u32;
+        let interval = Interval::new(days);
 
         let domain_memory_state = Self::from_fsrs_memory_state(review_state.memory)?;
         let stability = domain_memory_state.stability();

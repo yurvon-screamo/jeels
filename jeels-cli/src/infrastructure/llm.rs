@@ -159,7 +159,7 @@ impl QwenLlm {
     }
 
     fn create_input_tensor(tokens: &[u32], device: &Device) -> Result<Tensor, JeersError> {
-        Tensor::new(tokens, device)
+        Tensor::from_slice(tokens, (tokens.len(),), device)
             .map_err(|e| JeersError::LlmError {
                 reason: format!("Failed to create input tensor: {}", e),
             })?
