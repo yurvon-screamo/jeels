@@ -17,6 +17,7 @@ pub enum JeersError {
     RepositoryError { reason: String },
     EmbeddingError { reason: String },
     LlmError { reason: String },
+    SettingsError { reason: String },
 }
 
 impl fmt::Display for JeersError {
@@ -60,6 +61,9 @@ impl fmt::Display for JeersError {
             }
             JeersError::LlmError { reason } => {
                 write!(f, "LLM error: {}", reason)
+            }
+            JeersError::SettingsError { reason } => {
+                write!(f, "Settings error: {}", reason)
             }
         }
     }

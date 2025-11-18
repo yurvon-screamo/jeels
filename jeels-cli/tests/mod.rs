@@ -13,7 +13,7 @@ pub async fn create_test_repository() -> TestContext {
 }
 
 pub async fn create_test_user() -> User {
-    let repository = Settings::get().get_repository();
+    let repository = Settings::get().get_repository().await.unwrap();
     let user = User::new(
         "test_user".to_string(),
         JapaneseLevel::N5,

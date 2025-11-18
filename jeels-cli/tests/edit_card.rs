@@ -11,10 +11,10 @@ async fn edit_card_use_case_should_update_card_in_database() {
     // Arrange
     create_test_repository().await;
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator();
-    let llm_service = settings.get_llm_service();
+    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let llm_service = settings.get_llm_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     let card = create_use_case
         .execute(

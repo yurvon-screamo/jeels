@@ -8,7 +8,10 @@ use ulid::Ulid;
 use crate::{
     application::UserRepository,
     cli::{
-        card::{handle_create_card, handle_delete_card, handle_edit_card, handle_list_cards},
+        card::{
+            handle_create_card, handle_create_words, handle_delete_card, handle_edit_card,
+            handle_list_cards,
+        },
         learn::handle_learn,
     },
     domain::{JapaneseLevel, JeersError, NativeLanguage, User},
@@ -34,7 +37,10 @@ enum Command {
     Cards {},
     Create {
         question: String,
-        answer: Option<String>,
+        answer: String,
+    },
+    CreateWords {
+        questions: Vec<String>,
     },
     Edit {
         card_id: Ulid,
@@ -42,7 +48,7 @@ enum Command {
         answer: String,
     },
     Delete {
-        card_id: Ulid,
+        card_ids: Vec<Ulid>,
     },
 }
 
@@ -63,6 +69,9 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         Command::Create { question, answer } => {
             handle_create_card(user_id, question, answer).await?;
         }
+        Command::CreateWords { questions } => {
+            handle_create_words(user_id, questions).await?;
+        }
         Command::Edit {
             card_id,
             question,
@@ -70,8 +79,8 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         } => {
             handle_edit_card(user_id, card_id, question, answer).await?;
         }
-        Command::Delete { card_id } => {
-            handle_delete_card(user_id, card_id).await?;
+        Command::Delete { card_ids } => {
+            handle_delete_card(user_id, card_ids).await?;
         }
     }
 
@@ -82,7 +91,7 @@ async fn ensure_user_exists(
     settings: &'static Settings,
     username: &str,
 ) -> Result<Ulid, Box<dyn std::error::Error>> {
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await?;
 
     if let Some(user) = repository
         .find_by_username(username)
@@ -107,7 +116,7 @@ async fn ensure_user_exists(
 
 async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await?;
     let user = repository
         .find_by_id(user_id)
         .await?

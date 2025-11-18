@@ -12,10 +12,10 @@ async fn rate_card_use_case_should_add_review_and_update_schedule() {
     // Arrange
     create_test_repository().await;
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator();
-    let llm_service = settings.get_llm_service();
+    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let llm_service = settings.get_llm_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     let card = create_use_case
         .execute(
@@ -26,7 +26,7 @@ async fn rate_card_use_case_should_add_review_and_update_schedule() {
         .await
         .unwrap();
 
-    let srs_service = settings.get_srs_service();
+    let srs_service = settings.get_srs_service().await.unwrap();
     let rate_use_case = RateCardUseCase::new(repository, srs_service);
 
     // Act
@@ -48,10 +48,10 @@ async fn rate_card_use_case_should_use_reviews_for_memory_state_calculation() {
     // Arrange
     create_test_repository().await;
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator();
-    let llm_service = settings.get_llm_service();
+    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let llm_service = settings.get_llm_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     let card = create_use_case
         .execute(
@@ -62,7 +62,7 @@ async fn rate_card_use_case_should_use_reviews_for_memory_state_calculation() {
         .await
         .unwrap();
 
-    let srs_service = settings.get_srs_service();
+    let srs_service = settings.get_srs_service().await.unwrap();
     let rate_use_case = RateCardUseCase::new(repository, srs_service);
 
     // Act - First review

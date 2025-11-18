@@ -9,7 +9,7 @@ use crate::{
 
 pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await?;
     let cards = ListCardsUseCase::new(repository).execute(user_id).await?;
     element!(
         View(
@@ -30,15 +30,15 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
 pub async fn handle_create_card(
     user_id: Ulid,
     question: String,
-    answer: Option<String>,
+    answer: String,
 ) -> Result<(), JeersError> {
     let settings = Settings::get();
     let card = CreateCardUseCase::new(
-        settings.get_repository(),
-        settings.get_embedding_generator(),
-        settings.get_llm_service(),
+        settings.get_repository().await?,
+        settings.get_embedding_generator().await?,
+        settings.get_llm_service().await?,
     )
-    .execute(user_id, question, answer)
+    .execute(user_id, question, Some(answer))
     .await?;
 
     element! {
@@ -58,6 +58,34 @@ pub async fn handle_create_card(
     Ok(())
 }
 
+pub async fn handle_create_words(user_id: Ulid, questions: Vec<String>) -> Result<(), JeersError> {
+    let settings = Settings::get();
+    let use_case = CreateCardUseCase::new(
+        settings.get_repository().await?,
+        settings.get_embedding_generator().await?,
+        settings.get_llm_service().await?,
+    );
+
+    for question in questions {
+        let card = use_case.execute(user_id, question, None).await?;
+        element! {
+            View(
+                flex_direction: FlexDirection::Column,
+                margin_top: 1,
+                margin_bottom: 1,
+            ) {
+                Text(content: "Создана карточка:", weight: Weight::Bold, decoration: TextDecoration::Underline)
+                ContextProvider(value: Context::owned(card)) {
+                    CardDisplay
+                }
+            }
+        }
+        .print();
+    }
+
+    Ok(())
+}
+
 pub async fn handle_edit_card(
     user_id: Ulid,
     card_id: Ulid,
@@ -66,8 +94,8 @@ pub async fn handle_edit_card(
 ) -> Result<(), JeersError> {
     let settings = Settings::get();
     let card = EditCardUseCase::new(
-        settings.get_repository(),
-        settings.get_embedding_generator(),
+        settings.get_repository().await?,
+        settings.get_embedding_generator().await?,
     )
     .execute(user_id, card_id, question, answer)
     .await?;
@@ -89,25 +117,28 @@ pub async fn handle_edit_card(
     Ok(())
 }
 
-pub async fn handle_delete_card(user_id: Ulid, card_id: Ulid) -> Result<(), JeersError> {
+pub async fn handle_delete_card(user_id: Ulid, card_ids: Vec<Ulid>) -> Result<(), JeersError> {
     let settings = Settings::get();
-    let card = DeleteCardUseCase::new(settings.get_repository())
-        .execute(user_id, card_id)
-        .await?;
 
-    element! {
-        View(
-            flex_direction: FlexDirection::Column,
-            margin_top: 1,
-            margin_bottom: 1,
-        ) {
-            Text(content: "Карточка удалена:", weight: Weight::Bold, decoration: TextDecoration::Underline)
-            ContextProvider(value: Context::owned(card)) {
-                CardDisplay
+    for card_id in card_ids {
+        let card = DeleteCardUseCase::new(settings.get_repository().await?)
+            .execute(user_id, card_id)
+            .await?;
+
+        element! {
+            View(
+                flex_direction: FlexDirection::Column,
+                margin_top: 1,
+                margin_bottom: 1,
+            ) {
+                Text(content: "Карточка удалена:", weight: Weight::Bold, decoration: TextDecoration::Underline)
+                ContextProvider(value: Context::owned(card)) {
+                    CardDisplay
+                }
             }
         }
+        .print();
     }
-    .print();
 
     Ok(())
 }

@@ -12,10 +12,10 @@ async fn get_hints_use_case_should_return_similar_cards() {
     // Arrange
     create_test_repository().await;
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator();
-    let llm_service = settings.get_llm_service();
+    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let llm_service = settings.get_llm_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let card1 = create_use_case
@@ -69,10 +69,10 @@ async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
     // Arrange
     create_test_repository().await;
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator();
-    let llm_service = settings.get_llm_service();
+    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let llm_service = settings.get_llm_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let card = create_use_case
@@ -101,10 +101,10 @@ async fn get_hints_use_case_should_respect_limit() {
     // Arrange
     create_test_repository().await;
     let settings = Settings::get();
-    let repository = settings.get_repository();
+    let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator();
-    let llm_service = settings.get_llm_service();
+    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let llm_service = settings.get_llm_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let query_card = create_use_case

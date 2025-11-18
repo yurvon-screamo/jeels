@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
+use crate::domain::JeersError;
 use crate::infrastructure::{EmbeddingGenerator, FsrsSrsService, PoloDbUserRepository, QwenLlm};
+use tokio::sync::OnceCell;
 
 static SETTINGS: OnceLock<Settings> = OnceLock::new();
 
@@ -12,13 +14,13 @@ pub struct Settings {
     pub llm: LlmSettings,
 
     #[serde(skip)]
-    lazy_repository: Option<PoloDbUserRepository>,
+    lazy_repository: Arc<OnceCell<PoloDbUserRepository>>,
     #[serde(skip)]
-    lazy_embedding_generator: Option<EmbeddingGenerator>,
+    lazy_embedding_generator: Arc<OnceCell<EmbeddingGenerator>>,
     #[serde(skip)]
-    lazy_qwen_llm: Option<QwenLlm>,
+    lazy_qwen_llm: Arc<OnceCell<QwenLlm>>,
     #[serde(skip)]
-    lazy_srs_service: Option<FsrsSrsService>,
+    lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -69,10 +71,10 @@ impl Settings {
                 tokenizer_repo: "Qwen/Qwen3-1.7B".to_string(),
                 tokenizer_filename: "tokenizer.json".to_string(),
             },
-            lazy_repository: None,
-            lazy_embedding_generator: None,
-            lazy_qwen_llm: None,
-            lazy_srs_service: None,
+            lazy_repository: Arc::new(OnceCell::new()),
+            lazy_embedding_generator: Arc::new(OnceCell::new()),
+            lazy_qwen_llm: Arc::new(OnceCell::new()),
+            lazy_srs_service: Arc::new(OnceCell::new()),
         };
 
         Self::init(settings)?;
@@ -84,33 +86,55 @@ impl Settings {
         let contents = std::fs::read_to_string(&config_path)?;
         let mut settings: Settings = toml::from_str(&contents)?;
 
-        settings.lazy_repository = Some(PoloDbUserRepository::new(&settings).await?);
-        settings.lazy_embedding_generator = Some(EmbeddingGenerator::new()?);
-        settings.lazy_qwen_llm = Some(QwenLlm::new(&settings.llm)?);
-        settings.lazy_srs_service = Some(FsrsSrsService::new()?);
+        settings.lazy_repository = Arc::new(OnceCell::new());
+        settings.lazy_embedding_generator = Arc::new(OnceCell::new());
+        settings.lazy_qwen_llm = Arc::new(OnceCell::new());
+        settings.lazy_srs_service = Arc::new(OnceCell::new());
 
         Self::init(settings)?;
         Ok(())
     }
 
-    pub fn get_repository(&self) -> &PoloDbUserRepository {
-        self.lazy_repository.as_ref().expect("Repository not built")
+    pub async fn get_repository(&self) -> Result<&PoloDbUserRepository, JeersError> {
+        self.lazy_repository
+            .get_or_try_init(|| async {
+                PoloDbUserRepository::new(self)
+                    .await
+                    .map_err(|e| JeersError::SettingsError {
+                        reason: e.to_string(),
+                    })
+            })
+            .await
     }
 
-    pub fn get_embedding_generator(&self) -> &EmbeddingGenerator {
+    pub async fn get_embedding_generator(&self) -> Result<&EmbeddingGenerator, JeersError> {
         self.lazy_embedding_generator
-            .as_ref()
-            .expect("Embedding generator not built")
+            .get_or_try_init(|| async {
+                EmbeddingGenerator::new().map_err(|e| JeersError::SettingsError {
+                    reason: e.to_string(),
+                })
+            })
+            .await
     }
 
-    pub fn get_llm_service(&self) -> &QwenLlm {
-        self.lazy_qwen_llm.as_ref().expect("LLM not built")
+    pub async fn get_llm_service(&self) -> Result<&QwenLlm, JeersError> {
+        self.lazy_qwen_llm
+            .get_or_try_init(|| async {
+                QwenLlm::new(&self.llm).map_err(|e| JeersError::SettingsError {
+                    reason: e.to_string(),
+                })
+            })
+            .await
     }
 
-    pub fn get_srs_service(&self) -> &FsrsSrsService {
+    pub async fn get_srs_service(&self) -> Result<&FsrsSrsService, JeersError> {
         self.lazy_srs_service
-            .as_ref()
-            .expect("SRS service not built")
+            .get_or_try_init(|| async {
+                FsrsSrsService::new().map_err(|e| JeersError::SettingsError {
+                    reason: e.to_string(),
+                })
+            })
+            .await
     }
 
     fn find_config_file() -> Result<PathBuf, Box<dyn std::error::Error>> {

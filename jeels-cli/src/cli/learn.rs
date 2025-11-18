@@ -10,7 +10,7 @@ use crate::{
 pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
     let settings = Settings::get();
 
-    let start_study_usecase = StartStudySessionUseCase::new(settings.get_repository());
+    let start_study_usecase = StartStudySessionUseCase::new(settings.get_repository().await?);
     let cards = start_study_usecase.execute(user_id).await?;
 
     if cards.is_empty() {
@@ -53,7 +53,11 @@ pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
 #[component]
 fn LearnCard<'a>(mut hooks: Hooks) -> impl Into<AnyElement<'a>> {
     let settings = Settings::get();
-    let rate_usecase = RateCardUseCase::new(settings.get_repository(), settings.get_srs_service());
+    let repository = smol::block_on(settings.get_repository()).expect("Failed to get repository");
+    let srs_service =
+        smol::block_on(settings.get_srs_service()).expect("Failed to get srs service");
+
+    let rate_usecase = RateCardUseCase::new(repository, srs_service);
 
     let mut system = hooks.use_context_mut::<SystemContext>();
     let card = hooks.use_context::<Card>();
