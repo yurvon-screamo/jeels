@@ -4,7 +4,8 @@ use std::sync::{Arc, OnceLock};
 
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    EmbeddingGenerator, FsrsSrsService, OpenRouterLlm, PoloDbUserRepository,
+    AutorubyFuriganaGenerator, EmbeddingGenerator, FsrsSrsService, OpenRouterLlm,
+    PoloDbUserRepository,
 };
 use tokio::sync::OnceCell;
 
@@ -17,6 +18,7 @@ pub struct ApplicationEnvironment {
     lazy_embedding_generator: Arc<OnceCell<EmbeddingGenerator>>,
     lazy_llm: Arc<OnceCell<OpenRouterLlm>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
+    lazy_furigana_service: Arc<OnceCell<AutorubyFuriganaGenerator>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -129,6 +131,16 @@ impl ApplicationEnvironment {
             .await
     }
 
+    pub async fn get_furigana_service(&self) -> Result<&AutorubyFuriganaGenerator, JeersError> {
+        self.lazy_furigana_service
+            .get_or_try_init(|| async {
+                AutorubyFuriganaGenerator::new().map_err(|e| JeersError::SettingsError {
+                    reason: e.to_string(),
+                })
+            })
+            .await
+    }
+
     fn find_config_file() -> Result<PathBuf, Box<dyn std::error::Error>> {
         let possible_paths = vec![PathBuf::from("config.toml")];
 
@@ -148,6 +160,7 @@ impl ApplicationEnvironment {
             lazy_embedding_generator: Arc::new(OnceCell::new()),
             lazy_llm: Arc::new(OnceCell::new()),
             lazy_srs_service: Arc::new(OnceCell::new()),
+            lazy_furigana_service: Arc::new(OnceCell::new()),
         };
 
         SETTINGS

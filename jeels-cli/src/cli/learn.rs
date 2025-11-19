@@ -3,7 +3,7 @@ use std::io;
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{
     Frame,
-    layout::Alignment,
+    layout::{Alignment, Constraint, Layout},
     style::{Color, Style, Stylize},
     symbols::border,
     text::{Line, Text},
@@ -12,8 +12,11 @@ use ratatui::{
 use ulid::Ulid;
 
 use crate::{
-    application::{FindSynonymsUseCase, RateCardUseCase, StartStudySessionUseCase, UserRepository},
-    cli::render_once,
+    application::{
+        FindSynonymsUseCase, FuriganaService, GetFuriganaUseCase, RateCardUseCase,
+        StartStudySessionUseCase, UserRepository,
+    },
+    cli::{furigana_renderer, render_once},
     domain::{Card, JeersError, Rating},
     settings::ApplicationEnvironment,
 };
@@ -22,25 +25,30 @@ enum CardState {
     Question,
     Answer,
     Completed,
-    Synonyms(Vec<Card>),
 }
 
-struct LearnCardApp<'a, R: UserRepository> {
+struct LearnCardApp<'a, R: UserRepository, F: FuriganaService> {
     card: Card,
     state: CardState,
     exit: bool,
     user_id: Ulid,
     repository: &'a R,
+    furigana_service: &'a F,
+    synonyms: Option<Vec<Card>>,
+    furigana: Option<String>,
 }
 
-impl<'a, R: UserRepository> LearnCardApp<'a, R> {
-    fn new(card: Card, user_id: Ulid, repository: &'a R) -> Self {
+impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
+    fn new(card: Card, user_id: Ulid, repository: &'a R, furigana_service: &'a F) -> Self {
         Self {
             card,
             state: CardState::Question,
             exit: false,
             user_id,
             repository,
+            furigana_service,
+            synonyms: None,
+            furigana: None,
         }
     }
 
@@ -59,95 +67,176 @@ impl<'a, R: UserRepository> LearnCardApp<'a, R> {
 
     fn draw(&self, frame: &mut Frame) {
         let area = frame.area();
-        let block = Block::bordered()
+
+        let layout = if self.synonyms.is_some() {
+            Layout::horizontal([Constraint::Percentage(60), Constraint::Percentage(40)]).split(area)
+        } else {
+            Layout::horizontal([Constraint::Percentage(100)]).split(area)
+        };
+
+        let card_area = layout[0];
+        let synonyms_area = if layout.len() > 1 {
+            Some(layout[1])
+        } else {
+            None
+        };
+
+        // Отрисовка карточки
+        let card_block = Block::bordered()
             .border_set(border::ROUNDED)
             .border_style(Style::default().fg(Color::Green));
 
-        let content = match &self.state {
+        let card_content = match &self.state {
             CardState::Question => {
-                vec![
-                    Line::from(self.card.question().text().bold().fg(Color::Magenta)),
-                    Line::from(""),
-                    Line::from("Нажмите пробел чтобы показать ответ.".fg(Color::Gray)),
-                    Line::from("Нажмите \"h\" чтобы показать синонимы.".fg(Color::Gray)),
-                    Line::from("Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray)),
-                ]
+                let mut lines = vec![];
+                if let Some(question_furigana) = &self.furigana {
+                    lines.push(furigana_renderer::render_furigana(question_furigana));
+                    lines.push(Line::from(""));
+                }
+                lines.push(Line::from(
+                    self.card.question().text().bold().fg(Color::Magenta),
+                ));
+                lines.push(Line::from(""));
+                lines.push(Line::from(
+                    "Нажмите пробел чтобы показать ответ.".fg(Color::Gray),
+                ));
+                lines.push(Line::from(
+                    "Нажмите \"h\" чтобы показать синонимы.".fg(Color::Gray),
+                ));
+                if self.furigana.is_some() {
+                    lines.push(Line::from(
+                        "Нажмите \"f\" чтобы скрыть фуригану.".fg(Color::Gray),
+                    ));
+                } else {
+                    lines.push(Line::from(
+                        "Нажмите \"f\" чтобы показать фуригану.".fg(Color::Gray),
+                    ));
+                }
+                lines.push(Line::from(
+                    "Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray),
+                ));
+                lines
             }
             CardState::Answer => {
-                vec![
-                    Line::from(self.card.question().text().bold().fg(Color::Blue)),
-                    Line::from(self.card.answer().text().bold().fg(Color::Magenta)),
-                    Line::from(""),
-                    Line::from("Используйте цифры от 1 до 4 для оценки карточки.".fg(Color::Gray)),
-                    Line::from("1 - Легко".fg(Color::Gray)),
-                    Line::from("2 - Нормально".fg(Color::Gray)),
-                    Line::from("3 - Трудно".fg(Color::Gray)),
-                    Line::from("4 - Очень трудно".fg(Color::Gray)),
-                    Line::from("Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray)),
-                ]
+                let mut lines = vec![];
+                if let Some(question_furigana) = &self.furigana {
+                    lines.push(furigana_renderer::render_furigana(question_furigana));
+                    lines.push(Line::from(""));
+                }
+                lines.push(Line::from(
+                    self.card.question().text().bold().fg(Color::Blue),
+                ));
+                lines.push(Line::from(
+                    self.card.answer().text().bold().fg(Color::Magenta),
+                ));
+                lines.push(Line::from(""));
+                lines.push(Line::from(
+                    "Используйте цифры от 1 до 4 для оценки карточки.".fg(Color::Gray),
+                ));
+                lines.push(Line::from("1 - Легко".fg(Color::Gray)));
+                lines.push(Line::from("2 - Нормально".fg(Color::Gray)));
+                lines.push(Line::from("3 - Трудно".fg(Color::Gray)));
+                lines.push(Line::from("4 - Очень трудно".fg(Color::Gray)));
+                lines.push(Line::from(
+                    "Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray),
+                ));
+                lines
             }
             CardState::Completed => {
-                vec![
-                    Line::from(self.card.question().text().bold().fg(Color::Blue)),
-                    Line::from(self.card.answer().text().bold().fg(Color::Magenta)),
-                ]
+                let mut lines = vec![];
+                if let Some(question_furigana) = &self.furigana {
+                    lines.push(furigana_renderer::render_furigana(question_furigana));
+                    lines.push(Line::from(""));
+                }
+                lines.push(Line::from(
+                    self.card.question().text().bold().fg(Color::Blue),
+                ));
+                lines.push(Line::from(
+                    self.card.answer().text().bold().fg(Color::Magenta),
+                ));
+                lines
             }
-            CardState::Synonyms(synonyms) => {
-                let mut lines = vec![
-                    Line::from("Синонимы:".bold().fg(Color::Yellow)),
-                    Line::from(""),
-                ];
+        };
+
+        Paragraph::new(Text::from(card_content))
+            .block(card_block)
+            .alignment(Alignment::Left)
+            .render(card_area, frame.buffer_mut());
+
+        // Отрисовка синонимов (если есть)
+        if let Some(synonyms_area) = synonyms_area {
+            if let Some(synonyms) = &self.synonyms {
+                let synonyms_block = Block::bordered()
+                    .border_set(border::ROUNDED)
+                    .border_style(Style::default().fg(Color::Yellow))
+                    .title("Синонимы");
+
+                let mut synonyms_lines = vec![Line::from("")];
 
                 if synonyms.is_empty() {
-                    lines.push(Line::from("Синонимы не найдены.".fg(Color::Gray)));
+                    synonyms_lines.push(Line::from("Синонимы не найдены.".fg(Color::Gray)));
                 } else {
                     for synonym in synonyms {
-                        lines.push(Line::from(
+                        synonyms_lines.push(Line::from(
                             format!("• {}", synonym.question().text()).fg(Color::Cyan),
                         ));
                     }
                 }
 
-                lines.push(Line::from(""));
-                lines.push(Line::from(
-                    "Нажмите пробел чтобы вернуться к вопросу.".fg(Color::Gray),
-                ));
-
-                lines
+                Paragraph::new(Text::from(synonyms_lines))
+                    .block(synonyms_block)
+                    .alignment(Alignment::Left)
+                    .render(synonyms_area, frame.buffer_mut());
             }
-        };
-
-        Paragraph::new(Text::from(content))
-            .block(block)
-            .alignment(Alignment::Left)
-            .render(area, frame.buffer_mut());
+        }
     }
 
     async fn handle_events(&mut self, rating: &mut Option<Rating>) -> io::Result<()> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
                 match key_event.code {
-                    KeyCode::Char(' ') => match self.state {
-                        CardState::Question => {
+                    KeyCode::Char(' ') => {
+                        if matches!(self.state, CardState::Question) {
                             self.state = CardState::Answer;
                         }
-                        CardState::Synonyms(_) => {
-                            self.state = CardState::Question;
-                        }
-                        _ => {}
-                    },
+                    }
                     KeyCode::Char('h') => {
-                        if matches!(self.state, CardState::Question) {
+                        if matches!(self.state, CardState::Question)
+                            || matches!(self.state, CardState::Answer)
+                        {
                             let find_synonyms_usecase = FindSynonymsUseCase::new(self.repository);
                             match find_synonyms_usecase
                                 .execute(self.user_id, self.card.id())
                                 .await
                             {
                                 Ok(synonyms) => {
-                                    self.state = CardState::Synonyms(synonyms);
+                                    self.synonyms = Some(synonyms);
                                 }
                                 Err(_) => {
-                                    self.state = CardState::Synonyms(vec![]);
+                                    self.synonyms = Some(vec![]);
+                                }
+                            }
+                        }
+                    }
+                    KeyCode::Char('f') => {
+                        if matches!(self.state, CardState::Question)
+                            || matches!(self.state, CardState::Answer)
+                        {
+                            if self.furigana.is_some() {
+                                self.furigana = None;
+                            } else {
+                                let get_furigana_usecase =
+                                    GetFuriganaUseCase::new(self.repository, self.furigana_service);
+                                match get_furigana_usecase
+                                    .execute(self.user_id, self.card.id())
+                                    .await
+                                {
+                                    Ok(furigana) => {
+                                        self.furigana = Some(furigana);
+                                    }
+                                    Err(_) => {
+                                        self.furigana = None;
+                                    }
                                 }
                             }
                         }
@@ -225,7 +314,8 @@ pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
 
     for card in cards {
         let repository = settings.get_repository().await?;
-        let mut app = LearnCardApp::new(card.clone(), user_id, repository);
+        let furigana_service = settings.get_furigana_service().await?;
+        let mut app = LearnCardApp::new(card.clone(), user_id, repository, furigana_service);
         let rating = app.run().await.map_err(|e| JeersError::RepositoryError {
             reason: e.to_string(),
         })?;

@@ -1,4 +1,5 @@
 mod card;
+mod furigana_renderer;
 mod learn;
 
 use clap::Parser;

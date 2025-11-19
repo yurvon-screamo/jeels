@@ -18,6 +18,7 @@ pub enum JeersError {
     EmbeddingError { reason: String },
     LlmError { reason: String },
     SettingsError { reason: String },
+    FuriganaError { reason: String },
 }
 
 impl fmt::Display for JeersError {
@@ -64,6 +65,9 @@ impl fmt::Display for JeersError {
             }
             JeersError::SettingsError { reason } => {
                 write!(f, "Settings error: {}", reason)
+            }
+            JeersError::FuriganaError { reason } => {
+                write!(f, "Furigana error: {}", reason)
             }
         }
     }

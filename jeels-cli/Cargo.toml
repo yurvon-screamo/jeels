@@ -22,6 +22,7 @@ chrono = { version = "0.4", features = ["std", "clock", "serde"] }
 
 # Japan
 fsrs = "5.2"
+autoruby = { version = "0.5", features = ["integrated"] }
 
 # Database
 polodb_core = "5.1"
