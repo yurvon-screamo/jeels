@@ -284,8 +284,15 @@ mod tests {
         let future_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
-        user.schedule_next_review(card_id, future_date, stability, memory_state)
-            .unwrap();
+        user.rate_card(
+            card_id,
+            Rating::Good,
+            Interval::new(1),
+            future_date,
+            stability,
+            memory_state,
+        )
+        .unwrap();
 
         // Act
         let cards = user.start_study_session();
@@ -312,8 +319,15 @@ mod tests {
         let future_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
-        user.schedule_next_review(card2_id, future_date, stability, memory_state)
-            .unwrap();
+        user.rate_card(
+            card2_id,
+            Rating::Good,
+            Interval::new(1),
+            future_date,
+            stability,
+            memory_state,
+        )
+        .unwrap();
 
         // Act
         let cards = user.start_study_session();
@@ -333,9 +347,19 @@ mod tests {
         let card_id = card.id();
         let rating = Rating::Good;
         let interval = Interval::new(1);
+        let next_review_date = Utc::now() + Duration::days(1);
+        let stability = Stability::new(1.0).unwrap();
+        let memory_state = create_test_memory_state();
 
         // Act
-        let result = user.rate_card(card_id, rating, interval);
+        let result = user.rate_card(
+            card_id,
+            rating,
+            interval,
+            next_review_date,
+            stability,
+            memory_state,
+        );
 
         // Assert
         assert!(result.is_ok());
@@ -362,9 +386,19 @@ mod tests {
             let card = user.create_card(question, answer).unwrap();
             let card_id = card.id();
             let interval = Interval::new(expected_interval);
+            let next_review_date = Utc::now() + Duration::days(expected_interval as i64);
+            let stability = Stability::new(expected_interval as f64).unwrap();
+            let memory_state = create_test_memory_state();
 
             // Act
-            let result = user.rate_card(card_id, rating, interval);
+            let result = user.rate_card(
+                card_id,
+                rating,
+                interval,
+                next_review_date,
+                stability,
+                memory_state,
+            );
 
             // Assert
             assert!(result.is_ok());
@@ -384,11 +418,22 @@ mod tests {
         let card = user.create_card(question, answer).unwrap();
         let card_id = card.id();
         let ratings = vec![(Rating::Easy, 1), (Rating::Good, 2), (Rating::Hard, 3)];
+        let mut current_date = Utc::now();
 
         // Act
         for (rating, interval_days) in ratings.iter() {
-            user.rate_card(card_id, *rating, Interval::new(*interval_days))
-                .unwrap();
+            current_date = current_date + Duration::days(*interval_days as i64);
+            let stability = Stability::new(*interval_days as f64).unwrap();
+            let memory_state = create_test_memory_state();
+            user.rate_card(
+                card_id,
+                *rating,
+                Interval::new(*interval_days),
+                current_date,
+                stability,
+                memory_state,
+            )
+            .unwrap();
         }
 
         // Assert
@@ -406,9 +451,19 @@ mod tests {
         let non_existent_id = ulid::Ulid::new();
         let rating = Rating::Good;
         let interval = Interval::new(1);
+        let next_review_date = Utc::now() + Duration::days(1);
+        let stability = Stability::new(1.0).unwrap();
+        let memory_state = create_test_memory_state();
 
         // Act
-        let result = user.rate_card(non_existent_id, rating, interval);
+        let result = user.rate_card(
+            non_existent_id,
+            rating,
+            interval,
+            next_review_date,
+            stability,
+            memory_state,
+        );
 
         // Assert
         assert!(result.is_err());
@@ -420,7 +475,7 @@ mod tests {
     }
 
     #[test]
-    fn user_schedule_next_review_should_update_card_when_card_exists() {
+    fn user_rate_card_should_update_schedule_when_card_exists() {
         // Arrange
         let test_cases = vec![
             (Duration::days(1), 1.0),
@@ -440,7 +495,14 @@ mod tests {
             let memory_state = create_test_memory_state();
 
             // Act
-            let result = user.schedule_next_review(card_id, future_date, stability, memory_state);
+            let result = user.rate_card(
+                card_id,
+                Rating::Good,
+                Interval::new(duration.num_days() as u32),
+                future_date,
+                stability,
+                memory_state,
+            );
 
             // Assert
             assert!(result.is_ok());
@@ -451,7 +513,7 @@ mod tests {
     }
 
     #[test]
-    fn user_schedule_next_review_should_return_error_when_card_not_found() {
+    fn user_rate_card_should_return_error_when_card_not_found_for_schedule() {
         // Arrange
         let mut user = create_test_user();
         let non_existent_id = ulid::Ulid::new();
@@ -460,8 +522,14 @@ mod tests {
         let memory_state = create_test_memory_state();
 
         // Act
-        let result =
-            user.schedule_next_review(non_existent_id, future_date, stability, memory_state);
+        let result = user.rate_card(
+            non_existent_id,
+            Rating::Good,
+            Interval::new(5),
+            future_date,
+            stability,
+            memory_state,
+        );
 
         // Assert
         assert!(result.is_err());
