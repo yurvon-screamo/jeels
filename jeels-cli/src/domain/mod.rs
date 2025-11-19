@@ -73,8 +73,29 @@ impl User {
         &self.cards
     }
 
-    pub fn cards_mut(&mut self) -> &mut HashMap<Ulid, Card> {
-        &mut self.cards
+    pub fn find_synonyms(&self, card_id: Ulid) -> Result<Vec<Card>, JeersError> {
+        const SIMILARITY_THRESHOLD: f32 = 0.9;
+
+        let card = self
+            .cards
+            .get(&card_id)
+            .ok_or(JeersError::CardNotFound { card_id })?;
+
+        let query_embedding = card.question().embedding();
+
+        Ok(self
+            .cards
+            .iter()
+            .filter(|(id, card)| {
+                if *id == &card_id {
+                    return false;
+                }
+                let card_embedding = card.question().embedding();
+                let similarity = cosine_similarity(query_embedding, card_embedding);
+                similarity >= SIMILARITY_THRESHOLD
+            })
+            .map(|(_, card)| card.clone())
+            .collect())
     }
 
     fn has_card_with_question(&self, question: &Question, exclude_card_id: Option<Ulid>) -> bool {

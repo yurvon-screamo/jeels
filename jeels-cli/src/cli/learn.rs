@@ -12,7 +12,7 @@ use ratatui::{
 use ulid::Ulid;
 
 use crate::{
-    application::{RateCardUseCase, StartStudySessionUseCase},
+    application::{FindSynonymsUseCase, RateCardUseCase, StartStudySessionUseCase, UserRepository},
     cli::render_once,
     domain::{Card, JeersError, Rating},
     settings::ApplicationEnvironment,
@@ -22,30 +22,35 @@ enum CardState {
     Question,
     Answer,
     Completed,
+    Synonyms(Vec<Card>),
 }
 
-struct LearnCardApp {
+struct LearnCardApp<'a, R: UserRepository> {
     card: Card,
     state: CardState,
     exit: bool,
+    user_id: Ulid,
+    repository: &'a R,
 }
 
-impl LearnCardApp {
-    fn new(card: Card) -> Self {
+impl<'a, R: UserRepository> LearnCardApp<'a, R> {
+    fn new(card: Card, user_id: Ulid, repository: &'a R) -> Self {
         Self {
             card,
             state: CardState::Question,
             exit: false,
+            user_id,
+            repository,
         }
     }
 
-    fn run(&mut self) -> io::Result<Option<Rating>> {
+    async fn run(&mut self) -> io::Result<Option<Rating>> {
         let mut terminal = ratatui::init();
         let mut rating = None;
 
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
-            self.handle_events(&mut rating)?;
+            self.handle_events(&mut rating).await?;
         }
 
         ratatui::restore();
@@ -58,12 +63,13 @@ impl LearnCardApp {
             .border_set(border::ROUNDED)
             .border_style(Style::default().fg(Color::Green));
 
-        let content = match self.state {
+        let content = match &self.state {
             CardState::Question => {
                 vec![
                     Line::from(self.card.question().text().bold().fg(Color::Magenta)),
                     Line::from(""),
                     Line::from("Нажмите пробел чтобы показать ответ.".fg(Color::Gray)),
+                    Line::from("Нажмите \"h\" чтобы показать синонимы.".fg(Color::Gray)),
                     Line::from("Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray)),
                 ]
             }
@@ -86,6 +92,29 @@ impl LearnCardApp {
                     Line::from(self.card.answer().text().bold().fg(Color::Magenta)),
                 ]
             }
+            CardState::Synonyms(synonyms) => {
+                let mut lines = vec![
+                    Line::from("Синонимы:".bold().fg(Color::Yellow)),
+                    Line::from(""),
+                ];
+
+                if synonyms.is_empty() {
+                    lines.push(Line::from("Синонимы не найдены.".fg(Color::Gray)));
+                } else {
+                    for synonym in synonyms {
+                        lines.push(Line::from(
+                            format!("• {}", synonym.question().text()).fg(Color::Cyan),
+                        ));
+                    }
+                }
+
+                lines.push(Line::from(""));
+                lines.push(Line::from(
+                    "Нажмите пробел чтобы вернуться к вопросу.".fg(Color::Gray),
+                ));
+
+                lines
+            }
         };
 
         Paragraph::new(Text::from(content))
@@ -94,13 +123,33 @@ impl LearnCardApp {
             .render(area, frame.buffer_mut());
     }
 
-    fn handle_events(&mut self, rating: &mut Option<Rating>) -> io::Result<()> {
+    async fn handle_events(&mut self, rating: &mut Option<Rating>) -> io::Result<()> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
                 match key_event.code {
-                    KeyCode::Char(' ') => {
-                        if matches!(self.state, CardState::Question) {
+                    KeyCode::Char(' ') => match self.state {
+                        CardState::Question => {
                             self.state = CardState::Answer;
+                        }
+                        CardState::Synonyms(_) => {
+                            self.state = CardState::Question;
+                        }
+                        _ => {}
+                    },
+                    KeyCode::Char('h') => {
+                        if matches!(self.state, CardState::Question) {
+                            let find_synonyms_usecase = FindSynonymsUseCase::new(self.repository);
+                            match find_synonyms_usecase
+                                .execute(self.user_id, self.card.id())
+                                .await
+                            {
+                                Ok(synonyms) => {
+                                    self.state = CardState::Synonyms(synonyms);
+                                }
+                                Err(_) => {
+                                    self.state = CardState::Synonyms(vec![]);
+                                }
+                            }
                         }
                     }
                     KeyCode::Char('s') => {
@@ -175,8 +224,9 @@ pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
     let rate_usecase = RateCardUseCase::new(repository, srs_service);
 
     for card in cards {
-        let mut app = LearnCardApp::new(card.clone());
-        let rating = app.run().map_err(|e| JeersError::RepositoryError {
+        let repository = settings.get_repository().await?;
+        let mut app = LearnCardApp::new(card.clone(), user_id, repository);
+        let rating = app.run().await.map_err(|e| JeersError::RepositoryError {
             reason: e.to_string(),
         })?;
 

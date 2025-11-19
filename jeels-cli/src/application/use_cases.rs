@@ -1,6 +1,7 @@
 pub mod create_card;
 pub mod delete_card;
 pub mod edit_card;
+pub mod find_synonyms;
 pub mod generate_answer;
 pub mod get_hints;
 pub mod list_cards;
@@ -11,6 +12,7 @@ pub mod view_card;
 pub use create_card::CreateCardUseCase;
 pub use delete_card::DeleteCardUseCase;
 pub use edit_card::EditCardUseCase;
+pub use find_synonyms::FindSynonymsUseCase;
 pub use generate_answer::GenerateAnswerUseCase;
 pub use get_hints::{GetHintsUseCase, Hint};
 pub use list_cards::ListCardsUseCase;
