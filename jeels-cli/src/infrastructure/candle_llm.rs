@@ -13,7 +13,7 @@ use candle_transformers::generation::{LogitsProcessor, Sampling};
 use candle_transformers::models::quantized_qwen3::ModelWeights as Qwen3;
 use tokio::sync::Mutex;
 
-pub struct QwenLlm {
+pub struct CandleLlm {
     model: Arc<Mutex<Qwen3>>,
     tokenizer: Tokenizer,
     device: Device,
@@ -22,7 +22,7 @@ pub struct QwenLlm {
     max_sample_len: usize,
 }
 
-impl QwenLlm {
+impl CandleLlm {
     pub fn new(settings: &LlmSettings) -> Result<Self, JeersError> {
         let device = Device::Cpu;
         let model = Self::load_model(&device, settings)?;
@@ -132,7 +132,7 @@ impl QwenLlm {
     }
 }
 
-impl LlmService for QwenLlm {
+impl LlmService for CandleLlm {
     async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
         let prompt = Self::format_prompt(question);
         let input_tokens = Self::encode_prompt(&self.tokenizer, &prompt)?;
@@ -144,7 +144,7 @@ impl LlmService for QwenLlm {
     }
 }
 
-impl QwenLlm {
+impl CandleLlm {
     fn format_prompt(question: &str) -> String {
         format!("<|im_start|>user\n{question}/no_think<|im_end|>\n<|im_start|>assistant\n")
     }
