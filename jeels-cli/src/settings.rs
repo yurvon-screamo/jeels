@@ -8,21 +8,21 @@ use crate::infrastructure::{
 };
 use tokio::sync::OnceCell;
 
-static SETTINGS: OnceLock<Settings> = OnceLock::new();
+static SETTINGS: OnceLock<ApplicationEnvironment> = OnceLock::new();
+
+pub struct ApplicationEnvironment {
+    pub settings: Settings,
+
+    lazy_repository: Arc<OnceCell<PoloDbUserRepository>>,
+    lazy_embedding_generator: Arc<OnceCell<EmbeddingGenerator>>,
+    lazy_llm: Arc<OnceCell<OpenRouterLlm>>,
+    lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub llm: LlmSettings,
-
-    #[serde(skip)]
-    lazy_repository: Arc<OnceCell<PoloDbUserRepository>>,
-    #[serde(skip)]
-    lazy_embedding_generator: Arc<OnceCell<EmbeddingGenerator>>,
-    #[serde(skip)]
-    lazy_llm: Arc<OnceCell<OpenRouterLlm>>,
-    #[serde(skip)]
-    lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -51,9 +51,9 @@ pub struct LlmSettings {
     pub tokenizer_filename: String,
 }
 
-impl Settings {
+impl ApplicationEnvironment {
     pub fn from_database_path(database_path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-        let settings = Self {
+        let settings = Settings {
             database: DatabaseSettings {
                 path: database_path,
                 namespace: "default".to_string(),
@@ -73,10 +73,6 @@ impl Settings {
                 tokenizer_repo: "Qwen/Qwen3-1.7B".to_string(),
                 tokenizer_filename: "tokenizer.json".to_string(),
             },
-            lazy_repository: Arc::new(OnceCell::new()),
-            lazy_embedding_generator: Arc::new(OnceCell::new()),
-            lazy_llm: Arc::new(OnceCell::new()),
-            lazy_srs_service: Arc::new(OnceCell::new()),
         };
 
         Self::init(settings)?;
@@ -86,13 +82,7 @@ impl Settings {
     pub async fn load() -> Result<(), Box<dyn std::error::Error>> {
         let config_path = Self::find_config_file()?;
         let contents = std::fs::read_to_string(&config_path)?;
-        let mut settings: Settings = toml::from_str(&contents)?;
-
-        settings.lazy_repository = Arc::new(OnceCell::new());
-        settings.lazy_embedding_generator = Arc::new(OnceCell::new());
-        settings.lazy_llm = Arc::new(OnceCell::new());
-        settings.lazy_srs_service = Arc::new(OnceCell::new());
-
+        let settings: Settings = toml::from_str(&contents)?;
         Self::init(settings)?;
         Ok(())
     }
@@ -122,7 +112,7 @@ impl Settings {
     pub async fn get_llm_service(&self) -> Result<&OpenRouterLlm, JeersError> {
         self.lazy_llm
             .get_or_try_init(|| async {
-                OpenRouterLlm::new(&self.llm).map_err(|e| JeersError::SettingsError {
+                OpenRouterLlm::new(&self.settings.llm).map_err(|e| JeersError::SettingsError {
                     reason: e.to_string(),
                 })
             })
@@ -152,12 +142,20 @@ impl Settings {
     }
 
     fn init(settings: Settings) -> Result<(), Box<dyn std::error::Error>> {
+        let environment = ApplicationEnvironment {
+            settings,
+            lazy_repository: Arc::new(OnceCell::new()),
+            lazy_embedding_generator: Arc::new(OnceCell::new()),
+            lazy_llm: Arc::new(OnceCell::new()),
+            lazy_srs_service: Arc::new(OnceCell::new()),
+        };
+
         SETTINGS
-            .set(settings)
+            .set(environment)
             .map_err(|_| "Settings already initialized".into())
     }
 
-    pub fn get() -> &'static Settings {
+    pub fn get() -> &'static ApplicationEnvironment {
         SETTINGS.get().expect("Settings not initialized")
     }
 }

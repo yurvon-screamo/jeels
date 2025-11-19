@@ -159,6 +159,9 @@ impl User {
         card_id: Ulid,
         rating: Rating,
         interval: Interval,
+        next_review_date: DateTime<Utc>,
+        stability: Stability,
+        memory_state: MemoryState,
     ) -> Result<(), JeersError> {
         let card = self
             .cards
@@ -167,10 +170,12 @@ impl User {
 
         let review = Review::new(rating, interval);
         card.add_review(review);
+
+        self.schedule_next_review(card_id, next_review_date, stability, memory_state)?;
         Ok(())
     }
 
-    pub fn schedule_next_review(
+    fn schedule_next_review(
         &mut self,
         card_id: Ulid,
         next_review_date: DateTime<Utc>,

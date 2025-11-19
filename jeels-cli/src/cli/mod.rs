@@ -2,7 +2,14 @@ mod card;
 mod learn;
 
 use clap::Parser;
-use iocraft::prelude::*;
+use ratatui::{
+    Frame, Viewport,
+    layout::{Alignment, Constraint, Layout},
+    style::{Color, Style, Stylize},
+    symbols::border,
+    text::{Line, Text},
+    widgets::{Block, Paragraph, Widget},
+};
 use ulid::Ulid;
 
 use crate::{
@@ -15,7 +22,7 @@ use crate::{
         learn::handle_learn,
     },
     domain::{JapaneseLevel, JeersError, NativeLanguage, User},
-    settings::Settings,
+    settings::ApplicationEnvironment,
 };
 
 const DEFAULT_USERNAME: &str = "yurvon_screamo";
@@ -54,7 +61,7 @@ enum Command {
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let user_id = ensure_user_exists(Settings::get(), &args.username).await?;
+    let user_id = ensure_user_exists(ApplicationEnvironment::get(), &args.username).await?;
 
     match args.command {
         Command::Me {} => {
@@ -88,7 +95,7 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn ensure_user_exists(
-    settings: &'static Settings,
+    settings: &'static ApplicationEnvironment,
     username: &str,
 ) -> Result<Ulid, Box<dyn std::error::Error>> {
     let repository = settings.get_repository().await?;
@@ -115,31 +122,63 @@ async fn ensure_user_exists(
 }
 
 async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
     let user = repository
         .find_by_id(user_id)
         .await?
         .ok_or(JeersError::UserNotFound { user_id })?;
-    element! {
-        View(
-            flex_direction: FlexDirection::Column,
-            margin_top: 1,
-            margin_bottom: 1,
-        ) {
-            Text(content: "Информация о пользователе:", weight: Weight::Bold, decoration: TextDecoration::Underline)
-            View(
-                flex_direction: FlexDirection::Column,
-                border_style: BorderStyle::Round,
-                border_color: Color::Magenta,
-            ) {
-                Text(content: format!("ID: {}", user.id()))
-                Text(content: format!("Имя пользователя: {}", user.username()))
-                Text(content: format!("Уровень японского: {:?}", user.current_japanese_level()))
-                Text(content: format!("Родной язык: {:?}", user.native_language()))
-            }
-        }
-    }
-    .print();
+
+    render_once(
+        |frame| {
+            let area = frame.area();
+            let vertical = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
+            let [title_area, content_area] = vertical.areas(area);
+
+            let title = Line::from("Информация о пользователе:".bold().underlined());
+            Paragraph::new(title)
+                .alignment(Alignment::Left)
+                .render(title_area, frame.buffer_mut());
+
+            let content = vec![
+                Line::from(format!("ID: {}", user.id())),
+                Line::from(format!("Имя пользователя: {}", user.username())),
+                Line::from(format!(
+                    "Уровень японского: {:?}",
+                    user.current_japanese_level()
+                )),
+                Line::from(format!("Родной язык: {:?}", user.native_language())),
+            ];
+
+            let block = Block::bordered()
+                .border_set(border::ROUNDED)
+                .border_style(Style::default().fg(Color::Magenta));
+
+            Paragraph::new(Text::from(content))
+                .block(block)
+                .render(content_area, frame.buffer_mut());
+        },
+        7,
+    )
+    .map_err(|e| JeersError::SettingsError {
+        reason: e.to_string(),
+    })?;
+
+    Ok(())
+}
+
+pub(crate) fn render_once<F>(draw_fn: F, lines: u16) -> Result<(), JeersError>
+where
+    F: FnOnce(&mut Frame),
+{
+    let mut terminal = ratatui::init_with_options(ratatui::TerminalOptions {
+        viewport: Viewport::Inline(lines),
+    });
+
+    terminal
+        .draw(draw_fn)
+        .map_err(|e| JeersError::SettingsError {
+            reason: e.to_string(),
+        })?;
     Ok(())
 }

@@ -35,5 +35,5 @@ hf-hub = "0.4"
 
 # TUI
 clap = { version = "4.5", features = ["derive"] }
-iocraft = "0.7"
-smol = "2.0"
+ratatui = "0.29"
+crossterm = "0.28"

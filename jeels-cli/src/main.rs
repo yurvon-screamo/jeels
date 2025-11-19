@@ -1,8 +1,8 @@
-use jeels_cli::settings::Settings;
+use jeels_cli::settings::ApplicationEnvironment;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    Settings::load().await?;
+    ApplicationEnvironment::load().await?;
     jeels_cli::cli::run_cli().await?;
     Ok(())
 }

@@ -1,146 +1,191 @@
-use iocraft::prelude::*;
+use std::io;
+
+use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use ratatui::{
+    Frame,
+    layout::Alignment,
+    style::{Color, Style, Stylize},
+    symbols::border,
+    text::{Line, Text},
+    widgets::{Block, Paragraph, Widget},
+};
 use ulid::Ulid;
 
 use crate::{
     application::{RateCardUseCase, StartStudySessionUseCase},
+    cli::render_once,
     domain::{Card, JeersError, Rating},
-    settings::Settings,
+    settings::ApplicationEnvironment,
 };
 
-pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
-    let settings = Settings::get();
-
-    let start_study_usecase = StartStudySessionUseCase::new(settings.get_repository().await?);
-    let cards = start_study_usecase.execute(user_id).await?;
-
-    if cards.is_empty() {
-        element! {
-            View(
-                flex_direction: FlexDirection::Column,
-                margin_top: 1,
-                margin_bottom: 1,
-                border_style: BorderStyle::Round,
-                border_color: Color::Red)
-            {
-                Text(content: "Вы всё выучили!", weight: Weight::Bold, color: Some(Color::Red))
-            }
-        }
-        .print();
-
-        return Ok(());
-    }
-
-    for card in cards {
-        smol::block_on(
-            element!(
-                ContextProvider(value: Context::owned(card))
-                {
-                    ContextProvider(value: Context::owned(user_id)) {
-                        LearnCard
-                    }
-                }
-            )
-            .render_loop(),
-        )
-        .map_err(|e| JeersError::RepositoryError {
-            reason: e.to_string(),
-        })?;
-    }
-
-    Ok(())
+enum CardState {
+    Question,
+    Answer,
+    Completed,
 }
 
-#[component]
-fn LearnCard<'a>(mut hooks: Hooks) -> impl Into<AnyElement<'a>> {
-    let settings = Settings::get();
-    let repository = smol::block_on(settings.get_repository()).expect("Failed to get repository");
-    let srs_service =
-        smol::block_on(settings.get_srs_service()).expect("Failed to get srs service");
+struct LearnCardApp {
+    card: Card,
+    state: CardState,
+    exit: bool,
+}
 
-    let rate_usecase = RateCardUseCase::new(repository, srs_service);
+impl LearnCardApp {
+    fn new(card: Card) -> Self {
+        Self {
+            card,
+            state: CardState::Question,
+            exit: false,
+        }
+    }
 
-    let mut system = hooks.use_context_mut::<SystemContext>();
-    let card = hooks.use_context::<Card>();
-    let user_id = hooks.use_context::<Ulid>();
+    fn run(&mut self) -> io::Result<Option<Rating>> {
+        let mut terminal = ratatui::init();
+        let mut rating = None;
 
-    let mut rate = hooks.use_state(|| None);
-    let mut show_answer = hooks.use_state(|| false);
-    let mut should_exit = hooks.use_state(|| false);
+        while !self.exit {
+            terminal.draw(|frame| self.draw(frame))?;
+            self.handle_events(&mut rating)?;
+        }
 
-    hooks.use_terminal_events({
-        move |event| match event {
-            TerminalEvent::Key(KeyEvent { code, kind, .. }) if kind != KeyEventKind::Release => {
-                match code {
-                    KeyCode::Char(' ') => show_answer.set(true),
-                    KeyCode::Char('s') => should_exit.set(true),
-                    KeyCode::Char('1') => rate.set(Some(Rating::Easy)),
-                    KeyCode::Char('2') => rate.set(Some(Rating::Good)),
-                    KeyCode::Char('3') => rate.set(Some(Rating::Hard)),
-                    KeyCode::Char('4') => rate.set(Some(Rating::Again)),
+        ratatui::restore();
+        Ok(rating)
+    }
+
+    fn draw(&self, frame: &mut Frame) {
+        let area = frame.area();
+        let block = Block::bordered()
+            .border_set(border::ROUNDED)
+            .border_style(Style::default().fg(Color::Green));
+
+        let content = match self.state {
+            CardState::Question => {
+                vec![
+                    Line::from(self.card.question().text().bold().fg(Color::Magenta)),
+                    Line::from(""),
+                    Line::from("Нажмите пробел чтобы показать ответ.".fg(Color::Gray)),
+                    Line::from("Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray)),
+                ]
+            }
+            CardState::Answer => {
+                vec![
+                    Line::from(self.card.question().text().bold().fg(Color::Blue)),
+                    Line::from(self.card.answer().text().bold().fg(Color::Magenta)),
+                    Line::from(""),
+                    Line::from("Используйте цифры от 1 до 4 для оценки карточки.".fg(Color::Gray)),
+                    Line::from("1 - Легко".fg(Color::Gray)),
+                    Line::from("2 - Нормально".fg(Color::Gray)),
+                    Line::from("3 - Трудно".fg(Color::Gray)),
+                    Line::from("4 - Очень трудно".fg(Color::Gray)),
+                    Line::from("Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray)),
+                ]
+            }
+            CardState::Completed => {
+                vec![
+                    Line::from(self.card.question().text().bold().fg(Color::Blue)),
+                    Line::from(self.card.answer().text().bold().fg(Color::Magenta)),
+                ]
+            }
+        };
+
+        Paragraph::new(Text::from(content))
+            .block(block)
+            .alignment(Alignment::Left)
+            .render(area, frame.buffer_mut());
+    }
+
+    fn handle_events(&mut self, rating: &mut Option<Rating>) -> io::Result<()> {
+        match event::read()? {
+            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                match key_event.code {
+                    KeyCode::Char(' ') => {
+                        if matches!(self.state, CardState::Question) {
+                            self.state = CardState::Answer;
+                        }
+                    }
+                    KeyCode::Char('s') => {
+                        self.exit = true;
+                    }
+                    KeyCode::Char('1') => {
+                        if matches!(self.state, CardState::Answer) {
+                            *rating = Some(Rating::Easy);
+                            self.state = CardState::Completed;
+                            self.exit = true;
+                        }
+                    }
+                    KeyCode::Char('2') => {
+                        if matches!(self.state, CardState::Answer) {
+                            *rating = Some(Rating::Good);
+                            self.state = CardState::Completed;
+                            self.exit = true;
+                        }
+                    }
+                    KeyCode::Char('3') => {
+                        if matches!(self.state, CardState::Answer) {
+                            *rating = Some(Rating::Hard);
+                            self.state = CardState::Completed;
+                            self.exit = true;
+                        }
+                    }
+                    KeyCode::Char('4') => {
+                        if matches!(self.state, CardState::Answer) {
+                            *rating = Some(Rating::Again);
+                            self.state = CardState::Completed;
+                            self.exit = true;
+                        }
+                    }
                     _ => {}
                 }
             }
             _ => {}
         }
-    });
+        Ok(())
+    }
+}
 
-    if should_exit.get() {
-        system.exit();
+pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
+    let settings = ApplicationEnvironment::get();
+
+    let start_study_usecase = StartStudySessionUseCase::new(settings.get_repository().await?);
+    let cards = start_study_usecase.execute(user_id).await?;
+
+    if cards.is_empty() {
+        render_once(
+            |frame| {
+                let area = frame.area();
+                let block = Block::bordered()
+                    .border_set(border::ROUNDED)
+                    .border_style(Style::default().fg(Color::Red));
+                let text = Text::from(vec![Line::from("Вы всё выучили!".bold().fg(Color::Red))]);
+                Paragraph::new(text)
+                    .block(block)
+                    .alignment(Alignment::Center)
+                    .render(area, frame.buffer_mut());
+            },
+            10,
+        )
+        .map_err(|e| JeersError::RepositoryError {
+            reason: e.to_string(),
+        })?;
+        return Ok(());
     }
 
-    if let Some(current_rate) = rate.get() {
-        let card_id = card.id();
-        let user_id = *user_id;
+    let repository = settings.get_repository().await?;
+    let srs_service = settings.get_srs_service().await?;
+    let rate_usecase = RateCardUseCase::new(repository, srs_service);
 
-        if let Err(e) = smol::block_on(rate_usecase.execute(user_id, card_id, current_rate)) {
-            eprintln!("Error rating card: {:?}", e);
-        }
+    for card in cards {
+        let mut app = LearnCardApp::new(card.clone());
+        let rating = app.run().map_err(|e| JeersError::RepositoryError {
+            reason: e.to_string(),
+        })?;
 
-        should_exit.set(true);
-    }
-
-    element! {
-        View(
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::FlexStart,
-            border_style: BorderStyle::Round,
-            border_color: Color::Green,
-            width: 60,
-            margin_left: 2
-        ) {
-            #(if should_exit.get() {
-                element! {
-                    View(flex_direction: FlexDirection::Column) {
-                        View { Text(content: card.question().text(), weight: Weight::Bold, color: Some(Color::Blue))}
-                        View { Text(content: card.answer().text(), weight: Weight::Bold, color: Some(Color::Magenta))}
-                    }
-                }
-            } else if show_answer.get() {
-                element! {
-                    View(flex_direction: FlexDirection::Column) {
-                        View { Text(content: card.question().text(), weight: Weight::Bold, color: Some(Color::Blue))}
-                        View { Text(content: card.answer().text(), weight: Weight::Bold, color: Some(Color::Magenta)) }
-                        View(margin_top: 1, flex_direction: FlexDirection::Column) {
-                            Text(content: "Используйте цифры от 1 до 4 для оценки карточки.", weight: Weight::Light, color: Some(Color::Grey))
-                            Text(content: "1 - Легко", weight: Weight::Light, color: Some(Color::Grey))
-                            Text(content: "2 - Нормально", weight: Weight::Light, color: Some(Color::Grey))
-                            Text(content: "3 - Трудно", weight: Weight::Light, color: Some(Color::Grey))
-                            Text(content: "4 - Очень трудно", weight: Weight::Light, color: Some(Color::Grey))
-                            Text(content: "Нажмите \"s\" чтобы пропустить карточку.", weight: Weight::Light, color: Some(Color::Grey))
-                        }
-                    }
-                }
-            } else {
-                element! {
-                    View(flex_direction: FlexDirection::Column) {
-                        View { Text(content: card.question().text(), weight: Weight::Bold, color: Some(Color::Magenta))}
-                        View(margin_top: 1, flex_direction: FlexDirection::Column) {
-                            Text(content: "Нажмите пробел чтобы показать ответ.", weight: Weight::Light, color: Some(Color::Grey))
-                            Text(content: "Нажмите \"s\" чтобы пропустить карточку.", weight: Weight::Light, color: Some(Color::Grey))
-                        }
-                    }
-                }
-            })
+        if let Some(rating) = rating {
+            if let Err(e) = rate_usecase.execute(user_id, card.id(), rating).await {
+                eprintln!("Error rating card: {:?}", e);
+            }
         }
     }
+
+    Ok(())
 }

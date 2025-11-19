@@ -3,7 +3,7 @@ mod tests;
 
 use jeels_cli::{
     application::use_cases::{CreateCardUseCase, GetHintsUseCase},
-    settings::Settings,
+    settings::ApplicationEnvironment,
 };
 use tests::*;
 
@@ -11,7 +11,7 @@ use tests::*;
 async fn get_hints_use_case_should_return_similar_cards() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();
@@ -68,7 +68,7 @@ async fn get_hints_use_case_should_return_similar_cards() {
 async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();
@@ -100,7 +100,7 @@ async fn get_hints_use_case_should_return_empty_when_no_other_cards() {
 async fn get_hints_use_case_should_respect_limit() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();

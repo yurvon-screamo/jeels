@@ -20,8 +20,9 @@ impl<'a, R: UserRepository> ListCardsUseCase<'a, R> {
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let cards: Vec<Card> = user.cards().values().cloned().collect();
+        let mut cards: Vec<Card> = user.cards().values().cloned().collect();
+        cards.sort_by_key(|card| card.next_review_date());
+
         Ok(cards)
     }
 }
-

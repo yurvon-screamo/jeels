@@ -4,14 +4,14 @@ mod tests;
 use jeels_cli::application::use_cases::{CreateCardUseCase, RateCardUseCase};
 use jeels_cli::application::user_repository::UserRepository;
 use jeels_cli::domain::value_objects::Rating;
-use jeels_cli::settings::Settings;
+use jeels_cli::settings::ApplicationEnvironment;
 use tests::*;
 
 #[tokio::test]
 async fn rate_card_use_case_should_add_review_and_update_schedule() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();
@@ -47,7 +47,7 @@ async fn rate_card_use_case_should_add_review_and_update_schedule() {
 async fn rate_card_use_case_should_use_reviews_for_memory_state_calculation() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();

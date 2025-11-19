@@ -1,6 +1,6 @@
 use crate::application::user_repository::UserRepository;
 use crate::domain::{JeersError, User};
-use crate::settings::Settings;
+use crate::settings::ApplicationEnvironment;
 use polodb_core::bson::doc;
 use polodb_core::{CollectionT, Database};
 use std::sync::{Arc, Mutex};
@@ -11,14 +11,19 @@ pub struct PoloDbUserRepository {
 }
 
 impl PoloDbUserRepository {
-    pub async fn new(settings: &Settings) -> Result<Self, JeersError> {
-        std::fs::create_dir_all(&settings.database.path).map_err(|e| {
+    pub async fn new(environment: &ApplicationEnvironment) -> Result<Self, JeersError> {
+        std::fs::create_dir_all(&environment.settings.database.path).map_err(|e| {
             JeersError::RepositoryError {
                 reason: format!("Failed to create database directory: {}", e),
             }
         })?;
 
-        let db_path = settings.database.path.to_string_lossy().to_string();
+        let db_path = environment
+            .settings
+            .database
+            .path
+            .to_string_lossy()
+            .to_string();
 
         let db = tokio::task::spawn_blocking(move || {
             Database::open_path(&db_path).map_err(|e| JeersError::RepositoryError {

@@ -1,4 +1,5 @@
 use crate::application::SrsService;
+use crate::application::srs_service::NextReview;
 use crate::application::user_repository::UserRepository;
 use crate::domain::error::JeersError;
 use crate::domain::review::Review;
@@ -39,26 +40,26 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
         let reviews: Vec<Review> = card.reviews().iter().cloned().collect();
         let previous_memory_state = card.memory_state();
 
-        let elapsed_days = if let Some(last_review_date) = card.last_review_date() {
-            if last_review_date <= Utc::now() {
-                let duration = Utc::now().signed_duration_since(last_review_date);
-                duration.num_days().max(0) as u32
-            } else {
-                0
-            }
-        } else {
-            0
-        };
-
-        let (interval, new_stability, memory_state) = self
+        let NextReview {
+            interval,
+            stability,
+            memory_state,
+        } = self
             .srs_service
-            .calculate_next_review(rating, previous_memory_state, &reviews, elapsed_days)
+            .calculate_next_review(rating, previous_memory_state, &reviews)
             .await?;
 
         let next_review_date = Utc::now() + chrono::Duration::days(interval.days() as i64);
 
-        user.rate_card(card_id, rating, interval)?;
-        user.schedule_next_review(card_id, next_review_date, new_stability, memory_state)?;
+        user.rate_card(
+            card_id,
+            rating,
+            interval,
+            next_review_date,
+            stability,
+            memory_state,
+        )?;
+
         self.repository.save(&user).await?;
 
         Ok(())

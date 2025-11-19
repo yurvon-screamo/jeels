@@ -20,7 +20,7 @@ impl OpenRouterLlm {
             reason: "OPENROUTER_API_KEY environment variable not set".to_string(),
         })?;
 
-        let model = "mistralai/mistral-small-3.2-24b-instruct:free".to_string();
+        let model = "openrouter/sherlock-think-alpha".to_string();
 
         let config = OpenAIConfig::new()
             .with_api_key(api_key)

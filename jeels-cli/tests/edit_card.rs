@@ -3,14 +3,14 @@ mod tests;
 
 use jeels_cli::application::use_cases::{CreateCardUseCase, EditCardUseCase};
 use jeels_cli::application::user_repository::UserRepository;
-use jeels_cli::settings::Settings;
+use jeels_cli::settings::ApplicationEnvironment;
 use tests::*;
 
 #[tokio::test]
 async fn edit_card_use_case_should_update_card_in_database() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();

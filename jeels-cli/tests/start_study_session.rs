@@ -3,7 +3,7 @@ mod tests;
 
 use jeels_cli::{
     application::use_cases::{CreateCardUseCase, StartStudySessionUseCase},
-    settings::Settings,
+    settings::ApplicationEnvironment,
 };
 use tests::*;
 
@@ -11,7 +11,7 @@ use tests::*;
 async fn start_study_session_use_case_should_return_due_cards() {
     // Arrange
     create_test_repository().await;
-    let settings = Settings::get();
+    let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();
