@@ -76,7 +76,13 @@ impl EmbeddingGenerator {
     }
 
     fn normalize_l2(&self, v: &Tensor) -> Result<Tensor, candle_core::Error> {
-        v.broadcast_div(&v.sqr()?.sum_keepdim(1)?.sqrt()?)
+        // Compute L2 norm: sqrt(sum of squares) along the last dimension
+        // v shape: [batch, dim] -> norm shape: [batch, 1]
+        let norm = v.sqr()?.sum_keepdim(1)?.sqrt()?;
+        // Add small epsilon to avoid division by zero
+        let epsilon = Tensor::new(&[1e-8f32], v.device())?;
+        let norm_safe = norm.broadcast_add(&epsilon)?;
+        v.broadcast_div(&norm_safe)
     }
 }
 
@@ -136,42 +142,67 @@ impl EmbeddingService for EmbeddingGenerator {
                 reason: format!("Failed to generate embeddings: {}", e),
             })?;
 
-        let attention_mask_for_pooling =
+        // For MPNet models, use mean pooling with attention mask
+        // Convert attention mask to proper dtype and shape for broadcasting
+        let attention_mask_float =
             attention_mask
                 .to_dtype(DTYPE)
                 .map_err(|e| JeersError::EmbeddingError {
                     reason: format!("Failed to convert attention mask dtype: {}", e),
                 })?;
 
-        let attention_mask_for_pooling =
-            attention_mask_for_pooling
+        // Expand attention mask to match embeddings shape: [batch, seq_len] -> [batch, seq_len, 1]
+        let attention_mask_expanded =
+            attention_mask_float
                 .unsqueeze(2)
                 .map_err(|e| JeersError::EmbeddingError {
-                    reason: format!("Failed to unsqueeze attention mask: {}", e),
+                    reason: format!("Failed to expand attention mask: {}", e),
                 })?;
 
-        let sum_mask =
-            attention_mask_for_pooling
-                .sum(1)
+        // Apply attention mask: multiply embeddings by mask (0 for padding tokens)
+        // embeddings shape: [batch, seq_len, hidden_dim]
+        // attention_mask_expanded shape: [batch, seq_len, 1]
+        let masked_embeddings =
+            embeddings
+                .broadcast_mul(&attention_mask_expanded)
                 .map_err(|e| JeersError::EmbeddingError {
-                    reason: format!("Failed to sum attention mask: {}", e),
+                    reason: format!("Failed to apply attention mask: {}", e),
                 })?;
 
-        let embeddings = embeddings
-            .broadcast_mul(&attention_mask_for_pooling)
+        // Sum embeddings along sequence dimension (dim=1)
+        // Result shape: [batch, hidden_dim]
+        let sum_embeddings = masked_embeddings
+            .sum(1)
             .map_err(|e| JeersError::EmbeddingError {
-                reason: format!("Failed to apply attention mask: {}", e),
+                reason: format!("Failed to sum embeddings: {}", e),
             })?;
 
-        let pooled = embeddings.sum(1).map_err(|e| JeersError::EmbeddingError {
-            reason: format!("Failed to sum embeddings: {}", e),
-        })?;
-
-        let pooled = pooled
-            .broadcast_div(&sum_mask)
+        // Calculate sum of attention mask for averaging
+        // Sum along sequence dimension: [batch, seq_len, 1] -> [batch, 1]
+        let sum_mask = attention_mask_expanded
+            .sum(1)
             .map_err(|e| JeersError::EmbeddingError {
+                reason: format!("Failed to sum attention mask: {}", e),
+            })?;
+
+        // Average pooling: divide by number of non-padding tokens
+        // Add small epsilon to avoid division by zero
+        let epsilon =
+            Tensor::new(&[1e-9f32], &self.device).map_err(|e| JeersError::EmbeddingError {
+                reason: format!("Failed to create epsilon tensor: {}", e),
+            })?;
+        let sum_mask_safe =
+            sum_mask
+                .broadcast_add(&epsilon)
+                .map_err(|e| JeersError::EmbeddingError {
+                    reason: format!("Failed to add epsilon: {}", e),
+                })?;
+
+        let pooled = sum_embeddings.broadcast_div(&sum_mask_safe).map_err(|e| {
+            JeersError::EmbeddingError {
                 reason: format!("Failed to average embeddings: {}", e),
-            })?;
+            }
+        })?;
 
         // L2 normalization
         let normalized = self

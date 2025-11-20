@@ -1,3 +1,4 @@
+use chrono::Utc;
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -240,14 +241,21 @@ fn render_cards_table(cards: &[Card], area: Rect, frame: &mut Frame) {
     ])
     .style(Style::default());
 
+    let now = Utc::now();
     let rows: Vec<Row> = cards
         .iter()
         .enumerate()
         .map(|(i, card)| {
-            let style = if i % 2 == 0 {
+            let is_due = card.next_review_date() < now;
+            let base_style = if i % 2 == 0 {
                 Style::default()
             } else {
                 Style::default().bg(Color::DarkGray)
+            };
+            let style = if is_due {
+                base_style.fg(Color::LightMagenta).bold()
+            } else {
+                base_style
             };
             Row::new(vec![
                 Cell::from(card.id().to_string()),

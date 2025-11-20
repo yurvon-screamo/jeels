@@ -8,7 +8,8 @@ pub struct TestContext {}
 pub async fn create_test_repository() -> TestContext {
     let temp_dir = TempDir::new().unwrap();
     let db_path = temp_dir.path().join("test_db");
-    ApplicationEnvironment::from_database_path(db_path).unwrap();
+    // Ignore error if settings already initialized (for parallel test execution)
+    let _ = ApplicationEnvironment::from_database_path(db_path);
     TestContext {}
 }
 

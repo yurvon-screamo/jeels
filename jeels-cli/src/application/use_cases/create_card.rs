@@ -37,7 +37,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
                 self.llm_service.generate_text(&format!(
                 "Translate the following text to Russian: '{}'. Answer briefly and clearly.",
                 question_text
-            )).await?
+            )).await?.trim_matches(&['\n', '\r', '»', '«', '.', '"', ' ']).to_string()
             };
 
         let answer = Answer::new(answer_text)?;
