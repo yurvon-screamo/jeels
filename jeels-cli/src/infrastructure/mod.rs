@@ -6,7 +6,7 @@ pub mod srs;
 pub mod user_repository;
 
 pub use candle_llm::CandleLlm;
-pub use embedding_generator::EmbeddingGenerator;
+pub use embedding_generator::CandleEmbeddingService;
 pub use furigana_generator::AutorubyFuriganaGenerator;
 pub use openrouter_llm::OpenRouterLlm;
 pub use srs::FsrsSrsService;

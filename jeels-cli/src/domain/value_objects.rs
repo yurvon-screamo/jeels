@@ -3,19 +3,25 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Embedding(pub Vec<f32>);
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Question {
     text: String,
     embedding: Vec<f32>,
 }
 
 impl Question {
-    pub fn new(text: String, embedding: Vec<f32>) -> Result<Self, JeersError> {
+    pub fn new(text: String, embedding: Embedding) -> Result<Self, JeersError> {
         if text.trim().is_empty() {
             return Err(JeersError::InvalidQuestion {
                 reason: "Question text cannot be empty".to_string(),
             });
         }
-        Ok(Self { text, embedding })
+        Ok(Self {
+            text,
+            embedding: embedding.0,
+        })
     }
 
     pub fn text(&self) -> &str {

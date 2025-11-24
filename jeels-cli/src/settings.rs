@@ -4,7 +4,7 @@ use std::sync::{Arc, OnceLock};
 
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    AutorubyFuriganaGenerator, EmbeddingGenerator, FsrsSrsService, OpenRouterLlm,
+    AutorubyFuriganaGenerator, CandleEmbeddingService, FsrsSrsService, OpenRouterLlm,
     PoloDbUserRepository,
 };
 use tokio::sync::OnceCell;
@@ -15,7 +15,7 @@ pub struct ApplicationEnvironment {
     pub settings: Settings,
 
     lazy_repository: Arc<OnceCell<PoloDbUserRepository>>,
-    lazy_embedding_generator: Arc<OnceCell<EmbeddingGenerator>>,
+    lazy_embedding_generator: Arc<OnceCell<CandleEmbeddingService>>,
     lazy_llm: Arc<OnceCell<OpenRouterLlm>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
     lazy_furigana_service: Arc<OnceCell<AutorubyFuriganaGenerator>>,
@@ -101,10 +101,10 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_embedding_generator(&self) -> Result<&EmbeddingGenerator, JeersError> {
+    pub async fn get_embedding_generator(&self) -> Result<&CandleEmbeddingService, JeersError> {
         self.lazy_embedding_generator
             .get_or_try_init(|| async {
-                EmbeddingGenerator::new().map_err(|e| JeersError::SettingsError {
+                CandleEmbeddingService::new().map_err(|e| JeersError::SettingsError {
                     reason: e.to_string(),
                 })
             })

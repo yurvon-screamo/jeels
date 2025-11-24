@@ -1,5 +1,16 @@
 use crate::domain::error::JeersError;
+use crate::domain::value_objects::Embedding;
+
+use std::future::Future;
 
 pub trait EmbeddingService: Send + Sync {
-    fn embed(&self, text: &str) -> Result<Vec<f32>, JeersError>;
+    fn generate_embedding(
+        &self,
+        input: &String,
+    ) -> impl Future<Output = Result<Embedding, JeersError>> + Send;
+
+    fn generate_embeddings(
+        &self,
+        inputs: &[String],
+    ) -> impl Future<Output = Result<Vec<Embedding>, JeersError>> + Send;
 }

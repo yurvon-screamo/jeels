@@ -26,19 +26,21 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         question_text: String,
         answer_text: Option<String>,
     ) -> Result<Card, JeersError> {
-        let embedding = self.embedding_service.embed(&question_text)?;
+        let embedding = self
+            .embedding_service
+            .generate_embedding(&question_text)
+            .await?;
 
         let question = Question::new(question_text.clone(), embedding)?;
 
-        let answer_text =
-            if let Some(answer_text) = answer_text {
-                answer_text
-            } else {
-                self.llm_service.generate_text(&format!(
-                "Translate the following text to Russian: '{}'. Answer briefly and clearly.",
+        let answer_text = if let Some(answer_text) = answer_text {
+            answer_text
+        } else {
+            self.llm_service.generate_text(&format!(
+                "Объясни значение этого слова для рускоговорящего студента: '{}'. Ответь 1 предложением.",
                 question_text
             )).await?.trim_matches(&['\n', '\r', '»', '«', '.', '"', ' ']).to_string()
-            };
+        };
 
         let answer = Answer::new(answer_text)?;
 

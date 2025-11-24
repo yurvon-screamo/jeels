@@ -2,7 +2,7 @@
 mod tests {
     use crate::domain::error::JeersError;
     use crate::domain::value_objects::{
-        Answer, Interval, MemoryState, Question, Rating, Stability,
+        Answer, Embedding, Interval, MemoryState, Question, Rating, Stability,
     };
     use crate::domain::{JapaneseLevel, NativeLanguage, User};
     use chrono::{Duration, Utc};
@@ -23,7 +23,7 @@ mod tests {
         .unwrap()
     }
 
-    fn generate_embedding(text: &str) -> Vec<f32> {
+    fn generate_embedding(text: &str) -> Embedding {
         use std::collections::hash_map::DefaultHasher;
         use std::hash::{Hash, Hasher};
 
@@ -37,7 +37,7 @@ mod tests {
             embedding[i] =
                 ((hash.wrapping_mul(i as u64).wrapping_add(i as u64)) % 1000) as f32 / 1000.0;
         }
-        embedding
+        Embedding(embedding)
     }
 
     fn create_test_answer() -> Answer {

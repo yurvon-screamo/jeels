@@ -20,7 +20,8 @@ impl<'a, R: UserRepository> StartStudySessionUseCase<'a, R> {
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let cards = user.start_study_session();
+        let mut cards = user.start_study_session();
+        cards.sort_by_key(|card| card.next_review_date());
         Ok(cards)
     }
 }

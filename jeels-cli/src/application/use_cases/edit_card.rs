@@ -31,7 +31,10 @@ impl<'a, R: UserRepository, E: EmbeddingService> EditCardUseCase<'a, R, E> {
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let new_embedding = self.embedding_service.embed(&question_text)?;
+        let new_embedding = self
+            .embedding_service
+            .generate_embedding(&question_text)
+            .await?;
         let new_question = Question::new(question_text, new_embedding)?;
         let new_answer = Answer::new(answer_text)?;
 

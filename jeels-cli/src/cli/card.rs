@@ -22,10 +22,24 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
     let repository = settings.get_repository().await?;
     let cards = ListCardsUseCase::new(repository).execute(user_id).await?;
 
+    // Calculate required height:
+    // 1 line for title
+    // 2 lines for table borders (top + bottom)
+    // 1 line for table header
+    // cards.len() lines for data rows
+    // Total: 4 + cards.len()
+    let table_height = if cards.is_empty() {
+        3 // borders + empty message
+    } else {
+        2 + 1 + cards.len() as u16 // borders + header + rows
+    };
+    let total_height = 1 + table_height; // title + table
+
     render_once(
         |frame| {
             let area = frame.area();
-            let vertical = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
+            let vertical =
+                Layout::vertical([Constraint::Length(1), Constraint::Length(table_height)]);
             let [title_area, table_area] = vertical.areas(area);
 
             let title = Line::from("Список карточек:".bold().underlined());
@@ -35,7 +49,7 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
 
             render_cards_table(&cards, table_area, frame);
         },
-        4 + cards.len() as u16,
+        total_height,
     )?;
 
     Ok(())
@@ -218,6 +232,14 @@ fn render_card(card: &Card, area: Rect, frame: &mut Frame) {
     }
 }
 
+fn truncate_text(s: &str, max_len: usize) -> String {
+    if s.chars().count() <= max_len {
+        s.to_string()
+    } else {
+        s.chars().take(max_len - 3).collect::<String>() + "..."
+    }
+}
+
 fn render_cards_table(cards: &[Card], area: Rect, frame: &mut Frame) {
     let block = Block::bordered()
         .border_set(border::ROUNDED)
@@ -257,12 +279,13 @@ fn render_cards_table(cards: &[Card], area: Rect, frame: &mut Frame) {
             } else {
                 base_style
             };
+
             Row::new(vec![
-                Cell::from(card.id().to_string()),
-                Cell::from(card.question().text().to_string()),
-                Cell::from(card.answer().text().to_string()),
+                Cell::from(truncate_text(&card.id().to_string(), 22)),
+                Cell::from(truncate_text(card.question().text(), 30)),
+                Cell::from(truncate_text(card.answer().text(), 30)),
                 Cell::from(card.reviews().len().to_string()),
-                Cell::from(card.next_review_date().to_string()),
+                Cell::from(truncate_text(&card.next_review_date().to_string(), 30)),
             ])
             .style(style)
         })

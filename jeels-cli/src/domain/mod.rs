@@ -32,6 +32,18 @@ pub enum JapaneseLevel {
     N1,
 }
 
+impl JapaneseLevel {
+    pub fn as_number(&self) -> u8 {
+        match self {
+            JapaneseLevel::N5 => 5,
+            JapaneseLevel::N4 => 4,
+            JapaneseLevel::N3 => 3,
+            JapaneseLevel::N2 => 2,
+            JapaneseLevel::N1 => 1,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NativeLanguage {
     English,
@@ -82,8 +94,7 @@ impl User {
             .ok_or(JeersError::CardNotFound { card_id })?;
 
         let query_embedding = card.question().embedding();
-
-        Ok(self
+        let synonyms = self
             .cards
             .iter()
             .filter(|(id, card)| {
@@ -95,7 +106,9 @@ impl User {
                 similarity >= SIMILARITY_THRESHOLD
             })
             .map(|(_, card)| card.clone())
-            .collect())
+            .collect();
+
+        Ok(synonyms)
     }
 
     fn has_card_with_question(&self, question: &Question, exclude_card_id: Option<Ulid>) -> bool {

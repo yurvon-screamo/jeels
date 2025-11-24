@@ -1,6 +1,7 @@
 mod card;
 mod furigana_renderer;
 mod learn;
+mod migii;
 
 use clap::Parser;
 use ratatui::{
@@ -21,6 +22,7 @@ use crate::{
             handle_list_cards,
         },
         learn::handle_learn,
+        migii::handle_create_migii_pack,
     },
     domain::{JapaneseLevel, JeersError, NativeLanguage, User},
     settings::ApplicationEnvironment,
@@ -58,6 +60,9 @@ enum Command {
     Delete {
         card_ids: Vec<Ulid>,
     },
+    MigiiCreate {
+        lesson: u32,
+    },
 }
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
@@ -89,6 +94,9 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         }
         Command::Delete { card_ids } => {
             handle_delete_card(user_id, card_ids).await?;
+        }
+        Command::MigiiCreate { lesson } => {
+            handle_create_migii_pack(user_id, lesson).await?;
         }
     }
 
