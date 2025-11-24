@@ -4,8 +4,8 @@ use std::sync::{Arc, OnceLock};
 
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    AutorubyFuriganaGenerator, CandleEmbeddingService, FsrsSrsService, OpenRouterLlm,
-    PoloDbUserRepository,
+    AutorubyFuriganaGenerator, CandleEmbeddingService, CandleLlm, FsrsSrsService, GeminiLlm,
+    OpenRouterLlm, PoloDbUserRepository,
 };
 use tokio::sync::OnceCell;
 
@@ -16,9 +16,12 @@ pub struct ApplicationEnvironment {
 
     lazy_repository: Arc<OnceCell<PoloDbUserRepository>>,
     lazy_embedding_generator: Arc<OnceCell<CandleEmbeddingService>>,
-    lazy_llm: Arc<OnceCell<OpenRouterLlm>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
     lazy_furigana_service: Arc<OnceCell<AutorubyFuriganaGenerator>>,
+
+    lazy_gemini_llm: Arc<OnceCell<GeminiLlm>>,
+    _lazy_openrouter_llm: Arc<OnceCell<OpenRouterLlm>>,
+    _lazy_candle_llm: Arc<OnceCell<CandleLlm>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,15 +45,22 @@ pub struct AuthSettings {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LlmSettings {
-    pub max_sample_len: usize,
-    pub temperature: f64,
-    pub seed: u64,
-    pub model_repo: String,
-    pub model_filename: String,
-    pub model_revision: String,
-    pub tokenizer_repo: String,
-    pub tokenizer_filename: String,
+pub enum LlmSettings {
+    #[serde(rename = "gemini")]
+    Gemini { temperature: f32, model: String },
+    #[serde(rename = "openrouter")]
+    OpenRouter { temperature: f64, model: String },
+    #[serde(rename = "candle")]
+    Candle {
+        max_sample_len: usize,
+        temperature: f64,
+        seed: u64,
+        model_repo: String,
+        model_filename: String,
+        model_revision: String,
+        tokenizer_repo: String,
+        tokenizer_filename: String,
+    },
 }
 
 impl ApplicationEnvironment {
@@ -65,7 +75,7 @@ impl ApplicationEnvironment {
                     password: "default".to_string(),
                 },
             },
-            llm: LlmSettings {
+            llm: LlmSettings::Candle {
                 max_sample_len: 8192,
                 temperature: 0.7,
                 seed: 299792458,
@@ -111,14 +121,68 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_llm_service(&self) -> Result<&OpenRouterLlm, JeersError> {
-        self.lazy_llm
-            .get_or_try_init(|| async {
-                OpenRouterLlm::new(&self.settings.llm).map_err(|e| JeersError::SettingsError {
-                    reason: e.to_string(),
+    pub async fn get_llm_service(&self) -> Result<&GeminiLlm, JeersError> {
+        match &self.settings.llm {
+            LlmSettings::Gemini { temperature, model } => {
+                self.lazy_gemini_llm
+                    .get_or_try_init(|| async {
+                        GeminiLlm::new(*temperature, model.clone()).map_err(|e| {
+                            JeersError::SettingsError {
+                                reason: e.to_string(),
+                            }
+                        })
+                    })
+                    .await
+            }
+            LlmSettings::OpenRouter {
+                temperature: _,
+                model: _,
+            } => {
+                // self.lazy_openrouter_llm
+                //     .get_or_try_init(|| async {
+                //         OpenRouterLlm::new(*temperature, model.clone()).map_err(|e| {
+                //             JeersError::SettingsError {
+                //                 reason: e.to_string(),
+                //             }
+                //         })
+                //     })
+                //     .await
+                Err(JeersError::SettingsError {
+                    reason: "OpenRouter not supported yet".to_string(),
                 })
-            })
-            .await
+            }
+            LlmSettings::Candle {
+                max_sample_len: _,
+                temperature: _,
+                seed: _,
+                model_repo: _,
+                model_filename: _,
+                model_revision: _,
+                tokenizer_repo: _,
+                tokenizer_filename: _,
+            } => {
+                // self.lazy_candle_llm
+                //     .get_or_try_init(|| async {
+                //         CandleLlm::new(
+                //             *max_sample_len,
+                //             *temperature,
+                //             *seed,
+                //             model_repo.clone(),
+                //             model_filename.clone(),
+                //             model_revision.clone(),
+                //             tokenizer_repo.clone(),
+                //             tokenizer_filename.clone(),
+                //         )
+                //         .map_err(|e| JeersError::SettingsError {
+                //             reason: e.to_string(),
+                //         })
+                //     })
+                //     .await
+                Err(JeersError::SettingsError {
+                    reason: "Candle not supported yet".to_string(),
+                })
+            }
+        }
     }
 
     pub async fn get_srs_service(&self) -> Result<&FsrsSrsService, JeersError> {
@@ -158,9 +222,11 @@ impl ApplicationEnvironment {
             settings,
             lazy_repository: Arc::new(OnceCell::new()),
             lazy_embedding_generator: Arc::new(OnceCell::new()),
-            lazy_llm: Arc::new(OnceCell::new()),
             lazy_srs_service: Arc::new(OnceCell::new()),
             lazy_furigana_service: Arc::new(OnceCell::new()),
+            lazy_gemini_llm: Arc::new(OnceCell::new()),
+            _lazy_openrouter_llm: Arc::new(OnceCell::new()),
+            _lazy_candle_llm: Arc::new(OnceCell::new()),
         };
 
         SETTINGS

@@ -7,6 +7,7 @@ pub mod get_furigana;
 pub mod get_hints;
 pub mod list_cards;
 pub mod rate_card;
+pub mod rebuild_database;
 pub mod start_study_session;
 pub mod view_card;
 
@@ -19,5 +20,6 @@ pub use get_furigana::GetFuriganaUseCase;
 pub use get_hints::{GetHintsUseCase, Hint};
 pub use list_cards::ListCardsUseCase;
 pub use rate_card::RateCardUseCase;
+pub use rebuild_database::RebuildDatabaseUseCase;
 pub use start_study_session::StartStudySessionUseCase;
 pub use view_card::ViewCardUseCase;

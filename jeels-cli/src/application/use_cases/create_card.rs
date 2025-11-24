@@ -20,29 +20,51 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         }
     }
 
+    pub(crate) async fn generate_translation_and_embedding(
+        &self,
+        question_text: &str,
+    ) -> Result<(Question, Answer), JeersError> {
+        let question_text_string = question_text.to_string();
+        let embedding = self
+            .embedding_service
+            .generate_embedding(&question_text_string)
+            .await?;
+
+        let question = Question::new(question_text_string, embedding)?;
+
+        let answer_text = self
+            .llm_service
+            .generate_text(&format!(
+                "Объясни значение этого слова для рускоговорящего студента: '{}'. Ответь 1 предложением.",
+                question_text
+            ))
+            .await?
+            .trim_matches(&['\n', '\r', '»', '«', '.', '"', ' '])
+            .to_string();
+
+        let answer = Answer::new(answer_text)?;
+
+        Ok((question, answer))
+    }
+
     pub async fn execute(
         &self,
         user_id: Ulid,
         question_text: String,
         answer_text: Option<String>,
     ) -> Result<Card, JeersError> {
-        let embedding = self
-            .embedding_service
-            .generate_embedding(&question_text)
-            .await?;
-
-        let question = Question::new(question_text.clone(), embedding)?;
-
-        let answer_text = if let Some(answer_text) = answer_text {
-            answer_text
+        let (question, answer) = if let Some(answer_text) = answer_text {
+            let embedding = self
+                .embedding_service
+                .generate_embedding(&question_text)
+                .await?;
+            let question = Question::new(question_text, embedding)?;
+            let answer = Answer::new(answer_text)?;
+            (question, answer)
         } else {
-            self.llm_service.generate_text(&format!(
-                "Объясни значение этого слова для рускоговорящего студента: '{}'. Ответь 1 предложением.",
-                question_text
-            )).await?.trim_matches(&['\n', '\r', '»', '«', '.', '"', ' ']).to_string()
+            self.generate_translation_and_embedding(&question_text)
+                .await?
         };
-
-        let answer = Answer::new(answer_text)?;
 
         let mut user = self
             .repository

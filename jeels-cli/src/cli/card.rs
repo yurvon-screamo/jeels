@@ -10,7 +10,10 @@ use ratatui::{
 use ulid::Ulid;
 
 use crate::{
-    application::{CreateCardUseCase, DeleteCardUseCase, EditCardUseCase, ListCardsUseCase},
+    application::{
+        CreateCardUseCase, DeleteCardUseCase, EditCardUseCase, ListCardsUseCase,
+        RebuildDatabaseUseCase,
+    },
     domain::{Card, JeersError},
     settings::ApplicationEnvironment,
 };
@@ -175,6 +178,47 @@ pub async fn handle_delete_card(user_id: Ulid, card_ids: Vec<Ulid>) -> Result<()
             10,
         )?;
     }
+
+    Ok(())
+}
+
+pub async fn handle_rebuild_database(user_id: Ulid) -> Result<(), JeersError> {
+    let settings = ApplicationEnvironment::get();
+    let repository = settings.get_repository().await?;
+    let create_card_use_case = CreateCardUseCase::new(
+        repository,
+        settings.get_embedding_generator().await?,
+        settings.get_llm_service().await?,
+    );
+    let rebuild_use_case = RebuildDatabaseUseCase::new(repository, create_card_use_case);
+    let processed_count = rebuild_use_case.execute(user_id).await?;
+
+    render_once(
+        |frame| {
+            let area = frame.area();
+            let vertical = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
+            let [title_area, content_area] = vertical.areas(area);
+
+            let title = Line::from("Пересборка базы данных завершена:".bold().underlined());
+            Paragraph::new(title)
+                .alignment(Alignment::Left)
+                .render(title_area, frame.buffer_mut());
+
+            let content = vec![Line::from(format!(
+                "Обработано карточек: {}",
+                processed_count
+            ))];
+
+            let block = Block::bordered()
+                .border_set(border::ROUNDED)
+                .border_style(Style::default().fg(Color::Green));
+
+            Paragraph::new(Text::from(content))
+                .block(block)
+                .render(content_area, frame.buffer_mut());
+        },
+        5,
+    )?;
 
     Ok(())
 }

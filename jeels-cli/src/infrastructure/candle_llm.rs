@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::application::LlmService;
 use crate::domain::error::JeersError;
-use crate::settings::LlmSettings;
 
 use tokenizers::Tokenizer;
 
@@ -23,11 +22,20 @@ pub struct CandleLlm {
 }
 
 impl CandleLlm {
-    pub fn new(settings: &LlmSettings) -> Result<Self, JeersError> {
+    pub fn new(
+        max_sample_len: usize,
+        temperature: f32,
+        seed: u64,
+        model_repo: String,
+        model_filename: String,
+        model_revision: String,
+        tokenizer_repo: String,
+        tokenizer_filename: String,
+    ) -> Result<Self, JeersError> {
         let device = Device::Cpu;
-        let model = Self::load_model(&device, settings)?;
-        let tokenizer = Self::load_tokenizer(settings)?;
-        let logits_processor = Self::create_logits_processor(settings)?;
+        let model = Self::load_model(&device, model_repo, model_filename, model_revision)?;
+        let tokenizer = Self::load_tokenizer(tokenizer_repo, tokenizer_filename)?;
+        let logits_processor = Self::create_logits_processor(seed, temperature)?;
         let eos_token = Self::extract_eos_token(&tokenizer)?;
 
         Ok(Self {
@@ -36,7 +44,7 @@ impl CandleLlm {
             device,
             logits_processor: Arc::new(Mutex::new(logits_processor)),
             eos_token,
-            max_sample_len: settings.max_sample_len,
+            max_sample_len,
         })
     }
 
@@ -48,22 +56,31 @@ impl CandleLlm {
         Ok(*eos_token)
     }
 
-    fn load_model(device: &Device, settings: &LlmSettings) -> Result<Qwen3, JeersError> {
-        let model_path = Self::download_model_path(settings)?;
+    fn load_model(
+        device: &Device,
+        model_repo: String,
+        model_filename: String,
+        model_revision: String,
+    ) -> Result<Qwen3, JeersError> {
+        let model_path = Self::download_model_path(model_repo, model_filename, model_revision)?;
         let mut file = Self::open_model_file(&model_path)?;
         let gguf_content = Self::read_gguf_content(&mut file, &model_path)?;
         Self::load_model_from_gguf(gguf_content, &mut file, device)
     }
 
-    fn download_model_path(settings: &LlmSettings) -> Result<std::path::PathBuf, JeersError> {
+    fn download_model_path(
+        model_repo: String,
+        model_filename: String,
+        model_revision: String,
+    ) -> Result<std::path::PathBuf, JeersError> {
         let api = Self::create_hf_hub_api()?;
         let repo = hf_hub::Repo::with_revision(
-            settings.model_repo.clone(),
+            model_repo.clone(),
             hf_hub::RepoType::Model,
-            settings.model_revision.clone(),
+            model_revision.clone(),
         );
         api.repo(repo)
-            .get(&settings.model_filename)
+            .get(&model_filename)
             .map_err(|e| JeersError::LlmError {
                 reason: format!("Failed to get model: {}", e),
             })
@@ -102,15 +119,21 @@ impl CandleLlm {
         })
     }
 
-    fn load_tokenizer(settings: &LlmSettings) -> Result<Tokenizer, JeersError> {
-        let tokenizer_path = Self::download_tokenizer_path(settings)?;
+    fn load_tokenizer(
+        tokenizer_repo: String,
+        tokenizer_filename: String,
+    ) -> Result<Tokenizer, JeersError> {
+        let tokenizer_path = Self::download_tokenizer_path(tokenizer_repo, tokenizer_filename)?;
         Self::load_tokenizer_from_file(tokenizer_path)
     }
 
-    fn download_tokenizer_path(settings: &LlmSettings) -> Result<std::path::PathBuf, JeersError> {
+    fn download_tokenizer_path(
+        tokenizer_repo: String,
+        tokenizer_filename: String,
+    ) -> Result<std::path::PathBuf, JeersError> {
         let api = Self::create_hf_hub_api()?;
-        api.model(settings.tokenizer_repo.clone())
-            .get(&settings.tokenizer_filename)
+        api.model(tokenizer_repo.clone())
+            .get(&tokenizer_filename)
             .map_err(|e| JeersError::LlmError {
                 reason: format!("Failed to get tokenizer: {}", e),
             })
@@ -122,11 +145,11 @@ impl CandleLlm {
         })
     }
 
-    fn create_logits_processor(settings: &LlmSettings) -> Result<LogitsProcessor, JeersError> {
+    fn create_logits_processor(seed: u64, temperature: f32) -> Result<LogitsProcessor, JeersError> {
         Ok(LogitsProcessor::from_sampling(
-            settings.seed,
+            seed,
             Sampling::All {
-                temperature: settings.temperature,
+                temperature: temperature as f64,
             },
         ))
     }

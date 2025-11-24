@@ -1,6 +1,5 @@
 use crate::application::LlmService;
 use crate::domain::error::JeersError;
-use crate::settings::LlmSettings;
 use async_openai::{
     Client,
     config::OpenAIConfig,
@@ -15,12 +14,10 @@ pub struct OpenRouterLlm {
 }
 
 impl OpenRouterLlm {
-    pub fn new(settings: &LlmSettings) -> Result<Self, JeersError> {
+    pub fn new(temperature: f32, model: String) -> Result<Self, JeersError> {
         let api_key = std::env::var("OPENROUTER_API_KEY").map_err(|_| JeersError::LlmError {
             reason: "OPENROUTER_API_KEY environment variable not set".to_string(),
         })?;
-
-        let model = "qwen/qwen3-30b-a3b:free".to_string();
 
         let config = OpenAIConfig::new()
             .with_api_key(api_key)
@@ -31,7 +28,7 @@ impl OpenRouterLlm {
         Ok(Self {
             client: Arc::new(client),
             model,
-            temperature: settings.temperature as f32,
+            temperature,
         })
     }
 

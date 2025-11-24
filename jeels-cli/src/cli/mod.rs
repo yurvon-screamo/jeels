@@ -19,7 +19,7 @@ use crate::{
     cli::{
         card::{
             handle_create_card, handle_create_words, handle_delete_card, handle_edit_card,
-            handle_list_cards,
+            handle_list_cards, handle_rebuild_database,
         },
         learn::handle_learn,
         migii::handle_create_migii_pack,
@@ -63,6 +63,7 @@ enum Command {
     MigiiCreate {
         lesson: u32,
     },
+    RebuildDatabase {},
 }
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
@@ -97,6 +98,9 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         }
         Command::MigiiCreate { lesson } => {
             handle_create_migii_pack(user_id, lesson).await?;
+        }
+        Command::RebuildDatabase {} => {
+            handle_rebuild_database(user_id).await?;
         }
     }
 
