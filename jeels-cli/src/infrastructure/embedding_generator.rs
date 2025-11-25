@@ -359,7 +359,7 @@ fn load_tokenizer(model_root: &Path) -> Result<Tokenizer, JeersError> {
     Ok(tokenizer)
 }
 
-pub fn batch(encodings: Vec<Encoding>, pooled_indices: Vec<u32>, raw_indices: Vec<u32>) -> Batch {
+fn batch(encodings: Vec<Encoding>, pooled_indices: Vec<u32>, raw_indices: Vec<u32>) -> Batch {
     let mut input_ids = Vec::new();
     let mut token_type_ids = Vec::new();
     let mut position_ids = Vec::new();

@@ -5,7 +5,7 @@ use std::sync::{Arc, OnceLock};
 use crate::domain::JeersError;
 use crate::infrastructure::{
     AutorubyFuriganaGenerator, CandleEmbeddingService, CandleLlm, FsrsSrsService, GeminiLlm,
-    OpenRouterLlm, PoloDbUserRepository,
+    OpenAiLlm, PoloDbUserRepository,
 };
 use tokio::sync::OnceCell;
 
@@ -20,7 +20,7 @@ pub struct ApplicationEnvironment {
     lazy_furigana_service: Arc<OnceCell<AutorubyFuriganaGenerator>>,
 
     lazy_gemini_llm: Arc<OnceCell<GeminiLlm>>,
-    _lazy_openrouter_llm: Arc<OnceCell<OpenRouterLlm>>,
+    lazy_openrouter_llm: Arc<OnceCell<OpenAiLlm>>,
     _lazy_candle_llm: Arc<OnceCell<CandleLlm>>,
 }
 
@@ -48,8 +48,13 @@ pub struct AuthSettings {
 pub enum LlmSettings {
     #[serde(rename = "gemini")]
     Gemini { temperature: f32, model: String },
-    #[serde(rename = "openrouter")]
-    OpenRouter { temperature: f64, model: String },
+    #[serde(rename = "openai")]
+    OpenAi {
+        temperature: f32,
+        model: String,
+        base_url: String,
+        env_var_name: String,
+    },
     #[serde(rename = "candle")]
     Candle {
         max_sample_len: usize,
@@ -121,26 +126,12 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_llm_service(&self) -> Result<&GeminiLlm, JeersError> {
+    pub async fn get_llm_service(&self) -> Result<&OpenAiLlm, JeersError> {
         match &self.settings.llm {
             LlmSettings::Gemini { temperature, model } => {
-                self.lazy_gemini_llm
-                    .get_or_try_init(|| async {
-                        GeminiLlm::new(*temperature, model.clone()).map_err(|e| {
-                            JeersError::SettingsError {
-                                reason: e.to_string(),
-                            }
-                        })
-                    })
-                    .await
-            }
-            LlmSettings::OpenRouter {
-                temperature: _,
-                model: _,
-            } => {
-                // self.lazy_openrouter_llm
+                // self.lazy_gemini_llm
                 //     .get_or_try_init(|| async {
-                //         OpenRouterLlm::new(*temperature, model.clone()).map_err(|e| {
+                //         GeminiLlm::new(*temperature, model.clone()).map_err(|e| {
                 //             JeersError::SettingsError {
                 //                 reason: e.to_string(),
                 //             }
@@ -148,8 +139,28 @@ impl ApplicationEnvironment {
                 //     })
                 //     .await
                 Err(JeersError::SettingsError {
-                    reason: "OpenRouter not supported yet".to_string(),
+                    reason: "Gemini not supported yet".to_string(),
                 })
+            }
+            LlmSettings::OpenAi {
+                temperature,
+                model,
+                base_url,
+                env_var_name,
+            } => {
+                self.lazy_openrouter_llm
+                    .get_or_try_init(|| async {
+                        OpenAiLlm::new(
+                            *temperature,
+                            model.clone(),
+                            base_url.clone(),
+                            env_var_name.clone(),
+                        )
+                        .map_err(|e| JeersError::SettingsError {
+                            reason: e.to_string(),
+                        })
+                    })
+                    .await
             }
             LlmSettings::Candle {
                 max_sample_len: _,
@@ -225,7 +236,7 @@ impl ApplicationEnvironment {
             lazy_srs_service: Arc::new(OnceCell::new()),
             lazy_furigana_service: Arc::new(OnceCell::new()),
             lazy_gemini_llm: Arc::new(OnceCell::new()),
-            _lazy_openrouter_llm: Arc::new(OnceCell::new()),
+            lazy_openrouter_llm: Arc::new(OnceCell::new()),
             _lazy_candle_llm: Arc::new(OnceCell::new()),
         };
 

@@ -35,11 +35,11 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         let answer_text = self
             .llm_service
             .generate_text(&format!(
-                "Объясни значение этого слова для рускоговорящего студента: '{}'. Ответь 1 предложением.",
+                "Объясни значение этого слова для рускоговорящего студента: '{}'. Ответь 1 предложением. Не повторяй вопрос в ответе. Не указывай в ответе чтение или транскрипцию, студент умеет читать. Выдай просто ответ без вводных или объяснений зачем это ли для кого.",
                 question_text
             ))
             .await?
-            .trim_matches(&['\n', '\r', '»', '«', '.', '"', ' '])
+            .trim_matches(&['\n', '\r', '.', ' '])
             .to_string();
 
         let answer = Answer::new(answer_text)?;
@@ -58,9 +58,11 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
                 .embedding_service
                 .generate_embedding(&question_text)
                 .await?;
-            let question = Question::new(question_text, embedding)?;
-            let answer = Answer::new(answer_text)?;
-            (question, answer)
+
+            (
+                Question::new(question_text, embedding)?,
+                Answer::new(answer_text)?,
+            )
         } else {
             self.generate_translation_and_embedding(&question_text)
                 .await?

@@ -39,6 +39,11 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                 .generate_translation_and_embedding(question_text)
                 .await?;
 
+            println!(
+                "For card {}: generated question embedding and answer {}",
+                card.id(),
+                new_answer.text(),
+            );
             new_cards.insert(card.id(), (new_question, new_answer));
             processed_count += 1;
         }

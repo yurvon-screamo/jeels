@@ -7,21 +7,26 @@ use async_openai::{
 };
 use std::sync::Arc;
 
-pub struct OpenRouterLlm {
+pub struct OpenAiLlm {
     client: Arc<Client<OpenAIConfig>>,
     model: String,
     temperature: f32,
 }
 
-impl OpenRouterLlm {
-    pub fn new(temperature: f32, model: String) -> Result<Self, JeersError> {
-        let api_key = std::env::var("OPENROUTER_API_KEY").map_err(|_| JeersError::LlmError {
-            reason: "OPENROUTER_API_KEY environment variable not set".to_string(),
+impl OpenAiLlm {
+    pub fn new(
+        temperature: f32,
+        model: String,
+        base_url: String,
+        env_var_name: String,
+    ) -> Result<Self, JeersError> {
+        let api_key = std::env::var(&env_var_name).map_err(|_| JeersError::LlmError {
+            reason: format!("{} environment variable not set", env_var_name),
         })?;
 
         let config = OpenAIConfig::new()
             .with_api_key(api_key)
-            .with_api_base("https://openrouter.ai/api/v1");
+            .with_api_base(base_url);
 
         let client = Client::with_config(config);
 
@@ -63,7 +68,7 @@ impl OpenRouterLlm {
     }
 }
 
-impl LlmService for OpenRouterLlm {
+impl LlmService for OpenAiLlm {
     async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
         self.make_request(question).await
     }
