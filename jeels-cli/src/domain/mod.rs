@@ -93,7 +93,7 @@ impl User {
     }
 
     pub fn find_synonyms(&self, card_id: Ulid) -> Result<Vec<Card>, JeersError> {
-        const SIMILARITY_THRESHOLD: f32 = 0.75;
+        const SIMILARITY_THRESHOLD: f32 = 0.85;
 
         let card = self
             .cards

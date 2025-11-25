@@ -36,13 +36,12 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
     } else {
         2 + 1 + cards.len() as u16 // borders + header + rows
     };
-    let total_height = 1 + table_height; // title + table
+    let total_height = std::cmp::min(40, table_height + 1); // title + table
 
     render_once(
         |frame| {
             let area = frame.area();
-            let vertical =
-                Layout::vertical([Constraint::Length(1), Constraint::Length(table_height)]);
+            let vertical = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
             let [title_area, table_area] = vertical.areas(area);
 
             let title = Line::from("Список карточек:".bold().underlined());
