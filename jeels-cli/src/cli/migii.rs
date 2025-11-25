@@ -32,7 +32,11 @@ struct MigiiMeaning {
     mean: String,
 }
 
-pub async fn handle_create_migii_pack(user_id: Ulid, lesson: u32) -> Result<(), JeersError> {
+pub async fn handle_create_migii_pack(
+    user_id: Ulid,
+    lesson: u32,
+    question_only: bool,
+) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
 
@@ -103,11 +107,9 @@ pub async fn handle_create_migii_pack(user_id: Ulid, lesson: u32) -> Result<(), 
         } else {
             continue;
         };
+        let answer = if question_only { None } else { Some(answer) };
 
-        match use_case
-            .execute(user_id, question.clone(), Some(answer))
-            .await
-        {
+        match use_case.execute(user_id, question.clone(), answer).await {
             Ok(card) => {
                 created_count += 1;
                 render_once(

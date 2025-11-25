@@ -85,7 +85,8 @@ impl Card {
     }
 
     pub fn is_new(&self) -> bool {
-        self.reviews
+        !self
+            .reviews
             .iter()
             .any(|review| review.rating() != Rating::Again)
     }

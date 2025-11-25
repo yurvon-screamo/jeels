@@ -63,6 +63,8 @@ enum Command {
     },
     MigiiCreate {
         lesson: u32,
+        #[clap(short, long, default_value = "false")]
+        question_only: bool,
     },
     RebuildDatabase {},
 }
@@ -97,8 +99,11 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         Command::Delete { card_ids } => {
             handle_delete_card(user_id, card_ids).await?;
         }
-        Command::MigiiCreate { lesson } => {
-            handle_create_migii_pack(user_id, lesson).await?;
+        Command::MigiiCreate {
+            lesson,
+            question_only,
+        } => {
+            handle_create_migii_pack(user_id, lesson, question_only).await?;
         }
         Command::RebuildDatabase {} => {
             handle_rebuild_database(user_id).await?;

@@ -283,14 +283,12 @@ mod tests {
         let answer = create_test_answer();
         let card = user.create_card(question, answer).unwrap();
         let card_id = card.id();
-        let future_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
         user.rate_card(
             card_id,
             Rating::Good,
             Duration::days(1),
-            future_date,
             stability,
             memory_state,
         )
@@ -318,14 +316,12 @@ mod tests {
         let card2 = user.create_card(q2, a2).unwrap();
         let card2_id = card2.id();
 
-        let future_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
         user.rate_card(
             card2_id,
             Rating::Good,
             Duration::days(1),
-            future_date,
             stability,
             memory_state,
         )
@@ -355,14 +351,12 @@ mod tests {
         let a2 = Answer::new("A2".to_string()).unwrap();
         let card2 = user.create_card(q2, a2).unwrap();
         let card2_id = card2.id();
-        let past_date = Utc::now() - Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
         user.rate_card(
             card2_id,
             Rating::Good,
             Duration::days(1),
-            past_date,
             stability,
             memory_state,
         )
@@ -395,14 +389,12 @@ mod tests {
         let a2 = Answer::new("A2".to_string()).unwrap();
         let card2 = user.create_card(q2, a2).unwrap();
         let card2_id = card2.id();
-        let past_date = Utc::now() - Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
         user.rate_card(
             card2_id,
             Rating::Good,
             Duration::days(1),
-            past_date,
             stability,
             memory_state,
         )
@@ -433,14 +425,12 @@ mod tests {
                 Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
             let a = Answer::new(format!("A{}", i)).unwrap();
             let card = user.create_card(q, a).unwrap();
-            let past_date = Utc::now() - Duration::days(1);
             let stability = Stability::new(1.0).unwrap();
             let memory_state = create_test_memory_state();
             user.rate_card(
                 card.id(),
                 Rating::Good,
                 Duration::days(1),
-                past_date,
                 stability,
                 memory_state,
             )
@@ -503,15 +493,12 @@ mod tests {
         let card2_id = card2.id();
 
         // Set different review dates
-        let date1 = Utc::now() - Duration::days(2);
-        let date2 = Utc::now() - Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
         user.rate_card(
             card1_id,
             Rating::Again,
             Duration::days(1),
-            date1,
             stability,
             memory_state,
         )
@@ -520,7 +507,6 @@ mod tests {
             card2_id,
             Rating::Again,
             Duration::days(1),
-            date2,
             stability,
             memory_state,
         )
@@ -547,14 +533,12 @@ mod tests {
         let card1 = user.create_card(q1, a1).unwrap();
         let card1_id = card1.id();
 
-        let past_date = Utc::now() - Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
         user.rate_card(
             card1_id,
             Rating::Again,
             Duration::days(1),
-            past_date,
             stability,
             memory_state,
         )
@@ -597,14 +581,12 @@ mod tests {
                 Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
             let a = Answer::new(format!("A{}", i)).unwrap();
             let card = user.create_card(q, a).unwrap();
-            let past_date = Utc::now() - Duration::days(1);
             let stability = Stability::new(1.0).unwrap();
             let memory_state = create_test_memory_state();
             user.rate_card(
                 card.id(),
                 Rating::Good,
                 Duration::days(1),
-                past_date,
                 stability,
                 memory_state,
             )
@@ -636,19 +618,11 @@ mod tests {
         let card_id = card.id();
         let rating = Rating::Good;
         let interval = Duration::days(1);
-        let next_review_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
 
         // Act
-        let result = user.rate_card(
-            card_id,
-            rating,
-            interval,
-            next_review_date,
-            stability,
-            memory_state,
-        );
+        let result = user.rate_card(card_id, rating, interval, stability, memory_state);
 
         // Assert
         assert!(result.is_ok());
@@ -675,19 +649,11 @@ mod tests {
             let card = user.create_card(question, answer).unwrap();
             let card_id = card.id();
             let interval = Duration::days(expected_interval);
-            let next_review_date = Utc::now() + Duration::days(expected_interval as i64);
             let stability = Stability::new(expected_interval as f64).unwrap();
             let memory_state = create_test_memory_state();
 
             // Act
-            let result = user.rate_card(
-                card_id,
-                rating,
-                interval,
-                next_review_date,
-                stability,
-                memory_state,
-            );
+            let result = user.rate_card(card_id, rating, interval, stability, memory_state);
 
             // Assert
             assert!(result.is_ok());
@@ -707,18 +673,15 @@ mod tests {
         let card = user.create_card(question, answer).unwrap();
         let card_id = card.id();
         let ratings = vec![(Rating::Easy, 1), (Rating::Good, 2), (Rating::Hard, 3)];
-        let mut current_date = Utc::now();
 
         // Act
         for (rating, interval_days) in ratings.iter() {
-            current_date = current_date + Duration::days(*interval_days as i64);
             let stability = Stability::new(*interval_days as f64).unwrap();
             let memory_state = create_test_memory_state();
             user.rate_card(
                 card_id,
                 *rating,
                 Duration::days(*interval_days),
-                current_date,
                 stability,
                 memory_state,
             )
@@ -740,19 +703,11 @@ mod tests {
         let non_existent_id = ulid::Ulid::new();
         let rating = Rating::Good;
         let interval = Duration::days(1);
-        let next_review_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
 
         // Act
-        let result = user.rate_card(
-            non_existent_id,
-            rating,
-            interval,
-            next_review_date,
-            stability,
-            memory_state,
-        );
+        let result = user.rate_card(non_existent_id, rating, interval, stability, memory_state);
 
         // Assert
         assert!(result.is_err());
@@ -788,7 +743,6 @@ mod tests {
                 card_id,
                 Rating::Good,
                 Duration::days(duration.num_days()),
-                future_date,
                 stability,
                 memory_state,
             );
@@ -806,7 +760,6 @@ mod tests {
         // Arrange
         let mut user = create_test_user();
         let non_existent_id = ulid::Ulid::new();
-        let future_date = Utc::now() + Duration::days(5);
         let stability = Stability::new(2.5).unwrap();
         let memory_state = create_test_memory_state();
 
@@ -815,7 +768,6 @@ mod tests {
             non_existent_id,
             Rating::Good,
             Duration::days(5),
-            future_date,
             stability,
             memory_state,
         );

@@ -216,7 +216,6 @@ impl User {
         card_id: Ulid,
         rating: Rating,
         interval: Duration,
-        next_review_date: DateTime<Utc>,
         stability: Stability,
         memory_state: MemoryState,
     ) -> Result<(), JeersError> {
@@ -228,6 +227,7 @@ impl User {
         let review = Review::new(rating, interval);
         card.add_review(review);
 
+        let next_review_date = Utc::now() + interval;
         self.schedule_next_review(card_id, next_review_date, stability, memory_state)?;
         Ok(())
     }
