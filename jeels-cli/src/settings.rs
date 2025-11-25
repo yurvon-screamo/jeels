@@ -33,9 +33,6 @@ pub struct Settings {
 #[derive(Serialize, Deserialize)]
 pub struct DatabaseSettings {
     pub path: PathBuf,
-    pub namespace: String,
-    pub database: String,
-    pub auth: AuthSettings,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -73,12 +70,6 @@ impl ApplicationEnvironment {
         let settings = Settings {
             database: DatabaseSettings {
                 path: database_path,
-                namespace: "default".to_string(),
-                database: "default".to_string(),
-                auth: AuthSettings {
-                    username: "default".to_string(),
-                    password: "default".to_string(),
-                },
             },
             llm: LlmSettings::Candle {
                 max_sample_len: 8192,
