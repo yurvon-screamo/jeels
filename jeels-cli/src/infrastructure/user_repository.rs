@@ -1,169 +1,123 @@
 use crate::application::user_repository::UserRepository;
 use crate::domain::{JeersError, User};
 use crate::settings::ApplicationEnvironment;
-use polodb_core::bson::doc;
-use polodb_core::{CollectionT, Database};
-use std::sync::{Arc, Mutex};
+use std::path::PathBuf;
+use tokio::fs;
 use ulid::Ulid;
 
-pub struct PoloDbUserRepository {
-    db: Arc<Mutex<Database>>,
+pub struct FileSystemUserRepository {
+    users_dir: PathBuf,
 }
 
-impl PoloDbUserRepository {
+impl FileSystemUserRepository {
     pub async fn new(environment: &ApplicationEnvironment) -> Result<Self, JeersError> {
-        std::fs::create_dir_all(&environment.settings.database.path).map_err(|e| {
-            JeersError::RepositoryError {
-                reason: format!("Failed to create database directory: {}", e),
-            }
-        })?;
+        let users_dir = environment.settings.database.path.clone();
 
-        let db_path = environment
-            .settings
-            .database
-            .path
-            .to_string_lossy()
-            .to_string();
+        fs::create_dir_all(&users_dir)
+            .await
+            .map_err(|e| JeersError::RepositoryError {
+                reason: format!("Failed to create users directory: {}", e),
+            })?;
 
-        let db = tokio::task::spawn_blocking(move || {
-            Database::open_path(&db_path).map_err(|e| JeersError::RepositoryError {
-                reason: format!("Failed to open database: {}", e),
-            })
-        })
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to spawn database task: {}", e),
-        })??;
+        Ok(Self { users_dir })
+    }
 
-        Ok(Self {
-            db: Arc::new(Mutex::new(db)),
-        })
+    fn user_file_path(&self, user_id: Ulid) -> PathBuf {
+        self.users_dir.join(format!("{}.json", user_id))
     }
 }
 
 #[async_trait::async_trait]
-impl UserRepository for PoloDbUserRepository {
+impl UserRepository for FileSystemUserRepository {
     async fn find_by_id(&self, user_id: Ulid) -> Result<Option<User>, JeersError> {
-        let db = self.db.clone();
-        let user_id_str = user_id.to_string();
+        let file_path = self.user_file_path(user_id);
 
-        tokio::task::spawn_blocking(move || {
-            let db = db.lock().unwrap();
-            let collection = db.collection::<User>("users");
+        if !file_path.exists() {
+            return Ok(None);
+        }
 
-            let filter = doc! {
-                "id": &user_id_str,
-            };
-
-            collection
-                .find_one(filter)
+        let content =
+            fs::read_to_string(&file_path)
+                .await
                 .map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to find user by id: {}", e),
-                })
-        })
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to spawn find task: {}", e),
-        })?
+                    reason: format!("Failed to read user file: {}", e),
+                })?;
+
+        let user: User =
+            serde_json::from_str(&content).map_err(|e| JeersError::RepositoryError {
+                reason: format!("Failed to deserialize user: {}", e),
+            })?;
+
+        Ok(Some(user))
     }
 
     async fn find_by_username(&self, username: &str) -> Result<Option<User>, JeersError> {
-        let db = self.db.clone();
-        let username = username.to_string();
-
-        tokio::task::spawn_blocking(move || {
-            let db = db.lock().unwrap();
-            let collection = db.collection::<User>("users");
-
-            let filter = doc! {
-                "username": &username,
-            };
-
-            collection
-                .find_one(filter)
+        let mut entries =
+            fs::read_dir(&self.users_dir)
+                .await
                 .map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to find user by username: {}", e),
-                })
-        })
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to spawn find task: {}", e),
-        })?
+                    reason: format!("Failed to read users directory: {}", e),
+                })?;
+
+        while let Some(entry) =
+            entries
+                .next_entry()
+                .await
+                .map_err(|e| JeersError::RepositoryError {
+                    reason: format!("Failed to read directory entry: {}", e),
+                })?
+        {
+            let path = entry.path();
+            if path.extension().and_then(|s| s.to_str()) != Some("json") {
+                continue;
+            }
+
+            let content =
+                fs::read_to_string(&path)
+                    .await
+                    .map_err(|e| JeersError::RepositoryError {
+                        reason: format!("Failed to read user file: {}", e),
+                    })?;
+
+            let user: User =
+                serde_json::from_str(&content).map_err(|e| JeersError::RepositoryError {
+                    reason: format!("Failed to deserialize user: {}", e),
+                })?;
+
+            if user.username() == username {
+                return Ok(Some(user));
+            }
+        }
+
+        Ok(None)
     }
 
     async fn save(&self, user: &User) -> Result<(), JeersError> {
-        let db = self.db.clone();
-        let user = user.clone();
+        let file_path = self.user_file_path(user.id());
+        let json = serde_json::to_string_pretty(user).map_err(|e| JeersError::RepositoryError {
+            reason: format!("Failed to serialize user: {}", e),
+        })?;
 
-        tokio::task::spawn_blocking(move || {
-            let db = db.lock().unwrap();
-            let collection = db.collection::<User>("users");
+        fs::write(&file_path, json)
+            .await
+            .map_err(|e| JeersError::RepositoryError {
+                reason: format!("Failed to write user file: {}", e),
+            })?;
 
-            let filter = doc! {
-                "id": user.id().to_string(),
-            };
-
-            let exists =
-                collection
-                    .find_one(filter.clone())
-                    .map_err(|e| JeersError::RepositoryError {
-                        reason: format!("Failed to check if user exists: {}", e),
-                    })?;
-
-            if exists.is_some() {
-                collection
-                    .update_many(
-                        filter,
-                        doc! {
-                            "$set": polodb_core::bson::to_document(&user).map_err(|e| {
-                                JeersError::RepositoryError {
-                                    reason: format!("Failed to serialize user: {}", e),
-                                }
-                            })?,
-                        },
-                    )
-                    .map_err(|e| JeersError::RepositoryError {
-                        reason: format!("Failed to update user: {}", e),
-                    })?;
-            } else {
-                collection
-                    .insert_one(user)
-                    .map_err(|e| JeersError::RepositoryError {
-                        reason: format!("Failed to insert user: {}", e),
-                    })?;
-            }
-
-            Ok(())
-        })
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to spawn save task: {}", e),
-        })?
+        Ok(())
     }
 
     async fn delete(&self, user_id: Ulid) -> Result<(), JeersError> {
-        let db = self.db.clone();
-        let user_id_str = user_id.to_string();
+        let file_path = self.user_file_path(user_id);
 
-        tokio::task::spawn_blocking(move || {
-            let db = db.lock().unwrap();
-            let collection = db.collection::<User>("users");
-
-            let filter = doc! {
-                "id": &user_id_str,
-            };
-
-            collection
-                .delete_one(filter)
+        if file_path.exists() {
+            fs::remove_file(&file_path)
+                .await
                 .map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to delete user: {}", e),
+                    reason: format!("Failed to delete user file: {}", e),
                 })?;
+        }
 
-            Ok(())
-        })
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to spawn delete task: {}", e),
-        })?
+        Ok(())
     }
 }

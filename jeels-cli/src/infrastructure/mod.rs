@@ -12,4 +12,4 @@ pub use furigana_generator::AutorubyFuriganaGenerator;
 pub use gemini_llm::GeminiLlm;
 pub use openai_llm::OpenAiLlm;
 pub use srs::FsrsSrsService;
-pub use user_repository::PoloDbUserRepository;
+pub use user_repository::FileSystemUserRepository;

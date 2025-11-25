@@ -1,5 +1,5 @@
-use crate::domain::value_objects::{Rating, Interval};
-use chrono::{DateTime, Utc};
+use crate::domain::value_objects::Rating;
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
@@ -8,11 +8,11 @@ pub struct Review {
     id: Ulid,
     rating: Rating,
     timestamp: DateTime<Utc>,
-    interval: Interval,
+    interval: Duration,
 }
 
 impl Review {
-    pub fn new(rating: Rating, interval: Interval) -> Self {
+    pub fn new(rating: Rating, interval: Duration) -> Self {
         Self {
             id: Ulid::new(),
             rating,
@@ -33,7 +33,7 @@ impl Review {
         self.timestamp
     }
 
-    pub fn interval(&self) -> Interval {
+    pub fn interval(&self) -> Duration {
         self.interval
     }
 }

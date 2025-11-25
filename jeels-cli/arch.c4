@@ -26,7 +26,7 @@ model {
             userAggregate = component 'User Aggregate' 'Агрегатный корень User с карточками'
             cardEntity = component 'Card Entity' 'Дочерняя сущность Card'
             reviewEntity = component 'Review Entity' 'Дочерняя сущность Review'
-            valueObjects = component 'Value Objects' 'Question, Answer, Rating, Interval, Stability, MemoryState'
+            valueObjects = component 'Value Objects' 'Question, Answer, Rating, Duration, Stability, MemoryState'
 
             userAggregate -> cardEntity 'владеет'
             cardEntity -> reviewEntity 'хранит историю'

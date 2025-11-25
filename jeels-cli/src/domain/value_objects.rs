@@ -61,27 +61,6 @@ pub enum Rating {
     Again,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-pub struct Interval {
-    days: u32,
-}
-
-impl Interval {
-    pub fn new(days: u32) -> Self {
-        Self { days }
-    }
-
-    pub fn days(&self) -> u32 {
-        self.days
-    }
-}
-
-impl fmt::Display for Interval {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} days", self.days)
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Stability {
     value: f64,

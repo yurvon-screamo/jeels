@@ -135,7 +135,7 @@
      - edit_card(card_id: Ulid, new_question: Question, new_answer: Answer): Result<(), JeersError> (проверяет дубликаты по новому вопросу, исключая текущую карточку).  
      - delete_card(card_id: Ulid): Result<(), JeersError>.  
      - start_study_session(): Vec<Card> (возвращает карточки, готовые к повторению).  
-     - rate_card(card_id: Ulid, rating: Rating, interval: Interval): Result<(), JeersError>.  
+     - rate_card(card_id: Ulid, rating: Rating, interval: Duration): Result<(), JeersError>.  
      - schedule_next_review(card_id: Ulid, next_review_date: DateTime<Utc>, stability: Stability, memory_state: MemoryState): Result<(), JeersError>.  
      - get_card(card_id: Ulid): Option<&Card>.
 
@@ -171,13 +171,13 @@
      - id: Ulid.  
      - rating: Rating.  
      - timestamp: DateTime<Utc>.  
-     - interval: Interval.  
+     - interval: Duration.  
    - **Методы**:  
-     - new(rating: Rating, interval: Interval): Review.  
+     - new(rating: Rating, interval: Duration): Review.  
      - id(): Ulid.  
      - rating(): Rating.  
      - timestamp(): DateTime<Utc>.  
-     - interval(): Interval.
+     - interval(): Duration.
 
 ### Value Objects (Неизменяемые объекты)
 
@@ -194,9 +194,9 @@
 - **Rating**:  
   - Enum с вариантами: Easy, Good, Hard, Again.
 
-- **Interval**:  
+- **Duration**:  
   - days: u32.  
-  - Методы: new(days: u32): Interval, days(): u32.
+  - Методы: new(days: u32): Duration, days(): u32.
 
 - **Stability**:  
   - value: f64.  

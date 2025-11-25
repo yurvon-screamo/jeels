@@ -8,8 +8,8 @@ pub use error::JeersError;
 pub use review::Review;
 pub use value_objects::Rating;
 
-use crate::domain::value_objects::{Answer, Interval, MemoryState, Question, Stability};
-use chrono::{DateTime, Utc};
+use crate::domain::value_objects::{Answer, MemoryState, Question, Stability};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ulid::Ulid;
@@ -215,7 +215,7 @@ impl User {
         &mut self,
         card_id: Ulid,
         rating: Rating,
-        interval: Interval,
+        interval: Duration,
         next_review_date: DateTime<Utc>,
         stability: Stability,
         memory_state: MemoryState,

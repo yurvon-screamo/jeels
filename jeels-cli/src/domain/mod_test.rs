@@ -2,7 +2,7 @@
 mod tests {
     use crate::domain::error::JeersError;
     use crate::domain::value_objects::{
-        Answer, Embedding, Interval, MemoryState, Question, Rating, Stability,
+        Answer, Embedding, MemoryState, Question, Rating, Stability,
     };
     use crate::domain::{JapaneseLevel, NativeLanguage, User};
     use chrono::{Duration, Utc};
@@ -289,7 +289,7 @@ mod tests {
         user.rate_card(
             card_id,
             Rating::Good,
-            Interval::new(1),
+            Duration::days(1),
             future_date,
             stability,
             memory_state,
@@ -324,7 +324,7 @@ mod tests {
         user.rate_card(
             card2_id,
             Rating::Good,
-            Interval::new(1),
+            Duration::days(1),
             future_date,
             stability,
             memory_state,
@@ -361,7 +361,7 @@ mod tests {
         user.rate_card(
             card2_id,
             Rating::Good,
-            Interval::new(1),
+            Duration::days(1),
             past_date,
             stability,
             memory_state,
@@ -401,7 +401,7 @@ mod tests {
         user.rate_card(
             card2_id,
             Rating::Good,
-            Interval::new(1),
+            Duration::days(1),
             past_date,
             stability,
             memory_state,
@@ -439,7 +439,7 @@ mod tests {
             user.rate_card(
                 card.id(),
                 Rating::Good,
-                Interval::new(1),
+                Duration::days(1),
                 past_date,
                 stability,
                 memory_state,
@@ -510,7 +510,7 @@ mod tests {
         user.rate_card(
             card1_id,
             Rating::Again,
-            Interval::new(1),
+            Duration::days(1),
             date1,
             stability,
             memory_state,
@@ -519,7 +519,7 @@ mod tests {
         user.rate_card(
             card2_id,
             Rating::Again,
-            Interval::new(1),
+            Duration::days(1),
             date2,
             stability,
             memory_state,
@@ -553,7 +553,7 @@ mod tests {
         user.rate_card(
             card1_id,
             Rating::Again,
-            Interval::new(1),
+            Duration::days(1),
             past_date,
             stability,
             memory_state,
@@ -603,7 +603,7 @@ mod tests {
             user.rate_card(
                 card.id(),
                 Rating::Good,
-                Interval::new(1),
+                Duration::days(1),
                 past_date,
                 stability,
                 memory_state,
@@ -635,7 +635,7 @@ mod tests {
         let card = user.create_card(question, answer).unwrap();
         let card_id = card.id();
         let rating = Rating::Good;
-        let interval = Interval::new(1);
+        let interval = Duration::days(1);
         let next_review_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
@@ -655,7 +655,7 @@ mod tests {
         let card = user.get_card(card_id).unwrap();
         assert_eq!(card.reviews().len(), 1);
         assert_eq!(card.reviews()[0].rating(), rating);
-        assert_eq!(card.reviews()[0].interval().days(), 1);
+        assert_eq!(card.reviews()[0].interval().num_days(), 1);
     }
 
     #[test]
@@ -674,7 +674,7 @@ mod tests {
             let answer = create_test_answer();
             let card = user.create_card(question, answer).unwrap();
             let card_id = card.id();
-            let interval = Interval::new(expected_interval);
+            let interval = Duration::days(expected_interval);
             let next_review_date = Utc::now() + Duration::days(expected_interval as i64);
             let stability = Stability::new(expected_interval as f64).unwrap();
             let memory_state = create_test_memory_state();
@@ -694,7 +694,7 @@ mod tests {
             let card = user.get_card(card_id).unwrap();
             assert_eq!(card.reviews().len(), 1);
             assert_eq!(card.reviews()[0].rating(), rating);
-            assert_eq!(card.reviews()[0].interval().days(), expected_interval);
+            assert_eq!(card.reviews()[0].interval().num_days(), expected_interval);
         }
     }
 
@@ -717,7 +717,7 @@ mod tests {
             user.rate_card(
                 card_id,
                 *rating,
-                Interval::new(*interval_days),
+                Duration::days(*interval_days),
                 current_date,
                 stability,
                 memory_state,
@@ -739,7 +739,7 @@ mod tests {
         let mut user = create_test_user();
         let non_existent_id = ulid::Ulid::new();
         let rating = Rating::Good;
-        let interval = Interval::new(1);
+        let interval = Duration::days(1);
         let next_review_date = Utc::now() + Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
         let memory_state = create_test_memory_state();
@@ -787,7 +787,7 @@ mod tests {
             let result = user.rate_card(
                 card_id,
                 Rating::Good,
-                Interval::new(duration.num_days() as u32),
+                Duration::days(duration.num_days()),
                 future_date,
                 stability,
                 memory_state,
@@ -814,7 +814,7 @@ mod tests {
         let result = user.rate_card(
             non_existent_id,
             Rating::Good,
-            Interval::new(5),
+            Duration::days(5),
             future_date,
             stability,
             memory_state,

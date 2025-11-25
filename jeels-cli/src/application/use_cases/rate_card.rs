@@ -4,7 +4,7 @@ use crate::application::user_repository::UserRepository;
 use crate::domain::error::JeersError;
 use crate::domain::review::Review;
 use crate::domain::value_objects::Rating;
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use ulid::Ulid;
 
 #[derive(Clone, Copy)]
@@ -49,7 +49,7 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
             .calculate_next_review(rating, previous_memory_state, &reviews)
             .await?;
 
-        let next_review_date = Utc::now() + chrono::Duration::days(interval.days() as i64);
+        let next_review_date = Utc::now() + Duration::days(interval.num_days());
 
         user.rate_card(
             card_id,

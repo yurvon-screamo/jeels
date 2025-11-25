@@ -4,8 +4,8 @@ use std::sync::{Arc, OnceLock};
 
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    AutorubyFuriganaGenerator, CandleEmbeddingService, CandleLlm, FsrsSrsService, GeminiLlm,
-    OpenAiLlm, PoloDbUserRepository,
+    AutorubyFuriganaGenerator, CandleEmbeddingService, CandleLlm, FileSystemUserRepository,
+    FsrsSrsService, GeminiLlm, OpenAiLlm,
 };
 use tokio::sync::OnceCell;
 
@@ -14,12 +14,12 @@ static SETTINGS: OnceLock<ApplicationEnvironment> = OnceLock::new();
 pub struct ApplicationEnvironment {
     pub settings: Settings,
 
-    lazy_repository: Arc<OnceCell<PoloDbUserRepository>>,
+    lazy_repository: Arc<OnceCell<FileSystemUserRepository>>,
     lazy_embedding_generator: Arc<OnceCell<CandleEmbeddingService>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
     lazy_furigana_service: Arc<OnceCell<AutorubyFuriganaGenerator>>,
 
-    lazy_gemini_llm: Arc<OnceCell<GeminiLlm>>,
+    _lazy_gemini_llm: Arc<OnceCell<GeminiLlm>>,
     lazy_openrouter_llm: Arc<OnceCell<OpenAiLlm>>,
     _lazy_candle_llm: Arc<OnceCell<CandleLlm>>,
 }
@@ -104,10 +104,10 @@ impl ApplicationEnvironment {
         Ok(())
     }
 
-    pub async fn get_repository(&self) -> Result<&PoloDbUserRepository, JeersError> {
+    pub async fn get_repository(&self) -> Result<&FileSystemUserRepository, JeersError> {
         self.lazy_repository
             .get_or_try_init(|| async {
-                PoloDbUserRepository::new(self)
+                FileSystemUserRepository::new(self)
                     .await
                     .map_err(|e| JeersError::SettingsError {
                         reason: e.to_string(),
@@ -128,7 +128,10 @@ impl ApplicationEnvironment {
 
     pub async fn get_llm_service(&self) -> Result<&OpenAiLlm, JeersError> {
         match &self.settings.llm {
-            LlmSettings::Gemini { temperature, model } => {
+            LlmSettings::Gemini {
+                temperature: _,
+                model: _,
+            } => {
                 // self.lazy_gemini_llm
                 //     .get_or_try_init(|| async {
                 //         GeminiLlm::new(*temperature, model.clone()).map_err(|e| {
@@ -235,7 +238,7 @@ impl ApplicationEnvironment {
             lazy_embedding_generator: Arc::new(OnceCell::new()),
             lazy_srs_service: Arc::new(OnceCell::new()),
             lazy_furigana_service: Arc::new(OnceCell::new()),
-            lazy_gemini_llm: Arc::new(OnceCell::new()),
+            _lazy_gemini_llm: Arc::new(OnceCell::new()),
             lazy_openrouter_llm: Arc::new(OnceCell::new()),
             _lazy_candle_llm: Arc::new(OnceCell::new()),
         };

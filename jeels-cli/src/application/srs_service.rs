@@ -1,9 +1,10 @@
 use crate::domain::error::JeersError;
 use crate::domain::review::Review;
-use crate::domain::value_objects::{Interval, MemoryState, Rating, Stability};
+use crate::domain::value_objects::{MemoryState, Rating, Stability};
+use chrono::Duration;
 
 pub struct NextReview {
-    pub interval: Interval,
+    pub interval: Duration,
     pub stability: Stability,
     pub memory_state: MemoryState,
 }

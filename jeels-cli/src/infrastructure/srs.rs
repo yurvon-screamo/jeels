@@ -2,8 +2,8 @@ use crate::application::SrsService;
 use crate::application::srs_service::NextReview;
 use crate::domain::error::JeersError;
 use crate::domain::review::Review;
-use crate::domain::value_objects::{Interval, MemoryState, Rating, Stability};
-use chrono::Utc;
+use crate::domain::value_objects::{MemoryState, Rating, Stability};
+use chrono::{Duration, Utc};
 use fsrs::FSRS;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -63,10 +63,15 @@ impl SrsService for FsrsSrsService {
             Rating::Easy => &next_states.easy,
         };
 
-        let interval_days = next_state.interval.round() as u32;
+        let interval_days = next_state.interval.round() as i64;
         let stability = Stability::new(next_state.memory.stability as f64)?;
         let memory_state = MemoryState::new(stability, next_state.memory.difficulty as f64)?;
-        let interval = Interval::new(interval_days);
+
+        let interval = if interval_days == 0 && rating != Rating::Again {
+            Duration::hours(1)
+        } else {
+            Duration::days(interval_days)
+        };
 
         Ok(NextReview {
             interval,
