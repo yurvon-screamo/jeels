@@ -31,6 +31,7 @@ use crate::{
 const DEFAULT_USERNAME: &str = "yurvon_screamo";
 const DEFAULT_JAPANESE_LEVEL: JapaneseLevel = JapaneseLevel::N5;
 const DEFAULT_NATIVE_LANGUAGE: NativeLanguage = NativeLanguage::Russian;
+const DEFAULT_NEW_CARDS_LIMIT: usize = 10;
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -124,6 +125,7 @@ async fn ensure_user_exists(
             username.to_string(),
             DEFAULT_JAPANESE_LEVEL,
             DEFAULT_NATIVE_LANGUAGE,
+            DEFAULT_NEW_CARDS_LIMIT,
         );
         let user_id = new_user.id();
         repository

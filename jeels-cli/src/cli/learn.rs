@@ -35,7 +35,8 @@ struct LearnCardApp<'a, R: UserRepository, F: FuriganaService> {
     repository: &'a R,
     furigana_service: &'a F,
     synonyms: Option<Vec<Card>>,
-    furigana: Option<String>,
+    furigana_data: Option<String>,
+    furigana_shown: bool,
 }
 
 impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
@@ -48,13 +49,26 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
             repository,
             furigana_service,
             synonyms: None,
-            furigana: None,
+            furigana_data: None,
+            furigana_shown: false,
         }
     }
 
     async fn run(&mut self) -> io::Result<Option<Rating>> {
         let mut terminal = ratatui::init();
         let mut rating = None;
+
+        // Запрашиваем фуригану сразу, но не показываем
+        let get_furigana_usecase = GetFuriganaUseCase::new(self.repository, self.furigana_service);
+        if let Ok(furigana) = get_furigana_usecase
+            .execute(self.user_id, self.card.id())
+            .await
+        {
+            // Проверяем, не равна ли фуригана оригинальному тексту
+            if furigana != self.card.question().text() {
+                self.furigana_data = Some(furigana);
+            }
+        }
 
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
@@ -89,9 +103,11 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
         let card_content = match &self.state {
             CardState::Question => {
                 let mut lines = vec![];
-                if let Some(question_furigana) = &self.furigana {
-                    lines.push(furigana_renderer::render_furigana(question_furigana));
-                    lines.push(Line::from(""));
+                if self.furigana_shown {
+                    if let Some(question_furigana) = &self.furigana_data {
+                        lines.push(furigana_renderer::render_furigana(question_furigana));
+                        lines.push(Line::from(""));
+                    }
                 }
                 lines.push(Line::from(
                     self.card.question().text().bold().fg(Color::Magenta),
@@ -100,17 +116,25 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
                 lines.push(Line::from(
                     "Нажмите пробел чтобы показать ответ.".fg(Color::Gray),
                 ));
-                lines.push(Line::from(
-                    "Нажмите \"h\" чтобы показать синонимы.".fg(Color::Gray),
-                ));
-                if self.furigana.is_some() {
+                if self.synonyms.is_some() {
                     lines.push(Line::from(
-                        "Нажмите \"f\" чтобы скрыть фуригану.".fg(Color::Gray),
+                        "Нажмите \"h\" чтобы скрыть синонимы.".fg(Color::Gray),
                     ));
                 } else {
                     lines.push(Line::from(
-                        "Нажмите \"f\" чтобы показать фуригану.".fg(Color::Gray),
+                        "Нажмите \"h\" чтобы показать синонимы.".fg(Color::Gray),
                     ));
+                }
+                if self.furigana_data.is_some() {
+                    if self.furigana_shown {
+                        lines.push(Line::from(
+                            "Нажмите \"f\" чтобы скрыть фуригану.".fg(Color::Gray),
+                        ));
+                    } else {
+                        lines.push(Line::from(
+                            "Нажмите \"f\" чтобы показать фуригану.".fg(Color::Gray),
+                        ));
+                    }
                 }
                 lines.push(Line::from(
                     "Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray),
@@ -119,9 +143,11 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
             }
             CardState::Answer => {
                 let mut lines = vec![];
-                if let Some(question_furigana) = &self.furigana {
-                    lines.push(furigana_renderer::render_furigana(question_furigana));
-                    lines.push(Line::from(""));
+                if self.furigana_shown {
+                    if let Some(question_furigana) = &self.furigana_data {
+                        lines.push(furigana_renderer::render_furigana(question_furigana));
+                        lines.push(Line::from(""));
+                    }
                 }
                 lines.push(Line::from(
                     self.card.question().text().bold().fg(Color::Blue),
@@ -144,9 +170,11 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
             }
             CardState::Completed => {
                 let mut lines = vec![];
-                if let Some(question_furigana) = &self.furigana {
-                    lines.push(furigana_renderer::render_furigana(question_furigana));
-                    lines.push(Line::from(""));
+                if self.furigana_shown {
+                    if let Some(question_furigana) = &self.furigana_data {
+                        lines.push(furigana_renderer::render_furigana(question_furigana));
+                        lines.push(Line::from(""));
+                    }
                 }
                 lines.push(Line::from(
                     self.card.question().text().bold().fg(Color::Blue),
@@ -204,16 +232,21 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
                         if matches!(self.state, CardState::Question)
                             || matches!(self.state, CardState::Answer)
                         {
-                            let find_synonyms_usecase = FindSynonymsUseCase::new(self.repository);
-                            match find_synonyms_usecase
-                                .execute(self.user_id, self.card.id())
-                                .await
-                            {
-                                Ok(synonyms) => {
-                                    self.synonyms = Some(synonyms);
-                                }
-                                Err(_) => {
-                                    self.synonyms = Some(vec![]);
+                            if self.synonyms.is_some() {
+                                self.synonyms = None;
+                            } else {
+                                let find_synonyms_usecase =
+                                    FindSynonymsUseCase::new(self.repository);
+                                match find_synonyms_usecase
+                                    .execute(self.user_id, self.card.id())
+                                    .await
+                                {
+                                    Ok(synonyms) => {
+                                        self.synonyms = Some(synonyms);
+                                    }
+                                    Err(_) => {
+                                        self.synonyms = Some(vec![]);
+                                    }
                                 }
                             }
                         }
@@ -222,22 +255,8 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
                         if matches!(self.state, CardState::Question)
                             || matches!(self.state, CardState::Answer)
                         {
-                            if self.furigana.is_some() {
-                                self.furigana = None;
-                            } else {
-                                let get_furigana_usecase =
-                                    GetFuriganaUseCase::new(self.repository, self.furigana_service);
-                                match get_furigana_usecase
-                                    .execute(self.user_id, self.card.id())
-                                    .await
-                                {
-                                    Ok(furigana) => {
-                                        self.furigana = Some(furigana);
-                                    }
-                                    Err(_) => {
-                                        self.furigana = None;
-                                    }
-                                }
+                            if self.furigana_data.is_some() {
+                                self.furigana_shown = !self.furigana_shown;
                             }
                         }
                     }

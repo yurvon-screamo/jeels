@@ -12,6 +12,7 @@ mod tests {
             "test_user".to_string(),
             JapaneseLevel::N5,
             NativeLanguage::Russian,
+            10,
         )
     }
 
@@ -54,7 +55,7 @@ mod tests {
         let username = "test_user".to_string();
 
         // Act
-        let user = User::new(username, JapaneseLevel::N5, NativeLanguage::Russian);
+        let user = User::new(username, JapaneseLevel::N5, NativeLanguage::Russian, 10);
 
         // Assert
         assert_eq!(user.username(), "test_user");
@@ -82,6 +83,7 @@ mod tests {
                 username.to_string(),
                 JapaneseLevel::N5,
                 NativeLanguage::Russian,
+                10,
             );
 
             // Assert
@@ -335,6 +337,293 @@ mod tests {
         // Assert
         assert_eq!(cards.len(), 1);
         assert_eq!(cards[0].id(), card1_id);
+    }
+
+    #[test]
+    fn user_start_study_session_should_separate_old_and_new_cards() {
+        // Arrange
+        let mut user = create_test_user();
+
+        // Old card: no reviews (is_new() = false)
+        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
+        let a1 = Answer::new("A1".to_string()).unwrap();
+        let card1 = user.create_card(q1, a1).unwrap();
+        let card1_id = card1.id();
+
+        // New card: has review with Good rating (is_new() = true)
+        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
+        let a2 = Answer::new("A2".to_string()).unwrap();
+        let card2 = user.create_card(q2, a2).unwrap();
+        let card2_id = card2.id();
+        let past_date = Utc::now() - Duration::days(1);
+        let stability = Stability::new(1.0).unwrap();
+        let memory_state = create_test_memory_state();
+        user.rate_card(
+            card2_id,
+            Rating::Good,
+            Interval::new(1),
+            past_date,
+            stability,
+            memory_state,
+        )
+        .unwrap();
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        assert_eq!(cards.len(), 2);
+        // Old cards should come first
+        assert_eq!(cards[0].id(), card1_id);
+        // New cards should come after old cards
+        assert_eq!(cards[1].id(), card2_id);
+    }
+
+    #[test]
+    fn user_start_study_session_should_put_old_cards_first() {
+        // Arrange
+        let mut user = create_test_user();
+
+        // Create old card (no reviews)
+        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
+        let a1 = Answer::new("A1".to_string()).unwrap();
+        let card1 = user.create_card(q1, a1).unwrap();
+        let card1_id = card1.id();
+
+        // Create new card (has Good review)
+        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
+        let a2 = Answer::new("A2".to_string()).unwrap();
+        let card2 = user.create_card(q2, a2).unwrap();
+        let card2_id = card2.id();
+        let past_date = Utc::now() - Duration::days(1);
+        let stability = Stability::new(1.0).unwrap();
+        let memory_state = create_test_memory_state();
+        user.rate_card(
+            card2_id,
+            Rating::Good,
+            Interval::new(1),
+            past_date,
+            stability,
+            memory_state,
+        )
+        .unwrap();
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        assert_eq!(cards.len(), 2);
+        assert_eq!(cards[0].id(), card1_id);
+        assert_eq!(cards[1].id(), card2_id);
+    }
+
+    #[test]
+    fn user_start_study_session_should_limit_new_cards() {
+        // Arrange
+        let mut user = User::new(
+            "test_user".to_string(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+            2, // new_cards_limit = 2
+        );
+
+        // Create 3 new cards (all have Good reviews)
+        for i in 1..=3 {
+            let q =
+                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
+            let a = Answer::new(format!("A{}", i)).unwrap();
+            let card = user.create_card(q, a).unwrap();
+            let past_date = Utc::now() - Duration::days(1);
+            let stability = Stability::new(1.0).unwrap();
+            let memory_state = create_test_memory_state();
+            user.rate_card(
+                card.id(),
+                Rating::Good,
+                Interval::new(1),
+                past_date,
+                stability,
+                memory_state,
+            )
+            .unwrap();
+        }
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        // Should return only 2 new cards (limited by new_cards_limit)
+        assert_eq!(cards.len(), 2);
+    }
+
+    #[test]
+    fn user_start_study_session_should_return_all_old_cards() {
+        // Arrange
+        let mut user = User::new(
+            "test_user".to_string(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+            2, // new_cards_limit = 2
+        );
+
+        // Create 5 old cards (no reviews)
+        let mut old_card_ids = Vec::new();
+        for i in 1..=5 {
+            let q =
+                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
+            let a = Answer::new(format!("A{}", i)).unwrap();
+            let card = user.create_card(q, a).unwrap();
+            old_card_ids.push(card.id());
+        }
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        // Should return all 5 old cards (no limit for old cards)
+        assert_eq!(cards.len(), 5);
+        for card_id in old_card_ids {
+            assert!(cards.iter().any(|c| c.id() == card_id));
+        }
+    }
+
+    #[test]
+    fn user_start_study_session_should_sort_cards_by_next_review_date() {
+        // Arrange
+        let mut user = create_test_user();
+
+        // Create old cards with different review dates
+        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
+        let a1 = Answer::new("A1".to_string()).unwrap();
+        let card1 = user.create_card(q1, a1).unwrap();
+        let card1_id = card1.id();
+
+        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
+        let a2 = Answer::new("A2".to_string()).unwrap();
+        let card2 = user.create_card(q2, a2).unwrap();
+        let card2_id = card2.id();
+
+        // Set different review dates
+        let date1 = Utc::now() - Duration::days(2);
+        let date2 = Utc::now() - Duration::days(1);
+        let stability = Stability::new(1.0).unwrap();
+        let memory_state = create_test_memory_state();
+        user.rate_card(
+            card1_id,
+            Rating::Again,
+            Interval::new(1),
+            date1,
+            stability,
+            memory_state,
+        )
+        .unwrap();
+        user.rate_card(
+            card2_id,
+            Rating::Again,
+            Interval::new(1),
+            date2,
+            stability,
+            memory_state,
+        )
+        .unwrap();
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        assert_eq!(cards.len(), 2);
+        // Should be sorted by next_review_date (earlier first)
+        assert_eq!(cards[0].id(), card1_id);
+        assert_eq!(cards[1].id(), card2_id);
+    }
+
+    #[test]
+    fn user_start_study_session_should_treat_cards_with_only_again_as_old() {
+        // Arrange
+        let mut user = create_test_user();
+
+        // Create card with only Again reviews (should be old)
+        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
+        let a1 = Answer::new("A1".to_string()).unwrap();
+        let card1 = user.create_card(q1, a1).unwrap();
+        let card1_id = card1.id();
+
+        let past_date = Utc::now() - Duration::days(1);
+        let stability = Stability::new(1.0).unwrap();
+        let memory_state = create_test_memory_state();
+        user.rate_card(
+            card1_id,
+            Rating::Again,
+            Interval::new(1),
+            past_date,
+            stability,
+            memory_state,
+        )
+        .unwrap();
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        assert_eq!(cards.len(), 1);
+        assert_eq!(cards[0].id(), card1_id);
+        // Card with only Again should be treated as old (comes first, no limit)
+    }
+
+    #[test]
+    fn user_start_study_session_should_combine_old_and_new_cards_correctly() {
+        // Arrange
+        let mut user = User::new(
+            "test_user".to_string(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+            2, // new_cards_limit = 2
+        );
+
+        // Create 2 old cards
+        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
+        let a1 = Answer::new("A1".to_string()).unwrap();
+        let card1 = user.create_card(q1, a1).unwrap();
+        let card1_id = card1.id();
+
+        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
+        let a2 = Answer::new("A2".to_string()).unwrap();
+        let card2 = user.create_card(q2, a2).unwrap();
+        let card2_id = card2.id();
+
+        // Create 3 new cards
+        let mut new_card_ids = Vec::new();
+        for i in 3..=5 {
+            let q =
+                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
+            let a = Answer::new(format!("A{}", i)).unwrap();
+            let card = user.create_card(q, a).unwrap();
+            let past_date = Utc::now() - Duration::days(1);
+            let stability = Stability::new(1.0).unwrap();
+            let memory_state = create_test_memory_state();
+            user.rate_card(
+                card.id(),
+                Rating::Good,
+                Interval::new(1),
+                past_date,
+                stability,
+                memory_state,
+            )
+            .unwrap();
+            new_card_ids.push(card.id());
+        }
+
+        // Act
+        let cards = user.start_study_session();
+
+        // Assert
+        // Should return all 2 old cards + 2 new cards (limited)
+        assert_eq!(cards.len(), 4);
+        // First 2 should be old cards
+        assert_eq!(cards[0].id(), card1_id);
+        assert_eq!(cards[1].id(), card2_id);
+        // Last 2 should be new cards (limited to 2)
+        assert!(new_card_ids.contains(&cards[2].id()));
+        assert!(new_card_ids.contains(&cards[3].id()));
     }
 
     #[test]

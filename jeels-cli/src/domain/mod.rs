@@ -18,9 +18,10 @@ use ulid::Ulid;
 pub struct User {
     id: Ulid,
     username: String,
+    new_cards_limit: usize,
     cards: HashMap<Ulid, Card>,
-    current_japanese_level: JapaneseLevel,
     native_language: NativeLanguage,
+    current_japanese_level: JapaneseLevel,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -55,6 +56,7 @@ impl User {
         username: String,
         current_japanese_level: JapaneseLevel,
         native_language: NativeLanguage,
+        new_cards_limit: usize,
     ) -> Self {
         Self {
             id: Ulid::new(),
@@ -62,6 +64,7 @@ impl User {
             cards: HashMap::new(),
             current_japanese_level,
             native_language,
+            new_cards_limit,
         }
     }
 
@@ -85,8 +88,12 @@ impl User {
         &self.cards
     }
 
+    pub fn new_cards_limit(&self) -> usize {
+        self.new_cards_limit
+    }
+
     pub fn find_synonyms(&self, card_id: Ulid) -> Result<Vec<Card>, JeersError> {
-        const SIMILARITY_THRESHOLD: f32 = 0.9;
+        const SIMILARITY_THRESHOLD: f32 = 0.75;
 
         let card = self
             .cards
@@ -181,11 +188,27 @@ impl User {
     }
 
     pub fn start_study_session(&self) -> Vec<Card> {
-        self.cards
+        let mut old_cards: Vec<Card> = self
+            .cards
             .values()
-            .filter(|card| card.is_due())
+            .filter(|card| card.is_due() && !card.is_new())
             .cloned()
-            .collect()
+            .collect();
+
+        let mut new_cards: Vec<Card> = self
+            .cards
+            .values()
+            .filter(|card| card.is_due() && card.is_new())
+            .cloned()
+            .collect();
+
+        old_cards.sort_by_key(|a| a.next_review_date());
+        new_cards.sort_by_key(|a| a.next_review_date());
+
+        new_cards.truncate(self.new_cards_limit);
+        old_cards.append(&mut new_cards);
+
+        old_cards
     }
 
     pub fn rate_card(

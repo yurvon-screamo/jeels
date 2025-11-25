@@ -1,3 +1,4 @@
+use crate::domain::Rating;
 use crate::domain::review::Review;
 use crate::domain::value_objects::{Answer, MemoryState, Question, Stability};
 use chrono::{DateTime, Utc};
@@ -8,11 +9,11 @@ use ulid::Ulid;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Card {
     id: Ulid,
-    question: Question,
     answer: Answer,
+    question: Question,
+    stability: Stability,
     reviews: VecDeque<Review>,
     next_review_date: DateTime<Utc>,
-    stability: Stability,
     memory_state: Option<MemoryState>,
 }
 
@@ -81,6 +82,12 @@ impl Card {
 
     pub fn is_due(&self) -> bool {
         self.next_review_date <= Utc::now()
+    }
+
+    pub fn is_new(&self) -> bool {
+        self.reviews
+            .iter()
+            .any(|review| review.rating() != Rating::Again)
     }
 
     pub fn last_review_date(&self) -> Option<DateTime<Utc>> {
