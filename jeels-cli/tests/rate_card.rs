@@ -40,7 +40,8 @@ async fn rate_card_use_case_should_add_review_and_update_schedule() {
     let loaded_card = loaded_user.get_card(card.id()).unwrap();
     assert_eq!(loaded_card.reviews().len(), 1);
     assert_eq!(loaded_card.reviews()[0].rating(), Rating::Good);
-    assert!(loaded_card.memory_state().is_some());
+    assert!(loaded_card.difficulty().is_some());
+    assert!(loaded_card.stability().is_some());
 }
 
 #[tokio::test]
@@ -83,7 +84,8 @@ async fn rate_card_use_case_should_use_reviews_for_memory_state_calculation() {
     assert_eq!(loaded_card.reviews().len(), 2);
     assert_eq!(loaded_card.reviews()[0].rating(), Rating::Good);
     assert_eq!(loaded_card.reviews()[1].rating(), Rating::Easy);
-    assert!(loaded_card.memory_state().is_some());
+    assert!(loaded_card.difficulty().is_some());
+    assert!(loaded_card.stability().is_some());
     // Memory state should be updated based on both reviews
     assert!(loaded_card.next_review_date() > loaded_card.reviews()[1].timestamp());
 }

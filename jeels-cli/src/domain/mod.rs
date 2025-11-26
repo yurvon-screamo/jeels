@@ -8,7 +8,7 @@ pub use error::JeersError;
 pub use review::Review;
 pub use value_objects::Rating;
 
-use crate::domain::value_objects::{Answer, MemoryState, Question, Stability};
+use crate::domain::value_objects::{Answer, MemoryState, Question};
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -203,7 +203,14 @@ impl User {
             .collect();
 
         old_cards.sort_by_key(|a| a.next_review_date());
-        new_cards.sort_by_key(|a| a.next_review_date());
+        new_cards.sort_by(|a, b| {
+            let reviews_cmp = b.reviews().len().cmp(&a.reviews().len());
+            if reviews_cmp != std::cmp::Ordering::Equal {
+                reviews_cmp
+            } else {
+                a.next_review_date().cmp(&b.next_review_date())
+            }
+        });
 
         new_cards.truncate(self.new_cards_limit);
         old_cards.append(&mut new_cards);
@@ -216,7 +223,6 @@ impl User {
         card_id: Ulid,
         rating: Rating,
         interval: Duration,
-        stability: Stability,
         memory_state: MemoryState,
     ) -> Result<(), JeersError> {
         let card = self
@@ -228,7 +234,8 @@ impl User {
         card.add_review(review);
 
         let next_review_date = Utc::now() + interval;
-        self.schedule_next_review(card_id, next_review_date, stability, memory_state)?;
+        self.schedule_next_review(card_id, next_review_date, memory_state)?;
+
         Ok(())
     }
 
@@ -236,7 +243,6 @@ impl User {
         &mut self,
         card_id: Ulid,
         next_review_date: DateTime<Utc>,
-        stability: Stability,
         memory_state: MemoryState,
     ) -> Result<(), JeersError> {
         let card = self
@@ -244,8 +250,7 @@ impl User {
             .get_mut(&card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
 
-        card.update_schedule(next_review_date, stability);
-        card.update_memory_state(memory_state);
+        card.update_schedule(next_review_date, memory_state);
 
         Ok(())
     }

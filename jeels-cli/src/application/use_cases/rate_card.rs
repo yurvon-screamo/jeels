@@ -41,14 +41,13 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
 
         let NextReview {
             interval,
-            stability,
             memory_state,
         } = self
             .srs_service
             .calculate_next_review(rating, previous_memory_state, &reviews)
             .await?;
 
-        user.rate_card(card_id, rating, interval, stability, memory_state)?;
+        user.rate_card(card_id, rating, interval, memory_state)?;
 
         self.repository.save(&user).await?;
 

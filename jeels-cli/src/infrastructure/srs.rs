@@ -2,7 +2,7 @@ use crate::application::SrsService;
 use crate::application::srs_service::NextReview;
 use crate::domain::error::JeersError;
 use crate::domain::review::Review;
-use crate::domain::value_objects::{MemoryState, Rating, Stability};
+use crate::domain::value_objects::{Difficulty, MemoryState, Rating, Stability};
 use chrono::{Duration, Utc};
 use fsrs::FSRS;
 use std::sync::Arc;
@@ -30,7 +30,7 @@ impl SrsService for FsrsSrsService {
     async fn calculate_next_review(
         &self,
         rating: Rating,
-        previous_state: Option<MemoryState>,
+        previous_memory_state: Option<MemoryState>,
         reviews: &[Review],
     ) -> Result<NextReview, JeersError> {
         let elapsed_days = if let Some(last_review) = reviews.last() {
@@ -39,10 +39,14 @@ impl SrsService for FsrsSrsService {
             0
         };
 
-        let fsrs_memory_state = previous_state.map(|ms| fsrs::MemoryState {
-            stability: ms.stability().value() as f32,
-            difficulty: ms.difficulty() as f32,
-        });
+        let fsrs_memory_state = if let Some(previous_memory_state) = previous_memory_state {
+            Some(fsrs::MemoryState {
+                stability: previous_memory_state.stability().value() as f32,
+                difficulty: previous_memory_state.difficulty().value() as f32,
+            })
+        } else {
+            None
+        };
 
         let fsrs = self.fsrs.lock().await;
 
@@ -65,7 +69,8 @@ impl SrsService for FsrsSrsService {
 
         let interval_days = next_state.interval.round() as i64;
         let stability = Stability::new(next_state.memory.stability as f64)?;
-        let memory_state = MemoryState::new(stability, next_state.memory.difficulty as f64)?;
+        let difficulty = Difficulty::new(next_state.memory.difficulty as f64)?;
+        let memory_state = MemoryState::new(stability, difficulty);
 
         let interval = if interval_days == 0 && rating != Rating::Again {
             Duration::hours(1)
@@ -75,7 +80,6 @@ impl SrsService for FsrsSrsService {
 
         Ok(NextReview {
             interval,
-            stability,
             memory_state,
         })
     }

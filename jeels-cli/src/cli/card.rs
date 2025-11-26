@@ -1,11 +1,10 @@
-use chrono::Utc;
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Layout, Rect},
     style::{Color, Style, Stylize},
     symbols::border,
     text::{Line, Text},
-    widgets::{Block, Cell, Paragraph, Row, Table, Widget},
+    widgets::{Block, Paragraph, Widget},
 };
 use ulid::Ulid;
 
@@ -25,34 +24,48 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
     let repository = settings.get_repository().await?;
     let cards = ListCardsUseCase::new(repository).execute(user_id).await?;
 
-    // Calculate required height:
-    // 1 line for title
-    // 2 lines for table borders (top + bottom)
-    // 1 line for table header
-    // cards.len() lines for data rows
-    // Total: 4 + cards.len()
-    let table_height = if cards.is_empty() {
-        3 // borders + empty message
-    } else {
-        2 + 1 + cards.len() as u16 // borders + header + rows
-    };
-    let total_height = std::cmp::min(40, table_height + 1); // title + table
+    println!("Список карточек:");
+    println!();
 
-    render_once(
-        |frame| {
-            let area = frame.area();
-            let vertical = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
-            let [title_area, table_area] = vertical.areas(area);
+    if cards.is_empty() {
+        println!("Нет карточек");
+        return Ok(());
+    }
 
-            let title = Line::from("Список карточек:".bold().underlined());
-            Paragraph::new(title)
-                .alignment(Alignment::Left)
-                .render(title_area, frame.buffer_mut());
+    // Header
+    println!(
+        "{:<20} | {:<20} | {:<50} | {:>2} | {:<19}",
+        "Id", "Вопрос", "Ответ", "Оценок", "След. повторение"
+    );
+    println!("{}", "-".repeat(120));
 
-            render_cards_table(&cards, table_area, frame);
-        },
-        total_height,
-    )?;
+    // Data rows
+    for card in cards.iter() {
+        let id_str = truncate_text(&card.id().to_string(), 20);
+        let question_str = truncate_text(card.question().text(), 20);
+        let answer_str = truncate_text(card.answer().text(), 50);
+        let reviews_str = card.reviews().len().to_string();
+        let date = card
+            .next_review_date()
+            .naive_local()
+            .format("%Y-%m-%d %H:%M");
+        let date_str = truncate_text(&date.to_string(), 19);
+
+        let row = format!(
+            "{:<20} | {:<20} | {:<50} | {:>2} | {:<19}",
+            id_str, question_str, answer_str, reviews_str, date_str
+        );
+
+        if card.is_new() {
+            // Highlight new cards in cyan (priority over is_due)
+            println!("\x1b[96m{}\x1b[0m", row);
+        } else if card.is_due() {
+            // Highlight cards ready for review in yellow
+            println!("\x1b[93m{}\x1b[0m", row);
+        } else {
+            println!("{}", row);
+        }
+    }
 
     Ok(())
 }
@@ -252,22 +265,20 @@ fn render_card(card: &Card, area: Rect, frame: &mut Frame) {
         .render(qa_area, frame.buffer_mut());
 
     // Stats block
-    if card.memory_state().is_some() {
+    if let Some(stability) = card.stability()
+        && let Some(difficulty) = card.difficulty()
+    {
         let stats_block = Block::bordered()
             .border_set(border::ROUNDED)
             .border_style(Style::default().fg(Color::Blue));
-        let memory_state_text = card
-            .memory_state()
-            .map(|state| format!("{:.2}", state.difficulty()))
-            .unwrap_or_else(|| "None".to_string());
         let stats_text = Text::from(vec![
             Line::from(format!("Оценок: {}", card.reviews().len())),
             Line::from(format!(
                 "Дата следующего повторения: {}",
                 card.next_review_date()
             )),
-            Line::from(format!("Стабильность: {}", card.stability())),
-            Line::from(format!("Состояние памяти: {}", memory_state_text)),
+            Line::from(format!("Стабильность: {}", stability.value())),
+            Line::from(format!("Сложность: {}", difficulty.value())),
         ]);
         Paragraph::new(stats_text)
             .block(stats_block)
@@ -281,71 +292,4 @@ fn truncate_text(s: &str, max_len: usize) -> String {
     } else {
         s.chars().take(max_len - 3).collect::<String>() + "..."
     }
-}
-
-fn render_cards_table(cards: &[Card], area: Rect, frame: &mut Frame) {
-    let block = Block::bordered()
-        .border_set(border::ROUNDED)
-        .border_style(Style::default().fg(Color::Cyan));
-
-    if cards.is_empty() {
-        let empty_text = Text::from("Нет карточек");
-        Paragraph::new(empty_text)
-            .block(block)
-            .alignment(Alignment::Center)
-            .render(area, frame.buffer_mut());
-        return;
-    }
-
-    let header = Row::new(vec![
-        Cell::from("Id".bold().underlined()),
-        Cell::from("Вопрос".bold().underlined()),
-        Cell::from("Ответ".bold().underlined()),
-        Cell::from("Оценок".bold().underlined()),
-        Cell::from("Дата следующего повторения".bold().underlined()),
-    ])
-    .style(Style::default());
-
-    let now = Utc::now();
-    let rows: Vec<Row> = cards
-        .iter()
-        .enumerate()
-        .map(|(i, card)| {
-            let is_due = card.next_review_date() < now;
-            let base_style = if i % 2 == 0 {
-                Style::default()
-            } else {
-                Style::default().bg(Color::DarkGray)
-            };
-            let style = if is_due {
-                base_style.fg(Color::LightMagenta).bold()
-            } else {
-                base_style
-            };
-
-            Row::new(vec![
-                Cell::from(truncate_text(&card.id().to_string(), 22)),
-                Cell::from(truncate_text(card.question().text(), 30)),
-                Cell::from(truncate_text(card.answer().text(), 30)),
-                Cell::from(card.reviews().len().to_string()),
-                Cell::from(truncate_text(&card.next_review_date().to_string(), 30)),
-            ])
-            .style(style)
-        })
-        .collect();
-
-    let widths = [
-        Constraint::Percentage(15),
-        Constraint::Percentage(25),
-        Constraint::Percentage(25),
-        Constraint::Percentage(10),
-        Constraint::Percentage(25),
-    ];
-
-    let table = Table::new(rows, widths)
-        .header(header)
-        .block(block)
-        .column_spacing(1);
-
-    table.render(area, frame.buffer_mut());
 }

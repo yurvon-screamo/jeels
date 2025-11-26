@@ -2,7 +2,7 @@
 mod tests {
     use crate::domain::error::JeersError;
     use crate::domain::value_objects::{
-        Answer, Embedding, MemoryState, Question, Rating, Stability,
+        Answer, Difficulty, Embedding, MemoryState, Question, Rating, Stability,
     };
     use crate::domain::{JapaneseLevel, NativeLanguage, User};
     use chrono::{Duration, Utc};
@@ -45,8 +45,8 @@ mod tests {
         Answer::new("A systems programming language".to_string()).unwrap()
     }
 
-    fn create_test_memory_state() -> MemoryState {
-        MemoryState::new(Stability::new(1.0).unwrap(), 0.5).unwrap()
+    fn create_test_difficulty() -> Difficulty {
+        Difficulty::new(0.5).unwrap()
     }
 
     #[test]
@@ -284,13 +284,12 @@ mod tests {
         let card = user.create_card(question, answer).unwrap();
         let card_id = card.id();
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
         user.rate_card(
             card_id,
             Rating::Good,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
 
@@ -317,13 +316,12 @@ mod tests {
         let card2_id = card2.id();
 
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
         user.rate_card(
             card2_id,
             Rating::Good,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
 
@@ -352,13 +350,12 @@ mod tests {
         let card2 = user.create_card(q2, a2).unwrap();
         let card2_id = card2.id();
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
         user.rate_card(
             card2_id,
             Rating::Good,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
 
@@ -390,13 +387,12 @@ mod tests {
         let card2 = user.create_card(q2, a2).unwrap();
         let card2_id = card2.id();
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
         user.rate_card(
             card2_id,
             Rating::Good,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
 
@@ -426,13 +422,12 @@ mod tests {
             let a = Answer::new(format!("A{}", i)).unwrap();
             let card = user.create_card(q, a).unwrap();
             let stability = Stability::new(1.0).unwrap();
-            let memory_state = create_test_memory_state();
+            let difficulty = create_test_difficulty();
             user.rate_card(
                 card.id(),
                 Rating::Good,
                 Duration::days(1),
-                stability,
-                memory_state,
+                MemoryState::new(stability, difficulty),
             )
             .unwrap();
         }
@@ -494,21 +489,19 @@ mod tests {
 
         // Set different review dates
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
         user.rate_card(
             card1_id,
             Rating::Again,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
         user.rate_card(
             card2_id,
             Rating::Again,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
 
@@ -534,13 +527,12 @@ mod tests {
         let card1_id = card1.id();
 
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
         user.rate_card(
             card1_id,
             Rating::Again,
             Duration::days(1),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         )
         .unwrap();
 
@@ -582,13 +574,12 @@ mod tests {
             let a = Answer::new(format!("A{}", i)).unwrap();
             let card = user.create_card(q, a).unwrap();
             let stability = Stability::new(1.0).unwrap();
-            let memory_state = create_test_memory_state();
+            let difficulty = create_test_difficulty();
             user.rate_card(
                 card.id(),
                 Rating::Good,
                 Duration::days(1),
-                stability,
-                memory_state,
+                MemoryState::new(stability, difficulty),
             )
             .unwrap();
             new_card_ids.push(card.id());
@@ -619,10 +610,15 @@ mod tests {
         let rating = Rating::Good;
         let interval = Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
 
         // Act
-        let result = user.rate_card(card_id, rating, interval, stability, memory_state);
+        let result = user.rate_card(
+            card_id,
+            rating,
+            interval,
+            MemoryState::new(stability, difficulty),
+        );
 
         // Assert
         assert!(result.is_ok());
@@ -650,10 +646,15 @@ mod tests {
             let card_id = card.id();
             let interval = Duration::days(expected_interval);
             let stability = Stability::new(expected_interval as f64).unwrap();
-            let memory_state = create_test_memory_state();
+            let difficulty = create_test_difficulty();
 
             // Act
-            let result = user.rate_card(card_id, rating, interval, stability, memory_state);
+            let result = user.rate_card(
+                card_id,
+                rating,
+                interval,
+                MemoryState::new(stability, difficulty),
+            );
 
             // Assert
             assert!(result.is_ok());
@@ -677,13 +678,12 @@ mod tests {
         // Act
         for (rating, interval_days) in ratings.iter() {
             let stability = Stability::new(*interval_days as f64).unwrap();
-            let memory_state = create_test_memory_state();
+            let difficulty = create_test_difficulty();
             user.rate_card(
                 card_id,
                 *rating,
                 Duration::days(*interval_days),
-                stability,
-                memory_state,
+                MemoryState::new(stability, difficulty),
             )
             .unwrap();
         }
@@ -704,10 +704,15 @@ mod tests {
         let rating = Rating::Good;
         let interval = Duration::days(1);
         let stability = Stability::new(1.0).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
 
         // Act
-        let result = user.rate_card(non_existent_id, rating, interval, stability, memory_state);
+        let result = user.rate_card(
+            non_existent_id,
+            rating,
+            interval,
+            MemoryState::new(stability, difficulty),
+        );
 
         // Assert
         assert!(result.is_err());
@@ -736,22 +741,21 @@ mod tests {
             let card_id = card.id();
             let future_date = Utc::now() + duration;
             let stability = Stability::new(stability_value).unwrap();
-            let memory_state = create_test_memory_state();
+            let difficulty = create_test_difficulty();
 
             // Act
             let result = user.rate_card(
                 card_id,
                 Rating::Good,
                 Duration::days(duration.num_days()),
-                stability,
-                memory_state,
+                MemoryState::new(stability, difficulty),
             );
 
             // Assert
             assert!(result.is_ok());
             let card = user.get_card(card_id).unwrap();
             assert_eq!(card.next_review_date(), future_date);
-            assert_eq!(card.stability().value(), stability_value);
+            assert_eq!(card.stability().unwrap().value(), stability_value);
         }
     }
 
@@ -761,15 +765,14 @@ mod tests {
         let mut user = create_test_user();
         let non_existent_id = ulid::Ulid::new();
         let stability = Stability::new(2.5).unwrap();
-        let memory_state = create_test_memory_state();
+        let difficulty = create_test_difficulty();
 
         // Act
         let result = user.rate_card(
             non_existent_id,
             Rating::Good,
             Duration::days(5),
-            stability,
-            memory_state,
+            MemoryState::new(stability, difficulty),
         );
 
         // Assert

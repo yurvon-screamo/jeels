@@ -37,10 +37,19 @@ struct LearnCardApp<'a, R: UserRepository, F: FuriganaService> {
     synonyms: Option<Vec<Card>>,
     furigana_data: Option<String>,
     furigana_shown: bool,
+    current_index: usize,
+    total_count: usize,
 }
 
 impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
-    fn new(card: Card, user_id: Ulid, repository: &'a R, furigana_service: &'a F) -> Self {
+    fn new(
+        card: Card,
+        user_id: Ulid,
+        repository: &'a R,
+        furigana_service: &'a F,
+        current_index: usize,
+        total_count: usize,
+    ) -> Self {
         Self {
             card,
             state: CardState::Question,
@@ -51,6 +60,8 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
             synonyms: None,
             furigana_data: None,
             furigana_shown: false,
+            current_index,
+            total_count,
         }
     }
 
@@ -58,13 +69,11 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
         let mut terminal = ratatui::init();
         let mut rating = None;
 
-        // Запрашиваем фуригану сразу, но не показываем
         let get_furigana_usecase = GetFuriganaUseCase::new(self.repository, self.furigana_service);
         if let Ok(furigana) = get_furigana_usecase
             .execute(self.user_id, self.card.id())
             .await
         {
-            // Проверяем, не равна ли фуригана оригинальному тексту
             if furigana != self.card.question().text() {
                 self.furigana_data = Some(furigana);
             }
@@ -82,10 +91,17 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
     fn draw(&self, frame: &mut Frame) {
         let area = frame.area();
 
+        let vertical_layout =
+            Layout::vertical([Constraint::Min(0), Constraint::Length(1)]).split(area);
+
+        let main_area = vertical_layout[0];
+        let footer_area = vertical_layout[1];
+
         let layout = if self.synonyms.is_some() {
-            Layout::horizontal([Constraint::Percentage(60), Constraint::Percentage(40)]).split(area)
+            Layout::horizontal([Constraint::Percentage(60), Constraint::Percentage(40)])
+                .split(main_area)
         } else {
-            Layout::horizontal([Constraint::Percentage(100)]).split(area)
+            Layout::horizontal([Constraint::Percentage(100)]).split(main_area)
         };
 
         let card_area = layout[0];
@@ -191,7 +207,6 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
             .alignment(Alignment::Left)
             .render(card_area, frame.buffer_mut());
 
-        // Отрисовка синонимов (если есть)
         if let Some(synonyms_area) = synonyms_area {
             if let Some(synonyms) = &self.synonyms {
                 let synonyms_block = Block::bordered()
@@ -217,6 +232,18 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
                     .render(synonyms_area, frame.buffer_mut());
             }
         }
+
+        let remaining = self.total_count - self.current_index;
+        let progress_text = format!(
+            "Карточка {} из {} (осталось: {})",
+            self.current_index + 1,
+            self.total_count,
+            remaining
+        );
+        let progress_line = Line::from(progress_text.fg(Color::Cyan));
+        Paragraph::new(Text::from(vec![progress_line]))
+            .alignment(Alignment::Center)
+            .render(footer_area, frame.buffer_mut());
     }
 
     async fn handle_events(&mut self, rating: &mut Option<Rating>) -> io::Result<()> {
@@ -331,10 +358,18 @@ pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
     let srs_service = settings.get_srs_service().await?;
     let rate_usecase = RateCardUseCase::new(repository, srs_service);
 
-    for card in cards {
+    let total_count = cards.len();
+    for (index, card) in cards.iter().enumerate() {
         let repository = settings.get_repository().await?;
         let furigana_service = settings.get_furigana_service().await?;
-        let mut app = LearnCardApp::new(card.clone(), user_id, repository, furigana_service);
+        let mut app = LearnCardApp::new(
+            card.clone(),
+            user_id,
+            repository,
+            furigana_service,
+            index,
+            total_count,
+        );
         let rating = app.run().await.map_err(|e| JeersError::RepositoryError {
             reason: e.to_string(),
         })?;

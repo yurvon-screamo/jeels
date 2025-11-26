@@ -88,29 +88,60 @@ impl fmt::Display for Stability {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
-pub struct MemoryState {
-    stability: Stability,
-    difficulty: f64,
+pub struct Difficulty {
+    value: f64,
 }
 
-impl MemoryState {
-    pub fn new(stability: Stability, difficulty: f64) -> Result<Self, JeersError> {
-        if difficulty < 0.0 {
+impl Difficulty {
+    pub fn new(value: f64) -> Result<Self, JeersError> {
+        if value < 0.0 {
             return Err(JeersError::InvalidDifficulty {
                 reason: "Difficulty cannot be negative".to_string(),
             });
         }
-        Ok(Self {
+        Ok(Self { value })
+    }
+
+    pub fn value(&self) -> f64 {
+        self.value
+    }
+}
+
+impl fmt::Display for Difficulty {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:.2}", self.value)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct MemoryState {
+    stability: Stability,
+    difficulty: Difficulty,
+}
+
+impl MemoryState {
+    pub fn new(stability: Stability, difficulty: Difficulty) -> Self {
+        Self {
             stability,
             difficulty,
-        })
+        }
     }
 
     pub fn stability(&self) -> Stability {
         self.stability
     }
 
-    pub fn difficulty(&self) -> f64 {
+    pub fn difficulty(&self) -> Difficulty {
         self.difficulty
+    }
+}
+
+impl fmt::Display for MemoryState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Stability: {}, Difficulty: {}",
+            self.stability, self.difficulty
+        )
     }
 }
