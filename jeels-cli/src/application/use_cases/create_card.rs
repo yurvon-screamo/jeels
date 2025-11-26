@@ -57,6 +57,30 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         question_text: String,
         answer_text: Option<String>,
     ) -> Result<Card, JeersError> {
+        let answer_text = if let Some(answer_srt) = &answer_text
+            && answer_srt.trim().is_empty()
+        {
+            None
+        } else {
+            answer_text
+        };
+
+        let mut user = self
+            .repository
+            .find_by_id(user_id)
+            .await?
+            .ok_or(JeersError::UserNotFound { user_id })?;
+
+        if user
+            .cards()
+            .values()
+            .any(|card| card.question().text() == question_text)
+        {
+            return Err(JeersError::DuplicateCard {
+                question: question_text,
+            });
+        }
+
         let (question, answer) = if let Some(answer_text) = answer_text {
             let embedding = self
                 .embedding_service
@@ -71,12 +95,6 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
             self.generate_translation_and_embedding(&question_text)
                 .await?
         };
-
-        let mut user = self
-            .repository
-            .find_by_id(user_id)
-            .await?
-            .ok_or(JeersError::UserNotFound { user_id })?;
 
         let card = user.create_card(question, answer)?;
         self.repository.save(&user).await?;

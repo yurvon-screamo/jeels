@@ -34,7 +34,7 @@ struct MigiiMeaning {
 
 pub async fn handle_create_migii_pack(
     user_id: Ulid,
-    lesson: u32,
+    lessons: Vec<u32>,
     question_only: bool,
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
@@ -52,101 +52,109 @@ pub async fn handle_create_migii_pack(
         crate::domain::NativeLanguage::English => "en",
     };
 
-    let url = format!(
-        "https://jlpt.migii.net/api/theory/word/javi/{}/{}/{}",
-        native_lang, level_num, lesson
-    );
-
-    render_once(
-        |frame| {
-            let area = frame.area();
-            let block = Block::bordered()
-                .border_set(border::ROUNDED)
-                .border_style(Style::default().fg(Color::Yellow));
-            let text = Text::from(vec![Line::from(
-                format!("Загрузка урока {} уровня {:?}...", lesson, level).fg(Color::Yellow),
-            )]);
-            Paragraph::new(text)
-                .block(block)
-                .alignment(Alignment::Center)
-                .render(area, frame.buffer_mut());
-        },
-        5,
-    )?;
-
-    let response = reqwest::get(&url)
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to fetch Migii data: {}", e),
-        })?;
-
-    let migii_data: MigiiResponse =
-        response
-            .json()
-            .await
-            .map_err(|e| JeersError::RepositoryError {
-                reason: format!("Failed to parse Migii JSON: {}", e),
-            })?;
-
     let use_case = CreateCardUseCase::new(
         settings.get_repository().await?,
         settings.get_embedding_generator().await?,
         settings.get_llm_service().await?,
     );
 
-    let total_words = migii_data.data.len();
-    let mut created_count = 0;
-    let mut skipped_words = Vec::new();
+    let mut total_created_count = 0;
+    let mut total_skipped_words = Vec::new();
 
-    for word_data in migii_data.data {
-        let question = word_data.word.clone();
-        let answer = if !word_data.short_mean.is_empty() {
-            word_data.short_mean
-        } else if let Some(first_meaning) = word_data.mean.first() {
-            first_meaning.mean.clone()
-        } else {
-            continue;
-        };
-        let answer = if question_only { None } else { Some(answer) };
+    for lesson in lessons {
+        let url = format!(
+            "https://v2.migii.net/api/theory/word/javi/{}/{}/{}",
+            native_lang, level_num, lesson
+        );
 
-        match use_case.execute(user_id, question.clone(), answer).await {
-            Ok(card) => {
-                created_count += 1;
-                render_once(
-                    |frame| {
-                        let area = frame.area();
-                        let vertical =
-                            Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
-                        let [title_area, card_area] = vertical.areas(area);
+        render_once(
+            |frame| {
+                let area = frame.area();
+                let block = Block::bordered()
+                    .border_set(border::ROUNDED)
+                    .border_style(Style::default().fg(Color::Yellow));
+                let text = Text::from(vec![Line::from(
+                    format!("Загрузка урока {} уровня {:?}...", lesson, level).fg(Color::Yellow),
+                )]);
+                Paragraph::new(text)
+                    .block(block)
+                    .alignment(Alignment::Center)
+                    .render(area, frame.buffer_mut());
+            },
+            5,
+        )?;
 
-                        let title = Line::from(
-                            format!("Создана карточка {}/{}:", created_count, total_words)
+        let response = reqwest::get(&url)
+            .await
+            .map_err(|e| JeersError::RepositoryError {
+                reason: format!("Failed to fetch Migii data: {}", e),
+            })?;
+
+        let migii_data: MigiiResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| JeersError::RepositoryError {
+                    reason: format!("Failed to parse Migii JSON: {}", e),
+                })?;
+
+        let total_words = migii_data.data.len();
+        let mut created_count = 0;
+
+        for word_data in migii_data.data {
+            let question = word_data.word.clone();
+            let answer = if !word_data.short_mean.is_empty() {
+                word_data.short_mean
+            } else if let Some(first_meaning) = word_data.mean.first() {
+                first_meaning.mean.clone()
+            } else {
+                continue;
+            };
+            let answer = if question_only { None } else { Some(answer) };
+
+            match use_case.execute(user_id, question.clone(), answer).await {
+                Ok(card) => {
+                    created_count += 1;
+                    total_created_count += 1;
+                    render_once(
+                        |frame| {
+                            let area = frame.area();
+                            let vertical =
+                                Layout::vertical([Constraint::Length(1), Constraint::Min(0)]);
+                            let [title_area, card_area] = vertical.areas(area);
+
+                            let title = Line::from(
+                                format!(
+                                    "Создана карточка {}/{} (урок {}):",
+                                    created_count, total_words, lesson
+                                )
                                 .bold()
                                 .underlined(),
-                        );
-                        Paragraph::new(title)
-                            .alignment(Alignment::Left)
-                            .render(title_area, frame.buffer_mut());
+                            );
+                            Paragraph::new(title)
+                                .alignment(Alignment::Left)
+                                .render(title_area, frame.buffer_mut());
 
-                        let card_block = Block::bordered()
-                            .border_set(border::ROUNDED)
-                            .border_style(Style::default().fg(Color::Green));
-                        let card_text = Text::from(vec![
-                            Line::from(format!("Вопрос: {}", card.question().text())),
-                            Line::from(format!("Ответ: {}", card.answer().text())),
-                        ]);
-                        Paragraph::new(card_text)
-                            .block(card_block)
-                            .render(card_area, frame.buffer_mut());
-                    },
-                    8,
-                )?;
-            }
-            Err(JeersError::DuplicateCard { .. }) => {
-                skipped_words.push(question);
-            }
-            Err(e) => {
-                return Err(e);
+                            let card_block = Block::bordered()
+                                .border_set(border::ROUNDED)
+                                .border_style(Style::default().fg(Color::Green));
+                            let card_text = Text::from(vec![
+                                Line::from(format!("Вопрос: {}", card.question().text())),
+                                Line::from(format!("Ответ: {}", card.answer().text())),
+                            ]);
+                            Paragraph::new(card_text)
+                                .block(card_block)
+                                .render(card_area, frame.buffer_mut());
+                        },
+                        8,
+                    )?;
+                }
+                Err(JeersError::DuplicateCard { .. }) => {
+                    total_skipped_words.push(question);
+                }
+                Err(e) => {
+                    return Err(e);
+                }
             }
         }
     }
@@ -154,14 +162,17 @@ pub async fn handle_create_migii_pack(
     let mut text_lines = vec![
         Line::from("Пачка создана успешно!".bold().fg(Color::Green)),
         Line::from(""),
-        Line::from(format!("Создано карточек: {}", created_count)),
-        Line::from(format!("Пропущено (дубликаты): {}", skipped_words.len())),
+        Line::from(format!("Создано карточек: {}", total_created_count)),
+        Line::from(format!(
+            "Пропущено (дубликаты): {}",
+            total_skipped_words.len()
+        )),
     ];
 
-    if !skipped_words.is_empty() {
+    if !total_skipped_words.is_empty() {
         text_lines.push(Line::from(""));
         text_lines.push(Line::from("Пропущенные слова:".bold().fg(Color::Yellow)));
-        for word in &skipped_words {
+        for word in &total_skipped_words {
             text_lines.push(Line::from(format!("  • {}", word).fg(Color::Gray)));
         }
     }
