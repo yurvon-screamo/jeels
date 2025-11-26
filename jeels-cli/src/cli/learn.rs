@@ -327,11 +327,11 @@ impl<'a, R: UserRepository, F: FuriganaService> LearnCardApp<'a, R, F> {
     }
 }
 
-pub async fn handle_learn(user_id: Ulid) -> Result<(), JeersError> {
+pub async fn handle_learn(user_id: Ulid, force_new_cards: bool) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
 
     let start_study_usecase = StartStudySessionUseCase::new(settings.get_repository().await?);
-    let cards = start_study_usecase.execute(user_id).await?;
+    let cards = start_study_usecase.execute(user_id, force_new_cards).await?;
 
     if cards.is_empty() {
         render_once(

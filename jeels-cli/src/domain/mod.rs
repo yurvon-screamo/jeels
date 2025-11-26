@@ -187,7 +187,7 @@ impl User {
         Ok(card)
     }
 
-    pub fn start_study_session(&self) -> Vec<Card> {
+    pub fn start_study_session(&self, force_new_cards: bool) -> Vec<Card> {
         let mut old_cards: Vec<Card> = self
             .cards
             .values()
@@ -212,7 +212,10 @@ impl User {
             }
         });
 
-        new_cards.truncate(self.new_cards_limit);
+        if !force_new_cards {
+            new_cards.truncate(self.new_cards_limit);
+        }
+
         old_cards.append(&mut new_cards);
 
         old_cards

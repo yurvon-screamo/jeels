@@ -29,7 +29,7 @@ async fn start_study_session_use_case_should_return_due_cards() {
     let start_session_use_case = StartStudySessionUseCase::new(repository);
 
     // Act
-    let cards = start_session_use_case.execute(user.id()).await.unwrap();
+    let cards = start_session_use_case.execute(user.id(),false).await.unwrap();
 
     // Assert
     assert_eq!(cards.len(), 1);

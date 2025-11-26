@@ -33,7 +33,7 @@ use crate::{
 const DEFAULT_USERNAME: &str = "yurvon_screamo";
 const DEFAULT_JAPANESE_LEVEL: JapaneseLevel = JapaneseLevel::N5;
 const DEFAULT_NATIVE_LANGUAGE: NativeLanguage = NativeLanguage::Russian;
-const DEFAULT_NEW_CARDS_LIMIT: usize = 10;
+const DEFAULT_NEW_CARDS_LIMIT: usize = 15;
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -48,7 +48,11 @@ enum Command {
     /// Show user information
     Me {},
     /// Learn cards
-    Learn {},
+    Learn {
+        /// Ignore new cards limit and show all due cards
+        #[clap(short, long, default_value = "false")]
+        force_new_cards: bool,
+    },
     /// List cards
     Cards {},
     /// Create card
@@ -112,8 +116,8 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         Command::Cards {} => {
             handle_list_cards(user_id).await?;
         }
-        Command::Learn {} => {
-            handle_learn(user_id).await?;
+        Command::Learn { force_new_cards } => {
+            handle_learn(user_id, force_new_cards).await?;
         }
         Command::Create { question, answer } => {
             handle_create_card(user_id, question, answer).await?;

@@ -13,14 +13,14 @@ impl<'a, R: UserRepository> StartStudySessionUseCase<'a, R> {
         Self { repository }
     }
 
-    pub async fn execute(&self, user_id: Ulid) -> Result<Vec<Card>, JeersError> {
+    pub async fn execute(&self, user_id: Ulid, force_new_cards: bool) -> Result<Vec<Card>, JeersError> {
         let user = self
             .repository
             .find_by_id(user_id)
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(force_new_cards);
         Ok(cards)
     }
 }
