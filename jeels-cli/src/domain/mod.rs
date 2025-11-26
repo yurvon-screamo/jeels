@@ -92,8 +92,8 @@ impl User {
         self.new_cards_limit
     }
 
-    pub fn find_synonyms(&self, card_id: Ulid) -> Result<Vec<Card>, JeersError> {
-        const SIMILARITY_THRESHOLD: f32 = 0.85;
+    pub fn find_similarity(&self, card_id: Ulid) -> Result<Vec<Card>, JeersError> {
+        const SIMILARITY_THRESHOLD: f32 = 0.8;
 
         let card = self
             .cards
@@ -101,7 +101,7 @@ impl User {
             .ok_or(JeersError::CardNotFound { card_id })?;
 
         let query_embedding = card.question().embedding();
-        let synonyms = self
+        let similarity = self
             .cards
             .iter()
             .filter(|(id, card)| {
@@ -115,7 +115,7 @@ impl User {
             .map(|(_, card)| card.clone())
             .collect();
 
-        Ok(synonyms)
+        Ok(similarity)
     }
 
     fn has_card_with_question(&self, question: &Question, exclude_card_id: Option<Ulid>) -> bool {

@@ -2,13 +2,13 @@
 mod tests;
 
 use jeels_cli::{
-    application::use_cases::{CreateCardUseCase, FindSynonymsUseCase},
+    application::use_cases::{CreateCardUseCase, FindSimilarityUseCase},
     settings::ApplicationEnvironment,
 };
 use tests::*;
 
 #[tokio::test]
-async fn find_synonyms_should_return_similar_cards() {
+async fn find_similarity_should_return_similar_cards() {
     // Arrange
     create_test_repository().await;
     let settings = ApplicationEnvironment::get();
@@ -35,18 +35,19 @@ async fn find_synonyms_should_return_similar_cards() {
         .await
         .unwrap();
 
-    let find_synonyms_use_case = FindSynonymsUseCase::new(repository);
+    let furigana_service = settings.get_furigana_service().await.unwrap();
+    let find_similarity_use_case = FindSimilarityUseCase::new(repository, furigana_service);
 
     // Act
-    let synonyms = find_synonyms_use_case
+    let similarity = find_similarity_use_case
         .execute(user.id(), card1.id())
         .await
         .unwrap();
 
     // Assert
     // Should find card2 as a synonym
-    assert!(!synonyms.is_empty(), "Should find at least one synonym");
-    let synonym_ids: Vec<_> = synonyms.iter().map(|c| c.id()).collect();
+    assert!(!similarity.is_empty(), "Should find at least one synonym");
+    let synonym_ids: Vec<_> = similarity.iter().map(|sc| sc.card.id()).collect();
     assert!(
         synonym_ids.contains(&card2.id()),
         "Should find the similar card as a synonym"
@@ -59,7 +60,7 @@ async fn find_synonyms_should_return_similar_cards() {
 }
 
 #[tokio::test]
-async fn find_synonyms_should_return_empty_when_no_similar_cards() {
+async fn find_similarity_should_return_empty_when_no_similar_cards() {
     // Arrange
     create_test_repository().await;
     let settings = ApplicationEnvironment::get();
@@ -85,18 +86,19 @@ async fn find_synonyms_should_return_empty_when_no_similar_cards() {
         .await
         .unwrap();
 
-    let find_synonyms_use_case = FindSynonymsUseCase::new(repository);
+    let furigana_service = settings.get_furigana_service().await.unwrap();
+    let find_similarity_use_case = FindSimilarityUseCase::new(repository, furigana_service);
 
     // Act
-    let synonyms = find_synonyms_use_case
+    let similarity = find_similarity_use_case
         .execute(user.id(), card1.id())
         .await
         .unwrap();
 
     // Assert
-    // May or may not find synonyms depending on similarity threshold
+    // May or may not find similarity depending on similarity threshold
     // Just check that the query card is not in results
-    let synonym_ids: Vec<_> = synonyms.iter().map(|c| c.id()).collect();
+    let synonym_ids: Vec<_> = similarity.iter().map(|sc| sc.card.id()).collect();
     assert!(
         !synonym_ids.contains(&card1.id()),
         "Should not include the query card"
@@ -104,7 +106,7 @@ async fn find_synonyms_should_return_empty_when_no_similar_cards() {
 }
 
 #[tokio::test]
-async fn find_synonyms_should_find_multiple_similar_cards() {
+async fn find_similarity_should_find_multiple_similar_cards() {
     // Arrange
     create_test_repository().await;
     let settings = ApplicationEnvironment::get();
@@ -136,16 +138,17 @@ async fn find_synonyms_should_find_multiple_similar_cards() {
         .await
         .unwrap();
 
-    let find_synonyms_use_case = FindSynonymsUseCase::new(repository);
+    let furigana_service = settings.get_furigana_service().await.unwrap();
+    let find_similarity_use_case = FindSimilarityUseCase::new(repository, furigana_service);
 
     // Act
-    let synonyms = find_synonyms_use_case
+    let similarity = find_similarity_use_case
         .execute(user.id(), query_card.id())
         .await
         .unwrap();
 
     // Assert
-    let synonym_ids: Vec<_> = synonyms.iter().map(|c| c.id()).collect();
+    let synonym_ids: Vec<_> = similarity.iter().map(|sc| sc.card.id()).collect();
     assert!(
         synonym_ids.contains(&similar_card1.id()) || synonym_ids.contains(&similar_card2.id()),
         "Should find at least one of the similar cards"

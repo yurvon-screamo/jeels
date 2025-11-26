@@ -102,7 +102,11 @@ enum Command {
         dry_run: bool,
     },
     // Rebuild embedding and answers for all cards
-    RebuildDatabase {},
+    RebuildDatabase {
+        // Only embedding will be rebuilt, answers will not be regenerated
+        #[clap(short, long, default_value = "false")]
+        embedding_only: bool,
+    },
 }
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
@@ -149,8 +153,8 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         } => {
             handle_create_anki_pack(user_id, file_path, word_tag, translation_tag, dry_run).await?;
         }
-        Command::RebuildDatabase {} => {
-            handle_rebuild_database(user_id).await?;
+        Command::RebuildDatabase { embedding_only } => {
+            handle_rebuild_database(user_id, embedding_only).await?;
         }
     }
 

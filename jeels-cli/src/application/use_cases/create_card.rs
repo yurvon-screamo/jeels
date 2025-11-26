@@ -20,18 +20,10 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         }
     }
 
-    pub(crate) async fn generate_translation_and_embedding(
+    pub(crate) async fn generate_translation(
         &self,
         question_text: &str,
-    ) -> Result<(Question, Answer), JeersError> {
-        let question_text_string = question_text.to_string();
-        let embedding = self
-            .embedding_service
-            .generate_embedding(&question_text_string)
-            .await?;
-
-        let question = Question::new(question_text_string, embedding)?;
-
+    ) -> Result<Answer, JeersError> {
         let answer_text = self
             .llm_service
             .generate_text(&format!(
@@ -48,7 +40,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
 
         let answer = Answer::new(answer_text)?;
 
-        Ok((question, answer))
+        Ok(answer)
     }
 
     pub async fn execute(
@@ -81,20 +73,18 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
             });
         }
 
-        let (question, answer) = if let Some(answer_text) = answer_text {
-            let embedding = self
-                .embedding_service
-                .generate_embedding(&question_text)
-                .await?;
+        let embedding = self
+            .embedding_service
+            .generate_embedding(&question_text)
+            .await?;
 
-            (
-                Question::new(question_text, embedding)?,
-                Answer::new(answer_text)?,
-            )
+        let answer = if let Some(answer_text) = answer_text {
+            Answer::new(answer_text)?
         } else {
-            self.generate_translation_and_embedding(&question_text)
-                .await?
+            self.generate_translation(question_text.as_str()).await?
         };
+
+        let question = Question::new(question_text, embedding)?;
 
         let card = user.create_card(question, answer)?;
         self.repository.save(&user).await?;

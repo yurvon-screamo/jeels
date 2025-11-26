@@ -252,7 +252,7 @@ mod tests {
         let user = create_test_user();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 0);
@@ -268,7 +268,7 @@ mod tests {
         let card_id = card.id();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 1);
@@ -294,7 +294,7 @@ mod tests {
         .unwrap();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 0);
@@ -326,7 +326,7 @@ mod tests {
         .unwrap();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 1);
@@ -360,7 +360,7 @@ mod tests {
         .unwrap();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 2);
@@ -397,7 +397,7 @@ mod tests {
         .unwrap();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 2);
@@ -433,7 +433,7 @@ mod tests {
         }
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         // Should return only 2 new cards (limited by new_cards_limit)
@@ -461,7 +461,7 @@ mod tests {
         }
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         // Should return all 5 old cards (no limit for old cards)
@@ -506,7 +506,7 @@ mod tests {
         .unwrap();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 2);
@@ -537,7 +537,7 @@ mod tests {
         .unwrap();
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         assert_eq!(cards.len(), 1);
@@ -586,7 +586,7 @@ mod tests {
         }
 
         // Act
-        let cards = user.start_study_session();
+        let cards = user.start_study_session(false);
 
         // Assert
         // Should return all 2 old cards + 2 new cards (limited)

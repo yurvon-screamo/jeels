@@ -46,11 +46,12 @@ impl CandleEmbeddingService {
         inputs
             .iter()
             .map(|input| {
-                self.tokenizer.encode(input.as_str(), true).map_err(|e| {
-                    JeersError::EmbeddingError {
+                let instruction = self.create_instruction(&input);
+                self.tokenizer
+                    .encode(instruction.as_str(), true)
+                    .map_err(|e| JeersError::EmbeddingError {
                         reason: format!("Failed to encode input: {}", e),
-                    }
-                })
+                    })
             })
             .collect()
     }
@@ -67,11 +68,18 @@ impl CandleEmbeddingService {
         let pooled_embeddings = sort_embeddings(embeddings);
         Ok(pooled_embeddings)
     }
+
+    fn create_instruction(&self, word: &str) -> String {
+        format!(
+            "Instruct: Retrieve Japanese words that belong to the same semantic category.\nQuery: {}",
+            word
+        )
+    }
 }
 
 impl EmbeddingService for CandleEmbeddingService {
-    async fn generate_embedding(&self, input: &String) -> Result<TraitEmbedding, JeersError> {
-        let encodings = self.encode_inputs(&[input.clone()])?;
+    async fn generate_embedding(&self, input: &str) -> Result<TraitEmbedding, JeersError> {
+        let encodings = self.encode_inputs(&[input.to_string()])?;
         let batch = self.create_batch(encodings);
         let embeddings = {
             let backend = self.backend.lock().await;

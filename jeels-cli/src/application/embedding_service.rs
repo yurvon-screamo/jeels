@@ -6,7 +6,7 @@ use std::future::Future;
 pub trait EmbeddingService: Send + Sync {
     fn generate_embedding(
         &self,
-        input: &String,
+        input: &str,
     ) -> impl Future<Output = Result<Embedding, JeersError>> + Send;
 
     fn generate_embeddings(

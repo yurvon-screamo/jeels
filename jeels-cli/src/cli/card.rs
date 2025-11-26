@@ -194,16 +194,21 @@ pub async fn handle_delete_card(user_id: Ulid, card_ids: Vec<Ulid>) -> Result<()
     Ok(())
 }
 
-pub async fn handle_rebuild_database(user_id: Ulid) -> Result<(), JeersError> {
+pub async fn handle_rebuild_database(
+    user_id: Ulid,
+    embedding_only: bool,
+) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
+    let embedding_service = settings.get_embedding_generator().await?;
     let create_card_use_case = CreateCardUseCase::new(
         repository,
-        settings.get_embedding_generator().await?,
+        embedding_service,
         settings.get_llm_service().await?,
     );
-    let rebuild_use_case = RebuildDatabaseUseCase::new(repository, create_card_use_case);
-    let processed_count = rebuild_use_case.execute(user_id).await?;
+    let rebuild_use_case =
+        RebuildDatabaseUseCase::new(repository, embedding_service, create_card_use_case);
+    let processed_count = rebuild_use_case.execute(user_id, embedding_only).await?;
 
     render_once(
         |frame| {
