@@ -16,6 +16,7 @@ ordered-float = "5.1"
 zip = "6.0"
 rusqlite = { version = "0.37", features = ["bundled"] }
 regex = "1.12"
+rand = "0.9"
 
 # Logging
 tracing = "0.1"

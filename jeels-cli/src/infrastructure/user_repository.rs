@@ -1,6 +1,5 @@
 use crate::application::user_repository::UserRepository;
 use crate::domain::{JeersError, User};
-use crate::settings::ApplicationEnvironment;
 use std::path::PathBuf;
 use tokio::fs;
 use ulid::Ulid;
@@ -10,8 +9,8 @@ pub struct FileSystemUserRepository {
 }
 
 impl FileSystemUserRepository {
-    pub async fn new(environment: &ApplicationEnvironment) -> Result<Self, JeersError> {
-        let users_dir = environment.settings.database.path.clone();
+    pub async fn new(database_path: &str) -> Result<Self, JeersError> {
+        let users_dir = PathBuf::from(database_path);
 
         fs::create_dir_all(&users_dir)
             .await

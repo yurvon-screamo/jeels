@@ -12,7 +12,7 @@ use tokio::sync::OnceCell;
 static SETTINGS: OnceLock<ApplicationEnvironment> = OnceLock::new();
 
 pub struct ApplicationEnvironment {
-    pub settings: Settings,
+    settings: Settings,
 
     lazy_repository: Arc<OnceCell<FileSystemUserRepository>>,
     lazy_embedding_generator: Arc<OnceCell<CandleEmbeddingService>>,
@@ -98,7 +98,7 @@ impl ApplicationEnvironment {
     pub async fn get_repository(&self) -> Result<&FileSystemUserRepository, JeersError> {
         self.lazy_repository
             .get_or_try_init(|| async {
-                FileSystemUserRepository::new(self)
+                FileSystemUserRepository::new(&self.settings.database.path.to_str().unwrap())
                     .await
                     .map_err(|e| JeersError::SettingsError {
                         reason: e.to_string(),

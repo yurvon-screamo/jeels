@@ -272,7 +272,7 @@ mod tests {
 
         // Assert
         assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].id(), card_id);
+        assert_eq!(cards[0].card_id(), card_id);
     }
 
     #[test]
@@ -330,7 +330,7 @@ mod tests {
 
         // Assert
         assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].id(), card1_id);
+        assert_eq!(cards[0].card_id(), card1_id);
     }
 
     #[test]
@@ -365,9 +365,9 @@ mod tests {
         // Assert
         assert_eq!(cards.len(), 2);
         // Old cards should come first
-        assert_eq!(cards[0].id(), card1_id);
+        assert_eq!(cards[0].card_id(), card1_id);
         // New cards should come after old cards
-        assert_eq!(cards[1].id(), card2_id);
+        assert_eq!(cards[1].card_id(), card2_id);
     }
 
     #[test]
@@ -401,8 +401,8 @@ mod tests {
 
         // Assert
         assert_eq!(cards.len(), 2);
-        assert_eq!(cards[0].id(), card1_id);
-        assert_eq!(cards[1].id(), card2_id);
+        assert_eq!(cards[0].card_id(), card1_id);
+        assert_eq!(cards[1].card_id(), card2_id);
     }
 
     #[test]
@@ -467,7 +467,7 @@ mod tests {
         // Should return all 5 old cards (no limit for old cards)
         assert_eq!(cards.len(), 5);
         for card_id in old_card_ids {
-            assert!(cards.iter().any(|c| c.id() == card_id));
+            assert!(cards.iter().any(|c| c.card_id() == card_id));
         }
     }
 
@@ -511,8 +511,8 @@ mod tests {
         // Assert
         assert_eq!(cards.len(), 2);
         // Should be sorted by next_review_date (earlier first)
-        assert_eq!(cards[0].id(), card1_id);
-        assert_eq!(cards[1].id(), card2_id);
+        assert_eq!(cards[0].card_id(), card1_id);
+        assert_eq!(cards[1].card_id(), card2_id);
     }
 
     #[test]
@@ -541,7 +541,7 @@ mod tests {
 
         // Assert
         assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0].id(), card1_id);
+        assert_eq!(cards[0].card_id(), card1_id);
         // Card with only Again should be treated as old (comes first, no limit)
     }
 
@@ -592,11 +592,11 @@ mod tests {
         // Should return all 2 old cards + 2 new cards (limited)
         assert_eq!(cards.len(), 4);
         // First 2 should be old cards
-        assert_eq!(cards[0].id(), card1_id);
-        assert_eq!(cards[1].id(), card2_id);
+        assert_eq!(cards[0].card_id(), card1_id);
+        assert_eq!(cards[1].card_id(), card2_id);
         // Last 2 should be new cards (limited to 2)
-        assert!(new_card_ids.contains(&cards[2].id()));
-        assert!(new_card_ids.contains(&cards[3].id()));
+        assert!(new_card_ids.contains(&cards[2].card_id()));
+        assert!(new_card_ids.contains(&cards[3].card_id()));
     }
 
     #[test]

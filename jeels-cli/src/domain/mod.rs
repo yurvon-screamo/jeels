@@ -5,10 +5,11 @@ pub mod value_objects;
 
 pub use card::Card;
 pub use error::JeersError;
+use rand::{Rng, seq::SliceRandom};
 pub use review::Review;
 pub use value_objects::Rating;
 
-use crate::domain::value_objects::{Answer, MemoryState, Question};
+use crate::domain::value_objects::{Answer, MemoryState, Question, StudySessionItem};
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -22,6 +23,30 @@ pub struct User {
     cards: HashMap<Ulid, Card>,
     native_language: NativeLanguage,
     current_japanese_level: JapaneseLevel,
+
+    #[serde(default)]
+    lesson_history: Vec<LessonHistoryItem>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LessonHistoryItem {
+    timestamp: DateTime<Utc>,
+    avg_stability: f64,
+    avg_difficulty: f64,
+}
+
+impl LessonHistoryItem {
+    pub fn timestamp(&self) -> DateTime<Utc> {
+        self.timestamp
+    }
+
+    pub fn avg_stability(&self) -> f64 {
+        self.avg_stability
+    }
+
+    pub fn avg_difficulty(&self) -> f64 {
+        self.avg_difficulty
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -65,6 +90,7 @@ impl User {
             current_japanese_level,
             native_language,
             new_cards_limit,
+            lesson_history: Vec::new(),
         }
     }
 
@@ -187,19 +213,17 @@ impl User {
         Ok(card)
     }
 
-    pub fn start_study_session(&self, force_new_cards: bool) -> Vec<Card> {
-        let mut old_cards: Vec<Card> = self
+    pub fn start_study_session(&self, force_new_cards: bool) -> Vec<StudySessionItem> {
+        let mut old_cards: Vec<_> = self
             .cards
             .values()
             .filter(|card| card.is_due() && !card.is_new())
-            .cloned()
             .collect();
 
-        let mut new_cards: Vec<Card> = self
+        let mut new_cards: Vec<_> = self
             .cards
             .values()
             .filter(|card| card.is_due() && card.is_new())
-            .cloned()
             .collect();
 
         old_cards.sort_by_key(|a| a.next_review_date());
@@ -218,7 +242,39 @@ impl User {
 
         old_cards.append(&mut new_cards);
 
-        old_cards
+        let mut study_session_items: Vec<_> = old_cards
+            .into_iter()
+            .filter_map(|card| {
+                let shuffle = rand::rng().random_bool(0.5);
+                let (answer, question) = if card.is_known_card() && shuffle {
+                    (
+                        clear_japanese_characters(card.question().text()),
+                        card.answer().text().to_string(),
+                    )
+                } else {
+                    (
+                        card.answer().text().to_string(),
+                        card.question().text().to_string(),
+                    )
+                };
+
+                let mut item =
+                    StudySessionItem::new(card.id(), answer.to_string(), question.to_string());
+
+                let similarity = self.find_similarity(card.id());
+
+                if let Ok(similarity) = similarity {
+                    item.set_similarity(&similarity);
+                    Some(item)
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        study_session_items.shuffle(&mut rand::rng());
+
+        study_session_items
     }
 
     pub fn rate_card(
@@ -258,8 +314,46 @@ impl User {
         Ok(())
     }
 
+    pub fn create_lesson_history_item(&mut self) {
+        let avg_stability = self
+            .cards
+            .values()
+            .filter_map(|card| card.stability())
+            .map(|stability| stability.value())
+            .sum::<f64>()
+            / self
+                .cards
+                .values()
+                .filter_map(|card| card.stability())
+                .count() as f64;
+
+        let avg_difficulty = self
+            .cards
+            .values()
+            .filter_map(|card| card.difficulty())
+            .map(|difficulty| difficulty.value())
+            .sum::<f64>()
+            / self
+                .cards
+                .values()
+                .filter_map(|card| card.stability())
+                .count() as f64;
+
+        let lesson_history_item = LessonHistoryItem {
+            timestamp: Utc::now(),
+            avg_stability,
+            avg_difficulty,
+        };
+
+        self.lesson_history.push(lesson_history_item);
+    }
+
     pub fn get_card(&self, card_id: Ulid) -> Option<&Card> {
         self.cards.get(&card_id)
+    }
+
+    pub fn lesson_history(&self) -> &[LessonHistoryItem] {
+        &self.lesson_history
     }
 
     pub fn find_similar_cards(
@@ -305,6 +399,37 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
     }
 
     dot_product / (norm_a * norm_b)
+}
+
+fn clear_japanese_characters(text: &str) -> String {
+    text.chars()
+        .filter(|c| !is_japanese_character(*c))
+        .collect::<String>()
+        .replace("''", "")
+        .replace("\"\"", "")
+        .replace("““", "")
+        .replace("””", "")
+        .replace("«»", "")
+}
+
+fn is_japanese_character(c: char) -> bool {
+    let u = c as u32;
+    matches!(u,
+        // Hiragana
+        0x3040..=0x309F |
+        // Katakana
+        0x30A0..=0x30FF |
+        // Kanji (CJK Unified Ideographs)
+        0x4E00..=0x9FAF |
+        // Kanji Extension A
+        0x3400..=0x4DBF |
+        // CJK Symbols and Punctuation
+        0x3000..=0x303F |
+        // Half-width and Full-width Forms
+        0xFF00..=0xFFEF |
+        // Kanji Extension B
+        0x20000..=0x2A6DF
+    )
 }
 
 #[cfg(test)]

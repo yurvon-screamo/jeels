@@ -16,6 +16,7 @@ async fn start_study_session_use_case_should_return_due_cards() {
     let user = create_test_user().await;
     let embedding_generator = settings.get_embedding_generator().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
+    let furigana_service = settings.get_furigana_service().await.unwrap();
     let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     create_use_case
         .execute(
@@ -26,12 +27,15 @@ async fn start_study_session_use_case_should_return_due_cards() {
         .await
         .unwrap();
 
-    let start_session_use_case = StartStudySessionUseCase::new(repository);
+    let start_session_use_case = StartStudySessionUseCase::new(repository, furigana_service);
 
     // Act
-    let cards = start_session_use_case.execute(user.id(),false).await.unwrap();
+    let cards = start_session_use_case
+        .execute(user.id(), false)
+        .await
+        .unwrap();
 
     // Assert
     assert_eq!(cards.len(), 1);
-    assert_eq!(cards[0].question().text(), "What is Rust?");
+    assert_eq!(cards[0].question(), "What is Rust?");
 }

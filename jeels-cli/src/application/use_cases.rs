@@ -1,3 +1,4 @@
+pub mod complete_lesson;
 pub mod create_card;
 pub mod delete_card;
 pub mod edit_card;
@@ -11,6 +12,7 @@ pub mod rebuild_database;
 pub mod start_study_session;
 pub mod view_card;
 
+pub use complete_lesson::CompleteLessonUseCase;
 pub use create_card::CreateCardUseCase;
 pub use delete_card::DeleteCardUseCase;
 pub use edit_card::EditCardUseCase;

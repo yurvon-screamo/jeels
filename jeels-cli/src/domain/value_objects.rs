@@ -1,6 +1,7 @@
-use crate::domain::error::JeersError;
+use crate::domain::{Card, error::JeersError};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use ulid::Ulid;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Embedding(pub Vec<f32>);
@@ -143,5 +144,72 @@ impl fmt::Display for MemoryState {
             "Stability: {}, Difficulty: {}",
             self.stability, self.difficulty
         )
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct StudySessionItem {
+    card_id: Ulid,
+    answer: String,
+    question: String,
+    furigana: Option<String>,
+    similarity: Vec<StudySessionItem>,
+}
+
+impl StudySessionItem {
+    pub fn new(card_id: Ulid, answer: String, question: String) -> Self {
+        Self {
+            card_id,
+            answer,
+            question,
+            furigana: None,
+            similarity: vec![],
+        }
+    }
+
+    pub fn set_furigana(&mut self, furigana: String) {
+        self.furigana = Some(furigana);
+    }
+
+    pub fn set_similarity(&mut self, similarity: &[Card]) {
+        self.similarity = similarity
+            .iter()
+            .map(|card| {
+                StudySessionItem::new(
+                    card.id(),
+                    card.answer().text().to_string(),
+                    card.question().text().to_string(),
+                )
+            })
+            .collect();
+    }
+
+    pub fn card_id(&self) -> Ulid {
+        self.card_id
+    }
+
+    pub fn answer(&self) -> &str {
+        &self.answer
+    }
+
+    pub fn question(&self) -> &str {
+        &self.question
+    }
+
+    pub fn furigana(&self) -> Option<&str> {
+        self.furigana.as_deref()
+    }
+
+    pub fn similarity(&self) -> &Vec<StudySessionItem> {
+        &self.similarity
+    }
+
+    pub fn set_similarity_furigana(&mut self, card_id: Ulid, furigana: String) {
+        for similarity in self.similarity.iter_mut() {
+            if similarity.card_id() == card_id {
+                similarity.set_furigana(furigana);
+                break;
+            }
+        }
     }
 }

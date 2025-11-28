@@ -89,6 +89,12 @@ impl Card {
             .any(|review| review.rating() != Rating::Again)
     }
 
+    pub fn is_known_card(&self) -> bool {
+        self.reviews
+            .iter()
+            .any(|review| review.rating() == Rating::Easy)
+    }
+
     pub fn last_review_date(&self) -> Option<DateTime<Utc>> {
         self.reviews.back().map(|review| review.timestamp())
     }
