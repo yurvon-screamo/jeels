@@ -23,8 +23,6 @@ pub struct User {
     cards: HashMap<Ulid, Card>,
     native_language: NativeLanguage,
     current_japanese_level: JapaneseLevel,
-
-    #[serde(default)]
     lesson_history: Vec<LessonHistoryItem>,
 }
 
@@ -33,6 +31,10 @@ pub struct LessonHistoryItem {
     timestamp: DateTime<Utc>,
     avg_stability: f64,
     avg_difficulty: f64,
+
+    total_words: usize,
+    known_words: usize,
+    new_words: usize,
 }
 
 impl LessonHistoryItem {
@@ -46,6 +48,18 @@ impl LessonHistoryItem {
 
     pub fn avg_difficulty(&self) -> f64 {
         self.avg_difficulty
+    }
+
+    pub fn total_words(&self) -> usize {
+        self.total_words
+    }
+
+    pub fn known_words(&self) -> usize {
+        self.known_words
+    }
+
+    pub fn new_words(&self) -> usize {
+        self.new_words
     }
 }
 
@@ -338,10 +352,21 @@ impl User {
                 .filter_map(|card| card.stability())
                 .count() as f64;
 
+        let total_words = self.cards.len();
+        let known_words = self
+            .cards
+            .values()
+            .filter(|card| card.is_known_card())
+            .count();
+        let new_words = self.cards.values().filter(|card| card.is_new()).count();
+
         let lesson_history_item = LessonHistoryItem {
             timestamp: Utc::now(),
             avg_stability,
             avg_difficulty,
+            total_words,
+            known_words,
+            new_words,
         };
 
         self.lesson_history.push(lesson_history_item);

@@ -207,14 +207,6 @@ async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
         .await?
         .ok_or(JeersError::UserNotFound { user_id })?;
 
-    let cards = user.cards();
-    let total_cards = cards.len();
-    let new_cards = cards.values().filter(|card| card.is_new()).count();
-    let due_cards = cards
-        .values()
-        .filter(|card| card.is_due() && !card.is_new())
-        .count();
-
     render_once(
         |frame| {
             let area = frame.area();
@@ -234,11 +226,6 @@ async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
                     user.current_japanese_level()
                 )),
                 Line::from(format!("Родной язык: {:?}", user.native_language())),
-                Line::from(""),
-                Line::from("Статистика карточек:".bold()),
-                Line::from(format!("  Всего слов: {}", total_cards)),
-                Line::from(format!("  Новых слов: {}", new_cards)),
-                Line::from(format!("  Слов для изучения: {}", due_cards)),
             ];
 
             let lesson_history = user.lesson_history();
@@ -248,7 +235,7 @@ async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
                 .border_style(Style::default().fg(Color::Magenta));
 
             let content_height = content.len() as u16;
-            let graph_height = if !lesson_history.is_empty() { 10 } else { 0 };
+            let graph_height = if !lesson_history.is_empty() { 20 } else { 0 };
 
             let vertical = Layout::vertical([
                 Constraint::Length(content_height + 2),
@@ -269,9 +256,9 @@ async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
             }
         },
         if !user.lesson_history().is_empty() {
-            40
+            50
         } else {
-            25
+            15
         },
     )
     .map_err(|e| JeersError::SettingsError {
@@ -282,12 +269,26 @@ async fn handle_me(user_id: Ulid) -> Result<(), JeersError> {
 }
 
 fn draw_lesson_history_chart(frame: &mut Frame, area: Rect, history: &[LessonHistoryItem]) {
-    if history.is_empty() || area.width < 40 || area.height < 8 {
+    if history.is_empty() || area.width < 40 || area.height < 16 {
         return;
     }
 
-    let horizontal = Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)]);
-    let [stability_area, difficulty_area] = horizontal.areas(area);
+    let vertical = Layout::vertical([
+        Constraint::Length(area.height / 2),
+        Constraint::Length(area.height / 2),
+    ]);
+    let [top_row, bottom_row] = vertical.areas(area);
+
+    let top_horizontal = Layout::horizontal([
+        Constraint::Percentage(33),
+        Constraint::Percentage(33),
+        Constraint::Percentage(34),
+    ]);
+    let [stability_area, difficulty_area, total_words_area] = top_horizontal.areas(top_row);
+
+    let bottom_horizontal =
+        Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)]);
+    let [known_words_area, new_words_area] = bottom_horizontal.areas(bottom_row);
 
     draw_single_chart(
         frame,
@@ -296,6 +297,7 @@ fn draw_lesson_history_chart(frame: &mut Frame, area: Rect, history: &[LessonHis
         "Стабильность",
         Color::Green,
         |item| item.avg_stability(),
+        false,
     );
     draw_single_chart(
         frame,
@@ -304,6 +306,34 @@ fn draw_lesson_history_chart(frame: &mut Frame, area: Rect, history: &[LessonHis
         "Сложность",
         Color::Red,
         |item| item.avg_difficulty(),
+        false,
+    );
+    draw_single_chart(
+        frame,
+        total_words_area,
+        history,
+        "Всего слов",
+        Color::Blue,
+        |item| item.total_words() as f64,
+        true,
+    );
+    draw_single_chart(
+        frame,
+        known_words_area,
+        history,
+        "Изученных",
+        Color::Yellow,
+        |item| item.known_words() as f64,
+        true,
+    );
+    draw_single_chart(
+        frame,
+        new_words_area,
+        history,
+        "Новых",
+        Color::Cyan,
+        |item| item.new_words() as f64,
+        true,
     );
 }
 
@@ -314,6 +344,7 @@ fn draw_single_chart<F>(
     title: &str,
     color: Color,
     value_extractor: F,
+    is_integer: bool,
 ) where
     F: Fn(&LessonHistoryItem) -> f64,
 {
@@ -355,12 +386,10 @@ fn draw_single_chart<F>(
         .max(0.1);
 
     let value_range = max_value - min_value;
-    if value_range <= 0.0 {
-        return;
-    }
+    let is_constant = value_range <= 0.0;
 
-    fn value_to_y(value: f64, min: f64, max: f64, height: u16) -> u16 {
-        if max == min {
+    fn value_to_y(value: f64, min: f64, max: f64, height: u16, is_constant: bool) -> u16 {
+        if is_constant || max == min {
             return height / 2;
         }
         let normalized = (value - min) / (max - min);
@@ -392,7 +421,7 @@ fn draw_single_chart<F>(
             break;
         }
 
-        let value_y = value_to_y(value, min_value, max_value, chart_height);
+        let value_y = value_to_y(value, min_value, max_value, chart_height, is_constant);
         let line_y = inner_area.y + 1 + value_y;
 
         if idx > 0 {
@@ -401,6 +430,7 @@ fn draw_single_chart<F>(
                 min_value,
                 max_value,
                 chart_height,
+                is_constant,
             );
 
             let prev_x = chart_start_x + (idx - 1) as u16;
@@ -443,7 +473,11 @@ fn draw_single_chart<F>(
             }
 
             if idx == last_idx {
-                let label = format!("{:.1}", value);
+                let label = if is_integer {
+                    format!("{:.0}", value)
+                } else {
+                    format!("{:.1}", value)
+                };
                 let label_start_x = cell_x + 1;
                 for (i, ch) in label.chars().enumerate() {
                     let label_x = label_start_x + i as u16;
@@ -464,10 +498,20 @@ fn draw_single_chart<F>(
         }
 
         let normalized_y = 1.0 - (y as f64 / (chart_height - 1) as f64);
-        let value = min_value + (normalized_y * value_range);
+        let value = if is_constant {
+            min_value
+        } else {
+            min_value + (normalized_y * value_range)
+        };
 
         if y == 0 || y == chart_height - 1 || y == chart_height / 2 {
-            let label = format!("{:>5.1}", value);
+            let label = if is_integer {
+                format!("{:>5.0}", value)
+            } else if is_constant && y == chart_height / 2 {
+                format!("{:>5.0}", value)
+            } else {
+                format!("{:>5.1}", value)
+            };
             for (i, ch) in label.chars().enumerate() {
                 let label_x = inner_area.x + i as u16;
                 if label_x < chart_start_x {
