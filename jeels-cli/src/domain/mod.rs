@@ -245,21 +245,20 @@ impl User {
         let mut study_session_items: Vec<_> = old_cards
             .into_iter()
             .filter_map(|card| {
-                let shuffle = rand::rng().random_bool(0.5);
+                let mut shuffle = rand::rng().random_bool(0.65);
                 let (answer, question) = if card.is_known_card() && shuffle {
-                    (
-                        clear_japanese_characters(card.question().text()),
-                        card.answer().text().to_string(),
-                    )
+                    (card.question().text(), card.answer().text())
                 } else {
-                    (
-                        card.answer().text().to_string(),
-                        card.question().text().to_string(),
-                    )
+                    shuffle = false;
+                    (card.answer().text(), card.question().text())
                 };
 
-                let mut item =
-                    StudySessionItem::new(card.id(), answer.to_string(), question.to_string());
+                let mut item = StudySessionItem::new(
+                    card.id(),
+                    answer.to_string(),
+                    question.to_string(),
+                    shuffle,
+                );
 
                 let similarity = self.find_similarity(card.id());
 
@@ -399,37 +398,6 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
     }
 
     dot_product / (norm_a * norm_b)
-}
-
-fn clear_japanese_characters(text: &str) -> String {
-    text.chars()
-        .filter(|c| !is_japanese_character(*c))
-        .collect::<String>()
-        .replace("''", "")
-        .replace("\"\"", "")
-        .replace("““", "")
-        .replace("””", "")
-        .replace("«»", "")
-}
-
-fn is_japanese_character(c: char) -> bool {
-    let u = c as u32;
-    matches!(u,
-        // Hiragana
-        0x3040..=0x309F |
-        // Katakana
-        0x30A0..=0x30FF |
-        // Kanji (CJK Unified Ideographs)
-        0x4E00..=0x9FAF |
-        // Kanji Extension A
-        0x3400..=0x4DBF |
-        // CJK Symbols and Punctuation
-        0x3000..=0x303F |
-        // Half-width and Full-width Forms
-        0xFF00..=0xFFEF |
-        // Kanji Extension B
-        0x20000..=0x2A6DF
-    )
 }
 
 #[cfg(test)]

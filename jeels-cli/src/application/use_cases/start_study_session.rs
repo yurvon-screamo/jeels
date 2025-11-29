@@ -34,14 +34,17 @@ impl<'a, R: UserRepository, F: FuriganaService> StartStudySessionUseCase<'a, R, 
         let mut study_session_items = user.start_study_session(force_new_cards);
 
         for item in &mut study_session_items {
-            let furigana = self.furigana_service.get_furigana(item.question());
+            let furigana = self
+                .furigana_service
+                .get_furigana(item.get_text_to_furigana());
             item.set_furigana(furigana);
 
             let mut map = HashMap::new();
             for similarity in item.similarity() {
                 map.insert(
                     similarity.card_id(),
-                    self.furigana_service.get_furigana(similarity.question()),
+                    self.furigana_service
+                        .get_furigana(similarity.get_text_to_furigana()),
                 );
             }
 

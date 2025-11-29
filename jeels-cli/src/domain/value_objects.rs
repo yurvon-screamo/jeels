@@ -154,21 +154,20 @@ pub struct StudySessionItem {
     question: String,
     furigana: Option<String>,
     similarity: Vec<StudySessionItem>,
+
+    shuffled: bool,
 }
 
 impl StudySessionItem {
-    pub fn new(card_id: Ulid, answer: String, question: String) -> Self {
+    pub fn new(card_id: Ulid, answer: String, question: String, shuffled: bool) -> Self {
         Self {
             card_id,
             answer,
             question,
             furigana: None,
             similarity: vec![],
+            shuffled,
         }
-    }
-
-    pub fn set_furigana(&mut self, furigana: String) {
-        self.furigana = Some(furigana);
     }
 
     pub fn set_similarity(&mut self, similarity: &[Card]) {
@@ -179,6 +178,7 @@ impl StudySessionItem {
                     card.id(),
                     card.answer().text().to_string(),
                     card.question().text().to_string(),
+                    false,
                 )
             })
             .collect();
@@ -196,8 +196,36 @@ impl StudySessionItem {
         &self.question
     }
 
-    pub fn furigana(&self) -> Option<&str> {
-        self.furigana.as_deref()
+    pub fn answer_with_furigana(&self) -> &str {
+        if self.shuffled
+            && let Some(furigana) = self.furigana.as_ref()
+        {
+            furigana
+        } else {
+            &self.answer
+        }
+    }
+
+    pub fn question_with_furigana(&self) -> &str {
+        if !self.shuffled
+            && let Some(furigana) = self.furigana.as_ref()
+        {
+            furigana
+        } else {
+            &self.question
+        }
+    }
+
+    pub fn get_text_to_furigana(&self) -> &str {
+        if self.shuffled {
+            &self.answer
+        } else {
+            &self.question
+        }
+    }
+
+    pub fn set_furigana(&mut self, furigana: String) {
+        self.furigana = Some(furigana);
     }
 
     pub fn similarity(&self) -> &Vec<StudySessionItem> {
@@ -211,5 +239,14 @@ impl StudySessionItem {
                 break;
             }
         }
+    }
+
+    pub fn has_furigana(&self) -> bool {
+        if let Some(furigana) = self.furigana.as_ref() {
+            return furigana.trim() != self.question.trim()
+                && furigana.trim() != self.answer.trim();
+        }
+
+        false
     }
 }

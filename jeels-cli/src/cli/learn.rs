@@ -132,7 +132,7 @@ impl LearnCardApp {
             "Нажмите пробел чтобы показать ответ.".fg(Color::Gray),
         ));
         lines.push(self.build_similarity_hint());
-        if self.card.furigana().is_some() {
+        if self.card.has_furigana() {
             lines.push(self.build_furigana_hint());
         }
         lines.push(Line::from(
@@ -145,7 +145,7 @@ impl LearnCardApp {
     fn build_answer_content(&self) -> Vec<Line<'_>> {
         let mut lines = vec![];
         lines.push(self.render_question_line(Color::Blue));
-        lines.push(Line::from(self.card.answer().bold().fg(Color::Magenta)));
+        lines.push(self.render_answer_line());
         lines.push(Line::from(""));
         lines.push(Line::from(
             "Используйте цифры от 1 до 4 для оценки карточки.".fg(Color::Gray),
@@ -165,17 +165,28 @@ impl LearnCardApp {
     fn build_completed_content(&self) -> Vec<Line<'_>> {
         let mut lines = vec![];
         lines.push(self.render_question_line(Color::Blue));
-        lines.push(Line::from(self.card.answer().bold().fg(Color::Magenta)));
+        lines.push(self.render_answer_line());
         lines
     }
 
     fn render_question_line(&self, color: Color) -> Line<'_> {
         if self.furigana_shown {
-            if let Some(question_furigana) = self.card.furigana() {
-                return furigana_renderer::render_furigana(question_furigana);
+            let question_text = self.card.question_with_furigana();
+            if question_text != self.card.question() {
+                return furigana_renderer::render_furigana(question_text);
             }
         }
         Line::from(self.card.question().bold().fg(color))
+    }
+
+    fn render_answer_line(&self) -> Line<'_> {
+        if self.furigana_shown {
+            let answer_text = self.card.answer_with_furigana();
+            if answer_text != self.card.answer() {
+                return furigana_renderer::render_furigana(answer_text);
+            }
+        }
+        Line::from(self.card.answer().bold().fg(Color::Magenta))
     }
 
     fn build_similarity_hint(&self) -> Line<'_> {
@@ -231,13 +242,13 @@ impl LearnCardApp {
     }
 
     fn render_similar_card_question(&self, similar_card: &StudySessionItem) -> Line<'_> {
-        if self.furigana_shown
-            && let Some(furigana) = similar_card.furigana()
-        {
-            furigana_renderer::render_furigana(furigana)
-        } else {
-            Line::from(format!("• {}", similar_card.question()).fg(Color::Cyan))
+        if self.furigana_shown {
+            let question_text = similar_card.question_with_furigana();
+            if question_text != similar_card.question() {
+                return furigana_renderer::render_furigana(question_text);
+            }
         }
+        Line::from(format!("• {}", similar_card.question()).fg(Color::Cyan))
     }
 
     fn should_show_answer(&self) -> bool {
@@ -296,8 +307,7 @@ impl LearnCardApp {
     }
 
     fn handle_f_key(&mut self) {
-        if matches!(self.state, CardState::Question | CardState::Answer)
-            && self.card.furigana().is_some()
+        if matches!(self.state, CardState::Question | CardState::Answer) && self.card.has_furigana()
         {
             self.furigana_shown = !self.furigana_shown;
         }
