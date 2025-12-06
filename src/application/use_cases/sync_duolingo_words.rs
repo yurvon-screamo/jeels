@@ -65,11 +65,11 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, D: DuolingoClien
 
         for word in words {
             let question = word.text.clone();
-            let answer = Self::extract_answer_from_word(&word, question_only);
-
-            if answer.is_none() && !question_only {
-                continue;
-            }
+            let answer = if question_only {
+                None
+            } else {
+                Some(word.translations.join(", "))
+            };
 
             match self
                 .create_card_use_case
@@ -83,7 +83,8 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, D: DuolingoClien
                     skipped_words.push(question);
                 }
                 Err(e) => {
-                    return Err(e);
+                    tracing::error!("Failed to create card for word {}: {}", question, e);
+                    skipped_words.push(question);
                 }
             }
         }
@@ -92,16 +93,5 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, D: DuolingoClien
             total_created_count,
             skipped_words,
         })
-    }
-
-    fn extract_answer_from_word(word: &crate::application::DuolingoWord, question_only: bool) -> Option<String> {
-        if question_only {
-            return None;
-        }
-
-        word.translations
-            .first()
-            .map(|t| t.clone())
-            .filter(|t| !t.is_empty())
     }
 }

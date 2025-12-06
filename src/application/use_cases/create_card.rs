@@ -79,24 +79,53 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         "required": ["text", "translation"]
       }}
     }}
+
+    Например:
+    [
+    {{
+      "text": "私は日本語を勉強しています。",
+      "translation": "Я изучаю японский язык."
+    }}, 
+    {{
+      "text": "私は日本語を勉強しています。",
+      "translation": "Я изучаю японский язык."
+    }}
+    ]
     "#,
             word = question_text
         );
 
-        let example_phrases = self
-            .llm_service
-            .generate_text(&prompt)
-            .await?
-            .trim()
-            .replace("```json", "")
-            .replace("```", "");
+        const MAX_RETRIES: usize = 3;
+        let mut last_error = None;
 
-        let example_phrases = serde_json::from_str::<Vec<ExamplePhrase>>(&example_phrases)
-            .map_err(|e| JeersError::LlmError {
-                reason: format!("Failed to parse JSON: {}. Response: {}", e, example_phrases),
-            })?;
+        for attempt in 1..=MAX_RETRIES {
+            let example_phrases_raw = self
+                .llm_service
+                .generate_text(&prompt)
+                .await?
+                .trim()
+                .replace("```json", "")
+                .replace("```", "");
 
-        Ok(example_phrases)
+            match serde_json::from_str::<Vec<ExamplePhrase>>(&example_phrases_raw) {
+                Ok(example_phrases) => return Ok(example_phrases),
+                Err(e) => {
+                    last_error = Some(JeersError::LlmError {
+                        reason: format!(
+                            "Failed to parse JSON (attempt {}/{}): {}. Response: {}",
+                            attempt, MAX_RETRIES, e, example_phrases_raw
+                        ),
+                    });
+                    if attempt < MAX_RETRIES {
+                        continue;
+                    }
+                }
+            }
+        }
+
+        Err(last_error.unwrap_or_else(|| JeersError::LlmError {
+            reason: "Failed to parse JSON after all retries".to_string(),
+        }))
     }
 
     pub async fn execute(

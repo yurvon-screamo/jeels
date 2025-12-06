@@ -107,7 +107,8 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, M: MigiiClient>
                     skipped_words.push(question);
                 }
                 Err(e) => {
-                    return Err(e);
+                    tracing::error!("Failed to create card for word {}: {}", question, e);
+                    skipped_words.push(question);
                 }
             }
         }

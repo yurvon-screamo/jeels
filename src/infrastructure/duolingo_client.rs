@@ -1,15 +1,18 @@
 use crate::application::{DuolingoClient, DuolingoWord};
 use crate::domain::JeersError;
 use async_trait::async_trait;
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
 
 #[derive(Debug, Deserialize)]
 struct DuolingoUserProfileResponse {
+    #[serde(rename = "learningLanguage")]
     learning_language: String,
+    #[serde(rename = "fromLanguage")]
     from_language: String,
+    #[serde(rename = "currentCourse")]
     current_course: Option<DuolingoCurrentCourse>,
 }
 
@@ -29,12 +32,15 @@ struct DuolingoSkillDto {
 
 #[derive(Debug, Serialize)]
 struct LearnedLexemesRequest {
+    #[serde(rename = "progressedSkills")]
     progressed_skills: Vec<DuolingoProgressedSkillPayload>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 struct DuolingoProgressedSkillPayload {
+    #[serde(rename = "finishedLevels")]
     finished_levels: u32,
+    #[serde(rename = "finishedSessions")]
     finished_sessions: u32,
     #[serde(rename = "skillId")]
     skill_id: DuolingoSkillId,
@@ -47,13 +53,17 @@ struct DuolingoSkillId {
 
 #[derive(Debug, Deserialize)]
 struct LearnedLexemesResponse {
+    #[serde(rename = "learnedLexemes")]
     learned_lexemes: Vec<DuolingoLexemeDto>,
+    #[serde(rename = "pagination")]
     pagination: DuolingoPagination,
 }
 
 #[derive(Debug, Deserialize)]
 struct DuolingoLexemeDto {
+    #[serde(rename = "text")]
     text: String,
+    #[serde(rename = "translations")]
     translations: Vec<String>,
 }
 
@@ -129,18 +139,25 @@ fn extract_user_id_from_jwt(jwt_token: &str) -> Result<String, JeersError> {
             reason: format!("Failed to decode JWT payload: {}", e),
         })?;
 
-    let json: Value = serde_json::from_slice(&decoded).map_err(|e| JeersError::RepositoryError {
-        reason: format!("Failed to parse JWT payload: {}", e),
-    })?;
-
-    let sub = json
-        .get("sub")
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| JeersError::RepositoryError {
-            reason: "JWT token does not contain 'sub' field".to_string(),
+    let json: Value =
+        serde_json::from_slice(&decoded).map_err(|e| JeersError::RepositoryError {
+            reason: format!("Failed to parse JWT payload: {}", e),
         })?;
 
-    Ok(sub.to_string())
+    let sub = json.get("sub").ok_or_else(|| JeersError::RepositoryError {
+        reason: format!("JWT token does not contain 'sub' field: {}", json),
+    })?;
+
+    let sub_str = sub
+        .as_str()
+        .map(|s| s.to_string())
+        .or_else(|| sub.as_u64().map(|n| n.to_string()))
+        .or_else(|| sub.as_i64().map(|n| n.to_string()))
+        .ok_or_else(|| JeersError::RepositoryError {
+            reason: format!("JWT token 'sub' field is not a string or number: {}", json),
+        })?;
+
+    Ok(sub_str)
 }
 
 async fn get_user_profile(
@@ -173,17 +190,20 @@ async fn get_user_profile(
         });
     }
 
-    let profile: DuolingoUserProfileResponse = response
-        .json()
-        .await
-        .map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to parse Duolingo profile: {}", e),
-        })?;
+    let profile: DuolingoUserProfileResponse =
+        response
+            .json()
+            .await
+            .map_err(|e| JeersError::RepositoryError {
+                reason: format!("Failed to parse Duolingo profile: {}", e),
+            })?;
 
     Ok(profile)
 }
 
-fn build_progressed_skills(skills: &[Vec<DuolingoSkillDto>]) -> Vec<DuolingoProgressedSkillPayload> {
+fn build_progressed_skills(
+    skills: &[Vec<DuolingoSkillDto>],
+) -> Vec<DuolingoProgressedSkillPayload> {
     let mut progressed_skills = Vec::new();
 
     for section in skills {
@@ -251,21 +271,18 @@ async fn get_learned_lexemes(
             });
         }
 
-        let data: LearnedLexemesResponse = response
-            .json()
-            .await
-            .map_err(|e| JeersError::RepositoryError {
-                reason: format!("Failed to parse Duolingo lexemes: {}", e),
-            })?;
+        let data: LearnedLexemesResponse =
+            response
+                .json()
+                .await
+                .map_err(|e| JeersError::RepositoryError {
+                    reason: format!("Failed to parse Duolingo lexemes: {}", e),
+                })?;
 
-        all_words.extend(
-            data.learned_lexemes
-                .into_iter()
-                .map(|lexeme| DuolingoWord {
-                    text: lexeme.text,
-                    translations: lexeme.translations,
-                }),
-        );
+        all_words.extend(data.learned_lexemes.into_iter().map(|lexeme| DuolingoWord {
+            text: lexeme.text,
+            translations: lexeme.translations,
+        }));
 
         match data.pagination.next_start_index {
             Some(next_index) => {

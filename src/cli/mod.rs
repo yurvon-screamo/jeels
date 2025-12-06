@@ -102,6 +102,12 @@ enum Command {
         #[clap(short, long, default_value = "false")]
         question_only: bool,
     },
+    /// Sync words from Duolingo
+    DuolingoSync {
+        /// If true, only questions will be imported, answers will be generated
+        #[clap(short, long, default_value = "false")]
+        question_only: bool,
+    },
     /// Import Anki vocabulary from file
     AnkiCreate {
         /// File path to Anki desk file
@@ -135,12 +141,6 @@ enum Command {
     Kanji {
         /// Kanji character to get information about
         kanji: String,
-    },
-    /// Sync words from Duolingo
-    DuolingoSync {
-        /// If true, only questions will be imported, answers will be generated
-        #[clap(short, long, default_value = "false")]
-        question_only: bool,
     },
 }
 
