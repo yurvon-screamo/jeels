@@ -50,7 +50,7 @@ impl MigiiClient for HttpMigiiClient {
         };
 
         let url = format!(
-            "https://v2.migii.net/api/theory/word/javi/{}/{}/{}",
+            "https://jlpt.migii.net/api/theory/word/javi/{}/{}/{}",
             native_lang_str, level_num, lesson
         );
 

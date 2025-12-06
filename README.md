@@ -2,16 +2,18 @@
 
 Keikaku (計画) - application for learning japanese. Like Anki, but for japanese native and simplified for better user experience.
 
-Learn all flashcards as a single set, tracking your Japanese language progress as single value.
+Learn all flashcards as a single set with FSRS algorithm, tracking your Japanese language progress as single value.
 
-Suported native languages:
+Builded with Rust only.
+
+## Suported native languages
 
 * English
 * Russian
 
-Features:
+## Features
 
-* Learning vocabulary
+* Learning vocabulary with FSRS algorithm
 * Generation of translation for the flashcards
 * Generation of examples for flashcards
 * Generation of furigana for the text
@@ -22,4 +24,8 @@ Features:
 * Import flashcards from screenshots or any images with text
 * Import flashcards from youtube videos
 * Import flashcards from migii
-* Import flashcards from duolingo
+* Sync flashcards list from duolingo
+
+## License
+
+Application is licensed under [AGPL-3.0](./LICENSE).
