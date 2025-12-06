@@ -1,0 +1,38 @@
+# Rust
+/target/
+Cargo.lock
+target
+.fastembed_cache
+data
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config files with sensitive data
+config.toml
+
+# Output directory
+output/
+
+# Temporary files
+*.tmp
+*.temp
+temp_*
+tokens_*
+output_*
+trimmed_*
+concatenated_*
+
+# Logs
+*.log
+
+# Cache
+.cache/

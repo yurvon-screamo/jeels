@@ -1,0 +1,121 @@
+specification {
+    element system {
+        style {
+            shape rectangle
+            color blue
+        }
+    }
+    element layer {
+        style {
+            shape rectangle
+            color secondary
+        }
+    }
+    element component {
+        style {
+            shape rectangle
+            color gray
+        }
+    }
+}
+
+model {
+    jeersSystem = system 'Jeers' 'Минималистичный аналог Anki с FSRS на Rust для изучения японского языка' {
+
+        domainLayer = layer 'Domain Layer' 'Домен: Сущности и бизнес-логика' {
+            userAggregate = component 'User Aggregate' 'Агрегатный корень User с карточками, настройками и историей уроков'
+            cardEntity = component 'Card Entity' 'Дочерняя сущность Card с вопросом, ответом, примерами и историей повторений'
+            reviewEntity = component 'Review Entity' 'Дочерняя сущность Review - запись оценки карточки'
+            studySessionItem = component 'StudySessionItem' 'Элемент сессии изучения с фуриганой и похожими карточками'
+            valueObjects = component 'Value Objects' 'Question (с embedding), Answer, ExamplePhrase, Rating, Stability, Difficulty, MemoryState, JapaneseLevel, NativeLanguage, LessonHistoryItem'
+
+            userAggregate -> cardEntity 'владеет'
+            cardEntity -> reviewEntity 'хранит историю'
+            cardEntity -> valueObjects 'использует'
+            studySessionItem -> cardEntity 'представляет в сессии'
+        }
+
+        applicationLayer = layer 'Application Layer' 'Прикладной слой: Use Cases и сервисы' {
+            createCardUseCase = component 'CreateCardUseCase' 'Use Case для создания карточки с генерацией перевода и примеров'
+            editCardUseCase = component 'EditCardUseCase' 'Use Case для редактирования карточки'
+            deleteCardUseCase = component 'DeleteCardUseCase' 'Use Case для удаления карточки'
+            listCardsUseCase = component 'ListCardsUseCase' 'Use Case для просмотра списка карточек'
+            viewCardUseCase = component 'ViewCardUseCase' 'Use Case для просмотра деталей карточки'
+            selectCardsToLearnUseCase = component 'SelectCardsToLearnUseCase' 'Use Case для выбора карточек для изучения с фуриганой'
+            rateCardUseCase = component 'RateCardUseCase' 'Use Case для оценки ответа с автоматическим планированием'
+            completeLessonUseCase = component 'CompleteLessonUseCase' 'Use Case для завершения урока и сохранения статистики'
+            getUserInfoUseCase = component 'GetUserInfoUseCase' 'Use Case для получения информации о пользователе'
+            rebuildDatabaseUseCase = component 'RebuildDatabaseUseCase' 'Use Case для перестройки embeddings, переводов и примеров'
+
+            srsService = component 'SRS Service' 'Трейт для алгоритма FSRS (интерфейс)'
+            embeddingService = component 'EmbeddingService' 'Трейт для генерации векторных embeddings'
+            llmService = component 'LlmService' 'Трейт для генерации текста через LLM'
+            furiganaService = component 'FuriganaService' 'Трейт для генерации фуриганы'
+
+            createCardUseCase -> userAggregate 'использует'
+            createCardUseCase -> embeddingService 'генерирует embedding'
+            createCardUseCase -> llmService 'генерирует перевод и примеры'
+            editCardUseCase -> userAggregate 'изменяет через'
+            editCardUseCase -> embeddingService 'обновляет embedding при изменении вопроса'
+            deleteCardUseCase -> userAggregate 'удаляет из коллекции'
+            listCardsUseCase -> userAggregate 'получает список через'
+            viewCardUseCase -> userAggregate 'получает карточку через'
+            selectCardsToLearnUseCase -> userAggregate 'получает карточки через'
+            selectCardsToLearnUseCase -> furiganaService 'генерирует фуригану'
+            rateCardUseCase -> userAggregate 'обновляет через'
+            rateCardUseCase -> srsService 'использует для расчета'
+            completeLessonUseCase -> userAggregate 'сохраняет статистику через'
+            getUserInfoUseCase -> userAggregate 'получает информацию через'
+            rebuildDatabaseUseCase -> userAggregate 'обновляет карточки через'
+            rebuildDatabaseUseCase -> embeddingService 'перестраивает embeddings'
+            rebuildDatabaseUseCase -> llmService 'перестраивает переводы и примеры'
+
+            srsService -> valueObjects 'работает с MemoryState'
+            embeddingService -> valueObjects 'генерирует Embedding для Question'
+        }
+
+        infrastructureLayer = layer 'Infrastructure Layer' 'Слой инфраструктуры: Адаптеры и внешние интерфейсы' {
+            userRepository = component 'FileSystemUserRepository' 'Реализация UserRepository для файловой системы (JSON)'
+            srsAdapter = component 'FsrsSrsService' 'Реализация SRS Service для FSRS (fsrs crate 5.2)'
+            embeddingAdapter = component 'CandleEmbeddingService' 'Реализация EmbeddingService через Candle (локальные модели)'
+            llmOpenAIAdapter = component 'OpenAiLlm' 'Реализация LlmService через OpenAI API'
+            llmGeminiAdapter = component 'GeminiLlm' 'Реализация LlmService через Google Gemini API'
+            llmCandleAdapter = component 'CandleLlm' 'Реализация LlmService через Candle (локальные модели)'
+            furiganaAdapter = component 'AutorubyFuriganaGenerator' 'Реализация FuriganaService через autoruby crate'
+
+            srsAdapter -> srsService 'реализует (fsrs Rust library)'
+            embeddingAdapter -> embeddingService 'реализует (Candle ML framework)'
+            llmOpenAIAdapter -> llmService 'реализует (OpenAI API)'
+            llmGeminiAdapter -> llmService 'реализует (Gemini API)'
+            llmCandleAdapter -> llmService 'реализует (Candle ML framework)'
+            furiganaAdapter -> furiganaService 'реализует (autoruby crate)'
+        }
+
+        applicationLayer -> domainLayer 'зависит от'
+        infrastructureLayer -> applicationLayer 'зависит от'
+        infrastructureLayer -> domainLayer 'зависит от (через интерфейсы)'
+    }
+}
+
+
+views {
+    view componentView of jeersSystem {
+        title 'Компонентная диаграмма'
+        include *
+    }
+
+    view domainView of jeersSystem.domainLayer {
+        title 'Доменная диаграмма'
+        include *
+    }
+
+    view applicationView of jeersSystem.applicationLayer {
+        title 'Прикладная диаграмма'
+        include *
+    }
+
+    view infrastructureView of jeersSystem.infrastructureLayer {
+        title 'Инфраструктурная диаграмма'
+        include *
+    }
+}
