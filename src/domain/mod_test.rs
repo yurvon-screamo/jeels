@@ -17,11 +17,8 @@ mod tests {
     }
 
     fn create_test_question() -> Question {
-        Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap()
+        const QUESTION: &str = "何ですか？";
+        Question::new(QUESTION.to_string(), generate_embedding(QUESTION)).unwrap()
     }
 
     fn generate_embedding(text: &str) -> Embedding {
@@ -42,7 +39,8 @@ mod tests {
     }
 
     fn create_test_answer() -> Answer {
-        Answer::new("A systems programming language".to_string()).unwrap()
+        const ANSWER: &str = "Что ты хочешь сказать?";
+        Answer::new(ANSWER.to_string()).unwrap()
     }
 
     fn create_test_difficulty() -> Difficulty {
@@ -134,8 +132,8 @@ mod tests {
             .unwrap();
 
         // Assert
-        assert_eq!(card.question().text(), "What is Rust?");
-        assert_eq!(card.answer().text(), "A systems programming language");
+        assert_eq!(card.question().text(), "何ですか？");
+        assert_eq!(card.answer().text(), "Что ты хочешь сказать?");
         assert_eq!(user.cards().len(), 1);
         assert!(user.cards().contains_key(&card.id()));
     }
@@ -144,7 +142,11 @@ mod tests {
     fn user_create_card_should_create_multiple_cards_with_unique_ids() {
         // Arrange
         let mut user = create_test_user();
-        let test_data = vec![("Q1", "A1"), ("Q2", "A2"), ("Q3", "A3")];
+        let test_data = vec![
+            ("食べて", "есть"),
+            ("飲みます", "пить"),
+            ("教えて", "объяснить"),
+        ];
 
         // Act
         let mut card_ids = Vec::new();
@@ -172,12 +174,14 @@ mod tests {
         let answer = create_test_answer();
         let card = user.create_card(question, answer, vec![]).unwrap();
         let card_id = card.id();
+        let new_question_text = "教えて";
+        let new_answer_text = "объяснить";
         let new_question = Question::new(
-            "What is Python?".to_string(),
-            generate_embedding("What is Python?"),
+            new_question_text.to_string(),
+            generate_embedding(new_question_text),
         )
         .unwrap();
-        let new_answer = Answer::new("A high-level programming language".to_string()).unwrap();
+        let new_answer = Answer::new(new_answer_text.to_string()).unwrap();
 
         // Act
         let result = user.edit_card(card_id, new_question.clone(), new_answer.clone(), vec![]);
@@ -185,11 +189,8 @@ mod tests {
         // Assert
         assert!(result.is_ok());
         let updated_card = user.get_card(card_id).unwrap();
-        assert_eq!(updated_card.question().text(), "What is Python?");
-        assert_eq!(
-            updated_card.answer().text(),
-            "A high-level programming language"
-        );
+        assert_eq!(updated_card.question().text(), new_question_text);
+        assert_eq!(updated_card.answer().text(), new_answer_text);
     }
 
     #[test]
@@ -307,13 +308,13 @@ mod tests {
         // Arrange
         let mut user = create_test_user();
 
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
 
-        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
-        let a2 = Answer::new("A2".to_string()).unwrap();
+        let q2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let a2 = Answer::new("есть".to_string()).unwrap();
         let card2 = user.create_card(q2, a2, vec![]).unwrap();
         let card2_id = card2.id();
 
@@ -340,19 +341,14 @@ mod tests {
         // Arrange
         let mut user = create_test_user();
 
-        // Old card: no reviews (is_new() = true, but treated as old because no reviews)
-        // Actually, card with no reviews is new, but let's create one with Again rating to make it old
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        // Low stability card: has Again review (is_new() = false, is_low_stability = true)
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
-        // Card with no reviews is new, so we need to add an Again review to make it old
-        // Actually wait - card with no reviews: is_new() returns true (no reviews means all are Again)
-        // So card with no reviews is NEW, not old
-        // Old card = has reviews with non-Again rating
         let stability = Stability::new(0.1).unwrap();
         let difficulty = create_test_difficulty();
-        // Add Again review - card stays new and due (next_review_date stays at now or past)
+        // Add Again review - card becomes low_stability and due
         user.rate_card(
             card1_id,
             Rating::Again,
@@ -361,9 +357,9 @@ mod tests {
         )
         .unwrap();
 
-        // New card: has review with Good rating (is_new() = false, so it's old)
-        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
-        let a2 = Answer::new("A2".to_string()).unwrap();
+        // Old card: has review with Good rating (is_new() = false, is_low_stability = true)
+        let q2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let a2 = Answer::new("есть".to_string()).unwrap();
         let card2 = user.create_card(q2, a2, vec![]).unwrap();
         let card2_id = card2.id();
         let stability2 = Stability::new(0.1).unwrap();
@@ -391,9 +387,9 @@ mod tests {
         // Arrange
         let mut user = create_test_user();
 
-        // Create old card (has Good review - not new)
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        // Create old card (has Good review - not new, is_low_stability = true)
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
         let stability1 = Stability::new(0.1).unwrap();
@@ -406,19 +402,11 @@ mod tests {
         )
         .unwrap();
 
-        // Create new card (has only Again review - is new)
-        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
-        let a2 = Answer::new("A2".to_string()).unwrap();
+        // Create new card (without reviews - is new)
+        let q2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let a2 = Answer::new("есть".to_string()).unwrap();
         let card2 = user.create_card(q2, a2, vec![]).unwrap();
         let card2_id = card2.id();
-        let stability2 = Stability::new(0.1).unwrap();
-        user.rate_card(
-            card2_id,
-            Rating::Again,
-            Duration::zero(), // Make it due immediately
-            MemoryState::new(stability2, difficulty),
-        )
-        .unwrap();
 
         // Act
         let cards = user.start_study_session(false);
@@ -441,21 +429,12 @@ mod tests {
             2, // new_cards_limit = 2
         );
 
-        // Create 3 new cards (all have only Again reviews - they are new)
+        // Create 3 new cards (without reviews - they are new)
         for i in 1..=3 {
             let q =
-                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
-            let a = Answer::new(format!("A{}", i)).unwrap();
-            let card = user.create_card(q, a, vec![]).unwrap();
-            let stability = Stability::new(0.1).unwrap();
-            let difficulty = create_test_difficulty();
-            user.rate_card(
-                card.id(),
-                Rating::Again,
-                Duration::zero(), // Make it due immediately
-                MemoryState::new(stability, difficulty),
-            )
-            .unwrap();
+                Question::new(format!("私{}", i), generate_embedding(&format!("私{}", i))).unwrap();
+            let a = Answer::new(format!("Я{}", i)).unwrap();
+            user.create_card(q, a, vec![]).unwrap();
         }
 
         // Act
@@ -481,8 +460,8 @@ mod tests {
         let difficulty = create_test_difficulty();
         for i in 1..=5 {
             let q =
-                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
-            let a = Answer::new(format!("A{}", i)).unwrap();
+                Question::new(format!("私{}", i), generate_embedding(&format!("私{}", i))).unwrap();
+            let a = Answer::new(format!("Я{}", i)).unwrap();
             let card = user.create_card(q, a, vec![]).unwrap();
             let card_id = card.id();
             old_card_ids.push(card_id);
@@ -513,13 +492,13 @@ mod tests {
         let mut user = create_test_user();
 
         // Create old cards (with Good reviews to make them old)
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
 
-        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
-        let a2 = Answer::new("A2".to_string()).unwrap();
+        let q2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let a2 = Answer::new("есть".to_string()).unwrap();
         let card2 = user.create_card(q2, a2, vec![]).unwrap();
         let card2_id = card2.id();
 
@@ -557,21 +536,11 @@ mod tests {
         // Arrange
         let mut user = create_test_user();
 
-        // Create card with only Again reviews (should be new, not old)
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        // Create card without reviews (should be new)
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
-
-        let stability = Stability::new(0.1).unwrap();
-        let difficulty = create_test_difficulty();
-        user.rate_card(
-            card1_id,
-            Rating::Again,
-            Duration::zero(), // Make it due immediately
-            MemoryState::new(stability, difficulty),
-        )
-        .unwrap();
 
         // Act
         let cards = user.start_study_session(false);
@@ -579,7 +548,7 @@ mod tests {
         // Assert
         assert_eq!(cards.len(), 1);
         assert_eq!(cards[0].card_id(), card1_id);
-        // Card with only Again should be treated as new (comes after old cards, limited)
+        // Card without reviews should be treated as new
     }
 
     #[test]
@@ -592,19 +561,21 @@ mod tests {
             2, // new_cards_limit = 2
         );
 
-        // Create 2 old cards (with Good reviews - not new)
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        // Create 2 old cards (with Good reviews - not new, in_progress)
+        // in_progress requires stability >= 1.5 and < 4.0
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
 
-        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
-        let a2 = Answer::new("A2".to_string()).unwrap();
+        let q2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let a2 = Answer::new("есть".to_string()).unwrap();
         let card2 = user.create_card(q2, a2, vec![]).unwrap();
         let card2_id = card2.id();
 
         let difficulty = create_test_difficulty();
-        let stability_old = Stability::new(0.1).unwrap();
+        // Use stability 2.0 to make cards in_progress (>= 1.5 and < 4.0)
+        let stability_old = Stability::new(2.0).unwrap();
         user.rate_card(
             card1_id,
             Rating::Good,
@@ -620,21 +591,13 @@ mod tests {
         )
         .unwrap();
 
-        // Create 3 new cards (with only Again reviews - they are new)
+        // Create 3 new cards (without reviews - they are new)
         let mut new_card_ids = Vec::new();
-        let stability_new = Stability::new(0.1).unwrap();
         for i in 3..=5 {
             let q =
-                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
-            let a = Answer::new(format!("A{}", i)).unwrap();
+                Question::new(format!("私{}", i), generate_embedding(&format!("私{}", i))).unwrap();
+            let a = Answer::new(format!("Я{}", i)).unwrap();
             let card = user.create_card(q, a, vec![]).unwrap();
-            user.rate_card(
-                card.id(),
-                Rating::Again,
-                Duration::zero(), // Make it due immediately
-                MemoryState::new(stability_new, difficulty),
-            )
-            .unwrap();
             new_card_ids.push(card.id());
         }
 
@@ -878,13 +841,9 @@ mod tests {
     fn user_create_card_should_return_error_when_duplicate_question() {
         // Arrange
         let mut user = create_test_user();
-        let question = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let answer1 = Answer::new("A systems programming language".to_string()).unwrap();
-        let answer2 = Answer::new("Another answer".to_string()).unwrap();
+        let question = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let answer1 = Answer::new("Я".to_string()).unwrap();
+        let answer2 = Answer::new("Ты".to_string()).unwrap();
 
         // Act
         let card1 = user.create_card(question.clone(), answer1, vec![]).unwrap();
@@ -894,7 +853,7 @@ mod tests {
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
-            JeersError::DuplicateCard { question } if question == "What is Rust?"
+            JeersError::DuplicateCard { question } if question == "私"
         ));
         assert_eq!(user.cards().len(), 1);
         assert!(user.cards().contains_key(&card1.id()));
@@ -904,17 +863,9 @@ mod tests {
     fn user_create_card_should_allow_different_questions() {
         // Arrange
         let mut user = create_test_user();
-        let question1 = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let question2 = Question::new(
-            "What is Python?".to_string(),
-            generate_embedding("What is Python?"),
-        )
-        .unwrap();
-        let answer = Answer::new("A programming language".to_string()).unwrap();
+        let question1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let question2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let answer = Answer::new("есть".to_string()).unwrap();
 
         // Act
         let card1 = user.create_card(question1, answer.clone(), vec![]).unwrap();
@@ -926,62 +877,19 @@ mod tests {
     }
 
     #[test]
-    fn user_create_card_should_be_case_insensitive_for_duplicates() {
-        // Arrange
-        let mut user = create_test_user();
-        let question1 = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        // Same text (case-insensitive) should have same embedding for duplicate detection
-        let question2 = Question::new(
-            "what is rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let answer = Answer::new("A programming language".to_string()).unwrap();
-
-        // Act
-        let card1 = user.create_card(question1, answer.clone(), vec![]).unwrap();
-        let result = user.create_card(question2, answer, vec![]);
-
-        // Assert
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            JeersError::DuplicateCard { question } if question == "what is rust?"
-        ));
-        assert_eq!(user.cards().len(), 1);
-        assert!(user.cards().contains_key(&card1.id()));
-    }
-
-    #[test]
     fn user_edit_card_should_return_error_when_duplicate_question() {
         // Arrange
         let mut user = create_test_user();
-        let question1 = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let question2 = Question::new(
-            "What is Python?".to_string(),
-            generate_embedding("What is Python?"),
-        )
-        .unwrap();
-        let answer = Answer::new("A programming language".to_string()).unwrap();
+        let question1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let question2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let answer = Answer::new("есть".to_string()).unwrap();
 
         let card1 = user.create_card(question1, answer.clone(), vec![]).unwrap();
         let card2 = user.create_card(question2, answer, vec![]).unwrap();
         let card2_id = card2.id();
 
-        let duplicate_question = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let new_answer = Answer::new("New answer".to_string()).unwrap();
+        let duplicate_question = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let new_answer = Answer::new("Я".to_string()).unwrap();
 
         // Act
         let result = user.edit_card(card2_id, duplicate_question, new_answer, vec![]);
@@ -990,7 +898,7 @@ mod tests {
         assert!(result.is_err());
         assert!(matches!(
             result.unwrap_err(),
-            JeersError::DuplicateCard { question } if question == "What is Rust?"
+            JeersError::DuplicateCard { question } if question == "私"
         ));
         // Verify that card1 still exists and card2 was not modified
         assert!(user.cards().contains_key(&card1.id()));
@@ -1001,13 +909,9 @@ mod tests {
     fn user_edit_card_should_allow_same_question_for_same_card() {
         // Arrange
         let mut user = create_test_user();
-        let question = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let answer1 = Answer::new("A systems programming language".to_string()).unwrap();
-        let answer2 = Answer::new("Updated answer".to_string()).unwrap();
+        let question = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let answer1 = Answer::new("Я".to_string()).unwrap();
+        let answer2 = Answer::new("Ты".to_string()).unwrap();
 
         let card = user.create_card(question.clone(), answer1, vec![]).unwrap();
         let card_id = card.id();
@@ -1022,65 +926,23 @@ mod tests {
     }
 
     #[test]
-    fn user_edit_card_should_trim_and_compare_case_insensitively() {
-        // Arrange
-        let mut user = create_test_user();
-        let question1 = Question::new(
-            "What is Rust?".to_string(),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let question2 = Question::new(
-            "What is Python?".to_string(),
-            generate_embedding("What is Python?"),
-        )
-        .unwrap();
-        let answer = Answer::new("A programming language".to_string()).unwrap();
-
-        let card1 = user.create_card(question1, answer.clone(), vec![]).unwrap();
-        let card2 = user.create_card(question2, answer, vec![]).unwrap();
-        let card2_id = card2.id();
-
-        // Same text (trimmed and case-insensitive) should have same embedding
-        let duplicate_question = Question::new(
-            String::from("  WHAT IS RUST?  "),
-            generate_embedding("What is Rust?"),
-        )
-        .unwrap();
-        let new_answer = Answer::new("New answer".to_string()).unwrap();
-
-        // Act
-        let result = user.edit_card(card2_id, duplicate_question, new_answer, vec![]);
-
-        // Assert
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            JeersError::DuplicateCard { question } if question == "  WHAT IS RUST?  "
-        ));
-        // Verify that card1 still exists and card2 was not modified
-        assert!(user.cards().contains_key(&card1.id()));
-        assert!(user.cards().contains_key(&card2_id));
-    }
-
-    #[test]
     fn user_find_similarity_should_return_similar_cards() {
         // Arrange
         let mut user = create_test_user();
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
 
         // Create cards with different texts and embeddings
         // These will have different embeddings, so similarity will be low
         // But the method should still work correctly
-        let q2 = Question::new("Q2".to_string(), generate_embedding("Q2")).unwrap();
-        let a2 = Answer::new("A2".to_string()).unwrap();
+        let q2 = Question::new("食べて".to_string(), generate_embedding("食べて")).unwrap();
+        let a2 = Answer::new("есть".to_string()).unwrap();
         user.create_card(q2, a2, vec![]).unwrap();
 
-        let q3 = Question::new("Q3".to_string(), generate_embedding("Q3")).unwrap();
-        let a3 = Answer::new("A3".to_string()).unwrap();
+        let q3 = Question::new("教えて".to_string(), generate_embedding("教えて")).unwrap();
+        let a3 = Answer::new("объяснить".to_string()).unwrap();
         user.create_card(q3, a3, vec![]).unwrap();
 
         // Act
@@ -1117,16 +979,16 @@ mod tests {
     fn user_find_similar_cards_should_return_limited_results() {
         // Arrange
         let mut user = create_test_user();
-        let q1 = Question::new("Q1".to_string(), generate_embedding("Q1")).unwrap();
-        let a1 = Answer::new("A1".to_string()).unwrap();
+        let q1 = Question::new("私".to_string(), generate_embedding("私")).unwrap();
+        let a1 = Answer::new("Я".to_string()).unwrap();
         let card1 = user.create_card(q1, a1, vec![]).unwrap();
         let card1_id = card1.id();
 
         // Create multiple cards
         for i in 2..=5 {
             let q =
-                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
-            let a = Answer::new(format!("A{}", i)).unwrap();
+                Question::new(format!("私{}", i), generate_embedding(&format!("私{}", i))).unwrap();
+            let a = Answer::new(format!("Я{}", i)).unwrap();
             user.create_card(q, a, vec![]).unwrap();
         }
 
@@ -1199,7 +1061,8 @@ mod tests {
         let answer = create_test_answer();
         let card = user.create_card(question, answer, vec![]).unwrap();
         let card_id = card.id();
-        let stability = Stability::new(1.0).unwrap();
+        // Known card requires stability > 4.0
+        let stability = Stability::new(5.0).unwrap();
         let difficulty = create_test_difficulty();
         user.rate_card(
             card_id,
@@ -1291,8 +1154,8 @@ mod tests {
         let question = create_test_question();
         let answer = create_test_answer();
         let example_phrases = vec![
-            ExamplePhrase::new("Example 1".to_string(), "Translation 1".to_string()),
-            ExamplePhrase::new("Example 2".to_string(), "Translation 2".to_string()),
+            ExamplePhrase::new("私は食べて".to_string(), "Я ем".to_string()),
+            ExamplePhrase::new("私は教えて".to_string(), "Я объясняю".to_string()),
         ];
 
         // Act
@@ -1302,8 +1165,8 @@ mod tests {
 
         // Assert
         assert_eq!(card.example_phrases().len(), 2);
-        assert_eq!(card.example_phrases()[0].text(), "Example 1");
-        assert_eq!(card.example_phrases()[1].text(), "Example 2");
+        assert_eq!(card.example_phrases()[0].text(), "私は食べて");
+        assert_eq!(card.example_phrases()[1].text(), "私は教えて");
     }
 
     #[test]
@@ -1316,21 +1179,12 @@ mod tests {
             2, // new_cards_limit = 2
         );
 
-        // Create 3 new cards (with only Again reviews)
+        // Create 3 new cards (without reviews - they are new)
         for i in 1..=3 {
             let q =
-                Question::new(format!("Q{}", i), generate_embedding(&format!("Q{}", i))).unwrap();
-            let a = Answer::new(format!("A{}", i)).unwrap();
-            let card = user.create_card(q, a, vec![]).unwrap();
-            let stability = Stability::new(0.1).unwrap();
-            let difficulty = create_test_difficulty();
-            user.rate_card(
-                card.id(),
-                Rating::Again,
-                Duration::zero(),
-                MemoryState::new(stability, difficulty),
-            )
-            .unwrap();
+                Question::new(format!("私{}", i), generate_embedding(&format!("私{}", i))).unwrap();
+            let a = Answer::new(format!("Я{}", i)).unwrap();
+            user.create_card(q, a, vec![]).unwrap();
         }
 
         // Act - with force_new_cards = true

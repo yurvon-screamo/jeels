@@ -68,9 +68,8 @@ fn expand_tilde(path: &str) -> String {
         .or_else(|_| std::env::var("USERPROFILE")) // Windows
         .or_else(|_| {
             // Windows fallback: HOMEPATH is relative to HOMEDRIVE
-            std::env::var("HOMEPATH").and_then(|hp| {
-                std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp))
-            })
+            std::env::var("HOMEPATH")
+                .and_then(|hp| std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp)))
         })
         .unwrap_or_else(|_| "~".to_string());
 
@@ -127,15 +126,11 @@ impl ApplicationEnvironment {
             database: DatabaseSettings {
                 path: database_path,
             },
-            llm: LlmSettings::Candle {
-                max_sample_len: 8192,
-                temperature: 0.7,
-                seed: 299792458,
-                model_repo: "unsloth/Qwen3-1.7B-GGUF".to_string(),
-                model_filename: "Qwen3-1.7B-Q4_K_M.gguf".to_string(),
-                model_revision: "main".to_string(),
-                tokenizer_repo: "Qwen/Qwen3-1.7B".to_string(),
-                tokenizer_filename: "tokenizer.json".to_string(),
+            llm: LlmSettings::OpenAi {
+                temperature: 0.3,
+                model: "Qwen/Qwen3-4B-Instruct-2507".to_string(),
+                base_url: "http://10.2.11.6:8001/v1".to_string(),
+                env_var_name: "OPENROUTER_API_KEY".to_string(),
             },
             translation: TranslationSettings {
                 temperature: 0.8,

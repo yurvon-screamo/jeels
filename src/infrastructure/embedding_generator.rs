@@ -71,7 +71,7 @@ impl CandleEmbeddingService {
 
     fn create_instruction(&self, word: &str) -> String {
         format!(
-            "Instruct: Retrieve Japanese words that belong to the same semantic category.\nQuery: {}",
+            "Instruct: Represent this Japanese word for find same words in different grammar forms\nQuery: {}",
             word
         )
     }

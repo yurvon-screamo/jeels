@@ -18,6 +18,8 @@ pub trait IsJapaneseText {
     fn as_furigana(&self) -> String;
 
     fn as_hiragana(&self) -> String;
+
+    fn equals_by_reading(&self, other: &Self) -> bool;
 }
 
 impl IsJapanese for char {
@@ -64,5 +66,9 @@ impl IsJapaneseText for str {
 
     fn has_furigana(&self) -> bool {
         self.as_furigana() != self
+    }
+
+    fn equals_by_reading(&self, other: &Self) -> bool {
+        self.to_hiragana() == other.to_hiragana()
     }
 }

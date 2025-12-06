@@ -88,18 +88,20 @@ impl User {
     }
 
     pub fn find_homonyms(&self, card_id: Ulid) -> Result<Vec<VocabularyCard>, JeersError> {
-        let card = self
+        let original_card = self
             .vocabulary_cards
             .get(&card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
-
-        let hiragana = card.question().text().as_hiragana();
 
         let homonyms = self
             .vocabulary_cards
             .values()
             .filter(|card| card.id() != card_id)
-            .filter(|card| card.question().text().as_hiragana() == hiragana)
+            .filter(|card| {
+                card.question()
+                    .text()
+                    .equals_by_reading(original_card.question().text())
+            })
             .cloned()
             .collect::<Vec<_>>();
 
@@ -133,8 +135,9 @@ impl User {
     }
 
     fn has_card_with_question(&self, question: &Question, exclude_card_id: Option<Ulid>) -> bool {
+        const SIMILARITY_THRESHOLD: f32 = 0.97;
+
         let query_embedding = question.embedding();
-        const SIMILARITY_THRESHOLD: f32 = 0.9999;
 
         self.vocabulary_cards.iter().any(|(id, card)| {
             if let Some(exclude_id) = exclude_card_id
