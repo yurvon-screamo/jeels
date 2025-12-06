@@ -16,9 +16,6 @@ data
 .DS_Store
 Thumbs.db
 
-# Config files with sensitive data
-config.toml
-
 # Output directory
 output/
 

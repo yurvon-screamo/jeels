@@ -10,6 +10,7 @@ pub mod list_cards;
 pub mod rate_card;
 pub mod rebuild_database;
 pub mod select_cards_to_learn;
+pub mod sync_duolingo_words;
 pub mod translate;
 pub mod view_card;
 
@@ -25,5 +26,6 @@ pub use list_cards::ListCardsUseCase;
 pub use rate_card::RateCardUseCase;
 pub use rebuild_database::RebuildDatabaseUseCase;
 pub use select_cards_to_learn::SelectCardsToLearnUseCase;
+pub use sync_duolingo_words::{SyncDuolingoWordsResult, SyncDuolingoWordsUseCase};
 pub use translate::TranslateUseCase;
 pub use view_card::ViewCardUseCase;

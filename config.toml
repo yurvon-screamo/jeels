@@ -1,0 +1,26 @@
+[database]
+path = "~/.keikaku"
+
+# [llm.candle]
+# max_sample_len = 8192
+# temperature = 0.7
+# seed = 299792458
+# model_repo = "unsloth/Qwen3-1.7B-GGUF"
+# model_filename = "Qwen3-1.7B-Q4_K_M.gguf"
+# model_revision = "main"
+# tokenizer_repo = "Qwen/Qwen3-1.7B"
+# tokenizer_filename = "tokenizer.json"
+
+# [llm.gemini]
+# temperature = 0.7
+# model = "gemini-pro"
+
+[llm.openai]
+temperature = 0.3
+model = "amazon/nova-2-lite-v1:free"
+base_url = "https://openrouter.ai/api/v1"
+env_var_name = "OPENROUTER_API_KEY"
+
+[translation]
+temperature = 0.8
+seed = 299792458

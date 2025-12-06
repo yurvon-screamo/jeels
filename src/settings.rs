@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use std::sync::{Arc, OnceLock};
 
@@ -33,8 +33,56 @@ pub struct Settings {
 }
 
 #[derive(Serialize, Deserialize)]
+struct DatabaseSettingsHelper {
+    path: String,
+}
+
+#[derive(Serialize)]
 pub struct DatabaseSettings {
     pub path: PathBuf,
+}
+
+impl<'de> Deserialize<'de> for DatabaseSettings {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let helper = DatabaseSettingsHelper::deserialize(deserializer)?;
+        let expanded_path = expand_tilde(&helper.path);
+        Ok(DatabaseSettings {
+            path: PathBuf::from(expanded_path),
+        })
+    }
+}
+
+fn expand_tilde(path: &str) -> String {
+    if !path.starts_with("~/") && path != "~" {
+        return path.to_string();
+    }
+
+    // Try multiple methods to get home directory for cross-platform support
+    // 1. HOME - standard on Unix/Linux/Android (Termux)
+    // 2. USERPROFILE - standard on Windows
+    // 3. HOMEDRIVE + HOMEPATH - alternative Windows method
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE")) // Windows
+        .or_else(|_| {
+            // Windows fallback: HOMEPATH is relative to HOMEDRIVE
+            std::env::var("HOMEPATH").and_then(|hp| {
+                std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp))
+            })
+        })
+        .unwrap_or_else(|_| "~".to_string());
+
+    if path == "~" {
+        home
+    } else {
+        // Use PathBuf for proper path joining across platforms
+        // This handles Windows backslashes and Unix forward slashes correctly
+        let home_path = PathBuf::from(&home);
+        let relative_path = path.strip_prefix("~/").unwrap_or(path);
+        home_path.join(relative_path).to_string_lossy().to_string()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

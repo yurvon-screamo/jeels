@@ -1,5 +1,6 @@
 pub mod anki;
 mod card;
+mod duolingo;
 mod furigana_renderer;
 mod kanji;
 mod learn;
@@ -19,6 +20,7 @@ use crate::{
             handle_create_card, handle_create_words, handle_delete_card, handle_edit_card,
             handle_list_cards, handle_rebuild_database,
         },
+        duolingo::handle_sync_duolingo_words,
         kanji::handle_kanji,
         learn::handle_learn,
         me::handle_me,
@@ -35,7 +37,7 @@ use crate::{
 const DEFAULT_USERNAME: &str = "yurvon_screamo";
 const DEFAULT_JAPANESE_LEVEL: JapaneseLevel = JapaneseLevel::N5;
 const DEFAULT_NATIVE_LANGUAGE: NativeLanguage = NativeLanguage::Russian;
-const DEFAULT_NEW_CARDS_LIMIT: usize = 15;
+const DEFAULT_NEW_CARDS_LIMIT: usize = 7;
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -134,6 +136,12 @@ enum Command {
         /// Kanji character to get information about
         kanji: String,
     },
+    /// Sync words from Duolingo
+    DuolingoSync {
+        /// If true, only questions will be imported, answers will be generated
+        #[clap(short, long, default_value = "false")]
+        question_only: bool,
+    },
 }
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
@@ -210,6 +218,9 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         }
         Command::Kanji { kanji } => {
             handle_kanji(user_id, kanji).await?;
+        }
+        Command::DuolingoSync { question_only } => {
+            handle_sync_duolingo_words(user_id, question_only).await?;
         }
     }
 

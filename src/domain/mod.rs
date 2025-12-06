@@ -32,6 +32,7 @@ pub struct User {
     native_language: NativeLanguage,
     current_japanese_level: JapaneseLevel,
     lesson_history: Vec<DailyHistoryItem>,
+    duolingo_jwt_token: Option<String>,
 
     vocabulary_cards: HashMap<Ulid, VocabularyCard>,
 }
@@ -51,6 +52,7 @@ impl User {
             native_language,
             new_cards_limit,
             lesson_history: Vec::new(),
+            duolingo_jwt_token: None,
         }
     }
 
@@ -76,6 +78,14 @@ impl User {
 
     pub fn new_cards_limit(&self) -> usize {
         self.new_cards_limit
+    }
+
+    pub fn duolingo_jwt_token(&self) -> Option<&str> {
+        self.duolingo_jwt_token.as_deref()
+    }
+
+    pub fn set_duolingo_jwt_token(&mut self, token: Option<String>) {
+        self.duolingo_jwt_token = token;
     }
 
     pub fn find_homonyms(&self, card_id: Ulid) -> Result<Vec<VocabularyCard>, JeersError> {

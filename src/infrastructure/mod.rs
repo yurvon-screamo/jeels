@@ -1,5 +1,6 @@
 pub mod candle_llm;
 pub mod candle_translation;
+pub mod duolingo_client;
 pub mod embedding_generator;
 pub mod gemini_llm;
 pub mod migii_client;
@@ -9,6 +10,7 @@ pub mod user_repository;
 
 pub use candle_llm::CandleLlm;
 pub use candle_translation::CandleTranslationService;
+pub use duolingo_client::HttpDuolingoClient;
 pub use embedding_generator::CandleEmbeddingService;
 pub use gemini_llm::GeminiLlm;
 pub use migii_client::HttpMigiiClient;

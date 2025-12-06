@@ -10,6 +10,7 @@ pub struct DailyHistoryItem {
     total_words: usize,
     known_words: usize,
     new_words: usize,
+    lessons_completed: usize,
 }
 
 impl DailyHistoryItem {
@@ -28,6 +29,7 @@ impl DailyHistoryItem {
             total_words,
             known_words,
             new_words,
+            lessons_completed: 1,
         }
     }
 
@@ -68,5 +70,6 @@ impl DailyHistoryItem {
         self.total_words = total_words;
         self.known_words = known_words;
         self.new_words = new_words;
+        self.lessons_completed += 1;
     }
 }
