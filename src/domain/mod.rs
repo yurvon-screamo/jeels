@@ -33,7 +33,6 @@ pub struct User {
     current_japanese_level: JapaneseLevel,
     lesson_history: Vec<DailyHistoryItem>,
     duolingo_jwt_token: Option<String>,
-
     vocabulary_cards: HashMap<Ulid, VocabularyCard>,
 }
 
@@ -304,29 +303,39 @@ impl User {
     }
 
     pub fn update_daily_history(&mut self) {
-        let avg_stability = self
+        let stability_cards: Vec<_> = self
             .vocabulary_cards
             .values()
             .filter_map(|card| card.stability())
-            .map(|stability| stability.value())
-            .sum::<f64>()
-            / self
-                .vocabulary_cards
-                .values()
-                .filter_map(|card| card.stability())
-                .count() as f64;
+            .collect();
+        let avg_stability = if stability_cards.is_empty() {
+            None
+        } else {
+            Some(
+                stability_cards
+                    .iter()
+                    .map(|stability| stability.value())
+                    .sum::<f64>()
+                    / stability_cards.len() as f64,
+            )
+        };
 
-        let avg_difficulty = self
+        let difficulty_cards: Vec<_> = self
             .vocabulary_cards
             .values()
             .filter_map(|card| card.difficulty())
-            .map(|difficulty| difficulty.value())
-            .sum::<f64>()
-            / self
-                .vocabulary_cards
-                .values()
-                .filter_map(|card| card.stability())
-                .count() as f64;
+            .collect();
+        let avg_difficulty = if difficulty_cards.is_empty() {
+            None
+        } else {
+            Some(
+                difficulty_cards
+                    .iter()
+                    .map(|difficulty| difficulty.value())
+                    .sum::<f64>()
+                    / difficulty_cards.len() as f64,
+            )
+        };
 
         let total_words = self.vocabulary_cards.len();
         let known_words = self

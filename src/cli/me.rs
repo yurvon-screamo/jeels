@@ -111,7 +111,7 @@ fn draw_lesson_history_chart(frame: &mut Frame, area: Rect, history: &[DailyHist
         history,
         "Стабильность",
         Color::Green,
-        |item| item.avg_stability(),
+        |item| item.avg_stability().unwrap_or(0.0),
         false,
     );
     draw_single_chart(
@@ -120,7 +120,7 @@ fn draw_lesson_history_chart(frame: &mut Frame, area: Rect, history: &[DailyHist
         history,
         "Сложность",
         Color::Red,
-        |item| item.avg_difficulty(),
+        |item| item.avg_difficulty().unwrap_or(0.0),
         false,
     );
     draw_single_chart(

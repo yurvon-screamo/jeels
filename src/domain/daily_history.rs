@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DailyHistoryItem {
     timestamp: DateTime<Utc>,
-    avg_stability: f64,
-    avg_difficulty: f64,
+    avg_stability: Option<f64>,
+    avg_difficulty: Option<f64>,
 
     total_words: usize,
     known_words: usize,
@@ -16,8 +16,8 @@ pub struct DailyHistoryItem {
 impl DailyHistoryItem {
     pub fn new(
         timestamp: DateTime<Utc>,
-        avg_stability: f64,
-        avg_difficulty: f64,
+        avg_stability: Option<f64>,
+        avg_difficulty: Option<f64>,
         total_words: usize,
         known_words: usize,
         new_words: usize,
@@ -37,11 +37,11 @@ impl DailyHistoryItem {
         self.timestamp
     }
 
-    pub fn avg_stability(&self) -> f64 {
+    pub fn avg_stability(&self) -> Option<f64> {
         self.avg_stability
     }
 
-    pub fn avg_difficulty(&self) -> f64 {
+    pub fn avg_difficulty(&self) -> Option<f64> {
         self.avg_difficulty
     }
 
@@ -59,8 +59,8 @@ impl DailyHistoryItem {
 
     pub fn update(
         &mut self,
-        avg_stability: f64,
-        avg_difficulty: f64,
+        avg_stability: Option<f64>,
+        avg_difficulty: Option<f64>,
         total_words: usize,
         known_words: usize,
         new_words: usize,
