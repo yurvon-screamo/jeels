@@ -1,6 +1,16 @@
 src/domain/duolingo_words.json filter=lfs diff=lfs merge=lfs -text
-src/domain/jlpt_vocabulary.json filter=lfs diff=lfs merge=lfs -text
+src/domain/vocabulary.json filter=lfs diff=lfs merge=lfs -text
 src/domain/jltp_words.json filter=lfs diff=lfs merge=lfs -text
 src/domain/kanji.json filter=lfs diff=lfs merge=lfs -text
 src/domain/migii_words.json filter=lfs diff=lfs merge=lfs -text
 src/domain/radicals.json filter=lfs diff=lfs merge=lfs -text
+src/domain/vocabulary_n4.json filter=lfs diff=lfs merge=lfs -text
+src/domain/vocabulary_n5.json filter=lfs diff=lfs merge=lfs -text
+src/domain/jltp_words.json filter=lfs diff=lfs merge=lfs -text
+src/domain/kanji.json filter=lfs diff=lfs merge=lfs -text
+src/domain/migii_words.json filter=lfs diff=lfs merge=lfs -text
+src/domain/radicals.json filter=lfs diff=lfs merge=lfs -text
+src/domain/vocabulary_n1.json filter=lfs diff=lfs merge=lfs -text
+src/domain/vocabulary_n2.json filter=lfs diff=lfs merge=lfs -text
+src/domain/duolingo_words.json filter=lfs diff=lfs merge=lfs -text
+src/domain/vocabulary_n3.json filter=lfs diff=lfs merge=lfs -text

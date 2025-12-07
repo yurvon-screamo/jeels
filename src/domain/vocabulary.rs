@@ -4,7 +4,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::value_objects::{ExamplePhrase, JapaneseLevel, NativeLanguage};
 
-const VOCABULARY_DATA: &str = include_str!("./jlpt_vocabulary.json");
+const VOCABULARY_N5_DATA: &str = include_str!("./vocabulary_n5.json");
+const VOCABULARY_N4_DATA: &str = include_str!("./vocabulary_n4.json");
+const VOCABULARY_N3_DATA: &str = include_str!("./vocabulary_n3.json");
+const VOCABULARY_N2_DATA: &str = include_str!("./vocabulary_n2.json");
+const VOCABULARY_N1_DATA: &str = include_str!("./vocabulary_n1.json");
 
 pub static VOCABULARY_DB: LazyLock<VocabularyDatabase> = LazyLock::new(VocabularyDatabase::new);
 
@@ -45,8 +49,32 @@ impl Default for VocabularyDatabase {
 
 impl VocabularyDatabase {
     pub fn new() -> Self {
-        let vocabulary_data: HashMap<String, VocabularyEntryStoredType> =
-            serde_json::from_str(VOCABULARY_DATA).unwrap();
+        let vocabulary_data: HashMap<_, _> = serde_json::from_str::<
+            HashMap<String, VocabularyEntryStoredType>,
+        >(VOCABULARY_N5_DATA)
+        .unwrap()
+        .into_iter()
+        .chain(
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N4_DATA)
+                .unwrap()
+                .into_iter(),
+        )
+        .chain(
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N3_DATA)
+                .unwrap()
+                .into_iter(),
+        )
+        .chain(
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N2_DATA)
+                .unwrap()
+                .into_iter(),
+        )
+        .chain(
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N1_DATA)
+                .unwrap()
+                .into_iter(),
+        )
+        .collect();
 
         let vocabulary_map = vocabulary_data
             .into_iter()
