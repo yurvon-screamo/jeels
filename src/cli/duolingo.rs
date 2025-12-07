@@ -52,7 +52,7 @@ pub async fn handle_sync_duolingo_words(
     let duolingo_client = crate::infrastructure::HttpDuolingoClient::new();
     let use_case = SyncDuolingoWordsUseCase::new(
         settings.get_repository().await?,
-        settings.get_embedding_generator().await?,
+        settings.get_embedding_service().await?,
         settings.get_llm_service().await?,
         &duolingo_client,
     );

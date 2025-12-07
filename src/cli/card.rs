@@ -78,7 +78,7 @@ pub async fn handle_create_card(
     let settings = ApplicationEnvironment::get();
     let card = CreateCardUseCase::new(
         settings.get_repository().await?,
-        settings.get_embedding_generator().await?,
+        settings.get_embedding_service().await?,
         settings.get_llm_service().await?,
     )
     .execute(user_id, question, Some(answer), None)
@@ -107,7 +107,7 @@ pub async fn handle_create_words(user_id: Ulid, questions: Vec<String>) -> Resul
     let settings = ApplicationEnvironment::get();
     let use_case = CreateCardUseCase::new(
         settings.get_repository().await?,
-        settings.get_embedding_generator().await?,
+        settings.get_embedding_service().await?,
         settings.get_llm_service().await?,
     );
 
@@ -142,7 +142,7 @@ pub async fn handle_edit_card(
     let settings = ApplicationEnvironment::get();
     let card = EditCardUseCase::new(
         settings.get_repository().await?,
-        settings.get_embedding_generator().await?,
+        settings.get_embedding_service().await?,
     )
     .execute(user_id, card_id, question, answer, Vec::new())
     .await?;
@@ -202,7 +202,7 @@ pub async fn handle_rebuild_database(
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
-    let embedding_service = settings.get_embedding_generator().await?;
+    let embedding_service = settings.get_embedding_service().await?;
     let create_card_use_case = CreateCardUseCase::new(
         repository,
         embedding_service,

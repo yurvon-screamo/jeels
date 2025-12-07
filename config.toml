@@ -21,6 +21,13 @@ model = "Qwen/Qwen3-4B-Instruct-2507"
 base_url = "http://10.2.11.6:8001/v1"
 env_var_name = "OPENROUTER_API_KEY"
 
+# [embedding.candle]
+
+[embedding.openai]
+model = "Qwen/Qwen3-Embedding-0.6B"
+base_url = "http://10.3.168.177:8003/v1"
+env_var_name = "OPENROUTER_API_KEY"
+
 [translation]
 temperature = 0.8
 seed = 299792458

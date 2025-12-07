@@ -6,8 +6,9 @@ use std::sync::{Arc, OnceLock};
 use crate::application::LlmService;
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    CandleEmbeddingService, CandleLlm, CandleTranslationService, FileSystemUserRepository,
-    FsrsSrsService, GeminiLlm, HttpMigiiClient, OpenAiLlm,
+    CandleEmbeddingService, CandleLlm, CandleTranslationService, EmbeddingServiceEnum,
+    FileSystemUserRepository, FsrsSrsService, GeminiLlm, HttpMigiiClient, OpenAiEmbeddingService,
+    OpenAiLlm,
 };
 use tokio::sync::OnceCell;
 
@@ -17,7 +18,7 @@ pub struct ApplicationEnvironment {
     settings: Settings,
 
     lazy_repository: Arc<OnceCell<FileSystemUserRepository>>,
-    lazy_embedding_generator: Arc<OnceCell<CandleEmbeddingService>>,
+    lazy_embedding_service: Arc<OnceCell<EmbeddingServiceEnum>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
     lazy_translation_service: Arc<OnceCell<CandleTranslationService>>,
     lazy_migii_client: Arc<OnceCell<HttpMigiiClient>>,
@@ -29,6 +30,7 @@ pub struct ApplicationEnvironment {
 pub struct Settings {
     pub database: DatabaseSettings,
     pub llm: LlmSettings,
+    pub embedding: EmbeddingSettings,
     pub translation: TranslationSettings,
 }
 
@@ -115,6 +117,18 @@ pub enum LlmSettings {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum EmbeddingSettings {
+    #[serde(rename = "candle")]
+    Candle,
+    #[serde(rename = "openai")]
+    OpenAi {
+        model: String,
+        base_url: String,
+        env_var_name: String,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranslationSettings {
     pub temperature: f64,
     pub seed: u64,
@@ -130,6 +144,11 @@ impl ApplicationEnvironment {
                 temperature: 0.3,
                 model: "Qwen/Qwen3-4B-Instruct-2507".to_string(),
                 base_url: "http://10.2.11.6:8001/v1".to_string(),
+                env_var_name: "OPENROUTER_API_KEY".to_string(),
+            },
+            embedding: EmbeddingSettings::OpenAi {
+                model: "Qwen/Qwen3-Embedding-0.6B".to_string(),
+                base_url: "http://10.3.168.177:8003/v1".to_string(),
                 env_var_name: "OPENROUTER_API_KEY".to_string(),
             },
             translation: TranslationSettings {
@@ -162,12 +181,31 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_embedding_generator(&self) -> Result<&CandleEmbeddingService, JeersError> {
-        self.lazy_embedding_generator
+    pub async fn get_embedding_service(&self) -> Result<&EmbeddingServiceEnum, JeersError> {
+        self.lazy_embedding_service
             .get_or_try_init(|| async {
-                CandleEmbeddingService::new().map_err(|e| JeersError::SettingsError {
-                    reason: e.to_string(),
-                })
+                let service = match &self.settings.embedding {
+                    EmbeddingSettings::Candle => EmbeddingServiceEnum::Candle(
+                        CandleEmbeddingService::new().map_err(|e| JeersError::SettingsError {
+                            reason: e.to_string(),
+                        })?,
+                    ),
+                    EmbeddingSettings::OpenAi {
+                        model,
+                        base_url,
+                        env_var_name,
+                    } => EmbeddingServiceEnum::OpenAi(
+                        OpenAiEmbeddingService::new(
+                            model.clone(),
+                            base_url.clone(),
+                            env_var_name.clone(),
+                        )
+                        .map_err(|e| JeersError::SettingsError {
+                            reason: e.to_string(),
+                        })?,
+                    ),
+                };
+                Ok(service)
             })
             .await
     }
@@ -279,7 +317,7 @@ impl ApplicationEnvironment {
         let environment = ApplicationEnvironment {
             settings,
             lazy_repository: Arc::new(OnceCell::new()),
-            lazy_embedding_generator: Arc::new(OnceCell::new()),
+            lazy_embedding_service: Arc::new(OnceCell::new()),
             lazy_srs_service: Arc::new(OnceCell::new()),
             lazy_translation_service: Arc::new(OnceCell::new()),
             lazy_migii_client: Arc::new(OnceCell::new()),

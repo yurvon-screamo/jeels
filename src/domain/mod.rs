@@ -5,6 +5,7 @@ pub mod kanji;
 pub mod review;
 pub mod study_session;
 pub mod value_objects;
+pub mod vocabulary;
 pub mod vocabulary_card;
 
 pub use error::JeersError;

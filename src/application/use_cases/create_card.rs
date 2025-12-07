@@ -4,6 +4,7 @@ use crate::domain::error::JeersError;
 use crate::domain::value_objects::{
     Answer, ExamplePhrase, JapaneseLevel, NativeLanguage, Question,
 };
+use crate::domain::vocabulary::VOCABULARY_DB;
 use ulid::Ulid;
 
 #[derive(Clone)]
@@ -27,6 +28,10 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         question_text: &str,
         native_language: &NativeLanguage,
     ) -> Result<Answer, JeersError> {
+        if let Some(translation) = VOCABULARY_DB.get_translation(question_text, native_language) {
+            return Answer::new(translation);
+        }
+
         let answer_text = self
             .llm_service
             .generate_text(&format!(
@@ -52,6 +57,11 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         native_language: &NativeLanguage,
         japanese_level: &JapaneseLevel,
     ) -> Result<Vec<ExamplePhrase>, JeersError> {
+        if let Some(examples) = VOCABULARY_DB.get_examples(question_text, native_language)
+            && !examples.is_empty() {
+                return Ok(examples);
+            }
+
         let prompt = format!(
             r#"Ты — помощник для изучения языков.
     Твоя задача: Создай 2 простых примера использования слова: '{word}'.

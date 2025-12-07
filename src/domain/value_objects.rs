@@ -194,6 +194,20 @@ impl fmt::Display for NativeLanguage {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PartOfSpeech {
+    Noun,
+    Verb,
+    Adjective,
+    Adverb,
+    Pronoun,
+    Preposition,
+    Conjunction,
+    Interjection,
+    Particle,
+    Other,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ExamplePhrase {
     text: String,
@@ -211,5 +225,66 @@ impl ExamplePhrase {
 
     pub fn translation(&self) -> &String {
         &self.translation
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct JlptVocabularyEntry {
+    level: JapaneseLevel,
+    russian_translation: String,
+    english_translation: String,
+    russian_examples: Vec<ExamplePhrase>,
+    english_examples: Vec<ExamplePhrase>,
+    part_of_speech: PartOfSpeech,
+    embedding: Vec<f32>,
+}
+
+impl JlptVocabularyEntry {
+    pub fn new(
+        level: JapaneseLevel,
+        russian_translation: String,
+        english_translation: String,
+        russian_examples: Vec<ExamplePhrase>,
+        english_examples: Vec<ExamplePhrase>,
+        part_of_speech: PartOfSpeech,
+        embedding: Vec<f32>,
+    ) -> Self {
+        Self {
+            level,
+            russian_translation,
+            english_translation,
+            russian_examples,
+            english_examples,
+            part_of_speech,
+            embedding,
+        }
+    }
+
+    pub fn level(&self) -> &JapaneseLevel {
+        &self.level
+    }
+
+    pub fn russian_translation(&self) -> &str {
+        &self.russian_translation
+    }
+
+    pub fn english_translation(&self) -> &str {
+        &self.english_translation
+    }
+
+    pub fn russian_examples(&self) -> &[ExamplePhrase] {
+        &self.russian_examples
+    }
+
+    pub fn english_examples(&self) -> &[ExamplePhrase] {
+        &self.english_examples
+    }
+
+    pub fn part_of_speech(&self) -> &PartOfSpeech {
+        &self.part_of_speech
+    }
+
+    pub fn embedding(&self) -> &[f32] {
+        &self.embedding
     }
 }
