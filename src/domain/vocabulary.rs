@@ -51,11 +51,11 @@ impl VocabularyDatabase {
     pub fn new() -> Self {
         let vocabulary_data: HashMap<_, _> = serde_json::from_str::<
             HashMap<String, VocabularyEntryStoredType>,
-        >(VOCABULARY_N5_DATA)
+        >(VOCABULARY_N1_DATA)
         .unwrap()
         .into_iter()
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N4_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N2_DATA)
                 .unwrap()
                 .into_iter(),
         )
@@ -65,12 +65,12 @@ impl VocabularyDatabase {
                 .into_iter(),
         )
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N2_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N4_DATA)
                 .unwrap()
                 .into_iter(),
         )
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N1_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N5_DATA)
                 .unwrap()
                 .into_iter(),
         )
