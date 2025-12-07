@@ -94,4 +94,3 @@ pub async fn handle_sync_duolingo_words(
 
     Ok(())
 }
-

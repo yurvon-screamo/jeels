@@ -58,9 +58,10 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
         japanese_level: &JapaneseLevel,
     ) -> Result<Vec<ExamplePhrase>, JeersError> {
         if let Some(examples) = VOCABULARY_DB.get_examples(question_text, native_language)
-            && !examples.is_empty() {
-                return Ok(examples);
-            }
+            && !examples.is_empty()
+        {
+            return Ok(examples);
+        }
 
         let prompt = format!(
             r#"Ты — помощник для изучения языков.
