@@ -1,4 +1,5 @@
-use crate::application::{CreateCardUseCase, EmbeddingService, LlmService, UserRepository};
+use super::generate_card_content::GenerateCardContentUseCase;
+use crate::application::{EmbeddingService, LlmService, UserRepository};
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Embedding, Question};
 use tracing::error;
@@ -8,21 +9,17 @@ use ulid::Ulid;
 pub struct RebuildDatabaseUseCase<'a, R: UserRepository, E: EmbeddingService, L: LlmService> {
     repository: &'a R,
     embedding_service: &'a E,
-    create_card_use_case: CreateCardUseCase<'a, R, E, L>,
+    generate_content_use_case: GenerateCardContentUseCase<'a, L>,
 }
 
 impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
     RebuildDatabaseUseCase<'a, R, E, L>
 {
-    pub fn new(
-        repository: &'a R,
-        embedding_service: &'a E,
-        create_card_use_case: CreateCardUseCase<'a, R, E, L>,
-    ) -> Self {
+    pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
         Self {
             repository,
             embedding_service,
-            create_card_use_case,
+            generate_content_use_case: GenerateCardContentUseCase::new(llm_service),
         }
     }
 
@@ -43,47 +40,38 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
         let mut data = Vec::new();
 
         for card in cards.values() {
+            let needs_generation =
+                (rebuild_example_phrases && card.example_phrases().is_empty()) || rebuild_answer;
+
+            let (generated_answer, generated_examples) = if needs_generation {
+                match self
+                    .generate_content_use_case
+                    .generate_content(
+                        card.question().text(),
+                        user.native_language(),
+                        user.current_japanese_level(),
+                    )
+                    .await
+                {
+                    Ok((answer, examples)) => (Some(answer), Some(examples)),
+                    Err(e) => {
+                        error!("Failed to generate content for card {}: {}", card.id(), e);
+                        continue;
+                    }
+                }
+            } else {
+                (None, None)
+            };
+
             let new_example_phrases =
                 if rebuild_example_phrases && card.example_phrases().is_empty() {
-                    match self
-                        .create_card_use_case
-                        .generate_example_phrases(
-                            card.question().text(),
-                            user.native_language(),
-                            user.current_japanese_level(),
-                        )
-                        .await
-                    {
-                        Ok(value) => value,
-                        Err(e) => {
-                            error!(
-                                "Failed to generate example phrases for card {}: {}",
-                                card.id(),
-                                e
-                            );
-                            continue;
-                        }
-                    }
+                    generated_examples.unwrap_or_else(|| card.example_phrases().to_vec())
                 } else {
                     card.example_phrases().to_vec()
                 };
 
             let new_answer = if rebuild_answer {
-                match self
-                    .create_card_use_case
-                    .generate_translation(card.question().text(), user.native_language())
-                    .await
-                {
-                    Ok(value) => value,
-                    Err(e) => {
-                        error!(
-                            "Failed to generate translation for card {}: {}",
-                            card.id(),
-                            e
-                        );
-                        continue;
-                    }
-                }
+                generated_answer.unwrap_or_else(|| card.answer().clone())
             } else {
                 card.answer().clone()
             };

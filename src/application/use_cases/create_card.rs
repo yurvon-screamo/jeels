@@ -1,159 +1,46 @@
-use crate::application::{EmbeddingService, LlmService, UserRepository};
+use super::generate_card_content::GenerateCardContentUseCase;
+use crate::application::{EmbeddingService, UserRepository};
 use crate::domain::VocabularyCard;
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::{
-    Answer, ExamplePhrase, JapaneseLevel, NativeLanguage, Question,
-};
+use crate::domain::value_objects::{Answer, ExamplePhrase, Question};
 use crate::domain::vocabulary::VOCABULARY_DB;
 use ulid::Ulid;
 
-#[derive(Clone)]
-pub struct CreateCardUseCase<'a, R: UserRepository, E: EmbeddingService, L: LlmService> {
-    repository: &'a R,
-    embedding_service: &'a E,
-    llm_service: &'a L,
+#[derive(Clone, Debug)]
+pub struct CardContent {
+    pub answer: Answer,
+    pub example_phrases: Vec<ExamplePhrase>,
 }
 
-impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCase<'a, R, E, L> {
+#[derive(Clone)]
+pub struct CreateCardUseCase<
+    'a,
+    R: UserRepository,
+    E: EmbeddingService,
+    L: crate::application::LlmService,
+> {
+    repository: &'a R,
+    embedding_service: &'a E,
+    generate_content_use_case: GenerateCardContentUseCase<'a, L>,
+}
+
+impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmService>
+    CreateCardUseCase<'a, R, E, L>
+{
     pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
         Self {
             repository,
             embedding_service,
-            llm_service,
+            generate_content_use_case: GenerateCardContentUseCase::new(llm_service),
         }
-    }
-
-    pub(crate) async fn generate_translation(
-        &self,
-        question_text: &str,
-        native_language: &NativeLanguage,
-    ) -> Result<Answer, JeersError> {
-        if let Some(translation) = VOCABULARY_DB.get_translation(question_text, native_language) {
-            return Answer::new(translation);
-        }
-
-        let answer_text = self
-            .llm_service
-            .generate_text(&format!(
-                r#"Объясни значение этого слова для {native_language} говорящего студента: '{}'. Ответь 1 предложением.
-Не повторяй слово в ответе, потому что твой ответ будет использоваться как обратная сторона карточки и нужно иметь возможность их переворачивать и прогонять в обратом направлении.
-Не указывай в ответе чтение или транскрипцию, студент умеет читать.
-Выдай просто ответ без вводных или объяснений зачем и для кого это.
-Если слово состоит из 1 кандзи, то объясни его значение как слово, а не как кандзи."#,
-                question_text
-            ))
-            .await?
-            .trim_matches(['\n', '\r', '.', ' '])
-            .to_string();
-
-        let answer = Answer::new(answer_text)?;
-
-        Ok(answer)
-    }
-
-    pub(crate) async fn generate_example_phrases(
-        &self,
-        question_text: &str,
-        native_language: &NativeLanguage,
-        japanese_level: &JapaneseLevel,
-    ) -> Result<Vec<ExamplePhrase>, JeersError> {
-        if let Some(examples) = VOCABULARY_DB.get_examples(question_text, native_language)
-            && !examples.is_empty()
-        {
-            return Ok(examples);
-        }
-
-        let prompt = format!(
-            r#"Ты — помощник для изучения языков.
-    Твоя задача: Создай 2 простых примера использования слова: '{word}'.
-    Требования:
-    1. Максимально простая грамматика.
-    2. Короткие простыепредложения.
-    3. Ответ должен быть СТРОГО валидным JSON, без markdown разметки (без ```json).
-    4. Ориентируйся на уровень {japanese_level}.
-
-    Используй следующую JSON Schema для ответа:
-    {{
-      "type": "array",
-      "items": {{
-        "type": "object",
-        "properties": {{
-          "text": {{
-            "type": "string",
-            "description": "Предложение на японском языке"
-          }},
-          "translation": {{
-            "type": "string",
-            "description": "Перевод на {native_language} язык"
-          }}
-        }},
-        "required": ["text", "translation"]
-      }}
-    }}
-
-    Например:
-    [
-    {{
-      "text": "私は日本語を勉強しています。",
-      "translation": "Я изучаю японский язык."
-    }}, 
-    {{
-      "text": "私は日本語を勉強しています。",
-      "translation": "Я изучаю японский язык."
-    }}
-    ]
-    "#,
-            word = question_text
-        );
-
-        const MAX_RETRIES: usize = 3;
-        let mut last_error = None;
-
-        for attempt in 1..=MAX_RETRIES {
-            let example_phrases_raw = self
-                .llm_service
-                .generate_text(&prompt)
-                .await?
-                .trim()
-                .replace("```json", "")
-                .replace("```", "");
-
-            match serde_json::from_str::<Vec<ExamplePhrase>>(&example_phrases_raw) {
-                Ok(example_phrases) => return Ok(example_phrases),
-                Err(e) => {
-                    last_error = Some(JeersError::LlmError {
-                        reason: format!(
-                            "Failed to parse JSON (attempt {}/{}): {}. Response: {}",
-                            attempt, MAX_RETRIES, e, example_phrases_raw
-                        ),
-                    });
-                    if attempt < MAX_RETRIES {
-                        continue;
-                    }
-                }
-            }
-        }
-
-        Err(last_error.unwrap_or_else(|| JeersError::LlmError {
-            reason: "Failed to parse JSON after all retries".to_string(),
-        }))
     }
 
     pub async fn execute(
         &self,
         user_id: Ulid,
         question_text: String,
-        answer_text: Option<String>,
-        example_phrases: Option<Vec<ExamplePhrase>>,
+        content: Option<CardContent>,
     ) -> Result<VocabularyCard, JeersError> {
-        let answer_text = if let Some(answer_srt) = &answer_text
-            && answer_srt.trim().is_empty()
-        {
-            None
-        } else {
-            answer_text
-        };
-
         let mut user = self
             .repository
             .find_by_id(user_id)
@@ -170,27 +57,24 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> CreateCardUseCas
             });
         }
 
-        let embedding = self
-            .embedding_service
-            .generate_embedding(&question_text)
-            .await?;
-
-        let answer = if let Some(answer_text) = answer_text {
-            Answer::new(answer_text)?
+        let embedding = if let Some(embedding) = VOCABULARY_DB.get_embedding(&question_text) {
+            embedding
         } else {
-            self.generate_translation(question_text.as_str(), user.native_language())
+            self.embedding_service
+                .generate_embedding(&question_text)
                 .await?
         };
 
-        let example_phrases = if let Some(example_phrases) = example_phrases {
-            example_phrases
+        let (answer, example_phrases) = if let Some(content) = content {
+            (content.answer, content.example_phrases)
         } else {
-            self.generate_example_phrases(
-                question_text.as_str(),
-                user.native_language(),
-                user.current_japanese_level(),
-            )
-            .await?
+            self.generate_content_use_case
+                .generate_content(
+                    question_text.as_str(),
+                    user.native_language(),
+                    user.current_japanese_level(),
+                )
+                .await?
         };
 
         let question = Question::new(question_text, embedding)?;

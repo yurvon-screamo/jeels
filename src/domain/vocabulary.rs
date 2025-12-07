@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::LazyLock};
 
 use serde::{Deserialize, Serialize};
 
-use crate::domain::value_objects::{ExamplePhrase, JapaneseLevel, NativeLanguage};
+use crate::domain::value_objects::{Embedding, ExamplePhrase, JapaneseLevel, NativeLanguage};
 
 const VOCABULARY_N5_DATA: &str = include_str!("./vocabulary_n5.json");
 const VOCABULARY_N4_DATA: &str = include_str!("./vocabulary_n4.json");
@@ -20,6 +20,7 @@ pub struct VocabularyInfo {
     pub english_translation: String,
     pub russian_examples: Vec<ExamplePhrase>,
     pub english_examples: Vec<ExamplePhrase>,
+    pub embedding: Embedding,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -35,6 +36,7 @@ struct VocabularyEntryStoredType {
     english_translation: String,
     russian_examples: Vec<ExamplePhraseStoredType>,
     english_examples: Vec<ExamplePhraseStoredType>,
+    embedding: Vec<f32>,
 }
 
 pub struct VocabularyDatabase {
@@ -100,6 +102,7 @@ impl VocabularyDatabase {
                         english_translation: entry.english_translation,
                         russian_examples,
                         english_examples,
+                        embedding: Embedding(entry.embedding),
                     },
                 )
             })
@@ -132,6 +135,12 @@ impl VocabularyDatabase {
 
     pub fn get_vocabulary_info(&self, word: &str) -> Option<&VocabularyInfo> {
         self.vocabulary_map.get(word)
+    }
+
+    pub fn get_embedding(&self, word: &str) -> Option<Embedding> {
+        self.vocabulary_map
+            .get(word)
+            .map(|info| info.embedding.clone())
     }
 }
 

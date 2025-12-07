@@ -1,7 +1,9 @@
 use crate::application::{
     CreateCardUseCase, DuolingoClient, EmbeddingService, LlmService, UserRepository,
+    use_cases::create_card::CardContent,
 };
 use crate::domain::error::JeersError;
+use crate::domain::value_objects::Answer;
 use ulid::Ulid;
 
 pub struct SyncDuolingoWordsResult {
@@ -71,9 +73,18 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, D: DuolingoClien
                 Some(word.translations.join(", "))
             };
 
+            let content = if let Some(answer_text) = answer {
+                Some(CardContent {
+                    answer: Answer::new(answer_text)?,
+                    example_phrases: Vec::new(),
+                })
+            } else {
+                None
+            };
+
             match self
                 .create_card_use_case
-                .execute(user_id, question.clone(), answer, None)
+                .execute(user_id, question.clone(), content)
                 .await
             {
                 Ok(_) => {
