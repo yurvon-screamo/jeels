@@ -17,15 +17,20 @@ path = "~/.keikaku"
 
 [llm.openai]
 temperature = 0.3
-model = "llm-thinking"
+model = "llm_instruct"
 base_url = "http://10.2.11.6:8001/v1"
 env_var_name = "OPENROUTER_API_KEY"
 
 # [embedding.candle]
 
 [embedding.openai]
-model = "Qwen/Qwen3-Embedding-0.6B"
+model = "embedding"
 base_url = "http://10.3.168.177:8003/v1"
+env_var_name = "OPENROUTER_API_KEY"
+
+[reranker.openai]
+model = "reranker"
+base_url = "http://10.3.168.177:8002/v1"
 env_var_name = "OPENROUTER_API_KEY"
 
 [translation]

@@ -45,10 +45,10 @@ async fn regenerate_vocabularies() -> Result<(), Box<dyn std::error::Error>> {
 
     let levels = vec![
         ("words/vocabulary_n5.json", JapaneseLevel::N5),
-        // ("words/vocabulary_n4.json", JapaneseLevel::N4),
-        // ("words/vocabulary_n3.json", JapaneseLevel::N3),
-        // ("words/vocabulary_n2.json", JapaneseLevel::N2),
-        // ("words/vocabulary_n1.json", JapaneseLevel::N1),
+        ("words/vocabulary_n4.json", JapaneseLevel::N4),
+        ("words/vocabulary_n3.json", JapaneseLevel::N3),
+        ("words/vocabulary_n2.json", JapaneseLevel::N2),
+        ("words/vocabulary_n1.json", JapaneseLevel::N1),
     ];
 
     for (file_path, level) in levels {
