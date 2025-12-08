@@ -251,7 +251,7 @@ impl LearnCardApp {
     fn render_kanji_row(
         &self,
         row_area: Rect,
-        kanji_list: &[crate::domain::kanji::KanjiCard],
+        kanji_list: &[crate::domain::dictionary::KanjiInfo],
         row_idx: usize,
         frame: &mut Frame,
     ) {
@@ -279,14 +279,14 @@ impl LearnCardApp {
 
     fn render_kanji_card(
         &self,
-        kanji: &crate::domain::kanji::KanjiCard,
+        kanji: &crate::domain::dictionary::KanjiInfo,
         area: Rect,
         frame: &mut Frame,
     ) {
         let kanji_block = Block::bordered()
             .border_set(border::ROUNDED)
             .border_style(Style::default().fg(Color::Cyan))
-            .title(format!("{} (N{})", kanji.kanji, kanji.jlpt.as_number()));
+            .title(format!("{} (N{})", kanji.kanji(), kanji.jlpt().as_number()));
 
         let mut lines = self.build_kanji_card_lines(kanji);
         truncate_lines_if_needed(&mut lines, area.height);
@@ -300,26 +300,26 @@ impl LearnCardApp {
 
     fn build_kanji_card_lines(
         &self,
-        kanji: &crate::domain::kanji::KanjiCard,
+        kanji: &crate::domain::dictionary::KanjiInfo,
     ) -> Vec<Line<'static>> {
         let mut lines = vec![];
 
         // Show description only when rating (Answer or Completed state)
         if self.should_show_answer() {
             lines.push(Line::from("Описание:".fg(Color::Yellow).bold()));
-            lines.push(Line::from(kanji.description.clone()));
+            lines.push(Line::from(kanji.description().to_string()));
             lines.push(Line::from(""));
         }
 
         // Radicals
-        if !kanji.radicals_info.is_empty() {
+        if !kanji.radicals().is_empty() {
             lines.push(Line::from("Радикалы:".fg(Color::Yellow).bold()));
-            for radical in kanji.radicals_info.iter() {
+            for radical in kanji.radicals().iter() {
                 lines.push(Line::from(
-                    format!("{} - {}", radical.radical, radical.name).fg(Color::Cyan),
+                    format!("{} - {}", radical.radical(), radical.name()).fg(Color::Cyan),
                 ));
                 lines.push(Line::from(
-                    format!("  {}", radical.description).fg(Color::White),
+                    format!("  {}", radical.description()).fg(Color::White),
                 ));
             }
         } else {

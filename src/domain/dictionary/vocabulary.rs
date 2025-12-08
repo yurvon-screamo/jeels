@@ -2,19 +2,52 @@ use std::{collections::HashMap, fs, sync::LazyLock};
 
 use serde::{Deserialize, Serialize};
 
-use crate::domain::value_objects::{Embedding, ExamplePhrase, JapaneseLevel, NativeLanguage};
+use crate::domain::{
+    dictionary::kanji::parse_jlpt_level,
+    value_objects::{Embedding, ExamplePhrase, JapaneseLevel, NativeLanguage},
+};
 
 pub static VOCABULARY_DB: LazyLock<VocabularyDatabase> = LazyLock::new(VocabularyDatabase::new);
 
 #[derive(Debug, Clone)]
 pub struct VocabularyInfo {
-    pub word: String,
-    pub level: JapaneseLevel,
-    pub russian_translation: String,
-    pub english_translation: String,
-    pub russian_examples: Vec<ExamplePhrase>,
-    pub english_examples: Vec<ExamplePhrase>,
-    pub embedding: Embedding,
+    word: String,
+    level: JapaneseLevel,
+    russian_translation: String,
+    english_translation: String,
+    russian_examples: Vec<ExamplePhrase>,
+    english_examples: Vec<ExamplePhrase>,
+    embedding: Embedding,
+}
+
+impl VocabularyInfo {
+    pub fn word(&self) -> &str {
+        &self.word
+    }
+
+    pub fn level(&self) -> &JapaneseLevel {
+        &self.level
+    }
+
+    pub fn russian_translation(&self) -> &str {
+        &self.russian_translation
+    }
+
+    pub fn english_translation(&self) -> &str {
+        &self.english_translation
+    }
+
+    pub fn russian_examples(&self) -> &[ExamplePhrase] {
+        &self.russian_examples
+    }
+
+    pub fn english_examples(&self) -> &[ExamplePhrase] {
+        &self.english_examples
+    }
+
+    pub fn embedding(&self) -> &Embedding {
+        &self.embedding
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -137,16 +170,5 @@ impl VocabularyDatabase {
         self.vocabulary_map
             .get(word)
             .map(|info| info.embedding.clone())
-    }
-}
-
-fn parse_jlpt_level(s: &str) -> JapaneseLevel {
-    match s {
-        "N5" => JapaneseLevel::N5,
-        "N4" => JapaneseLevel::N4,
-        "N3" => JapaneseLevel::N3,
-        "N2" => JapaneseLevel::N2,
-        "N1" => JapaneseLevel::N1,
-        _ => JapaneseLevel::N1,
     }
 }

@@ -1,7 +1,7 @@
 use crate::application::EmbeddingService;
+use crate::domain::dictionary::VOCABULARY_DB;
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::Embedding;
-use crate::domain::vocabulary::VOCABULARY_DB;
 
 const PROMPT: &str = "Represent this Japanese word for find same words";
 

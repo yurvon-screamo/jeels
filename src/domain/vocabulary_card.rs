@@ -1,5 +1,5 @@
+use crate::domain::dictionary::{KANJI_DB, KanjiInfo};
 use crate::domain::japanese::IsJapanese;
-use crate::domain::kanji::{KANJI_DB, KanjiCard};
 use crate::domain::review::Review;
 use crate::domain::value_objects::{
     Answer, CardContent, Difficulty, ExamplePhrase, JapaneseLevel, MemoryState, Question, Stability,
@@ -138,13 +138,13 @@ impl VocabularyCard {
         self.reviews.back().map(|review| review.timestamp())
     }
 
-    pub fn get_kanji_cards(&self, current_level: &JapaneseLevel) -> Vec<KanjiCard> {
+    pub fn get_kanji_cards(&self, current_level: &JapaneseLevel) -> Vec<&KanjiInfo> {
         self.question
             .text()
             .chars()
             .filter(|c| c.is_kanji())
-            .filter_map(|c| KANJI_DB.get_kanji_card(&c).ok())
-            .filter(|k| &k.jlpt <= current_level)
-            .collect()
+            .filter_map(|c| KANJI_DB.get_kanji_info(&c).ok())
+            .filter(|k| k.jlpt() <= current_level)
+            .collect::<Vec<_>>()
     }
 }

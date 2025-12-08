@@ -17,7 +17,7 @@ path = "~/.keikaku"
 
 [llm.openai]
 temperature = 0.3
-model = "Qwen/Qwen3-VL-30B-A3B-Thinking"
+model = "llm-thinking"
 base_url = "http://10.2.11.6:8001/v1"
 env_var_name = "OPENROUTER_API_KEY"
 

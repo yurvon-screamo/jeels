@@ -10,7 +10,7 @@ use ulid::Ulid;
 
 use crate::{
     application::GetKanjiInfoUseCase,
-    domain::{JeersError, kanji::KanjiCard},
+    domain::{JeersError, dictionary::KanjiInfo},
 };
 
 use super::render_once;
@@ -37,8 +37,8 @@ pub async fn handle_kanji(_user_id: Ulid, kanji: String) -> Result<(), JeersErro
     Ok(())
 }
 
-fn render_kanji_card(kanji_data: &KanjiCard, area: Rect, frame: &mut Frame) {
-    let radicals_count = kanji_data.radicals_info.len();
+fn render_kanji_card(kanji_data: &KanjiInfo, area: Rect, frame: &mut Frame) {
+    let radicals_count = kanji_data.radicals().len();
     let radicals_height = if radicals_count > 0 {
         radicals_count * 3 + 2
     } else {
@@ -78,7 +78,7 @@ fn render_kanji_card(kanji_data: &KanjiCard, area: Rect, frame: &mut Frame) {
         .border_style(Style::default().fg(Color::Cyan))
         .title("Кандзи");
 
-    let kanji_content = Text::from(vec![Line::from(kanji_data.kanji.to_string().bold())]);
+    let kanji_content = Text::from(vec![Line::from(kanji_data.kanji().to_string().bold())]);
     Paragraph::new(kanji_content)
         .block(kanji_block)
         .render(kanji_area, frame.buffer_mut());
@@ -86,7 +86,7 @@ fn render_kanji_card(kanji_data: &KanjiCard, area: Rect, frame: &mut Frame) {
     // JLPT level block
     Paragraph::new(Text::from(vec![Line::from(format!(
         "N{}",
-        kanji_data.jlpt.as_number()
+        kanji_data.jlpt().as_number()
     ))]))
     .block(
         Block::bordered()
@@ -99,7 +99,7 @@ fn render_kanji_card(kanji_data: &KanjiCard, area: Rect, frame: &mut Frame) {
     // Usage count block
     Paragraph::new(Text::from(vec![Line::from(format!(
         "{}",
-        kanji_data.used_in
+        kanji_data.used_in()
     ))]))
     .block(
         Block::bordered()
@@ -115,7 +115,7 @@ fn render_kanji_card(kanji_data: &KanjiCard, area: Rect, frame: &mut Frame) {
         .border_style(Style::default().fg(Color::Magenta))
         .title("Описание");
 
-    let description_content = Text::from(vec![Line::from(kanji_data.description.as_str())]);
+    let description_content = Text::from(vec![Line::from(kanji_data.description())]);
     Paragraph::new(description_content)
         .block(description_block)
         .wrap(ratatui::widgets::Wrap { trim: true })
@@ -128,15 +128,16 @@ fn render_kanji_card(kanji_data: &KanjiCard, area: Rect, frame: &mut Frame) {
         .title("Радикалы");
 
     let mut radicals_lines = Vec::new();
-    if kanji_data.radicals_info.is_empty() {
+    if kanji_data.radicals().is_empty() {
         radicals_lines.push(Line::from("Информация о радикалах недоступна"));
     } else {
-        for radical_info in kanji_data.radicals_info.iter() {
+        for radical_info in kanji_data.radicals().iter() {
             radicals_lines.push(Line::from(format!(
                 "{} - {}",
-                radical_info.radical, radical_info.name
+                radical_info.radical(),
+                radical_info.name()
             )));
-            radicals_lines.push(Line::from(format!("  {}", radical_info.description)));
+            radicals_lines.push(Line::from(format!("  {}", radical_info.description())));
             radicals_lines.push(Line::from(""));
         }
         radicals_lines.pop(); // Remove last empty line

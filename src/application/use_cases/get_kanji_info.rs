@@ -1,6 +1,6 @@
 use crate::domain::{
+    dictionary::{KANJI_DB, KanjiInfo},
     error::JeersError,
-    kanji::{KANJI_DB, KanjiCard},
 };
 
 pub struct GetKanjiInfoUseCase;
@@ -16,7 +16,7 @@ impl GetKanjiInfoUseCase {
         Self
     }
 
-    pub fn execute(&self, kanji: char) -> Result<KanjiCard, JeersError> {
-        KANJI_DB.get_kanji_card(&kanji)
+    pub fn execute(&self, kanji: char) -> Result<KanjiInfo, JeersError> {
+        Ok(KANJI_DB.get_kanji_info(&kanji)?.to_owned())
     }
 }

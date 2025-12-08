@@ -1,11 +1,11 @@
 pub mod daily_history;
+pub mod dictionary;
 pub mod error;
 pub mod japanese;
-pub mod kanji;
+pub mod kanji_card;
 pub mod review;
 pub mod study_session;
 pub mod value_objects;
-pub mod vocabulary;
 pub mod vocabulary_card;
 
 pub use error::JeersError;
@@ -434,7 +434,10 @@ impl User {
             question.to_string(),
             shuffle,
             card.example_phrases().to_vec(),
-            card.get_kanji_cards(&self.current_japanese_level),
+            card.get_kanji_cards(&self.current_japanese_level)
+                .into_iter()
+                .cloned()
+                .collect(),
             self.current_japanese_level.clone(),
         );
 

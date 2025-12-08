@@ -37,11 +37,11 @@ async fn regenerate_vocabularies() -> Result<(), Box<dyn std::error::Error>> {
     let llm_service = env.get_llm_service().await?;
     let embedding_service = env.get_embedding_service().await?;
 
+    let semaphore = Arc::new(Semaphore::new(20));
     let use_case = Arc::new(GenerateVocabularyContentUseCase::new(
         llm_service,
         embedding_service,
     ));
-    let semaphore = Arc::new(Semaphore::new(20));
 
     let levels = vec![
         ("words/vocabulary_n5.json", JapaneseLevel::N5),
@@ -82,6 +82,7 @@ async fn regenerate_vocabularies() -> Result<(), Box<dyn std::error::Error>> {
             let task = tokio::spawn(async move {
                 let _permit = semaphore.acquire().await.unwrap();
                 let result = use_case.generate_content(&word, &level).await;
+                println!("Generated content for {}: {}", word, result.is_ok());
                 pb.inc(1);
                 (idx, word, result)
             });

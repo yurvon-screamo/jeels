@@ -1,9 +1,9 @@
 use crate::application::LlmService;
+use crate::domain::dictionary::VOCABULARY_DB;
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{
     Answer, CardContent, ExamplePhrase, JapaneseLevel, NativeLanguage,
 };
-use crate::domain::vocabulary::VOCABULARY_DB;
 use serde::Deserialize;
 
 const MAX_RETRIES: usize = 3;

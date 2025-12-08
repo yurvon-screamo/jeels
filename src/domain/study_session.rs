@@ -1,6 +1,6 @@
 use crate::domain::{
     VocabularyCard,
-    kanji::KanjiCard,
+    dictionary::KanjiInfo,
     value_objects::{ExamplePhrase, JapaneseLevel},
 };
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ pub struct StudySessionItem {
     homonyms: Vec<StudySessionItem>,
 
     example_phrases: Vec<ExamplePhrase>,
-    kanji: Vec<KanjiCard>,
+    kanji: Vec<KanjiInfo>,
 
     level: JapaneseLevel,
 }
@@ -30,7 +30,7 @@ impl StudySessionItem {
         question: String,
         shuffled: bool,
         example_phrases: Vec<ExamplePhrase>,
-        kanji: Vec<KanjiCard>,
+        kanji: Vec<KanjiInfo>,
         level: JapaneseLevel,
     ) -> Self {
         Self {
@@ -67,7 +67,10 @@ impl StudySessionItem {
             card.question().text().to_string(),
             false,
             card.example_phrases().to_vec(),
-            card.get_kanji_cards(&self.level),
+            card.get_kanji_cards(&self.level)
+                .into_iter()
+                .cloned()
+                .collect(),
             self.level.clone(),
         )
     }
@@ -96,7 +99,7 @@ impl StudySessionItem {
         &self.example_phrases
     }
 
-    pub fn kanji(&self) -> &[KanjiCard] {
+    pub fn kanji(&self) -> &[KanjiInfo] {
         &self.kanji
     }
 }
