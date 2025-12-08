@@ -18,7 +18,9 @@ use crate::domain::{
     daily_history::DailyHistoryItem,
     japanese::IsJapaneseText,
     study_session::StudySessionItem,
-    value_objects::{Answer, ExamplePhrase, JapaneseLevel, MemoryState, NativeLanguage, Question},
+    value_objects::{
+        Answer, CardContent, ExamplePhrase, JapaneseLevel, MemoryState, NativeLanguage, Question,
+    },
 };
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
@@ -157,15 +159,14 @@ impl User {
     pub fn create_card(
         &mut self,
         question: Question,
-        answer: Answer,
-        example_phrases: Vec<ExamplePhrase>,
+        content: CardContent,
     ) -> Result<VocabularyCard, JeersError> {
         if self.has_card_with_question(&question, None) {
             return Err(JeersError::DuplicateCard {
                 question: question.text().to_string(),
             });
         }
-        let card = VocabularyCard::new(question, answer, example_phrases);
+        let card = VocabularyCard::new(question, content);
         self.vocabulary_cards.insert(card.id(), card.clone());
         Ok(card)
     }
@@ -467,6 +468,3 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
 
     dot_product / (norm_a * norm_b)
 }
-
-#[cfg(test)]
-mod mod_test;

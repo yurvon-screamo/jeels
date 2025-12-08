@@ -1,6 +1,8 @@
 use crate::application::LlmService;
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::{Answer, ExamplePhrase, JapaneseLevel, NativeLanguage};
+use crate::domain::value_objects::{
+    Answer, CardContent, ExamplePhrase, JapaneseLevel, NativeLanguage,
+};
 use crate::domain::vocabulary::VOCABULARY_DB;
 use serde::Deserialize;
 
@@ -27,7 +29,7 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         question_text: &str,
         native_language: &NativeLanguage,
         japanese_level: &JapaneseLevel,
-    ) -> Result<(Answer, Vec<ExamplePhrase>), JeersError> {
+    ) -> Result<CardContent, JeersError> {
         if let Some(result) = self.try_get_from_dictionary(question_text, native_language)? {
             return Ok(result);
         }
@@ -40,15 +42,16 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         &self,
         question_text: &str,
         native_language: &NativeLanguage,
-    ) -> Result<Option<(Answer, Vec<ExamplePhrase>)>, JeersError> {
+    ) -> Result<Option<CardContent>, JeersError> {
         if let Some(translation) = VOCABULARY_DB.get_translation(question_text, native_language) {
             let answer = Answer::new(translation)?;
             if let Some(examples) = VOCABULARY_DB.get_examples(question_text, native_language)
                 && !examples.is_empty()
             {
-                return Ok(Some((answer, examples)));
+                return Ok(Some(CardContent::new(answer, examples)));
             }
         }
+
         Ok(None)
     }
 
@@ -57,14 +60,16 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         question_text: &str,
         native_language: &NativeLanguage,
         japanese_level: &JapaneseLevel,
-    ) -> Result<(Answer, Vec<ExamplePhrase>), JeersError> {
+    ) -> Result<CardContent, JeersError> {
         let prompt = build_prompt(question_text, native_language, japanese_level);
         let mut last_error = None;
 
         for attempt in 1..=MAX_RETRIES {
             match self.llm_service.generate_text(&prompt).await {
                 Ok(response) => match self.process_llm_response(&response, attempt) {
-                    Ok(result) => return Ok(result),
+                    Ok(result) => {
+                        return Ok(result);
+                    }
                     Err(e) => {
                         last_error = Some(e);
                         if attempt < MAX_RETRIES {
@@ -90,11 +95,11 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         &self,
         response: &str,
         attempt: usize,
-    ) -> Result<(Answer, Vec<ExamplePhrase>), JeersError> {
+    ) -> Result<CardContent, JeersError> {
         let response_cleaned = clean_json_response(response);
         let llm_response = parse_json_response(&response_cleaned, attempt)?;
         let answer = validate_and_create_answer(&llm_response.translation, attempt)?;
-        Ok((answer, llm_response.examples))
+        Ok(CardContent::new(answer, llm_response.examples))
     }
 }
 

@@ -2,11 +2,8 @@
 mod tests;
 
 use keikaku::{
-    application::{
-        create_card::CardContent,
-        use_cases::{CreateCardUseCase, SelectCardsToLearnUseCase},
-    },
-    domain::value_objects::Answer,
+    application::use_cases::{CreateCardUseCase, SelectCardsToLearnUseCase},
+    domain::value_objects::{Answer, CardContent},
     settings::ApplicationEnvironment,
 };
 use tests::*;
@@ -25,10 +22,10 @@ async fn start_study_session_use_case_should_return_due_cards() {
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            Some(CardContent {
-                answer: Answer::new("A systems programming language".to_string()).unwrap(),
-                example_phrases: vec![],
-            }),
+            Some(CardContent::new(
+                Answer::new("A systems programming language".to_string()).unwrap(),
+                Vec::new(),
+            )),
         )
         .await
         .unwrap();

@@ -3,6 +3,29 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CardContent {
+    answer: Answer,
+    example_phrases: Vec<ExamplePhrase>,
+}
+
+impl CardContent {
+    pub fn new(answer: Answer, example_phrases: Vec<ExamplePhrase>) -> Self {
+        Self {
+            answer,
+            example_phrases,
+        }
+    }
+
+    pub fn answer(&self) -> &Answer {
+        &self.answer
+    }
+
+    pub fn example_phrases(&self) -> &[ExamplePhrase] {
+        &self.example_phrases
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Embedding(pub Vec<f32>);
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

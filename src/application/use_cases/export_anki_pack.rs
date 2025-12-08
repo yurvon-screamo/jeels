@@ -1,9 +1,6 @@
-use crate::application::{
-    CreateCardUseCase, EmbeddingService, LlmService, UserRepository,
-    use_cases::create_card::CardContent,
-};
+use crate::application::{CreateCardUseCase, EmbeddingService, LlmService, UserRepository};
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::Answer;
+use crate::domain::value_objects::{Answer, CardContent};
 use regex::Regex;
 use rusqlite::Connection;
 use serde_json::Value;
@@ -94,10 +91,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> ExportAnkiPackUs
             let question = anki_card.word.clone();
 
             let content = if let Some(answer_text) = anki_card.translation {
-                Some(CardContent {
-                    answer: Answer::new(answer_text)?,
-                    example_phrases: Vec::new(),
-                })
+                Some(CardContent::new(Answer::new(answer_text)?, Vec::new()))
             } else {
                 None
             };

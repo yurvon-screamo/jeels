@@ -11,10 +11,12 @@ use ulid::Ulid;
 use crate::{
     application::{
         CreateCardUseCase, DeleteCardUseCase, EditCardUseCase, ListCardsUseCase,
-        RebuildDatabaseUseCase, use_cases::create_card::CardContent,
+        RebuildDatabaseUseCase, rebuild_database::RebuildDatabaseOptions,
     },
-    domain::value_objects::Answer,
-    domain::{JeersError, VocabularyCard},
+    domain::{
+        JeersError, VocabularyCard,
+        value_objects::{Answer, CardContent},
+    },
     settings::ApplicationEnvironment,
 };
 
@@ -85,10 +87,7 @@ pub async fn handle_create_card(
     .execute(
         user_id,
         question,
-        Some(CardContent {
-            answer: Answer::new(answer)?,
-            example_phrases: Vec::new(),
-        }),
+        Some(CardContent::new(Answer::new(answer)?, Vec::new())),
     )
     .await?;
 
@@ -204,23 +203,14 @@ pub async fn handle_delete_card(user_id: Ulid, card_ids: Vec<Ulid>) -> Result<()
 
 pub async fn handle_rebuild_database(
     user_id: Ulid,
-    rebuild_example_phrases: bool,
-    rebuild_embedding: bool,
-    rebuild_answer: bool,
+    options: RebuildDatabaseOptions,
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
     let embedding_service = settings.get_embedding_service().await?;
     let llm_service = settings.get_llm_service().await?;
     let rebuild_use_case = RebuildDatabaseUseCase::new(repository, embedding_service, llm_service);
-    let processed_count = rebuild_use_case
-        .execute(
-            user_id,
-            rebuild_example_phrases,
-            rebuild_embedding,
-            rebuild_answer,
-        )
-        .await?;
+    let processed_count = rebuild_use_case.execute(user_id, options).await?;
 
     render_once(
         |frame| {

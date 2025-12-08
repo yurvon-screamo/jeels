@@ -2,7 +2,7 @@ use crate::domain::japanese::IsJapanese;
 use crate::domain::kanji::{KANJI_DB, KanjiCard};
 use crate::domain::review::Review;
 use crate::domain::value_objects::{
-    Answer, Difficulty, ExamplePhrase, JapaneseLevel, MemoryState, Question, Stability,
+    Answer, CardContent, Difficulty, ExamplePhrase, JapaneseLevel, MemoryState, Question, Stability,
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -28,15 +28,15 @@ pub struct VocabularyCard {
 }
 
 impl VocabularyCard {
-    pub fn new(question: Question, answer: Answer, example_phrases: Vec<ExamplePhrase>) -> Self {
+    pub fn new(question: Question, content: CardContent) -> Self {
         Self {
             id: Ulid::new(),
             question,
-            answer,
             reviews: VecDeque::new(),
             next_review_date: Utc::now(),
             memory_state: None,
-            example_phrases,
+            answer: content.answer().clone(),
+            example_phrases: content.example_phrases().to_vec(),
         }
     }
 

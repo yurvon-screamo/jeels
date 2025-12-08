@@ -1,10 +1,9 @@
 #[path = "mod.rs"]
 mod tests;
 
-use keikaku::application::create_card::CardContent;
 use keikaku::application::use_cases::{CreateCardUseCase, DeleteCardUseCase};
 use keikaku::application::user_repository::UserRepository;
-use keikaku::domain::value_objects::Answer;
+use keikaku::domain::value_objects::{Answer, CardContent};
 use keikaku::settings::ApplicationEnvironment;
 use tests::*;
 
@@ -22,10 +21,10 @@ async fn delete_card_use_case_should_remove_card_from_database() {
         .execute(
             user.id(),
             "What is Rust?".to_string(),
-            Some(CardContent {
-                answer: Answer::new("A systems programming language".to_string()).unwrap(),
-                example_phrases: vec![],
-            }),
+            Some(CardContent::new(
+                Answer::new("A systems programming language".to_string()).unwrap(),
+                Vec::new(),
+            )),
         )
         .await
         .unwrap();

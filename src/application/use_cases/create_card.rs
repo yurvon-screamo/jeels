@@ -3,14 +3,8 @@ use super::generate_embedding::GenerateEmbeddingUseCase;
 use crate::application::{EmbeddingService, UserRepository};
 use crate::domain::VocabularyCard;
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::{Answer, ExamplePhrase, Question};
+use crate::domain::value_objects::{CardContent, Question};
 use ulid::Ulid;
-
-#[derive(Clone, Debug)]
-pub struct CardContent {
-    pub answer: Answer,
-    pub example_phrases: Vec<ExamplePhrase>,
-}
 
 #[derive(Clone)]
 pub struct CreateCardUseCase<
@@ -62,8 +56,8 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmServi
             .generate_embedding(&question_text)
             .await?;
 
-        let (answer, example_phrases) = if let Some(content) = content {
-            (content.answer, content.example_phrases)
+        let card_content = if let Some(content) = content {
+            content
         } else {
             self.generate_content_use_case
                 .generate_content(
@@ -76,7 +70,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmServi
 
         let question = Question::new(question_text, embedding)?;
 
-        let card = user.create_card(question, answer, example_phrases)?;
+        let card = user.create_card(question, card_content)?;
         self.repository.save(&user).await?;
 
         Ok(card)

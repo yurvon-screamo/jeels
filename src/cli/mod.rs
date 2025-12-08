@@ -13,7 +13,7 @@ use ratatui::{Frame, Viewport};
 use ulid::Ulid;
 
 use crate::{
-    application::UserRepository,
+    application::{UserRepository, rebuild_database::RebuildDatabaseOptions},
     cli::{
         anki::handle_create_anki_pack,
         card::{
@@ -122,15 +122,9 @@ enum Command {
     },
     /// Rebuild embedding and answers for all cards
     RebuildDatabase {
-        /// If true, example phrases will be rebuilt
-        #[clap(long, default_value = "false")]
-        rebuild_example_phrases: bool,
-        /// If true, embedding will be rebuilt
-        #[clap(long, default_value = "false")]
-        rebuild_embedding: bool,
-        /// If true, answers will be rebuilt
-        #[clap(long, default_value = "false")]
-        rebuild_answer: bool,
+        /// Options to rebuild database
+        #[clap(short, long)]
+        options: RebuildDatabaseOptions,
     },
     /// Translate text (auto-detects Japanese or native language)
     Translate {
@@ -200,18 +194,8 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         } => {
             handle_create_anki_pack(user_id, file_path, word_tag, translation_tag, dry_run).await?;
         }
-        Command::RebuildDatabase {
-            rebuild_example_phrases,
-            rebuild_embedding,
-            rebuild_answer,
-        } => {
-            handle_rebuild_database(
-                user_id,
-                rebuild_example_phrases,
-                rebuild_embedding,
-                rebuild_answer,
-            )
-            .await?;
+        Command::RebuildDatabase { options } => {
+            handle_rebuild_database(user_id, options).await?;
         }
         Command::Translate { text } => {
             handle_translate(user_id, text).await?;

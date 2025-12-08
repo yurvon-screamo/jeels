@@ -2,7 +2,8 @@ use super::generate_card_content::GenerateCardContentUseCase;
 use super::generate_embedding::GenerateEmbeddingUseCase;
 use crate::application::{EmbeddingService, LlmService, UserRepository};
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::{Embedding, Question};
+use crate::domain::value_objects::{CardContent, Embedding, Question};
+use clap::ValueEnum;
 use tracing::error;
 use ulid::Ulid;
 
@@ -11,6 +12,13 @@ pub struct RebuildDatabaseUseCase<'a, R: UserRepository, E: EmbeddingService, L:
     repository: &'a R,
     generate_embedding_use_case: GenerateEmbeddingUseCase<'a, E>,
     generate_content_use_case: GenerateCardContentUseCase<'a, L>,
+}
+
+#[derive(Debug, Clone, PartialEq, ValueEnum)]
+pub enum RebuildDatabaseOptions {
+    Content,
+    Embedding,
+    All,
 }
 
 impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
@@ -27,9 +35,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
     pub async fn execute(
         &self,
         user_id: Ulid,
-        rebuild_example_phrases: bool,
-        rebuild_embedding: bool,
-        rebuild_answer: bool,
+        options: RebuildDatabaseOptions,
     ) -> Result<usize, JeersError> {
         let mut user = self
             .repository
@@ -41,10 +47,9 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
         let mut data = Vec::new();
 
         for card in cards.values() {
-            let needs_generation =
-                (rebuild_example_phrases && card.example_phrases().is_empty()) || rebuild_answer;
-
-            let (generated_answer, generated_examples) = if needs_generation {
+            let generated_content = if options == RebuildDatabaseOptions::Content
+                || options == RebuildDatabaseOptions::All
+            {
                 match self
                     .generate_content_use_case
                     .generate_content(
@@ -54,30 +59,19 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                     )
                     .await
                 {
-                    Ok((answer, examples)) => (Some(answer), Some(examples)),
+                    Ok(content) => content,
                     Err(e) => {
                         error!("Failed to generate content for card {}: {}", card.id(), e);
                         continue;
                     }
                 }
             } else {
-                (None, None)
+                CardContent::new(card.answer().clone(), card.example_phrases().to_vec())
             };
 
-            let new_example_phrases =
-                if rebuild_example_phrases && card.example_phrases().is_empty() {
-                    generated_examples.unwrap_or_else(|| card.example_phrases().to_vec())
-                } else {
-                    card.example_phrases().to_vec()
-                };
-
-            let new_answer = if rebuild_answer {
-                generated_answer.unwrap_or_else(|| card.answer().clone())
-            } else {
-                card.answer().clone()
-            };
-
-            let new_embedding = if rebuild_embedding {
+            let new_embedding = if options == RebuildDatabaseOptions::Embedding
+                || options == RebuildDatabaseOptions::All
+            {
                 match self
                     .generate_embedding_use_case
                     .generate_embedding(card.question().text())
@@ -93,31 +87,19 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                 Embedding(card.question().embedding().clone())
             };
 
-            let new_question =
-                match Question::new(card.question().text().to_string(), new_embedding) {
-                    Ok(x) => x,
-                    Err(e) => {
-                        error!("Failed to create question for card {}: {}", card.id(), e);
-                        continue;
-                    }
-                };
+            let question = Question::new(card.question().text().to_string(), new_embedding)?;
 
-            println!(
-                "For card {}: generated question embedding and answer {} and example phrases {}",
-                card.id(),
-                new_answer.text(),
-                new_example_phrases
-                    .iter()
-                    .map(|x| format!("{}: {}", x.text(), x.translation()))
-                    .collect::<Vec<String>>()
-                    .join(", "),
-            );
-
-            data.push((card.id(), new_question, new_answer, new_example_phrases));
+            data.push((card.id(), question, generated_content));
         }
 
-        for (card_id, new_question, new_answer, new_example_phrases) in data {
-            let res = user.edit_card(card_id, new_question, new_answer, new_example_phrases);
+        for (card_id, question, new_content) in data {
+            let res = user.edit_card(
+                card_id,
+                question,
+                new_content.answer().clone(),
+                new_content.example_phrases().to_vec(),
+            );
+
             if let Err(e) = res {
                 error!("Failed to edit card {}: {}", card_id, e);
             }
