@@ -1,4 +1,5 @@
 use super::generate_card_content::GenerateCardContentUseCase;
+use super::generate_embedding::GenerateEmbeddingUseCase;
 use crate::application::{EmbeddingService, LlmService, UserRepository};
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Embedding, Question};
@@ -8,7 +9,7 @@ use ulid::Ulid;
 #[derive(Clone)]
 pub struct RebuildDatabaseUseCase<'a, R: UserRepository, E: EmbeddingService, L: LlmService> {
     repository: &'a R,
-    embedding_service: &'a E,
+    generate_embedding_use_case: GenerateEmbeddingUseCase<'a, E>,
     generate_content_use_case: GenerateCardContentUseCase<'a, L>,
 }
 
@@ -18,7 +19,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
     pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
         Self {
             repository,
-            embedding_service,
+            generate_embedding_use_case: GenerateEmbeddingUseCase::new(embedding_service),
             generate_content_use_case: GenerateCardContentUseCase::new(llm_service),
         }
     }
@@ -78,8 +79,8 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
 
             let new_embedding = if rebuild_embedding {
                 match self
-                    .embedding_service
-                    .generate_embedding(super::create_card::PROMT, card.question().text())
+                    .generate_embedding_use_case
+                    .generate_embedding(card.question().text())
                     .await
                 {
                     Ok(value) => value,

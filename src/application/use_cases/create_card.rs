@@ -1,12 +1,10 @@
 use super::generate_card_content::GenerateCardContentUseCase;
+use super::generate_embedding::GenerateEmbeddingUseCase;
 use crate::application::{EmbeddingService, UserRepository};
 use crate::domain::VocabularyCard;
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Answer, ExamplePhrase, Question};
-use crate::domain::vocabulary::VOCABULARY_DB;
 use ulid::Ulid;
-
-pub const PROMT: &str = "Represent this Japanese word for find same words";
 
 #[derive(Clone, Debug)]
 pub struct CardContent {
@@ -22,7 +20,7 @@ pub struct CreateCardUseCase<
     L: crate::application::LlmService,
 > {
     repository: &'a R,
-    embedding_service: &'a E,
+    generate_embedding_use_case: GenerateEmbeddingUseCase<'a, E>,
     generate_content_use_case: GenerateCardContentUseCase<'a, L>,
 }
 
@@ -32,7 +30,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmServi
     pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
         Self {
             repository,
-            embedding_service,
+            generate_embedding_use_case: GenerateEmbeddingUseCase::new(embedding_service),
             generate_content_use_case: GenerateCardContentUseCase::new(llm_service),
         }
     }
@@ -59,13 +57,10 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmServi
             });
         }
 
-        let embedding = if let Some(embedding) = VOCABULARY_DB.get_embedding(&question_text) {
-            embedding
-        } else {
-            self.embedding_service
-                .generate_embedding(PROMT, &question_text)
-                .await?
-        };
+        let embedding = self
+            .generate_embedding_use_case
+            .generate_embedding(&question_text)
+            .await?;
 
         let (answer, example_phrases) = if let Some(content) = content {
             (content.answer, content.example_phrases)

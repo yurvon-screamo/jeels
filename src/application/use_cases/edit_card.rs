@@ -1,3 +1,4 @@
+use super::generate_embedding::GenerateEmbeddingUseCase;
 use crate::application::{EmbeddingService, UserRepository};
 use crate::domain::VocabularyCard;
 use crate::domain::error::JeersError;
@@ -7,14 +8,14 @@ use ulid::Ulid;
 #[derive(Clone)]
 pub struct EditCardUseCase<'a, R: UserRepository, E: EmbeddingService> {
     repository: &'a R,
-    embedding_service: &'a E,
+    generate_embedding_use_case: GenerateEmbeddingUseCase<'a, E>,
 }
 
 impl<'a, R: UserRepository, E: EmbeddingService> EditCardUseCase<'a, R, E> {
     pub fn new(repository: &'a R, embedding_service: &'a E) -> Self {
         Self {
             repository,
-            embedding_service,
+            generate_embedding_use_case: GenerateEmbeddingUseCase::new(embedding_service),
         }
     }
 
@@ -33,8 +34,8 @@ impl<'a, R: UserRepository, E: EmbeddingService> EditCardUseCase<'a, R, E> {
             .ok_or(JeersError::UserNotFound { user_id })?;
 
         let new_embedding = self
-            .embedding_service
-            .generate_embedding(super::create_card::PROMT, &question_text)
+            .generate_embedding_use_case
+            .generate_embedding(&question_text)
             .await?;
         let new_question = Question::new(question_text, new_embedding)?;
         let new_answer = Answer::new(answer_text)?;
