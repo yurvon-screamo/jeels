@@ -1,14 +1,8 @@
-use std::{collections::HashMap, sync::LazyLock};
+use std::{collections::HashMap, fs, sync::LazyLock};
 
 use serde::{Deserialize, Serialize};
 
 use crate::domain::value_objects::{Embedding, ExamplePhrase, JapaneseLevel, NativeLanguage};
-
-const VOCABULARY_N5_DATA: &str = include_str!("./vocabulary_n5.json");
-const VOCABULARY_N4_DATA: &str = include_str!("./vocabulary_n4.json");
-const VOCABULARY_N3_DATA: &str = include_str!("./vocabulary_n3.json");
-const VOCABULARY_N2_DATA: &str = include_str!("./vocabulary_n2.json");
-const VOCABULARY_N1_DATA: &str = include_str!("./vocabulary_n1.json");
 
 pub static VOCABULARY_DB: LazyLock<VocabularyDatabase> = LazyLock::new(VocabularyDatabase::new);
 
@@ -51,28 +45,34 @@ impl Default for VocabularyDatabase {
 
 impl VocabularyDatabase {
     pub fn new() -> Self {
+        let vocabulary_n5_str = fs::read_to_string("words/vocabulary_n5.json").unwrap();
+        let vocabulary_n4_str = fs::read_to_string("words/vocabulary_n4.json").unwrap();
+        let vocabulary_n3_str = fs::read_to_string("words/vocabulary_n3.json").unwrap();
+        let vocabulary_n2_str = fs::read_to_string("words/vocabulary_n2.json").unwrap();
+        let vocabulary_n1_str = fs::read_to_string("words/vocabulary_n1.json").unwrap();
+
         let vocabulary_data: HashMap<_, _> = serde_json::from_str::<
             HashMap<String, VocabularyEntryStoredType>,
-        >(VOCABULARY_N1_DATA)
+        >(&vocabulary_n1_str)
         .unwrap()
         .into_iter()
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N2_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n2_str)
                 .unwrap()
                 .into_iter(),
         )
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N3_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n3_str)
                 .unwrap()
                 .into_iter(),
         )
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N4_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n4_str)
                 .unwrap()
                 .into_iter(),
         )
         .chain(
-            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(VOCABULARY_N5_DATA)
+            serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n5_str)
                 .unwrap()
                 .into_iter(),
         )
