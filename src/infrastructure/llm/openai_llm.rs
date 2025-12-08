@@ -54,7 +54,7 @@ impl OpenAiLlm {
                 .create(request)
                 .await
                 .map_err(|e| JeersError::LlmError {
-                    reason: format!("Failed to send request to OpenRouter: {}", e),
+                    reason: format!("Failed to send request to LLM: {}", e),
                 })?;
 
         let content = response
@@ -62,7 +62,7 @@ impl OpenAiLlm {
             .first()
             .and_then(|choice| choice.message.content.as_ref())
             .ok_or_else(|| JeersError::LlmError {
-                reason: "No content in OpenRouter response".to_string(),
+                reason: "No content in LLM response".to_string(),
             })?;
 
         Ok(content.clone())

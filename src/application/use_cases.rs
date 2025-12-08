@@ -6,6 +6,7 @@ pub mod export_anki_pack;
 pub mod export_migii_pack;
 pub mod generate_card_content;
 pub mod generate_embedding;
+pub mod generate_vocabulary_content;
 pub mod get_kanji_info;
 pub mod get_user_info;
 pub mod list_cards;
@@ -24,6 +25,7 @@ pub use export_anki_pack::{AnkiCard, ExportAnkiPackResult, ExportAnkiPackUseCase
 pub use export_migii_pack::{ExportMigiiPackResult, ExportMigiiPackUseCase};
 pub use generate_card_content::GenerateCardContentUseCase;
 pub use generate_embedding::GenerateEmbeddingUseCase;
+pub use generate_vocabulary_content::{GenerateVocabularyContentUseCase, VocabularyContent};
 pub use get_kanji_info::GetKanjiInfoUseCase;
 pub use get_user_info::{GetUserInfoUseCase, UserProfile};
 pub use list_cards::ListCardsUseCase;
