@@ -1,14 +1,12 @@
-use async_trait::async_trait;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
 use std::sync::{Arc, OnceLock};
 
-use crate::application::LlmService;
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    CandleEmbeddingService, CandleLlm, CandleTranslationService, EmbeddingServiceEnum,
-    FileSystemUserRepository, FsrsSrsService, GeminiLlm, HttpMigiiClient, OpenAiEmbeddingService,
-    OpenAiLlm,
+    CandleEmbeddingService, CandleLlm, CandleTranslationService, EmbeddingServiceInvoker,
+    FileSystemUserRepository, FsrsSrsService, GeminiLlm, HttpMigiiClient, LlmServiceInvoker,
+    OpenAiEmbeddingService, OpenAiLlm,
 };
 use tokio::sync::OnceCell;
 
@@ -18,12 +16,12 @@ pub struct ApplicationEnvironment {
     settings: Settings,
 
     lazy_repository: Arc<OnceCell<FileSystemUserRepository>>,
-    lazy_embedding_service: Arc<OnceCell<EmbeddingServiceEnum>>,
+    lazy_embedding_service: Arc<OnceCell<EmbeddingServiceInvoker>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
     lazy_translation_service: Arc<OnceCell<CandleTranslationService>>,
     lazy_migii_client: Arc<OnceCell<HttpMigiiClient>>,
 
-    lazy_llm: Arc<OnceCell<Box<dyn LlmService>>>,
+    lazy_llm: Arc<OnceCell<LlmServiceInvoker>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -181,11 +179,11 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_embedding_service(&self) -> Result<&EmbeddingServiceEnum, JeersError> {
+    pub async fn get_embedding_service(&self) -> Result<&EmbeddingServiceInvoker, JeersError> {
         self.lazy_embedding_service
             .get_or_try_init(|| async {
                 let service = match &self.settings.embedding {
-                    EmbeddingSettings::Candle => EmbeddingServiceEnum::Candle(
+                    EmbeddingSettings::Candle => EmbeddingServiceInvoker::Candle(
                         CandleEmbeddingService::new().map_err(|e| JeersError::SettingsError {
                             reason: e.to_string(),
                         })?,
@@ -194,7 +192,7 @@ impl ApplicationEnvironment {
                         model,
                         base_url,
                         env_var_name,
-                    } => EmbeddingServiceEnum::OpenAi(
+                    } => EmbeddingServiceInvoker::OpenAi(
                         OpenAiEmbeddingService::new(
                             model.clone(),
                             base_url.clone(),
@@ -210,24 +208,23 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_llm_service(&self) -> Result<&Box<dyn LlmService>, JeersError> {
-        let llm = self
-            .lazy_llm
+    pub async fn get_llm_service(&self) -> Result<&LlmServiceInvoker, JeersError> {
+        self.lazy_llm
             .get_or_try_init(|| async {
-                let boxed_service: Box<dyn LlmService> = match &self.settings.llm {
-                    LlmSettings::Gemini { temperature, model } => {
-                        Box::new(GeminiLlm::new(*temperature, model.clone()).map_err(|e| {
+                let service = match &self.settings.llm {
+                    LlmSettings::Gemini { temperature, model } => LlmServiceInvoker::Gemini(
+                        GeminiLlm::new(*temperature, model.clone()).map_err(|e| {
                             JeersError::SettingsError {
                                 reason: e.to_string(),
                             }
-                        })?)
-                    }
+                        })?,
+                    ),
                     LlmSettings::OpenAi {
                         temperature,
                         model,
                         base_url,
                         env_var_name,
-                    } => Box::new(
+                    } => LlmServiceInvoker::OpenAi(
                         OpenAiLlm::new(
                             *temperature,
                             model.clone(),
@@ -247,7 +244,7 @@ impl ApplicationEnvironment {
                         model_revision,
                         tokenizer_repo,
                         tokenizer_filename,
-                    } => Box::new(
+                    } => LlmServiceInvoker::Candle(
                         CandleLlm::new(
                             *max_sample_len,
                             *temperature,
@@ -263,12 +260,9 @@ impl ApplicationEnvironment {
                         })?,
                     ),
                 };
-
-                Ok(boxed_service)
+                Ok(service)
             })
-            .await?;
-
-        Ok(llm)
+            .await
     }
 
     pub async fn get_srs_service(&self) -> Result<&FsrsSrsService, JeersError> {
@@ -331,12 +325,5 @@ impl ApplicationEnvironment {
 
     pub fn get() -> &'static ApplicationEnvironment {
         SETTINGS.get().expect("Settings not initialized")
-    }
-}
-
-#[async_trait]
-impl LlmService for Box<dyn LlmService> {
-    async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
-        (**self).generate_text(question).await
     }
 }

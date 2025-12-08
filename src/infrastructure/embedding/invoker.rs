@@ -4,23 +4,23 @@ use crate::domain::value_objects::Embedding;
 
 use crate::infrastructure::{CandleEmbeddingService, OpenAiEmbeddingService};
 
-pub enum EmbeddingServiceEnum {
+pub enum EmbeddingServiceInvoker {
     Candle(CandleEmbeddingService),
     OpenAi(OpenAiEmbeddingService),
 }
 
-impl EmbeddingService for EmbeddingServiceEnum {
+impl EmbeddingService for EmbeddingServiceInvoker {
     async fn generate_embedding(&self, input: &str) -> Result<Embedding, JeersError> {
         match self {
-            EmbeddingServiceEnum::Candle(service) => service.generate_embedding(input).await,
-            EmbeddingServiceEnum::OpenAi(service) => service.generate_embedding(input).await,
+            EmbeddingServiceInvoker::Candle(service) => service.generate_embedding(input).await,
+            EmbeddingServiceInvoker::OpenAi(service) => service.generate_embedding(input).await,
         }
     }
 
     async fn generate_embeddings(&self, inputs: &[String]) -> Result<Vec<Embedding>, JeersError> {
         match self {
-            EmbeddingServiceEnum::Candle(service) => service.generate_embeddings(inputs).await,
-            EmbeddingServiceEnum::OpenAi(service) => service.generate_embeddings(inputs).await,
+            EmbeddingServiceInvoker::Candle(service) => service.generate_embeddings(inputs).await,
+            EmbeddingServiceInvoker::OpenAi(service) => service.generate_embeddings(inputs).await,
         }
     }
 }
