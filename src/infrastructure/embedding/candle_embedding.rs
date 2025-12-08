@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use hf_hub::api::sync::{ApiBuilder, ApiRepo};
 use hf_hub::{Repo, RepoType};
 use serde::Deserialize;
@@ -42,11 +43,15 @@ impl CandleEmbeddingService {
         })
     }
 
-    fn encode_inputs(&self, inputs: &[String]) -> Result<Vec<Encoding>, JeersError> {
+    fn encode_inputs(
+        &self,
+        instruction: &str,
+        inputs: &[String],
+    ) -> Result<Vec<Encoding>, JeersError> {
         inputs
             .iter()
             .map(|input| {
-                let instruction = self.create_instruction(input);
+                let instruction = self.create_instruction(instruction, input);
                 self.tokenizer
                     .encode(instruction.as_str(), true)
                     .map_err(|e| JeersError::EmbeddingError {
@@ -69,17 +74,19 @@ impl CandleEmbeddingService {
         Ok(pooled_embeddings)
     }
 
-    fn create_instruction(&self, word: &str) -> String {
-        format!(
-            "Instruct: Represent this Japanese word for find same words in different grammar forms\nQuery: {}",
-            word
-        )
+    fn create_instruction(&self, instruction: &str, word: &str) -> String {
+        format!("Instruct: {}\nQuery: {}", instruction, word)
     }
 }
 
+#[async_trait]
 impl EmbeddingService for CandleEmbeddingService {
-    async fn generate_embedding(&self, input: &str) -> Result<TraitEmbedding, JeersError> {
-        let encodings = self.encode_inputs(&[input.to_string()])?;
+    async fn generate_embedding(
+        &self,
+        instruction: &str,
+        input: &str,
+    ) -> Result<TraitEmbedding, JeersError> {
+        let encodings = self.encode_inputs(instruction, &[input.to_string()])?;
         let batch = self.create_batch(encodings);
         let embeddings = {
             let backend = self.backend.lock().await;
@@ -102,9 +109,10 @@ impl EmbeddingService for CandleEmbeddingService {
 
     async fn generate_embeddings(
         &self,
+        instruction: &str,
         inputs: &[String],
     ) -> Result<Vec<TraitEmbedding>, JeersError> {
-        let encodings = self.encode_inputs(inputs)?;
+        let encodings = self.encode_inputs(instruction, inputs)?;
         let batch = self.create_batch(encodings);
         let embeddings = {
             let backend = self.backend.lock().await;

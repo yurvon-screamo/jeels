@@ -58,23 +58,19 @@ impl VocabularyDatabase {
         .into_iter()
         .chain(
             serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n2_str)
-                .unwrap()
-                .into_iter(),
+                .unwrap(),
         )
         .chain(
             serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n3_str)
-                .unwrap()
-                .into_iter(),
+                .unwrap(),
         )
         .chain(
             serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n4_str)
-                .unwrap()
-                .into_iter(),
+                .unwrap(),
         )
         .chain(
             serde_json::from_str::<HashMap<String, VocabularyEntryStoredType>>(&vocabulary_n5_str)
-                .unwrap()
-                .into_iter(),
+                .unwrap(),
         )
         .collect();
 

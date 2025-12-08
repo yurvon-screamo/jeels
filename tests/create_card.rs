@@ -1,9 +1,11 @@
 #[path = "mod.rs"]
 mod tests;
 
+use keikaku::application::create_card::CardContent;
 use keikaku::application::use_cases::CreateCardUseCase;
 use keikaku::application::user_repository::UserRepository;
 use keikaku::domain::JeersError;
+use keikaku::domain::value_objects::Answer;
 use keikaku::settings::ApplicationEnvironment;
 use rstest::rstest;
 use tests::*;
@@ -15,18 +17,11 @@ async fn create_card_use_case_should_create_card_and_save_to_database() {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let embedding_generator = settings.get_embedding_service().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
     let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
-
-    // Act
     let card = use_case
-        .execute(
-            user.id(),
-            "あります".to_string(),
-            Some("есть".to_string()),
-            Some(vec![]),
-        )
+        .execute(user.id(), "あります".to_string(), None)
         .await
         .unwrap();
 
@@ -42,15 +37,17 @@ async fn create_card_use_case_should_persist_card_in_database() {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let embedding_generator = settings.get_embedding_service().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
     let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
     let card = use_case
         .execute(
             user.id(),
             "私".to_string(),
-            Some("я".to_string()),
-            Some(vec![]),
+            Some(CardContent {
+                answer: Answer::new("я".to_string()).unwrap(),
+                example_phrases: vec![],
+            }),
         )
         .await
         .unwrap();
@@ -71,12 +68,19 @@ async fn create_card_use_case_should_generate_answer_if_not_provided() {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let embedding_generator = settings.get_embedding_service().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
     let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
     let card = use_case
-        .execute(user.id(), "食べます".to_string(), None, Some(vec![]))
+        .execute(
+            user.id(),
+            "食べます".to_string(),
+            Some(CardContent {
+                answer: Answer::new("съедает, потребляет что-то как еду".to_string()).unwrap(),
+                example_phrases: vec![],
+            }),
+        )
         .await
         .unwrap();
 
@@ -111,7 +115,7 @@ async fn create_card_use_case_should_return_error_if_similar_card_already_exists
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let embedding_generator = settings.get_embedding_service().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
     let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
@@ -119,8 +123,10 @@ async fn create_card_use_case_should_return_error_if_similar_card_already_exists
         .execute(
             user.id(),
             existing_question.to_string(),
-            Some(answer.to_string()),
-            Some(vec![]),
+            Some(CardContent {
+                answer: Answer::new(answer.to_string()).unwrap(),
+                example_phrases: vec![],
+            }),
         )
         .await
         .unwrap();
@@ -132,8 +138,10 @@ async fn create_card_use_case_should_return_error_if_similar_card_already_exists
         .execute(
             user.id(),
             similar_question.to_string(),
-            Some(answer.to_string()),
-            Some(vec![]),
+            Some(CardContent {
+                answer: Answer::new(answer.to_string()).unwrap(),
+                example_phrases: vec![],
+            }),
         )
         .await
         .unwrap_err();
@@ -177,7 +185,7 @@ async fn create_card_use_case_should_return_ok_is_not_similar_card_already_exist
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_generator().await.unwrap();
+    let embedding_generator = settings.get_embedding_service().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
     let use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
 
@@ -185,8 +193,10 @@ async fn create_card_use_case_should_return_ok_is_not_similar_card_already_exist
         .execute(
             user.id(),
             first_question.to_string(),
-            Some(first_answer.to_string()),
-            Some(vec![]),
+            Some(CardContent {
+                answer: Answer::new(first_answer.to_string()).unwrap(),
+                example_phrases: vec![],
+            }),
         )
         .await
         .unwrap();
@@ -198,8 +208,10 @@ async fn create_card_use_case_should_return_ok_is_not_similar_card_already_exist
         .execute(
             user.id(),
             second_question.to_string(),
-            Some(second_answer.to_string()),
-            Some(vec![]),
+            Some(CardContent {
+                answer: Answer::new(second_answer.to_string()).unwrap(),
+                example_phrases: vec![],
+            }),
         )
         .await
         .unwrap();

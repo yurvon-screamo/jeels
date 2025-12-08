@@ -1,16 +1,19 @@
+use async_trait::async_trait;
+
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::Embedding;
 
-use std::future::Future;
-
+#[async_trait]
 pub trait EmbeddingService: Send + Sync {
-    fn generate_embedding(
+    async fn generate_embedding(
         &self,
+        instruction: &str,
         input: &str,
-    ) -> impl Future<Output = Result<Embedding, JeersError>> + Send;
+    ) -> Result<Embedding, JeersError>;
 
-    fn generate_embeddings(
+    async fn generate_embeddings(
         &self,
+        instruction: &str,
         inputs: &[String],
-    ) -> impl Future<Output = Result<Vec<Embedding>, JeersError>> + Send;
+    ) -> Result<Vec<Embedding>, JeersError>;
 }

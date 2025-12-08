@@ -6,6 +6,8 @@ use crate::domain::value_objects::{Answer, ExamplePhrase, Question};
 use crate::domain::vocabulary::VOCABULARY_DB;
 use ulid::Ulid;
 
+pub const PROMT: &str = "Represent this Japanese word for find same words";
+
 #[derive(Clone, Debug)]
 pub struct CardContent {
     pub answer: Answer,
@@ -61,7 +63,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmServi
             embedding
         } else {
             self.embedding_service
-                .generate_embedding(&question_text)
+                .generate_embedding(PROMT, &question_text)
                 .await?
         };
 

@@ -34,7 +34,7 @@ impl<'a, R: UserRepository, E: EmbeddingService> EditCardUseCase<'a, R, E> {
 
         let new_embedding = self
             .embedding_service
-            .generate_embedding(&question_text)
+            .generate_embedding(super::create_card::PROMT, &question_text)
             .await?;
         let new_question = Question::new(question_text, new_embedding)?;
         let new_answer = Answer::new(answer_text)?;

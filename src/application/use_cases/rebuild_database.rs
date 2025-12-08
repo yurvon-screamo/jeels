@@ -79,7 +79,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
             let new_embedding = if rebuild_embedding {
                 match self
                     .embedding_service
-                    .generate_embedding(card.question().text())
+                    .generate_embedding(super::create_card::PROMT, card.question().text())
                     .await
                 {
                     Ok(value) => value,
