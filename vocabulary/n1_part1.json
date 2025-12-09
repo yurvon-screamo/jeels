@@ -12759,7 +12759,45 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9995
+      },
+      {
+        "word": "買って",
+        "score": 0.9939
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9921
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.992
+      },
+      {
+        "word": "大幅",
+        "score": 0.9901
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9871
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9843
+      },
+      {
+        "word": "広々",
+        "score": 0.9821
+      },
+      {
+        "word": "内",
+        "score": 0.9804
+      }
+    ]
   },
   "トーン": {
     "english_translation": "Tone (quality of expression conveying attitude or emotional nuance).",
