@@ -11667,7 +11667,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9905
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9891
+      },
+      {
+        "word": "買って",
+        "score": 0.986
+      },
+      {
+        "word": "大幅",
+        "score": 0.9816
+      },
+      {
+        "word": "話して",
+        "score": 0.9804
+      }
+    ]
   },
   "タワー": {
     "english_translation": "Tower (tall structure).",
@@ -11693,7 +11715,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9949
+      },
+      {
+        "word": "買って",
+        "score": 0.9927
+      },
+      {
+        "word": "帯",
+        "score": 0.9895
+      },
+      {
+        "word": "話して",
+        "score": 0.9894
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9837
+      },
+      {
+        "word": "大幅",
+        "score": 0.9805
+      }
+    ]
   },
   "タンパク質": {
     "english_translation": "Protein (organic compound essential for growth and repair).",
@@ -11719,7 +11767,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9997
+      },
+      {
+        "word": "買って",
+        "score": 0.9932
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9891
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9856
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9825
+      },
+      {
+        "word": "話して",
+        "score": 0.9812
+      }
+    ]
   },
   "ダウン": {
     "english_translation": "Down, decline (loss of ability, decrease); down feather.",
@@ -11745,7 +11823,17 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9911
+      },
+      {
+        "word": "話して",
+        "score": 0.9909
+      }
+    ]
   },
   "ダブる": {
     "english_translation": "To overlap, duplicate (audio/video); to repeat a year of study.",
@@ -11771,7 +11859,37 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.999
+      },
+      {
+        "word": "大幅",
+        "score": 0.992
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9865
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9824
+      },
+      {
+        "word": "迎え",
+        "score": 0.982
+      },
+      {
+        "word": "確実",
+        "score": 0.9818
+      },
+      {
+        "word": "広々",
+        "score": 0.9812
+      }
+    ]
   },
   "ダンプ": {
     "english_translation": "Dump truck; to dump (data).",
@@ -11797,7 +11915,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9968
+      },
+      {
+        "word": "話して",
+        "score": 0.9929
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9913
+      },
+      {
+        "word": "買って",
+        "score": 0.9881
+      },
+      {
+        "word": "大幅",
+        "score": 0.9846
+      },
+      {
+        "word": "広々",
+        "score": 0.9836
+      }
+    ]
   },
   "ダース": {
     "english_translation": "Dozen (a quantity of twelve).",
@@ -11823,7 +11967,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "恵まれる",
+        "score": 0.992
+      },
+      {
+        "word": "見ないで",
+        "score": 0.991
+      },
+      {
+        "word": "買って",
+        "score": 0.9907
+      },
+      {
+        "word": "大幅",
+        "score": 0.9902
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9807
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9803
+      }
+    ]
   },
   "チェンジ": {
     "english_translation": "Change, switch, substitution (especially a sudden or significant alteration).",
@@ -11849,7 +12019,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9935
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9925
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.992
+      },
+      {
+        "word": "大幅",
+        "score": 0.9888
+      },
+      {
+        "word": "話して",
+        "score": 0.9873
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9869
+      },
+      {
+        "word": "広々",
+        "score": 0.9858
+      }
+    ]
   },
   "チャイム": {
     "english_translation": "Chime, bell (e.g., school bell).",

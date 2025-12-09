@@ -76,17 +76,20 @@
         /* Кастомный чекбокс и радио */
         .custom-check:checked {
             background-color: #F472B6;
-            /* Soft Pink */
             border-color: #F472B6;
-        }
-
-        .custom-check:checked {
             background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
         }
 
-        /* Добавляем градиент для свитча */
+        /* ОБНОВЛЕННЫЙ СВИТЧ (Яркий градиент при включении) */
         .bg-rainbow-switch:checked {
-            background-image: linear-gradient(to right, #F472B6, #A78BFA);
+            background-image: linear-gradient(to right, #F472B6, #A78BFA, #22D3EE);
+            /* Pink -> Purple -> Cyan */
+            opacity: 1;
+        }
+
+        /* Убираем стандартный серый фон при чеке, чтобы градиент был виден */
+        .peer:checked~.peer-checked-bg {
+            background-color: transparent;
         }
     </style>
 
@@ -180,10 +183,13 @@
                 <span class="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 block">02. Buttons</span>
 
                 <div class="flex flex-col gap-4">
+
                     <button
                         class="w-full py-3.5 rounded-xl bg-rainbow-vibrant text-white font-bold shadow-lg shadow-accent-purple/30 hover:scale-[1.02] hover:shadow-accent-pink/40 active:scale-95 transition-all duration-300 ease-elastic relative overflow-hidden group">
-                        <div
-                            class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-smooth">
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div
+                                class="w-[200%] h-[200%] bg-white/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500 ease-out">
+                            </div>
                         </div>
                         <span class="relative z-10">Rainbow Action</span>
                     </button>
@@ -200,14 +206,14 @@
 
                     <div class="flex gap-4 justify-center mt-2">
                         <button
-                            class="w-12 h-12 rounded-xl bg-white shadow-md text-slate-400 flex items-center justify-center hover:text-accent-pink hover:shadow-glow transition-all duration-300">
+                            class="w-12 h-12 rounded-xl bg-white shadow-lg shadow-accent-pink/20 text-slate-400 flex items-center justify-center hover:text-accent-pink hover:shadow-glow transition-all duration-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </button>
                         <button
-                            class="w-12 h-12 rounded-full bg-rainbow-vibrant text-white flex items-center justify-center hover:scale-110 hover:shadow-glow transition-all duration-300 ease-elastic">
+                            class="w-12 h-12 rounded-full bg-rainbow-vibrant text-white flex items-center justify-center shadow-lg shadow-accent-pink/20 hover:scale-110 hover:shadow-glow transition-all duration-300 ease-elastic">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -257,15 +263,19 @@
                     Controls</span>
 
                 <div class="space-y-6">
+
                     <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50">
                         <span class="text-sm font-bold text-slate-600">Rainbow Mode</span>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" value="" class="sr-only peer bg-rainbow-switch">
+                            <input type="checkbox" checked class="sr-only peer bg-rainbow-switch">
                             <div
-                                class="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer transition-all duration-300 ease-smooth">
+                                class="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-transparent transition-all duration-300 ease-smooth relative overflow-hidden peer-checked-bg">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 opacity-0 peer-checked:opacity-100 transition-opacity duration-300">
+                                </div>
                             </div>
                             <div
-                                class="absolute left-[4px] top-[4px] bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 ease-elastic peer-checked:translate-x-5">
+                                class="absolute left-[4px] top-[4px] bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 ease-elastic peer-checked:translate-x-5 z-10">
                             </div>
                         </label>
                     </div>
