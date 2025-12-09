@@ -14,7 +14,13 @@ use ulid::Ulid;
 use crate::{
     application::{CompleteLessonUseCase, RateCardUseCase, SelectCardsToLearnUseCase},
     cli::{furigana_renderer, render_once},
-    domain::{JeersError, Rating, japanese::IsJapaneseText, study_session::StudySessionItem},
+    domain::{
+        JeersError, Rating,
+        japanese::IsJapaneseText,
+        kanji_card::ExampleKanjiWord,
+        study_session::{KanjiStudySessionItem, StudySessionItem, VocabularyStudySessionItem},
+        value_objects::ExamplePhrase,
+    },
     settings::ApplicationEnvironment,
 };
 
@@ -24,6 +30,11 @@ enum CardState {
     Completed,
 }
 
+enum CardExamples<'a> {
+    Vocabulary(&'a [ExamplePhrase]),
+    Kanji(&'a [ExampleKanjiWord]),
+}
+
 struct LearnCardApp {
     card: StudySessionItem,
     state: CardState,
@@ -31,7 +42,6 @@ struct LearnCardApp {
     exit_session: bool,
     furigana_shown: bool,
     similarity_shown: bool,
-    homonyms_shown: bool,
     current_index: usize,
     total_count: usize,
 }
@@ -44,14 +54,18 @@ impl LearnCardApp {
         furigana_force: bool,
         similarity_force: bool,
     ) -> Self {
+        let supports_relations = matches!(
+            &card,
+            StudySessionItem::Vocabulary(item)
+                if !item.similarity().is_empty() || !item.homonyms().is_empty()
+        );
         Self {
             card,
             state: CardState::Question,
             exit: false,
             exit_session: false,
             furigana_shown: furigana_force,
-            similarity_shown: similarity_force,
-            homonyms_shown: similarity_force,
+            similarity_shown: similarity_force && supports_relations,
             current_index,
             total_count,
         }
@@ -68,6 +82,69 @@ impl LearnCardApp {
 
         ratatui::restore();
         Ok((rating, self.exit_session))
+    }
+
+    fn card_question_text(&self) -> String {
+        match &self.card {
+            StudySessionItem::Vocabulary(card) => card.word().to_string(),
+            StudySessionItem::Kanji(card) => card.kanji().to_string(),
+        }
+    }
+
+    fn card_answer_text(&self) -> String {
+        match &self.card {
+            StudySessionItem::Vocabulary(card) => card.meaning().to_string(),
+            StudySessionItem::Kanji(card) => card.description().to_string(),
+        }
+    }
+
+    fn card_similarity(&self) -> &[VocabularyStudySessionItem] {
+        match &self.card {
+            StudySessionItem::Vocabulary(card) => card.similarity(),
+            StudySessionItem::Kanji(_) => &[] as &[VocabularyStudySessionItem],
+        }
+    }
+
+    fn card_homonyms(&self) -> &[VocabularyStudySessionItem] {
+        match &self.card {
+            StudySessionItem::Vocabulary(card) => card.homonyms(),
+            StudySessionItem::Kanji(_) => &[] as &[VocabularyStudySessionItem],
+        }
+    }
+
+    fn card_examples(&self) -> CardExamples<'_> {
+        match &self.card {
+            StudySessionItem::Vocabulary(card) => CardExamples::Vocabulary(card.example_phrases()),
+            StudySessionItem::Kanji(card) => CardExamples::Kanji(card.example_words()),
+        }
+    }
+
+    fn card_kanji_info(&self) -> &[crate::domain::dictionary::KanjiInfo] {
+        match &self.card {
+            StudySessionItem::Vocabulary(card) => card.kanji(),
+            StudySessionItem::Kanji(_) => &[] as &[crate::domain::dictionary::KanjiInfo],
+        }
+    }
+
+    fn supports_relations(&self) -> bool {
+        !self.card_similarity().is_empty() || !self.card_homonyms().is_empty()
+    }
+
+    fn related_cards_visible(&self) -> bool {
+        self.supports_relations() && self.similarity_shown
+    }
+
+    fn has_furigana_content(&self) -> bool {
+        let question = self.card_question_text();
+        let answer = self.card_answer_text();
+        question.has_furigana() || answer.has_furigana()
+    }
+
+    fn kanji_card(&self) -> Option<&KanjiStudySessionItem> {
+        match &self.card {
+            StudySessionItem::Kanji(card) => Some(card),
+            _ => None,
+        }
     }
 
     fn draw(&self, frame: &mut Frame) {
@@ -100,7 +177,7 @@ impl LearnCardApp {
     }
 
     fn create_horizontal_layout(&self, main_area: Rect) -> (Rect, Option<Rect>) {
-        let similarity_shown = self.similarity_shown;
+        let similarity_shown = self.related_cards_visible();
 
         let layout = if similarity_shown {
             Layout::horizontal([Constraint::Percentage(60), Constraint::Percentage(40)])
@@ -126,7 +203,7 @@ impl LearnCardApp {
     }
 
     fn create_card_and_kanji_layout(&self, card_area: Rect) -> (Rect, Option<Rect>) {
-        let kanji_list = self.card.kanji();
+        let kanji_list = self.card_kanji_info();
         if kanji_list.is_empty() {
             return (card_area, None);
         }
@@ -170,8 +247,10 @@ impl LearnCardApp {
         lines.push(Line::from(
             "Нажмите пробел чтобы показать ответ.".fg(Color::Gray),
         ));
-        lines.push(self.build_similarity_hint());
-        if self.card.question().has_furigana() {
+        if self.supports_relations() {
+            lines.push(self.build_similarity_hint());
+        }
+        if self.has_furigana_content() {
             lines.push(self.build_furigana_hint());
         }
         lines.push(Line::from(
@@ -185,8 +264,16 @@ impl LearnCardApp {
         let mut lines = vec![];
         lines.push(self.render_question_line(Color::Blue));
         lines.push(self.render_answer_line());
-        lines.push(Line::from(""));
-        lines.extend(self.build_example_lines());
+        let example_lines = self.build_example_lines();
+        if !example_lines.is_empty() {
+            lines.push(Line::from(""));
+            lines.extend(example_lines);
+        }
+        let kanji_details = self.build_kanji_details_lines();
+        if !kanji_details.is_empty() {
+            lines.push(Line::from(""));
+            lines.extend(kanji_details);
+        }
         lines.push(Line::from(""));
         lines.push(Line::from(
             "Используйте цифры от 1 до 4 для оценки карточки.".fg(Color::Gray),
@@ -195,7 +282,9 @@ impl LearnCardApp {
         lines.push(Line::from("2 - Нормально".fg(Color::Gray)));
         lines.push(Line::from("3 - Трудно".fg(Color::Gray)));
         lines.push(Line::from("4 - Очень трудно".fg(Color::Gray)));
-        lines.push(self.build_similarity_hint());
+        if self.supports_relations() {
+            lines.push(self.build_similarity_hint());
+        }
         lines.push(Line::from(
             "Нажмите \"s\" чтобы пропустить карточку.".fg(Color::Gray),
         ));
@@ -207,33 +296,41 @@ impl LearnCardApp {
         let mut lines = vec![];
         lines.push(self.render_question_line(Color::Blue));
         lines.push(self.render_answer_line());
-        lines.push(Line::from(""));
-        lines.extend(self.build_example_lines());
+        let example_lines = self.build_example_lines();
+        if !example_lines.is_empty() {
+            lines.push(Line::from(""));
+            lines.extend(example_lines);
+        }
+        let kanji_details = self.build_kanji_details_lines();
+        if !kanji_details.is_empty() {
+            lines.push(Line::from(""));
+            lines.extend(kanji_details);
+        }
         lines
     }
 
     fn render_question_line(&self, color: Color) -> Line<'_> {
-        if self.furigana_shown {
-            let question_text = self.card.question().as_furigana();
-            if question_text != self.card.question() {
-                return furigana_renderer::render_furigana(&question_text);
-            }
-        }
-        Line::from(self.card.question().bold().fg(color))
+        let question = self.card_question_text();
+        self.render_text_with_furigana(question, color)
     }
 
     fn render_answer_line(&self) -> Line<'_> {
+        let answer = self.card_answer_text();
+        self.render_text_with_furigana(answer, Color::Magenta)
+    }
+
+    fn render_text_with_furigana(&self, text: String, color: Color) -> Line<'static> {
         if self.furigana_shown {
-            let answer_text = self.card.answer().as_furigana();
-            if answer_text != self.card.answer() {
-                return furigana_renderer::render_furigana(&answer_text);
+            let furigana_text = text.as_str().as_furigana();
+            if furigana_text != text {
+                return furigana_renderer::render_furigana(&furigana_text).fg(color);
             }
         }
-        Line::from(self.card.answer().bold().fg(Color::Magenta))
+        Line::from(Span::raw(text).fg(color).bold())
     }
 
     fn draw_kanji_grid(&self, frame: &mut Frame, area: Rect) {
-        let kanji_list = self.card.kanji();
+        let kanji_list = self.card_kanji_info();
         if kanji_list.is_empty() {
             return;
         }
@@ -330,7 +427,7 @@ impl LearnCardApp {
     }
 
     fn build_similarity_hint(&self) -> Line<'_> {
-        if self.similarity_shown {
+        if self.related_cards_visible() {
             Line::from("Нажмите \"h\" чтобы скрыть связанные карточки и омонимы.".fg(Color::Gray))
         } else {
             Line::from("Нажмите \"h\" чтобы показать связанные карточки и омонимы.".fg(Color::Gray))
@@ -346,7 +443,7 @@ impl LearnCardApp {
     }
 
     fn draw_similarity(&self, frame: &mut Frame, area: Rect) {
-        if !self.similarity_shown {
+        if !self.related_cards_visible() || self.card_similarity().is_empty() {
             return;
         }
 
@@ -365,14 +462,14 @@ impl LearnCardApp {
     fn build_similarity_lines(&self) -> Vec<Line<'_>> {
         let mut lines = vec![Line::from("")];
 
-        if self.card.similarity().is_empty() {
+        if self.card_similarity().is_empty() {
             lines.push(Line::from("Связанные карточки не найдены.".fg(Color::Gray)));
         } else {
-            for similar_card in self.card.similarity() {
+            for similar_card in self.card_similarity() {
                 lines.push(self.render_similar_card_question(similar_card));
                 if self.should_show_answer() {
                     lines.push(Line::from(
-                        format!("  {}", similar_card.answer()).fg(Color::Magenta),
+                        format!("  {}", similar_card.meaning()).fg(Color::Magenta),
                     ));
                 }
                 lines.push(Line::from(""));
@@ -381,18 +478,22 @@ impl LearnCardApp {
         lines
     }
 
-    fn render_similar_card_question(&self, similar_card: &StudySessionItem) -> Line<'_> {
+    fn render_similar_card_question(&self, similar_card: &VocabularyStudySessionItem) -> Line<'_> {
+        let question = similar_card.word();
         if self.furigana_shown {
-            let question_text = similar_card.question().as_furigana();
-            if question_text != similar_card.question() {
-                return furigana_renderer::render_furigana(&question_text);
+            let question_text = question.as_furigana();
+            if question_text != question {
+                let line = furigana_renderer::render_furigana(&question_text);
+                let mut spans = vec![Span::from("• ")];
+                spans.extend(line.spans);
+                return Line::from(spans).fg(Color::Cyan);
             }
         }
-        Line::from(format!("• {}", similar_card.question()).fg(Color::Cyan))
+        Line::from(format!("• {}", question).fg(Color::Cyan))
     }
 
     fn draw_homonyms(&self, frame: &mut Frame, area: Rect) {
-        if !self.similarity_shown {
+        if !self.related_cards_visible() || self.card_homonyms().is_empty() {
             return;
         }
 
@@ -411,14 +512,14 @@ impl LearnCardApp {
     fn build_homonyms_lines(&self) -> Vec<Line<'_>> {
         let mut lines = vec![Line::from("")];
 
-        if self.card.homonyms().is_empty() {
+        if self.card_homonyms().is_empty() {
             lines.push(Line::from("Омонимы не найдены.".fg(Color::Gray)));
         } else {
-            for homonym_card in self.card.homonyms() {
+            for homonym_card in self.card_homonyms() {
                 lines.push(self.render_homonym_card_question(homonym_card));
                 if self.should_show_answer() {
                     lines.push(Line::from(
-                        format!("  {}", homonym_card.answer()).fg(Color::Magenta),
+                        format!("  {}", homonym_card.meaning()).fg(Color::Magenta),
                     ));
                 }
                 lines.push(Line::from(""));
@@ -427,14 +528,18 @@ impl LearnCardApp {
         lines
     }
 
-    fn render_homonym_card_question(&self, homonym_card: &StudySessionItem) -> Line<'_> {
+    fn render_homonym_card_question(&self, homonym_card: &VocabularyStudySessionItem) -> Line<'_> {
+        let question = homonym_card.word();
         if self.furigana_shown {
-            let question_text = homonym_card.question().as_furigana();
-            if question_text != homonym_card.question() {
-                return furigana_renderer::render_furigana(&question_text);
+            let question_text = question.as_furigana();
+            if question_text != question {
+                let line = furigana_renderer::render_furigana(&question_text);
+                let mut spans = vec![Span::from("• ")];
+                spans.extend(line.spans);
+                return Line::from(spans).fg(Color::Cyan);
             }
         }
-        Line::from(format!("• {}", homonym_card.question()).fg(Color::Cyan))
+        Line::from(format!("• {}", question).fg(Color::Cyan))
     }
 
     fn should_show_answer(&self) -> bool {
@@ -442,9 +547,14 @@ impl LearnCardApp {
     }
 
     fn build_example_lines(&self) -> Vec<Line<'_>> {
-        let mut lines = vec![];
-        let examples = self.card.example_phrases();
+        match self.card_examples() {
+            CardExamples::Vocabulary(examples) => self.build_vocabulary_examples(examples),
+            CardExamples::Kanji(examples) => self.build_kanji_examples(examples),
+        }
+    }
 
+    fn build_vocabulary_examples(&self, examples: &[ExamplePhrase]) -> Vec<Line<'_>> {
+        let mut lines = vec![];
         if examples.is_empty() {
             return lines;
         }
@@ -460,6 +570,57 @@ impl LearnCardApp {
                 format!("  {}", example.translation()).fg(Color::White),
             ));
             lines.push(Line::from(""));
+        }
+
+        lines
+    }
+
+    fn build_kanji_examples(&self, examples: &[ExampleKanjiWord]) -> Vec<Line<'_>> {
+        let mut lines = vec![];
+        if examples.is_empty() {
+            return lines;
+        }
+
+        lines.push(Line::from("Популярные слова:".fg(Color::Yellow).bold()));
+        lines.push(Line::from(""));
+
+        for example in examples.iter() {
+            lines.push(self.render_example_text_line(example.word()));
+            lines.push(Line::from(
+                format!("  {}", example.meaning()).fg(Color::White),
+            ));
+            lines.push(Line::from(""));
+        }
+
+        lines
+    }
+
+    fn build_kanji_details_lines(&self) -> Vec<Line<'_>> {
+        let mut lines = vec![];
+        let Some(card) = self.kanji_card() else {
+            return lines;
+        };
+
+        lines.push(Line::from(
+            format!("JLPT: N{}", card.level().as_number())
+                .fg(Color::Yellow)
+                .bold(),
+        ));
+        lines.push(Line::from(""));
+        lines.push(Line::from("Радикалы:".fg(Color::Yellow).bold()));
+
+        if card.radicals().is_empty() {
+            lines.push(Line::from("  Радикалы не найдены.".fg(Color::Gray)));
+            return lines;
+        }
+
+        for radical in card.radicals().iter() {
+            lines.push(Line::from(
+                format!("  {} - {}", radical.radical(), radical.name()).fg(Color::Cyan),
+            ));
+            lines.push(Line::from(
+                format!("    {}", radical.description()).fg(Color::White),
+            ));
         }
 
         lines
@@ -525,15 +686,16 @@ impl LearnCardApp {
     }
 
     fn handle_h_key(&mut self) {
-        if matches!(self.state, CardState::Question | CardState::Answer) {
+        if matches!(self.state, CardState::Question | CardState::Answer)
+            && self.supports_relations()
+        {
             self.similarity_shown = !self.similarity_shown;
-            self.homonyms_shown = self.similarity_shown;
         }
     }
 
     fn handle_f_key(&mut self) {
         if matches!(self.state, CardState::Question | CardState::Answer)
-            && (self.card.question().has_furigana() || self.card.answer().has_furigana())
+            && self.has_furigana_content()
         {
             self.furigana_shown = !self.furigana_shown;
         }

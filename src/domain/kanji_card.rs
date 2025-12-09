@@ -2,27 +2,33 @@ use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
 use crate::domain::{
-    JeersError,
+    JeersError, Review,
     dictionary::{KANJI_DB, RadicalInfo, VOCABULARY_DB},
-    value_objects::{JapaneseLevel, NativeLanguage},
+    review::{MemoryHistory, MemoryState},
+    value_objects::{Answer, Embedding, JapaneseLevel, NativeLanguage, Question},
 };
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct KanjiCard {
     id: Ulid,
-    kanji: char,
-    description: String,
+    kanji: Question,
+    description: Answer,
     example_words: Vec<ExampleKanjiWord>,
+    memory_history: MemoryHistory,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ExampleKanjiWord {
     word: String,
     meaning: String,
 }
 
 impl KanjiCard {
-    pub fn new(kanji: char, native_language: &NativeLanguage) -> Result<Self, JeersError> {
+    pub fn new(
+        kanji: String,
+        embedding: Embedding,
+        native_language: &NativeLanguage,
+    ) -> Result<Self, JeersError> {
         let kanji_info = KANJI_DB.get_kanji_info(&kanji)?;
         let description = kanji_info.description();
         let example_words = kanji_info
@@ -46,9 +52,10 @@ impl KanjiCard {
 
         Ok(Self {
             id: Ulid::new(),
-            kanji,
-            description: description.to_string(),
+            kanji: Question::new(kanji.to_string(), embedding)?,
+            description: Answer::new(description.to_string())?,
             example_words,
+            memory_history: MemoryHistory::new(),
         })
     }
 
@@ -56,11 +63,11 @@ impl KanjiCard {
         self.id
     }
 
-    pub fn kanji(&self) -> char {
-        self.kanji
+    pub fn kanji(&self) -> &Question {
+        &self.kanji
     }
 
-    pub fn description(&self) -> &str {
+    pub fn description(&self) -> &Answer {
         &self.description
     }
 
@@ -70,20 +77,28 @@ impl KanjiCard {
 
     pub fn jlpt(&self) -> JapaneseLevel {
         KANJI_DB
-            .get_kanji_info(&self.kanji)
+            .get_kanji_info(&self.kanji.text())
             .map(|kanji_info| kanji_info.jlpt().to_owned())
             .unwrap_or(JapaneseLevel::N1)
     }
 
     pub fn used_in(&self) -> u32 {
         KANJI_DB
-            .get_kanji_info(&self.kanji)
+            .get_kanji_info(&self.kanji.text())
             .map(|kanji_info| kanji_info.used_in())
             .unwrap_or(0)
     }
 
     pub fn radicals_info(&self) -> Result<Vec<&RadicalInfo>, JeersError> {
-        Ok(KANJI_DB.get_kanji_info(&self.kanji)?.radicals())
+        Ok(KANJI_DB.get_kanji_info(&self.kanji.text())?.radicals())
+    }
+
+    pub fn memory_history(&self) -> &MemoryHistory {
+        &self.memory_history
+    }
+
+    pub(crate) fn add_review(&mut self, memory_state: MemoryState, review: Review) {
+        self.memory_history.add_review(memory_state, review);
     }
 }
 

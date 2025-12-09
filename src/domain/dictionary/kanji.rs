@@ -11,7 +11,7 @@ use crate::domain::{
 const KANJI_DATA: &str = include_str!("./kanji.json");
 pub static KANJI_DB: LazyLock<KanjiDatabase> = LazyLock::new(KanjiDatabase::new);
 pub struct KanjiDatabase {
-    kanji_map: HashMap<char, KanjiInfo>,
+    kanji_map: HashMap<String, KanjiInfo>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -76,7 +76,7 @@ impl KanjiDatabase {
                     .collect::<Vec<char>>();
 
                 (
-                    kanji_char,
+                    kanji_char.to_string(),
                     KanjiInfo {
                         kanji: kanji_char,
                         jlpt,
@@ -87,12 +87,12 @@ impl KanjiDatabase {
                     },
                 )
             })
-            .collect::<HashMap<char, KanjiInfo>>();
+            .collect::<HashMap<String, KanjiInfo>>();
 
         Self { kanji_map }
     }
 
-    pub fn get_kanji_info(&self, kanji: &char) -> Result<&KanjiInfo, JeersError> {
+    pub fn get_kanji_info(&self, kanji: &str) -> Result<&KanjiInfo, JeersError> {
         self.kanji_map.get(kanji).ok_or(JeersError::KradfileError {
             reason: format!("Kanji {} not found in kanji database", kanji),
         })

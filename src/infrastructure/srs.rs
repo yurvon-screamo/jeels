@@ -1,8 +1,8 @@
 use crate::application::SrsService;
 use crate::application::srs_service::NextReview;
 use crate::domain::error::JeersError;
-use crate::domain::review::Review;
-use crate::domain::value_objects::{Difficulty, MemoryState, Rating, Stability};
+use crate::domain::review::{MemoryState, Review};
+use crate::domain::value_objects::{Difficulty, Rating, Stability};
 use chrono::{Duration, Utc};
 use fsrs::FSRS;
 use std::sync::Arc;
@@ -30,7 +30,7 @@ impl SrsService for FsrsSrsService {
     async fn calculate_next_review(
         &self,
         rating: Rating,
-        previous_memory_state: Option<MemoryState>,
+        previous_memory_state: Option<&MemoryState>,
         reviews: &[Review],
     ) -> Result<NextReview, JeersError> {
         let elapsed_days = if let Some(last_review) = reviews.last() {
@@ -65,9 +65,10 @@ impl SrsService for FsrsSrsService {
         };
 
         let interval_days = next_state.interval.round() as i64;
+        let next_review_date = Utc::now() + Duration::days(interval_days);
         let stability = Stability::new(next_state.memory.stability as f64)?;
         let difficulty = Difficulty::new(next_state.memory.difficulty as f64)?;
-        let memory_state = MemoryState::new(stability, difficulty);
+        let memory_state = MemoryState::new(stability, difficulty, next_review_date);
 
         let interval = if interval_days == 0 && rating != Rating::Again {
             Duration::hours(1)

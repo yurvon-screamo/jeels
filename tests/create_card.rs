@@ -21,6 +21,6 @@ async fn create_card_use_case_should_create_card_and_save_to_database() {
         .unwrap();
 
     // Assert
-    assert_eq!(card.question().text(), "あります");
-    assert_eq!(card.answer().text(), "есть");
+    assert_eq!(card.word().text(), "あります");
+    assert_eq!(card.meaning().text(), "есть");
 }

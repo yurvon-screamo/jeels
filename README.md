@@ -1,5 +1,8 @@
 # Keikaku
 
+3503
+2678
+
 Keikaku (計画) - application for learning japanese. Like Anki, but for japanese native and simplified for better user experience.
 
 Learn all flashcards as a single set with FSRS algorithm, tracking your Japanese language progress as single value.

@@ -21,7 +21,7 @@ impl<'a, R: UserRepository> ListCardsUseCase<'a, R> {
             .ok_or(JeersError::UserNotFound { user_id })?;
 
         let mut cards: Vec<VocabularyCard> = user.cards().values().cloned().collect();
-        cards.sort_by_key(|card| card.next_review_date());
+        cards.sort_by_key(|card| card.memory().next_review_date().cloned());
 
         Ok(cards)
     }

@@ -76,7 +76,7 @@ impl Answer {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum Rating {
     Easy,
     Good,
@@ -133,39 +133,6 @@ impl Difficulty {
 impl fmt::Display for Difficulty {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:.2}", self.value)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
-pub struct MemoryState {
-    stability: Stability,
-    difficulty: Difficulty,
-}
-
-impl MemoryState {
-    pub fn new(stability: Stability, difficulty: Difficulty) -> Self {
-        Self {
-            stability,
-            difficulty,
-        }
-    }
-
-    pub fn stability(&self) -> Stability {
-        self.stability
-    }
-
-    pub fn difficulty(&self) -> Difficulty {
-        self.difficulty
-    }
-}
-
-impl fmt::Display for MemoryState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "Stability: {}, Difficulty: {}",
-            self.stability, self.difficulty
-        )
     }
 }
 

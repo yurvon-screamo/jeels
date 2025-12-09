@@ -28,6 +28,6 @@ impl<'a, R: UserRepository> ViewCardUseCase<'a, R> {
             .get_card(card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
 
-        Ok((card.question().clone(), card.answer().clone()))
+        Ok((card.word().clone(), card.meaning().clone()))
     }
 }

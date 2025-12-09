@@ -44,7 +44,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: crate::application::LlmServi
         if user
             .cards()
             .values()
-            .any(|card| card.question().text() == question_text)
+            .any(|card| card.word().text() == question_text)
         {
             return Err(JeersError::DuplicateCard {
                 question: question_text,

@@ -45,24 +45,24 @@ pub async fn handle_list_cards(user_id: Ulid) -> Result<(), JeersError> {
     // Data rows
     for card in cards.iter() {
         let id_str = truncate_text(&card.id().to_string(), 20);
-        let question_str = truncate_text(card.question().text(), 20);
-        let answer_str = truncate_text(card.answer().text(), 50);
-        let reviews_str = card.reviews().len().to_string();
+        let question_str = truncate_text(card.word().text(), 20);
+        let answer_str = truncate_text(card.meaning().text(), 50);
+        let reviews_str = card.memory().reviews().len().to_string();
         let date = card
+            .memory()
             .next_review_date()
-            .naive_local()
-            .format("%Y-%m-%d %H:%M");
-        let date_str = truncate_text(&date.to_string(), 19);
+            .map(|date| date.naive_local().to_string())
+            .unwrap_or_default();
 
         let row = format!(
             "{:<20} | {:<20} | {:<50} | {:>2} | {:<19}",
-            id_str, question_str, answer_str, reviews_str, date_str
+            id_str, question_str, answer_str, reviews_str, date
         );
 
-        if card.is_new() {
+        if card.memory().is_new() {
             // Highlight new cards in cyan (priority over is_due)
             println!("\x1b[96m{}\x1b[0m", row);
-        } else if card.is_due() {
+        } else if card.memory().is_due() {
             // Highlight cards ready for review in yellow
             println!("\x1b[93m{}\x1b[0m", row);
         } else {
@@ -264,25 +264,28 @@ fn render_card(card: &VocabularyCard, area: Rect, frame: &mut Frame) {
         .border_set(border::ROUNDED)
         .border_style(Style::default().fg(Color::Blue));
     let qa_text = Text::from(vec![
-        Line::from(format!("Вопрос: {}", card.question().text())),
-        Line::from(format!("Ответ: {}", card.answer().text())),
+        Line::from(format!("Вопрос: {}", card.word().text())),
+        Line::from(format!("Ответ: {}", card.meaning().text())),
     ]);
     Paragraph::new(qa_text)
         .block(qa_block)
         .render(qa_area, frame.buffer_mut());
 
     // Stats block
-    if let Some(stability) = card.stability()
-        && let Some(difficulty) = card.difficulty()
+    if let Some(stability) = card.memory().stability()
+        && let Some(difficulty) = card.memory().difficulty()
     {
         let stats_block = Block::bordered()
             .border_set(border::ROUNDED)
             .border_style(Style::default().fg(Color::Blue));
         let stats_text = Text::from(vec![
-            Line::from(format!("Оценок: {}", card.reviews().len())),
+            Line::from(format!("Оценок: {}", card.memory().reviews().len())),
             Line::from(format!(
                 "Дата следующего повторения: {}",
-                card.next_review_date()
+                card.memory()
+                    .next_review_date()
+                    .map(|date| date.naive_local().to_string())
+                    .unwrap_or_default()
             )),
             Line::from(format!("Стабильность: {}", stability.value())),
             Line::from(format!("Сложность: {}", difficulty.value())),

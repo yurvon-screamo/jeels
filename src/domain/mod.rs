@@ -17,15 +17,27 @@ pub use vocabulary_card::VocabularyCard;
 use crate::domain::{
     daily_history::DailyHistoryItem,
     japanese::IsJapaneseText,
-    study_session::StudySessionItem,
-    value_objects::{
-        Answer, CardContent, ExamplePhrase, JapaneseLevel, MemoryState, NativeLanguage, Question,
-    },
+    kanji_card::KanjiCard,
+    review::MemoryState,
+    study_session::{KanjiStudySessionItem, StudySessionItem, VocabularyStudySessionItem},
+    value_objects::{Answer, CardContent, ExamplePhrase, JapaneseLevel, NativeLanguage, Question},
 };
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ulid::Ulid;
+
+#[derive(Clone)]
+struct StudyCard {
+    item: StudySessionItem,
+    next_review_date: Option<DateTime<Utc>>,
+    reviews_len: usize,
+    is_due: bool,
+    is_low_stability: bool,
+    is_in_progress: bool,
+    is_known: bool,
+    is_new: bool,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -36,7 +48,9 @@ pub struct User {
     current_japanese_level: JapaneseLevel,
     lesson_history: Vec<DailyHistoryItem>,
     duolingo_jwt_token: Option<String>,
+
     vocabulary_cards: HashMap<Ulid, VocabularyCard>,
+    kanji_cards: HashMap<Ulid, KanjiCard>,
 }
 
 impl User {
@@ -50,6 +64,7 @@ impl User {
             id: Ulid::new(),
             username,
             vocabulary_cards: HashMap::new(),
+            kanji_cards: HashMap::new(),
             current_japanese_level,
             native_language,
             new_cards_limit,
@@ -101,9 +116,9 @@ impl User {
             .values()
             .filter(|card| card.id() != card_id)
             .filter(|card| {
-                card.question()
+                card.word()
                     .text()
-                    .equals_by_reading(original_card.question().text())
+                    .equals_by_reading(original_card.word().text())
             })
             .cloned()
             .collect::<Vec<_>>();
@@ -119,7 +134,7 @@ impl User {
             .get(&card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
 
-        let query_embedding = card.question().embedding();
+        let query_embedding = card.word().embedding();
         let similarity = self
             .vocabulary_cards
             .iter()
@@ -127,7 +142,7 @@ impl User {
                 if *id == &card_id {
                     return false;
                 }
-                let card_embedding = card.question().embedding();
+                let card_embedding = card.word().embedding();
                 let similarity = cosine_similarity(query_embedding, card_embedding);
                 similarity >= SIMILARITY_THRESHOLD
             })
@@ -149,7 +164,7 @@ impl User {
                 return false;
             }
 
-            let card_embedding = card.question().embedding();
+            let card_embedding = card.word().embedding();
             let similarity = cosine_similarity(query_embedding, card_embedding);
 
             similarity >= SIMILARITY_THRESHOLD
@@ -183,7 +198,7 @@ impl User {
             .get(&card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
 
-        let current_question = card.question();
+        let current_question = card.word();
         let question_changed = current_question.text().trim().to_lowercase()
             != new_question.text().trim().to_lowercase();
 
@@ -213,59 +228,50 @@ impl User {
     }
 
     pub fn start_low_stability_cards_session(&self) -> Vec<StudySessionItem> {
-        self.vocabulary_cards
-            .values()
-            .filter(|card| card.is_low_stability())
-            .filter_map(|card| self.card_to_study_item(card))
+        self.collect_study_cards()
+            .into_iter()
+            .filter(|card| card.is_low_stability)
+            .map(|card| card.item)
             .collect()
     }
 
     pub fn start_study_session(&self, force_new_cards: bool) -> Vec<StudySessionItem> {
-        let mut old_cards: Vec<_> = self
-            .vocabulary_cards
-            .values()
-            .filter(|card| card.is_due() && (card.is_in_progress() || card.is_known_card()))
+        let all_cards = self.collect_study_cards();
+        let mut due_cards: Vec<_> = all_cards
+            .iter()
+            .filter(|card| card.is_due && (card.is_in_progress || card.is_known))
+            .cloned()
+            .collect();
+        let mut priority_cards: Vec<_> = all_cards
+            .iter()
+            .filter(|card| card.is_due && card.is_low_stability)
+            .cloned()
             .collect();
 
-        let mut low_stability_cards: Vec<_> = self
-            .vocabulary_cards
-            .values()
-            .filter(|card| card.is_due() && card.is_low_stability())
-            .collect();
-
-        if force_new_cards || low_stability_cards.len() < self.new_cards_limit {
-            let new_cards = self.vocabulary_cards.values().filter(|card| card.is_new());
+        if force_new_cards || priority_cards.len() < self.new_cards_limit {
+            let mut new_cards: Vec<_> = all_cards.into_iter().filter(|card| card.is_new).collect();
+            new_cards.sort_by_key(|card| card.next_review_date);
 
             if !force_new_cards {
-                let new_count = self.new_cards_limit - low_stability_cards.len();
-
-                let mut truncated_new_cards: Vec<_> = new_cards.collect();
-                truncated_new_cards.sort_by_key(|a| a.next_review_date());
-                truncated_new_cards.truncate(new_count);
-
-                low_stability_cards.extend(truncated_new_cards);
-            } else {
-                low_stability_cards.extend(new_cards);
+                let available = self.new_cards_limit.saturating_sub(priority_cards.len());
+                new_cards.truncate(available);
             }
+
+            priority_cards.extend(new_cards);
         }
 
-        old_cards.sort_by_key(|a| a.next_review_date());
-        low_stability_cards.sort_by(|a, b| {
-            let reviews_cmp = b.reviews().len().cmp(&a.reviews().len());
+        due_cards.sort_by_key(|card| card.next_review_date);
+        priority_cards.sort_by(|a, b| {
+            let reviews_cmp = b.reviews_len.cmp(&a.reviews_len);
             if reviews_cmp != std::cmp::Ordering::Equal {
-                reviews_cmp
-            } else {
-                a.next_review_date().cmp(&b.next_review_date())
+                return reviews_cmp;
             }
+            a.next_review_date.cmp(&b.next_review_date)
         });
 
-        old_cards.append(&mut low_stability_cards);
+        due_cards.append(&mut priority_cards);
 
-        let mut study_session_items: Vec<_> = old_cards
-            .into_iter()
-            .filter_map(|card| self.card_to_study_item(card))
-            .collect();
-
+        let mut study_session_items: Vec<_> = due_cards.into_iter().map(|card| card.item).collect();
         study_session_items.shuffle(&mut rand::rng());
         study_session_items
     }
@@ -277,32 +283,15 @@ impl User {
         interval: Duration,
         memory_state: MemoryState,
     ) -> Result<(), JeersError> {
-        let card = self
-            .vocabulary_cards
-            .get_mut(&card_id)
-            .ok_or(JeersError::CardNotFound { card_id })?;
-
-        let review = Review::new(rating, interval);
-        card.add_review(review);
-
-        let next_review_date = Utc::now() + interval;
-        self.schedule_next_review(card_id, next_review_date, memory_state)?;
-
-        Ok(())
-    }
-
-    fn schedule_next_review(
-        &mut self,
-        card_id: Ulid,
-        next_review_date: DateTime<Utc>,
-        memory_state: MemoryState,
-    ) -> Result<(), JeersError> {
-        let card = self
-            .vocabulary_cards
-            .get_mut(&card_id)
-            .ok_or(JeersError::CardNotFound { card_id })?;
-
-        card.update_schedule(next_review_date, memory_state);
+        if let Some(card) = self.vocabulary_cards.get_mut(&card_id) {
+            let review = Review::new(rating, interval);
+            card.add_review(memory_state, review);
+        } else if let Some(card) = self.kanji_cards.get_mut(&card_id) {
+            let review = Review::new(rating, interval);
+            card.add_review(memory_state, review);
+        } else {
+            return Err(JeersError::CardNotFound { card_id });
+        }
 
         Ok(())
     }
@@ -311,7 +300,7 @@ impl User {
         let stability_cards: Vec<_> = self
             .vocabulary_cards
             .values()
-            .filter_map(|card| card.stability())
+            .filter_map(|card| card.memory().stability())
             .collect();
         let avg_stability = if stability_cards.is_empty() {
             None
@@ -328,7 +317,7 @@ impl User {
         let difficulty_cards: Vec<_> = self
             .vocabulary_cards
             .values()
-            .filter_map(|card| card.difficulty())
+            .filter_map(|card| card.memory().difficulty())
             .collect();
         let avg_difficulty = if difficulty_cards.is_empty() {
             None
@@ -346,12 +335,12 @@ impl User {
         let known_words = self
             .vocabulary_cards
             .values()
-            .filter(|card| card.is_known_card())
+            .filter(|card| card.memory().is_known_card())
             .count();
         let new_words = self
             .vocabulary_cards
             .values()
-            .filter(|card| card.is_new())
+            .filter(|card| card.memory().is_new())
             .count();
 
         let now = Utc::now();
@@ -387,6 +376,10 @@ impl User {
         self.vocabulary_cards.get(&card_id)
     }
 
+    pub fn get_kanji_card(&self, card_id: Ulid) -> Option<&KanjiCard> {
+        self.kanji_cards.get(&card_id)
+    }
+
     pub fn lesson_history(&self) -> &[DailyHistoryItem] {
         &self.lesson_history
     }
@@ -401,14 +394,14 @@ impl User {
             .get(&card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
 
-        let query_embedding = query_card.question().embedding();
+        let query_embedding = query_card.word().embedding();
 
         let mut results: Vec<(VocabularyCard, f32)> = self
             .vocabulary_cards
             .values()
             .filter(|card| card.id() != card_id)
             .map(|card| {
-                let card_embedding = card.question().embedding();
+                let card_embedding = card.word().embedding();
                 let similarity = cosine_similarity(query_embedding, card_embedding);
                 (card.clone(), similarity)
             })
@@ -419,40 +412,85 @@ impl User {
         Ok(results)
     }
 
-    fn card_to_study_item(&self, card: &VocabularyCard) -> Option<StudySessionItem> {
-        let mut shuffle = rand::rng().random_bool(0.65);
-        let (answer, question) = if card.is_known_card() && shuffle {
-            (card.question().text(), card.answer().text())
-        } else {
-            shuffle = false;
-            (card.answer().text(), card.question().text())
-        };
+    fn card_to_study_item(&self, card: &VocabularyCard) -> Result<StudySessionItem, JeersError> {
+        let shuffle = rand::rng().random_bool(0.65);
+        let similarity = self.find_similarity(card.id())?;
+        let homonyms = self.find_homonyms(card.id())?;
 
-        let mut item = StudySessionItem::new(
+        Ok(StudySessionItem::Vocabulary(
+            VocabularyStudySessionItem::new(
+                card.id(),
+                card.word().text().to_string(),
+                card.meaning().text().to_string(),
+                shuffle,
+                similarity,
+                homonyms,
+                card.example_phrases().to_vec(),
+                card.get_kanji_cards(&self.current_japanese_level)
+                    .into_iter()
+                    .cloned()
+                    .collect(),
+                self.current_japanese_level.clone(),
+            ),
+        ))
+    }
+
+    fn kanji_card_to_study_item(&self, card: &KanjiCard) -> Result<StudySessionItem, JeersError> {
+        let radicals = card
+            .radicals_info()?
+            .into_iter()
+            .cloned()
+            .collect::<Vec<_>>();
+        Ok(StudySessionItem::Kanji(KanjiStudySessionItem::new(
             card.id(),
-            answer.to_string(),
-            question.to_string(),
-            shuffle,
-            card.example_phrases().to_vec(),
-            card.get_kanji_cards(&self.current_japanese_level)
-                .into_iter()
-                .cloned()
-                .collect(),
-            self.current_japanese_level.clone(),
-        );
+            card.kanji().text().chars().next().unwrap_or_default(),
+            card.description().text().to_string(),
+            card.example_words().to_vec(),
+            radicals,
+            card.jlpt(),
+        )))
+    }
 
-        let similarity = self.find_similarity(card.id());
-        let homonyms = self.find_homonyms(card.id());
+    fn collect_study_cards(&self) -> Vec<StudyCard> {
+        let vocabulary_cards = self
+            .vocabulary_cards
+            .values()
+            .filter_map(|card| self.vocabulary_to_study_card(card).ok());
+        let kanji_cards = self
+            .kanji_cards
+            .values()
+            .filter_map(|card| self.kanji_to_study_card(card).ok());
+        vocabulary_cards.chain(kanji_cards).collect()
+    }
 
-        if let Ok(similarity) = similarity {
-            item.set_similarity(&similarity);
-        }
+    fn vocabulary_to_study_card(&self, card: &VocabularyCard) -> Result<StudyCard, JeersError> {
+        let item = self.card_to_study_item(card)?;
+        let memory = card.memory();
+        Ok(StudyCard {
+            item,
+            next_review_date: memory.next_review_date().cloned(),
+            reviews_len: memory.reviews().len(),
+            is_due: memory.is_due(),
+            is_low_stability: memory.is_low_stability(),
+            is_in_progress: memory.is_in_progress(),
+            is_known: memory.is_known_card(),
+            is_new: memory.is_new(),
+        })
+    }
 
-        if let Ok(homonyms) = homonyms {
-            item.set_homonyms(&homonyms);
-        }
-
-        Some(item)
+    fn kanji_to_study_card(&self, card: &KanjiCard) -> Result<StudyCard, JeersError> {
+        let item = self.kanji_card_to_study_item(card)?;
+        let memory = card.memory_history();
+        Ok(StudyCard {
+            item,
+            next_review_date: memory.next_review_date().cloned(),
+            reviews_len: memory.reviews().len(),
+            is_due: memory.is_due(),
+            is_low_stability: memory.is_low_stability(),
+            is_in_progress: memory.is_in_progress(),
+            is_known: memory.is_known_card(),
+            is_new: memory.is_new(),
+        })
     }
 }
 

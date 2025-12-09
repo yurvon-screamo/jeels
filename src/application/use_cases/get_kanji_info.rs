@@ -16,7 +16,7 @@ impl GetKanjiInfoUseCase {
         Self
     }
 
-    pub fn execute(&self, kanji: char) -> Result<KanjiInfo, JeersError> {
-        Ok(KANJI_DB.get_kanji_info(&kanji)?.to_owned())
+    pub fn execute(&self, kanji: &str) -> Result<KanjiInfo, JeersError> {
+        Ok(KANJI_DB.get_kanji_info(kanji)?.to_owned())
     }
 }

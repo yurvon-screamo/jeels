@@ -53,7 +53,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                 match self
                     .generate_content_use_case
                     .generate_content(
-                        card.question().text(),
+                        card.word().text(),
                         user.native_language(),
                         user.current_japanese_level(),
                     )
@@ -66,7 +66,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                     }
                 }
             } else {
-                CardContent::new(card.answer().clone(), card.example_phrases().to_vec())
+                CardContent::new(card.meaning().clone(), card.example_phrases().to_vec())
             };
 
             let new_embedding = if options == RebuildDatabaseOptions::Embedding
@@ -74,7 +74,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
             {
                 match self
                     .generate_embedding_use_case
-                    .generate_embedding(card.question().text())
+                    .generate_embedding(card.word().text())
                     .await
                 {
                     Ok(value) => value,
@@ -84,10 +84,10 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                     }
                 }
             } else {
-                Embedding(card.question().embedding().clone())
+                Embedding(card.word().embedding().clone())
             };
 
-            let question = Question::new(card.question().text().to_string(), new_embedding)?;
+            let question = Question::new(card.word().text().to_string(), new_embedding)?;
 
             data.push((card.id(), question, generated_content));
         }

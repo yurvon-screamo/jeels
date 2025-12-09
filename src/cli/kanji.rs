@@ -16,12 +16,8 @@ use crate::{
 use super::render_once;
 
 pub async fn handle_kanji(_user_id: Ulid, kanji: String) -> Result<(), JeersError> {
-    let kanji_char = kanji.chars().next().ok_or(JeersError::KradfileError {
-        reason: "Empty kanji string".to_string(),
-    })?;
-
     let use_case = GetKanjiInfoUseCase::new();
-    let kanji_data = use_case.execute(kanji_char)?;
+    let kanji_data = use_case.execute(&kanji)?;
 
     render_once(
         |frame| {

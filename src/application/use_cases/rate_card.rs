@@ -32,12 +32,27 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let card = user
-            .get_card(card_id)
-            .ok_or(JeersError::CardNotFound { card_id })?;
-
-        let reviews: Vec<Review> = card.reviews().iter().cloned().collect();
-        let previous_memory_state = card.memory_state();
+        let (reviews, previous_memory_state) = if let Some(card) = user.get_card(card_id) {
+            (
+                card.memory()
+                    .reviews()
+                    .iter()
+                    .cloned()
+                    .collect::<Vec<Review>>(),
+                card.memory().memory_state(),
+            )
+        } else if let Some(card) = user.get_kanji_card(card_id) {
+            (
+                card.memory_history()
+                    .reviews()
+                    .iter()
+                    .cloned()
+                    .collect::<Vec<Review>>(),
+                card.memory_history().memory_state(),
+            )
+        } else {
+            return Err(JeersError::CardNotFound { card_id });
+        };
 
         let NextReview {
             interval,
