@@ -27,18 +27,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ulid::Ulid;
 
-#[derive(Clone)]
-struct StudyCard {
-    item: StudySessionItem,
-    next_review_date: Option<DateTime<Utc>>,
-    reviews_len: usize,
-    is_due: bool,
-    is_low_stability: bool,
-    is_in_progress: bool,
-    is_known: bool,
-    is_new: bool,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
     id: Ulid,
@@ -508,4 +496,16 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
     }
 
     dot_product / (norm_a * norm_b)
+}
+
+#[derive(Clone)]
+struct StudyCard {
+    item: StudySessionItem,
+    next_review_date: Option<DateTime<Utc>>,
+    reviews_len: usize,
+    is_due: bool,
+    is_low_stability: bool,
+    is_in_progress: bool,
+    is_known: bool,
+    is_new: bool,
 }

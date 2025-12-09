@@ -38,3 +38,11 @@ words/vocabulary_n1.json filter=lfs diff=lfs merge=lfs -text
 words/vocabulary_n2.json filter=lfs diff=lfs merge=lfs -text
 words/vocabulary_n3.json filter=lfs diff=lfs merge=lfs -text
 words/vocabulary_n4.json filter=lfs diff=lfs merge=lfs -text
+words/jltp_words.json filter=lfs diff=lfs merge=lfs -text
+words/migii_words.json filter=lfs diff=lfs merge=lfs -text
+words/vocabulary_n1.json filter=lfs diff=lfs merge=lfs -text
+words/vocabulary_n2.json filter=lfs diff=lfs merge=lfs -text
+words/vocabulary_n3.json filter=lfs diff=lfs merge=lfs -text
+words/vocabulary_n4.json filter=lfs diff=lfs merge=lfs -text
+words/vocabulary_n5.json filter=lfs diff=lfs merge=lfs -text
+words/duolingo_words.json filter=lfs diff=lfs merge=lfs -text
