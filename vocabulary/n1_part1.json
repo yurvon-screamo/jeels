@@ -23,7 +23,41 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.996
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9936
+      },
+      {
+        "word": "買って",
+        "score": 0.9927
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9925
+      },
+      {
+        "word": "広々",
+        "score": 0.9912
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9883
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9838
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9815
+      }
+    ]
   },
   "あざ笑う": {
     "english_translation": "To mock someone with contempt, showing superiority and scornful amusement.",
@@ -49,7 +83,33 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9979
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9975
+      },
+      {
+        "word": "大幅",
+        "score": 0.9944
+      },
+      {
+        "word": "話して",
+        "score": 0.9918
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9912
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9809
+      }
+    ]
   },
   "あっさり": {
     "english_translation": "The flavor of food or drink is light and refreshing, without excessive richness, oil, or salt, giving it a clean and easy-to-enjoy taste.",
@@ -75,7 +135,25 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9975
+      },
+      {
+        "word": "大幅",
+        "score": 0.9805
+      },
+      {
+        "word": "話して",
+        "score": 0.9804
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9801
+      }
+    ]
   },
   "あべこべ": {
     "english_translation": "A reversal of the expected order of actions or thoughts, where everything happens in the opposite way to what is logical.",
@@ -101,7 +179,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9959
+      },
+      {
+        "word": "大幅",
+        "score": 0.9872
+      },
+      {
+        "word": "買って",
+        "score": 0.9864
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9801
+      }
+    ]
   },
   "あやふや": {
     "english_translation": "Uncertain, ambiguous, unclear, causing doubt.",
@@ -127,7 +223,33 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.996
+      },
+      {
+        "word": "もったいない",
+        "score": 0.9923
+      },
+      {
+        "word": "広々",
+        "score": 0.9863
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9833
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9832
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9805
+      }
+    ]
   },
   "あら": {
     "english_translation": "An exclamation of surprise, amazement, or slight distress, equivalent to 'Oh my' or 'Really?'",
@@ -153,7 +275,37 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9983
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9953
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9928
+      },
+      {
+        "word": "買って",
+        "score": 0.9919
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9913
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9906
+      },
+      {
+        "word": "話して",
+        "score": 0.9861
+      }
+    ]
   },
   "あられ": {
     "english_translation": "Small ice pellets that fall as precipitation in very cold weather, often mixed with rain or snow (graupel).",
@@ -179,7 +331,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "みずぎ",
+        "score": 0.9959
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9918
+      },
+      {
+        "word": "話して",
+        "score": 0.9882
+      },
+      {
+        "word": "買って",
+        "score": 0.982
+      },
+      {
+        "word": "大幅",
+        "score": 0.9809
+      },
+      {
+        "word": "もったいない",
+        "score": 0.9805
+      }
+    ]
   },
   "いい加減": {
     "english_translation": "Stop it; that's enough; you've gone far enough (used to demand that a behavior or situation cease).",
@@ -205,7 +383,17 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9957
+      },
+      {
+        "word": "大幅",
+        "score": 0.9858
+      }
+    ]
   },
   "いく": {
     "english_translation": "To go, to move forward toward a place or event, emphasizing direction and purpose.",
@@ -231,7 +419,33 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9978
+      },
+      {
+        "word": "帯",
+        "score": 0.9965
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9901
+      },
+      {
+        "word": "話して",
+        "score": 0.9892
+      },
+      {
+        "word": "大幅",
+        "score": 0.9864
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9846
+      }
+    ]
   },
   "いざ": {
     "english_translation": "Now is the time to act without delay; well then, at the critical moment.",
@@ -257,7 +471,33 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9949
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9925
+      },
+      {
+        "word": "大幅",
+        "score": 0.991
+      },
+      {
+        "word": "話して",
+        "score": 0.9886
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9851
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9802
+      }
+    ]
   },
   "いっそ": {
     "english_translation": "Better to just do something definite right away than hesitate; rather, sooner (expressing a preference for a more decisive action).",
@@ -283,7 +523,33 @@
       }
     ],
     "part_of_speech": "Conjunction",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9925
+      },
+      {
+        "word": "大幅",
+        "score": 0.9906
+      },
+      {
+        "word": "話して",
+        "score": 0.9888
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9879
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9848
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9841
+      }
+    ]
   },
   "いやに": {
     "english_translation": "Very, extremely, but with a nuance of discomfort or excessive intensity that feels unnatural or intrusive.",
@@ -309,7 +575,37 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.997
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9924
+      },
+      {
+        "word": "買って",
+        "score": 0.9918
+      },
+      {
+        "word": "話して",
+        "score": 0.9887
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9886
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9835
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9831
+      }
+    ]
   },
   "うんざり": {
     "english_translation": "To be fed up with or bored by constant repetition; disgusted, wearied.",
@@ -335,7 +631,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9974
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9906
+      },
+      {
+        "word": "大幅",
+        "score": 0.9903
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9846
+      },
+      {
+        "word": "帯",
+        "score": 0.9842
+      },
+      {
+        "word": "広々",
+        "score": 0.9828
+      }
+    ]
   },
   "えい": {
     "english_translation": "An interjection used when taking decisive action or exerting physical effort, similar to 'Halt!' or a loud effort-grunt.",
@@ -361,7 +683,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9946
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9941
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9903
+      },
+      {
+        "word": "買って",
+        "score": 0.9861
+      },
+      {
+        "word": "話して",
+        "score": 0.9824
+      }
+    ]
   },
   "おい": {
     "english_translation": "Hey! (a rough call to get someone's attention, often considered rude unless used among close peers).",
@@ -387,7 +731,25 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9974
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9907
+      },
+      {
+        "word": "話して",
+        "score": 0.9891
+      },
+      {
+        "word": "広々",
+        "score": 0.9846
+      }
+    ]
   },
   "おおい": {
     "english_translation": "To a significant extent; many, much; prevalent.",
@@ -413,7 +775,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9929
+      },
+      {
+        "word": "大幅",
+        "score": 0.992
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9902
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9865
+      }
+    ]
   },
   "おっかない": {
     "english_translation": "Extremely unsettling, evoking deep anxiety or fear, especially due to suddenness, a dark atmosphere, or an ambiguous threat.",
@@ -439,7 +819,29 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.994
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9923
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.991
+      },
+      {
+        "word": "買って",
+        "score": 0.9831
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9802
+      }
+    ]
   },
   "おどおど": {
     "english_translation": "To feel awkward and lose composure; nervous, timid, hesitant (often in stressful or embarrassing moments).",
@@ -465,7 +867,17 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9949
+      },
+      {
+        "word": "大幅",
+        "score": 0.992
+      }
+    ]
   },
   "お世辞": {
     "english_translation": "Flattery or compliments, often used to improve relationships or gain advantage, but not necessarily sincere.",
@@ -491,7 +903,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9939
+      },
+      {
+        "word": "大幅",
+        "score": 0.9931
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9828
+      },
+      {
+        "word": "買って",
+        "score": 0.9825
+      }
+    ]
   },
   "お休み": {
     "english_translation": "A holiday, day off; rest (noun).",
@@ -517,7 +947,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9972
+      },
+      {
+        "word": "話して",
+        "score": 0.9816
+      },
+      {
+        "word": "大幅",
+        "score": 0.9815
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9804
+      }
+    ]
   },
   "お使い": {
     "english_translation": "An errand or short trip undertaken for someone else; polite noun for a messenger/servant.",
@@ -543,7 +991,21 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9901
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9899
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.986
+      }
+    ]
   },
   "お供": {
     "english_translation": "An attendant, companion; accompanying someone (often respectfully).",
@@ -569,7 +1031,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9983
+      },
+      {
+        "word": "大幅",
+        "score": 0.9907
+      },
+      {
+        "word": "買って",
+        "score": 0.9833
+      }
+    ]
   },
   "お先に": {
     "english_translation": "Excuse me for going ahead (a set phrase used when leaving before others or going first).",
@@ -595,7 +1071,41 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9958
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9954
+      },
+      {
+        "word": "買って",
+        "score": 0.9904
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9904
+      },
+      {
+        "word": "大幅",
+        "score": 0.989
+      },
+      {
+        "word": "いたいです",
+        "score": 0.989
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9821
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9811
+      }
+    ]
   },
   "お八": {
     "english_translation": "An old name for a geisha or woman's name (archaic).",
@@ -621,7 +1131,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9934
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9889
+      },
+      {
+        "word": "大幅",
+        "score": 0.9864
+      },
+      {
+        "word": "話して",
+        "score": 0.985
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9847
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9802
+      }
+    ]
   },
   "お出でになる": {
     "english_translation": "To come, go, or be (highly honorific/formal equivalent of 'iru/kuru/iku').",
@@ -647,7 +1183,21 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9946
+      },
+      {
+        "word": "大幅",
+        "score": 0.9931
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.982
+      }
+    ]
   },
   "お喋り": {
     "english_translation": "Chit-chat, excessive talking; a chatterbox.",
@@ -673,7 +1223,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9983
+      },
+      {
+        "word": "買って",
+        "score": 0.9934
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9919
+      },
+      {
+        "word": "大幅",
+        "score": 0.9904
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9869
+      }
+    ]
   },
   "お大事に": {
     "english_translation": "Take care of yourself (said to someone ill or injured).",
@@ -699,7 +1271,37 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9973
+      },
+      {
+        "word": "大幅",
+        "score": 0.991
+      },
+      {
+        "word": "買って",
+        "score": 0.9887
+      },
+      {
+        "word": "帯",
+        "score": 0.9886
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9857
+      },
+      {
+        "word": "さようなら",
+        "score": 0.9857
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9843
+      }
+    ]
   },
   "お宮": {
     "english_translation": "Shinto shrine.",
@@ -725,7 +1327,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9963
+      },
+      {
+        "word": "大幅",
+        "score": 0.9923
+      },
+      {
+        "word": "話して",
+        "score": 0.9842
+      },
+      {
+        "word": "買って",
+        "score": 0.9839
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9827
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9804
+      }
+    ]
   },
   "お巡りさん": {
     "english_translation": "Police officer (a respectful, somewhat familiar term).",
@@ -751,7 +1379,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9951
+      },
+      {
+        "word": "買って",
+        "score": 0.99
+      },
+      {
+        "word": "大幅",
+        "score": 0.9896
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9891
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9856
+      }
+    ]
   },
   "お手上げ": {
     "english_translation": "Hands up; giving up, hopeless; beyond one's control.",
@@ -777,7 +1427,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9962
+      },
+      {
+        "word": "話して",
+        "score": 0.9926
+      },
+      {
+        "word": "帯",
+        "score": 0.987
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9816
+      }
+    ]
   },
   "お早う": {
     "english_translation": "Good morning.",
@@ -803,7 +1471,29 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "みずぎ",
+        "score": 0.9961
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9947
+      },
+      {
+        "word": "買って",
+        "score": 0.9937
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9849
+      },
+      {
+        "word": "大幅",
+        "score": 0.9836
+      }
+    ]
   },
   "お洒落": {
     "english_translation": "Stylish, fashionable, well-dressed (often used as a noun 'oshare' for being fashionable).",
@@ -829,7 +1519,29 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9957
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9932
+      },
+      {
+        "word": "いたいです",
+        "score": 0.988
+      },
+      {
+        "word": "買って",
+        "score": 0.9868
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9826
+      }
+    ]
   },
   "お産": {
     "english_translation": "Childbirth, delivery, labor.",
@@ -855,7 +1567,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9956
+      },
+      {
+        "word": "大幅",
+        "score": 0.9921
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9914
+      },
+      {
+        "word": "買って",
+        "score": 0.9909
+      },
+      {
+        "word": "話して",
+        "score": 0.9835
+      }
+    ]
   },
   "お目出度う": {
     "english_translation": "Congratulations (a more formal or written form of 'omedetou').",
@@ -881,7 +1615,29 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "引っ掻く",
+        "score": 0.9916
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9915
+      },
+      {
+        "word": "大幅",
+        "score": 0.9906
+      },
+      {
+        "word": "買って",
+        "score": 0.9903
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9877
+      }
+    ]
   },
   "お祖母さん": {
     "english_translation": "Grandmother.",
@@ -907,7 +1663,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9958
+      },
+      {
+        "word": "買って",
+        "score": 0.9949
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9893
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9883
+      },
+      {
+        "word": "大幅",
+        "score": 0.9872
+      },
+      {
+        "word": "帯",
+        "score": 0.9869
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9821
+      }
+    ]
   },
   "お祖父さん": {
     "english_translation": "Grandfather.",
@@ -933,7 +1719,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9956
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9955
+      },
+      {
+        "word": "買って",
+        "score": 0.9945
+      },
+      {
+        "word": "帯",
+        "score": 0.9894
+      },
+      {
+        "word": "大幅",
+        "score": 0.9883
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9868
+      },
+      {
+        "word": "集中",
+        "score": 0.9829
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9826
+      }
+    ]
   },
   "お菜": {
     "english_translation": "Side dish, accompaniment to rice (okazu).",
@@ -959,7 +1779,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9954
+      },
+      {
+        "word": "話して",
+        "score": 0.9946
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "買って",
+        "score": 0.9858
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9853
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9823
+      }
+    ]
   },
   "お蔭": {
     "english_translation": "Owing to, thanks to (often used for positive outcomes).",
@@ -985,7 +1831,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9917
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9868
+      },
+      {
+        "word": "精",
+        "score": 0.9808
+      }
+    ]
   },
   "お蔭様で": {
     "english_translation": "Thanks to you; fortunately; I'm doing well (a set polite phrase).",
@@ -1011,7 +1871,41 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.997
+      },
+      {
+        "word": "買って",
+        "score": 0.9922
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9898
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9884
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9879
+      },
+      {
+        "word": "話して",
+        "score": 0.9869
+      },
+      {
+        "word": "広々",
+        "score": 0.9847
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9832
+      }
+    ]
   },
   "お襁褓": {
     "english_translation": "Diaper, swaddling cloth.",
@@ -1037,7 +1931,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9979
+      },
+      {
+        "word": "帯",
+        "score": 0.9967
+      },
+      {
+        "word": "買って",
+        "score": 0.9949
+      },
+      {
+        "word": "大幅",
+        "score": 0.9876
+      }
+    ]
   },
   "お邪魔します": {
     "english_translation": "Excuse me for disturbing (lit. 'I will intrude,' a set phrase said upon entering someone's home).",
@@ -1063,7 +1975,33 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9966
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9933
+      },
+      {
+        "word": "買って",
+        "score": 0.993
+      },
+      {
+        "word": "大幅",
+        "score": 0.9923
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9909
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9874
+      }
+    ]
   },
   "お願いします": {
     "english_translation": "Please (requesting a favor or help).",
@@ -1089,7 +2027,37 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9934
+      },
+      {
+        "word": "話して",
+        "score": 0.9928
+      },
+      {
+        "word": "買って",
+        "score": 0.9917
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9913
+      },
+      {
+        "word": "大幅",
+        "score": 0.9912
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9877
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9855
+      }
+    ]
   },
   "かも知れない": {
     "english_translation": "May, might, possibly, perhaps.",
@@ -1115,7 +2083,29 @@
       }
     ],
     "part_of_speech": "Other",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9974
+      },
+      {
+        "word": "買って",
+        "score": 0.9934
+      },
+      {
+        "word": "いたいです",
+        "score": 0.991
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9868
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9832
+      }
+    ]
   },
   "がっくり": {
     "english_translation": "Deeply disappointed, downcast, heartbroken; to slump suddenly.",
@@ -1141,7 +2131,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9998
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9959
+      },
+      {
+        "word": "大幅",
+        "score": 0.9931
+      },
+      {
+        "word": "話して",
+        "score": 0.9922
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9858
+      }
+    ]
   },
   "がっしり": {
     "english_translation": "Solid, sturdy, robust (used to describe strong, well-built structures or bodies, emphasizing durability and stability).",
@@ -1167,7 +2179,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "みずぎ",
+        "score": 0.9976
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "帯",
+        "score": 0.9941
+      },
+      {
+        "word": "大幅",
+        "score": 0.9879
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9836
+      }
+    ]
   },
   "がっちり": {
     "english_translation": "Solidly, firmly, with a tight and stable grip; well-organized, shrewd (about business/money).",
@@ -1193,7 +2227,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9978
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9934
+      },
+      {
+        "word": "大幅",
+        "score": 0.9922
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.981
+      },
+      {
+        "word": "買って",
+        "score": 0.9809
+      }
+    ]
   },
   "がる": {
     "english_translation": "To seem or appear to be (experiencing an emotion or state); suffix indicating outward appearance of an internal feeling (e.g., 'samugaru' - to act cold).",
@@ -1219,7 +2275,21 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9963
+      },
+      {
+        "word": "大幅",
+        "score": 0.9921
+      },
+      {
+        "word": "話して",
+        "score": 0.9906
+      }
+    ]
   },
   "きちっと": {
     "english_translation": "Precisely, properly, neatly, exactly (following rules or expectations without unnecessary fuss).",
@@ -1245,7 +2315,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9986
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9882
+      },
+      {
+        "word": "大幅",
+        "score": 0.9861
+      }
+    ]
   },
   "きっかり": {
     "english_translation": "Exactly, precisely (often used for time, price, or measure).",
@@ -1271,7 +2355,13 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9886
+      }
+    ]
   },
   "きっちり": {
     "english_translation": "Precisely, neatly, strictly; perfectly fit.",
@@ -1297,7 +2387,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9973
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9916
+      },
+      {
+        "word": "話して",
+        "score": 0.9824
+      }
+    ]
   },
   "きっぱり": {
     "english_translation": "Decisively, flatly, plainly, without hesitation (often in refusing or declaring something).",
@@ -1323,7 +2427,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9903
+      },
+      {
+        "word": "帯",
+        "score": 0.9899
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9897
+      },
+      {
+        "word": "買って",
+        "score": 0.9812
+      }
+    ]
   },
   "きまり悪い": {
     "english_translation": "Feeling awkward, embarrassed, or shy, especially when violating social expectations or feeling out of place.",
@@ -1349,7 +2471,25 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9985
+      },
+      {
+        "word": "大幅",
+        "score": 0.9908
+      },
+      {
+        "word": "買って",
+        "score": 0.9892
+      },
+      {
+        "word": "話して",
+        "score": 0.9836
+      }
+    ]
   },
   "くじ引き": {
     "english_translation": "A lottery, drawing lots.",
@@ -1375,7 +2515,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9961
+      },
+      {
+        "word": "話して",
+        "score": 0.9946
+      },
+      {
+        "word": "買って",
+        "score": 0.9942
+      },
+      {
+        "word": "大幅",
+        "score": 0.9925
+      },
+      {
+        "word": "縫",
+        "score": 0.9894
+      },
+      {
+        "word": "帯",
+        "score": 0.9865
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9821
+      }
+    ]
   },
   "くっきり": {
     "english_translation": "Clearly, sharply, distinctly (of vision or outline).",
@@ -1401,7 +2571,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9939
+      },
+      {
+        "word": "帯",
+        "score": 0.9899
+      },
+      {
+        "word": "話して",
+        "score": 0.9876
+      },
+      {
+        "word": "買って",
+        "score": 0.9848
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9825
+      }
+    ]
   },
   "くっ付く": {
     "english_translation": "To stick to, cling to, adhere to (often with an unpleasant or persistent feeling).",
@@ -1427,7 +2619,41 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9996
+      },
+      {
+        "word": "見ないで",
+        "score": 0.999
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9962
+      },
+      {
+        "word": "大幅",
+        "score": 0.995
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9908
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9868
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9823
+      },
+      {
+        "word": "広々",
+        "score": 0.9812
+      }
+    ]
   },
   "くっ付ける": {
     "english_translation": "To stick, glue, or attach something firmly to a surface.",
@@ -1453,7 +2679,53 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9996
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9996
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9967
+      },
+      {
+        "word": "大幅",
+        "score": 0.9947
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9924
+      },
+      {
+        "word": "買って",
+        "score": 0.9899
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9875
+      },
+      {
+        "word": "広々",
+        "score": 0.985
+      },
+      {
+        "word": "すし",
+        "score": 0.9846
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9827
+      },
+      {
+        "word": "話して",
+        "score": 0.9802
+      }
+    ]
   },
   "くらい": {
     "english_translation": "Approximately, about; extent to which; degree of something.",
@@ -1479,7 +2751,17 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9944
+      },
+      {
+        "word": "広々",
+        "score": 0.9841
+      }
+    ]
   },
   "ぐっと": {
     "english_translation": "Suddenly, quickly (change); strongly, firmly; deeply (emotionally or physically, e.g., gulping).",
@@ -1505,7 +2787,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9944
+      },
+      {
+        "word": "帯",
+        "score": 0.9937
+      },
+      {
+        "word": "大幅",
+        "score": 0.987
+      }
+    ]
   },
   "ぐらい": {
     "english_translation": "Approximately, about; extent to which (colloquial version of 'kurai').",
@@ -1531,7 +2827,13 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9915
+      }
+    ]
   },
   "げっそり": {
     "english_translation": "Looking haggard, extremely thin, emaciated (due to illness or worry); deeply disappointed.",
@@ -1557,7 +2859,37 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9958
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9916
+      },
+      {
+        "word": "買って",
+        "score": 0.9906
+      },
+      {
+        "word": "大幅",
+        "score": 0.9903
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9843
+      },
+      {
+        "word": "広々",
+        "score": 0.9812
+      },
+      {
+        "word": "集中",
+        "score": 0.9805
+      }
+    ]
   },
   "こげ茶": {
     "english_translation": "Dark brown, burnt brown (color).",
@@ -1583,7 +2915,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9969
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9935
+      },
+      {
+        "word": "大幅",
+        "score": 0.9917
+      },
+      {
+        "word": "買って",
+        "score": 0.9846
+      },
+      {
+        "word": "話して",
+        "score": 0.9802
+      }
+    ]
   },
   "こだわる": {
     "english_translation": "To be extremely particular about something, to fuss over, to stick stubbornly to details or principles.",
@@ -1609,7 +2963,37 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9993
+      },
+      {
+        "word": "帯",
+        "score": 0.9955
+      },
+      {
+        "word": "大幅",
+        "score": 0.9929
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9897
+      },
+      {
+        "word": "話して",
+        "score": 0.9882
+      },
+      {
+        "word": "広々",
+        "score": 0.9853
+      },
+      {
+        "word": "すし",
+        "score": 0.9818
+      }
+    ]
   },
   "この間": {
     "english_translation": "Recently, the other day; during this period.",
@@ -1635,7 +3019,33 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9938
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9936
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9927
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9912
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9899
+      },
+      {
+        "word": "広々",
+        "score": 0.9832
+      }
+    ]
   },
   "この頃": {
     "english_translation": "Recently, these days.",
@@ -1661,7 +3071,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9903
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9896
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9865
+      },
+      {
+        "word": "大幅",
+        "score": 0.9815
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9807
+      }
+    ]
   },
   "ご座います": {
     "english_translation": "To be (highly polite, archaic form of 'gozaimasu').",
@@ -1687,7 +3119,33 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9958
+      },
+      {
+        "word": "大幅",
+        "score": 0.9914
+      },
+      {
+        "word": "話して",
+        "score": 0.9901
+      },
+      {
+        "word": "買って",
+        "score": 0.9888
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9865
+      },
+      {
+        "word": "ます",
+        "score": 0.9847
+      }
+    ]
   },
   "ご無沙汰": {
     "english_translation": "Long silence, long time no see (apology for the absence of contact).",
@@ -1713,7 +3171,37 @@
       }
     ],
     "part_of_speech": "Other",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9901
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9886
+      },
+      {
+        "word": "大幅",
+        "score": 0.9865
+      },
+      {
+        "word": "さようなら",
+        "score": 0.9834
+      },
+      {
+        "word": "話して",
+        "score": 0.9818
+      },
+      {
+        "word": "友好",
+        "score": 0.9807
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9803
+      }
+    ]
   },
   "ご苦労様": {
     "english_translation": "Thank you for your efforts (used by superiors/seniors to subordinates/juniors).",
@@ -1739,7 +3227,21 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.992
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9859
+      },
+      {
+        "word": "買って",
+        "score": 0.9814
+      }
+    ]
   },
   "ご馳走": {
     "english_translation": "A feast, delicious food (prepared with care).",
@@ -1765,7 +3267,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9955
+      },
+      {
+        "word": "大幅",
+        "score": 0.9926
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9882
+      },
+      {
+        "word": "いたいです",
+        "score": 0.987
+      },
+      {
+        "word": "話して",
+        "score": 0.9861
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9847
+      }
+    ]
   },
   "ご馳走さま": {
     "english_translation": "Thank you for the meal (said after finishing the food).",
@@ -1791,7 +3319,29 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "みずぎ",
+        "score": 0.9973
+      },
+      {
+        "word": "話して",
+        "score": 0.9942
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9936
+      },
+      {
+        "word": "大幅",
+        "score": 0.9884
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9879
+      }
+    ]
   },
   "さっと": {
     "english_translation": "Quickly, swiftly, instantly, lightly (without unnecessary movements).",
@@ -1817,7 +3367,17 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9892
+      },
+      {
+        "word": "買って",
+        "score": 0.988
+      }
+    ]
   },
   "さん": {
     "english_translation": "San (polite honorific suffix used when addressing or referring to someone).",
@@ -1843,7 +3403,29 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9945
+      },
+      {
+        "word": "大幅",
+        "score": 0.9933
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9923
+      },
+      {
+        "word": "買って",
+        "score": 0.992
+      },
+      {
+        "word": "集中",
+        "score": 0.9833
+      }
+    ]
   },
   "し": {
     "english_translation": "Particle connecting clauses, meaning 'and,' 'furthermore,' or listing reasons (often emphasizing the subsequent point).",
@@ -1869,7 +3451,29 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9989
+      },
+      {
+        "word": "大幅",
+        "score": 0.9895
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9842
+      },
+      {
+        "word": "買って",
+        "score": 0.9836
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9814
+      }
+    ]
   },
   "しくじる": {
     "english_translation": "To fail, make a mistake, mess up (often resulting in getting fired or failing an exam).",
@@ -1895,7 +3499,25 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9976
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9969
+      },
+      {
+        "word": "大幅",
+        "score": 0.9955
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9842
+      }
+    ]
   },
   "しなやか": {
     "english_translation": "Supple, flexible, graceful (maintaining shape when bent, often describing natural or emotional qualities).",
@@ -1921,7 +3543,21 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9948
+      },
+      {
+        "word": "大幅",
+        "score": 0.9939
+      },
+      {
+        "word": "帯",
+        "score": 0.9845
+      }
+    ]
   },
   "しぶとい": {
     "english_translation": "Tenacious, stubborn, persistent (especially in a negative or difficult context, like enduring tough trials).",
@@ -1947,7 +3583,33 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9948
+      },
+      {
+        "word": "大幅",
+        "score": 0.9942
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9902
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9886
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9858
+      },
+      {
+        "word": "精",
+        "score": 0.9855
+      }
+    ]
   },
   "しょっちゅう": {
     "english_translation": "Often, frequently, regularly.",
@@ -1973,7 +3635,33 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9997
+      },
+      {
+        "word": "大幅",
+        "score": 0.9957
+      },
+      {
+        "word": "買って",
+        "score": 0.9919
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9913
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9875
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9838
+      }
+    ]
   },
   "し尿": {
     "english_translation": "Human waste (feces and urine).",
@@ -1999,7 +3687,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.997
+      },
+      {
+        "word": "大幅",
+        "score": 0.9914
+      },
+      {
+        "word": "話して",
+        "score": 0.9843
+      }
+    ]
   },
   "じっくり": {
     "english_translation": "Carefully and thoroughly, taking sufficient time without rushing.",
@@ -2025,7 +3727,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9974
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9942
+      },
+      {
+        "word": "広々",
+        "score": 0.9829
+      },
+      {
+        "word": "買って",
+        "score": 0.9813
+      },
+      {
+        "word": "話して",
+        "score": 0.9804
+      }
+    ]
   },
   "じゃん拳": {
     "english_translation": "Rock-paper-scissors (Jan-ken-pon).",
@@ -2051,7 +3775,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9938
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9924
+      },
+      {
+        "word": "大幅",
+        "score": 0.9916
+      },
+      {
+        "word": "広々",
+        "score": 0.9874
+      },
+      {
+        "word": "話して",
+        "score": 0.9834
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9829
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9823
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9803
+      }
+    ]
   },
   "すばしこい": {
     "english_translation": "Quick, agile, nimble.",
@@ -2077,7 +3835,37 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.992
+      },
+      {
+        "word": "大幅",
+        "score": 0.9917
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9888
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9875
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9873
+      },
+      {
+        "word": "買って",
+        "score": 0.9857
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9848
+      }
+    ]
   },
   "すれ違い": {
     "english_translation": "Passing each other (without meeting or noticing); misunderstanding, disagreement.",
@@ -2103,7 +3891,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9996
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9964
+      },
+      {
+        "word": "話して",
+        "score": 0.9938
+      },
+      {
+        "word": "大幅",
+        "score": 0.9903
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9878
+      }
+    ]
   },
   "すれ違う": {
     "english_translation": "To pass each other (without eye contact or speaking); to miss an opportunity.",
@@ -2129,7 +3939,45 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9995
+      },
+      {
+        "word": "大幅",
+        "score": 0.9905
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.989
+      },
+      {
+        "word": "帯",
+        "score": 0.9876
+      },
+      {
+        "word": "話して",
+        "score": 0.9873
+      },
+      {
+        "word": "すし",
+        "score": 0.9856
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9832
+      },
+      {
+        "word": "広々",
+        "score": 0.9829
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9809
+      }
+    ]
   },
   "すんなり": {
     "english_translation": "Smoothly, without trouble; gracefully, slenderly (of a person's figure).",
@@ -2155,7 +4003,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.997
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9921
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9921
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9865
+      }
+    ]
   },
   "ずばり": {
     "english_translation": "Directly, straight to the point, without beating around the bush.",
@@ -2181,7 +4047,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9922
+      },
+      {
+        "word": "話して",
+        "score": 0.9904
+      },
+      {
+        "word": "買って",
+        "score": 0.989
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9826
+      }
+    ]
   },
   "ずぶ濡れ": {
     "english_translation": "Completely soaked through; dripping wet.",
@@ -2207,7 +4091,29 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.994
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9933
+      },
+      {
+        "word": "大幅",
+        "score": 0.9909
+      },
+      {
+        "word": "帯",
+        "score": 0.9899
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9817
+      }
+    ]
   },
   "ずらっと": {
     "english_translation": "In a long, continuous line; lined up, row after row.",
@@ -2233,7 +4139,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9925
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9851
+      },
+      {
+        "word": "買って",
+        "score": 0.9843
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9818
+      }
+    ]
   },
   "ずるずる": {
     "english_translation": "Slowly and unsteadily; dragging along; lingering (a situation); a slurping sound (e.g., of noodles).",
@@ -2259,7 +4183,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9942
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9932
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9821
+      }
+    ]
   },
   "ずれ": {
     "english_translation": "A gap, deviation from the normal position or alignment; misalignment, displacement.",
@@ -2285,7 +4223,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9958
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9953
+      },
+      {
+        "word": "話して",
+        "score": 0.9946
+      },
+      {
+        "word": "買って",
+        "score": 0.9883
+      }
+    ]
   },
   "ずれる": {
     "english_translation": "To shift out of alignment, to be displaced; to be out of sync (ideas, timing).",
@@ -2311,7 +4267,25 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9983
+      },
+      {
+        "word": "大幅",
+        "score": 0.9862
+      },
+      {
+        "word": "話して",
+        "score": 0.9857
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9815
+      }
+    ]
   },
   "その上": {
     "english_translation": "Moreover, furthermore, besides (adding an additional point or intensifying the previous statement).",
@@ -2337,7 +4311,21 @@
       }
     ],
     "part_of_speech": "Conjunction",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9874
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9854
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9845
+      }
+    ]
   },
   "その内": {
     "english_translation": "Soon, eventually, in the near future.",
@@ -2363,7 +4351,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9892
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9846
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9804
+      }
+    ]
   },
   "その外": {
     "english_translation": "In addition, besides, apart from that.",
@@ -2389,7 +4391,13 @@
       }
     ],
     "part_of_speech": "Conjunction",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9867
+      }
+    ]
   },
   "その為": {
     "english_translation": "Because of that, for that reason, therefore.",
@@ -2415,7 +4423,33 @@
       }
     ],
     "part_of_speech": "Conjunction",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9934
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9886
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9871
+      },
+      {
+        "word": "広々",
+        "score": 0.984
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.983
+      }
+    ]
   },
   "ぞんざい": {
     "english_translation": "Rude, careless, rough (behavior or speech that lacks politeness, especially in formal settings).",
@@ -2441,7 +4475,17 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9955
+      },
+      {
+        "word": "大幅",
+        "score": 0.9926
+      }
+    ]
   },
   "たった": {
     "english_translation": "Only, merely, just (emphasizing a small amount or duration, yet implying significance).",
@@ -2467,7 +4511,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9868
+      },
+      {
+        "word": "大幅",
+        "score": 0.9839
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9834
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.983
+      },
+      {
+        "word": "話して",
+        "score": 0.981
+      }
+    ]
   },
   "たどり着く": {
     "english_translation": "To finally reach a destination after a long and difficult journey, to struggle up to.",
@@ -2493,7 +4559,29 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9971
+      },
+      {
+        "word": "大幅",
+        "score": 0.9966
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9939
+      },
+      {
+        "word": "話して",
+        "score": 0.9837
+      },
+      {
+        "word": "広々",
+        "score": 0.9804
+      }
+    ]
   },
   "だぶだぶ": {
     "english_translation": "Baggy, loose-fitting (of clothes); slack, loose.",
@@ -2519,7 +4607,25 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9991
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9984
+      },
+      {
+        "word": "大幅",
+        "score": 0.9899
+      },
+      {
+        "word": "買って",
+        "score": 0.9871
+      }
+    ]
   },
   "だらけ": {
     "english_translation": "Full of, covered with (often implying an excessive or undesirable amount).",
@@ -2545,7 +4651,25 @@
       }
     ],
     "part_of_speech": "Other",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.99
+      },
+      {
+        "word": "買って",
+        "score": 0.9897
+      },
+      {
+        "word": "帯",
+        "score": 0.9858
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9832
+      }
+    ]
   },
   "ちやほや": {
     "english_translation": "To pamper, make a fuss over, dote on (often excessively or insincerely).",
@@ -2571,7 +4695,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9978
+      },
+      {
+        "word": "もったいない",
+        "score": 0.9881
+      },
+      {
+        "word": "大幅",
+        "score": 0.988
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9846
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9842
+      }
+    ]
   },
   "ちょくちょく": {
     "english_translation": "Frequently, often, regularly (but not necessarily on a fixed schedule).",
@@ -2597,7 +4743,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9944
+      },
+      {
+        "word": "買って",
+        "score": 0.9881
+      },
+      {
+        "word": "大幅",
+        "score": 0.9824
+      }
+    ]
   },
   "ちらっと": {
     "english_translation": "To glance quickly or briefly, to catch a glimpse.",
@@ -2623,7 +4783,33 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9983
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9944
+      },
+      {
+        "word": "大幅",
+        "score": 0.9927
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9889
+      },
+      {
+        "word": "買って",
+        "score": 0.9873
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9818
+      }
+    ]
   },
   "ちり取り": {
     "english_translation": "Dustpan.",
@@ -2649,7 +4835,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9966
+      },
+      {
+        "word": "買って",
+        "score": 0.989
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9851
+      },
+      {
+        "word": "大幅",
+        "score": 0.9828
+      }
+    ]
   },
   "つかの間": {
     "english_translation": "A brief moment, a short time (often implying meaningfulness despite its fleeting nature).",
@@ -2675,7 +4879,17 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9952
+      },
+      {
+        "word": "大幅",
+        "score": 0.9919
+      }
+    ]
   },
   "つり革": {
     "english_translation": "Strap hanger (handle for standing passengers in public transport).",
@@ -2701,7 +4915,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9941
+      },
+      {
+        "word": "話して",
+        "score": 0.9914
+      },
+      {
+        "word": "大幅",
+        "score": 0.9881
+      },
+      {
+        "word": "買って",
+        "score": 0.9831
+      },
+      {
+        "word": "内",
+        "score": 0.9809
+      }
+    ]
   },
   "てっきり": {
     "english_translation": "Surely, certainly (used when one was sure of something but turned out to be wrong).",
@@ -2727,7 +4963,17 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9837
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9817
+      }
+    ]
   },
   "てんで": {
     "english_translation": "Not at all, absolutely not, by no means (used to strongly emphasize negation in informal speech).",
@@ -2753,7 +4999,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "恵まれる",
+        "score": 0.9872
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9872
+      },
+      {
+        "word": "話して",
+        "score": 0.9862
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9859
+      },
+      {
+        "word": "大幅",
+        "score": 0.9844
+      }
+    ]
   },
   "でかい": {
     "english_translation": "Very large, huge, gigantic (casual, often conveying surprise or admiration).",
@@ -2779,7 +5047,21 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9903
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9886
+      },
+      {
+        "word": "大幅",
+        "score": 0.9862
+      }
+    ]
   },
   "と": {
     "english_translation": "Particle meaning 'and' (connecting nouns), 'with,' or 'when/if' (conditional).",
@@ -2805,7 +5087,25 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9898
+      },
+      {
+        "word": "大幅",
+        "score": 0.9874
+      },
+      {
+        "word": "話して",
+        "score": 0.9815
+      },
+      {
+        "word": "集中",
+        "score": 0.9815
+      }
+    ]
   },
   "とんだ": {
     "english_translation": "Utter, surprising, unexpected, awful.",
@@ -2831,7 +5131,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.989
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9871
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9835
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.98
+      }
+    ]
   },
   "どうぞ宜しく": {
     "english_translation": "Pleased to meet you; please be kind to me (a set phrase, often used for first encounters or requesting goodwill).",
@@ -2857,7 +5175,29 @@
       }
     ],
     "part_of_speech": "Other",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9926
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9926
+      },
+      {
+        "word": "話して",
+        "score": 0.9913
+      },
+      {
+        "word": "買って",
+        "score": 0.9883
+      },
+      {
+        "word": "大幅",
+        "score": 0.9869
+      }
+    ]
   },
   "どうにか": {
     "english_translation": "In some way or somehow (managed to overcome difficulties); barely, narrowly.",
@@ -2883,7 +5223,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9994
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9928
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.987
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9843
+      },
+      {
+        "word": "大幅",
+        "score": 0.9843
+      }
+    ]
   },
   "どうやら": {
     "english_translation": "It seems, apparently (based on indirect signs); somehow, one way or another.",
@@ -2909,7 +5271,17 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9906
+      },
+      {
+        "word": "話して",
+        "score": 0.9818
+      }
+    ]
   },
   "ど忘れ": {
     "english_translation": "A sudden, temporary lapse of memory (e.g., forgetting a name).",
@@ -2935,7 +5307,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9947
+      },
+      {
+        "word": "大幅",
+        "score": 0.989
+      },
+      {
+        "word": "買って",
+        "score": 0.9858
+      }
+    ]
   },
   "なんか": {
     "english_translation": "Something (vague, hard to put into words); or something like that; sort of.",
@@ -2961,7 +5347,21 @@
       }
     ],
     "part_of_speech": "Pronoun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9997
+      },
+      {
+        "word": "大幅",
+        "score": 0.9893
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9889
+      }
+    ]
   },
   "なんだかんだ": {
     "english_translation": "For one reason or another; in the end, despite everything.",
@@ -2987,7 +5387,25 @@
       }
     ],
     "part_of_speech": "Particle",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "恵まれる",
+        "score": 0.9908
+      },
+      {
+        "word": "大幅",
+        "score": 0.9898
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9859
+      },
+      {
+        "word": "買って",
+        "score": 0.9844
+      }
+    ]
   },
   "にも拘らず": {
     "english_translation": "In spite of, nevertheless, despite (formal).",
@@ -3013,7 +5431,21 @@
       }
     ],
     "part_of_speech": "Conjunction",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9876
+      },
+      {
+        "word": "大幅",
+        "score": 0.9832
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9822
+      }
+    ]
   },
   "ねじ回し": {
     "english_translation": "Screwdriver.",
@@ -3039,7 +5471,49 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.995
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9948
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9905
+      },
+      {
+        "word": "大幅",
+        "score": 0.9897
+      },
+      {
+        "word": "すし",
+        "score": 0.9863
+      },
+      {
+        "word": "広々",
+        "score": 0.9846
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9834
+      },
+      {
+        "word": "話して",
+        "score": 0.9833
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9819
+      },
+      {
+        "word": "帯",
+        "score": 0.9803
+      }
+    ]
   },
   "ばい菌": {
     "english_translation": "Germ, microbe (often used informally for bacteria or viruses causing infections).",
@@ -3065,7 +5539,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9955
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9922
+      },
+      {
+        "word": "大幅",
+        "score": 0.9878
+      },
+      {
+        "word": "買って",
+        "score": 0.9872
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9835
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9805
+      }
+    ]
   },
   "ばてる": {
     "english_translation": "To be utterly exhausted, worn out, run down (especially physically).",
@@ -3091,7 +5591,25 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9976
+      },
+      {
+        "word": "帯",
+        "score": 0.9896
+      },
+      {
+        "word": "話して",
+        "score": 0.9883
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9813
+      }
+    ]
   },
   "ひょっと": {
     "english_translation": "Perhaps, possibly, by chance.",
@@ -3117,7 +5635,33 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9876
+      },
+      {
+        "word": "見ないで",
+        "score": 0.987
+      },
+      {
+        "word": "買って",
+        "score": 0.986
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9853
+      },
+      {
+        "word": "帯",
+        "score": 0.9837
+      },
+      {
+        "word": "大幅",
+        "score": 0.9819
+      }
+    ]
   },
   "びっしょり": {
     "english_translation": "Drenched, thoroughly soaked, dripping wet.",
@@ -3143,7 +5687,29 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "いたいです",
+        "score": 0.9938
+      },
+      {
+        "word": "買って",
+        "score": 0.9931
+      },
+      {
+        "word": "大幅",
+        "score": 0.9916
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9857
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9845
+      }
+    ]
   },
   "びり": {
     "english_translation": "The last person or position (in a list, race, or queue); tail-end.",
@@ -3169,7 +5735,17 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9942
+      },
+      {
+        "word": "大幅",
+        "score": 0.9844
+      }
+    ]
   },
   "ふんだん": {
     "english_translation": "Plentiful, abundant, generous; in abundance.",
@@ -3195,7 +5771,25 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9918
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9917
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9863
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9833
+      }
+    ]
   },
   "ぶかぶか": {
     "english_translation": "Too big, baggy, loose-fitting (of clothing or objects).",
@@ -3221,7 +5815,21 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9983
+      },
+      {
+        "word": "大幅",
+        "score": 0.986
+      },
+      {
+        "word": "買って",
+        "score": 0.9844
+      }
+    ]
   },
   "ぶらぶら": {
     "english_translation": "Aimlessly wandering, loafing, dangling idly; swinging loosely.",
@@ -3247,7 +5855,17 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9962
+      },
+      {
+        "word": "大幅",
+        "score": 0.9851
+      }
+    ]
   },
   "ぶら下げる": {
     "english_translation": "To hang down, suspend, dangle (often an object like a necklace or bag).",
@@ -3273,7 +5891,37 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9994
+      },
+      {
+        "word": "帯",
+        "score": 0.9984
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9925
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9895
+      },
+      {
+        "word": "大幅",
+        "score": 0.9882
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9857
+      },
+      {
+        "word": "もったいない",
+        "score": 0.9822
+      }
+    ]
   },
   "ぺこぺこ": {
     "english_translation": "Intense hunger (stomach rumbling); fawning, bowing repeatedly (humble/servile).",
@@ -3299,7 +5947,13 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9963
+      }
+    ]
   },
   "ほっと": {
     "english_translation": "A sigh of relief; feeling relieved, relaxed.",
@@ -3325,7 +5979,21 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.994
+      },
+      {
+        "word": "大幅",
+        "score": 0.991
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9882
+      }
+    ]
   },
   "ぼつぼつ": {
     "english_translation": "One by one, gradually, little by little; soon (starting soon); small dots or pimples.",
@@ -3351,7 +6019,21 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9833
+      }
+    ]
   },
   "ぼやく": {
     "english_translation": "To grumble, mutter quietly about minor annoyances; to complain.",
@@ -3377,7 +6059,21 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9965
+      },
+      {
+        "word": "大幅",
+        "score": 0.9918
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9864
+      }
+    ]
   },
   "ぼやける": {
     "english_translation": "To become blurred, indistinct, or lose sharpness (due to fatigue, poor quality, or external factors).",
@@ -3403,7 +6099,33 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9976
+      },
+      {
+        "word": "大幅",
+        "score": 0.9943
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9937
+      },
+      {
+        "word": "話して",
+        "score": 0.9863
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9861
+      },
+      {
+        "word": "すし",
+        "score": 0.9841
+      }
+    ]
   },
   "まごつく": {
     "english_translation": "To be confused, flustered, hesitant (unable to quickly form a coherent thought due to surprise or embarrassment).",
@@ -3429,7 +6151,41 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9978
+      },
+      {
+        "word": "帯",
+        "score": 0.9976
+      },
+      {
+        "word": "大幅",
+        "score": 0.9964
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.994
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.992
+      },
+      {
+        "word": "買って",
+        "score": 0.9832
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9809
+      },
+      {
+        "word": "広々",
+        "score": 0.9804
+      }
+    ]
   },
   "もろに": {
     "english_translation": "Completely, entirely; head-on, directly (with full force or intensity, without restraint).",
@@ -3455,7 +6211,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9937
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9897
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9844
+      },
+      {
+        "word": "買って",
+        "score": 0.9833
+      }
+    ]
   },
   "やっ付ける": {
     "english_translation": "To finish a difficult task once and for all; to defeat, beat up.",
@@ -3481,7 +6255,29 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9988
+      },
+      {
+        "word": "大幅",
+        "score": 0.987
+      },
+      {
+        "word": "広々",
+        "score": 0.9847
+      },
+      {
+        "word": "やかましい",
+        "score": 0.9839
+      },
+      {
+        "word": "帯",
+        "score": 0.9831
+      }
+    ]
   },
   "ややこしい": {
     "english_translation": "Complex, confusing, intricate (due to subtle interconnections that are hard to grasp immediately).",
@@ -3507,7 +6303,33 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9944
+      },
+      {
+        "word": "買って",
+        "score": 0.9926
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.991
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9891
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9877
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9872
+      }
+    ]
   },
   "やり遂げる": {
     "english_translation": "To successfully complete, carry through to the end (overcoming challenges and demonstrating perseverance).",
@@ -3533,7 +6355,33 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9965
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9943
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9925
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9922
+      },
+      {
+        "word": "況",
+        "score": 0.983
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9803
+      }
+    ]
   },
   "ゆとり": {
     "english_translation": "Time, resources, or freedom of action; leeway, room (for calm and deliberate decision-making).",
@@ -3559,7 +6407,17 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9878
+      },
+      {
+        "word": "買って",
+        "score": 0.9871
+      }
+    ]
   },
   "よそ見": {
     "english_translation": "Looking aside, glancing away; distraction (looking away from the task at hand).",
@@ -3585,7 +6443,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9974
+      },
+      {
+        "word": "大幅",
+        "score": 0.9947
+      },
+      {
+        "word": "話して",
+        "score": 0.9921
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9888
+      },
+      {
+        "word": "迎え",
+        "score": 0.9839
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9829
+      },
+      {
+        "word": "広々",
+        "score": 0.9822
+      },
+      {
+        "word": "よこはま",
+        "score": 0.9811
+      }
+    ]
   },
   "アクセル": {
     "english_translation": "Accelerator (pedal or device); throttle.",
@@ -3611,7 +6503,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9994
+      },
+      {
+        "word": "買って",
+        "score": 0.9955
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9936
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9896
+      }
+    ]
   },
   "アップ": {
     "english_translation": "Up, raising, increasing (e.g., price increase); close-up (photography); update, improvement.",
@@ -3637,7 +6547,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "広々",
+        "score": 0.9872
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.984
+      }
+    ]
   },
   "アプローチ": {
     "english_translation": "Approach (method, style, or access route); access.",
@@ -3663,7 +6587,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9945
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9937
+      },
+      {
+        "word": "大幅",
+        "score": 0.986
+      },
+      {
+        "word": "買って",
+        "score": 0.9858
+      }
+    ]
   },
   "アマチュア": {
     "english_translation": "Amateur (someone engaging in an activity without professional compensation).",
@@ -3689,7 +6631,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9896
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9858
+      },
+      {
+        "word": "大幅",
+        "score": 0.9856
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9836
+      }
+    ]
   },
   "アラブ": {
     "english_translation": "Arab; Arabic (relating to the people and language of the Middle East and North Africa).",
@@ -3715,7 +6675,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "買って",
+        "score": 0.9939
+      },
+      {
+        "word": "大幅",
+        "score": 0.9804
+      }
+    ]
   },
   "アルカリ": {
     "english_translation": "Alkali (a compound that increases pH and neutralizes acids).",
@@ -3741,7 +6715,49 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.996
+      },
+      {
+        "word": "買って",
+        "score": 0.9941
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9908
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9892
+      },
+      {
+        "word": "話して",
+        "score": 0.9866
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9859
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9856
+      },
+      {
+        "word": "大幅",
+        "score": 0.9839
+      },
+      {
+        "word": "わかりました",
+        "score": 0.9828
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9814
+      }
+    ]
   },
   "アルミ": {
     "english_translation": "Aluminum.",
@@ -3767,7 +6783,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9957
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9953
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9946
+      },
+      {
+        "word": "大幅",
+        "score": 0.9908
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9884
+      },
+      {
+        "word": "内",
+        "score": 0.983
+      }
+    ]
   },
   "アワー": {
     "english_translation": "Hour; an academic unit of work (e.g., 45-50 minutes).",
@@ -3793,7 +6835,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9936
+      },
+      {
+        "word": "大幅",
+        "score": 0.9876
+      },
+      {
+        "word": "買って",
+        "score": 0.9848
+      },
+      {
+        "word": "帯",
+        "score": 0.983
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9818
+      }
+    ]
   },
   "アンケート": {
     "english_translation": "Questionnaire, survey.",
@@ -3819,7 +6883,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9978
+      },
+      {
+        "word": "話して",
+        "score": 0.9953
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9901
+      },
+      {
+        "word": "買って",
+        "score": 0.9877
+      }
+    ]
   },
   "アンコール": {
     "english_translation": "Encore (a repeated performance requested by the audience).",
@@ -3845,7 +6927,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9901
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9882
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9874
+      },
+      {
+        "word": "話して",
+        "score": 0.9832
+      }
+    ]
   },
   "イエス": {
     "english_translation": "Yes (affirmative response, especially in casual speech or when directly translating the English word).",
@@ -3871,7 +6971,45 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.997
+      },
+      {
+        "word": "いたいです",
+        "score": 0.995
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9945
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9927
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.987
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9865
+      },
+      {
+        "word": "はい",
+        "score": 0.9847
+      },
+      {
+        "word": "帯",
+        "score": 0.9841
+      },
+      {
+        "word": "大幅",
+        "score": 0.9818
+      }
+    ]
   },
   "インターチェンジ": {
     "english_translation": "Interchange (a complex highway junction).",
@@ -3897,7 +7035,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9958
+      },
+      {
+        "word": "話して",
+        "score": 0.9919
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9898
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9895
+      },
+      {
+        "word": "買って",
+        "score": 0.9894
+      },
+      {
+        "word": "大幅",
+        "score": 0.9871
+      }
+    ]
   },
   "インターナショナル": {
     "english_translation": "International.",
@@ -3923,7 +7087,41 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9976
+      },
+      {
+        "word": "買って",
+        "score": 0.993
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9898
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9887
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.988
+      },
+      {
+        "word": "大幅",
+        "score": 0.9873
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9826
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9821
+      }
+    ]
   },
   "インターフォン": {
     "english_translation": "Intercom, door phone.",
@@ -3949,7 +7147,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9985
+      },
+      {
+        "word": "買って",
+        "score": 0.9951
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9943
+      },
+      {
+        "word": "大幅",
+        "score": 0.9862
+      }
+    ]
   },
   "インテリ": {
     "english_translation": "Intellectual (a person with advanced education and intellectual interests).",
@@ -3975,7 +7191,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9941
+      },
+      {
+        "word": "買って",
+        "score": 0.9923
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9914
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9907
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9821
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9808
+      }
+    ]
   },
   "インフォメーション": {
     "english_translation": "Information; information desk.",
@@ -4001,7 +7243,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9977
+      },
+      {
+        "word": "買って",
+        "score": 0.9926
+      },
+      {
+        "word": "大幅",
+        "score": 0.9888
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9826
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9806
+      }
+    ]
   },
   "インフレ": {
     "english_translation": "Inflation.",
@@ -4027,7 +7291,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9972
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9959
+      },
+      {
+        "word": "大幅",
+        "score": 0.9931
+      },
+      {
+        "word": "帯",
+        "score": 0.9929
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9887
+      }
+    ]
   },
   "ウイルス": {
     "english_translation": "Virus (microscopic infectious agent).",
@@ -4053,7 +7339,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9969
+      },
+      {
+        "word": "買って",
+        "score": 0.9955
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9954
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.991
+      },
+      {
+        "word": "大幅",
+        "score": 0.9883
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9861
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9802
+      }
+    ]
   },
   "ウェートレス": {
     "english_translation": "Waitress.",
@@ -4079,7 +7395,45 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9989
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9962
+      },
+      {
+        "word": "買って",
+        "score": 0.9924
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.986
+      },
+      {
+        "word": "大幅",
+        "score": 0.9857
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9848
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9842
+      },
+      {
+        "word": "内",
+        "score": 0.9834
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9826
+      }
+    ]
   },
   "エアメール": {
     "english_translation": "Airmail (fast postal service by air).",
@@ -4105,7 +7459,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9997
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9953
+      },
+      {
+        "word": "買って",
+        "score": 0.99
+      },
+      {
+        "word": "大幅",
+        "score": 0.9862
+      },
+      {
+        "word": "広々",
+        "score": 0.9809
+      }
+    ]
   },
   "エレガント": {
     "english_translation": "Elegant, refined, graceful.",
@@ -4131,7 +7507,33 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9924
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9905
+      },
+      {
+        "word": "大幅",
+        "score": 0.9874
+      },
+      {
+        "word": "買って",
+        "score": 0.9852
+      },
+      {
+        "word": "いたいです",
+        "score": 0.984
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9801
+      }
+    ]
   },
   "エンジニア": {
     "english_translation": "Engineer (a professional who designs and builds technical systems).",
@@ -4157,7 +7559,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9904
+      },
+      {
+        "word": "大幅",
+        "score": 0.9898
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9891
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9888
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9857
+      },
+      {
+        "word": "わかりました",
+        "score": 0.9839
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9811
+      }
+    ]
   },
   "オドオド": {
     "english_translation": "Nervous, timid, hesitant (onomatopoeia describing trembling or nervousness).",
@@ -4183,7 +7615,17 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9907
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9854
+      }
+    ]
   },
   "オリエンテーション": {
     "english_translation": "Orientation (program for new students or employees).",
@@ -4209,7 +7651,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9966
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9944
+      },
+      {
+        "word": "話して",
+        "score": 0.9944
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9935
+      },
+      {
+        "word": "大幅",
+        "score": 0.9909
+      },
+      {
+        "word": "買って",
+        "score": 0.9899
+      }
+    ]
   },
   "オレンジ": {
     "english_translation": "Orange (color or fruit).",
@@ -4235,7 +7703,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9975
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9955
+      },
+      {
+        "word": "帯",
+        "score": 0.9912
+      },
+      {
+        "word": "大幅",
+        "score": 0.9907
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9819
+      }
+    ]
   },
   "オンライン": {
     "english_translation": "Online.",
@@ -4261,7 +7751,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "クッキー",
+        "score": 0.9979
+      },
+      {
+        "word": "大幅",
+        "score": 0.9945
+      },
+      {
+        "word": "買って",
+        "score": 0.9944
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9911
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9881
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9871
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9824
+      }
+    ]
   },
   "オーケー": {
     "english_translation": "OK, agreed, fine.",
@@ -4287,7 +7807,37 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9964
+      },
+      {
+        "word": "話して",
+        "score": 0.9953
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9891
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9881
+      },
+      {
+        "word": "大幅",
+        "score": 0.986
+      },
+      {
+        "word": "買って",
+        "score": 0.985
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9828
+      }
+    ]
   },
   "オートマチック": {
     "english_translation": "Automatic (describing operation without manual control).",
@@ -4313,7 +7863,33 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9958
+      },
+      {
+        "word": "買って",
+        "score": 0.9932
+      },
+      {
+        "word": "大幅",
+        "score": 0.9876
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9862
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9852
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9833
+      }
+    ]
   },
   "オープン": {
     "english_translation": "Open; grand opening (official start of a public or commercial event).",
@@ -4339,7 +7915,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9967
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9915
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9905
+      },
+      {
+        "word": "話して",
+        "score": 0.9829
+      },
+      {
+        "word": "大幅",
+        "score": 0.9824
+      },
+      {
+        "word": "広々",
+        "score": 0.9806
+      }
+    ]
   },
   "カクテル": {
     "english_translation": "Cocktail (a drink made from multiple ingredients).",
@@ -4365,7 +7967,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9922
+      },
+      {
+        "word": "買って",
+        "score": 0.992
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9915
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9871
+      },
+      {
+        "word": "大幅",
+        "score": 0.9838
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9821
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9821
+      }
+    ]
   },
   "カット": {
     "english_translation": "Cut, haircut; reduction (of costs/volume); scene cut (film).",
@@ -4391,7 +8023,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9981
+      },
+      {
+        "word": "帯",
+        "score": 0.995
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9945
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9895
+      },
+      {
+        "word": "大幅",
+        "score": 0.9831
+      }
+    ]
   },
   "カテゴリー": {
     "english_translation": "Category, group (of items united by a common characteristic).",
@@ -4417,7 +8071,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9911
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9907
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9901
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9898
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9891
+      },
+      {
+        "word": "大幅",
+        "score": 0.9842
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9817
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9812
+      }
+    ]
   },
   "カムバック": {
     "english_translation": "Comeback, return (to public life after a long break).",
@@ -4443,7 +8131,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9941
+      },
+      {
+        "word": "大幅",
+        "score": 0.9926
+      },
+      {
+        "word": "買って",
+        "score": 0.9923
+      },
+      {
+        "word": "話して",
+        "score": 0.9911
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9897
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.986
+      }
+    ]
   },
   "カメラマン": {
     "english_translation": "Cameraman, photographer, cinematographer.",
@@ -4469,7 +8183,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9946
+      },
+      {
+        "word": "買って",
+        "score": 0.9932
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9919
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9917
+      },
+      {
+        "word": "帯",
+        "score": 0.9855
+      },
+      {
+        "word": "大幅",
+        "score": 0.985
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9832
+      }
+    ]
   },
   "カルテ": {
     "english_translation": "Medical chart, patient record.",
@@ -4495,7 +8239,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9962
+      },
+      {
+        "word": "買って",
+        "score": 0.9927
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9907
+      },
+      {
+        "word": "大幅",
+        "score": 0.9869
+      }
+    ]
   },
   "カンニング": {
     "english_translation": "Cheating (in an exam by copying answers).",
@@ -4521,7 +8283,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9922
+      },
+      {
+        "word": "話して",
+        "score": 0.9905
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9893
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9866
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9808
+      }
+    ]
   },
   "カーペット": {
     "english_translation": "Carpet, rug.",
@@ -4547,7 +8331,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9978
+      },
+      {
+        "word": "買って",
+        "score": 0.9976
+      },
+      {
+        "word": "大幅",
+        "score": 0.9877
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9871
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9844
+      }
+    ]
   },
   "ガイド": {
     "english_translation": "Guide (person or book); guidance.",
@@ -4573,7 +8379,45 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.998
+      },
+      {
+        "word": "見ないで",
+        "score": 0.997
+      },
+      {
+        "word": "買って",
+        "score": 0.9929
+      },
+      {
+        "word": "話して",
+        "score": 0.991
+      },
+      {
+        "word": "大幅",
+        "score": 0.9878
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.984
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.983
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9827
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9822
+      }
+    ]
   },
   "ガイドブック": {
     "english_translation": "Guidebook (reference book for tourists).",
@@ -4599,7 +8443,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.995
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9914
+      },
+      {
+        "word": "話して",
+        "score": 0.9888
+      },
+      {
+        "word": "大幅",
+        "score": 0.9866
+      },
+      {
+        "word": "買って",
+        "score": 0.9858
+      }
+    ]
   },
   "ガレージ": {
     "english_translation": "Garage.",
@@ -4625,7 +8491,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9953
+      },
+      {
+        "word": "いたいです",
+        "score": 0.99
+      },
+      {
+        "word": "大幅",
+        "score": 0.9895
+      },
+      {
+        "word": "買って",
+        "score": 0.9871
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9862
+      }
+    ]
   },
   "キャッチ": {
     "english_translation": "Catch (a memorable phrase that captures the essence of an advertisement); to catch, seize.",
@@ -4651,7 +8539,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9952
+      },
+      {
+        "word": "大幅",
+        "score": 0.9918
+      },
+      {
+        "word": "話して",
+        "score": 0.9904
+      },
+      {
+        "word": "帯",
+        "score": 0.9867
+      },
+      {
+        "word": "買って",
+        "score": 0.9848
+      }
+    ]
   },
   "キャリア": {
     "english_translation": "Career (professional journey); track record; carrier (in IT/telecom).",
@@ -4677,7 +8587,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9956
+      },
+      {
+        "word": "大幅",
+        "score": 0.9955
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9891
+      },
+      {
+        "word": "買って",
+        "score": 0.9886
+      },
+      {
+        "word": "もったいない",
+        "score": 0.9871
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9835
+      },
+      {
+        "word": "広々",
+        "score": 0.983
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9826
+      }
+    ]
   },
   "クイズ": {
     "english_translation": "Quiz, trivia game.",
@@ -4703,7 +8647,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.996
+      },
+      {
+        "word": "大幅",
+        "score": 0.9935
+      },
+      {
+        "word": "買って",
+        "score": 0.9918
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9845
+      },
+      {
+        "word": "話して",
+        "score": 0.9806
+      },
+      {
+        "word": "内",
+        "score": 0.9805
+      }
+    ]
   },
   "クラブ": {
     "english_translation": "Club (organization or group); nightclub; club (suit in cards).",
@@ -4729,7 +8699,17 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9942
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9899
+      }
+    ]
   },
   "クレーン": {
     "english_translation": "Crane (lifting machine).",
@@ -4755,7 +8735,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9966
+      },
+      {
+        "word": "買って",
+        "score": 0.9952
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9874
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9865
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9863
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9806
+      }
+    ]
   },
   "グラフ": {
     "english_translation": "Graph, chart (visual representation of data).",
@@ -4781,7 +8787,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9942
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9941
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9932
+      },
+      {
+        "word": "大幅",
+        "score": 0.9855
+      }
+    ]
   },
   "グレー": {
     "english_translation": "Gray (color); ambiguous, unclear (situation).",
@@ -4807,7 +8831,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.994
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9879
+      },
+      {
+        "word": "見ないで",
+        "score": 0.987
+      }
+    ]
   },
   "ゲスト": {
     "english_translation": "Guest (invited person, often in a respectful context).",
@@ -4833,7 +8871,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9924
+      },
+      {
+        "word": "見ないで",
+        "score": 0.99
+      },
+      {
+        "word": "買って",
+        "score": 0.9866
+      },
+      {
+        "word": "大幅",
+        "score": 0.9852
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9846
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9837
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9829
+      }
+    ]
   },
   "コマーシャル": {
     "english_translation": "Commercial (advertisement, especially on TV or online).",
@@ -4859,7 +8927,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "話して",
+        "score": 0.9953
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9944
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9918
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9916
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.989
+      }
+    ]
   },
   "コミュニケーション": {
     "english_translation": "Communication, interaction (exchange of information, thoughts, and feelings).",
@@ -4885,7 +8979,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9965
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9944
+      },
+      {
+        "word": "大幅",
+        "score": 0.9922
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9895
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9817
+      },
+      {
+        "word": "いたいです",
+        "score": 0.981
+      }
+    ]
   },
   "コメント": {
     "english_translation": "Comment, remark (a short message expressing an opinion).",
@@ -4911,7 +9031,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9963
+      },
+      {
+        "word": "買って",
+        "score": 0.9937
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9917
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9903
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9873
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9811
+      }
+    ]
   },
   "コンタクト": {
     "english_translation": "Contact (regular communication or connection); contact lens.",
@@ -4937,7 +9083,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9975
+      },
+      {
+        "word": "買って",
+        "score": 0.9946
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9926
+      },
+      {
+        "word": "話して",
+        "score": 0.9896
+      },
+      {
+        "word": "大幅",
+        "score": 0.989
+      }
+    ]
   },
   "コンテスト": {
     "english_translation": "Contest, competition.",
@@ -4963,7 +9131,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9957
+      },
+      {
+        "word": "買って",
+        "score": 0.9925
+      },
+      {
+        "word": "大幅",
+        "score": 0.992
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9906
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9892
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9885
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9864
+      }
+    ]
   },
   "コントラスト": {
     "english_translation": "Contrast (difference in color, brightness, or intensity).",
@@ -4989,7 +9187,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9968
+      },
+      {
+        "word": "買って",
+        "score": 0.9943
+      },
+      {
+        "word": "大幅",
+        "score": 0.9928
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9852
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9847
+      }
+    ]
   },
   "コントロール": {
     "english_translation": "Control, management, regulation (the act of managing to achieve a desired outcome).",
@@ -5015,7 +9235,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9971
+      },
+      {
+        "word": "買って",
+        "score": 0.9956
+      },
+      {
+        "word": "大幅",
+        "score": 0.9934
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9865
+      }
+    ]
   },
   "コンパス": {
     "english_translation": "Compass (device for determining direction); pair of compasses (for drawing circles).",
@@ -5041,7 +9279,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9958
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9957
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9889
+      }
+    ]
   },
   "コーナー": {
     "english_translation": "Corner (point where two surfaces meet); section, specialized area (in a store/program).",
@@ -5067,7 +9319,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9959
+      },
+      {
+        "word": "買って",
+        "score": 0.9938
+      },
+      {
+        "word": "大幅",
+        "score": 0.992
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9919
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9841
+      },
+      {
+        "word": "話して",
+        "score": 0.9833
+      }
+    ]
   },
   "サイクル": {
     "english_translation": "Cycle (a recurring sequence of events or processes).",
@@ -5093,7 +9371,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9954
+      },
+      {
+        "word": "見ないで",
+        "score": 0.995
+      },
+      {
+        "word": "大幅",
+        "score": 0.9935
+      },
+      {
+        "word": "買って",
+        "score": 0.9933
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9805
+      }
+    ]
   },
   "サイズ": {
     "english_translation": "Size, measurement.",
@@ -5119,7 +9419,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9946
+      },
+      {
+        "word": "大幅",
+        "score": 0.9928
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9921
+      },
+      {
+        "word": "いたいです",
+        "score": 0.99
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9887
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9885
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9821
+      }
+    ]
   },
   "サボる": {
     "english_translation": "To skip school/work, to slack off (from the French word 'saboter').",
@@ -5145,7 +9475,29 @@
       }
     ],
     "part_of_speech": "Verb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9974
+      },
+      {
+        "word": "話して",
+        "score": 0.9894
+      },
+      {
+        "word": "買って",
+        "score": 0.9887
+      },
+      {
+        "word": "帯",
+        "score": 0.9837
+      },
+      {
+        "word": "大幅",
+        "score": 0.9837
+      }
+    ]
   },
   "サンキュー": {
     "english_translation": "Thank you.",
@@ -5171,7 +9523,37 @@
       }
     ],
     "part_of_speech": "Interjection",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9966
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9944
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9913
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9896
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9891
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9869
+      },
+      {
+        "word": "大幅",
+        "score": 0.9861
+      }
+    ]
   },
   "サンタクロース": {
     "english_translation": "Santa Claus.",
@@ -5197,7 +9579,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9988
+      },
+      {
+        "word": "買って",
+        "score": 0.9971
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9957
+      },
+      {
+        "word": "大幅",
+        "score": 0.9938
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9876
+      },
+      {
+        "word": "広々",
+        "score": 0.9873
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9841
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9821
+      }
+    ]
   },
   "システム": {
     "english_translation": "System (a set of interrelated components).",
@@ -5223,7 +9639,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9941
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9937
+      },
+      {
+        "word": "大幅",
+        "score": 0.9889
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9842
+      },
+      {
+        "word": "話して",
+        "score": 0.9819
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9805
+      }
+    ]
   },
   "シック": {
     "english_translation": "Chic, stylish, sophisticated; sick, dark, unusual (often in a fashion context).",
@@ -5249,7 +9691,17 @@
       }
     ],
     "part_of_speech": "Adjective",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9943
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9939
+      }
+    ]
   },
   "シナリオ": {
     "english_translation": "Scenario, script (detailed outline of events).",
@@ -5275,7 +9727,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9951
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9948
+      },
+      {
+        "word": "大幅",
+        "score": 0.9946
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9943
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9829
+      }
+    ]
   },
   "ショック": {
     "english_translation": "Shock (a strong emotional reaction or sudden disruption).",
@@ -5301,7 +9775,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9955
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9953
+      },
+      {
+        "word": "大幅",
+        "score": 0.9874
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9862
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9829
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9825
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9823
+      }
+    ]
   },
   "ショー": {
     "english_translation": "Show, public performance, spectacle.",
@@ -5327,7 +9831,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9953
+      },
+      {
+        "word": "買って",
+        "score": 0.9949
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9934
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9883
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9804
+      }
+    ]
   },
   "シート": {
     "english_translation": "Seat; sheet (of paper or material); ticket.",
@@ -5353,7 +9883,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9973
+      },
+      {
+        "word": "話して",
+        "score": 0.9949
+      },
+      {
+        "word": "大幅",
+        "score": 0.9935
+      },
+      {
+        "word": "買って",
+        "score": 0.9854
+      }
+    ]
   },
   "ジャズ": {
     "english_translation": "Jazz (musical genre).",
@@ -5379,7 +9927,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9976
+      },
+      {
+        "word": "買って",
+        "score": 0.995
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9922
+      },
+      {
+        "word": "大幅",
+        "score": 0.9909
+      },
+      {
+        "word": "見ないで",
+        "score": 0.988
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9861
+      },
+      {
+        "word": "わかりました",
+        "score": 0.9818
+      }
+    ]
   },
   "ジャンパー": {
     "english_translation": "Jumper, jacket, windbreaker.",
@@ -5405,7 +9983,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "買って",
+        "score": 0.992
+      },
+      {
+        "word": "話して",
+        "score": 0.9893
+      },
+      {
+        "word": "大幅",
+        "score": 0.9833
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9808
+      }
+    ]
   },
   "ジャンプ": {
     "english_translation": "Jump, leap.",
@@ -5431,7 +10031,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9966
+      },
+      {
+        "word": "買って",
+        "score": 0.9929
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.986
+      },
+      {
+        "word": "大幅",
+        "score": 0.9842
+      },
+      {
+        "word": "話して",
+        "score": 0.9813
+      }
+    ]
   },
   "ジャンボ": {
     "english_translation": "Jumbo, very large.",
@@ -5457,7 +10079,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "大幅",
+        "score": 0.9937
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.993
+      },
+      {
+        "word": "買って",
+        "score": 0.9927
+      },
+      {
+        "word": "話して",
+        "score": 0.9896
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9887
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9816
+      }
+    ]
   },
   "ジャンル": {
     "english_translation": "Genre, category, field.",
@@ -5483,7 +10135,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.993
+      },
+      {
+        "word": "買って",
+        "score": 0.992
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9855
+      },
+      {
+        "word": "大幅",
+        "score": 0.9848
+      }
+    ]
   },
   "ジーパン": {
     "english_translation": "Jeans (casual clothing made from denim).",
@@ -5509,7 +10179,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.997
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9968
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9927
+      },
+      {
+        "word": "話して",
+        "score": 0.9897
+      },
+      {
+        "word": "大幅",
+        "score": 0.9882
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9863
+      },
+      {
+        "word": "内",
+        "score": 0.9826
+      }
+    ]
   },
   "スタジオ": {
     "english_translation": "Studio (facility for production of film, music, or art).",
@@ -5535,7 +10235,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9934
+      },
+      {
+        "word": "買って",
+        "score": 0.9894
+      },
+      {
+        "word": "大幅",
+        "score": 0.9884
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9882
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9875
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9858
+      },
+      {
+        "word": "広々",
+        "score": 0.9802
+      }
+    ]
   },
   "スチーム": {
     "english_translation": "Steam, water vapor.",
@@ -5561,7 +10291,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9967
+      },
+      {
+        "word": "買って",
+        "score": 0.9965
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9956
+      },
+      {
+        "word": "大幅",
+        "score": 0.9925
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.986
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9856
+      },
+      {
+        "word": "話して",
+        "score": 0.981
+      }
+    ]
   },
   "ストライキ": {
     "english_translation": "Strike (worker protest).",
@@ -5587,7 +10347,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9961
+      },
+      {
+        "word": "買って",
+        "score": 0.9914
+      },
+      {
+        "word": "帯",
+        "score": 0.9875
+      },
+      {
+        "word": "大幅",
+        "score": 0.9858
+      },
+      {
+        "word": "すし",
+        "score": 0.9837
+      }
+    ]
   },
   "ストレス": {
     "english_translation": "Stress (physiological and psychological response to demands).",
@@ -5613,7 +10395,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9951
+      },
+      {
+        "word": "買って",
+        "score": 0.9934
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9903
+      },
+      {
+        "word": "大幅",
+        "score": 0.9889
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9841
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9803
+      }
+    ]
   },
   "ストロボ": {
     "english_translation": "Strobe light, flash.",
@@ -5639,7 +10447,49 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9982
+      },
+      {
+        "word": "買って",
+        "score": 0.9972
+      },
+      {
+        "word": "大幅",
+        "score": 0.9934
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9878
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9876
+      },
+      {
+        "word": "広々",
+        "score": 0.9859
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9834
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.983
+      },
+      {
+        "word": "スムージー",
+        "score": 0.9821
+      },
+      {
+        "word": "話して",
+        "score": 0.9804
+      }
+    ]
   },
   "ストロー": {
     "english_translation": "Straw (for drinking).",
@@ -5665,7 +10515,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9976
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9944
+      },
+      {
+        "word": "買って",
+        "score": 0.9939
+      },
+      {
+        "word": "話して",
+        "score": 0.9905
+      },
+      {
+        "word": "集中",
+        "score": 0.9855
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9855
+      },
+      {
+        "word": "大幅",
+        "score": 0.9829
+      },
+      {
+        "word": "内",
+        "score": 0.9818
+      }
+    ]
   },
   "スピード": {
     "english_translation": "Speed, velocity; pace.",
@@ -5691,7 +10575,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9952
+      },
+      {
+        "word": "買って",
+        "score": 0.9913
+      },
+      {
+        "word": "大幅",
+        "score": 0.9874
+      }
+    ]
   },
   "スプリング": {
     "english_translation": "Spring (elastic component); springtime.",
@@ -5717,7 +10615,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9954
+      },
+      {
+        "word": "大幅",
+        "score": 0.99
+      },
+      {
+        "word": "買って",
+        "score": 0.9871
+      }
+    ]
   },
   "スペース": {
     "english_translation": "Space, room, area.",
@@ -5743,7 +10655,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9956
+      },
+      {
+        "word": "大幅",
+        "score": 0.9938
+      },
+      {
+        "word": "買って",
+        "score": 0.9906
+      },
+      {
+        "word": "話して",
+        "score": 0.984
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9819
+      }
+    ]
   },
   "スポーツカー": {
     "english_translation": "Sports car.",
@@ -5769,7 +10703,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9969
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9937
+      },
+      {
+        "word": "大幅",
+        "score": 0.9893
+      },
+      {
+        "word": "買って",
+        "score": 0.9889
+      },
+      {
+        "word": "集中",
+        "score": 0.9828
+      }
+    ]
   },
   "スラックス": {
     "english_translation": "Slacks, trousers (often men's sturdy fabric pants).",
@@ -5795,7 +10751,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.996
+      },
+      {
+        "word": "買って",
+        "score": 0.9958
+      },
+      {
+        "word": "帯",
+        "score": 0.9928
+      },
+      {
+        "word": "大幅",
+        "score": 0.9915
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9841
+      },
+      {
+        "word": "話して",
+        "score": 0.9824
+      }
+    ]
   },
   "セクション": {
     "english_translation": "Section, division, part (logically distinct part of a whole).",
@@ -5821,7 +10803,41 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9966
+      },
+      {
+        "word": "大幅",
+        "score": 0.9927
+      },
+      {
+        "word": "話して",
+        "score": 0.9923
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9923
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9906
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9879
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9829
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.982
+      }
+    ]
   },
   "セックス": {
     "english_translation": "Sex (physical intimate activity).",
@@ -5847,7 +10863,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9934
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9882
+      },
+      {
+        "word": "大幅",
+        "score": 0.9876
+      },
+      {
+        "word": "買って",
+        "score": 0.987
+      },
+      {
+        "word": "実際",
+        "score": 0.982
+      },
+      {
+        "word": "わかりました",
+        "score": 0.9801
+      }
+    ]
   },
   "セレモニー": {
     "english_translation": "Ceremony, official event.",
@@ -5873,7 +10915,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9948
+      },
+      {
+        "word": "買って",
+        "score": 0.9919
+      },
+      {
+        "word": "大幅",
+        "score": 0.9907
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9895
+      },
+      {
+        "word": "話して",
+        "score": 0.9816
+      }
+    ]
   },
   "センス": {
     "english_translation": "Sense, taste (intuitive understanding of what is appropriate/stylish).",
@@ -5899,7 +10963,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.993
+      },
+      {
+        "word": "買って",
+        "score": 0.9886
+      },
+      {
+        "word": "大幅",
+        "score": 0.9865
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9858
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9854
+      },
+      {
+        "word": "話して",
+        "score": 0.9847
+      }
+    ]
   },
   "セール": {
     "english_translation": "Sale (temporary price reduction).",
@@ -5925,7 +11015,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9965
+      },
+      {
+        "word": "買って",
+        "score": 0.9933
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9931
+      },
+      {
+        "word": "大幅",
+        "score": 0.9883
+      },
+      {
+        "word": "話して",
+        "score": 0.9846
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9844
+      },
+      {
+        "word": "広々",
+        "score": 0.9805
+      }
+    ]
   },
   "ゼリー": {
     "english_translation": "Jelly, gelatin.",
@@ -5951,7 +11071,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.996
+      },
+      {
+        "word": "買って",
+        "score": 0.9957
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9943
+      },
+      {
+        "word": "話して",
+        "score": 0.9918
+      },
+      {
+        "word": "大幅",
+        "score": 0.9916
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9808
+      },
+      {
+        "word": "広々",
+        "score": 0.9804
+      }
+    ]
   },
   "ソックス": {
     "english_translation": "Socks.",
@@ -5977,7 +11127,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9982
+      },
+      {
+        "word": "買って",
+        "score": 0.9958
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9909
+      },
+      {
+        "word": "内",
+        "score": 0.9841
+      },
+      {
+        "word": "大幅",
+        "score": 0.9841
+      },
+      {
+        "word": "広々",
+        "score": 0.984
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9827
+      }
+    ]
   },
   "ソロ": {
     "english_translation": "Solo (performance by a single performer).",
