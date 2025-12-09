@@ -2,6 +2,7 @@ pub mod anki;
 mod card;
 mod duolingo;
 mod furigana_renderer;
+mod jlpt;
 mod kanji;
 mod learn;
 mod me;
@@ -21,6 +22,7 @@ use crate::{
             handle_list_cards, handle_rebuild_database,
         },
         duolingo::handle_sync_duolingo_words,
+        jlpt::handle_export_jlpt_recommended,
         kanji::handle_kanji,
         learn::handle_learn,
         me::handle_me,
@@ -102,6 +104,12 @@ enum Command {
         #[clap(short, long, default_value = "false")]
         question_only: bool,
     },
+    /// Import JLPT recommended vocabulary
+    JlptCreate {
+        /// Japanese levels to import (e.g. N5 N4).
+        #[clap(short, long)]
+        levels: Vec<JapaneseLevel>,
+    },
     /// Sync words from Duolingo
     DuolingoSync {
         /// If true, only questions will be imported, answers will be generated
@@ -120,7 +128,7 @@ enum Command {
         #[clap(short, long, default_value = "false")]
         dry_run: bool,
     },
-    /// Rebuild embedding and answers for all cards
+    /// Rebuild answers for all cards
     RebuildDatabase {
         /// Options to rebuild database
         #[clap(short, long)]
@@ -185,6 +193,9 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             question_only,
         } => {
             handle_create_migii_pack(user_id, lessons, question_only).await?;
+        }
+        Command::JlptCreate { levels } => {
+            handle_export_jlpt_recommended(user_id, levels).await?;
         }
         Command::AnkiCreate {
             file_path,
