@@ -20,9 +20,9 @@ async fn edit_card_use_case_should_update_card_in_database() {
     let card = create_use_case
         .execute(
             user.id(),
-            "What is Rust?".to_string(),
+            "あります".to_string(),
             Some(CardContent::new(
-                Answer::new("A systems programming language".to_string()).unwrap(),
+                Answer::new("есть".to_string()).unwrap(),
                 Vec::new(),
             )),
         )
@@ -36,8 +36,8 @@ async fn edit_card_use_case_should_update_card_in_database() {
         .execute(
             user.id(),
             card.id(),
-            "What is Rust language?".to_string(),
-            "A memory-safe systems programming language".to_string(),
+            "あります".to_string(),
+            "есть (неодушевленное)".to_string(),
             vec![],
         )
         .await
@@ -46,9 +46,6 @@ async fn edit_card_use_case_should_update_card_in_database() {
     // Assert
     let loaded_user = repository.find_by_id(user.id()).await.unwrap().unwrap();
     let loaded_card = loaded_user.get_card(card.id()).unwrap();
-    assert_eq!(loaded_card.word().text(), "What is Rust language?");
-    assert_eq!(
-        loaded_card.meaning().text(),
-        "A memory-safe systems programming language"
-    );
+    assert_eq!(loaded_card.word().text(), "あります");
+    assert_eq!(loaded_card.meaning().text(), "есть (неодушевленное)");
 }

@@ -3,7 +3,10 @@ mod tests;
 
 use keikaku::{
     application::use_cases::{CreateCardUseCase, SelectCardsToLearnUseCase},
-    domain::value_objects::{Answer, CardContent},
+    domain::{
+        study_session::StudySessionItem,
+        value_objects::{Answer, CardContent},
+    },
     settings::ApplicationEnvironment,
 };
 use tests::*;
@@ -21,9 +24,9 @@ async fn start_study_session_use_case_should_return_due_cards() {
     create_use_case
         .execute(
             user.id(),
-            "What is Rust?".to_string(),
+            "あります".to_string(),
             Some(CardContent::new(
-                Answer::new("A systems programming language".to_string()).unwrap(),
+                Answer::new("есть".to_string()).unwrap(),
                 Vec::new(),
             )),
         )
@@ -40,5 +43,11 @@ async fn start_study_session_use_case_should_return_due_cards() {
 
     // Assert
     assert_eq!(cards.len(), 1);
-    assert_eq!(cards[0].question(), "What is Rust?");
+
+    let card = &cards[0];
+    if let StudySessionItem::Vocabulary(card) = card {
+        assert_eq!(card.word(), "あります");
+    } else {
+        panic!("Card is not a vocabulary card");
+    }
 }

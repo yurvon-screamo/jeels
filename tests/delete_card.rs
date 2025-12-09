@@ -20,9 +20,9 @@ async fn delete_card_use_case_should_remove_card_from_database() {
     let card = create_use_case
         .execute(
             user.id(),
-            "What is Rust?".to_string(),
+            "あります".to_string(),
             Some(CardContent::new(
-                Answer::new("A systems programming language".to_string()).unwrap(),
+                Answer::new("есть".to_string()).unwrap(),
                 Vec::new(),
             )),
         )
