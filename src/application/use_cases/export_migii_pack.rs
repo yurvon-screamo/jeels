@@ -1,6 +1,4 @@
-use crate::application::{
-    CreateCardUseCase, EmbeddingService, LlmService, MigiiClient, MigiiWord, UserRepository,
-};
+use crate::application::{CreateCardUseCase, LlmService, MigiiClient, MigiiWord, UserRepository};
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Answer, CardContent};
 use ulid::Ulid;
@@ -10,34 +8,17 @@ pub struct ExportMigiiPackResult {
     pub skipped_words: Vec<String>,
 }
 
-pub struct ExportMigiiPackUseCase<
-    'a,
-    R: UserRepository,
-    E: EmbeddingService,
-    L: LlmService,
-    M: MigiiClient,
-> {
+pub struct ExportMigiiPackUseCase<'a, R: UserRepository, L: LlmService, M: MigiiClient> {
     repository: &'a R,
-    create_card_use_case: CreateCardUseCase<'a, R, E, L>,
+    create_card_use_case: CreateCardUseCase<'a, R, L>,
     migii_client: &'a M,
 }
 
-impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, M: MigiiClient>
-    ExportMigiiPackUseCase<'a, R, E, L, M>
-{
-    pub fn new(
-        repository: &'a R,
-        embedding_service: &'a E,
-        llm_service: &'a L,
-        migii_client: &'a M,
-    ) -> Self {
+impl<'a, R: UserRepository, L: LlmService, M: MigiiClient> ExportMigiiPackUseCase<'a, R, L, M> {
+    pub fn new(repository: &'a R, llm_service: &'a L, migii_client: &'a M) -> Self {
         Self {
             repository,
-            create_card_use_case: CreateCardUseCase::new(
-                repository,
-                embedding_service,
-                llm_service,
-            ),
+            create_card_use_case: CreateCardUseCase::new(repository, llm_service),
             migii_client,
         }
     }

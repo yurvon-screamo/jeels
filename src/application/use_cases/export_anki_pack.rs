@@ -1,4 +1,4 @@
-use crate::application::{CreateCardUseCase, EmbeddingService, LlmService, UserRepository};
+use crate::application::{CreateCardUseCase, LlmService, UserRepository};
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Answer, CardContent};
 use regex::Regex;
@@ -24,20 +24,16 @@ pub struct ExportAnkiPackResult {
     pub skipped_words: Vec<String>,
 }
 
-pub struct ExportAnkiPackUseCase<'a, R: UserRepository, E: EmbeddingService, L: LlmService> {
+pub struct ExportAnkiPackUseCase<'a, R: UserRepository, L: LlmService> {
     repository: &'a R,
-    create_card_use_case: CreateCardUseCase<'a, R, E, L>,
+    create_card_use_case: CreateCardUseCase<'a, R, L>,
 }
 
-impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService> ExportAnkiPackUseCase<'a, R, E, L> {
-    pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
+impl<'a, R: UserRepository, L: LlmService> ExportAnkiPackUseCase<'a, R, L> {
+    pub fn new(repository: &'a R, llm_service: &'a L) -> Self {
         Self {
             repository,
-            create_card_use_case: CreateCardUseCase::new(
-                repository,
-                embedding_service,
-                llm_service,
-            ),
+            create_card_use_case: CreateCardUseCase::new(repository, llm_service),
         }
     }
 

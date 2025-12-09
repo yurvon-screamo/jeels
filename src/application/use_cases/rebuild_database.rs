@@ -1,33 +1,27 @@
 use super::generate_card_content::GenerateCardContentUseCase;
-use super::generate_embedding::GenerateEmbeddingUseCase;
-use crate::application::{EmbeddingService, LlmService, UserRepository};
+use crate::application::{LlmService, UserRepository};
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::{CardContent, Embedding, Question};
+use crate::domain::value_objects::{CardContent, Question};
 use clap::ValueEnum;
 use tracing::error;
 use ulid::Ulid;
 
 #[derive(Clone)]
-pub struct RebuildDatabaseUseCase<'a, R: UserRepository, E: EmbeddingService, L: LlmService> {
+pub struct RebuildDatabaseUseCase<'a, R: UserRepository, L: LlmService> {
     repository: &'a R,
-    generate_embedding_use_case: GenerateEmbeddingUseCase<'a, E>,
     generate_content_use_case: GenerateCardContentUseCase<'a, L>,
 }
 
 #[derive(Debug, Clone, PartialEq, ValueEnum)]
 pub enum RebuildDatabaseOptions {
     Content,
-    Embedding,
     All,
 }
 
-impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
-    RebuildDatabaseUseCase<'a, R, E, L>
-{
-    pub fn new(repository: &'a R, embedding_service: &'a E, llm_service: &'a L) -> Self {
+impl<'a, R: UserRepository, L: LlmService> RebuildDatabaseUseCase<'a, R, L> {
+    pub fn new(repository: &'a R, llm_service: &'a L) -> Self {
         Self {
             repository,
-            generate_embedding_use_case: GenerateEmbeddingUseCase::new(embedding_service),
             generate_content_use_case: GenerateCardContentUseCase::new(llm_service),
         }
     }
@@ -69,25 +63,7 @@ impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService>
                 CardContent::new(card.meaning().clone(), card.example_phrases().to_vec())
             };
 
-            let new_embedding = if options == RebuildDatabaseOptions::Embedding
-                || options == RebuildDatabaseOptions::All
-            {
-                match self
-                    .generate_embedding_use_case
-                    .generate_embedding(card.word().text())
-                    .await
-                {
-                    Ok(value) => value,
-                    Err(e) => {
-                        error!("Failed to generate embedding for card {}: {}", card.id(), e);
-                        continue;
-                    }
-                }
-            } else {
-                Embedding(card.word().embedding().clone())
-            };
-
-            let question = Question::new(card.word().text().to_string(), new_embedding)?;
+            let question = Question::new(card.word().text().to_string())?;
 
             data.push((card.id(), question, generated_content));
         }

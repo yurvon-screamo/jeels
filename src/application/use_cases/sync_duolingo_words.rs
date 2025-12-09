@@ -1,6 +1,4 @@
-use crate::application::{
-    CreateCardUseCase, DuolingoClient, EmbeddingService, LlmService, UserRepository,
-};
+use crate::application::{CreateCardUseCase, DuolingoClient, LlmService, UserRepository};
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{Answer, CardContent};
 use ulid::Ulid;
@@ -10,34 +8,19 @@ pub struct SyncDuolingoWordsResult {
     pub skipped_words: Vec<String>,
 }
 
-pub struct SyncDuolingoWordsUseCase<
-    'a,
-    R: UserRepository,
-    E: EmbeddingService,
-    L: LlmService,
-    D: DuolingoClient,
-> {
+pub struct SyncDuolingoWordsUseCase<'a, R: UserRepository, L: LlmService, D: DuolingoClient> {
     repository: &'a R,
-    create_card_use_case: CreateCardUseCase<'a, R, E, L>,
+    create_card_use_case: CreateCardUseCase<'a, R, L>,
     duolingo_client: &'a D,
 }
 
-impl<'a, R: UserRepository, E: EmbeddingService, L: LlmService, D: DuolingoClient>
-    SyncDuolingoWordsUseCase<'a, R, E, L, D>
+impl<'a, R: UserRepository, L: LlmService, D: DuolingoClient>
+    SyncDuolingoWordsUseCase<'a, R, L, D>
 {
-    pub fn new(
-        repository: &'a R,
-        embedding_service: &'a E,
-        llm_service: &'a L,
-        duolingo_client: &'a D,
-    ) -> Self {
+    pub fn new(repository: &'a R, llm_service: &'a L, duolingo_client: &'a D) -> Self {
         Self {
             repository,
-            create_card_use_case: CreateCardUseCase::new(
-                repository,
-                embedding_service,
-                llm_service,
-            ),
+            create_card_use_case: CreateCardUseCase::new(repository, llm_service),
             duolingo_client,
         }
     }

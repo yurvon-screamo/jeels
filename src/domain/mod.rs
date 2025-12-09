@@ -115,48 +115,24 @@ impl User {
     }
 
     pub fn find_similarity(&self, card_id: Ulid) -> Result<Vec<VocabularyCard>, JeersError> {
-        const SIMILARITY_THRESHOLD: f32 = 0.8;
-
         let card = self
             .vocabulary_cards
             .get(&card_id)
             .ok_or(JeersError::CardNotFound { card_id })?;
 
-        let query_embedding = card.word().embedding();
         let similarity = self
             .vocabulary_cards
             .iter()
-            .filter(|(id, card)| {
+            .filter(|(id, c)| {
                 if *id == &card_id {
                     return false;
                 }
-                let card_embedding = card.word().embedding();
-                let similarity = cosine_similarity(query_embedding, card_embedding);
-                similarity >= SIMILARITY_THRESHOLD
+                c.word().text() == card.word().text()
             })
             .map(|(_, card)| card.clone())
-            .collect();
+            .collect::<Vec<_>>();
 
         Ok(similarity)
-    }
-
-    fn has_card_with_question(&self, question: &Question, exclude_card_id: Option<Ulid>) -> bool {
-        const SIMILARITY_THRESHOLD: f32 = 0.97;
-
-        let query_embedding = question.embedding();
-
-        self.vocabulary_cards.iter().any(|(id, card)| {
-            if let Some(exclude_id) = exclude_card_id
-                && *id == exclude_id
-            {
-                return false;
-            }
-
-            let card_embedding = card.word().embedding();
-            let similarity = cosine_similarity(query_embedding, card_embedding);
-
-            similarity >= SIMILARITY_THRESHOLD
-        })
     }
 
     pub fn create_card(
@@ -164,7 +140,11 @@ impl User {
         question: Question,
         content: CardContent,
     ) -> Result<VocabularyCard, JeersError> {
-        if self.has_card_with_question(&question, None) {
+        if self
+            .vocabulary_cards
+            .values()
+            .any(|card| card.word().text() == question.text())
+        {
             return Err(JeersError::DuplicateCard {
                 question: question.text().to_string(),
             });
@@ -190,7 +170,12 @@ impl User {
         let question_changed = current_question.text().trim().to_lowercase()
             != new_question.text().trim().to_lowercase();
 
-        if question_changed && self.has_card_with_question(&new_question, Some(card_id)) {
+        if question_changed
+            && self
+                .vocabulary_cards
+                .values()
+                .any(|card| card.word().text() == new_question.text())
+        {
             return Err(JeersError::DuplicateCard {
                 question: new_question.text().to_string(),
             });
@@ -372,34 +357,6 @@ impl User {
         &self.lesson_history
     }
 
-    pub fn find_similar_cards(
-        &self,
-        card_id: Ulid,
-        limit: usize,
-    ) -> Result<Vec<(VocabularyCard, f32)>, JeersError> {
-        let query_card = self
-            .vocabulary_cards
-            .get(&card_id)
-            .ok_or(JeersError::CardNotFound { card_id })?;
-
-        let query_embedding = query_card.word().embedding();
-
-        let mut results: Vec<(VocabularyCard, f32)> = self
-            .vocabulary_cards
-            .values()
-            .filter(|card| card.id() != card_id)
-            .map(|card| {
-                let card_embedding = card.word().embedding();
-                let similarity = cosine_similarity(query_embedding, card_embedding);
-                (card.clone(), similarity)
-            })
-            .collect();
-
-        results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-        results.truncate(limit);
-        Ok(results)
-    }
-
     fn card_to_study_item(&self, card: &VocabularyCard) -> Result<StudySessionItem, JeersError> {
         let shuffle = rand::rng().random_bool(0.65);
         let similarity = self.find_similarity(card.id())?;
@@ -480,22 +437,6 @@ impl User {
             is_new: memory.is_new(),
         })
     }
-}
-
-fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
-    if a.len() != b.len() {
-        return 0.0;
-    }
-
-    let dot_product: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
-    let norm_a: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();
-    let norm_b: f32 = b.iter().map(|x| x * x).sum::<f32>().sqrt();
-
-    if norm_a == 0.0 || norm_b == 0.0 {
-        return 0.0;
-    }
-
-    dot_product / (norm_a * norm_b)
 }
 
 #[derive(Clone)]

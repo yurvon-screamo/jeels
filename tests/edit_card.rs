@@ -14,9 +14,8 @@ async fn edit_card_use_case_should_update_card_in_database() {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await.unwrap();
     let user = create_test_user().await;
-    let embedding_generator = settings.get_embedding_service().await.unwrap();
     let llm_service = settings.get_llm_service().await.unwrap();
-    let create_use_case = CreateCardUseCase::new(repository, embedding_generator, llm_service);
+    let create_use_case = CreateCardUseCase::new(repository, llm_service);
     let card = create_use_case
         .execute(
             user.id(),
@@ -29,7 +28,7 @@ async fn edit_card_use_case_should_update_card_in_database() {
         .await
         .unwrap();
 
-    let edit_use_case = EditCardUseCase::new(repository, embedding_generator);
+    let edit_use_case = EditCardUseCase::new(repository);
 
     // Act
     edit_use_case

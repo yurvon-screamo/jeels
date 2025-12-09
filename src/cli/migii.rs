@@ -53,7 +53,6 @@ pub async fn handle_create_migii_pack(
 
     let use_case = ExportMigiiPackUseCase::new(
         settings.get_repository().await?,
-        settings.get_embedding_service().await?,
         settings.get_llm_service().await?,
         settings.get_migii_client().await?,
     );

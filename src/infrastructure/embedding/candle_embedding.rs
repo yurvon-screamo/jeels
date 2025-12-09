@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use hf_hub::api::sync::{ApiBuilder, ApiRepo};
 use hf_hub::{Repo, RepoType};
 use serde::Deserialize;
@@ -11,9 +10,7 @@ use tokio::sync::Mutex;
 use text_embeddings_backend_candle::CandleBackend;
 use text_embeddings_backend_core::{Backend, Batch, Embedding, Embeddings, ModelType, Pool};
 
-use crate::application::embedding_service::EmbeddingService;
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::Embedding as TraitEmbedding;
 
 const MODEL_ID: &str = "Qwen/Qwen3-Embedding-0.6B";
 
@@ -66,10 +63,7 @@ impl CandleEmbeddingService {
         batch(encodings, pooled_indices, vec![])
     }
 
-    fn process_embeddings(
-        &self,
-        embeddings: Embeddings,
-    ) -> Result<Vec<TraitEmbedding>, JeersError> {
+    fn process_embeddings(&self, embeddings: Embeddings) -> Result<Vec<Vec<f32>>, JeersError> {
         let pooled_embeddings = sort_embeddings(embeddings);
         Ok(pooled_embeddings)
     }
@@ -79,13 +73,12 @@ impl CandleEmbeddingService {
     }
 }
 
-#[async_trait]
-impl EmbeddingService for CandleEmbeddingService {
-    async fn generate_embedding(
+impl CandleEmbeddingService {
+    pub async fn generate_embedding(
         &self,
         instruction: &str,
         input: &str,
-    ) -> Result<TraitEmbedding, JeersError> {
+    ) -> Result<Vec<f32>, JeersError> {
         let encodings = self.encode_inputs(instruction, &[input.to_string()])?;
         let batch = self.create_batch(encodings);
         let embeddings = {
@@ -107,11 +100,11 @@ impl EmbeddingService for CandleEmbeddingService {
         })
     }
 
-    async fn generate_embeddings(
+    pub async fn generate_embeddings(
         &self,
         instruction: &str,
         inputs: &[String],
-    ) -> Result<Vec<TraitEmbedding>, JeersError> {
+    ) -> Result<Vec<Vec<f32>>, JeersError> {
         let encodings = self.encode_inputs(instruction, inputs)?;
         let batch = self.create_batch(encodings);
         let embeddings = {
@@ -126,12 +119,12 @@ impl EmbeddingService for CandleEmbeddingService {
     }
 }
 
-fn sort_embeddings(embeddings: Embeddings) -> Vec<TraitEmbedding> {
+fn sort_embeddings(embeddings: Embeddings) -> Vec<Vec<f32>> {
     let mut pooled_embeddings = Vec::new();
 
     for (_, embedding) in embeddings {
         match embedding {
-            Embedding::Pooled(e) => pooled_embeddings.push(TraitEmbedding(e)),
+            Embedding::Pooled(e) => pooled_embeddings.push(e.to_vec()),
             Embedding::All(_) => {}
         }
     }

@@ -5,7 +5,7 @@ use crate::domain::{
     JeersError, Review,
     dictionary::{KANJI_DB, RadicalInfo, VOCABULARY_DB},
     review::{MemoryHistory, MemoryState},
-    value_objects::{Answer, Embedding, JapaneseLevel, NativeLanguage, Question},
+    value_objects::{Answer, JapaneseLevel, NativeLanguage, Question},
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -24,11 +24,7 @@ pub struct ExampleKanjiWord {
 }
 
 impl KanjiCard {
-    pub fn new(
-        kanji: String,
-        embedding: Embedding,
-        native_language: &NativeLanguage,
-    ) -> Result<Self, JeersError> {
+    pub fn new(kanji: String, native_language: &NativeLanguage) -> Result<Self, JeersError> {
         let kanji_info = KANJI_DB.get_kanji_info(&kanji)?;
         let description = kanji_info.description();
         let example_words = kanji_info
@@ -52,7 +48,7 @@ impl KanjiCard {
 
         Ok(Self {
             id: Ulid::new(),
-            kanji: Question::new(kanji.to_string(), embedding)?,
+            kanji: Question::new(kanji.to_string())?,
             description: Answer::new(description.to_string())?,
             example_words,
             memory_history: MemoryHistory::new(),

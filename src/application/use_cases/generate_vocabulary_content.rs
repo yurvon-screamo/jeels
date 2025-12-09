@@ -1,4 +1,4 @@
-use crate::application::{EmbeddingService, LlmService};
+use crate::application::LlmService;
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{ExamplePhrase, JapaneseLevel, PartOfSpeech};
 use serde::Deserialize;
@@ -6,9 +6,8 @@ use serde::Deserialize;
 const MAX_RETRIES: usize = 4;
 
 #[derive(Clone)]
-pub struct GenerateVocabularyContentUseCase<'a, L: LlmService, E: EmbeddingService> {
+pub struct GenerateVocabularyContentUseCase<'a, L: LlmService> {
     llm_service: &'a L,
-    embedding_service: &'a E,
 }
 
 #[derive(Debug, Deserialize)]
@@ -26,15 +25,11 @@ pub struct VocabularyContent {
     pub part_of_speech: PartOfSpeech,
     pub russian_examples: Vec<ExamplePhrase>,
     pub english_examples: Vec<ExamplePhrase>,
-    pub embedding: Vec<f32>,
 }
 
-impl<'a, L: LlmService, E: EmbeddingService> GenerateVocabularyContentUseCase<'a, L, E> {
-    pub fn new(llm_service: &'a L, embedding_service: &'a E) -> Self {
-        Self {
-            llm_service,
-            embedding_service,
-        }
+impl<'a, L: LlmService> GenerateVocabularyContentUseCase<'a, L> {
+    pub fn new(llm_service: &'a L) -> Self {
+        Self { llm_service }
     }
 
     pub async fn generate_content(
@@ -43,18 +38,12 @@ impl<'a, L: LlmService, E: EmbeddingService> GenerateVocabularyContentUseCase<'a
         japanese_level: &JapaneseLevel,
     ) -> Result<VocabularyContent, JeersError> {
         let content = self.generate_with_llm(word, japanese_level).await?;
-        let embedding = self
-            .embedding_service
-            .generate_embedding("Represent this Japanese word for find same words", word)
-            .await?;
-
         Ok(VocabularyContent {
             russian_translation: content.russian_translation,
             english_translation: content.english_translation,
             part_of_speech: content.part_of_speech,
             russian_examples: content.russian_examples,
             english_examples: content.english_examples,
-            embedding: embedding.0,
         })
     }
 

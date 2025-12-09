@@ -26,33 +26,22 @@ impl CardContent {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Embedding(pub Vec<f32>);
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Question {
     text: String,
-    embedding: Vec<f32>,
 }
 
 impl Question {
-    pub fn new(text: String, embedding: Embedding) -> Result<Self, JeersError> {
+    pub fn new(text: String) -> Result<Self, JeersError> {
         if text.trim().is_empty() {
             return Err(JeersError::InvalidQuestion {
                 reason: "Question text cannot be empty".to_string(),
             });
         }
-        Ok(Self {
-            text,
-            embedding: embedding.0,
-        })
+        Ok(Self { text })
     }
 
     pub fn text(&self) -> &str {
         &self.text
-    }
-
-    pub fn embedding(&self) -> &Vec<f32> {
-        &self.embedding
     }
 }
 
@@ -226,7 +215,6 @@ pub struct JlptVocabularyEntry {
     russian_examples: Vec<ExamplePhrase>,
     english_examples: Vec<ExamplePhrase>,
     part_of_speech: PartOfSpeech,
-    embedding: Vec<f32>,
 }
 
 impl JlptVocabularyEntry {
@@ -237,7 +225,6 @@ impl JlptVocabularyEntry {
         russian_examples: Vec<ExamplePhrase>,
         english_examples: Vec<ExamplePhrase>,
         part_of_speech: PartOfSpeech,
-        embedding: Vec<f32>,
     ) -> Self {
         Self {
             level,
@@ -246,7 +233,6 @@ impl JlptVocabularyEntry {
             russian_examples,
             english_examples,
             part_of_speech,
-            embedding,
         }
     }
 
@@ -272,9 +258,5 @@ impl JlptVocabularyEntry {
 
     pub fn part_of_speech(&self) -> &PartOfSpeech {
         &self.part_of_speech
-    }
-
-    pub fn embedding(&self) -> &[f32] {
-        &self.embedding
     }
 }

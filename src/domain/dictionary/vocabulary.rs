@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::{
     dictionary::kanji::parse_jlpt_level,
-    value_objects::{Embedding, ExamplePhrase, JapaneseLevel, NativeLanguage},
+    value_objects::{ExamplePhrase, JapaneseLevel, NativeLanguage},
 };
 
 pub static VOCABULARY_DB: LazyLock<VocabularyDatabase> = LazyLock::new(VocabularyDatabase::new);
@@ -17,7 +17,6 @@ pub struct VocabularyInfo {
     english_translation: String,
     russian_examples: Vec<ExamplePhrase>,
     english_examples: Vec<ExamplePhrase>,
-    embedding: Embedding,
 }
 
 impl VocabularyInfo {
@@ -43,10 +42,6 @@ impl VocabularyInfo {
 
     pub fn english_examples(&self) -> &[ExamplePhrase] {
         &self.english_examples
-    }
-
-    pub fn embedding(&self) -> &Embedding {
-        &self.embedding
     }
 }
 
@@ -131,7 +126,6 @@ impl VocabularyDatabase {
                         english_translation: entry.english_translation,
                         russian_examples,
                         english_examples,
-                        embedding: Embedding(entry.embedding),
                     },
                 )
             })
@@ -164,11 +158,5 @@ impl VocabularyDatabase {
 
     pub fn get_vocabulary_info(&self, word: &str) -> Option<&VocabularyInfo> {
         self.vocabulary_map.get(word)
-    }
-
-    pub fn get_embedding(&self, word: &str) -> Option<Embedding> {
-        self.vocabulary_map
-            .get(word)
-            .map(|info| info.embedding.clone())
     }
 }

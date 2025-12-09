@@ -40,7 +40,6 @@ pub async fn handle_create_anki_pack(
 
     let use_case = ExportAnkiPackUseCase::new(
         settings.get_repository().await?,
-        settings.get_embedding_service().await?,
         settings.get_llm_service().await?,
     );
 

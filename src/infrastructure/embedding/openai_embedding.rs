@@ -1,8 +1,5 @@
-use crate::application::embedding_service::EmbeddingService;
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::Embedding;
 use async_openai::{Client, config::OpenAIConfig, types::CreateEmbeddingRequestArgs};
-use async_trait::async_trait;
 use std::sync::Arc;
 
 pub struct OpenAiEmbeddingService {
@@ -33,13 +30,12 @@ impl OpenAiEmbeddingService {
     }
 }
 
-#[async_trait]
-impl EmbeddingService for OpenAiEmbeddingService {
-    async fn generate_embedding(
+impl OpenAiEmbeddingService {
+    pub async fn generate_embedding(
         &self,
         instruction: &str,
         input: &str,
-    ) -> Result<Embedding, JeersError> {
+    ) -> Result<Vec<f32>, JeersError> {
         let input = self.create_instruction(instruction, input);
 
         let request = CreateEmbeddingRequestArgs::default()
@@ -68,14 +64,14 @@ impl EmbeddingService for OpenAiEmbeddingService {
             .embedding
             .clone();
 
-        Ok(Embedding(embedding_vec))
+        Ok(embedding_vec)
     }
 
-    async fn generate_embeddings(
+    pub async fn generate_embeddings(
         &self,
         instruction: &str,
         inputs: &[String],
-    ) -> Result<Vec<Embedding>, JeersError> {
+    ) -> Result<Vec<Vec<f32>>, JeersError> {
         let inputs = inputs
             .iter()
             .map(|s| self.create_instruction(instruction, s))
@@ -98,10 +94,10 @@ impl EmbeddingService for OpenAiEmbeddingService {
                 reason: format!("Failed to generate embeddings: {}", e),
             })?;
 
-        let embeddings: Result<Vec<Embedding>, JeersError> = response
+        let embeddings: Result<Vec<Vec<f32>>, JeersError> = response
             .data
             .into_iter()
-            .map(|item| Ok(Embedding(item.embedding)))
+            .map(|item| Ok(item.embedding))
             .collect();
 
         embeddings
