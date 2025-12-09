@@ -17,7 +17,8 @@ path = "~/.keikaku"
 
 [llm.openai]
 temperature = 0.3
-model = "llm_instruct"
+# model = "llm_instruct"
+model = "llm_thinking"
 base_url = "http://10.2.11.6:8001/v1"
 env_var_name = "OPENROUTER_API_KEY"
 

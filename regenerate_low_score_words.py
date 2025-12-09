@@ -127,7 +127,20 @@ async def call_llm(
             response.raise_for_status()
             data = await response.json()
 
-            content = data.get("choices", [{}])[0].get("message", {}).get("content")
+            # Handle different response formats (including thinking models)
+            content = None
+            if "choices" in data and len(data["choices"]) > 0:
+                choice = data["choices"][0]
+                if "message" in choice:
+                    message = choice["message"]
+                    # Try content first
+                    content = message.get("content")
+                    # If content is None, try reasoning fields (for thinking models)
+                    if not content:
+                        content = message.get("reasoning_content") or message.get(
+                            "reasoning"
+                        )
+
             return content
 
     except Exception as e:
@@ -190,11 +203,53 @@ async def regenerate_word_content(
         return word, parsed
 
 
+async def regenerate_word_content_with_retries(
+    session: aiohttp.ClientSession,
+    semaphore: asyncio.Semaphore,
+    word: str,
+    word_data: Dict[str, Any],
+    base_url: str,
+    model: str,
+    temperature: float,
+    api_key: Optional[str] = None,
+    max_retries: int = 3,
+) -> tuple[str, Optional[Dict[str, Any]], int]:
+    """
+    Regenerate content for a single word with retries.
+
+    Returns: (word, content, retry_count)
+    """
+    for attempt in range(max_retries):
+        result_word, result_content = await regenerate_word_content(
+            session,
+            semaphore,
+            word,
+            word_data,
+            base_url,
+            model,
+            temperature,
+            api_key,
+        )
+
+        if result_content is not None:
+            return result_word, result_content, attempt
+
+        # Wait before retry
+        if attempt < max_retries - 1:
+            await asyncio.sleep(1)
+
+    return word, None, max_retries
+
+
 def find_words_to_regenerate(
     evaluation_dir: Path = Path("evaluation_results"),
-    threshold: float = 0.8,
+    threshold: float = 1.0,
 ) -> Dict[str, List[Dict[str, Any]]]:
-    """Find all words with score below threshold."""
+    """
+    Find all words with incorrect translations (score < 1.0).
+
+    New format: 1.0 = correct, 0.0 = incorrect/lying, None = failed to check
+    """
     words_to_regenerate = {}
 
     evaluation_files = sorted(evaluation_dir.glob("*_evaluation.json"))
@@ -207,8 +262,12 @@ def find_words_to_regenerate(
         with open(eval_file, "r", encoding="utf-8") as f:
             evaluation_data = json.load(f)
 
+        # Find words with score < 1.0 (includes 0.0 and None)
+        # Score 0.0 = incorrect translation, None = failed to validate
         low_score_words = [
-            item for item in evaluation_data if item.get("score", 1.0) < threshold
+            item
+            for item in evaluation_data
+            if item.get("score") is None or item.get("score", 1.0) < threshold
         ]
 
         if low_score_words:
@@ -249,20 +308,32 @@ async def regenerate_words(
     base_url: str,
     model: str,
     temperature: float,
-    api_key: Optional[str] = None,
-    threshold: float = 0.8,
+    api_key: Optional[str],
+    threshold: float,
     max_concurrent: int = 30,
+    max_retries: int = 3,
     dry_run: bool = False,
     output_file: Optional[str] = None,
 ) -> None:
     """Regenerate content for all words with low scores."""
-    print("Finding words to regenerate...")
+    print("Finding words with incorrect translations to regenerate...")
     words_to_regenerate = find_words_to_regenerate(evaluation_dir, threshold)
 
     total_words = sum(len(words) for words in words_to_regenerate.values())
+    incorrect_count = sum(
+        len([w for w in words if w.get("score") == 0.0])
+        for words in words_to_regenerate.values()
+    )
+    failed_count = sum(
+        len([w for w in words if w.get("score") is None])
+        for words in words_to_regenerate.values()
+    )
+
     print(
         f"Found {total_words} words to regenerate across {len(words_to_regenerate)} levels"
     )
+    print(f"  - Incorrect translations (score=0.0): {incorrect_count}")
+    print(f"  - Failed to validate (score=None): {failed_count}")
 
     if dry_run:
         print("\nDRY RUN MODE - No changes will be made")
@@ -277,6 +348,7 @@ async def regenerate_words(
         "success": 0,
         "failed": 0,
         "skipped": 0,
+        "retries": 0,
     }
 
     # Create semaphore for limiting concurrent requests
@@ -321,7 +393,7 @@ async def regenerate_words(
                 word_scores[word] = score
                 stats["total"] += 1
 
-                task = regenerate_word_content(
+                task = regenerate_word_content_with_retries(
                     session,
                     semaphore,
                     word,
@@ -330,6 +402,7 @@ async def regenerate_words(
                     model,
                     temperature,
                     api_key,
+                    max_retries,
                 )
                 tasks.append(task)
 
@@ -349,8 +422,11 @@ async def regenerate_words(
             failed_count = 0
             regenerated_content = {} if output_file else None
 
-            for word, new_content in results:
+            for word, new_content, retry_count in results:
                 score = word_scores.get(word, 0.0)
+
+                if retry_count > 0:
+                    stats["retries"] += retry_count
 
                 if not new_content:
                     failed_count += 1
@@ -434,6 +510,7 @@ async def regenerate_words(
     print(f"Successfully regenerated: {stats['success']}")
     print(f"Failed: {stats['failed']}")
     print(f"Skipped: {stats['skipped']}")
+    print(f"Total retries: {stats['retries']}")
     print(
         f"Success rate: {(stats['success'] / stats['total'] * 100) if stats['total'] > 0 else 0:.1f}%"
     )
@@ -464,14 +541,20 @@ def main():
     parser.add_argument(
         "--threshold",
         type=float,
-        default=0.8,
-        help="Score threshold (words below this will be regenerated)",
+        default=1.0,
+        help="Score threshold (words with score < this will be regenerated). Default: 1.0 (only incorrect translations)",
     )
     parser.add_argument(
         "--max-concurrent",
         type=int,
         default=30,
         help="Maximum number of concurrent requests",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=3,
+        help="Maximum number of retries for failed words",
     )
     parser.add_argument(
         "--dry-run",
@@ -527,6 +610,7 @@ def main():
             api_key,
             args.threshold,
             args.max_concurrent,
+            args.max_retries,
             args.dry_run,
             args.output_file,
         )
