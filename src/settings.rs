@@ -4,9 +4,9 @@ use std::sync::{Arc, OnceLock};
 
 use crate::domain::JeersError;
 use crate::infrastructure::{
-    CandleEmbeddingService, CandleLlm, CandleTranslationService, EmbeddingServiceInvoker,
-    FileSystemUserRepository, FsrsSrsService, GeminiLlm, HttpMigiiClient, LlmServiceInvoker,
-    OpenAiEmbeddingService, OpenAiLlm,
+    CandleEmbeddingService, CandleLlm, CandleTranslationService, EmbeddedMigiiClient,
+    EmbeddingServiceInvoker, FileSystemUserRepository, FsrsSrsService, GeminiLlm,
+    LlmServiceInvoker, OpenAiEmbeddingService, OpenAiLlm,
 };
 use tokio::sync::OnceCell;
 
@@ -19,7 +19,7 @@ pub struct ApplicationEnvironment {
     lazy_embedding_service: Arc<OnceCell<EmbeddingServiceInvoker>>,
     lazy_srs_service: Arc<OnceCell<FsrsSrsService>>,
     lazy_translation_service: Arc<OnceCell<CandleTranslationService>>,
-    lazy_migii_client: Arc<OnceCell<HttpMigiiClient>>,
+    lazy_migii_client: Arc<OnceCell<EmbeddedMigiiClient>>,
 
     lazy_llm: Arc<OnceCell<LlmServiceInvoker>>,
 }
@@ -289,9 +289,9 @@ impl ApplicationEnvironment {
             .await
     }
 
-    pub async fn get_migii_client(&self) -> Result<&HttpMigiiClient, JeersError> {
+    pub async fn get_migii_client(&self) -> Result<&EmbeddedMigiiClient, JeersError> {
         self.lazy_migii_client
-            .get_or_try_init(|| async { Ok(HttpMigiiClient::new()) })
+            .get_or_try_init(|| async { Ok(EmbeddedMigiiClient::new()) })
             .await
     }
 

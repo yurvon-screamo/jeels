@@ -2,7 +2,7 @@ pub mod candle_translation;
 pub mod duolingo_client;
 pub mod embedding;
 pub mod llm;
-pub mod migii_client;
+pub mod migii;
 pub mod srs;
 pub mod user_repository;
 
@@ -15,6 +15,6 @@ pub use llm::CandleLlm;
 pub use llm::GeminiLlm;
 pub use llm::LlmServiceInvoker;
 pub use llm::OpenAiLlm;
-pub use migii_client::HttpMigiiClient;
+pub use migii::{EmbeddedMigiiClient, HttpMigiiClient};
 pub use srs::FsrsSrsService;
 pub use user_repository::FileSystemUserRepository;
