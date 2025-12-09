@@ -11183,7 +11183,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9955
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9938
+      },
+      {
+        "word": "話して",
+        "score": 0.9933
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9917
+      },
+      {
+        "word": "買って",
+        "score": 0.9904
+      },
+      {
+        "word": "大幅",
+        "score": 0.989
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9871
+      }
+    ]
   },
   "ソース": {
     "english_translation": "Sauce; source (original code, data origin).",
@@ -11209,7 +11239,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9948
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9929
+      },
+      {
+        "word": "買って",
+        "score": 0.9895
+      },
+      {
+        "word": "あたたかくなかった",
+        "score": 0.9891
+      }
+    ]
   },
   "タイトル": {
     "english_translation": "Title (of a work, article, or project).",
@@ -11235,7 +11283,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9966
+      },
+      {
+        "word": "買って",
+        "score": 0.9931
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9868
+      },
+      {
+        "word": "大幅",
+        "score": 0.981
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9809
+      }
+    ]
   },
   "タイピスト": {
     "english_translation": "Typist, clerk (professional who types text).",
@@ -11261,7 +11331,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.996
+      },
+      {
+        "word": "買って",
+        "score": 0.9922
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9903
+      },
+      {
+        "word": "大幅",
+        "score": 0.9892
+      }
+    ]
   },
   "タイマー": {
     "english_translation": "Timer (device or function that counts down a specified duration).",
@@ -11287,7 +11375,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9942
+      },
+      {
+        "word": "買って",
+        "score": 0.9901
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9895
+      },
+      {
+        "word": "大幅",
+        "score": 0.9889
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9877
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9876
+      }
+    ]
   },
   "タイミング": {
     "english_translation": "Timing (precise alignment with the optimal moment).",
@@ -11313,7 +11427,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9964
+      },
+      {
+        "word": "大幅",
+        "score": 0.9946
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9928
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9885
+      },
+      {
+        "word": "買って",
+        "score": 0.9849
+      },
+      {
+        "word": "時代",
+        "score": 0.984
+      }
+    ]
   },
   "タイム": {
     "english_translation": "Time (measured result, especially in sports).",
@@ -11339,7 +11479,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9966
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9953
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9921
+      },
+      {
+        "word": "大幅",
+        "score": 0.9898
+      },
+      {
+        "word": "買って",
+        "score": 0.9815
+      }
+    ]
   },
   "タイムリー": {
     "english_translation": "Timely, at the right moment, opportune.",
@@ -11365,7 +11527,25 @@
       }
     ],
     "part_of_speech": "Adverb",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9976
+      },
+      {
+        "word": "大幅",
+        "score": 0.9955
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9882
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9853
+      }
+    ]
   },
   "タイヤ": {
     "english_translation": "Tire, rubber.",
@@ -11391,7 +11571,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.996
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9955
+      },
+      {
+        "word": "話して",
+        "score": 0.9902
+      },
+      {
+        "word": "大幅",
+        "score": 0.9884
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9827
+      }
+    ]
   },
   "タイル": {
     "english_translation": "Tile (flat ceramic or glass element for floors/walls).",
@@ -11417,7 +11619,29 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9971
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9954
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9932
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9863
+      },
+      {
+        "word": "話して",
+        "score": 0.9809
+      }
+    ]
   },
   "タレント": {
     "english_translation": "Talent (person with exceptional abilities, celebrity).",
