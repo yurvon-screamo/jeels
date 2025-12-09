@@ -12075,7 +12075,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.998
+      },
+      {
+        "word": "買って",
+        "score": 0.992
+      },
+      {
+        "word": "大幅",
+        "score": 0.9819
+      }
+    ]
   },
   "チャネル": {
     "english_translation": "Channel (a specialized platform, frequency, or source of information).",
@@ -12101,7 +12115,21 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.992
+      },
+      {
+        "word": "買って",
+        "score": 0.9887
+      },
+      {
+        "word": "大幅",
+        "score": 0.9829
+      }
+    ]
   },
   "チャンネル": {
     "english_translation": "Channel (TV, specialized source of information).",
