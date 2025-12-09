@@ -1,0 +1,1146 @@
+{
+  "がいいです": {
+    "russian_translation": "Я бы предпочёл это; так лучше.",
+    "english_translation": "I would prefer this; it is better."
+  },
+  "暗い": {
+    "russian_translation": "Тёмный; мрачный.",
+    "english_translation": "Dark; gloomy."
+  },
+  "グループで": {
+    "russian_translation": "Группой; в составе группы.",
+    "english_translation": "In a group; as a group."
+  },
+  "具体的": {
+    "russian_translation": "Конкретный.",
+    "english_translation": "Concrete; specific."
+  },
+  "バリカン": {
+    "russian_translation": "Машинка для стрижки волос.",
+    "english_translation": "Hair clippers."
+  },
+  "洗う": {
+    "russian_translation": "Мыть; стирать.",
+    "english_translation": "To wash."
+  },
+  "ねこ": {
+    "russian_translation": "Кошка; кот.",
+    "english_translation": "Cat."
+  },
+  "食べられ": {
+    "russian_translation": "Съедобный; можно есть (потенциальный залог).",
+    "english_translation": "Edible; can be eaten."
+  },
+  "掘": {
+    "russian_translation": "Копать; рыть.",
+    "english_translation": "To dig."
+  },
+  "知って": {
+    "russian_translation": "Знать (форма тэ); зная.",
+    "english_translation": "Know (te-form); knowing."
+  },
+  "千葉": {
+    "russian_translation": "Тиба (префектура).",
+    "english_translation": "Chiba (prefecture)."
+  },
+  "飴": {
+    "russian_translation": "Леденец; конфета.",
+    "english_translation": "Candy; hard candy."
+  },
+  "ドリンクバー": {
+    "russian_translation": "Бар напитков (система самообслуживания).",
+    "english_translation": "Drink bar; self-service drink station."
+  },
+  "軽": {
+    "russian_translation": "Лёгкий (по весу).",
+    "english_translation": "Light (weight)."
+  },
+  "リビング": {
+    "russian_translation": "Гостиная.",
+    "english_translation": "Living room."
+  },
+  "大人": {
+    "russian_translation": "Взрослый.",
+    "english_translation": "Adult."
+  },
+  "毎朝": {
+    "russian_translation": "Каждое утро.",
+    "english_translation": "Every morning."
+  },
+  "うで": {
+    "russian_translation": "Рука (от плеча до кисти).",
+    "english_translation": "Arm."
+  },
+  "老": {
+    "russian_translation": "Старость; пожилой.",
+    "english_translation": "Old age; elderly."
+  },
+  "好物": {
+    "russian_translation": "Любимая еда; любимая вещь.",
+    "english_translation": "Favorite food; favorite item."
+  },
+  "なし": {
+    "russian_translation": "Отсутствует; нет.",
+    "english_translation": "None; not available."
+  },
+  "移": {
+    "russian_translation": "Перемещать; переносить.",
+    "english_translation": "Move; shift."
+  },
+  "足": {
+    "russian_translation": "Нога; ступня.",
+    "english_translation": "Leg; foot."
+  },
+  "つくりましょう": {
+    "russian_translation": "Давайте сделаем (приготовим).",
+    "english_translation": "Let's make."
+  },
+  "ならびます": {
+    "russian_translation": "Стоять в очереди; выстраиваться.",
+    "english_translation": "Line up; stand in line."
+  },
+  "残し": {
+    "russian_translation": "Остаток; недоеденное.",
+    "english_translation": "Leftover; leaving behind."
+  },
+  "でも": {
+    "russian_translation": "Но; однако.",
+    "english_translation": "But; however."
+  },
+  "りょこう": {
+    "russian_translation": "Путешествие.",
+    "english_translation": "Trip; travel."
+  },
+  "あなた": {
+    "russian_translation": "Вы; ты (обращение жены к мужу).",
+    "english_translation": "You; dear (wife to husband)."
+  },
+  "賃": {
+    "russian_translation": "Плата; тариф; аренда.",
+    "english_translation": "Fare; fee; rent."
+  },
+  "一周": {
+    "russian_translation": "Один круг; один оборот.",
+    "english_translation": "One lap; one round."
+  },
+  "スリッパ": {
+    "russian_translation": "Тапочки.",
+    "english_translation": "Slippers."
+  },
+  "しょうゆ": {
+    "russian_translation": "Соевый соус.",
+    "english_translation": "Soy sauce."
+  },
+  "止まり": {
+    "russian_translation": "Остановка; конец пути.",
+    "english_translation": "Stop; end."
+  },
+  "かびん": {
+    "russian_translation": "Ваза (для цветов).",
+    "english_translation": "Vase (for flowers)."
+  },
+  "動物": {
+    "russian_translation": "Животное.",
+    "english_translation": "Animal."
+  },
+  "喫": {
+    "russian_translation": "Потреблять (пить, курить).",
+    "english_translation": "Consume; ingest."
+  },
+  "あつくない": {
+    "russian_translation": "Не горячий; не жаркий.",
+    "english_translation": "Not hot."
+  },
+  "乗り場": {
+    "russian_translation": "Место посадки; платформа; остановка.",
+    "english_translation": "Boarding area; platform."
+  },
+  "遠": {
+    "russian_translation": "Далёкий; далеко.",
+    "english_translation": "Far; distant."
+  },
+  "ゆびわ": {
+    "russian_translation": "Кольцо (украшение).",
+    "english_translation": "Ring (jewelry)."
+  },
+  "大丈夫": {
+    "russian_translation": "В порядке; хорошо.",
+    "english_translation": "Okay; fine."
+  },
+  "のりかえます": {
+    "russian_translation": "Делать пересадку (транспорт).",
+    "english_translation": "To transfer (trains/buses)."
+  },
+  "吸い": {
+    "russian_translation": "Вдыхать; сосать.",
+    "english_translation": "Suck; inhale."
+  },
+  "はんこ": {
+    "russian_translation": "Личная печать.",
+    "english_translation": "Name seal; stamp."
+  },
+  "なっとう": {
+    "russian_translation": "Натто (ферментированные соевые бобы).",
+    "english_translation": "Natto (fermented soybeans)."
+  },
+  "働いて": {
+    "russian_translation": "Работая; работать (форма тэ).",
+    "english_translation": "Working; to work (te-form)."
+  },
+  "じゅぎょう": {
+    "russian_translation": "Урок; занятие.",
+    "english_translation": "Class; lesson."
+  },
+  "行きたくないです": {
+    "russian_translation": "Не хочу идти.",
+    "english_translation": "I don't want to go."
+  },
+  "ポップス": {
+    "russian_translation": "Поп-музыка.",
+    "english_translation": "Pop music."
+  },
+  "勤める": {
+    "russian_translation": "Служить; работать (в компании).",
+    "english_translation": "To work for; to be employed."
+  },
+  "しんじゅく": {
+    "russian_translation": "Синдзюку (район Токио).",
+    "english_translation": "Shinjuku (district in Tokyo)."
+  },
+  "中学生": {
+    "russian_translation": "Ученик средней школы (7-9 классы).",
+    "english_translation": "Junior high school student."
+  },
+  "十": {
+    "russian_translation": "Десять.",
+    "english_translation": "Ten."
+  },
+  "四日": {
+    "russian_translation": "Четвёртое число; четыре дня.",
+    "english_translation": "4th day of the month; four days."
+  },
+  "いません": {
+    "russian_translation": "Нет (о живых существах); отсутствует.",
+    "english_translation": "Not present; (he/she) is not here."
+  },
+  "バイク": {
+    "russian_translation": "Мотоцикл.",
+    "english_translation": "Motorcycle."
+  },
+  "えんげき": {
+    "russian_translation": "Театральное представление; драма.",
+    "english_translation": "Drama; theater performance."
+  },
+  "り": {
+    "russian_translation": "Слог «ри» (хирагана).",
+    "english_translation": "The syllable 'ri' (hiragana)."
+  },
+  "としょかん": {
+    "russian_translation": "Библиотека.",
+    "english_translation": "Library."
+  },
+  "輩": {
+    "russian_translation": "Товарищи; компания (людей).",
+    "english_translation": "Fellows; comrades."
+  },
+  "背広": {
+    "russian_translation": "Деловой костюм.",
+    "english_translation": "Business suit."
+  },
+  "固": {
+    "russian_translation": "Твёрдый.",
+    "english_translation": "Hard; solid."
+  },
+  "くれて": {
+    "russian_translation": "Дав (мне); давать (мне, форма тэ).",
+    "english_translation": "Give (to me) (te-form)."
+  },
+  "大学": {
+    "russian_translation": "Университет.",
+    "english_translation": "University."
+  },
+  "いっしょに": {
+    "russian_translation": "Вместе.",
+    "english_translation": "Together."
+  },
+  "柔": {
+    "russian_translation": "Мягкий; нежный.",
+    "english_translation": "Soft; gentle."
+  },
+  "明": {
+    "russian_translation": "Светлый; ясный.",
+    "english_translation": "Bright; clear."
+  },
+  "しょくどう": {
+    "russian_translation": "Столовая.",
+    "english_translation": "Cafeteria; dining hall."
+  },
+  "こちら": {
+    "russian_translation": "Здесь; сюда (вежливо).",
+    "english_translation": "Here; this way (polite)."
+  },
+  "好": {
+    "russian_translation": "Любить; нравиться.",
+    "english_translation": "Like; fond of."
+  },
+  "臭": {
+    "russian_translation": "Вонь; дурной запах.",
+    "english_translation": "Stink; smell."
+  },
+  "チェックイン": {
+    "russian_translation": "Регистрация (заезд).",
+    "english_translation": "Check-in."
+  },
+  "華": {
+    "russian_translation": "Цветок; великолепие.",
+    "english_translation": "Flower; splendor."
+  },
+  "喫茶店": {
+    "russian_translation": "Кофейня; кафе.",
+    "english_translation": "Coffee shop; cafe."
+  },
+  "我が": {
+    "russian_translation": "Мой; наш.",
+    "english_translation": "My; our."
+  },
+  "王座": {
+    "russian_translation": "Трон; престол.",
+    "english_translation": "Throne."
+  },
+  "吹く": {
+    "russian_translation": "Дуть (о ветре).",
+    "english_translation": "To blow (wind)."
+  },
+  "拍": {
+    "russian_translation": "Хлопать в ладоши; такт.",
+    "english_translation": "Clap; beat."
+  },
+  "かわいい": {
+    "russian_translation": "Милый.",
+    "english_translation": "Cute."
+  },
+  "現": {
+    "russian_translation": "Действительный; текущий.",
+    "english_translation": "Present; existing."
+  },
+  "できて": {
+    "russian_translation": "Сделав; будучи в состоянии.",
+    "english_translation": "Being able to; finished."
+  },
+  "ふゆ": {
+    "russian_translation": "Зима.",
+    "english_translation": "Winter."
+  },
+  "くしゃくしゃ": {
+    "russian_translation": "Мятый; взъерошенный.",
+    "english_translation": "Crumpled; messy."
+  },
+  "連れて": {
+    "russian_translation": "Взяв с собой (кого-то).",
+    "english_translation": "Taking along (someone)."
+  },
+  "オリンピック": {
+    "russian_translation": "Олимпийские игры.",
+    "english_translation": "Olympics."
+  },
+  "イギリス": {
+    "russian_translation": "Великобритания.",
+    "english_translation": "UK; United Kingdom."
+  },
+  "二年生": {
+    "russian_translation": "Ученик второго класса/курса.",
+    "english_translation": "Second-year student."
+  },
+  "歯石": {
+    "russian_translation": "Зубной камень.",
+    "english_translation": "Tartar (dental)."
+  },
+  "出口": {
+    "russian_translation": "Выход.",
+    "english_translation": "Exit."
+  },
+  "全部": {
+    "russian_translation": "Всё; целиком.",
+    "english_translation": "All; everything."
+  },
+  "戻": {
+    "russian_translation": "Возвращаться.",
+    "english_translation": "Return."
+  },
+  "ごご": {
+    "russian_translation": "Вторая половина дня; PM.",
+    "english_translation": "Afternoon; P.M."
+  },
+  "永": {
+    "russian_translation": "Вечный; долгий.",
+    "english_translation": "Eternity; long time."
+  },
+  "幻": {
+    "russian_translation": "Иллюзия; призрачный.",
+    "english_translation": "Illusion; phantom."
+  },
+  "貿": {
+    "russian_translation": "Торговля.",
+    "english_translation": "Trade."
+  },
+  "近く": {
+    "russian_translation": "Близко; поблизости.",
+    "english_translation": "Near; nearby."
+  },
+  "出かける": {
+    "russian_translation": "Выходить (из дома); отправляться.",
+    "english_translation": "To go out."
+  },
+  "猫": {
+    "russian_translation": "Кошка; кот.",
+    "english_translation": "Cat."
+  },
+  "おきます": {
+    "russian_translation": "Класть; ставить.",
+    "english_translation": "To put; to place."
+  },
+  "カナダじん": {
+    "russian_translation": "Канадец.",
+    "english_translation": "Canadian person."
+  },
+  "出る": {
+    "russian_translation": "Выходить; появляться.",
+    "english_translation": "To exit; to appear."
+  },
+  "鶏肉": {
+    "russian_translation": "Куриное мясо; курятина.",
+    "english_translation": "Chicken meat."
+  },
+  "どうりょう": {
+    "russian_translation": "Коллега.",
+    "english_translation": "Colleague."
+  },
+  "います": {
+    "russian_translation": "Быть; находиться (о живых).",
+    "english_translation": "To be; to exist (animate)."
+  },
+  "ができます": {
+    "russian_translation": "Мочь; уметь.",
+    "english_translation": "Can do; be able to."
+  },
+  "ポップコーン": {
+    "russian_translation": "Попкорн.",
+    "english_translation": "Popcorn."
+  },
+  "辞任": {
+    "russian_translation": "Отставка.",
+    "english_translation": "Resignation."
+  },
+  "戦後": {
+    "russian_translation": "Послевоенный период.",
+    "english_translation": "Post-war period."
+  },
+  "黄": {
+    "russian_translation": "Жёлтый.",
+    "english_translation": "Yellow."
+  },
+  "受け": {
+    "russian_translation": "Получать; приём.",
+    "english_translation": "Receive; reception."
+  },
+  "食べたいです": {
+    "russian_translation": "Хочу есть.",
+    "english_translation": "I want to eat."
+  },
+  "やり方": {
+    "russian_translation": "Способ действия; метод.",
+    "english_translation": "Way of doing; method."
+  },
+  "せまい": {
+    "russian_translation": "Узкий; тесный.",
+    "english_translation": "Narrow; cramped."
+  },
+  "ざっし": {
+    "russian_translation": "Журнал.",
+    "english_translation": "Magazine."
+  },
+  "春": {
+    "russian_translation": "Весна.",
+    "english_translation": "Spring."
+  },
+  "食べる": {
+    "russian_translation": "Есть; кушать.",
+    "english_translation": "To eat."
+  },
+  "いい": {
+    "russian_translation": "Хороший.",
+    "english_translation": "Good."
+  },
+  "中山": {
+    "russian_translation": "Накаяма (фамилия).",
+    "english_translation": "Nakayama (surname)."
+  },
+  "まいにち": {
+    "russian_translation": "Каждый день.",
+    "english_translation": "Every day."
+  },
+  "はんがく": {
+    "russian_translation": "Половина цены.",
+    "english_translation": "Half price."
+  },
+  "切符": {
+    "russian_translation": "Билет (на транспорт).",
+    "english_translation": "Ticket."
+  },
+  "起きる": {
+    "russian_translation": "Просыпаться; происходить.",
+    "english_translation": "To wake up; to happen."
+  },
+  "満": {
+    "russian_translation": "Полный; наполненный.",
+    "english_translation": "Full; satisfied."
+  },
+  "入": {
+    "russian_translation": "Входить.",
+    "english_translation": "Enter."
+  },
+  "足元": {
+    "russian_translation": "Под ногами.",
+    "english_translation": "At one's feet."
+  },
+  "けいたい": {
+    "russian_translation": "Мобильный телефон.",
+    "english_translation": "Mobile phone."
+  },
+  "三分": {
+    "russian_translation": "Одна треть.",
+    "english_translation": "One third."
+  },
+  "ロッカールーム": {
+    "russian_translation": "Раздевалка.",
+    "english_translation": "Locker room."
+  },
+  "三つ": {
+    "russian_translation": "Три (предмета).",
+    "english_translation": "Three (items)."
+  },
+  "時間": {
+    "russian_translation": "Время.",
+    "english_translation": "Time."
+  },
+  "コート": {
+    "russian_translation": "Пальто.",
+    "english_translation": "Coat."
+  },
+  "笑": {
+    "russian_translation": "Смеяться; улыбаться.",
+    "english_translation": "Laugh; smile."
+  },
+  "噌": {
+    "russian_translation": "Со (иероглиф, используемый в слове «мисо»).",
+    "english_translation": "So (kanji used in 'miso')."
+  },
+  "問題": {
+    "russian_translation": "Проблема; вопрос.",
+    "english_translation": "Problem; question."
+  },
+  "それから": {
+    "russian_translation": "Затем; после этого.",
+    "english_translation": "Then; after that."
+  },
+  "ポロシャツ": {
+    "russian_translation": "Рубашка поло.",
+    "english_translation": "Polo shirt."
+  },
+  "でんきや": {
+    "russian_translation": "Магазин электротоваров.",
+    "english_translation": "Electronics store."
+  },
+  "褒": {
+    "russian_translation": "Хвалить.",
+    "english_translation": "Praise."
+  },
+  "始": {
+    "russian_translation": "Начинать; начало.",
+    "english_translation": "Begin; start."
+  },
+  "誤": {
+    "russian_translation": "Ошибка.",
+    "english_translation": "Mistake."
+  },
+  "踏": {
+    "russian_translation": "Наступать (на что-то).",
+    "english_translation": "Step on."
+  },
+  "い": {
+    "russian_translation": "И (знак хираганы).",
+    "english_translation": "i (hiragana character)."
+  },
+  "シチュー": {
+    "russian_translation": "Рагу; стью.",
+    "english_translation": "Stew."
+  },
+  "じゃないです": {
+    "russian_translation": "Не является.",
+    "english_translation": "Is not."
+  },
+  "ズボン": {
+    "russian_translation": "Брюки; штаны.",
+    "english_translation": "Trousers; pants."
+  },
+  "させられ": {
+    "russian_translation": "Был принуждён сделать (страдательно-понудительный залог).",
+    "english_translation": "Was made to do."
+  },
+  "日曜日": {
+    "russian_translation": "Воскресенье.",
+    "english_translation": "Sunday."
+  },
+  "言葉": {
+    "russian_translation": "Слово; язык.",
+    "english_translation": "Word; language."
+  },
+  "指名": {
+    "russian_translation": "Номинация; указание имени.",
+    "english_translation": "Nomination; designating."
+  },
+  "抱": {
+    "russian_translation": "Обнимать.",
+    "english_translation": "Hug; embrace."
+  },
+  "かかり": {
+    "russian_translation": "Расходы; затраты.",
+    "english_translation": "Expenses; costs."
+  },
+  "ならいます": {
+    "russian_translation": "Учить; изучать.",
+    "english_translation": "To learn."
+  },
+  "お疲れ様": {
+    "russian_translation": "Спасибо за труд (приветствие коллегам).",
+    "english_translation": "Thank you for your hard work."
+  },
+  "太い": {
+    "russian_translation": "Толстый (о предметах).",
+    "english_translation": "Thick; fat."
+  },
+  "いま": {
+    "russian_translation": "Сейчас.",
+    "english_translation": "Now."
+  },
+  "しあわせ": {
+    "russian_translation": "Счастье.",
+    "english_translation": "Happiness."
+  },
+  "ひさしぶりです": {
+    "russian_translation": "Давно не виделись.",
+    "english_translation": "Long time no see."
+  },
+  "とります": {
+    "russian_translation": "Брать.",
+    "english_translation": "To take."
+  },
+  "さすが": {
+    "russian_translation": "Как и ожидалось (похвала).",
+    "english_translation": "As expected; wonderful."
+  },
+  "フライドポテト": {
+    "russian_translation": "Картофель фри.",
+    "english_translation": "French fries."
+  },
+  "半": {
+    "russian_translation": "Половина.",
+    "english_translation": "Half."
+  },
+  "ふとん": {
+    "russian_translation": "Футон (японский матрас).",
+    "english_translation": "Futon."
+  },
+  "すぐに": {
+    "russian_translation": "Сразу; немедленно.",
+    "english_translation": "Immediately."
+  },
+  "上着": {
+    "russian_translation": "Верхняя одежда; пиджак.",
+    "english_translation": "Outerwear; jacket."
+  },
+  "もらえる": {
+    "russian_translation": "Могу получить.",
+    "english_translation": "Can receive."
+  },
+  "恐": {
+    "russian_translation": "Страх; бояться.",
+    "english_translation": "Fear."
+  },
+  "提": {
+    "russian_translation": "Предлагать.",
+    "english_translation": "Propose."
+  },
+  "ヤンキー": {
+    "russian_translation": "Хулиган (молодёжная субкультура).",
+    "english_translation": "Delinquent youth; Yankee."
+  },
+  "きたない": {
+    "russian_translation": "Грязный.",
+    "english_translation": "Dirty."
+  },
+  "先週": {
+    "russian_translation": "Прошлая неделя.",
+    "english_translation": "Last week."
+  },
+  "背": {
+    "russian_translation": "Спина; рост.",
+    "english_translation": "Back; height."
+  },
+  "おかえりなさい": {
+    "russian_translation": "С возвращением (домой).",
+    "english_translation": "Welcome home."
+  },
+  "おします": {
+    "russian_translation": "Толкать; нажимать.",
+    "english_translation": "To push; to press."
+  },
+  "来ます": {
+    "russian_translation": "Приходить.",
+    "english_translation": "To come."
+  },
+  "夜": {
+    "russian_translation": "Ночь.",
+    "english_translation": "Night."
+  },
+  "水曜日": {
+    "russian_translation": "Среда.",
+    "english_translation": "Wednesday."
+  },
+  "外": {
+    "russian_translation": "Снаружи; улица.",
+    "english_translation": "Outside."
+  },
+  "さあ": {
+    "russian_translation": "Ну...; итак.",
+    "english_translation": "Well; come on."
+  },
+  "苦": {
+    "russian_translation": "Мучение; горький.",
+    "english_translation": "Suffering; bitter."
+  },
+  "一週間": {
+    "russian_translation": "Одна неделя.",
+    "english_translation": "One week."
+  },
+  "切る": {
+    "russian_translation": "Резать.",
+    "english_translation": "To cut."
+  },
+  "茶髪": {
+    "russian_translation": "Осветлённые волосы (крашеные в коричневый).",
+    "english_translation": "Dyed brown hair."
+  },
+  "止まれ": {
+    "russian_translation": "Стоп (приказ).",
+    "english_translation": "Stop (imperative)."
+  },
+  "ゴミばこ": {
+    "russian_translation": "Мусорное ведро.",
+    "english_translation": "Trash can."
+  },
+  "歩き": {
+    "russian_translation": "Ходьба.",
+    "english_translation": "Walking."
+  },
+  "つかいます": {
+    "russian_translation": "Использовать.",
+    "english_translation": "To use."
+  },
+  "ありますか": {
+    "russian_translation": "У вас есть?; имеется ли?",
+    "english_translation": "Do you have?; is there?"
+  },
+  "買います": {
+    "russian_translation": "Покупать.",
+    "english_translation": "To buy."
+  },
+  "緑色": {
+    "russian_translation": "Зелёный цвет.",
+    "english_translation": "Green color."
+  },
+  "おじ": {
+    "russian_translation": "Дядя.",
+    "english_translation": "Uncle."
+  },
+  "零": {
+    "russian_translation": "Ноль.",
+    "english_translation": "Zero."
+  },
+  "ハンカチ": {
+    "russian_translation": "Носовой платок.",
+    "english_translation": "Handkerchief."
+  },
+  "九州": {
+    "russian_translation": "Кюсю.",
+    "english_translation": "Kyushu."
+  },
+  "うた": {
+    "russian_translation": "Песня.",
+    "english_translation": "Song."
+  },
+  "そこ": {
+    "russian_translation": "Там (около собеседника).",
+    "english_translation": "There (near listener)."
+  },
+  "おわります": {
+    "russian_translation": "Заканчиваться.",
+    "english_translation": "To finish."
+  },
+  "プレゼン": {
+    "russian_translation": "Презентация.",
+    "english_translation": "Presentation."
+  },
+  "読んだ": {
+    "russian_translation": "Читал (прошедшее время).",
+    "english_translation": "Read (past tense)."
+  },
+  "ねました": {
+    "russian_translation": "Спал.",
+    "english_translation": "Slept."
+  },
+  "七時": {
+    "russian_translation": "Семь часов.",
+    "english_translation": "Seven o'clock."
+  },
+  "上手": {
+    "russian_translation": "Умелый; хорошо получается.",
+    "english_translation": "Skillful; good at."
+  },
+  "オーストラリア": {
+    "russian_translation": "Австралия.",
+    "english_translation": "Australia."
+  },
+  "両親": {
+    "russian_translation": "Родители.",
+    "english_translation": "Parents."
+  },
+  "アイヌ": {
+    "russian_translation": "Айны (народ).",
+    "english_translation": "Ainu."
+  },
+  "建物": {
+    "russian_translation": "Здание.",
+    "english_translation": "Building."
+  },
+  "あめ": {
+    "russian_translation": "Дождь.",
+    "english_translation": "Rain."
+  },
+  "厚い": {
+    "russian_translation": "Толстый (о плоских предметах).",
+    "english_translation": "Thick."
+  },
+  "返す": {
+    "russian_translation": "Возвращать (что-то).",
+    "english_translation": "To return (something)."
+  },
+  "スニーカー": {
+    "russian_translation": "Кроссовки.",
+    "english_translation": "Sneakers."
+  },
+  "きょうだい": {
+    "russian_translation": "Братья и сёстры.",
+    "english_translation": "Siblings."
+  },
+  "ました": {
+    "russian_translation": "Суффикс прошедшего времени.",
+    "english_translation": "Past tense suffix."
+  },
+  "大使館": {
+    "russian_translation": "Посольство.",
+    "english_translation": "Embassy."
+  },
+  "浴": {
+    "russian_translation": "Купаться; обливаться.",
+    "english_translation": "Bathe; bask."
+  },
+  "作られる": {
+    "russian_translation": "Создаваться; быть сделанным.",
+    "english_translation": "To be made; created."
+  },
+  "くうこう": {
+    "russian_translation": "Аэропорт.",
+    "english_translation": "Airport."
+  },
+  "花見をします": {
+    "russian_translation": "Любоваться цветением сакуры.",
+    "english_translation": "To view cherry blossoms."
+  },
+  "つかれました": {
+    "russian_translation": "Я устал.",
+    "english_translation": "I got tired."
+  },
+  "とおい": {
+    "russian_translation": "Далёкий.",
+    "english_translation": "Far."
+  },
+  "付": {
+    "russian_translation": "Прикреплять; платить.",
+    "english_translation": "Attach; pay."
+  },
+  "会う": {
+    "russian_translation": "Встречать.",
+    "english_translation": "To meet."
+  },
+  "けいさつ": {
+    "russian_translation": "Полиция.",
+    "english_translation": "Police."
+  },
+  "スマホ": {
+    "russian_translation": "Смартфон.",
+    "english_translation": "Smartphone."
+  },
+  "下手": {
+    "russian_translation": "Неумелый; плохо получается.",
+    "english_translation": "Unskillful; bad at."
+  },
+  "快": {
+    "russian_translation": "Приятный; быстрый.",
+    "english_translation": "Pleasant; fast."
+  },
+  "にんじん": {
+    "russian_translation": "Морковь.",
+    "english_translation": "Carrot."
+  },
+  "壁": {
+    "russian_translation": "Стена.",
+    "english_translation": "Wall."
+  },
+  "電": {
+    "russian_translation": "Электричество.",
+    "english_translation": "Electricity."
+  },
+  "切": {
+    "russian_translation": "Резать.",
+    "english_translation": "Cut."
+  },
+  "慰": {
+    "russian_translation": "Утешать.",
+    "english_translation": "Console."
+  },
+  "途": {
+    "russian_translation": "Путь; дорога.",
+    "english_translation": "Route; way."
+  },
+  "ねませんでした": {
+    "russian_translation": "Не спал.",
+    "english_translation": "Did not sleep."
+  },
+  "整": {
+    "russian_translation": "Упорядочивать; приводить в порядок.",
+    "english_translation": "Arrange; organize."
+  },
+  "過": {
+    "russian_translation": "Проходить; превышать.",
+    "english_translation": "Pass; exceed."
+  },
+  "こんな": {
+    "russian_translation": "Такой; подобный этому.",
+    "english_translation": "Such; like this."
+  },
+  "伯母さん": {
+    "russian_translation": "Тётя (старшая сестра родителя).",
+    "english_translation": "Aunt (older sister of parent)."
+  },
+  "自衛隊": {
+    "russian_translation": "Силы самообороны.",
+    "english_translation": "Self-Defense Forces."
+  },
+  "散歩": {
+    "russian_translation": "Прогулка.",
+    "english_translation": "Walk; stroll."
+  },
+  "小さく": {
+    "russian_translation": "Маленький (наречие).",
+    "english_translation": "Small (adverbial)."
+  },
+  "留学生": {
+    "russian_translation": "Иностранный студент.",
+    "english_translation": "International student."
+  },
+  "シーン": {
+    "russian_translation": "Сцена; эпизод.",
+    "english_translation": "Scene."
+  },
+  "具": {
+    "russian_translation": "Ингредиент; инструмент.",
+    "english_translation": "Ingredient; tool."
+  },
+  "忙しい": {
+    "russian_translation": "Занятой.",
+    "english_translation": "Busy."
+  },
+  "博": {
+    "russian_translation": "Обширный (о знаниях); выставка.",
+    "english_translation": "Broad (knowledge); exhibition."
+  },
+  "さいきん": {
+    "russian_translation": "В последнее время; недавно.",
+    "english_translation": "Recently; lately."
+  },
+  "議": {
+    "russian_translation": "Обсуждение.",
+    "english_translation": "Deliberation; discussion."
+  },
+  "村": {
+    "russian_translation": "Деревня.",
+    "english_translation": "Village."
+  },
+  "かどうか": {
+    "russian_translation": "Ли (частица сомнения).",
+    "english_translation": "Whether or not."
+  },
+  "じゃない": {
+    "russian_translation": "Не является (разг.).",
+    "english_translation": "Is not (casual)."
+  },
+  "お父さん": {
+    "russian_translation": "Папа; отец.",
+    "english_translation": "Father."
+  },
+  "うでどけい": {
+    "russian_translation": "Наручные часы.",
+    "english_translation": "Wristwatch."
+  },
+  "土曜日": {
+    "russian_translation": "Суббота.",
+    "english_translation": "Saturday."
+  },
+  "救急車": {
+    "russian_translation": "Скорая помощь.",
+    "english_translation": "Ambulance."
+  },
+  "どうぞ": {
+    "russian_translation": "Пожалуйста (при предложении взять).",
+    "english_translation": "Please; here you go."
+  },
+  "やばい": {
+    "russian_translation": "Опасно; круто; жесть (слэнг).",
+    "english_translation": "Dangerous; crazy; cool."
+  },
+  "ふね": {
+    "russian_translation": "Корабль; лодка.",
+    "english_translation": "Ship; boat."
+  },
+  "東": {
+    "russian_translation": "Восток.",
+    "english_translation": "East."
+  },
+  "スペイン料理": {
+    "russian_translation": "Испанская кухня.",
+    "english_translation": "Spanish cuisine."
+  },
+  "漢字": {
+    "russian_translation": "Кандзи; иероглифы.",
+    "english_translation": "Kanji."
+  },
+  "薄": {
+    "russian_translation": "Тонкий.",
+    "english_translation": "Thin."
+  },
+  "アプリ": {
+    "russian_translation": "Приложение.",
+    "english_translation": "App."
+  },
+  "腫": {
+    "russian_translation": "Опухоль; отёк.",
+    "english_translation": "Tumor; swelling."
+  },
+  "スプーン": {
+    "russian_translation": "Ложка.",
+    "english_translation": "Spoon."
+  },
+  "インターネット": {
+    "russian_translation": "Интернет.",
+    "english_translation": "Internet."
+  },
+  "キス": {
+    "russian_translation": "Поцелуй.",
+    "english_translation": "Kiss."
+  },
+  "ページ": {
+    "russian_translation": "Страница.",
+    "english_translation": "Page."
+  },
+  "三日間": {
+    "russian_translation": "Три дня.",
+    "english_translation": "Three days."
+  },
+  "ひる休み": {
+    "russian_translation": "Обеденный перерыв.",
+    "english_translation": "Lunch break."
+  },
+  "買わなくて": {
+    "russian_translation": "Не покупая; не купив.",
+    "english_translation": "Not buying; without buying."
+  },
+  "ジム": {
+    "russian_translation": "Спортзал.",
+    "english_translation": "Gym."
+  },
+  "小さくて": {
+    "russian_translation": "Маленький и...",
+    "english_translation": "Small and..."
+  },
+  "なり": {
+    "russian_translation": "Форма; вид; стиль.",
+    "english_translation": "Shape; form; style."
+  },
+  "求": {
+    "russian_translation": "Требовать; искать.",
+    "english_translation": "Request; seek."
+  },
+  "飲酒": {
+    "russian_translation": "Употребление алкоголя.",
+    "english_translation": "Drinking alcohol."
+  },
+  "ひっこします": {
+    "russian_translation": "Переезжать (на новое место).",
+    "english_translation": "To move (house)."
+  },
+  "フォーク": {
+    "russian_translation": "Вилка.",
+    "english_translation": "Fork."
+  },
+  "カレー": {
+    "russian_translation": "Карри.",
+    "english_translation": "Curry."
+  },
+  "圧": {
+    "russian_translation": "Давление.",
+    "english_translation": "Pressure."
+  },
+  "はいりません": {
+    "russian_translation": "Не входит; не влезает.",
+    "english_translation": "Does not enter; does not fit."
+  },
+  "しょうしょうおまちください": {
+    "russian_translation": "Подождите немного (вежливо).",
+    "english_translation": "Please wait a moment."
+  },
+  "きっぷ": {
+    "russian_translation": "Билет.",
+    "english_translation": "Ticket."
+  },
+  "上": {
+    "russian_translation": "Верх; над.",
+    "english_translation": "Up; above."
+  },
+  "こども": {
+    "russian_translation": "Ребёнок.",
+    "english_translation": "Child."
+  },
+  "こわくなかった": {
+    "russian_translation": "Не было страшно.",
+    "english_translation": "Was not scary."
+  },
+  "隠": {
+    "russian_translation": "Прятать; скрывать.",
+    "english_translation": "Hide; conceal."
+  },
+  "長さ": {
+    "russian_translation": "Длина.",
+    "english_translation": "Length."
+  }
+}

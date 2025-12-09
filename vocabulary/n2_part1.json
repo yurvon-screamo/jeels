@@ -1,0 +1,4002 @@
+{
+  "×": {
+    "english_translation": "multiplication sign (arithmetic operation)",
+    "russian_translation": "знак умножения"
+  },
+  "Ͼ立": {
+    "english_translation": "to stand up (emphasizing the upward motion)",
+    "russian_translation": "встать, подняться"
+  },
+  "あいかわらず": {
+    "english_translation": "as ever, as usual, still",
+    "russian_translation": "по-прежнему, как обычно"
+  },
+  "あいまい": {
+    "english_translation": "vague, ambiguous, obscure",
+    "russian_translation": "неясный, двусмысленный, расплывчатый"
+  },
+  "あかんぼう": {
+    "english_translation": "baby, infant (colloquial)",
+    "russian_translation": "младенец, кроха (разг.)"
+  },
+  "あきれる": {
+    "english_translation": "to be utterly astonished, dumbfounded",
+    "russian_translation": "поразиться, опешить"
+  },
+  "あくび": {
+    "english_translation": "yawn",
+    "russian_translation": "зевок"
+  },
+  "あたりまえ": {
+    "english_translation": "natural, obvious, reasonable",
+    "russian_translation": "естественно, само собой разумеется"
+  },
+  "あちらこちら": {
+    "english_translation": "here and there, everywhere",
+    "russian_translation": "повсюду, то тут, то там"
+  },
+  "あてはまる": {
+    "english_translation": "to apply (to a rule, condition), to be applicable",
+    "russian_translation": "соответствовать, подходить (правилу, условию)"
+  },
+  "あてはめる": {
+    "english_translation": "to apply (a rule, standard) to, to fit (something into a framework)",
+    "russian_translation": "применять, подгонять (под стандарт)"
+  },
+  "あひら": {
+    "english_translation": "The door remained open.",
+    "russian_translation": "Дверь осталась открытой."
+  },
+  "あふれる": {
+    "english_translation": "to overflow, to be filled with (e.g., emotions)",
+    "russian_translation": "переполнять, литься через край"
+  },
+  "あぶる": {
+    "english_translation": "to grill (over an open flame), to toast lightly",
+    "russian_translation": "жарить, поджаривать"
+  },
+  "あらすじ": {
+    "english_translation": "outline, summary (of a story/plot)",
+    "russian_translation": "краткое содержание, сюжет"
+  },
+  "あれこれ": {
+    "english_translation": "this and that, various things",
+    "russian_translation": "то-сё, всякое"
+  },
+  "あわただしい": {
+    "english_translation": "hurried, busy, restless (atmosphere)",
+    "russian_translation": "суетливый, хлопотливый"
+  },
+  "あわてる": {
+    "english_translation": "to become flustered, to panic, to rush",
+    "russian_translation": "волноваться, торопиться, растеряться"
+  },
+  "いきなり": {
+    "english_translation": "suddenly, abruptly, without warning",
+    "russian_translation": "внезапно, сразу же"
+  },
+  "いちいち": {
+    "english_translation": "one by one; meticulously, dwelling on every detail",
+    "russian_translation": "по одному; дотошно, вдаваясь в мелочи"
+  },
+  "いっていらっしゃい": {
+    "english_translation": "Please go, come back safely. (Formal)",
+    "russian_translation": "Идите, возвращайтесь (с миром, формально)."
+  },
+  "いってまいります": {
+    "english_translation": "I'm leaving (but will return). (Humble)",
+    "russian_translation": "Я отлучусь, но скоро вернусь (скромно)."
+  },
+  "いってらっしゃい": {
+    "english_translation": "See you later, take care (when someone leaves).",
+    "russian_translation": "Счастливо оставаться, возвращайся."
+  },
+  "いつのまにか": {
+    "english_translation": "before one knows it, imperceptibly",
+    "russian_translation": "незаметно, в мгновение ока"
+  },
+  "いつの間にか": {
+    "english_translation": "before one notices, imperceptibly",
+    "russian_translation": "незаметно, неведомо как"
+  },
+  "いよいよ": {
+    "english_translation": "at last, finally, all the more",
+    "russian_translation": "наконец-то, в конце концов"
+  },
+  "うっかり": {
+    "english_translation": "carelessly, by accident (often with regret)",
+    "russian_translation": "по неосторожности, нечаянно"
+  },
+  "うどん": {
+    "english_translation": "udon (thick wheat noodles)",
+    "russian_translation": "удон (толстая лапша)"
+  },
+  "うろうろ": {
+    "english_translation": "to wander around aimlessly, to loiter",
+    "russian_translation": "бродить без цели, слоняться"
+  },
+  "うんと": {
+    "english_translation": "very much, considerably, a great deal",
+    "russian_translation": "очень, значительно, много"
+  },
+  "ええと": {
+    "english_translation": "um, well, let me see (pause filler)",
+    "russian_translation": "э-э, ну, дайте подумать (пауза)"
+  },
+  "えっと": {
+    "english_translation": "um, well, let me see (pause filler)",
+    "russian_translation": "э-э, ну, вот (пауза)"
+  },
+  "おおざっぱ": {
+    "english_translation": "rough, crude, broad (not detailed)",
+    "russian_translation": "небрежный, приблизительный"
+  },
+  "おかけください": {
+    "english_translation": "Please sit down; Please hold on (on the phone). (Polite)",
+    "russian_translation": "Садитесь, пожалуйста; Ждите (на телефоне)."
+  },
+  "おかげさまで": {
+    "english_translation": "Thanks to you (or circumstances), fortunately",
+    "russian_translation": "Слава богу, благодаря вам"
+  },
+  "おかず": {
+    "english_translation": "side dish (served with rice)",
+    "russian_translation": "закуска, гарнир (к рису)"
+  },
+  "おきのどくに": {
+    "english_translation": "I sympathize with you. (Archaic/rarely used, often replaced by お気の毒に)",
+    "russian_translation": "Мне жаль вас. (Устар./редко)"
+  },
+  "おくさん": {
+    "english_translation": "wife (of someone else)",
+    "russian_translation": "жена, супруга (чужая)"
+  },
+  "おげんきで": {
+    "english_translation": "Take care (used when parting for a long time).",
+    "russian_translation": "Берегите себя, будьте здоровы (на прощание)."
+  },
+  "おさきに": {
+    "english_translation": "Pardon me for going first.",
+    "russian_translation": "Извините, что ухожу первым."
+  },
+  "おしゃれ": {
+    "english_translation": "fashionable, stylish, smartly dressed",
+    "russian_translation": "модный, стильный"
+  },
+  "おじゃまします": {
+    "english_translation": "Sorry for disturbing (used when entering someone's home).",
+    "russian_translation": "Простите за беспокойство (при входе)."
+  },
+  "おだいじに": {
+    "english_translation": "Take care of yourself (to a sick person).",
+    "russian_translation": "Берегите себя, поправляйтесь."
+  },
+  "おととい": {
+    "english_translation": "the day before yesterday",
+    "russian_translation": "позавчера"
+  },
+  "おととし": {
+    "english_translation": "the year before last",
+    "russian_translation": "позапрошлый год"
+  },
+  "おとなしい": {
+    "english_translation": "docile, quiet, gentle",
+    "russian_translation": "покладистый, смирный, тихий"
+  },
+  "おどかす": {
+    "english_translation": "to startle, to surprise (often as a joke)",
+    "russian_translation": "напугать, испугать, ошарашить"
+  },
+  "おねがいします": {
+    "english_translation": "please, I request, I ask you",
+    "russian_translation": "пожалуйста, прошу вас"
+  },
+  "おはよう": {
+    "english_translation": "Good morning (informal or casual).",
+    "russian_translation": "Доброе утро (неформ.)."
+  },
+  "おまたせしました": {
+    "english_translation": "Sorry to have kept you waiting. (Humble)",
+    "russian_translation": "Извините за ожидание."
+  },
+  "おまちください": {
+    "english_translation": "Please wait. (Polite)",
+    "russian_translation": "Подождите, пожалуйста."
+  },
+  "おまちどおさま": {
+    "english_translation": "Thank you for waiting. (Used by service staff)",
+    "russian_translation": "Спасибо за ожидание. (От обслуживающего персонала)"
+  },
+  "おめでたい": {
+    "english_translation": "joyous, auspicious, happy",
+    "russian_translation": "радостный, праздничный"
+  },
+  "おやすみ": {
+    "english_translation": "Good night (informal).",
+    "russian_translation": "Спокойной ночи (неформ.)."
+  },
+  "おやつ": {
+    "english_translation": "snack, afternoon tea/snack",
+    "russian_translation": "перекус, полдник"
+  },
+  "お代わり": {
+    "english_translation": "second helping, refill",
+    "russian_translation": "добавка, вторая порция"
+  },
+  "お出掛け": {
+    "english_translation": "going out (for pleasure/errands)",
+    "russian_translation": "выход из дома, прогулка"
+  },
+  "お参り": {
+    "english_translation": "visiting a shrine/temple (to pray/pay respects)",
+    "russian_translation": "посещение храма, паломничество"
+  },
+  "お帰り": {
+    "english_translation": "Welcome home (informal/casual greeting).",
+    "russian_translation": "С возвращением (неформ.)."
+  },
+  "お待たせしました": {
+    "english_translation": "Sorry to have kept you waiting. (Polite)",
+    "russian_translation": "Извините за ожидание."
+  },
+  "お待ち遠様": {
+    "english_translation": "Thank you for waiting. (Very polite, used by staff)",
+    "russian_translation": "Благодарю за ожидание (вежл.)."
+  },
+  "お手伝いさん": {
+    "english_translation": "maid, domestic helper",
+    "russian_translation": "помощница по хозяйству, прислуга"
+  },
+  "お気の毒に": {
+    "english_translation": "My condolences, I'm sorry to hear that.",
+    "russian_translation": "Мне жаль, сочувствую."
+  },
+  "お辞儀": {
+    "english_translation": "bow (greeting/sign of respect)",
+    "russian_translation": "поклон"
+  },
+  "かしこまりました": {
+    "english_translation": "Certainly, I understand. (Humble/very polite)",
+    "russian_translation": "Вас понял, принято (вежл.)."
+  },
+  "かじる": {
+    "english_translation": "to nibble, to bite (on something hard)",
+    "russian_translation": "откусывать, грызть"
+  },
+  "かゆい": {
+    "english_translation": "itchy",
+    "russian_translation": "зудящий"
+  },
+  "からかう": {
+    "english_translation": "to tease, to make fun of",
+    "russian_translation": "дразнить, подшучивать"
+  },
+  "かるた": {
+    "english_translation": "karuta (traditional Japanese card game)",
+    "russian_translation": "карута (японская карточная игра)"
+  },
+  "かわいがる": {
+    "english_translation": "to love, to treat with affection, to cherish",
+    "russian_translation": "любить, лелеять, ласкать"
+  },
+  "きっかけ": {
+    "english_translation": "starting point, trigger, motive",
+    "russian_translation": "повод, толчок, начало"
+  },
+  "ぎっしり": {
+    "english_translation": "tightly packed, crammed, filled to the brim",
+    "russian_translation": "плотно, битком"
+  },
+  "くしゃみ": {
+    "english_translation": "sneeze",
+    "russian_translation": "чихание, чих"
+  },
+  "くたびれる": {
+    "english_translation": "to get tired out, to wear out (physically or mentally)",
+    "russian_translation": "устать, вымотаться"
+  },
+  "くだらない": {
+    "english_translation": "worthless, stupid, trifling",
+    "russian_translation": "бессмысленный, ерундовый, неважный"
+  },
+  "くっつく": {
+    "english_translation": "to stick to, to cling to, to be attached",
+    "russian_translation": "прилипнуть, приклеиться"
+  },
+  "くっつける": {
+    "english_translation": "to attach, to stick (something to something else)",
+    "russian_translation": "приклеивать, прикреплять"
+  },
+  "くどい": {
+    "english_translation": "too persistent; heavy, rich (taste); wordy",
+    "russian_translation": "назойливый; приторный (вкус); многословный"
+  },
+  "くるむ": {
+    "english_translation": "to wrap, to cover, to tuck in",
+    "russian_translation": "завернуть, обернуть"
+  },
+  "くれぐれも": {
+    "english_translation": "repeatedly, earnestly, sincerely",
+    "russian_translation": "очень прошу, в любом случае (напутствие)"
+  },
+  "こうして": {
+    "english_translation": "thus, in this way, like this",
+    "russian_translation": "таким образом, вот так"
+  },
+  "こしらえる": {
+    "english_translation": "to make, to produce, to manufacture",
+    "russian_translation": "изготавливать, создавать"
+  },
+  "こちらこそ": {
+    "english_translation": "It is I who should say so; likewise.",
+    "russian_translation": "Это вам спасибо; мне тоже (приятно)."
+  },
+  "こっそり": {
+    "english_translation": "stealthily, secretly, privately",
+    "russian_translation": "тайком, втихомолку"
+  },
+  "こないだ": {
+    "english_translation": "the other day, recently (colloquial contraction of この間)",
+    "russian_translation": "недавно, на днях"
+  },
+  "こぼす": {
+    "english_translation": "to spill, to drop, to complain (metaphorical)",
+    "russian_translation": "пролить, рассыпать"
+  },
+  "こぼれる": {
+    "english_translation": "to spill, to overflow, to scatter",
+    "russian_translation": "пролиться, рассыпаться"
+  },
+  "こらえる": {
+    "english_translation": "to endure, to bear, to restrain oneself (e.g., laughter)",
+    "russian_translation": "сдерживаться, терпеть"
+  },
+  "こんばんは": {
+    "english_translation": "Good evening.",
+    "russian_translation": "Добрый вечер."
+  },
+  "ごくろうさま": {
+    "english_translation": "Thank you for your hard work (used by a superior/senior).",
+    "russian_translation": "Спасибо за труд (к подчинённому)."
+  },
+  "ごぞんじですか": {
+    "english_translation": "Do you know? (Humble form of 知っていますか)",
+    "russian_translation": "Вы в курсе? (Вежл.)"
+  },
+  "ごちそうさま": {
+    "english_translation": "Thank you for the meal (after eating).",
+    "russian_translation": "Спасибо за угощение."
+  },
+  "ごめんください": {
+    "english_translation": "Excuse me, is anyone home? (Used at the door)",
+    "russian_translation": "Извините, есть кто-нибудь дома? (При входе)"
+  },
+  "さきおととい": {
+    "english_translation": "three days ago",
+    "russian_translation": "три дня назад"
+  },
+  "さっさ": {
+    "english_translation": "quickly, immediately",
+    "russian_translation": "быстро, живо"
+  },
+  "さっさと": {
+    "english_translation": "quickly, promptly, without delay",
+    "russian_translation": "быстро, живо, без промедления"
+  },
+  "さようなら": {
+    "english_translation": "Goodbye (formal/final).",
+    "russian_translation": "До свидания, прощайте."
+  },
+  "さわやか": {
+    "english_translation": "fresh, refreshing, clear (weather/mood)",
+    "russian_translation": "свежий, бодрящий"
+  },
+  "しあさって": {
+    "english_translation": "three days after tomorrow",
+    "russian_translation": "через три дня"
+  },
+  "しいんと": {
+    "english_translation": "silent (used for sudden, deep silence)",
+    "russian_translation": "тихо, беззвучно"
+  },
+  "しっぽ": {
+    "english_translation": "tail (of an animal)",
+    "russian_translation": "хвост"
+  },
+  "しつこい": {
+    "english_translation": "persistent, insistent, heavy (taste), nagging",
+    "russian_translation": "назойливый, приставучий; жирный (вкус)"
+  },
+  "しびれる": {
+    "english_translation": "to feel numb, to go to sleep (limb)",
+    "russian_translation": "онеметь, затечь"
+  },
+  "しぼむ": {
+    "english_translation": "to wither (flower), to deflate, to fade (emotions)",
+    "russian_translation": "увядать, сдуваться"
+  },
+  "しみじみ": {
+    "english_translation": "deeply, profoundly, earnestly (often in connection with nostalgia or emotion)",
+    "russian_translation": "глубоко, проникновенно, с чувством"
+  },
+  "しゃがむ": {
+    "english_translation": "to squat, to crouch down",
+    "russian_translation": "присесть, сесть на корточки"
+  },
+  "しゃっくり": {
+    "english_translation": "hiccups",
+    "russian_translation": "икота"
+  },
+  "しゃぶる": {
+    "english_translation": "to suck (on candy, a thumb); to dip (meat into broth)",
+    "russian_translation": "лизать, сосать; окунать (мясо в бульон)"
+  },
+  "しょうがない": {
+    "english_translation": "cannot be helped, inevitable",
+    "russian_translation": "ничего не поделаешь, неизбежно"
+  },
+  "しんと": {
+    "english_translation": "suddenly silent, still, hushed",
+    "russian_translation": "внезапно тихо, безмолвно"
+  },
+  "じゃんけん": {
+    "english_translation": "Janken (rock-paper-scissors game)",
+    "russian_translation": "джан-кэн-по (камень-ножницы-бумага)"
+  },
+  "じゅうたん": {
+    "english_translation": "carpet, rug",
+    "russian_translation": "ковёр"
+  },
+  "すくなくとも": {
+    "english_translation": "at least, at the minimum",
+    "russian_translation": "по крайней мере, как минимум"
+  },
+  "すっきり": {
+    "english_translation": "feeling refreshed, neat, clean-cut (style)",
+    "russian_translation": "освежённый, бодрый; опрятный"
+  },
+  "すっぱい": {
+    "english_translation": "sour, acidic",
+    "russian_translation": "кислый"
+  },
+  "すまない": {
+    "english_translation": "I'm sorry, excuse me (casual apology)",
+    "russian_translation": "прости, извини (неформ.)"
+  },
+  "すれちがう": {
+    "english_translation": "to pass by each other, to miss each other",
+    "russian_translation": "разминуться, пройти мимо"
+  },
+  "ずうずうしい": {
+    "english_translation": "impudent, shameless, audacious",
+    "russian_translation": "наглый, бесцеремонный"
+  },
+  "ずうっと": {
+    "english_translation": "for a long time, all the way, far away",
+    "russian_translation": "долго, с тех пор, намного (больше)"
+  },
+  "ずらす": {
+    "english_translation": "to shift, to slide, to delay (slightly)",
+    "russian_translation": "сдвигать, смещать"
+  },
+  "ずらり": {
+    "english_translation": "in a row, in a line (impressively long/many)",
+    "russian_translation": "в ряд, длинной очередью"
+  },
+  "せっせと": {
+    "english_translation": "diligently, industriously, hard at work",
+    "russian_translation": "усердно, старательно"
+  },
+  "せめて": {
+    "english_translation": "at least, at the very least",
+    "russian_translation": "хотя бы, по меньшей мере"
+  },
+  "ぜひとも": {
+    "english_translation": "by all means, absolutely",
+    "russian_translation": "обязательно, во что бы то ни стало"
+  },
+  "そういえば": {
+    "english_translation": "Speaking of which, come to think of it (used to change topic).",
+    "russian_translation": "Кстати, говоря об этом (вводная фраза)."
+  },
+  "そうっと": {
+    "english_translation": "softly, gently, quietly",
+    "russian_translation": "осторожно, тихо, нежно"
+  },
+  "そそっかしい": {
+    "english_translation": "careless, thoughtless, hasty",
+    "russian_translation": "неосторожный, легкомысленный"
+  },
+  "そのうえ": {
+    "english_translation": "in addition, moreover, furthermore",
+    "russian_translation": "к тому же, вдобавок"
+  },
+  "そのころ": {
+    "english_translation": "at that time, back then",
+    "russian_translation": "в то время, тогда"
+  },
+  "そのため": {
+    "english_translation": "therefore, for that reason",
+    "russian_translation": "поэтому, из-за этого"
+  },
+  "そのほか": {
+    "english_translation": "besides, in addition, other (items)",
+    "russian_translation": "помимо этого, кроме того"
+  },
+  "その他": {
+    "english_translation": "and others, etc.",
+    "russian_translation": "и другие, прочее"
+  },
+  "その頃": {
+    "english_translation": "at that time, around then",
+    "russian_translation": "в то время"
+  },
+  "それなのに": {
+    "english_translation": "even so, despite that, nevertheless",
+    "russian_translation": "несмотря на это, тем не менее"
+  },
+  "たちまち": {
+    "english_translation": "at once, immediately, in an instant",
+    "russian_translation": "тотчас, мгновенно"
+  },
+  "ためらう": {
+    "english_translation": "to hesitate, to waver, to delay",
+    "russian_translation": "колебаться, не решаться"
+  },
+  "ため息": {
+    "english_translation": "sigh",
+    "russian_translation": "вздох"
+  },
+  "たんす": {
+    "english_translation": "chest of drawers, wardrobe",
+    "russian_translation": "комод, шкаф"
+  },
+  "だいいち": {
+    "english_translation": "firstly, to begin with; above all",
+    "russian_translation": "во-первых, в первую очередь"
+  },
+  "だます": {
+    "english_translation": "to deceive, to trick, to cheat",
+    "russian_translation": "обманывать, вводить в заблуждение"
+  },
+  "だらしない": {
+    "english_translation": "sloppy, untidy, loose (morals)",
+    "russian_translation": "неряшливый, расхлябанный, беспутный"
+  },
+  "ちぎる": {
+    "english_translation": "to tear up, to shred (by hand)",
+    "russian_translation": "разрывать, рвать на части"
+  },
+  "ちり紙": {
+    "english_translation": "toilet paper, tissue paper",
+    "russian_translation": "туалетная бумага, папиросная бумага"
+  },
+  "ついで": {
+    "english_translation": "on the way, at the same time, incidental matter",
+    "russian_translation": "заодно, по пути, по случаю"
+  },
+  "つまずく": {
+    "english_translation": "to stumble, to trip; to fail (metaphorical)",
+    "russian_translation": "споткнуться, оступиться"
+  },
+  "でたらめ": {
+    "english_translation": "nonsense, absurd, random",
+    "russian_translation": "чепуха, вздор, наугад"
+  },
+  "とっくに": {
+    "english_translation": "long ago, already, a long time since",
+    "russian_translation": "давно, уже прошло"
+  },
+  "ともかく": {
+    "english_translation": "anyway, anyhow, at any rate",
+    "russian_translation": "во всяком случае, как бы то ни было"
+  },
+  "どうせ": {
+    "english_translation": "anyway, in any case (often with resignation)",
+    "russian_translation": "в любом случае, всё равно"
+  },
+  "どうぞよろしく": {
+    "english_translation": "Nice to meet you; Please be kind to me (often after an introduction).",
+    "russian_translation": "Приятно познакомиться; Прошу любить и жаловать."
+  },
+  "どきどき": {
+    "english_translation": "heart beating fast (with excitement/fear)",
+    "russian_translation": "частое биение сердца (тук-тук)"
+  },
+  "どっと": {
+    "english_translation": "suddenly, all at once (sound/emotion)",
+    "russian_translation": "внезапно, разом (например, смех)"
+  },
+  "どなる": {
+    "english_translation": "to yell, to shout, to roar (in anger)",
+    "russian_translation": "кричать, орать (от злости)"
+  },
+  "なぐる": {
+    "english_translation": "to strike, to hit, to punch",
+    "russian_translation": "бить, ударять (кулаком)"
+  },
+  "なだらか": {
+    "english_translation": "gentle (slope), smooth, gradual",
+    "russian_translation": "пологий, плавный, гладкий"
+  },
+  "なにしろ": {
+    "english_translation": "at any rate, because, as you know",
+    "russian_translation": "поскольку, ведь, как-никак"
+  },
+  "なんとなく": {
+    "english_translation": "somehow, vaguely, without any particular reason",
+    "russian_translation": "почему-то, смутно, без особой причины"
+  },
+  "なんとも": {
+    "english_translation": "nothing in particular; indeed, very (often with a negative tone)",
+    "russian_translation": "ничего особенного; (ни)как не могу (решить)"
+  },
+  "にこにこ": {
+    "english_translation": "smiling cheerfully, beaming",
+    "russian_translation": "улыбаясь (нежно, добродушно)"
+  },
+  "ねじ": {
+    "english_translation": "screw, bolt",
+    "russian_translation": "винт, шуруп"
+  },
+  "のこぎり": {
+    "english_translation": "saw",
+    "russian_translation": "пила"
+  },
+  "のろのろ": {
+    "english_translation": "slowly, sluggishly, tardily",
+    "russian_translation": "медленно, черепашьим шагом"
+  },
+  "はきはき": {
+    "english_translation": "clearly, briskly, articulately",
+    "russian_translation": "чётко, бойко, энергично"
+  },
+  "はじめまして": {
+    "english_translation": "How do you do? (Greeting upon first meeting).",
+    "russian_translation": "Рад знакомству (при первой встрече)."
+  },
+  "はめる": {
+    "english_translation": "to fit into (a slot, groove), to insert; to frame (a person)",
+    "russian_translation": "вставлять, вдевать; подставлять"
+  },
+  "ばからしい": {
+    "english_translation": "absurd, ridiculous, nonsensical",
+    "russian_translation": "глупый, нелепый, бессмысленный"
+  },
+  "ばつ": {
+    "english_translation": "penalty, punishment; cross mark (×)",
+    "russian_translation": "наказание, штраф; крестик (знак неправильности)"
+  },
+  "ばね": {
+    "english_translation": "spring (elastic component)",
+    "russian_translation": "пружина"
+  },
+  "ひっくり返す": {
+    "english_translation": "to overturn, to turn upside down, to flip (an opinion)",
+    "russian_translation": "переворачивать, опрокидывать"
+  },
+  "ひっくり返る": {
+    "english_translation": "to be overturned, to fall over, to capsize",
+    "russian_translation": "опрокинуться, перевернуться"
+  },
+  "ひとまず": {
+    "english_translation": "for the time being, for now, tentatively",
+    "russian_translation": "пока что, на первое время"
+  },
+  "ひとりでに": {
+    "english_translation": "by itself, automatically, spontaneously",
+    "russian_translation": "сам по себе, непроизвольно"
+  },
+  "ひゃっかじてん": {
+    "english_translation": "encyclopedia",
+    "russian_translation": "энциклопедия"
+  },
+  "ぴかぴか": {
+    "english_translation": "glittering, sparkling, brand new",
+    "russian_translation": "сверкающий, блестящий"
+  },
+  "ぴたり": {
+    "english_translation": "exactly, precisely, suddenly (stop)",
+    "russian_translation": "точно, вплотную"
+  },
+  "ふざける": {
+    "english_translation": "to joke, to fool around, to misbehave",
+    "russian_translation": "шутить, дурачиться, озорничать"
+  },
+  "ふわふわ": {
+    "english_translation": "soft, fluffy, light; floating",
+    "russian_translation": "мягкий, пушистый; воздушный"
+  },
+  "ぶつかる": {
+    "english_translation": "to collide, to strike against; to conflict (opinion)",
+    "russian_translation": "столкнуться, налететь; конфликтовать"
+  },
+  "ぶつける": {
+    "english_translation": "to hit, to strike (something against something else)",
+    "russian_translation": "ударить, стукнуть"
+  },
+  "ぶつぶつ": {
+    "english_translation": "muttering, grumbling (sound); pimples",
+    "russian_translation": "ворчание, бормотание"
+  },
+  "ぶらさげる": {
+    "english_translation": "to hang, to suspend (something from something else)",
+    "russian_translation": "подвешивать, свисать"
+  },
+  "へそ": {
+    "english_translation": "navel, belly button",
+    "russian_translation": "пупок"
+  },
+  "へる": {
+    "english_translation": "to decrease, to diminish, to lessen",
+    "russian_translation": "уменьшаться, убывать"
+  },
+  "ぺん": {
+    "english_translation": "pen",
+    "russian_translation": "ручка"
+  },
+  "ほどく": {
+    "english_translation": "to unfasten, to untie, to undo",
+    "russian_translation": "развязывать, расстёгивать"
+  },
+  "ぼろ": {
+    "english_translation": "rag, tattered clothes; flaw, weakness (metaphorical)",
+    "russian_translation": "лохмотья, ветошь; изъян"
+  },
+  "まあまあ": {
+    "english_translation": "so-so, passable, tolerable",
+    "russian_translation": "так себе, сносно"
+  },
+  "まごまご": {
+    "english_translation": "to be bewildered, to hesitate, to fumble",
+    "russian_translation": "растеряться, замешкаться"
+  },
+  "またぐ": {
+    "english_translation": "to step over, to straddle",
+    "russian_translation": "перешагивать"
+  },
+  "まぶしい": {
+    "english_translation": "dazzling, glaring, blinding (light)",
+    "russian_translation": "ослепительный, яркий"
+  },
+  "まぶた": {
+    "english_translation": "eyelid",
+    "russian_translation": "веко"
+  },
+  "みじめ": {
+    "english_translation": "miserable, wretched, pathetic",
+    "russian_translation": "жалкий, несчастный"
+  },
+  "みっともない": {
+    "english_translation": "shameful, indecent, unbecoming",
+    "russian_translation": "позорный, некрасивый, неприличный"
+  },
+  "めちゃくちゃ": {
+    "english_translation": "messy, ruined; very, extremely (colloquial)",
+    "russian_translation": "бардак, беспорядок; очень, крайне (разг.)"
+  },
+  "めっきり": {
+    "english_translation": "remarkably, noticeably (used for change)",
+    "russian_translation": "заметно, значительно"
+  },
+  "めでたい": {
+    "english_translation": "auspicious, happy, celebratory",
+    "russian_translation": "праздничный, радостный"
+  },
+  "めまい": {
+    "english_translation": "dizziness, vertigo",
+    "russian_translation": "головокружение"
+  },
+  "もしかしたら": {
+    "english_translation": "perhaps, maybe (stronger doubt than もしかすると)",
+    "russian_translation": "может быть, возможно"
+  },
+  "もしかすると": {
+    "english_translation": "perhaps, maybe (with some degree of doubt)",
+    "russian_translation": "возможно, может быть"
+  },
+  "もたれる": {
+    "english_translation": "to lean against; to be heavy (on the stomach)",
+    "russian_translation": "опираться; быть тяжёлым (о еде)"
+  },
+  "もったいない": {
+    "english_translation": "wasteful, what a waste; sacred (archaic)",
+    "russian_translation": "жаль, расточительно"
+  },
+  "やかましい": {
+    "english_translation": "noisy, loud; strict, fault-finding",
+    "russian_translation": "шумный, громкий; придирчивый"
+  },
+  "やたら": {
+    "english_translation": "excessively, unnecessarily; at random",
+    "russian_translation": "чрезмерно, без надобности; как попало"
+  },
+  "やっつける": {
+    "english_translation": "to defeat, to beat; to finish off (a task)",
+    "russian_translation": "одолеть, победить; покончить (с делом)"
+  },
+  "やむをえない": {
+    "english_translation": "unavoidable, inevitable, no choice but to",
+    "russian_translation": "вынужденный, неизбежный"
+  },
+  "やむを得ない": {
+    "english_translation": "unavoidable, necessary (due to circumstances)",
+    "russian_translation": "неизбежный, вынужденный"
+  },
+  "ゆでる": {
+    "english_translation": "to boil (food), to parboil",
+    "russian_translation": "варить, отваривать"
+  },
+  "よこす": {
+    "english_translation": "to send, to hand over, to give (informal/polite)",
+    "russian_translation": "присылать, передавать"
+  },
+  "わりあいに": {
+    "english_translation": "relatively, comparatively",
+    "russian_translation": "относительно, сравнительно"
+  },
+  "アイデア": {
+    "english_translation": "idea, notion",
+    "russian_translation": "идея, замысел"
+  },
+  "アイディア": {
+    "english_translation": "idea, plan (variant of アイデア)",
+    "russian_translation": "идея, мысль"
+  },
+  "アクセント": {
+    "english_translation": "accent (pronunciation); stress",
+    "russian_translation": "акцент, ударение"
+  },
+  "アンテナ": {
+    "english_translation": "antenna, aerial",
+    "russian_translation": "антенна"
+  },
+  "イコール": {
+    "english_translation": "equal (equals sign =)",
+    "russian_translation": "равно (знак =)"
+  },
+  "インキ": {
+    "english_translation": "ink",
+    "russian_translation": "чернила"
+  },
+  "インタビュー": {
+    "english_translation": "interview",
+    "russian_translation": "интервью, беседа"
+  },
+  "ウェイトレス": {
+    "english_translation": "waitress",
+    "russian_translation": "официантка"
+  },
+  "ウエートレス": {
+    "english_translation": "waitress (variant of ウェイトレス)",
+    "russian_translation": "официантка"
+  },
+  "ウーマン": {
+    "english_translation": "woman (often in compounds, e.g., career woman)",
+    "russian_translation": "женщина"
+  },
+  "ウール": {
+    "english_translation": "wool",
+    "russian_translation": "шерсть"
+  },
+  "エチケット": {
+    "english_translation": "etiquette, manners",
+    "russian_translation": "этикет, правила поведения"
+  },
+  "エプロン": {
+    "english_translation": "apron",
+    "russian_translation": "фартук"
+  },
+  "オイル": {
+    "english_translation": "oil (lubricant, fuel, cooking)",
+    "russian_translation": "масло, нефть"
+  },
+  "オルガン": {
+    "english_translation": "organ (musical instrument)",
+    "russian_translation": "орган (музыкальный инструмент)"
+  },
+  "オーケストラ": {
+    "english_translation": "orchestra",
+    "russian_translation": "оркестр"
+  },
+  "オートメーション": {
+    "english_translation": "automation",
+    "russian_translation": "автоматизация"
+  },
+  "オーバコート": {
+    "english_translation": "overcoat (less common variant)",
+    "russian_translation": "пальто, шинель"
+  },
+  "オーバーコート": {
+    "english_translation": "overcoat",
+    "russian_translation": "пальто, шинель"
+  },
+  "カセット": {
+    "english_translation": "cassette, cartridge",
+    "russian_translation": "кассета"
+  },
+  "カバー": {
+    "english_translation": "cover (book, protective case); cover (song)",
+    "russian_translation": "обложка, чехол; кавер (песня)"
+  },
+  "カラー": {
+    "english_translation": "color; collar",
+    "russian_translation": "цвет; воротник"
+  },
+  "カロリー": {
+    "english_translation": "calorie",
+    "russian_translation": "калория"
+  },
+  "カーブ": {
+    "english_translation": "curve (road, line); curve ball (baseball)",
+    "russian_translation": "изгиб, поворот; кривая"
+  },
+  "ガム": {
+    "english_translation": "gum (chewing)",
+    "russian_translation": "жевательная резинка"
+  },
+  "キャンパス": {
+    "english_translation": "campus (university grounds)",
+    "russian_translation": "кампус, университетский городок"
+  },
+  "ギャング": {
+    "english_translation": "gang",
+    "russian_translation": "банда, шайка"
+  },
+  "クリーニング": {
+    "english_translation": "dry cleaning, cleaning service",
+    "russian_translation": "химчистка, чистка"
+  },
+  "クーラー": {
+    "english_translation": "air conditioner, cooler",
+    "russian_translation": "кондиционер, охладитель"
+  },
+  "コック": {
+    "english_translation": "cook, chef",
+    "russian_translation": "повар"
+  },
+  "コレクション": {
+    "english_translation": "collection",
+    "russian_translation": "коллекция"
+  },
+  "コンクリート": {
+    "english_translation": "concrete",
+    "russian_translation": "бетон, железобетон"
+  },
+  "コンクール": {
+    "english_translation": "contest, competition",
+    "russian_translation": "конкурс"
+  },
+  "コンセント": {
+    "english_translation": "electrical outlet, socket",
+    "russian_translation": "электрическая розетка"
+  },
+  "コース": {
+    "english_translation": "course (path, study program, meal)",
+    "russian_translation": "курс, маршрут, блюдо"
+  },
+  "コーラス": {
+    "english_translation": "chorus (singers, part of a song)",
+    "russian_translation": "хор, припев"
+  },
+  "ゴム": {
+    "english_translation": "rubber, gum, eraser",
+    "russian_translation": "резина, ластик"
+  },
+  "サイレン": {
+    "english_translation": "siren (alarm)",
+    "russian_translation": "сирена, гудок"
+  },
+  "サラリーマン": {
+    "english_translation": "salaryman (office worker, typically male, in Japan)",
+    "russian_translation": "офисный работник, служащий"
+  },
+  "サンプル": {
+    "english_translation": "sample, specimen",
+    "russian_translation": "образец, проба"
+  },
+  "サークル": {
+    "english_translation": "circle (shape); club, student society",
+    "russian_translation": "круг, окружность; кружок, клуб"
+  },
+  "シャッター": {
+    "english_translation": "shutter (camera, security)",
+    "russian_translation": "затвор, ставень"
+  },
+  "ショップ": {
+    "english_translation": "shop, store (often a specialized one)",
+    "russian_translation": "магазин, лавка"
+  },
+  "シリーズ": {
+    "english_translation": "series, sequence",
+    "russian_translation": "серия"
+  },
+  "シーズン": {
+    "english_translation": "season (period of time for events, etc.)",
+    "russian_translation": "сезон"
+  },
+  "シーツ": {
+    "english_translation": "sheet (bedding)",
+    "russian_translation": "простыня"
+  },
+  "ジャーナリスト": {
+    "english_translation": "journalist",
+    "russian_translation": "журналист"
+  },
+  "スカーフ": {
+    "english_translation": "scarf",
+    "russian_translation": "шарф, платок"
+  },
+  "スクール": {
+    "english_translation": "school (often specialized, e.g., dance school)",
+    "russian_translation": "школа, учебное заведение"
+  },
+  "スケジュール": {
+    "english_translation": "schedule, timetable",
+    "russian_translation": "расписание, график"
+  },
+  "スタート": {
+    "english_translation": "start, beginning",
+    "russian_translation": "старт, начало"
+  },
+  "スチュワーデス": {
+    "english_translation": "stewardess, flight attendant (outdated term)",
+    "russian_translation": "стюардесса"
+  },
+  "ステージ": {
+    "english_translation": "stage (in theater, process); phase",
+    "russian_translation": "сцена, этап, фаза"
+  },
+  "ストッキング": {
+    "english_translation": "stockings, pantyhose",
+    "russian_translation": "чулки, колготки"
+  },
+  "ストップ": {
+    "english_translation": "stop (interjection, signal)",
+    "russian_translation": "стоп (остановка)"
+  },
+  "スピーカー": {
+    "english_translation": "speaker (device); speaker (person, e.g., at a conference)",
+    "russian_translation": "динамик, колонка; оратор"
+  },
+  "スマート": {
+    "english_translation": "smart, stylish, slender (often refers to appearance/design)",
+    "russian_translation": "стильный, стройный, умный"
+  },
+  "スライド": {
+    "english_translation": "slide (for presentation, playground)",
+    "russian_translation": "слайд; горка"
+  },
+  "セメント": {
+    "english_translation": "cement",
+    "russian_translation": "цемент"
+  },
+  "センチ": {
+    "english_translation": "centimeter; sentiment (emotions)",
+    "russian_translation": "сантиметр"
+  },
+  "ゼミ": {
+    "english_translation": "seminar, study group (short for ゼミナール)",
+    "russian_translation": "семинар, кружок"
+  },
+  "タイア": {
+    "english_translation": "tire, tyre (variant of タイヤ)",
+    "russian_translation": "шина, покрышка"
+  },
+  "ダイアグラム": {
+    "english_translation": "diagram, chart, graph",
+    "russian_translation": "диаграмма, схема"
+  },
+  "ダイヤグラム": {
+    "english_translation": "diagram (especially timetable/schedule chart)",
+    "russian_translation": "диаграмма (особ. расписания)"
+  },
+  "ダイヤモンド": {
+    "english_translation": "diamond",
+    "russian_translation": "алмаз, бриллиант"
+  },
+  "ダイヤル": {
+    "english_translation": "dial (phone, meter), control knob",
+    "russian_translation": "циферблат, диск, набор (телефона)"
+  },
+  "ダブル": {
+    "english_translation": "double (size, amount, room)",
+    "russian_translation": "двойной, два (в спорте, гостинице)"
+  },
+  "ダム": {
+    "english_translation": "dam (barrier for water)",
+    "russian_translation": "плотина, дамба"
+  },
+  "チップ": {
+    "english_translation": "tip (gratuity); microchip",
+    "russian_translation": "чаевые; чип"
+  },
+  "チョーク": {
+    "english_translation": "chalk",
+    "russian_translation": "мел"
+  },
+  "テニスコート": {
+    "english_translation": "tennis court",
+    "russian_translation": "теннисный корт"
+  },
+  "テンポ": {
+    "english_translation": "tempo, pace (music, speed)",
+    "russian_translation": "темп, ритм"
+  },
+  "テーマ": {
+    "english_translation": "theme, topic, subject",
+    "russian_translation": "тема, предмет"
+  },
+  "トレーニング": {
+    "english_translation": "training, workout",
+    "russian_translation": "тренировка"
+  },
+  "ドキドキ": {
+    "english_translation": "heart pounding (from excitement, nervousness)",
+    "russian_translation": "частое биение сердца (от волнения)"
+  },
+  "ナイロン": {
+    "english_translation": "nylon",
+    "russian_translation": "нейлон"
+  },
+  "ナンバー": {
+    "english_translation": "number (serial, ID, phone)",
+    "russian_translation": "номер"
+  },
+  "ニコニコ": {
+    "english_translation": "smiling cheerfully, beaming (variant of にこにこ)",
+    "russian_translation": "улыбаясь (радостно)"
+  },
+  "ネックレス": {
+    "english_translation": "necklace",
+    "russian_translation": "ожерелье, колье"
+  },
+  "ハンドル": {
+    "english_translation": "handle, steering wheel (car, door)",
+    "russian_translation": "руль, рукоятка"
+  },
+  "バイバイ": {
+    "english_translation": "Bye-bye. (Informal/casual)",
+    "russian_translation": "Пока-пока."
+  },
+  "バケツ": {
+    "english_translation": "bucket, pail",
+    "russian_translation": "ведро"
+  },
+  "バック": {
+    "english_translation": "back (rear part); bag, backpack",
+    "russian_translation": "задняя часть; сумка, рюкзак"
+  },
+  "バランス": {
+    "english_translation": "balance, equilibrium",
+    "russian_translation": "баланс, равновесие"
+  },
+  "バンド": {
+    "english_translation": "band (music, rubber)",
+    "russian_translation": "группа, оркестр; ремень"
+  },
+  "パターン": {
+    "english_translation": "pattern, model, style",
+    "russian_translation": "шаблон, образец, паттерн"
+  },
+  "パンツ": {
+    "english_translation": "pants, trousers; underwear (slight difference depending on context)",
+    "russian_translation": "брюки, штаны; трусы"
+  },
+  "ビタミン": {
+    "english_translation": "vitamin",
+    "russian_translation": "витамин"
+  },
+  "ビニール": {
+    "english_translation": "vinyl, plastic (sheet, bag)",
+    "russian_translation": "полиэтилен, винил, плёнка"
+  },
+  "ビルディング": {
+    "english_translation": "building, skyscraper",
+    "russian_translation": "здание, высотка"
+  },
+  "ピカピカ": {
+    "english_translation": "glittering, sparkling, shiny (variant of ぴかぴか)",
+    "russian_translation": "сверкающий, блестящий"
+  },
+  "ピストル": {
+    "english_translation": "pistol, gun",
+    "russian_translation": "пистолет"
+  },
+  "ピンク": {
+    "english_translation": "pink",
+    "russian_translation": "розовый (цвет)"
+  },
+  "ファスナー": {
+    "english_translation": "zipper, fastener",
+    "russian_translation": "молния (застёжка)"
+  },
+  "フライパン": {
+    "english_translation": "frying pan, skillet",
+    "russian_translation": "сковорода"
+  },
+  "フリー": {
+    "english_translation": "free (unrestricted, independent)",
+    "russian_translation": "свободный, независимый"
+  },
+  "フワフワ": {
+    "english_translation": "soft, fluffy, light (variant of ふわふわ)",
+    "russian_translation": "мягкий, воздушный"
+  },
+  "ブラウス": {
+    "english_translation": "blouse",
+    "russian_translation": "блузка"
+  },
+  "ブラシ": {
+    "english_translation": "brush",
+    "russian_translation": "щётка, кисть"
+  },
+  "ブローチ": {
+    "english_translation": "brooch",
+    "russian_translation": "брошь"
+  },
+  "プラスチック": {
+    "english_translation": "plastic",
+    "russian_translation": "пластик, пластмасса"
+  },
+  "プラットホーム": {
+    "english_translation": "platform (railway/subway station)",
+    "russian_translation": "платформа (вокзала)"
+  },
+  "プリント": {
+    "english_translation": "print, printed material; handout",
+    "russian_translation": "принт, распечатка, копия"
+  },
+  "プログラム": {
+    "english_translation": "program (computer, event, TV)",
+    "russian_translation": "программа"
+  },
+  "ヘリコプター": {
+    "english_translation": "helicopter",
+    "russian_translation": "вертолёт"
+  },
+  "ベテラン": {
+    "english_translation": "veteran, experienced expert",
+    "russian_translation": "ветеран, опытный специалист"
+  },
+  "ペンチ": {
+    "english_translation": "pliers, pincers",
+    "russian_translation": "плоскогубцы"
+  },
+  "ボーナス": {
+    "english_translation": "bonus",
+    "russian_translation": "бонус, премия"
+  },
+  "ポスター": {
+    "english_translation": "poster",
+    "russian_translation": "плакат, афиша"
+  },
+  "マイナス": {
+    "english_translation": "minus, negative (sign/value)",
+    "russian_translation": "минус, отрицательный"
+  },
+  "マスク": {
+    "english_translation": "mask",
+    "russian_translation": "маска"
+  },
+  "マフラー": {
+    "english_translation": "muffler, scarf (winter wear)",
+    "russian_translation": "шарф"
+  },
+  "マラソン": {
+    "english_translation": "marathon",
+    "russian_translation": "марафон"
+  },
+  "マンション": {
+    "english_translation": "condominium, large apartment building",
+    "russian_translation": "многоквартирный дом, кондоминиум"
+  },
+  "ミシン": {
+    "english_translation": "sewing machine",
+    "russian_translation": "швейная машинка"
+  },
+  "ミリ": {
+    "english_translation": "millimeter, milligram, etc. (prefix milli-)",
+    "russian_translation": "миллиметр (сокращение)"
+  },
+  "メニュー": {
+    "english_translation": "menu (restaurant, computer)",
+    "russian_translation": "меню"
+  },
+  "メーター": {
+    "english_translation": "meter (measuring device); meter (unit of length)",
+    "russian_translation": "счётчик, измерительный прибор; метр"
+  },
+  "モダン": {
+    "english_translation": "modern, contemporary",
+    "russian_translation": "современный, модерн"
+  },
+  "モデル": {
+    "english_translation": "model (person, product, example)",
+    "russian_translation": "модель, образец"
+  },
+  "モノレール": {
+    "english_translation": "monorail",
+    "russian_translation": "монорельс"
+  },
+  "モーター": {
+    "english_translation": "motor, engine",
+    "russian_translation": "мотор, двигатель"
+  },
+  "ラッシュアワー": {
+    "english_translation": "rush hour",
+    "russian_translation": "час пик"
+  },
+  "ランチ": {
+    "english_translation": "lunch",
+    "russian_translation": "ланч, обед"
+  },
+  "ランニング": {
+    "english_translation": "running (sport/exercise)",
+    "russian_translation": "бег, пробежка"
+  },
+  "リズム": {
+    "english_translation": "rhythm, cadence",
+    "russian_translation": "ритм"
+  },
+  "リットル": {
+    "english_translation": "liter",
+    "russian_translation": "литр"
+  },
+  "リボン": {
+    "english_translation": "ribbon, band",
+    "russian_translation": "лента, бант"
+  },
+  "レインコート": {
+    "english_translation": "raincoat",
+    "russian_translation": "дождевик, плащ"
+  },
+  "レクリェーション": {
+    "english_translation": "recreation, leisure",
+    "russian_translation": "рекреация, отдых"
+  },
+  "レジャー": {
+    "english_translation": "leisure, free time (often outdoor)",
+    "russian_translation": "досуг, отдых"
+  },
+  "レベル": {
+    "english_translation": "level, standard, stage",
+    "russian_translation": "уровень"
+  },
+  "レンズ": {
+    "english_translation": "lens",
+    "russian_translation": "линза, объектив"
+  },
+  "ロッカー": {
+    "english_translation": "locker, cabinet",
+    "russian_translation": "шкафчик, сейф"
+  },
+  "ロビー": {
+    "english_translation": "lobby, lounge, foyer",
+    "russian_translation": "лобби, вестибюль"
+  },
+  "ローマじ": {
+    "english_translation": "Rōmaji (Japanese written in Latin script)",
+    "russian_translation": "ромадзи (латинская транслитерация японского)"
+  },
+  "ワンピース": {
+    "english_translation": "dress (one-piece garment)",
+    "russian_translation": "платье (цельное)"
+  },
+  "一休み": {
+    "english_translation": "a short rest, a break",
+    "russian_translation": "короткий отдых, передышка"
+  },
+  "一定": {
+    "english_translation": "fixed, constant, certain (degree)",
+    "russian_translation": "постоянный, определённый, фиксированный"
+  },
+  "一応": {
+    "english_translation": "for the time being; in outline; just in case",
+    "russian_translation": "на всякий случай; в общих чертах"
+  },
+  "一斉": {
+    "english_translation": "simultaneously, all at once",
+    "russian_translation": "одновременно, разом"
+  },
+  "一旦": {
+    "english_translation": "for a short time, briefly; once, as soon as (something happens)",
+    "russian_translation": "на время, пока; как только, если"
+  },
+  "一段": {
+    "english_translation": "a step, a stage; a paragraph",
+    "russian_translation": "ступень, этап; абзац"
+  },
+  "一流": {
+    "english_translation": "first-class, top-grade, leading",
+    "russian_translation": "первоклассный, высший сорт"
+  },
+  "一通り": {
+    "english_translation": "from beginning to end; briefly, generally",
+    "russian_translation": "от начала до конца; в общих чертах"
+  },
+  "万歳": {
+    "english_translation": "Banzai! (Long live! Hurray!)",
+    "russian_translation": "Банзай! (Ура! Да здравствует!)"
+  },
+  "三日月": {
+    "english_translation": "crescent moon, new moon",
+    "russian_translation": "полумесяц"
+  },
+  "三角": {
+    "english_translation": "triangle, triangular",
+    "russian_translation": "треугольник"
+  },
+  "上り": {
+    "english_translation": "ascending, going up (to the capital/main city)",
+    "russian_translation": "подъём, направление к столице"
+  },
+  "上下": {
+    "english_translation": "up and down; superiority and inferiority; fluctuation",
+    "russian_translation": "верх и низ; колебание, перепад"
+  },
+  "上旬": {
+    "english_translation": "first third of a month (1st to 10th day)",
+    "russian_translation": "первая декада месяца"
+  },
+  "上級": {
+    "english_translation": "advanced level, high grade",
+    "russian_translation": "продвинутый уровень, старшие классы"
+  },
+  "下品": {
+    "english_translation": "vulgar, indecent, low-class",
+    "russian_translation": "пошлый, неприличный, низкопробный"
+  },
+  "下旬": {
+    "english_translation": "last third of a month (21st to the end)",
+    "russian_translation": "последняя декада месяца"
+  },
+  "下書き": {
+    "english_translation": "draft, rough copy",
+    "russian_translation": "черновик"
+  },
+  "下水": {
+    "english_translation": "sewage, drainage, sewer",
+    "russian_translation": "канализация, сточные воды"
+  },
+  "下町": {
+    "english_translation": "low city, old town (traditional working-class area)",
+    "russian_translation": "старый городской район, нижний город"
+  },
+  "下線": {
+    "english_translation": "underline, underscore",
+    "russian_translation": "подчёркивание"
+  },
+  "下車": {
+    "english_translation": "alighting (from a vehicle), getting off",
+    "russian_translation": "высадка, выход (из транспорта)"
+  },
+  "下降": {
+    "english_translation": "descent, fall, decline",
+    "russian_translation": "спуск, снижение, падение"
+  },
+  "下駄": {
+    "english_translation": "geta (traditional Japanese wooden clogs)",
+    "russian_translation": "гэта (японские сандалии)"
+  },
+  "不潔": {
+    "english_translation": "unclean, dirty, filthy",
+    "russian_translation": "нечистый, грязный"
+  },
+  "不規則": {
+    "english_translation": "irregular, unsystematic",
+    "russian_translation": "нерегулярный, беспорядочный"
+  },
+  "不通": {
+    "english_translation": "stoppage, cessation of communication (traffic)",
+    "russian_translation": "прекращение (сообщения), закрытие (пути)"
+  },
+  "不運": {
+    "english_translation": "unlucky, misfortune, bad luck",
+    "russian_translation": "несчастливый, невезение"
+  },
+  "両側": {
+    "english_translation": "both sides",
+    "russian_translation": "обе стороны"
+  },
+  "並木": {
+    "english_translation": "row of trees, roadside trees",
+    "russian_translation": "аллея, ряд деревьев"
+  },
+  "並行": {
+    "english_translation": "parallel (line, process); simultaneous",
+    "russian_translation": "параллельный, одновременный"
+  },
+  "中世": {
+    "english_translation": "Middle Ages, medieval period",
+    "russian_translation": "Средневековье"
+  },
+  "中味": {
+    "english_translation": "contents, substance, essence",
+    "russian_translation": "содержимое, суть"
+  },
+  "中年": {
+    "english_translation": "middle age",
+    "russian_translation": "средний возраст"
+  },
+  "中性": {
+    "english_translation": "neutral (gender, chemistry, color)",
+    "russian_translation": "нейтральный"
+  },
+  "中指": {
+    "english_translation": "middle finger",
+    "russian_translation": "средний палец"
+  },
+  "中旬": {
+    "english_translation": "middle third of a month (11th to 20th day)",
+    "russian_translation": "середина месяца"
+  },
+  "中身": {
+    "english_translation": "contents (of a package, container)",
+    "russian_translation": "содержимое, начинка"
+  },
+  "中途": {
+    "english_translation": "halfway, en route, in the middle of",
+    "russian_translation": "на полпути, на середине"
+  },
+  "中間": {
+    "english_translation": "middle, midpoint, intermediate",
+    "russian_translation": "середина, промежуток"
+  },
+  "主役": {
+    "english_translation": "leading role, main character",
+    "russian_translation": "главная роль, протагонист"
+  },
+  "主語": {
+    "english_translation": "subject (grammatical)",
+    "russian_translation": "подлежащее"
+  },
+  "丼": {
+    "english_translation": "donburi (bowl of rice with topping)",
+    "russian_translation": "донбури (блюдо в миске)"
+  },
+  "乗換": {
+    "english_translation": "transfer (transportation)",
+    "russian_translation": "пересадка (транспорт)"
+  },
+  "乗車": {
+    "english_translation": "boarding (a vehicle), getting on",
+    "russian_translation": "посадка (в транспорт)"
+  },
+  "乱暴": {
+    "english_translation": "violence, rough, rude",
+    "russian_translation": "грубость, насилие"
+  },
+  "乾かす": {
+    "english_translation": "to dry (something), to air-dry",
+    "russian_translation": "сушить"
+  },
+  "乾杯": {
+    "english_translation": "Cheers! Bottoms up! (toast)",
+    "russian_translation": "За ваше здоровье! (тост)"
+  },
+  "乾燥": {
+    "english_translation": "dryness, desiccation, arid",
+    "russian_translation": "сухость, высыхание"
+  },
+  "乾電池": {
+    "english_translation": "dry cell battery",
+    "russian_translation": "сухая батарейка"
+  },
+  "予備": {
+    "english_translation": "reserve, spare, preliminary",
+    "russian_translation": "запасной, резервный"
+  },
+  "争う": {
+    "english_translation": "to compete, to contend, to dispute",
+    "russian_translation": "соревноваться, спорить"
+  },
+  "五十音": {
+    "english_translation": "the Japanese syllabary (Gojūon)",
+    "russian_translation": "гондзюон (японская азбука)"
+  },
+  "井戸": {
+    "english_translation": "well (water source)",
+    "russian_translation": "колодец"
+  },
+  "亡くす": {
+    "english_translation": "to lose (a person), to mourn",
+    "russian_translation": "потерять, лишиться (кого-то)"
+  },
+  "交ざる": {
+    "english_translation": "to be mixed, to mingle (intransitive, natural mixing)",
+    "russian_translation": "смешиваться, перемешиваться"
+  },
+  "交じる": {
+    "english_translation": "to be mixed, to mingle (intransitive, becoming a part of)",
+    "russian_translation": "смешиваться, быть в составе"
+  },
+  "交ぜる": {
+    "english_translation": "to mix, to blend (transitive)",
+    "russian_translation": "смешивать, примешивать"
+  },
+  "交代": {
+    "english_translation": "change (shift, turns), alternation",
+    "russian_translation": "смена, чередование"
+  },
+  "交差": {
+    "english_translation": "crossing, intersection",
+    "russian_translation": "пересечение"
+  },
+  "交替": {
+    "english_translation": "taking turns, replacement (of people)",
+    "russian_translation": "смена (по очереди), замещение"
+  },
+  "交流": {
+    "english_translation": "exchange (cultural, information), interaction",
+    "russian_translation": "обмен, общение, взаимодействие"
+  },
+  "交通機関": {
+    "english_translation": "transportation system, public transport",
+    "russian_translation": "транспортная система"
+  },
+  "人命": {
+    "english_translation": "human life",
+    "russian_translation": "человеческая жизнь"
+  },
+  "人差し指": {
+    "english_translation": "index finger",
+    "russian_translation": "указательный палец"
+  },
+  "人差指": {
+    "english_translation": "index finger (variant of 人差し指)",
+    "russian_translation": "указательный палец"
+  },
+  "人文科学": {
+    "english_translation": "humanities (liberal arts)",
+    "russian_translation": "гуманитарные науки"
+  },
+  "人通り": {
+    "english_translation": "pedestrian traffic",
+    "russian_translation": "прохожие, людской поток"
+  },
+  "人造": {
+    "english_translation": "artificial, man-made",
+    "russian_translation": "искусственный"
+  },
+  "仕上がる": {
+    "english_translation": "to be finished, to be completed (work, task)",
+    "russian_translation": "завершиться, закончиться"
+  },
+  "付合う": {
+    "english_translation": "to associate with, to date (archaic/less common 付合う)",
+    "russian_translation": "общаться, встречаться (устар./редко)"
+  },
+  "付近": {
+    "english_translation": "vicinity, nearby, neighborhood",
+    "russian_translation": "окрестности, поблизости"
+  },
+  "代える": {
+    "english_translation": "to substitute, to replace (something with something else)",
+    "russian_translation": "заменять, подменять"
+  },
+  "代る": {
+    "english_translation": "to substitute, to take the place of (variant of 変わる/代わる)",
+    "russian_translation": "замещать, сменять (кого-либо)"
+  },
+  "代名詞": {
+    "english_translation": "pronoun",
+    "russian_translation": "местоимение"
+  },
+  "以後": {
+    "english_translation": "after this, henceforth, from now on",
+    "russian_translation": "после, впредь, с этого момента"
+  },
+  "以降": {
+    "english_translation": "from (a point in time/place) onward (including that point)",
+    "russian_translation": "начиная с, после"
+  },
+  "仮名": {
+    "english_translation": "kana (Japanese syllabic script: hiragana and katakana)",
+    "russian_translation": "кана (японская слоговая азбука)"
+  },
+  "仮名遣い": {
+    "english_translation": "kana usage, orthography of kana",
+    "russian_translation": "правила написания каной"
+  },
+  "仮定": {
+    "english_translation": "assumption, hypothesis",
+    "russian_translation": "предположение, допущение"
+  },
+  "仲直り": {
+    "english_translation": "reconciliation, making up (after a quarrel)",
+    "russian_translation": "примирение"
+  },
+  "仲良し": {
+    "english_translation": "good friend, close acquaintance",
+    "russian_translation": "близкий друг, дружба"
+  },
+  "休息": {
+    "english_translation": "rest, break, recess",
+    "russian_translation": "отдых, перерыв"
+  },
+  "休業": {
+    "english_translation": "temporary closure (of a business), suspension of business",
+    "russian_translation": "временное закрытие (предприятия)"
+  },
+  "休講": {
+    "english_translation": "cancellation of a lecture/class",
+    "russian_translation": "отмена занятий"
+  },
+  "休養": {
+    "english_translation": "rest, recuperation, relaxation (for health)",
+    "russian_translation": "отдых, восстановление сил"
+  },
+  "会館": {
+    "english_translation": "assembly hall, public building",
+    "russian_translation": "дом собраний, конференц-зал"
+  },
+  "伝わる": {
+    "english_translation": "to be transmitted, to be conveyed, to be heard",
+    "russian_translation": "передаваться, доходить, становиться известным"
+  },
+  "伝染": {
+    "english_translation": "contagion, infection, spread (of disease, influence)",
+    "russian_translation": "инфекция, заражение"
+  },
+  "伝記": {
+    "english_translation": "biography",
+    "russian_translation": "биография"
+  },
+  "伯父さん": {
+    "english_translation": "uncle (older than a parent)",
+    "russian_translation": "дядя (старший)"
+  },
+  "但し": {
+    "english_translation": "however, provided that (used to state an exception/condition)",
+    "russian_translation": "однако, при условии, если"
+  },
+  "低下": {
+    "english_translation": "fall, decline, degradation (in level, quality)",
+    "russian_translation": "снижение, падение"
+  },
+  "住まい": {
+    "english_translation": "dwelling, residence (focus on act of living)",
+    "russian_translation": "жильё, место проживания"
+  },
+  "住居": {
+    "english_translation": "dwelling, residence (structure itself)",
+    "russian_translation": "жилище, дом"
+  },
+  "体制": {
+    "english_translation": "system, structure, regime (political, organizational)",
+    "russian_translation": "система, строй, режим"
+  },
+  "体操": {
+    "english_translation": "gymnastics, physical exercises",
+    "russian_translation": "гимнастика, зарядка"
+  },
+  "体積": {
+    "english_translation": "volume (of a body in 3D space)",
+    "russian_translation": "объём"
+  },
+  "体系": {
+    "english_translation": "system, organization, structure (logical/conceptual)",
+    "russian_translation": "система, структура, классификация"
+  },
+  "何々": {
+    "english_translation": "what-what (used when not wanting to specify a name/thing)",
+    "russian_translation": "то-то и то-то, такой-то"
+  },
+  "何分": {
+    "english_translation": "how many minutes; anyway, after all (written style)",
+    "russian_translation": "сколько минут; во всяком случае (письм.)"
+  },
+  "余る": {
+    "english_translation": "to remain, to be left over, to exceed",
+    "russian_translation": "оставаться, быть лишним"
+  },
+  "余所": {
+    "english_translation": "another place, elsewhere, strange quarter",
+    "russian_translation": "другое место, чужая сторона"
+  },
+  "余計": {
+    "english_translation": "too much, unnecessary, superfluous",
+    "russian_translation": "лишний, излишний"
+  },
+  "佚": {
+    "english_translation": "lost, missing (character used in compounds like 佚文 - lost writing)",
+    "russian_translation": "утерянный, пропавший (в составе слов)"
+  },
+  "作成": {
+    "english_translation": "drawing up, preparing (documents, data)",
+    "russian_translation": "составление, оформление"
+  },
+  "作者": {
+    "english_translation": "author, creator, artist",
+    "russian_translation": "автор, создатель"
+  },
+  "作製": {
+    "english_translation": "manufacture, production, creation (of physical object)",
+    "russian_translation": "изготовление, производство"
+  },
+  "例える": {
+    "english_translation": "to compare, to liken, to use a simile",
+    "russian_translation": "сравнивать, уподоблять"
+  },
+  "例外": {
+    "english_translation": "exception",
+    "russian_translation": "исключение"
+  },
+  "侵入": {
+    "english_translation": "invasion, trespass, intrusion",
+    "russian_translation": "вторжение, проникновение"
+  },
+  "便所": {
+    "english_translation": "toilet, lavatory, restroom (old-fashioned/blunt)",
+    "russian_translation": "туалет, уборная (грубо/устар.)"
+  },
+  "便箋": {
+    "english_translation": "writing paper, stationery",
+    "russian_translation": "бумага для писем"
+  },
+  "係わる": {
+    "english_translation": "to concern, to have to do with, to be related to",
+    "russian_translation": "касаться, иметь отношение"
+  },
+  "俄": {
+    "english_translation": "Russia (archaic, rarely used except in compounds); sudden, unexpected (used as a prefix)",
+    "russian_translation": "Россия (редко); внезапный (в составе слов)"
+  },
+  "保健": {
+    "english_translation": "health preservation, hygiene",
+    "russian_translation": "охрана здоровья, гигиена"
+  },
+  "信ずる": {
+    "english_translation": "to believe, to trust, to be convinced (literary/archaic form of 信じる)",
+    "russian_translation": "верить, доверять (книжн.)"
+  },
+  "修繕": {
+    "english_translation": "repair, mending, restoration",
+    "russian_translation": "ремонт, починка"
+  },
+  "俳句": {
+    "english_translation": "haiku (Japanese short poem)",
+    "russian_translation": "хайку"
+  },
+  "倉庫": {
+    "english_translation": "warehouse, storehouse, depot",
+    "russian_translation": "склад, хранилище"
+  },
+  "個体": {
+    "english_translation": "individual (organism, item), solid body",
+    "russian_translation": "индивидуум, отдельный экземпляр"
+  },
+  "個所": {
+    "english_translation": "place, spot, section, passage (variant of 箇所)",
+    "russian_translation": "место, участок, пункт"
+  },
+  "倣う": {
+    "english_translation": "to imitate, to follow (an example), to conform to",
+    "russian_translation": "подражать, следовать примеру"
+  },
+  "偉い": {
+    "english_translation": "great, admirable, important, eminent",
+    "russian_translation": "великий, важный, выдающийся"
+  },
+  "停止": {
+    "english_translation": "stop, halt, suspension (of an action/movement)",
+    "russian_translation": "остановка, прекращение"
+  },
+  "停車": {
+    "english_translation": "stopping (of a vehicle), parking",
+    "russian_translation": "остановка (транспорта)"
+  },
+  "停電": {
+    "english_translation": "power outage, blackout",
+    "russian_translation": "отключение электричества"
+  },
+  "偶数": {
+    "english_translation": "even number",
+    "russian_translation": "чётное число"
+  },
+  "傑作": {
+    "english_translation": "masterpiece, finest work, great success",
+    "russian_translation": "шедевр, выдающееся произведение"
+  },
+  "催し": {
+    "english_translation": "event, gathering, function",
+    "russian_translation": "мероприятие, торжество"
+  },
+  "催促": {
+    "english_translation": "request, demand, urge (to hurry up)",
+    "russian_translation": "поторопить, настоять"
+  },
+  "傾く": {
+    "english_translation": "to lean, to tilt, to incline; to decline (power)",
+    "russian_translation": "наклоняться, крениться"
+  },
+  "儀式": {
+    "english_translation": "ritual, ceremony",
+    "russian_translation": "церемония, обряд"
+  },
+  "儲かる": {
+    "english_translation": "to be profitable, to yield a profit",
+    "russian_translation": "быть прибыльным"
+  },
+  "儲ける": {
+    "english_translation": "to earn, to gain, to make money; to be blessed with (a child)",
+    "russian_translation": "зарабатывать, получать прибыль"
+  },
+  "元々": {
+    "english_translation": "originally, by nature, from the start",
+    "russian_translation": "изначально, с самого начала"
+  },
+  "先々月": {
+    "english_translation": "the month before last",
+    "russian_translation": "позапрошлый месяц"
+  },
+  "先々週": {
+    "english_translation": "the week before last",
+    "russian_translation": "позапрошлая неделя"
+  },
+  "先ほど": {
+    "english_translation": "a while ago, just now (polite)",
+    "russian_translation": "недавно, только что"
+  },
+  "先祖": {
+    "english_translation": "ancestor",
+    "russian_translation": "предок"
+  },
+  "先程": {
+    "english_translation": "a while ago, just now (more formal than 先ほど)",
+    "russian_translation": "недавно, только что (вежл.)"
+  },
+  "先端": {
+    "english_translation": "tip, point; cutting edge (technology)",
+    "russian_translation": "кончик, остриё; передовой (технологии)"
+  },
+  "先頭": {
+    "english_translation": "head, lead, front (of a line/group)",
+    "russian_translation": "голова (колонны), впереди"
+  },
+  "光線": {
+    "english_translation": "ray of light, beam",
+    "russian_translation": "луч света"
+  },
+  "免税": {
+    "english_translation": "tax exemption, duty-free",
+    "russian_translation": "беспошлинный"
+  },
+  "児童": {
+    "english_translation": "children, juveniles (especially in school context)",
+    "russian_translation": "дети, учащиеся"
+  },
+  "入れ物": {
+    "english_translation": "container, case, receptacle",
+    "russian_translation": "ёмкость, контейнер"
+  },
+  "入社": {
+    "english_translation": "joining a company, entering employment",
+    "russian_translation": "поступление на работу (в компанию)"
+  },
+  "全般": {
+    "english_translation": "overall, generally, comprehensively",
+    "russian_translation": "в целом, общий"
+  },
+  "全身": {
+    "english_translation": "entire body",
+    "russian_translation": "всё тело, с головы до ног"
+  },
+  "全集": {
+    "english_translation": "complete works, complete collection",
+    "russian_translation": "полное собрание сочинений"
+  },
+  "公共": {
+    "english_translation": "public, communal (e.g., public transport, public services)",
+    "russian_translation": "общественный, публичный"
+  },
+  "公務": {
+    "english_translation": "official business, public service duties",
+    "russian_translation": "служебные обязанности"
+  },
+  "公害": {
+    "english_translation": "environmental pollution (from industry, etc.)",
+    "russian_translation": "промышленное загрязнение"
+  },
+  "公式": {
+    "english_translation": "formula (math/science); official (document, statement)",
+    "russian_translation": "формула; официальный"
+  },
+  "公正": {
+    "english_translation": "justice, fairness, impartiality",
+    "russian_translation": "справедливость, беспристрастность"
+  },
+  "公衆": {
+    "english_translation": "the public, the general populace",
+    "russian_translation": "общественность, публика"
+  },
+  "公表": {
+    "english_translation": "official announcement, publication",
+    "russian_translation": "официальное объявление"
+  },
+  "兵隊": {
+    "english_translation": "soldier, troop",
+    "russian_translation": "солдат, войска"
+  },
+  "具える": {
+    "english_translation": "to possess, to be equipped with (ability, quality)",
+    "russian_translation": "обладать (качествами), быть оснащённым"
+  },
+  "兼ねる": {
+    "english_translation": "to hold concurrently; to be unable to (do both/at the end of a verb)",
+    "russian_translation": "совмещать (должности); не мочь"
+  },
+  "内科": {
+    "english_translation": "internal medicine (department)",
+    "russian_translation": "терапия, внутренние болезни"
+  },
+  "内線": {
+    "english_translation": "internal phone line, extension",
+    "russian_translation": "внутренняя линия, добавочный номер"
+  },
+  "円周": {
+    "english_translation": "circumference (of a circle)",
+    "russian_translation": "окружность"
+  },
+  "再三": {
+    "english_translation": "again and again, repeatedly",
+    "russian_translation": "неоднократно, раз за разом"
+  },
+  "再来年": {
+    "english_translation": "the year after next",
+    "russian_translation": "через год (после следующего)"
+  },
+  "再来月": {
+    "english_translation": "the month after next",
+    "russian_translation": "через месяц (после следующего)"
+  },
+  "再来週": {
+    "english_translation": "the week after next",
+    "russian_translation": "через неделю (после следующей)"
+  },
+  "写る": {
+    "english_translation": "to be photographed, to be reflected (intransitive)",
+    "russian_translation": "быть снятым (на фото), отражаться"
+  },
+  "写生": {
+    "english_translation": "sketching, drawing from nature/life",
+    "russian_translation": "рисование с натуры"
+  },
+  "冠": {
+    "english_translation": "crown, chaplet; best, top (prestige)",
+    "russian_translation": "корона, венец"
+  },
+  "冷ます": {
+    "english_translation": "to cool down (something, transitive); to dampen (enthusiasm)",
+    "russian_translation": "остужать, охлаждать"
+  },
+  "冷める": {
+    "english_translation": "to cool down (intransitive); to cool off (emotions)",
+    "russian_translation": "остывать, охлаждаться"
+  },
+  "冷やす": {
+    "english_translation": "to chill, to cool (something, often deliberately)",
+    "russian_translation": "охлаждать, студить"
+  },
+  "冷凍": {
+    "english_translation": "freezing, cold storage",
+    "russian_translation": "заморозка, хранение в холоде"
+  },
+  "凍える": {
+    "english_translation": "to be frozen, to shiver with cold",
+    "russian_translation": "замерзать, коченеть (от холода)"
+  },
+  "凸凹": {
+    "english_translation": "unevenness, bumps and hollows, ruggedness",
+    "russian_translation": "неровность, бугры и впадины"
+  },
+  "凹む": {
+    "english_translation": "to be dented, to be concave; to be depressed (emotionally)",
+    "russian_translation": "прогибаться, образовывать вмятину"
+  },
+  "出入り": {
+    "english_translation": "coming and going, frequenting; income and expenditure",
+    "russian_translation": "вход и выход; приход и расход"
+  },
+  "出入口": {
+    "english_translation": "entrance and exit, doorway",
+    "russian_translation": "вход-выход"
+  },
+  "出勤": {
+    "english_translation": "going to work, presence at work",
+    "russian_translation": "выход на работу, явка"
+  },
+  "出合い": {
+    "english_translation": "encounter, chance meeting (variant of 出会い)",
+    "russian_translation": "встреча, знакомство"
+  },
+  "出張": {
+    "english_translation": "business trip, official journey",
+    "russian_translation": "командировка"
+  },
+  "出掛ける": {
+    "english_translation": "to go out, to leave home (for an activity)",
+    "russian_translation": "выходить, отправляться"
+  },
+  "出来上がり": {
+    "english_translation": "completion, finished result (product, dish)",
+    "russian_translation": "готовый результат, завершение"
+  },
+  "出来上がる": {
+    "english_translation": "to be finished, to be ready (dish, work)",
+    "russian_translation": "быть готовым, завершиться"
+  },
+  "出迎え": {
+    "english_translation": "meeting (a person), welcoming",
+    "russian_translation": "встреча (приезжающего)"
+  },
+  "出迎える": {
+    "english_translation": "to meet, to welcome (a visitor)",
+    "russian_translation": "встречать, приветствовать"
+  },
+  "分かれる": {
+    "english_translation": "to be divided, to branch off, to separate (intransitive)",
+    "russian_translation": "разделяться, расходиться (мнения)"
+  },
+  "分る": {
+    "english_translation": "to understand, to comprehend (variant of わかる)",
+    "russian_translation": "понимать, осознавать"
+  },
+  "分布": {
+    "english_translation": "distribution, spread, range",
+    "russian_translation": "распределение, ареал"
+  },
+  "分数": {
+    "english_translation": "fraction (mathematical)",
+    "russian_translation": "дробь (математическая)"
+  },
+  "分解": {
+    "english_translation": "disassembly, decomposition, analysis",
+    "russian_translation": "разложение, распад, разборка"
+  },
+  "分量": {
+    "english_translation": "quantity, amount, portion",
+    "russian_translation": "количество, объём, порция"
+  },
+  "分類": {
+    "english_translation": "classification, sorting, categorization",
+    "russian_translation": "классификация, сортировка"
+  },
+  "列島": {
+    "english_translation": "archipelago, chain of islands",
+    "russian_translation": "архипелаг, цепь островов"
+  },
+  "初めに": {
+    "english_translation": "first, at the beginning (adverbial phrase)",
+    "russian_translation": "вначале, прежде всего"
+  },
+  "初旬": {
+    "english_translation": "first third of a month (variant of 上旬)",
+    "russian_translation": "первая декада месяца"
+  },
+  "初級": {
+    "english_translation": "elementary level, beginner grade",
+    "russian_translation": "начальный уровень"
+  },
+  "判事": {
+    "english_translation": "judge, magistrate",
+    "russian_translation": "судья"
+  },
+  "判子": {
+    "english_translation": "hanko (personal seal used in Japan)",
+    "russian_translation": "ханко, печать (личная)"
+  },
+  "別々": {
+    "english_translation": "separately, individually",
+    "russian_translation": "отдельно, по отдельности"
+  },
+  "別荘": {
+    "english_translation": "villa, country house, second home",
+    "russian_translation": "вилла, загородный дом"
+  },
+  "利害": {
+    "english_translation": "advantages and disadvantages, interest",
+    "russian_translation": "выгода и ущерб, интересы"
+  },
+  "制作": {
+    "english_translation": "production, creation (art, film, software)",
+    "russian_translation": "создание, производство (искусство)"
+  },
+  "刷る": {
+    "english_translation": "to print, to brush (off dust), to scrub",
+    "russian_translation": "печатать, наносить (краску)"
+  },
+  "刺さる": {
+    "english_translation": "to pierce, to stick into (intransitive)",
+    "russian_translation": "вонзиться, застрять"
+  },
+  "刺す": {
+    "english_translation": "to stab, to pierce; to sting (insect)",
+    "russian_translation": "колоть, протыкать; жалить"
+  },
+  "刺身": {
+    "english_translation": "sashimi (sliced raw fish)",
+    "russian_translation": "сасими (сырая рыба)"
+  },
+  "刻む": {
+    "english_translation": "to chop, to mince; to carve; to engrave (in memory)",
+    "russian_translation": "нарезать, рубить; гравировать"
+  },
+  "剃る": {
+    "english_translation": "to shave",
+    "russian_translation": "брить, сбривать"
+  },
+  "剃刀": {
+    "english_translation": "razor, safety razor",
+    "russian_translation": "бритва"
+  },
+  "削る": {
+    "english_translation": "to shave off, to cut down, to sharpen (pencil)",
+    "russian_translation": "точить, срезать, сокращать"
+  },
+  "削除": {
+    "english_translation": "deletion, elimination, cancellation",
+    "russian_translation": "удаление, исключение"
+  },
+  "前後": {
+    "english_translation": "front and back; before and after; around, approximately",
+    "russian_translation": "перед и зад; приблизительно; последовательность"
+  },
+  "剥く": {
+    "english_translation": "to peel, to skin, to bare (transitive)",
+    "russian_translation": "чистить (овощи), снимать кожуру"
+  },
+  "剥す": {
+    "english_translation": "to peel off, to strip off, to uncover (variant of 剥がす)",
+    "russian_translation": "снимать (оболочку), отдирать"
+  },
+  "副詞": {
+    "english_translation": "adverb",
+    "russian_translation": "наречие"
+  },
+  "割と": {
+    "english_translation": "relatively, comparatively, rather",
+    "russian_translation": "довольно, сравнительно"
+  },
+  "割引": {
+    "english_translation": "discount, price reduction",
+    "russian_translation": "скидка"
+  },
+  "割算": {
+    "english_translation": "division (mathematical operation)",
+    "russian_translation": "деление (арифм. действие)"
+  },
+  "創作": {
+    "english_translation": "creation, creative work (original fiction/art)",
+    "russian_translation": "творчество, создание"
+  },
+  "力強い": {
+    "english_translation": "powerful, strong, forceful, reassuring",
+    "russian_translation": "мощный, сильный, энергичный"
+  },
+  "功績": {
+    "english_translation": "achievement, distinguished service, merit",
+    "russian_translation": "заслуга, достижение"
+  },
+  "加熱": {
+    "english_translation": "heating, application of heat",
+    "russian_translation": "нагрев, подогрев"
+  },
+  "加速": {
+    "english_translation": "acceleration, speed increase",
+    "russian_translation": "ускорение"
+  },
+  "加速度": {
+    "english_translation": "acceleration (physical quantity)",
+    "russian_translation": "ускорение (физ.)"
+  },
+  "助かる": {
+    "english_translation": "to be saved, to be rescued; to be helpful, to be much appreciated",
+    "russian_translation": "спастись; быть полезным"
+  },
+  "助教授": {
+    "english_translation": "associate professor (in Japan, typically roughly equivalent to Western associate/assistant professor)",
+    "russian_translation": "доцент (в японском вузе)"
+  },
+  "努める": {
+    "english_translation": "to endeavor, to strive, to make an effort",
+    "russian_translation": "стараться, прилагать усилия"
+  },
+  "効力": {
+    "english_translation": "effect, validity, efficacy",
+    "russian_translation": "эффективность, сила (закона)"
+  },
+  "勇ましい": {
+    "english_translation": "brave, valiant, courageous",
+    "russian_translation": "храбрый, мужественный"
+  },
+  "動作": {
+    "english_translation": "action, movement, behavior",
+    "russian_translation": "движение, действие"
+  },
+  "勘違い": {
+    "english_translation": "misunderstanding, wrong guess, false impression",
+    "russian_translation": "недоразумение, ошибочное мнение"
+  },
+  "務める": {
+    "english_translation": "to serve, to fill a post, to play a role (duty-focused)",
+    "russian_translation": "исполнять обязанности, служить"
+  },
+  "勝敗": {
+    "english_translation": "victory or defeat, outcome (of a contest)",
+    "russian_translation": "победа или поражение, исход"
+  },
+  "勝負": {
+    "english_translation": "match, contest, game; victory or defeat",
+    "russian_translation": "поединок, спор; исход"
+  },
+  "募集": {
+    "english_translation": "recruitment, solicitation, call for participants",
+    "russian_translation": "набор, объявление о сборе"
+  },
+  "匂う": {
+    "english_translation": "to smell, to give off a scent (intransitive)",
+    "russian_translation": "пахнуть, издавать запах"
+  },
+  "包丁": {
+    "english_translation": "kitchen knife",
+    "russian_translation": "кухонный нож"
+  },
+  "包帯": {
+    "english_translation": "bandage, dressing",
+    "russian_translation": "бинт, повязка"
+  },
+  "包装": {
+    "english_translation": "packing, wrapping, packaging",
+    "russian_translation": "упаковка, обёртка"
+  },
+  "北極": {
+    "english_translation": "North Pole, Arctic",
+    "russian_translation": "Северный полюс, Арктика"
+  },
+  "匙": {
+    "english_translation": "spoon",
+    "russian_translation": "ложка"
+  },
+  "区分": {
+    "english_translation": "division, section, classification",
+    "russian_translation": "разделение, классификация"
+  },
+  "区切る": {
+    "english_translation": "to punctuate, to divide (into sections), to mark off",
+    "russian_translation": "разделять, ставить знаки препинания"
+  },
+  "区域": {
+    "english_translation": "zone, district, territory",
+    "russian_translation": "зона, район, территория"
+  },
+  "半島": {
+    "english_translation": "peninsula",
+    "russian_translation": "полуостров"
+  },
+  "半径": {
+    "english_translation": "radius",
+    "russian_translation": "радиус"
+  },
+  "卑怯": {
+    "english_translation": "cowardice, meanness, unfairness",
+    "russian_translation": "трусость, подлость"
+  },
+  "卒直": {
+    "english_translation": "frankness, candidness (variant of 率直)",
+    "russian_translation": "откровенный, прямолинейный"
+  },
+  "南北": {
+    "english_translation": "north and south",
+    "russian_translation": "север и юг"
+  },
+  "南極": {
+    "english_translation": "South Pole, Antarctica",
+    "russian_translation": "Южный полюс, Антарктида"
+  },
+  "南米": {
+    "english_translation": "South America",
+    "russian_translation": "Южная Америка"
+  },
+  "単数": {
+    "english_translation": "singular (number)",
+    "russian_translation": "единственное число"
+  },
+  "占う": {
+    "english_translation": "to tell fortunes, to predict, to divine",
+    "russian_translation": "гадать, предсказывать"
+  },
+  "危うい": {
+    "english_translation": "dangerous, perilous; narrow (escape)",
+    "russian_translation": "опасный, рискованный"
+  },
+  "却って": {
+    "english_translation": "on the contrary, instead, all the more",
+    "russian_translation": "наоборот, вопреки, вместо этого"
+  },
+  "卸す": {
+    "english_translation": "to wholesale; to grate (food); to lower (a price)",
+    "russian_translation": "продавать оптом; натирать (на тёрке)"
+  },
+  "厚かましい": {
+    "english_translation": "impudent, shameless, audacious",
+    "russian_translation": "наглый, бессовестный"
+  },
+  "原始": {
+    "english_translation": "primeval, primitive, original",
+    "russian_translation": "первобытный, примитивный"
+  },
+  "原料": {
+    "english_translation": "raw materials, ingredients",
+    "russian_translation": "сырьё, исходный материал"
+  },
+  "原理": {
+    "english_translation": "principle, fundamental truth, general law",
+    "russian_translation": "принцип, основа"
+  },
+  "原産": {
+    "english_translation": "place of origin, native product",
+    "russian_translation": "место происхождения"
+  },
+  "原稿": {
+    "english_translation": "manuscript, draft, copy (for printing)",
+    "russian_translation": "рукопись, черновик"
+  },
+  "厳重": {
+    "english_translation": "strict, severe, rigorous",
+    "russian_translation": "строгий, суровый, тщательный"
+  },
+  "又は": {
+    "english_translation": "or (formal, written)",
+    "russian_translation": "или, либо (письм.)"
+  },
+  "友好": {
+    "english_translation": "friendship, friendly relations",
+    "russian_translation": "дружба, дружелюбие"
+  },
+  "反る": {
+    "english_translation": "to warp, to curve, to arch (intransitive)",
+    "russian_translation": "изгибаться, прогибаться"
+  },
+  "反映": {
+    "english_translation": "reflection (of an idea, condition), influence",
+    "russian_translation": "отражение, отзвук"
+  },
+  "反省": {
+    "english_translation": "reflection, introspection, self-examination",
+    "russian_translation": "самоанализ, размышление"
+  },
+  "叔父さん": {
+    "english_translation": "uncle (younger than a parent)",
+    "russian_translation": "дядя (младший)"
+  },
+  "取り入れる": {
+    "english_translation": "to take in, to adopt, to incorporate",
+    "russian_translation": "вводить, принимать, внедрять"
+  },
+  "取り出す": {
+    "english_translation": "to take out, to pull out, to extract",
+    "russian_translation": "вынимать, извлекать"
+  },
+  "取り消す": {
+    "english_translation": "to cancel, to revoke, to withdraw",
+    "russian_translation": "отменять, аннулировать"
+  },
+  "受け持つ": {
+    "english_translation": "to take (charge of), to be in charge of (a class, duty)",
+    "russian_translation": "брать на себя (ответственность), руководить"
+  },
+  "受取": {
+    "english_translation": "receipt (the act of receiving)",
+    "russian_translation": "получение"
+  },
+  "受取り": {
+    "english_translation": "receipt (the act of receiving or the document)",
+    "russian_translation": "получение; квитанция"
+  },
+  "受話器": {
+    "english_translation": "receiver (of a phone)",
+    "russian_translation": "телефонная трубка"
+  },
+  "受験": {
+    "english_translation": "taking an examination (especially entrance exam)",
+    "russian_translation": "сдача экзаменов"
+  },
+  "口実": {
+    "english_translation": "excuse, pretext",
+    "russian_translation": "отговорка, предлог"
+  },
+  "口紅": {
+    "english_translation": "lipstick",
+    "russian_translation": "губная помада"
+  },
+  "古典": {
+    "english_translation": "classic (work), classical (literature, music)",
+    "russian_translation": "классика, классический"
+  },
+  "句読点": {
+    "english_translation": "punctuation marks",
+    "russian_translation": "знаки препинания"
+  },
+  "只": {
+    "english_translation": "only, just (variant of ただ)",
+    "russian_translation": "только, лишь"
+  },
+  "可決": {
+    "english_translation": "approval, adoption (of a motion/bill)",
+    "russian_translation": "одобрение, принятие (решения)"
+  },
+  "司会": {
+    "english_translation": "master of ceremonies, chairmanship",
+    "russian_translation": "председательство; ведущий (мероприятия)"
+  },
+  "各々": {
+    "english_translation": "each, respectively",
+    "russian_translation": "каждый (в отдельности)"
+  },
+  "各地": {
+    "english_translation": "various places, everywhere",
+    "russian_translation": "разные места, повсеместно"
+  },
+  "各自": {
+    "english_translation": "each one, individual, respective",
+    "russian_translation": "каждый (по отдельности)"
+  },
+  "合同": {
+    "english_translation": "union, merger; joint, combined",
+    "russian_translation": "объединение, совместный"
+  },
+  "合流": {
+    "english_translation": "confluence, merging (of rivers, people, ideas)",
+    "russian_translation": "слияние, объединение"
+  },
+  "合理": {
+    "english_translation": "rational, reasonable, logical",
+    "russian_translation": "разумный, рациональный"
+  },
+  "吊す": {
+    "english_translation": "to hang, to suspend (transitive, typically from above)",
+    "russian_translation": "вешать, подвешивать"
+  },
+  "吊る": {
+    "english_translation": "to hang, to suspend (transitive, similar to 吊す)",
+    "russian_translation": "вешать, подвешивать"
+  },
+  "同格": {
+    "english_translation": "equal status, same rank; apposition (grammar)",
+    "russian_translation": "равный статус; приложение (грам.)"
+  },
+  "名作": {
+    "english_translation": "masterpiece, famous work",
+    "russian_translation": "шедевр, знаменитое произведение"
+  },
+  "名刺": {
+    "english_translation": "business card",
+    "russian_translation": "визитная карточка"
+  },
+  "名字": {
+    "english_translation": "surname, family name (variant of 苗字)",
+    "russian_translation": "фамилия"
+  },
+  "名所": {
+    "english_translation": "famous place, place of interest",
+    "russian_translation": "достопримечательность"
+  },
+  "名物": {
+    "english_translation": "specialty, famous product (local, regional)",
+    "russian_translation": "фирменное блюдо, местный продукт"
+  },
+  "名詞": {
+    "english_translation": "noun",
+    "russian_translation": "существительное"
+  },
+  "吐き気": {
+    "english_translation": "nausea, urge to vomit",
+    "russian_translation": "тошнота"
+  },
+  "向う": {
+    "english_translation": "opposite side, beyond; facing (variant of 向こう)",
+    "russian_translation": "напротив, в противоположной стороне"
+  },
+  "含める": {
+    "english_translation": "to include, to comprise, to involve",
+    "russian_translation": "включать, содержать"
+  },
+  "吹雪": {
+    "english_translation": "snowstorm, blizzard",
+    "russian_translation": "метель, пурга"
+  },
+  "呑気": {
+    "english_translation": "carefree, optimistic, easygoing (often slightly negative connotation)",
+    "russian_translation": "беззаботный, беспечный"
+  },
+  "周辺": {
+    "english_translation": "surroundings, vicinity, outskirts",
+    "russian_translation": "окрестности, периферия"
+  },
+  "味わう": {
+    "english_translation": "to taste, to savor; to experience (life, hardship)",
+    "russian_translation": "пробовать, смаковать; испытать"
+  },
+  "呼びかける": {
+    "english_translation": "to call out to, to address, to appeal (variant of 呼び掛ける)",
+    "russian_translation": "окликнуть, обратиться"
+  },
+  "呼び出す": {
+    "english_translation": "to summon, to call up (on phone, computer)",
+    "russian_translation": "вызывать, звонить"
+  },
+  "呼び掛ける": {
+    "english_translation": "to call out to, to address, to appeal",
+    "russian_translation": "окликнуть, обратиться"
+  },
+  "命ずる": {
+    "english_translation": "to order, to command, to appoint (formal)",
+    "russian_translation": "приказывать, назначать"
+  },
+  "和服": {
+    "english_translation": "Japanese clothing (e.g., kimono)",
+    "russian_translation": "вафуку (японская традиционная одежда)"
+  },
+  "和英": {
+    "english_translation": "Japanese-English (dictionary, translation)",
+    "russian_translation": "японско-английский (словарь)"
+  },
+  "咥える": {
+    "english_translation": "to hold in one's mouth, to bite (variant of 銜える)",
+    "russian_translation": "держать во рту, кусать"
+  },
+  "唇": {
+    "english_translation": "lip",
+    "russian_translation": "губа"
+  },
+  "商店": {
+    "english_translation": "shop, store (general term)",
+    "russian_translation": "магазин, лавка"
+  },
+  "商業": {
+    "english_translation": "commerce, trade, business",
+    "russian_translation": "коммерция, торговля"
+  },
+  "商社": {
+    "english_translation": "trading company, commercial firm",
+    "russian_translation": "торговая компания"
+  },
+  "問い合わせ": {
+    "english_translation": "inquiry, query, request for information",
+    "russian_translation": "запрос, справка"
+  },
+  "問答": {
+    "english_translation": "dialogue, question and answer (session)",
+    "russian_translation": "диалог, вопросы и ответы"
+  },
+  "嗅ぐ": {
+    "english_translation": "to smell, to sniff (transitive)",
+    "russian_translation": "нюхать, обнюхивать"
+  },
+  "器具": {
+    "english_translation": "appliance, tool, implement",
+    "russian_translation": "прибор, инструмент"
+  },
+  "器械": {
+    "english_translation": "instrument, apparatus, machinery (variant of 機械)",
+    "russian_translation": "прибор, снаряд (спорт.), механизм"
+  },
+  "噴水": {
+    "english_translation": "fountain",
+    "russian_translation": "фонтан"
+  },
+  "噴火": {
+    "english_translation": "volcanic eruption",
+    "russian_translation": "извержение вулкана"
+  },
+  "囁く": {
+    "english_translation": "to whisper, to murmur",
+    "russian_translation": "шептать"
+  },
+  "四つ角": {
+    "english_translation": "crossroads, street corner",
+    "russian_translation": "перекрёсток, угол улицы"
+  },
+  "四季": {
+    "english_translation": "four seasons",
+    "russian_translation": "четыре времени года"
+  },
+  "四捨五入": {
+    "english_translation": "rounding off (mathematical)",
+    "russian_translation": "округление"
+  },
+  "四角": {
+    "english_translation": "square, quadrilateral",
+    "russian_translation": "квадрат, четырёхугольник"
+  },
+  "四角い": {
+    "english_translation": "square, rectangular, angular",
+    "russian_translation": "квадратный, прямоугольный"
+  },
+  "回り道": {
+    "english_translation": "detour, roundabout way",
+    "russian_translation": "обходной путь"
+  },
+  "回数": {
+    "english_translation": "number of times, frequency",
+    "russian_translation": "количество раз, частота"
+  },
+  "回数券": {
+    "english_translation": "book of tickets, coupon book (for multiple rides)",
+    "russian_translation": "проездной билет (на несколько поездок)"
+  },
+  "回答": {
+    "english_translation": "answer, reply (written, often formal)",
+    "russian_translation": "ответ"
+  },
+  "回転": {
+    "english_translation": "rotation, revolution, spinning",
+    "russian_translation": "вращение, оборот"
+  },
+  "因る": {
+    "english_translation": "to be due to, to result from, to depend on (variant of 依る/よる)",
+    "russian_translation": "происходить из-за, зависеть от"
+  },
+  "団地": {
+    "english_translation": "large housing development, apartment complex",
+    "russian_translation": "жилой комплекс, микрорайон"
+  },
+  "図形": {
+    "english_translation": "figure, shape (geometric)",
+    "russian_translation": "геометрическая фигура"
+  },
+  "図表": {
+    "english_translation": "chart, diagram, graphic representation",
+    "russian_translation": "схема, диаграмма, таблица"
+  },
+  "図鑑": {
+    "english_translation": "illustrated book, picture book (often natural history)",
+    "russian_translation": "иллюстрированный справочник, атлас"
+  },
+  "固まる": {
+    "english_translation": "to harden, to solidify, to set (intransitive)",
+    "russian_translation": "застывать, затвердевать"
+  },
+  "国王": {
+    "english_translation": "king, monarch",
+    "russian_translation": "король"
+  },
+  "国立": {
+    "english_translation": "national (established and maintained by the government)",
+    "russian_translation": "государственный, национальный"
+  },
+  "国籍": {
+    "english_translation": "nationality, citizenship",
+    "russian_translation": "гражданство, национальность"
+  },
+  "園芸": {
+    "english_translation": "horticulture, gardening",
+    "russian_translation": "садоводство, огородничество"
+  },
+  "圧縮": {
+    "english_translation": "compression, condensation, reduction (data, file)",
+    "russian_translation": "сжатие, компрессия"
+  },
+  "在る": {
+    "english_translation": "to be, to exist, to be situated (inanimate objects, formal)",
+    "russian_translation": "находиться, располагаться"
+  },
+  "在学": {
+    "english_translation": "enrollment (in school/university), being in school",
+    "russian_translation": "обучение (в учебном заведении)"
+  },
+  "地下水": {
+    "english_translation": "groundwater",
+    "russian_translation": "подземные воды"
+  },
+  "地名": {
+    "english_translation": "place name, geographical name",
+    "russian_translation": "географическое название"
+  },
+  "地味": {
+    "english_translation": "plain, subdued, simple (style, color)",
+    "russian_translation": "скромный, неброский, простой"
+  },
+  "地帯": {
+    "english_translation": "zone, area, region (geographical/climatic)",
+    "russian_translation": "зона, пояс, регион"
+  },
+  "地点": {
+    "english_translation": "spot, point, location (precise)",
+    "russian_translation": "точка, местоположение"
+  },
+  "地盤": {
+    "english_translation": "ground, foundation, base (geology, politics)",
+    "russian_translation": "грунт, основание, фундамент"
+  },
+  "地質": {
+    "english_translation": "geology, geological features",
+    "russian_translation": "геологическое строение, геология"
+  },
+  "坊さん": {
+    "english_translation": "Buddhist priest, monk (colloquial, respectful)",
+    "russian_translation": "буддийский монах, бонза"
+  },
+  "坊っちゃん": {
+    "english_translation": "son (of a wealthy family), young master (sometimes ironic)",
+    "russian_translation": "сынок, барин (устар./ирон.)"
+  },
+  "坊や": {
+    "english_translation": "boy (term of endearment for a young child)",
+    "russian_translation": "мальчик, сынок (ласк.)"
+  },
+  "垂直": {
+    "english_translation": "vertical, perpendicular",
+    "russian_translation": "вертикальный, перпендикулярный"
+  },
+  "垣根": {
+    "english_translation": "hedge, fence, barrier",
+    "russian_translation": "изгородь, забор"
+  },
+  "埋める": {
+    "english_translation": "to bury, to fill up, to embed",
+    "russian_translation": "зарывать, закапывать, заполнять"
+  },
+  "執筆": {
+    "english_translation": "writing (of a book, article), literary composition",
+    "russian_translation": "написание (текста), авторство"
+  },
+  "基地": {
+    "english_translation": "base (military, scientific)",
+    "russian_translation": "база"
+  },
+  "基準": {
+    "english_translation": "standard, criterion, benchmark",
+    "russian_translation": "стандарт, критерий, норма"
+  },
+  "基盤": {
+    "english_translation": "foundation, basis, infrastructure",
+    "russian_translation": "основа, база, фундамент"
+  },
+  "基礎": {
+    "english_translation": "foundation, basis, groundwork",
+    "russian_translation": "основа, фундамент, база"
+  },
+  "堀": {
+    "english_translation": "moat, ditch, canal",
+    "russian_translation": "ров, канал"
+  },
+  "堅い": {
+    "english_translation": "hard, firm, solid (material); reserved, reliable",
+    "russian_translation": "твёрдый, крепкий; надёжный"
+  },
+  "塊": {
+    "english_translation": "lump, mass, clod",
+    "russian_translation": "комок, кусок, глыба"
+  },
+  "塞がる": {
+    "english_translation": "to be blocked, to be closed; to be occupied (intransitive)",
+    "russian_translation": "быть заблокированным, занятым"
+  },
+  "塞ぐ": {
+    "english_translation": "to stop up, to close (a hole), to block (transitive)",
+    "russian_translation": "затыкать, заслонять, блокировать"
+  },
+  "塩辛い": {
+    "english_translation": "salty (taste); tart, rough (speech)",
+    "russian_translation": "солёный; острый (вкус/слова)"
+  },
+  "塵紙": {
+    "english_translation": "tissue paper, toilet paper (variant of ちり紙)",
+    "russian_translation": "бумажная салфетка, туалетная бумага"
+  },
+  "塵芥": {
+    "english_translation": "dust, trash, garbage (archaic/literary)",
+    "russian_translation": "мусор, отбросы"
+  },
+  "境界": {
+    "english_translation": "boundary, border, limit",
+    "russian_translation": "граница, рубеж"
+  },
+  "増やす": {
+    "english_translation": "to increase, to add to, to multiply (transitive)",
+    "russian_translation": "увеличивать, прибавлять"
+  },
+  "増大": {
+    "english_translation": "increase, growth, expansion (in size or quantity)",
+    "russian_translation": "увеличение, рост"
+  },
+  "増減": {
+    "english_translation": "increase and decrease, fluctuation",
+    "russian_translation": "увеличение и уменьшение, колебание"
+  },
+  "墨": {
+    "english_translation": "ink (Japanese/Chinese calligraphy)",
+    "russian_translation": "тушь (для письма)"
+  },
+  "売り上げ": {
+    "english_translation": "sales, proceeds, turnover (variant of 売上)",
+    "russian_translation": "продажи, выручка"
+  },
+  "売り切れ": {
+    "english_translation": "sold out",
+    "russian_translation": "распродано, нет в наличии"
+  },
+  "売り切れる": {
+    "english_translation": "to be sold out (intransitive)",
+    "russian_translation": "быть полностью распроданным"
+  },
+  "売上": {
+    "english_translation": "sales, revenue, turnover",
+    "russian_translation": "объём продаж, выручка"
+  },
+  "売店": {
+    "english_translation": "store, stand, booth (small retail spot)",
+    "russian_translation": "ларёк, киоск"
+  },
+  "売行き": {
+    "english_translation": "sales performance, demand (of goods)",
+    "russian_translation": "сбыт, продажи"
+  },
+  "売買": {
+    "english_translation": "buying and selling, trade",
+    "russian_translation": "купля-продажа, торговля"
+  },
+  "夕刊": {
+    "english_translation": "evening newspaper",
+    "russian_translation": "вечерняя газета"
+  },
+  "夕日": {
+    "english_translation": "evening sun, setting sun",
+    "russian_translation": "закатное солнце"
+  },
+  "夕立": {
+    "english_translation": "evening shower, sudden downpour (summer)",
+    "russian_translation": "вечерний ливень"
+  },
+  "外れる": {
+    "english_translation": "to be disconnected, to come off; to be out of place, to miss (a target)",
+    "russian_translation": "отсоединиться, слететь; не соответствовать"
+  },
+  "外科": {
+    "english_translation": "surgery, surgical department",
+    "russian_translation": "хирургия"
+  },
+  "外部": {
+    "english_translation": "the outside, external, exterior",
+    "russian_translation": "снаружи, внешняя часть"
+  },
+  "夜行": {
+    "english_translation": "night travel, night train",
+    "russian_translation": "ночной поезд, ночное путешествие"
+  },
+  "夜間": {
+    "english_translation": "nighttime, during the night",
+    "russian_translation": "ночное время"
+  },
+  "大して": {
+    "english_translation": "not so much, not very (used with negation)",
+    "russian_translation": "не особо, не очень (с отрицанием)"
+  },
+  "大凡": {
+    "english_translation": "generally, roughly, about (variant of おおよそ)",
+    "russian_translation": "в основном, примерно"
+  },
+  "大学院": {
+    "english_translation": "graduate school",
+    "russian_translation": "аспирантура, магистратура"
+  },
+  "大小": {
+    "english_translation": "size (large and small), dimensions; greater or smaller",
+    "russian_translation": "размер, габариты"
+  },
+  "大層": {
+    "english_translation": "very, greatly, immensely (literary); exaggerated",
+    "russian_translation": "очень, весьма, сильно (книжн.)"
+  },
+  "大工": {
+    "english_translation": "carpenter",
+    "russian_translation": "плотник"
+  },
+  "大木": {
+    "english_translation": "large tree",
+    "russian_translation": "большое дерево"
+  },
+  "大通り": {
+    "english_translation": "main street, avenue",
+    "russian_translation": "главная улица, проспект"
+  },
+  "大雑把": {
+    "english_translation": "rough, broad, vague (person/plan)",
+    "russian_translation": "небрежный, приблизительный"
+  },
+  "天皇": {
+    "english_translation": "Emperor of Japan",
+    "russian_translation": "Император Японии"
+  },
+  "太鼓": {
+    "english_translation": "taiko (Japanese drum)",
+    "russian_translation": "тайко (японский барабан)"
+  },
+  "夫妻": {
+    "english_translation": "husband and wife, married couple",
+    "russian_translation": "супруги"
+  },
+  "失恋": {
+    "english_translation": "broken heart, disappointment in love",
+    "russian_translation": "несчастная любовь, разбитое сердце"
+  },
+  "女の人": {
+    "english_translation": "woman (neutral term)",
+    "russian_translation": "женщина"
+  },
+  "女房": {
+    "english_translation": "wife (humble, often older generation)",
+    "russian_translation": "жена (скромно/устар.)"
+  },
+  "好き好き": {
+    "english_translation": "matter of taste, personal preference",
+    "russian_translation": "дело вкуса, личные пристрастия"
+  },
+  "好き嫌い": {
+    "english_translation": "likes and dislikes, preference (especially for food)",
+    "russian_translation": "вкусы, пристрастия"
+  },
+  "妥当": {
+    "english_translation": "appropriate, proper, reasonable",
+    "russian_translation": "разумный, обоснованный, подходящий"
+  },
+  "妨げる": {
+    "english_translation": "to prevent, to obstruct, to hinder",
+    "russian_translation": "препятствовать, мешать"
+  },
+  "始めに": {
+    "english_translation": "at first, initially (variant of 初めに)",
+    "russian_translation": "вначале, на первом этапе"
+  },
+  "始終": {
+    "english_translation": "from beginning to end; all the time, constantly",
+    "russian_translation": "всё время, постоянно"
+  },
+  "姓": {
+    "english_translation": "surname, family name",
+    "russian_translation": "фамилия"
+  },
+  "姪": {
+    "english_translation": "niece",
+    "russian_translation": "племянница"
+  },
+  "姿勢": {
+    "english_translation": "posture, stance; attitude, approach",
+    "russian_translation": "поза, осанка; отношение"
+  },
+  "威張る": {
+    "english_translation": "to boast, to swagger, to put on airs",
+    "russian_translation": "хвастаться, важничать"
+  },
+  "娯楽": {
+    "english_translation": "entertainment, amusement, recreation",
+    "russian_translation": "развлечение, досуг"
+  },
+  "嫌がる": {
+    "english_translation": "to hate, to dislike (often shows reluctance to do something)",
+    "russian_translation": "не любить, не хотеть"
+  },
+  "子孫": {
+    "english_translation": "descendants, posterity",
+    "russian_translation": "потомки"
+  },
+  "存じる": {
+    "english_translation": "to know, to think (humble verb form)",
+    "russian_translation": "знать, думать (скромно-вежл.)"
+  },
+  "存ずる": {
+    "english_translation": "to know, to think (humble verb form, variant of 存じる)",
+    "russian_translation": "знать, полагать (скромно-вежл.)"
+  },
+  "孝行": {
+    "english_translation": "filial piety (duty to parents)",
+    "russian_translation": "почтительность к родителям"
+  },
+  "学会": {
+    "english_translation": "scientific society, academic conference",
+    "russian_translation": "научное общество, конференция"
+  },
+  "学力": {
+    "english_translation": "academic ability, scholarship",
+    "russian_translation": "успеваемость, уровень знаний"
+  },
+  "学年": {
+    "english_translation": "academic year, school grade",
+    "russian_translation": "учебный год, класс"
+  },
+  "学科": {
+    "english_translation": "subject of study, department (in university)",
+    "russian_translation": "учебный предмет, дисциплина"
+  },
+  "学級": {
+    "english_translation": "class (in school, a grade group)",
+    "russian_translation": "учебный класс, группа"
+  },
+  "学術": {
+    "english_translation": "science, scholarship, learning",
+    "russian_translation": "наука, научные знания"
+  },
+  "学部": {
+    "english_translation": "faculty, department (of a university)",
+    "russian_translation": "факультет"
+  },
+  "安易": {
+    "english_translation": "easy, simple, careless (often critical)",
+    "russian_translation": "лёгкий, простой, легкомысленный"
+  },
+  "官庁": {
+    "english_translation": "government office, public agency",
+    "russian_translation": "государственное учреждение"
+  },
+  "定休日": {
+    "english_translation": "regular holiday, fixed day off",
+    "russian_translation": "регулярный выходной"
+  },
+  "定価": {
+    "english_translation": "fixed price, list price",
+    "russian_translation": "фиксированная цена"
+  },
+  "定員": {
+    "english_translation": "fixed number of people, capacity (e.g., of a bus)",
+    "russian_translation": "вместимость, штатная численность"
+  },
+  "定期券": {
+    "english_translation": "commuter pass, season ticket",
+    "russian_translation": "проездной билет"
+  },
+  "定規": {
+    "english_translation": "ruler (measuring tool)",
+    "russian_translation": "линейка"
+  },
+  "宛名": {
+    "english_translation": "address and name of recipient",
+    "russian_translation": "имя и адрес получателя"
+  },
+  "実る": {
+    "english_translation": "to bear fruit, to ripen; to come to fruition (plans)",
+    "russian_translation": "приносить плоды, созревать"
+  },
+  "実例": {
+    "english_translation": "concrete example, actual case",
+    "russian_translation": "практический пример"
+  },
+  "実力": {
+    "english_translation": "true ability, real power, competence",
+    "russian_translation": "реальная сила, способности"
+  },
+  "実感": {
+    "english_translation": "true feeling, realization (sense of reality)",
+    "russian_translation": "ощущение реальности, подлинное чувство"
+  },
+  "実物": {
+    "english_translation": "real thing, actual object",
+    "russian_translation": "подлинник, оригинал"
+  },
+  "実用": {
+    "english_translation": "practical use, utility",
+    "russian_translation": "практическое применение"
+  },
+  "実績": {
+    "english_translation": "results, achievements, track record",
+    "russian_translation": "результаты, достижения"
+  },
+  "実習": {
+    "english_translation": "practical training, practice, field work",
+    "russian_translation": "практика, стажировка"
+  },
+  "客席": {
+    "english_translation": "audience seating, customer seats",
+    "russian_translation": "зрительный зал, места для гостей"
+  },
+  "客間": {
+    "english_translation": "guest room, parlor",
+    "russian_translation": "гостиная, комната для гостей"
+  },
+  "宣伝": {
+    "english_translation": "publicity, advertisement, propaganda",
+    "russian_translation": "реклама, пропаганда"
+  },
+  "宴会": {
+    "english_translation": "party, banquet, feast (often with drinking)",
+    "russian_translation": "банкет, застолье"
+  },
+  "家主": {
+    "english_translation": "landlord, homeowner, head of a household",
+    "russian_translation": "домовладелец, хозяин дома"
+  },
+  "家屋": {
+    "english_translation": "house, building (as a structure)",
+    "russian_translation": "жилой дом, строение"
+  },
+  "容器": {
+    "english_translation": "container, vessel, receptacle",
+    "russian_translation": "ёмкость, сосуд"
+  },
+  "容積": {
+    "english_translation": "capacity, volume (internal space)",
+    "russian_translation": "внутренний объём, вместимость"
+  },
+  "寄せる": {
+    "english_translation": "to move closer, to approach; to gather, to collect",
+    "russian_translation": "придвигать, приближать"
+  },
+  "寒帯": {
+    "english_translation": "frigid zone, cold region",
+    "russian_translation": "холодный пояс (климат.)"
+  },
+  "寝台": {
+    "english_translation": "bed, berth (on a train, ship)",
+    "russian_translation": "койка, спальное место"
+  },
+  "寝巻": {
+    "english_translation": "sleepwear, pajamas (variant of 寝巻き)",
+    "russian_translation": "пижама, ночная рубашка"
+  },
+  "寝巻き": {
+    "english_translation": "sleepwear, pajamas (general term)",
+    "russian_translation": "пижама, ночная одежда"
+  },
+  "寝間着": {
+    "english_translation": "sleepwear, nightclothes (variant of 寝巻き)",
+    "russian_translation": "ночная одежда"
+  },
+  "寮": {
+    "english_translation": "dormitory, hostel, hall of residence",
+    "russian_translation": "общежитие, интернат"
+  },
+  "寸法": {
+    "english_translation": "measurement, dimension, size",
+    "russian_translation": "размер, габариты"
+  },
+  "寺院": {
+    "english_translation": "temple, monastery (Buddhist)",
+    "russian_translation": "храм, монастырь"
+  },
+  "対照": {
+    "english_translation": "contrast, antithesis",
+    "russian_translation": "контраст, противопоставление"
+  },
+  "対策": {
+    "english_translation": "measure, countermeasure, step (to solve a problem)",
+    "russian_translation": "мера, контрмера"
+  },
+  "寿命": {
+    "english_translation": "lifespan, longevity, term of life",
+    "russian_translation": "продолжительность жизни, срок службы"
+  },
+  "専制": {
+    "english_translation": "autocracy, despotism, absolute rule",
+    "russian_translation": "самодержавие, деспотизм"
+  },
+  "射す": {
+    "english_translation": "to shine, to illuminate; to shoot, to pierce (variant of 射る)",
+    "russian_translation": "светить, проникать (о луче)"
+  },
+  "将棋": {
+    "english_translation": "shogi (Japanese chess)",
+    "russian_translation": "сёги (японские шахматы)"
+  },
+  "小便": {
+    "english_translation": "urination, urine (euphemistic/children's term)",
+    "russian_translation": "мочеиспускание"
+  },
+  "小学生": {
+    "english_translation": "elementary school student",
+    "russian_translation": "ученик начальной школы"
+  },
+  "小指": {
+    "english_translation": "little finger, pinky",
+    "russian_translation": "мизинец"
+  },
+  "小数": {
+    "english_translation": "decimal (fraction), small number",
+    "russian_translation": "десятичная дробь"
+  },
+  "小父さん": {
+    "english_translation": "uncle (man of parent's age, slightly informal)",
+    "russian_translation": "дядя (по возрасту)"
+  },
+  "小遣い": {
+    "english_translation": "pocket money, spending money, allowance",
+    "russian_translation": "карманные деньги"
+  },
+  "尖る": {
+    "english_translation": "to taper, to come to a point, to be sharpened (intransitive)",
+    "russian_translation": "заостряться, торчать"
+  },
+  "就任": {
+    "english_translation": "inauguration, assumption of office",
+    "russian_translation": "вступление в должность"
+  },
+  "屋外": {
+    "english_translation": "outdoors, open air, outside (area)",
+    "russian_translation": "вне помещения, на улице"
+  },
+  "屑": {
+    "english_translation": "waste, trash, scraps, dregs",
+    "russian_translation": "мусор, отходы, обрезки"
+  },
+  "展開": {
+    "english_translation": "development, expansion, unfolding (plot, business)",
+    "russian_translation": "развитие, развёртывание"
+  },
+  "属する": {
+    "english_translation": "to belong to, to be affiliated with, to be under the jurisdiction of",
+    "russian_translation": "принадлежать, относиться к"
+  },
+  "山林": {
+    "english_translation": "mountain forest, timberland",
+    "russian_translation": "горный лес, лесистая местность"
+  },
+  "岬": {
+    "english_translation": "cape, promontory, headland",
+    "russian_translation": "мыс"
+  },
+  "峠": {
+    "english_translation": "mountain pass, crest (of a mountain)",
+    "russian_translation": "горный перевал, вершина"
+  },
+  "崩す": {
+    "english_translation": "to destroy, to pull down; to change (money); to lose (form)",
+    "russian_translation": "разрушать, ломать; разменивать (деньги)"
+  },
+  "崩れる": {
+    "english_translation": "to collapse, to crumble, to break down (intransitive)",
+    "russian_translation": "рушиться, обваливаться"
+  },
+  "巡る": {
+    "english_translation": "to go around, to circulate, to concern (an issue)",
+    "russian_translation": "кружить, циркулировать; касаться"
+  },
+  "巡査": {
+    "english_translation": "police officer (patrolman, low rank)",
+    "russian_translation": "патрульный, полицейский"
+  },
+  "工事": {
+    "english_translation": "construction work, engineering works",
+    "russian_translation": "строительные работы"
+  },
+  "工員": {
+    "english_translation": "factory worker, laborer",
+    "russian_translation": "рабочий, фабричный работник"
+  },
+  "工夫": {
+    "english_translation": "device, contrivance; ingenuity, resourcefulness",
+    "russian_translation": "выдумка, изобретательность"
+  },
+  "工芸": {
+    "english_translation": "craft, industrial arts, fine crafts",
+    "russian_translation": "ремесло, художественное изделие"
+  },
+  "差し引き": {
+    "english_translation": "deduction, subtraction; balance (after deduction)",
+    "russian_translation": "вычет, сальдо"
+  },
+  "差し支え": {
+    "english_translation": "hindrance, obstruction, inconvenience",
+    "russian_translation": "помеха, неудобство"
+  },
+  "巻く": {
+    "english_translation": "to wind, to roll up, to coil",
+    "russian_translation": "наматывать, обёртывать, сворачивать"
+  },
+  "帰す": {
+    "english_translation": "to send home, to let go home (transitive)",
+    "russian_translation": "отпускать домой, возвращать"
+  },
+  "干す": {
+    "english_translation": "to dry, to air (transitive); to drink up (a glass)",
+    "russian_translation": "сушить, вывешивать (бельё)"
+  },
+  "平仮名": {
+    "english_translation": "Hiragana (Japanese syllabic script)",
+    "russian_translation": "хирагана"
+  },
+  "平凡": {
+    "english_translation": "ordinary, common, mediocre",
+    "russian_translation": "обычный, заурядный, посредственный"
+  },
+  "平日": {
+    "english_translation": "weekday",
+    "russian_translation": "будний день"
+  },
+  "平気": {
+    "english_translation": "calmness, indifference; alright, no problem",
+    "russian_translation": "спокойствие, безразличие; ничего страшного"
+  },
+  "平野": {
+    "english_translation": "plain, open field, level ground",
+    "russian_translation": "равнина, низменность"
+  },
+  "年度": {
+    "english_translation": "fiscal year, academic year (often starting in April in Japan)",
+    "russian_translation": "финансовый год, учебный год"
+  },
+  "幼児": {
+    "english_translation": "infant, baby, young child (usually 1-6 years old)",
+    "russian_translation": "младенец, ребёнок (дошкольного возраста)"
+  },
+  "幼稚": {
+    "english_translation": "infantile, childish, immature",
+    "russian_translation": "детский, инфантильный"
+  },
+  "幼稚園": {
+    "english_translation": "kindergarten",
+    "russian_translation": "детский сад"
+  },
+  "幾分": {
+    "english_translation": "somewhat, a little, to some extent",
+    "russian_translation": "отчасти, в некоторой степени"
+  },
+  "広々": {
+    "english_translation": "spacious, vast, expansive",
+    "russian_translation": "просторно, широко"
+  },
+  "広げる": {
+    "english_translation": "to spread, to widen, to extend (transitive)",
+    "russian_translation": "расширять, развёртывать"
+  },
+  "広さ": {
+    "english_translation": "extent, area, width",
+    "russian_translation": "площадь, ширина"
+  },
+  "広める": {
+    "english_translation": "to spread, to propagate, to make widely known",
+    "russian_translation": "распространять, популяризировать"
+  },
+  "広場": {
+    "english_translation": "square, plaza, open space",
+    "russian_translation": "площадь, сквер"
+  },
+  "床の間": {
+    "english_translation": "tokonoma (alcove for displaying art in a Japanese room)",
+    "russian_translation": "токонома (ниша для свитков и цветов)"
+  },
+  "床屋": {
+    "english_translation": "barber shop, barbers",
+    "russian_translation": "парикмахерская (мужская)"
+  },
+  "庖丁": {
+    "english_translation": "kitchen knife (archaic kanji for 包丁)",
+    "russian_translation": "кухонный нож (устар.)"
+  },
+  "店屋": {
+    "english_translation": "shop, store, retail outlet (often small, variant of 店)",
+    "russian_translation": "магазин, лавка"
+  },
+  "座布団": {
+    "english_translation": "zabuton (Japanese floor cushion)",
+    "russian_translation": "дзабутон (подушка для сидения на полу)"
+  },
+  "座敷": {
+    "english_translation": "zashiki (traditional Japanese room with tatami flooring)",
+    "russian_translation": "дзасики (комната с татами)"
+  },
+  "延ばす": {
+    "english_translation": "to extend, to lengthen, to postpone (transitive)",
+    "russian_translation": "продлевать, откладывать"
+  },
+  "延びる": {
+    "english_translation": "to be extended, to be postponed; to grow (intransitive)",
+    "russian_translation": "продлеваться, откладываться"
+  },
+  "延長": {
+    "english_translation": "extension, prolongation, lengthening",
+    "russian_translation": "продление, расширение"
+  },
+  "建つ": {
+    "english_translation": "to be built, to be erected (intransitive)",
+    "russian_translation": "строиться, быть построенным"
+  },
+  "引き止める": {
+    "english_translation": "to detain, to stop (someone from leaving), to hold back",
+    "russian_translation": "задерживать, удерживать"
+  },
+  "引き算": {
+    "english_translation": "subtraction (arithmetic operation)",
+    "russian_translation": "вычитание"
+  },
+  "引き返す": {
+    "english_translation": "to turn back, to return, to retrace one's steps",
+    "russian_translation": "возвращаться, идти обратно"
+  },
+  "引っかかる": {
+    "english_translation": "to be caught, to be hooked; to be deceived, to be tricked (intransitive)",
+    "russian_translation": "зацепиться, попасться"
+  },
+  "引っ掛かる": {
+    "english_translation": "to be caught, to be hooked (variant of 引っかかる)",
+    "russian_translation": "зацепиться, застрять"
+  },
+  "引っ繰り返す": {
+    "english_translation": "to overturn, to capsize, to upset (transitive, variant of ひっくり返す)",
+    "russian_translation": "переворачивать, опрокидывать"
+  },
+  "引っ繰り返る": {
+    "english_translation": "to be overturned, to fall over (intransitive, variant of ひっくり返る)",
+    "russian_translation": "опрокинуться, перевернуться"
+  },
+  "引っ越し": {
+    "english_translation": "moving house, relocation (variant of 引越し)",
+    "russian_translation": "переезд"
+  },
+  "引っ込む": {
+    "english_translation": "to draw back, to retire; to sink, to be dented",
+    "russian_translation": "отступать, уходить; вдавливаться"
+  },
+  "引出す": {
+    "english_translation": "to pull out, to draw out; to withdraw (money) (variant of 引き出す)",
+    "russian_translation": "вытаскивать, вытягивать; снимать (деньги)"
+  },
+  "引分け": {
+    "english_translation": "draw, tie (in a contest)",
+    "russian_translation": "ничья"
+  },
+  "引力": {
+    "english_translation": "gravity, attraction, pull",
+    "russian_translation": "сила притяжения, гравитация"
+  },
+  "引受る": {
+    "english_translation": "to take over, to undertake, to assume (a task) (variant of 引き受ける)",
+    "russian_translation": "брать на себя (ответственность)"
+  },
+  "引算": {
+    "english_translation": "subtraction (variant of 引き算)",
+    "russian_translation": "вычитание"
+  },
+  "引越し": {
+    "english_translation": "moving house, relocation",
+    "russian_translation": "переезд"
+  },
+  "引返す": {
+    "english_translation": "to turn back, to return (variant of 引き返す)",
+    "russian_translation": "возвращаться, идти обратно"
+  },
+  "弱点": {
+    "english_translation": "weak point, weakness, vulnerability",
+    "russian_translation": "слабое место, уязвимость"
+  },
+  "張り切る": {
+    "english_translation": "to be full of enthusiasm, to be in high spirits",
+    "russian_translation": "быть полным энтузиазма, рваться в бой"
+  },
+  "強化": {
+    "english_translation": "strengthening, enhancement, reinforcement",
+    "russian_translation": "усиление, укрепление"
+  },
+  "強引": {
+    "english_translation": "overbearing, coercive, forcible",
+    "russian_translation": "насильственный, принудительный"
+  },
+  "強気": {
+    "english_translation": "firm, confident, bullish (stock market)",
+    "russian_translation": "уверенный, оптимистичный"
+  },
+  "当日": {
+    "english_translation": "the appointed day, the day itself",
+    "russian_translation": "в тот же день, назначенный день"
+  },
+  "当番": {
+    "english_translation": "being on duty, assigned task",
+    "russian_translation": "дежурство, дежурный"
+  },
+  "形容動詞": {
+    "english_translation": "adjectival noun (na-adjective)",
+    "russian_translation": "имя прилагательное-наречие (na-прилагательное)"
+  },
+  "形容詞": {
+    "english_translation": "adjective (i-adjective)",
+    "russian_translation": "имя прилагательное (i-прилагательное)"
+  },
+  "形式": {
+    "english_translation": "form, format, formality",
+    "russian_translation": "форма, формат, формальность"
+  },
+  "彫る": {
+    "english_translation": "to carve, to engrave, to sculpt",
+    "russian_translation": "вырезать, гравировать"
+  },
+  "彫刻": {
+    "english_translation": "carving, sculpture, engraving",
+    "russian_translation": "скульптура, гравировка"
+  },
+  "役人": {
+    "english_translation": "government official, public servant (often with negative connotation)",
+    "russian_translation": "чиновник, служащий (гос.)"
+  },
+  "役所": {
+    "english_translation": "government office, public office",
+    "russian_translation": "администрация, гос. учреждение"
+  },
+  "役目": {
+    "english_translation": "role, duty, function",
+    "russian_translation": "роль, обязанность"
+  },
+  "役者": {
+    "english_translation": "actor, performer (often traditional/stage)",
+    "russian_translation": "актёр"
+  },
+  "往復": {
+    "english_translation": "round trip, going and returning",
+    "russian_translation": "туда и обратно, двусторонний"
+  },
+  "待ち合わせる": {
+    "english_translation": "to arrange to meet, to meet by appointment",
+    "russian_translation": "договориться о встрече"
+  },
+  "待合室": {
+    "english_translation": "waiting room, lounge",
+    "russian_translation": "комната ожидания"
+  },
+  "後輩": {
+    "english_translation": "junior (at work, school, club)",
+    "russian_translation": "младший (по положению, курсу)"
+  },
+  "従姉妹": {
+    "english_translation": "female cousin",
+    "russian_translation": "двоюродная сестра"
+  },
+  "御中": {
+    "english_translation": "attention to (an organization, department, not a person)",
+    "russian_translation": "в организацию (обращение)"
+  },
+  "御免": {
+    "english_translation": "pardon, excuse me (can be a refusal); Imperial sanction (archaic)",
+    "russian_translation": "извините, простите (неформ.)"
+  },
+  "御手洗": {
+    "english_translation": "toilet, restroom (polite, used for public toilets or Shinto purification fonts)",
+    "russian_translation": "туалет (вежл.); место для омовения (синто)"
+  },
+  "御無沙汰": {
+    "english_translation": "long silence, long time no see (apology for not contacting)",
+    "russian_translation": "давнее отсутствие (связи), давно не виделись"
+  },
+  "御覧": {
+    "english_translation": "look, see (honorific of 見る)",
+    "russian_translation": "смотреть, взглянуть (вежл.)"
+  },
+  "御辞儀": {
+    "english_translation": "bow (honorific of お辞儀)",
+    "russian_translation": "поклон (вежл.)"
+  },
+  "御馳走": {
+    "english_translation": "feast, treat, good meal (honorific of ごちそう)",
+    "russian_translation": "угощение, роскошный обед"
+  },
+  "循環": {
+    "english_translation": "circulation, cycle, rotation",
+    "russian_translation": "циркуляция, кругооборот"
+  },
+  "心当たり": {
+    "english_translation": "having a clue, idea, or vague recollection",
+    "russian_translation": "догадка, предположение"
+  },
+  "心得る": {
+    "english_translation": "to understand, to comprehend; to be aware of (rules, etiquette)",
+    "russian_translation": "понимать, знать (этикет)"
+  },
+  "心身": {
+    "english_translation": "mind and body",
+    "russian_translation": "душа и тело"
+  },
+  "必需品": {
+    "english_translation": "necessities, essentials (goods)",
+    "russian_translation": "предметы первой необходимости"
+  },
+  "応ずる": {
+    "english_translation": "to answer, to respond to, to comply with (formal)",
+    "russian_translation": "отвечать, отзываться"
+  },
+  "応対": {
+    "english_translation": "reception, dealing with (customers, visitors)",
+    "russian_translation": "приём, обслуживание (клиентов)"
+  },
+  "応接": {
+    "english_translation": "reception (of guests), interviewing",
+    "russian_translation": "приём (гостей, посетителей)"
+  },
+  "応援": {
+    "english_translation": "aid, support, cheering",
+    "russian_translation": "поддержка, подбадривание"
+  },
+  "応用": {
+    "english_translation": "application (of knowledge, theory)",
+    "russian_translation": "применение, прикладной"
+  },
+  "快晴": {
+    "english_translation": "clear weather, cloudless sky",
+    "russian_translation": "ясная погода, безоблачное небо"
+  },
+  "思いがけない": {
+    "english_translation": "unexpected, unforeseen, surprising",
+    "russian_translation": "неожиданный, непредвиденный"
+  },
+  "思いっ切り": {
+    "english_translation": "with all one's might, to the utmost (colloquial contraction)",
+    "russian_translation": "изо всех сил, на полную"
+  },
+  "思いつく": {
+    "english_translation": "to think of, to hit upon (an idea, solution) (variant of 思い付く)",
+    "russian_translation": "придумать, осенить"
+  },
+  "思い付く": {
+    "english_translation": "to think of, to hit upon (an idea, solution)",
+    "russian_translation": "придумать, осенить"
+  },
+  "思い掛けない": {
+    "english_translation": "unexpected, surprising (variant of 思いがけない)",
+    "russian_translation": "неожиданный, внезапный"
+  },
+  "思い込む": {
+    "english_translation": "to be under the impression, to take for granted; to be convinced",
+    "russian_translation": "убедиться, вообразить"
+  },
+  "怠る": {
+    "english_translation": "to neglect, to be lazy, to fail to do",
+    "russian_translation": "пренебрегать, лениться"
+  },
+  "性別": {
+    "english_translation": "gender, sex",
+    "russian_translation": "пол"
+  },
+  "性能": {
+    "english_translation": "performance, efficiency, capacity (of a machine)",
+    "russian_translation": "производительность, характеристики"
+  },
+  "性質": {
+    "english_translation": "nature, property, characteristic, disposition",
+    "russian_translation": "характер, свойство, природа"
+  },
+  "怪しい": {
+    "english_translation": "suspicious, doubtful, strange",
+    "russian_translation": "подозрительный, сомнительный"
+  },
+  "恋しい": {
+    "english_translation": "missed, longed for, yearned for",
+    "russian_translation": "тоскующий по, любимый"
+  },
+  "恐縮": {
+    "english_translation": "feeling obliged, feeling small, apology (for trouble caused)",
+    "russian_translation": "неловкость, стеснение"
+  },
+  "恨み": {
+    "english_translation": "resentment, grudge, bitter feeling",
+    "russian_translation": "обида, злоба, вражда"
+  },
+  "恨む": {
+    "english_translation": "to bear a grudge, to resent, to blame",
+    "russian_translation": "затаить обиду, ненавидеть"
+  },
+  "憎らしい": {
+    "english_translation": "detestable, hateful, provoking annoyance (but often with a touch of affection)",
+    "russian_translation": "противный, вызывающий раздражение"
+  },
+  "恩恵": {
+    "english_translation": "favor, grace, benefit",
+    "russian_translation": "благо, милость, польза"
+  },
+  "恵まれる": {
+    "english_translation": "to be blessed with, to be fortunate in",
+    "russian_translation": "быть облагодетельствованным, повезти"
+  },
+  "悔しい": {
+    "english_translation": "frustrating, regrettable, vexing (feeling of annoyance at failure)",
+    "russian_translation": "досадный, обидный"
+  },
+  "悔やむ": {
+    "english_translation": "to regret, to lament, to mourn (a death)",
+    "russian_translation": "сожалеть, раскаиваться"
+  },
+  "悠々": {
+    "english_translation": "calm, relaxed, unhurried, leisurely",
+    "russian_translation": "непринуждённо, спокойно, не торопясь"
+  },
+  "惜しい": {
+    "english_translation": "pitiable, regrettable; nearly successful (but failed); too good to lose",
+    "russian_translation": "жаль; почти (удалось)"
+  },
+  "意地悪": {
+    "english_translation": "malicious, ill-natured, mean-spirited",
+    "russian_translation": "злой, вредный, злорадный"
+  },
+  "意義": {
+    "english_translation": "meaning, significance, importance",
+    "russian_translation": "значение, смысл"
+  },
+  "感ずる": {
+    "english_translation": "to feel, to sense, to be impressed (literary/archaic form of 感じる)",
+    "russian_translation": "чувствовать, ощущать (книжн.)"
+  },
+  "感想": {
+    "english_translation": "impression, thoughts, feelings (after reading/seeing)",
+    "russian_translation": "впечатление, отзыв"
+  },
+  "感激": {
+    "english_translation": "deep emotion, impression, moving (feeling)",
+    "russian_translation": "восторг, глубокое впечатление"
+  },
+  "慰める": {
+    "english_translation": "to comfort, to console, to soothe",
+    "russian_translation": "утешать, успокаивать"
+  },
+  "慶び": {
+    "english_translation": "joy, delight, celebration (variant of 喜び)",
+    "russian_translation": "радость, торжество"
+  },
+  "慶ぶ": {
+    "english_translation": "to be delighted, to celebrate (variant of 喜ぶ)",
+    "russian_translation": "радоваться, праздновать"
+  },
+  "憎い": {
+    "english_translation": "hateful, detestable, provoking envy",
+    "russian_translation": "ненавистный, отвратительный"
+  },
+  "憎む": {
+    "english_translation": "to hate, to detest, to loathe",
+    "russian_translation": "ненавидеть, питать отвращение"
+  },
+  "憧れる": {
+    "english_translation": "to long for, to yearn for, to admire",
+    "russian_translation": "страстно желать, восхищаться"
+  },
+  "懐かしい": {
+    "english_translation": "nostalgic, fondly remembered (old times, friends)",
+    "russian_translation": "ностальгический, милый сердцу (о прошлом)"
+  },
+  "成分": {
+    "english_translation": "ingredient, component, constituent",
+    "russian_translation": "состав, ингредиент"
+  },
+  "成立": {
+    "english_translation": "formation, conclusion (of a contract), establishment (of a system)",
+    "russian_translation": "формирование, заключение"
+  },
+  "戸棚": {
+    "english_translation": "cupboard, cabinet, locker",
+    "russian_translation": "шкаф, буфет"
+  },
+  "所々": {
+    "english_translation": "here and there, in places, patches",
+    "russian_translation": "кое-где, местами"
+  },
+  "扇ぐ": {
+    "english_translation": "to fan (oneself), to wave (a fan)",
+    "russian_translation": "обмахивать, веять"
+  },
+  "扇子": {
+    "english_translation": "folding fan",
+    "russian_translation": "складной веер"
+  },
+  "扇風機": {
+    "english_translation": "electric fan",
+    "russian_translation": "вентилятор"
+  },
+  "手ごろ": {
+    "english_translation": "handy, reasonable (price), moderate (variant of 手頃)",
+    "russian_translation": "подходящий, доступный (по цене)"
+  },
+  "手ぬぐい": {
+    "english_translation": "tenugui (traditional Japanese hand towel)",
+    "russian_translation": "тэнугуи (японское полотенце)"
+  },
+  "手入れ": {
+    "english_translation": "care, maintenance, upkeep",
+    "russian_translation": "уход, обслуживание"
+  },
+  "手前": {
+    "english_translation": "before (in front of); this side; one's position (often humble)",
+    "russian_translation": "перед; с этой стороны; моё положение (вежл.)"
+  },
+  "手帳": {
+    "english_translation": "notebook, diary, pocket diary",
+    "russian_translation": "записная книжка, блокнот"
+  },
+  "手拭い": {
+    "english_translation": "towel, washcloth (variant of 手ぬぐい)",
+    "russian_translation": "полотенце"
+  },
+  "手洗い": {
+    "english_translation": "washing hands; hand-washing (of clothes); toilet/restroom (euphemistic)",
+    "russian_translation": "мытьё рук; туалет (вежл.)"
+  },
+  "手続き": {
+    "english_translation": "procedure, process, formalities",
+    "russian_translation": "процедура, формальности"
+  },
+  "手頃": {
+    "english_translation": "handy, reasonable (price), affordable",
+    "russian_translation": "подходящий, доступный (по цене)"
+  },
+  "手首": {
+    "english_translation": "wrist",
+    "russian_translation": "запястье"
+  },
+  "打ち消す": {
+    "english_translation": "to deny, to negate, to cancel (a rumor/effect)",
+    "russian_translation": "отрицать, опровергать, сводить на нет"
+  },
+  "打合せ": {
+    "english_translation": "meeting, arrangement, preliminary discussion",
+    "russian_translation": "встреча, совещание"
+  },
+  "払い戻す": {
+    "english_translation": "to refund, to pay back",
+    "russian_translation": "возвращать деньги"
+  },
+  "払い込む": {
+    "english_translation": "to pay in, to deposit (money, dues)",
+    "russian_translation": "вносить плату, оплачивать"
+  },
+  "承る": {
+    "english_translation": "to hear, to be told; to receive (an order) (humble verb form)",
+    "russian_translation": "удостоиться услышать; принимать (вежл.)"
+  },
+  "投書": {
+    "english_translation": "letter to the editor, contribution (to a newspaper)",
+    "russian_translation": "письмо в редакцию"
+  },
+  "折角": {
+    "english_translation": "with trouble, at great pains; kindly, specifically (often conveying 'since you've gone to the trouble')",
+    "russian_translation": "специально, с трудом (иронич. или благодарно)"
+  },
+  "押える": {
+    "english_translation": "to hold down, to restrain (variant of 押さえる)",
+    "russian_translation": "придерживать, удерживать"
+  },
+  "抽象": {
+    "english_translation": "abstract, abstraction",
+    "russian_translation": "абстракция, отвлечённость"
+  },
+  "担ぐ": {
+    "english_translation": "to carry (on shoulder); to deceive; to be superstitious",
+    "russian_translation": "нести (на плече), взваливать"
+  },
+  "拝む": {
+    "english_translation": "to worship, to bow in prayer",
+    "russian_translation": "молиться, поклоняться"
+  },
+  "拡充": {
+    "english_translation": "expansion, extension (of facilities, staff)",
+    "russian_translation": "расширение, увеличение"
+  },
+  "拡張": {
+    "english_translation": "expansion, extension, enlargement (physical or conceptual)",
+    "russian_translation": "расширение, распространение"
+  },
+  "括弧": {
+    "english_translation": "parentheses, brackets",
+    "russian_translation": "скобки"
+  },
+  "拭く": {
+    "english_translation": "to wipe, to dry, to polish",
+    "russian_translation": "вытирать"
+  },
+  "持参": {
+    "english_translation": "bringing (something) with one, carrying",
+    "russian_translation": "принесение, взятие с собой"
+  },
+  "指定": {
+    "english_translation": "designation, specification, assignment",
+    "russian_translation": "назначение, указание"
+  },
+  "挙げる": {
+    "english_translation": "to raise (hand); to cite, to list (examples); to marry",
+    "russian_translation": "поднимать; приводить (примеры)"
+  },
+  "挟まる": {
+    "english_translation": "to be caught in between (intransitive)",
+    "russian_translation": "застрять, оказаться зажатым"
+  },
+  "挟む": {
+    "english_translation": "to hold between, to sandwich; to interrupt (a conversation)",
+    "russian_translation": "зажимать, вставлять (между)"
+  },
+  "振り仮名": {
+    "english_translation": "furigana (small kana next to kanji for pronunciation)",
+    "russian_translation": "фуригана (кана над иероглифами)"
+  }
+}
