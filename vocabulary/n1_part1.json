@@ -12395,7 +12395,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9965
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9959
+      },
+      {
+        "word": "大幅",
+        "score": 0.9924
+      },
+      {
+        "word": "話して",
+        "score": 0.9894
+      },
+      {
+        "word": "見ないで",
+        "score": 0.989
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9846
+      }
+    ]
   },
   "デザート": {
     "english_translation": "Dessert (sweet dish served at the end of a meal).",
@@ -12421,7 +12447,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9948
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9922
+      },
+      {
+        "word": "帯",
+        "score": 0.9919
+      },
+      {
+        "word": "大幅",
+        "score": 0.9897
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9856
+      },
+      {
+        "word": "買って",
+        "score": 0.9837
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.982
+      }
+    ]
   },
   "デッサン": {
     "english_translation": "Sketch, drawing (made to practice proportions and form, often from life).",
@@ -12447,7 +12503,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9919
+      },
+      {
+        "word": "買って",
+        "score": 0.9912
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9883
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9882
+      },
+      {
+        "word": "羨ましい",
+        "score": 0.9857
+      },
+      {
+        "word": "もったいない",
+        "score": 0.9838
+      }
+    ]
   },
   "デモンストレーション": {
     "english_translation": "Demonstration, visual presentation (illustrating how something works).",
@@ -12473,7 +12555,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "買って",
+        "score": 0.9964
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9941
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9864
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9841
+      },
+      {
+        "word": "大幅",
+        "score": 0.9833
+      },
+      {
+        "word": "いたいです",
+        "score": 0.9816
+      }
+    ]
   },
   "データ": {
     "english_translation": "Data, information (collected and processed in digital form).",
@@ -12499,7 +12607,25 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "見ないで",
+        "score": 0.9923
+      },
+      {
+        "word": "買って",
+        "score": 0.9921
+      },
+      {
+        "word": "大幅",
+        "score": 0.9917
+      },
+      {
+        "word": "話して",
+        "score": 0.9819
+      }
+    ]
   },
   "トラブル": {
     "english_translation": "Trouble, malfunction, unexpected problem (requiring resolution).",
@@ -12525,7 +12651,33 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "大幅",
+        "score": 0.9958
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9946
+      },
+      {
+        "word": "話して",
+        "score": 0.9939
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9876
+      },
+      {
+        "word": "買って",
+        "score": 0.9861
+      },
+      {
+        "word": "時代",
+        "score": 0.9802
+      }
+    ]
   },
   "トランジスタ": {
     "english_translation": "Transistor (a semiconductor component).",
@@ -12551,7 +12703,37 @@
       }
     ],
     "part_of_speech": "Noun",
-    "level": "N1"
+    "level": "N1",
+    "related_words": [
+      {
+        "word": "帯",
+        "score": 0.9993
+      },
+      {
+        "word": "買って",
+        "score": 0.9947
+      },
+      {
+        "word": "見ないで",
+        "score": 0.9933
+      },
+      {
+        "word": "引っ掻く",
+        "score": 0.9918
+      },
+      {
+        "word": "大幅",
+        "score": 0.99
+      },
+      {
+        "word": "みずぎ",
+        "score": 0.9899
+      },
+      {
+        "word": "恵まれる",
+        "score": 0.9804
+      }
+    ]
   },
   "トランジスター": {
     "english_translation": "Transistor (a semiconductor component).",
