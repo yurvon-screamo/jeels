@@ -1,0 +1,196 @@
+@font-face {
+    font-family: 'Maple Mono';
+    src: url('https://cdn.jsdelivr.net/gh/subframe7536/maple-font@v6.4/woff2/MapleMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Maple Mono';
+    src: url('https://cdn.jsdelivr.net/gh/subframe7536/maple-font@v6.4/woff2/MapleMono-Bold.woff2') format('woff2');
+    font-weight: 700;
+}
+
+/* Base reset */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+}
+
+html {
+    background-color: #F8F9FD;
+    font-family: 'Maple Mono', monospace;
+}
+
+body {
+    background-color: #F8F9FD;
+    color: #334155;
+    font-family: 'Maple Mono', monospace;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Entry animations */
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-enter {
+    animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+/* Delay classes for cascade */
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-400 {
+    animation-delay: 400ms;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
+
+/* Custom checkbox and radio */
+.custom-check:checked {
+    background-color: #F472B6;
+    border-color: #F472B6;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
+/* Custom checkbox and radio */
+.custom-radio:checked {
+    background-color: #F472B6;
+    border-color: #F472B6;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+}
+
+/* Rainbow switch */
+.bg-rainbow-switch:checked {
+    background-image: linear-gradient(to right, #F472B6, #A78BFA, #22D3EE);
+    opacity: 1;
+}
+
+.peer:checked~.peer-checked-bg {
+    background-color: transparent;
+}
+
+/* Custom colors and gradients */
+.bg-bg {
+    background-color: #F8F9FD;
+}
+
+.bg-surface {
+    background-color: #FFFFFF;
+}
+
+.text-text-main {
+    color: #334155;
+}
+
+.text-text-muted {
+    color: #94A3B8;
+}
+
+.text-accent-pink {
+    color: #F472B6;
+}
+
+.text-accent-purple {
+    color: #A78BFA;
+}
+
+.text-accent-cyan {
+    color: #22D3EE;
+}
+
+.bg-rainbow-soft {
+    background-image: linear-gradient(to right top, #ffc3a0, #ffafbd, #c9afff, #a0e9ff);
+}
+
+.bg-rainbow-vibrant {
+    background-image: linear-gradient(to right, #F472B6, #A78BFA, #60A5FA);
+}
+
+.shadow-soft {
+    box-shadow: 0 20px 40px -15px rgba(200, 100, 200, 0.05);
+}
+
+.shadow-soft-hover {
+    box-shadow: 0 30px 60px -12px rgba(200, 100, 255, 0.1);
+}
+
+.shadow-glow {
+    box-shadow: 0 0 25px rgba(244, 114, 182, 0.4), 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+.ease-elastic {
+    transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ease-smooth {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Selection styles */
+.selection\:bg-accent-pink\/30::selection {
+    background-color: rgba(244, 114, 182, 0.3);
+}
+
+.selection\:text-text-main::selection {
+    color: #334155;
+}
+
+/* Group focus within */
+.group-focus-within\:text-accent-pink:focus-within .group {
+    color: #F472B6;
+}
+
+.group-focus-within\:text-accent-cyan:focus-within .group {
+    color: #22D3EE;
+}
+
+.group-focus-within\:text-accent-purple:focus-within .group {
+    color: #A78BFA;
+}

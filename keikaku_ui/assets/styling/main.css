@@ -1,8 +1,24 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+}
+
+html {
+    background-color: #F8F9FD;
+    font-family: 'Maple Mono', monospace;
+}
+
 body {
-    background-color: #0f1116;
-    color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+    background-color: #F8F9FD;
+    color: #334155;
+    font-family: 'Maple Mono', monospace;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 #hero {

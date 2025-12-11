@@ -2,8 +2,7 @@
 // need dioxus
 use dioxus::prelude::*;
 
-use components::Hero;
-use views::{Blog, Home, Navbar};
+use views::{Blog, Home, Navbar, Showcase};
 
 /// Define a components module that contains all shared components for our app.
 mod components;
@@ -31,6 +30,9 @@ enum Route {
         // Fields of the route variant will be passed to the component as props. In this case, the blog component must accept
         // an `id` prop of type `i32`.
         Blog { id: i32 },
+        // Showcase page with all UI components
+        #[route("/showcase")]
+        Showcase {},
 }
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
@@ -39,6 +41,7 @@ const FAVICON: Asset = asset!("/assets/favicon.ico");
 // The asset macro also minifies some assets like CSS and JS to make bundled smaller
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
+const UI_STYLES: Asset = asset!("/assets/ui-styles.css");
 
 fn main() {
     // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
@@ -59,6 +62,39 @@ fn App() -> Element {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        document::Link { rel: "stylesheet", href: UI_STYLES }
+        
+        // Apply global styles
+        style {
+            {r#"
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    border: none;
+                    outline: none;
+                    box-sizing: border-box;
+                }
+                
+                html {
+                    background-color: #F8F9FD;
+                    font-family: 'Maple Mono', monospace;
+                }
+                
+                body {
+                    background-color: #F8F9FD;
+                    color: #334155;
+                    font-family: 'Maple Mono', monospace;
+                    margin: 0;
+                    padding: 0;
+                    min-height: 100vh;
+                    overflow-x: hidden;
+                }
+                
+                * {
+                    box-sizing: border-box;
+                }
+            "#}
+        }
 
         // The router component renders the route enum we defined above. It will handle synchronization of the URL and render
         // the layouts and components for the active route.

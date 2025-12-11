@@ -1,8 +1,6 @@
 use crate::Route;
 use dioxus::prelude::*;
 
-const NAVBAR_CSS: Asset = asset!("/assets/styling/navbar.css");
-
 /// The Navbar component that will be rendered on all pages of our app since every page is under the layout.
 ///
 ///
@@ -11,17 +9,39 @@ const NAVBAR_CSS: Asset = asset!("/assets/styling/navbar.css");
 #[component]
 pub fn Navbar() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: NAVBAR_CSS }
-
-        div {
-            id: "navbar",
-            Link {
-                to: Route::Home {},
-                "Home"
-            }
-            Link {
-                to: Route::Blog { id: 1 },
-                "Blog"
+        nav {
+            class: "bg-surface shadow-soft sticky top-0 z-50 backdrop-blur-md bg-white/80",
+            div {
+                class: "max-w-7xl mx-auto px-8 py-4",
+                div {
+                    class: "flex items-center justify-between",
+                    div {
+                        class: "flex items-center gap-2",
+                        Link {
+                            to: Route::Home {},
+                            class: "text-2xl font-bold bg-clip-text text-transparent bg-rainbow-vibrant",
+                            "Keikaku"
+                        }
+                    }
+                    div {
+                        class: "flex items-center gap-4",
+                        Link {
+                            to: Route::Home {},
+                            class: "text-text-main hover:text-accent-pink transition-colors font-medium",
+                            "Home"
+                        }
+                        Link {
+                            to: Route::Blog { id: 1 },
+                            class: "text-text-main hover:text-accent-purple transition-colors font-medium",
+                            "Blog"
+                        }
+                        Link {
+                            to: Route::Showcase {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Showcase"
+                        }
+                    }
+                }
             }
         }
 

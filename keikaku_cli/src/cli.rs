@@ -11,7 +11,7 @@ use keikaku::{
     settings::ApplicationEnvironment,
 };
 
-use crate::cli::{
+use crate::{
     anki::handle_create_anki_pack,
     card::{
         handle_create_card, handle_create_words, handle_delete_card, handle_edit_card,

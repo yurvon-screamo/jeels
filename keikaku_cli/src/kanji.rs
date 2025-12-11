@@ -13,7 +13,7 @@ use keikaku::{
     domain::{JeersError, dictionary::KanjiInfo},
 };
 
-use super::render_once;
+use crate::cli::render_once;
 
 pub async fn handle_kanji(_user_id: Ulid, kanji: String) -> Result<(), JeersError> {
     let use_case = GetKanjiInfoUseCase::new();

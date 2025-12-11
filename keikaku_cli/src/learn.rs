@@ -22,7 +22,7 @@ use keikaku::{
     },
     settings::ApplicationEnvironment,
 };
-use crate::cli::{furigana_renderer, render_once};
+use crate::{cli::render_once, furigana_renderer};
 
 enum CardState {
     Question,

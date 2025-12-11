@@ -9,7 +9,7 @@ use ulid::Ulid;
 
 use keikaku::{application::TranslateUseCase, domain::JeersError, settings::ApplicationEnvironment};
 
-use super::render_once;
+use crate::cli::render_once;
 
 pub async fn handle_translate(user_id: Ulid, text: String) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
