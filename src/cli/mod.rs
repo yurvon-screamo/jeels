@@ -55,6 +55,9 @@ enum Command {
     Me {},
     /// Learn cards
     Learn {
+        /// Limit of cards to learn
+        #[clap(short, long)]
+        limit: Option<usize>,
         /// Ignore new cards limit and show all due cards
         #[clap(short, long, default_value = "false")]
         new_cards_force: bool,
@@ -162,6 +165,7 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
             furigana_force,
             similarity_force,
             loop_mod,
+            limit,
         } => {
             handle_learn(
                 user_id,
@@ -169,6 +173,7 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 furigana_force,
                 similarity_force,
                 loop_mod,
+                limit,
             )
             .await?;
         }

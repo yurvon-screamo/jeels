@@ -21,6 +21,7 @@ pub enum JeersError {
     FuriganaError { reason: String },
     TranslationError { reason: String },
     KradfileError { reason: String },
+    InvalidValues { reason: String },
 }
 
 impl fmt::Display for JeersError {
@@ -76,6 +77,9 @@ impl fmt::Display for JeersError {
             }
             JeersError::KradfileError { reason } => {
                 write!(f, "Kradfile error: {}", reason)
+            }
+            JeersError::InvalidValues { reason } => {
+                write!(f, "Invalid values: {}", reason)
             }
         }
     }

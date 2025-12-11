@@ -36,7 +36,7 @@ async fn start_study_session_use_case_should_return_due_cards() {
 
     // Act
     let cards = start_session_use_case
-        .execute(user.id(), false, false)
+        .execute(user.id(), false, false, 100)
         .await
         .unwrap();
 

@@ -200,16 +200,20 @@ impl User {
         Ok(card)
     }
 
-    pub fn start_low_stability_cards_session(&self) -> Vec<StudySessionItem> {
-        self.collect_study_cards()
+    pub fn start_low_stability_cards_session(&self, limit: Option<usize>) -> Vec<StudySessionItem> {
+        self.collect_study_cards(limit)
             .into_iter()
             .filter(|card| card.is_low_stability)
             .map(|card| card.item)
             .collect()
     }
 
-    pub fn start_study_session(&self, force_new_cards: bool) -> Vec<StudySessionItem> {
-        let all_cards = self.collect_study_cards();
+    pub fn start_study_session(
+        &self,
+        force_new_cards: bool,
+        limit: Option<usize>,
+    ) -> Vec<StudySessionItem> {
+        let all_cards = self.collect_study_cards(limit);
         let mut due_cards: Vec<_> = all_cards
             .iter()
             .filter(|card| card.is_due && (card.is_in_progress || card.is_known))
@@ -396,7 +400,7 @@ impl User {
         )))
     }
 
-    fn collect_study_cards(&self) -> Vec<StudyCard> {
+    fn collect_study_cards(&self, limit: Option<usize>) -> Vec<StudyCard> {
         let vocabulary_cards = self
             .vocabulary_cards
             .values()
@@ -405,7 +409,15 @@ impl User {
             .kanji_cards
             .values()
             .filter_map(|card| self.kanji_to_study_card(card).ok());
-        vocabulary_cards.chain(kanji_cards).collect()
+
+        let mut cards: Vec<_> = vocabulary_cards.chain(kanji_cards).collect();
+        cards.sort_by_key(|card| card.next_review_date);
+
+        if let Some(limit) = limit {
+            cards.truncate(limit);
+        }
+
+        cards
     }
 
     fn vocabulary_to_study_card(&self, card: &VocabularyCard) -> Result<StudyCard, JeersError> {

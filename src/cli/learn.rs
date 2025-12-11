@@ -745,6 +745,7 @@ pub async fn handle_learn(
     furigana_force: bool,
     similarity_force: bool,
     loop_mod: bool,
+    limit: Option<usize>,
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
 
@@ -754,6 +755,7 @@ pub async fn handle_learn(
             new_cards_force,
             furigana_force,
             similarity_force,
+            limit,
             settings,
         )
         .await
@@ -763,6 +765,7 @@ pub async fn handle_learn(
             new_cards_force,
             furigana_force,
             similarity_force,
+            limit,
             settings,
         )
         .await
@@ -774,13 +777,14 @@ async fn handle_loop_mode(
     new_cards_force: bool,
     furigana_force: bool,
     similarity_force: bool,
+    limit: Option<usize>,
     settings: &'static ApplicationEnvironment,
 ) -> Result<(), JeersError> {
     loop {
         let start_study_usecase = SelectCardsToLearnUseCase::new(settings.get_repository().await?);
 
         let cards = start_study_usecase
-            .execute(user_id, new_cards_force, true)
+            .execute(user_id, new_cards_force, true, limit)
             .await?;
 
         if cards.is_empty() {
@@ -806,12 +810,13 @@ async fn handle_normal_mode(
     new_cards_force: bool,
     furigana_force: bool,
     similarity_force: bool,
+    limit: Option<usize>,
     settings: &'static ApplicationEnvironment,
 ) -> Result<(), JeersError> {
     let start_study_usecase = SelectCardsToLearnUseCase::new(settings.get_repository().await?);
 
     let cards = start_study_usecase
-        .execute(user_id, new_cards_force, false)
+        .execute(user_id, new_cards_force, false, limit)
         .await?;
 
     if cards.is_empty() {
