@@ -1,0 +1,18 @@
+[package]
+name = "keikaku_cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+keikaku = { path = "../keikaku" }
+
+# System
+tokio.workspace = true
+
+# Domain
+ulid.workspace = true
+
+# TUI
+clap.workspace = true
+ratatui.workspace = true
+crossterm.workspace = true

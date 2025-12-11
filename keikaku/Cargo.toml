@@ -1,0 +1,56 @@
+[package]
+name = "keikaku"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+
+# System
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+indicatif.workspace = true
+base64.workspace = true
+toml.workspace = true
+tempfile.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
+ordered-float.workspace = true
+zip.workspace = true
+rusqlite.workspace = true
+regex.workspace = true
+rand.workspace = true
+libz-sys.workspace = true
+flate2.workspace = true
+
+# Logging
+tracing.workspace = true
+
+# OpenAI
+async-openai.workspace = true
+
+# Domain
+ulid.workspace = true
+serde.workspace = true
+chrono.workspace = true
+
+# Japan
+fsrs.workspace = true
+autoruby.workspace = true
+wana_kana.workspace = true
+
+# Machine Learning
+hf-hub.workspace = true
+intel-mkl-src.workspace = true
+candle-core.workspace = true
+candle-transformers.workspace = true
+candle-nn.workspace = true
+text-embeddings-backend-core.workspace = true
+text-embeddings-backend-candle.workspace = true
+tokenizers.workspace = true
+
+# CLI utilities (for ValueEnum)
+clap.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true

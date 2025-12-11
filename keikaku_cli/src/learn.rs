@@ -11,9 +11,8 @@ use ratatui::{
 };
 use ulid::Ulid;
 
-use crate::{
+use keikaku::{
     application::{CompleteLessonUseCase, RateCardUseCase, SelectCardsToLearnUseCase},
-    cli::{furigana_renderer, render_once},
     domain::{
         JeersError, Rating,
         japanese::IsJapaneseText,
@@ -23,6 +22,7 @@ use crate::{
     },
     settings::ApplicationEnvironment,
 };
+use crate::cli::{furigana_renderer, render_once};
 
 enum CardState {
     Question,
@@ -119,10 +119,10 @@ impl LearnCardApp {
         }
     }
 
-    fn card_kanji_info(&self) -> &[crate::domain::dictionary::KanjiInfo] {
+    fn card_kanji_info(&self) -> &[keikaku::domain::dictionary::KanjiInfo] {
         match &self.card {
             StudySessionItem::Vocabulary(card) => card.kanji(),
-            StudySessionItem::Kanji(_) => &[] as &[crate::domain::dictionary::KanjiInfo],
+            StudySessionItem::Kanji(_) => &[] as &[keikaku::domain::dictionary::KanjiInfo],
         }
     }
 
@@ -348,7 +348,7 @@ impl LearnCardApp {
     fn render_kanji_row(
         &self,
         row_area: Rect,
-        kanji_list: &[crate::domain::dictionary::KanjiInfo],
+        kanji_list: &[keikaku::domain::dictionary::KanjiInfo],
         row_idx: usize,
         frame: &mut Frame,
     ) {
@@ -376,7 +376,7 @@ impl LearnCardApp {
 
     fn render_kanji_card(
         &self,
-        kanji: &crate::domain::dictionary::KanjiInfo,
+        kanji: &keikaku::domain::dictionary::KanjiInfo,
         area: Rect,
         frame: &mut Frame,
     ) {
@@ -397,7 +397,7 @@ impl LearnCardApp {
 
     fn build_kanji_card_lines(
         &self,
-        kanji: &crate::domain::dictionary::KanjiInfo,
+        kanji: &keikaku::domain::dictionary::KanjiInfo,
     ) -> Vec<Line<'static>> {
         let mut lines = vec![];
 

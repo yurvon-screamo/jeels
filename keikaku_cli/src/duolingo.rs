@@ -1,11 +1,11 @@
 use ulid::Ulid;
 
-use crate::{
-    application::{ExportMigiiPackUseCase, UserRepository},
-    cli::render_once,
+use keikaku::{
+    application::{SyncDuolingoWordsUseCase, UserRepository},
     domain::JeersError,
     settings::ApplicationEnvironment,
 };
+use crate::cli::render_once;
 use ratatui::{
     layout::Alignment,
     style::{Color, Stylize},
@@ -14,9 +14,8 @@ use ratatui::{
     widgets::{Block, Paragraph, Widget},
 };
 
-pub async fn handle_create_migii_pack(
+pub async fn handle_sync_duolingo_words(
     user_id: Ulid,
-    lessons: Vec<u32>,
     question_only: bool,
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
@@ -27,7 +26,11 @@ pub async fn handle_create_migii_pack(
         .await?
         .ok_or(JeersError::UserNotFound { user_id })?;
 
-    let level = user.current_japanese_level();
+    if user.duolingo_jwt_token().is_none() {
+        return Err(JeersError::RepositoryError {
+            reason: "Duolingo JWT token not set. Please set it first.".to_string(),
+        });
+    }
 
     render_once(
         |frame| {
@@ -36,12 +39,7 @@ pub async fn handle_create_migii_pack(
                 .border_set(border::ROUNDED)
                 .border_style(ratatui::style::Style::default().fg(Color::Yellow));
             let text = ratatui::text::Text::from(vec![Line::from(
-                format!(
-                    "Создание пачки из {} уроков уровня {:?}...",
-                    lessons.len(),
-                    level
-                )
-                .fg(Color::Yellow),
+                "Синхронизация слов из Duolingo...".fg(Color::Yellow),
             )]);
             Paragraph::new(text)
                 .block(block)
@@ -51,16 +49,17 @@ pub async fn handle_create_migii_pack(
         5,
     )?;
 
-    let use_case = ExportMigiiPackUseCase::new(
+    let duolingo_client = keikaku::infrastructure::HttpDuolingoClient::new();
+    let use_case = SyncDuolingoWordsUseCase::new(
         settings.get_repository().await?,
         settings.get_llm_service().await?,
-        settings.get_migii_client().await?,
+        &duolingo_client,
     );
 
-    let result = use_case.execute(user_id, lessons, question_only).await?;
+    let result = use_case.execute(user_id, question_only).await?;
 
     let mut text_lines = vec![
-        Line::from("Пачка создана успешно!".bold().fg(Color::Green)),
+        Line::from("Синхронизация завершена успешно!".bold().fg(Color::Green)),
         Line::from(""),
         Line::from(format!("Создано карточек: {}", result.total_created_count)),
         Line::from(format!(

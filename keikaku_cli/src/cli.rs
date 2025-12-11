@@ -1,39 +1,29 @@
-pub mod anki;
-mod card;
-mod duolingo;
-mod furigana_renderer;
-mod jlpt;
-mod kanji;
-mod learn;
-mod me;
-mod migii;
-mod translate;
-
 use clap::Parser;
 use ratatui::{Frame, Viewport};
 use ulid::Ulid;
 
-use crate::{
+use keikaku::{
     application::{UserRepository, rebuild_database::RebuildDatabaseOptions},
-    cli::{
-        anki::handle_create_anki_pack,
-        card::{
-            handle_create_card, handle_create_words, handle_delete_card, handle_edit_card,
-            handle_list_cards, handle_rebuild_database,
-        },
-        duolingo::handle_sync_duolingo_words,
-        jlpt::handle_export_jlpt_recommended,
-        kanji::handle_kanji,
-        learn::handle_learn,
-        me::handle_me,
-        migii::handle_create_migii_pack,
-        translate::handle_translate,
-    },
     domain::{
         JeersError, User,
         value_objects::{JapaneseLevel, NativeLanguage},
     },
     settings::ApplicationEnvironment,
+};
+
+use crate::cli::{
+    anki::handle_create_anki_pack,
+    card::{
+        handle_create_card, handle_create_words, handle_delete_card, handle_edit_card,
+        handle_list_cards, handle_rebuild_database,
+    },
+    duolingo::handle_sync_duolingo_words,
+    jlpt::handle_export_jlpt_recommended,
+    kanji::handle_kanji,
+    learn::handle_learn,
+    me::handle_me,
+    migii::handle_create_migii_pack,
+    translate::handle_translate,
 };
 
 const DEFAULT_USERNAME: &str = "yurvon_screamo";

@@ -1,11 +1,11 @@
 use ulid::Ulid;
 
-use crate::{
+use keikaku::{
     application::{ExportJlptRecommendedUseCase, UserRepository},
-    cli::render_once,
     domain::{JeersError, value_objects::JapaneseLevel},
     settings::ApplicationEnvironment,
 };
+use crate::cli::render_once;
 use ratatui::{
     layout::Alignment,
     style::{Color, Stylize},

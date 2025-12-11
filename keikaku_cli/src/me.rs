@@ -8,7 +8,7 @@ use ratatui::{
 };
 use ulid::Ulid;
 
-use crate::{
+use keikaku::{
     application::use_cases::GetUserInfoUseCase,
     domain::{JeersError, daily_history::DailyHistoryItem},
     settings::ApplicationEnvironment,

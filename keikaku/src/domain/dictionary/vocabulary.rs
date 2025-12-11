@@ -70,19 +70,19 @@ impl Default for VocabularyDatabase {
     }
 }
 
-static N5_PART1_STR: &str = include_str!("../../../vocabulary/n5_part1.json");
-static N5_PART2_STR: &str = include_str!("../../../vocabulary/n5_part2.json");
-static N5_PART3_STR: &str = include_str!("../../../vocabulary/n5_part3.json");
-static N4_PART1_STR: &str = include_str!("../../../vocabulary/n4_part1.json");
-static N4_PART2_STR: &str = include_str!("../../../vocabulary/n4_part2.json");
-static N3_PART1_STR: &str = include_str!("../../../vocabulary/n3_part1.json");
-static N3_PART2_STR: &str = include_str!("../../../vocabulary/n3_part2.json");
-static N2_PART1_STR: &str = include_str!("../../../vocabulary/n2_part1.json");
-static N2_PART2_STR: &str = include_str!("../../../vocabulary/n2_part2.json");
-static N1_PART1_STR: &str = include_str!("../../../vocabulary/n1_part1.json");
-static N1_PART2_STR: &str = include_str!("../../../vocabulary/n1_part2.json");
-static N1_PART3_STR: &str = include_str!("../../../vocabulary/n1_part3.json");
-static N1_PART4_STR: &str = include_str!("../../../vocabulary/n1_part4.json");
+static N5_PART1_STR: &str = include_str!("../../../../vocabulary/n5_part1.json");
+static N5_PART2_STR: &str = include_str!("../../../../vocabulary/n5_part2.json");
+static N5_PART3_STR: &str = include_str!("../../../../vocabulary/n5_part3.json");
+static N4_PART1_STR: &str = include_str!("../../../../vocabulary/n4_part1.json");
+static N4_PART2_STR: &str = include_str!("../../../../vocabulary/n4_part2.json");
+static N3_PART1_STR: &str = include_str!("../../../../vocabulary/n3_part1.json");
+static N3_PART2_STR: &str = include_str!("../../../../vocabulary/n3_part2.json");
+static N2_PART1_STR: &str = include_str!("../../../../vocabulary/n2_part1.json");
+static N2_PART2_STR: &str = include_str!("../../../../vocabulary/n2_part2.json");
+static N1_PART1_STR: &str = include_str!("../../../../vocabulary/n1_part1.json");
+static N1_PART2_STR: &str = include_str!("../../../../vocabulary/n1_part2.json");
+static N1_PART3_STR: &str = include_str!("../../../../vocabulary/n1_part3.json");
+static N1_PART4_STR: &str = include_str!("../../../../vocabulary/n1_part4.json");
 
 impl VocabularyDatabase {
     pub fn new() -> Self {

@@ -8,7 +8,7 @@ use ratatui::{
 };
 use ulid::Ulid;
 
-use crate::{
+use keikaku::{
     application::{
         CreateCardUseCase, DeleteCardUseCase, EditCardUseCase, ListCardsUseCase,
         RebuildDatabaseUseCase, rebuild_database::RebuildDatabaseOptions,

@@ -8,7 +8,7 @@ use ratatui::{
 };
 use ulid::Ulid;
 
-use crate::{
+use keikaku::{
     application::GetKanjiInfoUseCase,
     domain::{JeersError, dictionary::KanjiInfo},
 };
