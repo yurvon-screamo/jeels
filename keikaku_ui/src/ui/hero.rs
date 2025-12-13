@@ -1,4 +1,4 @@
-use crate::components::{Button, ButtonVariant, Paragraph};
+use crate::ui::{Button, ButtonVariant, Paragraph};
 use dioxus::prelude::*;
 
 #[component]

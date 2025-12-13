@@ -52,7 +52,6 @@ pub fn to_error(err: impl std::fmt::Display) -> String {
     err.to_string()
 }
 
-mod components;
 mod domain;
 mod ui;
 mod views;

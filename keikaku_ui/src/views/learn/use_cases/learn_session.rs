@@ -260,6 +260,6 @@ pub fn RatingButton(
     }
 }
 
-pub fn handle_key_action(action: crate::components::KeyAction) {
+pub fn handle_key_action(action: crate::domain::KeyAction) {
     // TODO: Implement key handling
 }

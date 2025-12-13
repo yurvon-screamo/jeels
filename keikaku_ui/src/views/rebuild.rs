@@ -1,4 +1,4 @@
-use crate::components::{Button, ButtonVariant, Card, Paragraph, Radio, SectionHeader};
+use crate::ui::{Button, ButtonVariant, Card, Paragraph, Radio, SectionHeader};
 use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::rebuild_database::{

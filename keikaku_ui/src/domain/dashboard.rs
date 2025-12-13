@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use super::{Card, Paragraph};
+use crate::ui::{Card, Paragraph};
 
 #[derive(PartialEq, Clone)]
 pub enum MetricTone {

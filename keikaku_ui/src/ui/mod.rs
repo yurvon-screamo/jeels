@@ -41,3 +41,6 @@ pub use notification::{NotificationBanner, NotificationType};
 
 mod loading;
 pub use loading::LoadingState;
+
+mod hero;
+pub use hero::Hero;

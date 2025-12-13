@@ -1,4 +1,4 @@
-use crate::components::{Button, ButtonVariant, Card, LoadingState, MetricTone, Paragraph, Pill};
+use crate::ui::{Button, ButtonVariant, Card, LoadingState, Paragraph, Pill, MetricTone};
 use dioxus::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -26,7 +26,7 @@ pub struct UiCard {
 
 #[component]
 pub fn CardsHeader(total_count: usize, due_count: usize) -> Element {
-    use crate::components::SectionHeader;
+    use crate::ui::SectionHeader;
 
     rsx! {
         SectionHeader {
@@ -90,7 +90,7 @@ pub fn CardsFilters(
     filter_status: Signal<FilterStatus>,
     sort_by: Signal<SortBy>,
 ) -> Element {
-    use crate::components::SearchInput;
+    use crate::ui::SearchInput;
 
     rsx! {
         Card { class: Some("space-y-4".to_string()),
@@ -233,7 +233,7 @@ pub fn CardRow(
     on_edit: EventHandler<String>,
     on_delete: EventHandler<String>,
 ) -> Element {
-    use crate::components::H2;
+    use crate::ui::H2;
 
     let card_id = card.id.clone();
 
