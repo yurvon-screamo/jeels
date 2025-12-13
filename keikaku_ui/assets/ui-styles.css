@@ -194,3 +194,48 @@ body {
 .group-focus-within\:text-accent-purple:focus-within .group {
     color: #A78BFA;
 }
+
+/* --- Rate Status Colors & Gradients --- */
+
+.bg-status-perfect {
+    background-image: linear-gradient(135deg, #FDE68A 0%, #F472B6 50%, #22D3EE 100%);
+}
+
+.text-status-perfect {
+    background: linear-gradient(135deg, #F59E0B 0%, #DB2777 50%, #0891B2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 2. Good: Pastel Mint */
+.text-status-good {
+    color: #334155;
+}
+
+.bg-status-good-soft {
+    background-color: #D1FAE5;
+}
+
+/* 3. Neutral: Warm Stone */
+.text-status-neutral {
+    color: #334155;
+}
+
+/* 4. Error: Soft Coral*/
+.text-status-error {
+    color: #334155;
+}
+
+.bg-status-error-soft {
+    background-color: #f0888f;
+}
+
+/* --- Shadows for rate statuses --- */
+
+.shadow-glow-perfect {
+    box-shadow: 0 0 20px rgba(253, 230, 138, 0.4), 0 0 10px rgba(34, 211, 238, 0.2);
+}
+
+.shadow-glow-good {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
+}

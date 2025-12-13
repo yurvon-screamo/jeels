@@ -13,9 +13,6 @@ pub use completed::LearnCompleted;
 mod progress;
 pub use progress::LearnProgress;
 
-mod navigation;
-pub use navigation::LearnNavigation;
-
 mod card_display;
 pub use card_display::LearnCardDisplay;
 

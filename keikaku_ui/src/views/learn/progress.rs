@@ -29,7 +29,6 @@ pub fn LearnProgress(current: usize, total: usize, progress: f64) -> Element {
                     ),
                     style: "width: {progress}%",
 
-                    // Добавим анимированный блеск для прогресса
                     if progress > 0.0 && progress < 100.0 {
                         div { class: "absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse opacity-30" }
                     }

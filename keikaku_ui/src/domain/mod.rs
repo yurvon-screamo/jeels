@@ -12,7 +12,7 @@ mod card_answer;
 pub use card_answer::CardAnswer;
 
 mod rating_buttons;
-pub use rating_buttons::{Rating, RatingButtons};
+pub use rating_buttons::{AnswerActionButtons, QuestionActionButtons, Rating, RatingButtons};
 
 mod card_list;
 pub use card_list::UiCard;

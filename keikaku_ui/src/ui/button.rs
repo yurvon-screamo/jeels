@@ -37,11 +37,17 @@ pub fn Button(
                 div { class: "absolute inset-0 flex items-center justify-center pointer-events-none",
                     div { class: "w-[200%] h-[200%] bg-white/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500 ease-out" }
                 }
-                span { class: "relative z-10", {children} }
+                span { class: "relative z-10",
+                    div { class: "px-2 py-1 flex items-center justify-center", {children} }
+                }
             } else if variant == ButtonVariant::Outline {
-                span { class: "relative z-10", {children} }
+                span { class: "relative z-10",
+                    div { class: "px-2 py-1 flex items-center justify-center", {children} }
+                }
             } else {
-                {children}
+                span { class: "relative z-10",
+                    div { class: "px-2 py-1 flex items-center justify-center", {children} }
+                }
             }
         }
     }

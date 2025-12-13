@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::Paragraph;
+use crate::ui::{Button, ButtonVariant, Paragraph};
 
 #[derive(Clone, PartialEq)]
 pub enum Rating {
@@ -22,10 +22,10 @@ impl Rating {
 
     fn color(&self) -> &'static str {
         match self {
-            Rating::Easy => "bg-green-500 hover:bg-green-600",
-            Rating::Good => "bg-blue-500 hover:bg-blue-600",
-            Rating::Hard => "bg-orange-500 hover:bg-orange-600",
-            Rating::Again => "bg-red-500 hover:bg-red-600",
+            Rating::Easy => "bg-status-perfect hover:opacity-90 text-white shadow-glow-perfect",
+            Rating::Good => "bg-status-good-soft hover:bg-emerald-100 text-status-good border border-emerald-200",
+            Rating::Hard => "bg-slate-100 hover:bg-slate-200 text-status-neutral border border-slate-300",
+            Rating::Again => "bg-status-error-soft hover:bg-red-100 text-status-error border border-red-200",
         }
     }
 
@@ -42,25 +42,59 @@ impl Rating {
 #[component]
 pub fn RatingButtons(on_rate: EventHandler<Rating>) -> Element {
     rsx! {
+        AnswerActionButtons { on_rate }
+    }
+}
+
+#[component]
+pub fn QuestionActionButtons(on_show_answer: EventHandler<()>) -> Element {
+    rsx! {
+        div { class: "space-y-3 pt-6 justify-center",
+            div { class: "flex flex-col gap-2",
+                ActionButton {
+                    label: "Показать ответ",
+                    key_hint: "Пробел",
+                    onclick: move |_| on_show_answer.call(()),
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn AnswerActionButtons(on_rate: EventHandler<Rating>) -> Element {
+    rsx! {
         div { class: "space-y-3",
             Paragraph { class: Some("text-xs text-center text-slate-500 font-semibold mb-2".to_string()),
                 "Как хорошо вы знали ответ?"
             }
-            div { class: "grid grid-cols-2 gap-2",
-                RatingButton {
-                    rating: Rating::Easy,
+            div { class: "flex flex-col gap-2",
+                ActionButton {
+                    label: "Легко",
+                    key_hint: "1",
+                    color_class: Some("bg-status-perfect hover:opacity-90 text-white shadow-glow-perfect"),
                     onclick: move |_| on_rate.call(Rating::Easy),
                 }
-                RatingButton {
-                    rating: Rating::Good,
+                ActionButton {
+                    label: "Хорошо",
+                    key_hint: "2",
+                    color_class: Some(
+                        "bg-status-good-soft hover:bg-emerald-100 text-status-good border border-emerald-200",
+                    ),
                     onclick: move |_| on_rate.call(Rating::Good),
                 }
-                RatingButton {
-                    rating: Rating::Hard,
+                ActionButton {
+                    label: "Сложно",
+                    key_hint: "3",
+                    color_class: Some("bg-slate-100 hover:bg-slate-200 text-status-neutral border border-slate-300"),
                     onclick: move |_| on_rate.call(Rating::Hard),
                 }
-                RatingButton {
-                    rating: Rating::Again,
+                ActionButton {
+                    label: "Снова",
+                    key_hint: "4",
+                    color_class: Some(
+                        "bg-status-error-soft hover:bg-red-100 text-status-error border border-red-200",
+                    ),
                     onclick: move |_| on_rate.call(Rating::Again),
                 }
             }
@@ -74,12 +108,31 @@ pub fn RatingButtons(on_rate: EventHandler<Rating>) -> Element {
 #[component]
 fn RatingButton(rating: Rating, onclick: EventHandler<MouseEvent>) -> Element {
     rsx! {
-        button {
-            class: "{rating.color()} text-white font-bold py-4 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 text-sm",
-            onclick: move |e| onclick.call(e),
+        ActionButton {
+            label: rating.label(),
+            key_hint: rating.key_hint(),
+            color_class: Some(rating.color()),
+            onclick,
+        }
+    }
+}
+
+#[component]
+fn ActionButton(
+    label: &'static str,
+    key_hint: &'static str,
+    color_class: Option<&'static str>,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
+    let color_class_str = color_class.unwrap_or("");
+    rsx! {
+        Button {
+            variant: ButtonVariant::Outline,
+            class: Some(format!("{} text-left", color_class_str)),
+            onclick: Some(onclick),
             div { class: "space-y-1",
-                span { class: "block text-xs opacity-90", "Клавиша {rating.key_hint()}" }
-                span { class: "block text-base", {rating.label()} }
+                span { class: "block text-xs opacity-90", "Клавиша {key_hint}" }
+                span { class: "block text-base", {label} }
             }
         }
     }

@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use super::{LearnCardDisplay, LearnNavigation, LearnProgress};
+use super::{LearnCardDisplay, LearnProgress};
 
 #[component]
 pub fn LearnActive(
@@ -8,12 +8,10 @@ pub fn LearnActive(
     current_index: usize,
     current_step: super::LearnStep,
     show_furigana: bool,
-    similarity_shown: bool,
     on_next: EventHandler<()>,
     on_show_answer: EventHandler<()>,
     on_prev: Option<EventHandler<()>>,
     on_rate: EventHandler<crate::domain::Rating>,
-    on_toggle_similarity: EventHandler<()>,
     on_skip: EventHandler<()>,
     on_quit: EventHandler<()>,
 ) -> Element {
@@ -57,11 +55,6 @@ pub fn LearnActive(
                                 }
                             }
                         }
-                        Code::KeyH => {
-                            // H - переключить связанные карточки
-                            e.prevent_default();
-                            on_toggle_similarity.call(());
-                        }
                         Code::KeyS => {
                             // S - пропустить карточку
                             e.prevent_default();
@@ -104,31 +97,21 @@ pub fn LearnActive(
                     }
                 }
             },
-
-            LearnProgress {
-                current: current_index + 1,
-                total: cards.len(),
-                progress,
-            }
-
             LearnCardDisplay {
                 cards: cards.clone(),
                 current_index,
                 current_step: current_step.clone(),
                 show_furigana,
-                similarity_shown,
                 on_show_answer,
                 on_next,
                 on_rate,
-                on_toggle_similarity,
             }
 
-            LearnNavigation {
-                current_index,
-                total_cards: cards.len(),
-                current_step: current_step.clone(),
-                on_next,
-                on_prev: on_prev.clone(),
+
+            LearnProgress {
+                current: current_index + 1,
+                total: cards.len(),
+                progress,
             }
         }
     }

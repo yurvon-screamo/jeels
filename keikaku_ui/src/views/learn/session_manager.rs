@@ -19,10 +19,6 @@ pub struct LearnSessionData {
     pub current_step: LearnStep,
     pub limit: Option<String>,
     pub show_furigana: bool,
-    pub similarity_shown: bool,
-    pub new_cards_force: bool,
-    pub similarity_force: bool,
-    pub loop_mod: bool,
 }
 
 impl Default for LearnSessionData {
@@ -31,12 +27,8 @@ impl Default for LearnSessionData {
             cards: vec![],
             current_index: 0,
             current_step: LearnStep::Question,
-            limit: Some("7".to_string()),
-            show_furigana: false,
-            similarity_shown: false,
-            new_cards_force: false,
-            similarity_force: false,
-            loop_mod: false,
+            show_furigana: true,
+            limit: None,
         }
     }
 }
@@ -48,51 +40,40 @@ pub fn use_learn_session() -> LearnSessionSignals {
     LearnSessionSignals {
         state: state.clone(),
         session_data: session_data.clone(),
-        start_session: Rc::new(
-            move |limit: Option<usize>,
-                  show_furigana: bool,
-                  similarity_shown: bool,
-                  new_cards_force: bool,
-                  similarity_force: bool,
-                  loop_mod: bool| {
-                let mut state = state.clone();
-                let mut session_data = session_data.clone();
+        start_session: Rc::new(move |limit: Option<usize>, show_furigana: bool| {
+            let mut state = state.clone();
+            let mut session_data = session_data.clone();
 
-                spawn(async move {
-                    state.set(SessionState::Loading);
+            spawn(async move {
+                state.set(SessionState::Loading);
 
-                    match fetch_cards_to_learn(limit, new_cards_force, loop_mod).await {
-                        Ok(items) => {
-                            if items.is_empty() {
-                                state.set(SessionState::Settings);
-                                session_data.write().cards = vec![];
-                            } else {
-                                let learn_cards = items
-                                    .into_iter()
-                                    .map(map_study_item_to_learn_card)
-                                    .collect::<Vec<_>>();
-                                session_data.write().cards = learn_cards;
-                                session_data.write().current_index = 0;
-                                session_data.write().current_step = LearnStep::Question;
-                                session_data.write().limit = limit.map(|l| l.to_string());
-                                session_data.write().show_furigana = show_furigana;
-                                session_data.write().similarity_shown = similarity_force;
-                                session_data.write().new_cards_force = new_cards_force;
-                                session_data.write().similarity_force = similarity_force;
-                                session_data.write().loop_mod = loop_mod;
-                                state.set(SessionState::Active);
-                            }
-                        }
-                        Err(e) => {
-                            session_data.write().cards = vec![];
+                match fetch_cards_to_learn(limit).await {
+                    Ok(items) => {
+                        if items.is_empty() {
                             state.set(SessionState::Settings);
+                            session_data.write().cards = vec![];
+                        } else {
+                            let learn_cards = items
+                                .into_iter()
+                                .map(map_study_item_to_learn_card)
+                                .collect::<Vec<_>>();
+                            session_data.write().cards = learn_cards;
+                            session_data.write().current_index = 0;
                             session_data.write().current_step = LearnStep::Question;
-                            error!("learn fetch error: {}", e);
+                            session_data.write().limit = limit.map(|l| l.to_string());
+                            session_data.write().show_furigana = show_furigana;
+                            state.set(SessionState::Active);
                         }
                     }
-                });
-            },
-        ),
+                    Err(e) => {
+                        session_data.write().cards = vec![];
+                        state.set(SessionState::Settings);
+                        session_data.write().current_step = LearnStep::Question;
+                        error!("learn fetch error: {}", e);
+                    }
+                }
+            });
+        }),
         next_card: Rc::new(move || {
             let mut state = state.clone();
             let mut session_data = session_data.clone();
@@ -169,16 +150,6 @@ pub fn use_learn_session() -> LearnSessionSignals {
                 }
             });
         }),
-        toggle_furigana: Rc::new(move || {
-            let mut session_data = session_data.clone();
-            let mut data = session_data.write();
-            data.show_furigana = !data.show_furigana;
-        }),
-        toggle_similarity: Rc::new(move || {
-            let mut session_data = session_data.clone();
-            let mut data = session_data.write();
-            data.similarity_shown = !data.similarity_shown;
-        }),
     }
 }
 
@@ -186,26 +157,20 @@ pub fn use_learn_session() -> LearnSessionSignals {
 pub struct LearnSessionSignals {
     pub state: Signal<SessionState>,
     pub session_data: Signal<LearnSessionData>,
-    pub start_session: Rc<dyn Fn(Option<usize>, bool, bool, bool, bool, bool)>,
+    pub start_session: Rc<dyn Fn(Option<usize>, bool)>,
     pub next_card: Rc<dyn Fn()>,
     pub restart_session: Rc<dyn Fn()>,
     pub show_answer: Rc<dyn Fn()>,
     pub prev_card: Rc<dyn Fn()>,
     pub rate_card: Rc<dyn Fn(crate::domain::Rating)>,
-    pub toggle_furigana: Rc<dyn Fn()>,
-    pub toggle_similarity: Rc<dyn Fn()>,
 }
 
-async fn fetch_cards_to_learn(
-    limit: Option<usize>,
-    new_cards_force: bool,
-    loop_mod: bool,
-) -> Result<Vec<StudySessionItem>, String> {
+async fn fetch_cards_to_learn(limit: Option<usize>) -> Result<Vec<StudySessionItem>, String> {
     let env = init_env().await?;
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectCardsToLearnUseCase::new(repo)
-        .execute(user_id, new_cards_force, loop_mod, limit)
+        .execute(user_id, false, false, limit)
         .await
         .map_err(to_error)
 }
