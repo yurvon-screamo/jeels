@@ -42,7 +42,7 @@ pub fn ErrorCard(message: String, class: Option<String>) -> Element {
                         {message}
                     }
                 }
-
+            
             }
         }
     }

@@ -1,6 +1,7 @@
-use crate::components::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Textarea};
-use crate::hooks::{use_translate, Direction, UseTranslate};
+use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Textarea};
 use dioxus::prelude::*;
+
+use super::use_cases::translate::{use_translate, Direction, UseTranslate};
 
 #[component]
 pub fn Translate() -> Element {

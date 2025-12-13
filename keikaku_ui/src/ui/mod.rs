@@ -3,7 +3,7 @@
 //! They can be used to defined common UI elements like buttons, forms, and modals.
 
 mod typography;
-pub use typography::{Paragraph, H1, H2, H3, Tag};
+pub use typography::{Paragraph, Tag, H1, H2, H3};
 
 mod button;
 pub use button::{Button, ButtonVariant, IconButton};

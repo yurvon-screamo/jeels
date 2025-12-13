@@ -1,9 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Card, H2, Paragraph};
+use crate::ui::{Button, ButtonVariant, Card, Paragraph, H2};
 
 #[component]
-pub fn LearnCompleted() -> Element {
+#[component]
+pub fn LearnCompleted(on_restart: EventHandler<()>) -> Element {
     rsx! {
         Card { class: Some("space-y-6 text-center py-12".to_string()),
             div { class: "text-6xl mb-4", "🎉" }
@@ -16,7 +17,7 @@ pub fn LearnCompleted() -> Element {
             Button {
                 variant: ButtonVariant::Rainbow,
                 class: Some("w-full max-w-xs mx-auto".to_string()),
-                onclick: move |_| {},
+                onclick: move |_| on_restart.call(()),
                 "Начать новую сессию"
             }
         }

@@ -1,119 +1,71 @@
 use dioxus::prelude::*;
+use keikaku::application::use_cases::{
+    get_user_info::{GetUserInfoUseCase, UserProfile},
+    list_cards::ListCardsUseCase,
+};
+use keikaku::domain::VocabularyCard;
 
 use crate::ui::{Card, Chart, ChartDataPoint, MetricCard, MetricTone, Paragraph, Section, H1};
+use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+
+use super::{build_charts, build_metrics, calculate_stats, OverviewCharts};
+
+async fn fetch_profile() -> Result<UserProfile, String> {
+    let env = init_env().await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    GetUserInfoUseCase::new(repo)
+        .execute(user_id)
+        .await
+        .map_err(to_error)
+}
+
+async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
+    let env = init_env().await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    ListCardsUseCase::new(repo)
+        .execute(user_id)
+        .await
+        .map_err(to_error)
+}
 
 #[component]
 pub fn Overview() -> Element {
-    // Заглушка для данных
-    let username = "Пользователь".to_string();
-    let metrics = vec![
-        (
-            "Карточек".to_string(),
-            "42".to_string(),
-            "Всего карточек".to_string(),
-            MetricTone::Info,
-        ),
-        (
-            "К повторению".to_string(),
-            "7".to_string(),
-            "Сегодня".to_string(),
-            MetricTone::Warning,
-        ),
-        (
-            "Сессий".to_string(),
-            "15".to_string(),
-            "За неделю".to_string(),
-            MetricTone::Success,
-        ),
-    ];
+    let profile_resource = use_resource(fetch_profile);
+    let cards_resource = use_resource(fetch_cards);
 
-    let charts = OverviewCharts {
-        stability_data: vec![
-            ChartDataPoint {
-                label: "Пн".to_string(),
-                value: 85.0,
-            },
-            ChartDataPoint {
-                label: "Вт".to_string(),
-                value: 90.0,
-            },
-            ChartDataPoint {
-                label: "Ср".to_string(),
-                value: 88.0,
-            },
-            ChartDataPoint {
-                label: "Чт".to_string(),
-                value: 92.0,
-            },
-            ChartDataPoint {
-                label: "Пт".to_string(),
-                value: 95.0,
-            },
-            ChartDataPoint {
-                label: "Сб".to_string(),
-                value: 93.0,
-            },
-            ChartDataPoint {
-                label: "Вс".to_string(),
-                value: 96.0,
-            },
-        ],
-        words_progress_data: vec![
-            ChartDataPoint {
-                label: "Неделя 1".to_string(),
-                value: 10.0,
-            },
-            ChartDataPoint {
-                label: "Неделя 2".to_string(),
-                value: 25.0,
-            },
-            ChartDataPoint {
-                label: "Неделя 3".to_string(),
-                value: 45.0,
-            },
-            ChartDataPoint {
-                label: "Неделя 4".to_string(),
-                value: 70.0,
-            },
-        ],
-        lessons_data: vec![
-            ChartDataPoint {
-                label: "Пн".to_string(),
-                value: 2.0,
-            },
-            ChartDataPoint {
-                label: "Вт".to_string(),
-                value: 1.0,
-            },
-            ChartDataPoint {
-                label: "Ср".to_string(),
-                value: 3.0,
-            },
-            ChartDataPoint {
-                label: "Чт".to_string(),
-                value: 2.0,
-            },
-            ChartDataPoint {
-                label: "Пт".to_string(),
-                value: 1.0,
-            },
-            ChartDataPoint {
-                label: "Сб".to_string(),
-                value: 0.0,
-            },
-            ChartDataPoint {
-                label: "Вс".to_string(),
-                value: 1.0,
-            },
-        ],
-    };
+    // Read resources once and store results
+    let profile_read = profile_resource.read();
+    let cards_read = cards_resource.read();
 
-    rsx! {
-        div { class: "bg-bg min-h-screen text-text-main px-6 py-8",
-            OverviewHeader { username }
-            OverviewMetrics { metrics }
-            OverviewChartsComponent { charts }
+    match (profile_read.as_ref(), cards_read.as_ref()) {
+        (Some(Err(profile_err)), _) => rsx! {
+            div { class: "bg-bg min-h-screen text-text-main px-6 py-8",
+                "Ошибка загрузки профиля: {profile_err}"
+            }
+        },
+        (_, Some(Err(cards_err))) => rsx! {
+            div { class: "bg-bg min-h-screen text-text-main px-6 py-8",
+                "Ошибка загрузки карточек: {cards_err}"
+            }
+        },
+        (Some(Ok(profile)), Some(Ok(cards))) => {
+            let stats = calculate_stats(Some(profile), Some(cards));
+            let metrics = build_metrics(&stats);
+            let charts = build_charts(&profile.lesson_history[..]);
+
+            rsx! {
+                div { class: "bg-bg min-h-screen text-text-main px-6 py-8",
+                    OverviewHeader { username: stats.username }
+                    OverviewMetrics { metrics }
+                    OverviewChartsComponent { charts }
+                }
+            }
         }
+        _ => rsx! {
+            div { class: "bg-bg min-h-screen text-text-main px-6 py-8", "Загрузка..." }
+        },
     }
 }
 
@@ -188,11 +140,4 @@ fn OverviewChartsComponent(charts: OverviewCharts) -> Element {
             }
         }
     }
-}
-
-#[derive(Clone, PartialEq)]
-pub struct OverviewCharts {
-    pub stability_data: Vec<ChartDataPoint>,
-    pub words_progress_data: Vec<ChartDataPoint>,
-    pub lessons_data: Vec<ChartDataPoint>,
 }

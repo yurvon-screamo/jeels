@@ -1,4 +1,4 @@
-use crate::keikaku_api::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::select_cards_to_learn::SelectCardsToLearnUseCase;
 use keikaku::domain::study_session::StudySessionItem;
@@ -150,4 +150,116 @@ fn map_item(item: StudySessionItem) -> Option<LearnCard> {
             answer: k.description().to_string(),
         }),
     }
+}
+
+#[component]
+pub fn QuestionView(
+    question: String,
+    show_furigana: bool,
+    on_show_answer: EventHandler<MouseEvent>,
+) -> Element {
+    use crate::domain::WordCard;
+    use crate::ui::{Button, ButtonVariant, Paragraph};
+
+    rsx! {
+        div { class: "space-y-4",
+            WordCard { text: question, show_furigana }
+            div { class: "space-y-2",
+                Button {
+                    variant: ButtonVariant::Rainbow,
+                    class: Some("w-full".to_string()),
+                    onclick: on_show_answer,
+                    "Показать ответ (Пробел)"
+                }
+                Paragraph { class: Some("text-xs text-center text-slate-400".to_string()),
+                    "Нажмите Пробел или кнопку выше"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn AnswerView(
+    question: String,
+    answer: String,
+    show_furigana: bool,
+    session: UseLearnSession,
+) -> Element {
+    rsx! {
+        div { class: "space-y-4",
+            crate::domain::CardAnswer {
+                question,
+                answer,
+                show_furigana,
+                examples: None,
+            }
+            RatingSection { on_rate: // TODO: Implement rating
+                move |rating| {} }
+        }
+    }
+}
+
+#[component]
+pub fn RatingSection(on_rate: EventHandler<u8>) -> Element {
+    use crate::domain::RatingButtons;
+
+    rsx! {
+        RatingButtons {
+            on_rate: move |rating| {
+                // Преобразовать Rating в u8
+                let rating_value = match rating {
+                    crate::domain::Rating::Easy => 1,
+                    crate::domain::Rating::Good => 2,
+                    crate::domain::Rating::Hard => 3,
+                    crate::domain::Rating::Again => 4,
+                };
+                on_rate.call(rating_value);
+            },
+        }
+    }
+}
+
+#[component]
+pub fn QuestionCard(question: String, show_furigana: bool) -> Element {
+    rsx! {
+        crate::domain::WordCard { text: question, show_furigana }
+    }
+}
+
+#[component]
+pub fn AnswerCard(question: String, answer: String, show_furigana: bool) -> Element {
+    rsx! {
+        crate::domain::CardAnswer {
+            question,
+            answer,
+            show_furigana,
+            examples: None,
+        }
+    }
+}
+
+#[component]
+pub fn RatingButton(
+    rating: u8,
+    label: String,
+    color: String,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
+    use crate::ui::Button;
+
+    rsx! {
+        button {
+            class: "{color} text-white font-bold py-4 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 text-sm",
+            onclick: move |e| onclick.call(e),
+            div { class: "space-y-1",
+                span { class: "block text-xs opacity-90", "Клавиша {rating}" }
+                span { class: "block text-base", {label} }
+            }
+        }
+    }
+}
+
+pub fn handle_key_action(action: crate::components::KeyAction) {
+    // TODO: Implement key handling
 }

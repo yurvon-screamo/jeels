@@ -13,11 +13,9 @@ pub fn TextInput(
     let class_str = class.unwrap_or_default();
 
     rsx! {
-        div {
-            class: "group",
+        div { class: "group",
             if let Some(label_text) = label {
-                label {
-                    class: "block text-xs font-bold text-slate-400 mb-2 ml-1 group-focus-within:text-accent-pink transition-colors",
+                label { class: "block text-xs font-bold text-slate-400 mb-2 ml-1 group-focus-within:text-accent-pink transition-colors",
                     {label_text}
                 }
             }
@@ -44,11 +42,9 @@ pub fn SearchInput(
     oninput: Option<EventHandler<Event<FormData>>>,
 ) -> Element {
     rsx! {
-        div {
-            class: "group relative",
+        div { class: "group relative",
             if let Some(label_text) = label {
-                label {
-                    class: "block text-xs font-bold text-slate-400 mb-2 ml-1 group-focus-within:text-accent-cyan transition-colors",
+                label { class: "block text-xs font-bold text-slate-400 mb-2 ml-1 group-focus-within:text-accent-cyan transition-colors",
                     {label_text}
                 }
             }
@@ -89,11 +85,9 @@ pub fn Textarea(
     let rows_val = rows.unwrap_or(3);
 
     rsx! {
-        div {
-            class: "group",
+        div { class: "group",
             if let Some(label_text) = label {
-                label {
-                    class: "block text-xs font-bold text-slate-400 mb-2 ml-1 group-focus-within:text-accent-purple transition-colors",
+                label { class: "block text-xs font-bold text-slate-400 mb-2 ml-1 group-focus-within:text-accent-purple transition-colors",
                     {label_text}
                 }
             }

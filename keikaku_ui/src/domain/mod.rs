@@ -12,10 +12,10 @@ mod card_answer;
 pub use card_answer::CardAnswer;
 
 mod rating_buttons;
-pub use rating_buttons::{RatingButtons, Rating};
+pub use rating_buttons::{Rating, RatingButtons};
 
 mod card_list;
-pub use card_list::{CardsList, CardRow, EmptyCardsState, UiCard};
+pub use card_list::{CardRow, CardsList, EmptyCardsState, UiCard};
 
 mod card_filters;
 pub use card_filters::{CardFilters, FilterSelect, FilterStatus, SortBy};

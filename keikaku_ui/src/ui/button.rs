@@ -12,6 +12,7 @@ pub fn Button(
     variant: ButtonVariant,
     onclick: Option<EventHandler<MouseEvent>>,
     class: Option<String>,
+    disabled: Option<bool>,
     children: Element,
 ) -> Element {
     let class_str = class.unwrap_or_default();
@@ -24,9 +25,12 @@ pub fn Button(
     rsx! {
         button {
             class: "{base_classes} {class_str}",
+            disabled: disabled.unwrap_or(false),
             onclick: move |e| {
-                if let Some(handler) = onclick.as_ref() {
-                    handler.call(e);
+                if !disabled.unwrap_or(false) {
+                    if let Some(handler) = onclick.as_ref() {
+                        handler.call(e);
+                    }
                 }
             },
             if variant == ButtonVariant::Rainbow {

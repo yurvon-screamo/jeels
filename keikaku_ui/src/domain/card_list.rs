@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Card, LoadingState, Paragraph, Pill, SectionHeader, MetricTone};
+use crate::ui::{Button, ButtonVariant, Card, LoadingState, MetricTone, Paragraph, Pill};
 
 #[derive(Clone, PartialEq)]
 pub struct UiCard {

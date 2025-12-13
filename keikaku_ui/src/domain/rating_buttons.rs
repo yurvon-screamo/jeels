@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Paragraph};
+use crate::ui::Paragraph;
 
 #[derive(Clone, PartialEq)]
 pub enum Rating {
