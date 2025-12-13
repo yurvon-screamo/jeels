@@ -1,46 +1,12 @@
 use dioxus::prelude::*;
-use keikaku::application::use_cases::select_cards_to_learn::SelectCardsToLearnUseCase;
-use keikaku::domain::study_session::StudySessionItem;
 
 use crate::ui::SectionHeader;
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 
-use super::{LearnActive, LearnCard, LearnCompleted, LearnSettings, LearnStep, SessionState};
-
-async fn fetch_cards_to_learn(limit: usize) -> Result<Vec<StudySessionItem>, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    SelectCardsToLearnUseCase::new(repo)
-        .execute(user_id, false, false, Some(limit))
-        .await
-        .map_err(to_error)
-}
-
-fn map_study_item_to_learn_card(item: StudySessionItem) -> LearnCard {
-    match item {
-        StudySessionItem::Vocabulary(v) => LearnCard {
-            id: v.card_id().to_string(),
-            question: v.word().to_string(),
-            answer: v.meaning().to_string(),
-        },
-        StudySessionItem::Kanji(k) => LearnCard {
-            id: k.card_id().to_string(),
-            question: k.kanji().to_string(),
-            answer: k.description().to_string(),
-        },
-    }
-}
+use super::{use_learn_session, LearnActive, LearnCompleted, LearnSettings, SessionState};
 
 #[component]
 pub fn Learn() -> Element {
-    let mut state = use_signal(|| SessionState::Settings);
-    let mut cards = use_signal(Vec::<LearnCard>::new);
-    let mut current_index = use_signal(|| 0);
-    let mut current_step = use_signal(|| LearnStep::Question);
-    let limit = use_signal(|| "7".to_string());
-    let show_furigana = use_signal(|| false);
-    let loading = use_signal(|| false);
+    let session = use_learn_session();
 
     rsx! {
         div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
@@ -51,79 +17,38 @@ pub fn Learn() -> Element {
             }
 
             {
-                match state() {
+                match (session.state)() {
                     SessionState::Settings => rsx! {
                         LearnSettings {
-                            limit,
-                            show_furigana,
-                            loading,
-                            on_start: move |_| {
-                                let limit_val = limit().parse::<usize>().unwrap_or(7);
-                                let mut state = state;
-                                let mut cards = cards;
-                                let mut current_index = current_index;
-                                let mut current_step = current_step;
-                                let mut loading = loading;
-
-                                spawn(async move {
-                                    loading.set(true);
-                                    state.set(SessionState::Loading);
-
-                                    match fetch_cards_to_learn(limit_val).await {
-                                        Ok(items) => {
-                                            if items.is_empty() {
-                                                state.set(SessionState::Settings);
-                                                cards.set(vec![]);
-                                            } else {
-                                                let learn_cards = items.into_iter().map(map_study_item_to_learn_card).collect::<Vec<_>>();
-                                                cards.set(learn_cards);
-                                                current_index.set(0);
-                                                current_step.set(LearnStep::Question);
-                                                state.set(SessionState::Active);
-                                            }
-                                            loading.set(false);
-                                        }
-                                        Err(e) => {
-                                            cards.set(vec![]);
-                                            state.set(SessionState::Settings);
-                                            current_step.set(LearnStep::Question);
-                                            loading.set(false);
-                                            error!("learn fetch error: {}", e);
-                                        }
-                                    }
-                                });
-                            }
+                            limit: (session.session_data)().limit.clone(),
+                            show_furigana: (session.session_data)().show_furigana,
+                            loading: false,
+                            on_start: move |(limit_str, show_furigana_val): (String, bool)| {
+                                let limit_val = limit_str.parse::<usize>().unwrap_or(7);
+                                (session.start_session)(limit_val, show_furigana_val);
+                            },
                         }
                     },
                     SessionState::Loading => rsx! {
-                        div { "Загрузка..." }
+                        div { class: "flex items-center justify-center py-12",
+                            crate::ui::LoadingState { message: Some("Загрузка карточек...".to_string()) }
+                        }
                     },
                     SessionState::Active => rsx! {
                         LearnActive {
-                            cards,
-                            current_index,
-                            current_step,
-                            show_furigana,
-                            on_next: move |_| {
-                                let current_index_val = current_index();
-                                let cards_len = cards().len();
-                                if current_index_val + 1 < cards_len {
-                                    current_index.set(current_index_val + 1);
-                                    current_step.set(LearnStep::Question);
-                                } else {
-                                    state.set(SessionState::Completed);
-                                }
-                            }
+                            cards: (session.session_data)().cards.clone(),
+                            current_index: (session.session_data)().current_index,
+                            current_step: (session.session_data)().current_step.clone(),
+                            show_furigana: (session.session_data)().show_furigana,
+                            on_next: move |_| (session.next_card)(),
+                            on_show_answer: move |_| (session.show_answer)(),
+                            on_prev: Some(EventHandler::new(move |_| (session.prev_card)())),
                         }
                     },
                     SessionState::Completed => rsx! {
                         LearnCompleted {
-                            on_restart: move |_| {
-                                cards.set(vec![]);
-                                current_index.set(0);
-                                current_step.set(LearnStep::Question);
-                                state.set(SessionState::Settings);
-                            }
+                            total_cards: (session.session_data)().cards.len(),
+                            on_restart: move |_| (session.restart_session)(),
                         }
                     },
                 }

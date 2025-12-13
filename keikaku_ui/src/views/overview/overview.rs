@@ -11,9 +11,7 @@ use crate::{
 };
 use crate::{
     ui::{ChartDataPoint, StateTone},
-    views::overview::{
-        chart::OverviewChartsComponent, header::OverviewHeader, metric::OverviewMetrics,
-    },
+    views::overview::{chart::OverviewChartsComponent, metric::OverviewMetrics},
 };
 
 #[component]
@@ -33,13 +31,12 @@ pub fn Overview() -> Element {
             ErrorCard { message: format!("Ошибка загрузки карточек: {}", cards_err) }
         },
         (Some(Ok(profile)), Some(Ok(cards))) => {
-            let stats = calculate_stats(Some(profile), Some(cards));
+            let stats = calculate_stats(cards);
             let primary_metrics = build_primary_metrics(&stats);
             let card_status_metrics = build_card_status_metrics(&stats);
             let charts = build_charts(&profile.lesson_history[..]);
 
             rsx! {
-                OverviewHeader { username: stats.username }
                 OverviewMetrics { primary_metrics, card_status_metrics }
                 OverviewChartsComponent { charts }
             }
@@ -109,31 +106,15 @@ async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
         .map_err(to_error)
 }
 
-fn calculate_stats(
-    profile: Option<&UserProfile>,
-    cards: Option<&Vec<VocabularyCard>>,
-) -> OverviewStats {
-    let username = profile
-        .map(|p| p.username.clone())
-        .unwrap_or_else(|| "Неизвестный пользователь".to_string());
-
-    let empty_vec = Vec::new();
-    let cards_data = cards.unwrap_or(&empty_vec);
-
-    let total_cards = cards_data.len();
-    let due_cards = cards_data
-        .iter()
-        .filter(|card| card.memory().is_due())
-        .count();
-    let new_cards = cards_data
-        .iter()
-        .filter(|card| card.memory().is_new())
-        .count();
-    let learning_cards = cards_data
+fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
+    let total_cards = cards.len();
+    let due_cards = cards.iter().filter(|card| card.memory().is_due()).count();
+    let new_cards = cards.iter().filter(|card| card.memory().is_new()).count();
+    let learning_cards = cards
         .iter()
         .filter(|card| card.memory().is_in_progress())
         .count();
-    let known_cards = cards_data
+    let known_cards = cards
         .iter()
         .filter(|card| card.memory().is_known_card())
         .count();
@@ -141,7 +122,6 @@ fn calculate_stats(
     let streak_days = 0; // TODO: Implement streak calculation
 
     OverviewStats {
-        username,
         total_cards,
         due_cards,
         new_cards,
@@ -207,7 +187,6 @@ fn build_card_status_metrics(stats: &OverviewStats) -> Vec<MetricData> {
 
 #[derive(Default)]
 struct OverviewStats {
-    pub username: String,
     pub total_cards: usize,
     pub due_cards: usize,
     pub new_cards: usize,

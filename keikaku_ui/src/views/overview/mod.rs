@@ -1,5 +1,4 @@
 mod chart;
-mod header;
 mod metric;
 mod metric_card;
 mod overview;

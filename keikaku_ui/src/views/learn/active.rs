@@ -1,21 +1,20 @@
 use dioxus::prelude::*;
 
-use crate::ui::Card;
+use super::{LearnCardDisplay, LearnNavigation, LearnProgress};
 
-use super::use_cases::QuestionView;
-
-#[component]
 #[component]
 pub fn LearnActive(
-    cards: Signal<Vec<super::LearnCard>>,
-    current_index: Signal<usize>,
-    current_step: Signal<super::LearnStep>,
-    show_furigana: Signal<bool>,
+    cards: Vec<super::LearnCard>,
+    current_index: usize,
+    current_step: super::LearnStep,
+    show_furigana: bool,
     on_next: EventHandler<()>,
+    on_show_answer: EventHandler<()>,
+    on_prev: Option<EventHandler<()>>,
 ) -> Element {
     let progress = {
-        let current = current_index() + 1;
-        let total = cards().len();
+        let current = current_index + 1;
+        let total = cards.len();
         if total > 0 {
             (current as f64 / total as f64) * 100.0
         } else {
@@ -24,105 +23,66 @@ pub fn LearnActive(
     };
 
     rsx! {
-        div { class: "space-y-6", tabindex: "0",
+        div {
+            class: "space-y-6",
+            tabindex: "0",
+            onkeydown: {
+                let current_step_clone = current_step.clone();
+                move |e: KeyboardEvent| {
+                    use dioxus::prelude::Code;
+                    match e.code() {
+                        Code::Space => {
+                            // Пробел - показать ответ или перейти дальше
+                            e.prevent_default();
+                            if current_step_clone == super::LearnStep::Question {
+                                on_show_answer.call(());
+                            } else {
+                                on_next.call(());
+                            }
+                        }
+                        Code::Enter => {
+                            // Enter - перейти дальше
+                            e.prevent_default();
+                            on_next.call(());
+                        }
+                        Code::Backspace => {
+                            // Backspace - вернуться к предыдущей карточке
+                            if let Some(on_prev) = on_prev.clone() {
+                                let is_first_card = current_index == 0;
+                                let can_go_prev = !is_first_card
+                                    && current_step_clone == super::LearnStep::Answer;
+                                if can_go_prev {
+                                    e.prevent_default();
+                                    on_prev.call(());
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            },
 
             LearnProgress {
-                current: current_index() + 1,
-                total: cards().len(),
+                current: current_index + 1,
+                total: cards.len(),
                 progress,
             }
 
             LearnCardDisplay {
-                cards,
+                cards: cards.clone(),
                 current_index,
-                current_step,
+                current_step: current_step.clone(),
                 show_furigana,
-                on_show_answer: move |_| current_step.set(super::LearnStep::Answer),
+                on_show_answer,
                 on_next,
             }
 
             LearnNavigation {
-                cards,
                 current_index,
+                total_cards: cards.len(),
+                current_step: current_step.clone(),
                 on_next,
-            }
-        }
-    }
-}
-
-#[component]
-pub fn LearnProgress(current: usize, total: usize, progress: f64) -> Element {
-    rsx! {
-        Card { class: Some("space-y-3".to_string()),
-            div { class: "flex items-center justify-between text-sm",
-                span { class: "font-semibold text-slate-700", "Прогресс" }
-                span { class: "text-slate-500", "{current} из {total}" }
-            }
-            div { class: "w-full h-3 bg-slate-100 rounded-full overflow-hidden",
-                div {
-                    class: "h-full bg-rainbow-vibrant rounded-full transition-all duration-500 ease-out",
-                    style: "width: {progress}%",
-                }
-            }
-        }
-    }
-}
-
-#[component]
-pub fn LearnCardDisplay(
-    cards: Signal<Vec<super::LearnCard>>,
-    current_index: Signal<usize>,
-    current_step: Signal<super::LearnStep>,
-    show_furigana: Signal<bool>,
-    on_show_answer: EventHandler<()>,
-    on_next: EventHandler<()>,
-) -> Element {
-    let card = cards().get(current_index()).cloned();
-
-    if let Some(card) = card {
-        rsx! {
-            Card { class: Some("space-y-4".to_string()),
-                if current_step() == super::LearnStep::Question {
-                    QuestionView {
-                        question: card.question,
-                        show_furigana: show_furigana(),
-                        on_show_answer: move |_| on_show_answer.call(()),
-                    }
-                } else {
-                    crate::domain::CardAnswer {
-                        question: card.question,
-                        answer: card.answer,
-                        show_furigana: show_furigana(),
-                        examples: None,
-                    }
-                }
-            }
-        }
-    } else {
-        rsx! {
-            Card { class: Some("space-y-4".to_string()),
-                crate::ui::Paragraph { class: Some("text-sm text-slate-500 text-center".to_string()),
-                    "Нет карточек для отображения"
-                }
-            }
-        }
-    }
-}
-
-#[component]
-#[component]
-pub fn LearnNavigation(
-    cards: Signal<Vec<super::LearnCard>>,
-    current_index: Signal<usize>,
-    on_next: EventHandler<()>,
-) -> Element {
-    rsx! {
-        div { class: "flex gap-2",
-            crate::ui::Button {
-                variant: crate::ui::ButtonVariant::Outline,
-                class: Some("w-full".to_string()),
-                onclick: move |_| on_next.call(()),
-                "Далее"
+                on_prev: on_prev.clone(),
             }
         }
     }
