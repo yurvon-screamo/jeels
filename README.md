@@ -1,18 +1,5 @@
 # Keikaku
 
-Проведи валидацию этого словаря. Предоставь новый полностью переработанный документ. 
-
-Надо: 
-
-* Bсправить ошибки в переводе. 
-* Убрать транслит из русских переводов (например, «Синкансэн» вместо «Shinkansen» и другие).
-* Исправить неточности и сделать переводы более естественными и лаконичными.
-* Убрать излишества и лишние вводные слова/пояснения, сохранив при этом ясность.
-
-```json
-
-```
- 
 Keikaku (計画) - application for learning japanese. Like Anki, but for japanese native and simplified for better user experience.
 
 Learn all flashcards as a single set with FSRS algorithm, tracking your Japanese language progress as single value.
