@@ -1,2 +1,2 @@
 pub mod kanji;
-pub use kanji::{use_kanji, UseKanji};
+pub use kanji::use_kanji;

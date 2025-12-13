@@ -5,9 +5,7 @@ use keikaku::domain::study_session::StudySessionItem;
 use crate::ui::SectionHeader;
 use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 
-use super::{
-    LearnActive, LearnCompleted, LearnSettings, SessionState, LearnCard, LearnStep,
-};
+use super::{LearnActive, LearnCard, LearnCompleted, LearnSettings, LearnStep, SessionState};
 
 async fn fetch_cards_to_learn(limit: usize) -> Result<Vec<StudySessionItem>, String> {
     let env = init_env().await?;
@@ -40,9 +38,9 @@ pub fn Learn() -> Element {
     let mut cards = use_signal(Vec::<LearnCard>::new);
     let mut current_index = use_signal(|| 0);
     let mut current_step = use_signal(|| LearnStep::Question);
-    let mut limit = use_signal(|| "7".to_string());
-    let mut show_furigana = use_signal(|| false);
-    let mut loading = use_signal(|| false);
+    let limit = use_signal(|| "7".to_string());
+    let show_furigana = use_signal(|| false);
+    let loading = use_signal(|| false);
 
     rsx! {
         div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
@@ -61,11 +59,11 @@ pub fn Learn() -> Element {
                             loading,
                             on_start: move |_| {
                                 let limit_val = limit().parse::<usize>().unwrap_or(7);
-                                let mut state = state.clone();
-                                let mut cards = cards.clone();
-                                let mut current_index = current_index.clone();
-                                let mut current_step = current_step.clone();
-                                let mut loading = loading.clone();
+                                let mut state = state;
+                                let mut cards = cards;
+                                let mut current_index = current_index;
+                                let mut current_step = current_step;
+                                let mut loading = loading;
 
                                 spawn(async move {
                                     loading.set(true);

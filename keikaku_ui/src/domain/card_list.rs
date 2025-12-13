@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Card, LoadingState, MetricTone, Paragraph, Pill};
+use crate::ui::{Button, ButtonVariant, Card, LoadingState, Paragraph, Pill, StateTone};
 
 #[derive(Clone, PartialEq)]
 pub struct UiCard {
@@ -87,11 +87,11 @@ pub fn CardRow(
                     div { class: "flex items-center gap-2 flex-wrap mt-3",
                         Pill {
                             text: format!("Повтор: {}", card.next_review),
-                            tone: Some(if card.due { MetricTone::Warning } else { MetricTone::Info }),
+                            tone: Some(if card.due { StateTone::Warning } else { StateTone::Info }),
                         }
                         Pill {
                             text: if card.due { "К повторению".to_string() } else { "Запланирована".to_string() },
-                            tone: Some(if card.due { MetricTone::Warning } else { MetricTone::Neutral }),
+                            tone: Some(if card.due { StateTone::Warning } else { StateTone::Neutral }),
                         }
                     }
                 }

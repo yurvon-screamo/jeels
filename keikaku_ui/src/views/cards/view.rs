@@ -39,7 +39,11 @@ async fn create_card(question: String, answer: String) -> Result<VocabularyCard,
         .map_err(to_error)
 }
 
-async fn edit_card(card_id: String, question: String, answer: String) -> Result<VocabularyCard, String> {
+async fn edit_card(
+    card_id: String,
+    question: String,
+    answer: String,
+) -> Result<VocabularyCard, String> {
     let env = init_env().await?;
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
@@ -88,16 +92,13 @@ pub fn Cards() -> Element {
     let mut modal_state = use_signal(|| ModalState::None);
     let mut notification = use_signal(|| Notification::None);
     let mut delete_confirm = use_signal(|| None::<String>);
-    let mut loading = use_signal(|| false);
+    let loading = use_signal(|| false);
 
     let cards_resource = use_resource(fetch_cards);
 
     use_effect(move || {
         if let Some(Ok(remote)) = cards_resource.read().as_ref() {
-            let mapped = remote
-                .iter()
-                .map(map_card)
-                .collect::<Vec<_>>();
+            let mapped = remote.iter().map(map_card).collect::<Vec<_>>();
             cards.set(mapped);
         }
     });

@@ -5,20 +5,18 @@ mod settings;
 pub use settings::LearnSettings;
 
 mod active;
-pub use active::{LearnActive, LearnCardDisplay, LearnNavigation, LearnProgress};
+pub use active::LearnActive;
 
 mod completed;
 pub use completed::LearnCompleted;
 
 mod use_cases;
-pub use use_cases::learn_session::{
-    use_learn_session, LearnCard, LearnStep, SessionState,
-};
+pub use use_cases::learn_session::{LearnCard, LearnStep, SessionState};
 
+use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::select_cards_to_learn::SelectCardsToLearnUseCase;
 use keikaku::domain::study_session::StudySessionItem;
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 
 #[derive(Clone, PartialEq)]
 pub struct UseLearnSession {
@@ -82,6 +80,4 @@ impl UseLearnSession {
         let cards_len = (self.cards)().len();
         index >= cards_len.saturating_sub(1)
     }
-
-
 }

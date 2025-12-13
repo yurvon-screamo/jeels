@@ -246,8 +246,6 @@ pub fn RatingButton(
     color: String,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    use crate::ui::Button;
-
     rsx! {
         button {
             class: "{color} text-white font-bold py-4 px-4 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 text-sm",
