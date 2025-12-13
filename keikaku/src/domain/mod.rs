@@ -4,6 +4,7 @@ pub mod error;
 pub mod japanese;
 pub mod kanji_card;
 pub mod review;
+pub mod settings;
 pub mod study_session;
 pub mod value_objects;
 pub mod vocabulary_card;
@@ -21,6 +22,7 @@ pub use error::JeersError;
 use rand::{Rng, seq::SliceRandom};
 pub use review::Review;
 use serde::{Deserialize, Serialize};
+pub use settings::{EmbeddingSettings, LlmSettings, TranslationSettings, UserSettings};
 use std::collections::HashMap;
 use ulid::Ulid;
 pub use value_objects::Rating;
@@ -34,7 +36,9 @@ pub struct User {
     native_language: NativeLanguage,
     current_japanese_level: JapaneseLevel,
     lesson_history: Vec<DailyHistoryItem>,
-    duolingo_jwt_token: Option<String>,
+
+    #[serde(default)]
+    settings: UserSettings,
 
     vocabulary_cards: HashMap<Ulid, VocabularyCard>,
     kanji_cards: HashMap<Ulid, KanjiCard>,
@@ -56,7 +60,7 @@ impl User {
             native_language,
             new_cards_limit,
             lesson_history: Vec::new(),
-            duolingo_jwt_token: None,
+            settings: UserSettings::empty(),
         }
     }
 
@@ -84,12 +88,12 @@ impl User {
         self.new_cards_limit
     }
 
-    pub fn duolingo_jwt_token(&self) -> Option<&str> {
-        self.duolingo_jwt_token.as_deref()
+    pub fn settings(&self) -> &UserSettings {
+        &self.settings
     }
 
-    pub fn set_duolingo_jwt_token(&mut self, token: Option<String>) {
-        self.duolingo_jwt_token = token;
+    pub fn settings_mut(&mut self) -> &mut UserSettings {
+        &mut self.settings
     }
 
     pub fn find_homonyms(&self, card_id: Ulid) -> Result<Vec<VocabularyCard>, JeersError> {

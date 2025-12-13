@@ -9,26 +9,26 @@ pub fn Navbar() -> Element {
                 div { class: "flex items-center justify-between",
                     div { class: "flex items-center gap-2",
                         Link {
-                            to: Route::Overview {},
+                            to: Route::Learn {},
                             class: "text-2xl font-bold bg-clip-text text-transparent bg-rainbow-vibrant",
                             "Keikaku"
                         }
                     }
                     div { class: "flex items-center gap-4",
                         Link {
+                            to: Route::Learn {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Обучение"
+                        }
+                        Link {
                             to: Route::Overview {},
                             class: "text-text-main hover:text-accent-pink transition-colors font-medium",
-                            "Обзор"
+                            "Статистика"
                         }
                         Link {
                             to: Route::Cards {},
                             class: "text-text-main hover:text-accent-purple transition-colors font-medium",
                             "Карточки"
-                        }
-                        Link {
-                            to: Route::Learn {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Обучение"
                         }
                         Link {
                             to: Route::Translate {},
@@ -39,6 +39,36 @@ pub fn Navbar() -> Element {
                             to: Route::Kanji {},
                             class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
                             "Кандзи"
+                        }
+                        Link {
+                            to: Route::Jlpt {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "JLPT"
+                        }
+                        Link {
+                            to: Route::Duolingo {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Duolingo"
+                        }
+                        Link {
+                            to: Route::Migii {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Migii"
+                        }
+                        Link {
+                            to: Route::Anki {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Anki"
+                        }
+                        Link {
+                            to: Route::Rebuild {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Перестроить"
+                        }
+                        Link {
+                            to: Route::Profile {},
+                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            "Профиль"
                         }
                     }
                 }

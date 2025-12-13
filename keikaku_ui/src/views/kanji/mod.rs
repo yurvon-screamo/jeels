@@ -1,4 +1,3 @@
-pub mod use_cases;
-pub mod view;
+mod view;
 
 pub use view::Kanji;

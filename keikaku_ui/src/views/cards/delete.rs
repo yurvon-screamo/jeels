@@ -5,7 +5,8 @@ use ulid::Ulid;
 
 use crate::ui::{Button, ButtonVariant, Card, Icon, Modal, Paragraph};
 use crate::views::cards::notification::Notification;
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use keikaku::settings::ApplicationEnvironment;
 
 #[component]
 pub fn DeleteConfirmModal(
@@ -90,7 +91,7 @@ pub fn delete_card_with_handlers(
 }
 
 async fn delete_card(card_id: String) -> Result<VocabularyCard, String> {
-    let env = init_env().await?;
+    let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
 

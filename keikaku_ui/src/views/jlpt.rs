@@ -1,8 +1,9 @@
 use crate::ui::{Button, ButtonVariant, Card, Checkbox, Paragraph, SectionHeader};
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::export_jlpt_recommended::ExportJlptRecommendedUseCase;
 use keikaku::domain::value_objects::JapaneseLevel;
+use keikaku::settings::ApplicationEnvironment;
 
 #[component]
 pub fn Jlpt() -> Element {
@@ -88,17 +89,17 @@ pub fn Jlpt() -> Element {
 }
 
 async fn run_jlpt(levels: Vec<String>) -> Result<String, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service().await.map_err(to_error)?;
+    let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
 
     let parsed_levels = levels
         .into_iter()
         .map(|l| l.parse::<JapaneseLevel>())
         .collect::<Result<Vec<_>, _>>()?;
 
-    let res = ExportJlptRecommendedUseCase::new(repo, llm)
+    let res = ExportJlptRecommendedUseCase::new(repo, &llm)
         .execute(user_id, parsed_levels)
         .await
         .map_err(to_error)?;

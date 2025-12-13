@@ -1,13 +1,51 @@
+use crate::ui::{Button, ButtonVariant, Card, ErrorCard, Paragraph, TextInput, H1};
 use dioxus::prelude::*;
+use keikaku::application::use_cases::get_kanji_info::GetKanjiInfoUseCase;
+use keikaku::domain::dictionary::KanjiInfo;
 
-use super::use_cases::use_kanji;
-use crate::ui::{Button, ButtonVariant, Card, Paragraph, TextInput, H1};
+pub async fn fetch_kanji_info(query: String) -> Result<Option<KanjiInfo>, String> {
+    if query.trim().is_empty() {
+        return Ok(None);
+    }
+
+    match GetKanjiInfoUseCase::new().execute(&query) {
+        Ok(kanji_info) => Ok(Some(kanji_info)),
+        Err(err) => Err(format!("Ошибка получения информации о кандзи: {}", err)),
+    }
+}
 
 #[component]
 pub fn Kanji() -> Element {
-    let kanji = use_kanji();
+    let mut current_query = use_signal(|| "語".to_string());
+    let kanji_resource = use_resource(move || fetch_kanji_info(current_query()));
+    let kanji_read = kanji_resource.read();
 
-    let kanji_for_button = kanji.clone();
+    match kanji_read.as_ref() {
+        Some(Ok(kanji_info)) => rsx! {
+            KanjiContent {
+                initial_kanji_info: kanji_info.clone(),
+                on_search: move |query: String| {
+                    current_query.set(query);
+                },
+            }
+        },
+        Some(Err(err)) => rsx! {
+            ErrorCard { message: err.clone() }
+        },
+        None => rsx! {
+            div { class: "bg-bg min-h-screen text-text-main px-6 py-8", "Загрузка..." }
+        },
+    }
+}
+
+#[component]
+fn KanjiContent(
+    initial_kanji_info: Option<keikaku::domain::dictionary::KanjiInfo>,
+    on_search: EventHandler<String>,
+) -> Element {
+    let query = use_signal(|| "語".to_string());
+    let mut loading = use_signal(|| false);
+
     rsx! {
         div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
             H1 { "Кандзи" }
@@ -16,23 +54,25 @@ pub fn Kanji() -> Element {
                 div { class: "space-y-4",
                     TextInput {
                         label: "Кандзи",
-                        value: kanji.query,
+                        value: query,
                         placeholder: "Введите кандзи для поиска...",
                     }
 
                     Button {
                         variant: ButtonVariant::Rainbow,
                         onclick: move |_| {
-                            let mut kanji = kanji_for_button.clone();
-                            kanji.fetch_kanji_info();
+                            loading.set(true);
+                            let search_query = query();
+                            on_search.call(search_query);
+                            loading.set(false);
                         },
-                        disabled: Some((kanji.loading)()),
+                        disabled: Some(loading()),
                         "Поиск"
                     }
                 }
             }
 
-            if let Some(info) = (kanji.info)() {
+            if let Some(info) = initial_kanji_info {
                 Card {
                     div { class: "space-y-4",
                         div { class: "text-4xl font-bold text-center", "{info.kanji()}" }

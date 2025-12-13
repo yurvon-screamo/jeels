@@ -1,9 +1,10 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, Radio, SectionHeader};
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::rebuild_database::{
     RebuildDatabaseOptions, RebuildDatabaseUseCase,
 };
+use keikaku::settings::ApplicationEnvironment;
 
 #[component]
 pub fn Rebuild() -> Element {
@@ -76,17 +77,17 @@ pub fn Rebuild() -> Element {
 }
 
 async fn run_rebuild(option: &str) -> Result<String, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service().await.map_err(to_error)?;
+    let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
 
     let opt = match option.to_lowercase().as_str() {
         "all" => RebuildDatabaseOptions::All,
         _ => RebuildDatabaseOptions::Content,
     };
 
-    let count = RebuildDatabaseUseCase::new(repo, llm)
+    let count = RebuildDatabaseUseCase::new(repo, &llm)
         .execute(user_id, opt)
         .await
         .map_err(to_error)?;

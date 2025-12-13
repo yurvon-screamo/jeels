@@ -38,10 +38,8 @@ pub async fn handle_create_anki_pack(
         5,
     )?;
 
-    let use_case = ExportAnkiPackUseCase::new(
-        settings.get_repository().await?,
-        settings.get_llm_service().await?,
-    );
+    let llm_service = settings.get_llm_service(user_id).await?;
+    let use_case = ExportAnkiPackUseCase::new(settings.get_repository().await?, &llm_service);
 
     if dry_run {
         let cards = use_case

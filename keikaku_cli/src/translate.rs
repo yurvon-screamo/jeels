@@ -16,9 +16,8 @@ use crate::cli::render_once;
 pub async fn handle_translate(user_id: Ulid, text: String) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
-    let translation_service = settings.get_translation_service().await?;
-
-    let use_case = TranslateUseCase::new(repository, translation_service);
+    let translation_service = settings.get_translation_service(user_id).await?;
+    let use_case = TranslateUseCase::new(repository, &translation_service);
     let result = use_case.execute(user_id, text.clone()).await?;
 
     let source_text = text.clone();

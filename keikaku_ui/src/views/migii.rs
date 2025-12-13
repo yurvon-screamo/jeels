@@ -1,7 +1,8 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Switch, TextInput};
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::export_migii_pack::ExportMigiiPackUseCase;
+use keikaku::settings::ApplicationEnvironment;
 
 #[component]
 pub fn Migii() -> Element {
@@ -73,11 +74,11 @@ pub fn Migii() -> Element {
 }
 
 async fn run_migii(lessons: String, question_only: bool) -> Result<String, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service().await.map_err(to_error)?;
-    let migii_client = env.get_migii_client().await.map_err(to_error)?;
+    let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
+    let migii_client = env.get_migii_client().await.map_err(to_error)?;
 
     let lesson_numbers: Vec<u32> = lessons
         .split(',')
@@ -87,7 +88,7 @@ async fn run_migii(lessons: String, question_only: bool) -> Result<String, Strin
         return Err("Укажите хотя бы один номер урока".to_string());
     }
 
-    let res = ExportMigiiPackUseCase::new(repo, llm, migii_client)
+    let res = ExportMigiiPackUseCase::new(repo, &llm, migii_client)
         .execute(user_id, lesson_numbers, question_only)
         .await
         .map_err(to_error)?;

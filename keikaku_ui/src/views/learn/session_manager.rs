@@ -5,10 +5,11 @@ use keikaku::application::use_cases::{
     select_cards_to_learn::SelectCardsToLearnUseCase,
 };
 use keikaku::domain::study_session::StudySessionItem;
+use keikaku::settings::ApplicationEnvironment;
 use std::rc::Rc;
 use ulid::Ulid;
 
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 
 use super::{LearnCard, LearnStep, SessionState};
 
@@ -38,11 +39,11 @@ pub fn use_learn_session() -> LearnSessionSignals {
     let session_data = use_signal(LearnSessionData::default);
 
     LearnSessionSignals {
-        state: state.clone(),
-        session_data: session_data.clone(),
+        state,
+        session_data,
         start_session: Rc::new(move |limit: Option<usize>, show_furigana: bool| {
-            let mut state = state.clone();
-            let mut session_data = session_data.clone();
+            let mut state = state;
+            let mut session_data = session_data;
 
             spawn(async move {
                 state.set(SessionState::Loading);
@@ -75,8 +76,8 @@ pub fn use_learn_session() -> LearnSessionSignals {
             });
         }),
         next_card: Rc::new(move || {
-            let mut state = state.clone();
-            let mut session_data = session_data.clone();
+            let mut state = state;
+            let mut session_data = session_data;
             let mut data = session_data.write();
             let current_index = data.current_index;
             let cards_len = data.cards.len();
@@ -90,17 +91,17 @@ pub fn use_learn_session() -> LearnSessionSignals {
             }
         }),
         restart_session: Rc::new(move || {
-            let mut state = state.clone();
-            let mut session_data = session_data.clone();
+            let mut state = state;
+            let mut session_data = session_data;
             *session_data.write() = LearnSessionData::default();
             state.set(SessionState::Settings);
         }),
         show_answer: Rc::new(move || {
-            let mut session_data = session_data.clone();
+            let mut session_data = session_data;
             session_data.write().current_step = LearnStep::Answer;
         }),
         prev_card: Rc::new(move || {
-            let mut session_data = session_data.clone();
+            let mut session_data = session_data;
             let mut data = session_data.write();
             if data.current_index > 0 {
                 data.current_index -= 1;
@@ -108,8 +109,8 @@ pub fn use_learn_session() -> LearnSessionSignals {
             }
         }),
         rate_card: Rc::new(move |rating: crate::domain::Rating| {
-            let state = state.clone();
-            let mut session_data = session_data.clone();
+            let state = state;
+            let mut session_data = session_data;
 
             spawn(async move {
                 let data = session_data.read();
@@ -137,7 +138,7 @@ pub fn use_learn_session() -> LearnSessionSignals {
                             data.current_step = LearnStep::Question;
                         } else {
                             drop(data);
-                            let mut state = state.clone();
+                            let mut state = state;
                             state.set(SessionState::Completed);
                             // Complete lesson
                             spawn(async move {
@@ -166,7 +167,7 @@ pub struct LearnSessionSignals {
 }
 
 async fn fetch_cards_to_learn(limit: Option<usize>) -> Result<Vec<StudySessionItem>, String> {
-    let env = init_env().await?;
+    let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectCardsToLearnUseCase::new(repo)
@@ -202,7 +203,7 @@ fn map_study_item_to_learn_card(item: StudySessionItem) -> LearnCard {
             kanji_info: v.kanji().to_vec(),
             example_words: vec![],
             radicals: vec![],
-            jlpt_level: v.level().clone(),
+            jlpt_level: *v.level(),
         },
         StudySessionItem::Kanji(k) => LearnCard {
             id: k.card_id().to_string(),
@@ -215,13 +216,13 @@ fn map_study_item_to_learn_card(item: StudySessionItem) -> LearnCard {
             kanji_info: vec![],
             example_words: k.example_words().to_vec(),
             radicals: k.radicals().to_vec(),
-            jlpt_level: k.level().clone(),
+            jlpt_level: *k.level(),
         },
     }
 }
 
 async fn rate_card_impl(card_id: Ulid, rating: crate::domain::Rating) -> Result<(), String> {
-    let env = init_env().await?;
+    let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let srs_service = env.get_srs_service().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
@@ -240,7 +241,7 @@ async fn rate_card_impl(card_id: Ulid, rating: crate::domain::Rating) -> Result<
 }
 
 pub async fn complete_lesson_impl() -> Result<(), String> {
-    let env = init_env().await?;
+    let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     let complete_usecase = CompleteLessonUseCase::new(repo);

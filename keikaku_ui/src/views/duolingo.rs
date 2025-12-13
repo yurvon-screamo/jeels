@@ -1,8 +1,9 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Switch};
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::sync_duolingo_words::SyncDuolingoWordsUseCase;
 use keikaku::infrastructure::HttpDuolingoClient;
+use keikaku::settings::ApplicationEnvironment;
 
 #[component]
 pub fn Duolingo() -> Element {
@@ -59,12 +60,12 @@ pub fn Duolingo() -> Element {
 }
 
 async fn run_duolingo(question_only: bool) -> Result<String, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service().await.map_err(to_error)?;
-    let client = HttpDuolingoClient::new();
+    let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    let use_case = SyncDuolingoWordsUseCase::new(repo, llm, &client);
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
+    let client = HttpDuolingoClient::new();
+    let use_case = SyncDuolingoWordsUseCase::new(repo, &llm, &client);
     let res = use_case
         .execute(user_id, question_only)
         .await

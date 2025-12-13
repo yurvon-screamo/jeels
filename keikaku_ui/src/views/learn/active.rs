@@ -45,7 +45,7 @@ pub fn LearnActive(
                         }
                         Code::Backspace => {
                             // Backspace - вернуться к предыдущей карточке
-                            if let Some(on_prev) = on_prev.clone() {
+                            if let Some(on_prev) = on_prev {
                                 let is_first_card = current_index == 0;
                                 let can_go_prev = !is_first_card
                                     && current_step_clone == super::LearnStep::Answer;

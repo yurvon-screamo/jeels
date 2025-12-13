@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Card, Paragraph, H2};
+use crate::ui::{Button, ButtonVariant, Card, Paragraph, StatCard, H2};
 
 #[component]
 pub fn LearnCompleted(total_cards: usize, on_restart: EventHandler<()>) -> Element {
@@ -18,9 +18,9 @@ pub fn LearnCompleted(total_cards: usize, on_restart: EventHandler<()>) -> Eleme
 
             div { class: "bg-slate-50 rounded-lg p-6 mb-8",
                 div { class: "grid grid-cols-1 gap-4",
-                    div { class: "text-center",
-                        div { class: "text-3xl font-bold text-blue-600", "{total_cards}" }
-                        div { class: "text-sm text-slate-500", "Карточек пройдено" }
+                    StatCard {
+                        value: total_cards.to_string(),
+                        label: "Карточек пройдено".to_string(),
                     }
                 }
             }

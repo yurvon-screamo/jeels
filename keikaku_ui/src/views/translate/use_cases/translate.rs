@@ -1,6 +1,7 @@
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::translate::TranslateUseCase;
+use keikaku::settings::ApplicationEnvironment;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Direction {
@@ -48,12 +49,15 @@ impl UseTranslate {
 }
 
 async fn run_translate(src: String) -> Result<String, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let translation = env.get_translation_service().await.map_err(to_error)?;
+    let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let translation = env
+        .get_translation_service(user_id)
+        .await
+        .map_err(to_error)?;
 
-    TranslateUseCase::new(repo, translation)
+    TranslateUseCase::new(repo, &translation)
         .execute(user_id, src)
         .await
         .map_err(to_error)

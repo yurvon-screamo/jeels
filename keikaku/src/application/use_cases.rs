@@ -15,6 +15,7 @@ pub mod rebuild_database;
 pub mod select_cards_to_learn;
 pub mod sync_duolingo_words;
 pub mod translate;
+pub mod update_user_settings;
 pub mod view_card;
 
 pub use complete_lesson::CompleteLessonUseCase;
@@ -34,4 +35,5 @@ pub use rebuild_database::RebuildDatabaseUseCase;
 pub use select_cards_to_learn::SelectCardsToLearnUseCase;
 pub use sync_duolingo_words::{SyncDuolingoWordsResult, SyncDuolingoWordsUseCase};
 pub use translate::TranslateUseCase;
+pub use update_user_settings::{UpdateUserSettingsRequest, UpdateUserSettingsUseCase};
 pub use view_card::ViewCardUseCase;

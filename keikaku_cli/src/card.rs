@@ -79,16 +79,14 @@ pub async fn handle_create_card(
     answer: String,
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
-    let card = CreateCardUseCase::new(
-        settings.get_repository().await?,
-        settings.get_llm_service().await?,
-    )
-    .execute(
-        user_id,
-        question,
-        Some(CardContent::new(Answer::new(answer)?, Vec::new())),
-    )
-    .await?;
+    let llm_service = settings.get_llm_service(user_id).await?;
+    let card = CreateCardUseCase::new(settings.get_repository().await?, &llm_service)
+        .execute(
+            user_id,
+            question,
+            Some(CardContent::new(Answer::new(answer)?, Vec::new())),
+        )
+        .await?;
 
     render_once(
         |frame| {
@@ -111,10 +109,8 @@ pub async fn handle_create_card(
 
 pub async fn handle_create_words(user_id: Ulid, questions: Vec<String>) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
-    let use_case = CreateCardUseCase::new(
-        settings.get_repository().await?,
-        settings.get_llm_service().await?,
-    );
+    let llm_service = settings.get_llm_service(user_id).await?;
+    let use_case = CreateCardUseCase::new(settings.get_repository().await?, &llm_service);
 
     for question in questions {
         let card = use_case.execute(user_id, question, None).await?;
@@ -202,8 +198,8 @@ pub async fn handle_rebuild_database(
 ) -> Result<(), JeersError> {
     let settings = ApplicationEnvironment::get();
     let repository = settings.get_repository().await?;
-    let llm_service = settings.get_llm_service().await?;
-    let rebuild_use_case = RebuildDatabaseUseCase::new(repository, llm_service);
+    let llm_service = settings.get_llm_service(user_id).await?;
+    let rebuild_use_case = RebuildDatabaseUseCase::new(repository, &llm_service);
     let processed_count = rebuild_use_case.execute(user_id, options).await?;
 
     render_once(

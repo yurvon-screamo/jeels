@@ -55,10 +55,9 @@ pub async fn handle_export_jlpt_recommended(
         5,
     )?;
 
-    let use_case = ExportJlptRecommendedUseCase::new(
-        settings.get_repository().await?,
-        settings.get_llm_service().await?,
-    );
+    let llm_service = settings.get_llm_service(user_id).await?;
+    let use_case =
+        ExportJlptRecommendedUseCase::new(settings.get_repository().await?, &llm_service);
 
     let result = use_case.execute(user_id, selected_levels.clone()).await?;
 

@@ -51,9 +51,10 @@ pub async fn handle_create_migii_pack(
         5,
     )?;
 
+    let llm_service = settings.get_llm_service(user_id).await?;
     let use_case = ExportMigiiPackUseCase::new(
         settings.get_repository().await?,
-        settings.get_llm_service().await?,
+        &llm_service,
         settings.get_migii_client().await?,
     );
 

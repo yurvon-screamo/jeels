@@ -30,3 +30,6 @@ pub use anki::Anki;
 
 mod rebuild;
 pub use rebuild::Rebuild;
+
+mod profile;
+pub use profile::Profile;

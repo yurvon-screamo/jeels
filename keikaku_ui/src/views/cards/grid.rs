@@ -2,8 +2,8 @@ use dioxus::prelude::*;
 use std::rc::Rc;
 
 use crate::{
-    domain::UiCard,
-    ui::{Button, ButtonVariant, Card, Grid, LoadingState, Paragraph, Pill, StateTone},
+    ui::{Button, ButtonVariant, Card, EmptyState, Grid, LoadingState, Paragraph, Pill, StateTone},
+    views::cards::UiCard,
 };
 
 #[component]
@@ -42,25 +42,20 @@ pub fn CardsGrid(
 #[component]
 fn EmptyCardsState(on_create_click: EventHandler<()>) -> Element {
     rsx! {
-        div { class: "text-center space-y-6 py-12",
-            div { class: "text-6xl mb-6", "🎯" }
-            Paragraph { class: Some("text-xl font-bold text-slate-700".to_string()),
-                "Добро пожаловать в Keikaku!"
-            }
-            Paragraph { class: Some("text-base text-slate-500 max-w-md mx-auto".to_string()),
+        EmptyState {
+            icon: Some("🎯".to_string()),
+            title: "Добро пожаловать в Keikaku!".to_string(),
+            description: Some(
                 "Начните свое путешествие по изучению японского языка. Создайте свою первую карточку и откройте для себя эффективный метод повторений."
-            }
-            div { class: "space-y-3",
-                Button {
-                    variant: ButtonVariant::Rainbow,
-                    class: Some("px-8 py-3 text-lg font-semibold".to_string()),
-                    onclick: move |_| on_create_click.call(()),
-                    "+ Создать первую карточку"
-                }
+                    .to_string(),
+            ),
+            action_text: Some("+ Создать первую карточку".to_string()),
+            on_action: Some(on_create_click),
+            additional_content: Some(rsx! {
                 div { class: "text-xs text-slate-400",
                     "💡 Начните с 5-10 карточек для лучшего запоминания"
                 }
-            }
+            }),
         }
     }
 }

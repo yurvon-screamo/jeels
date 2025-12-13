@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::domain::{AnswerActionButtons, FuriganaText, QuestionActionButtons, Rating, WordCard};
-use crate::ui::{Card, Pill, H2};
+use crate::ui::{Card, InfoGrid, InfoSection, InfoSectionTone, Pill};
 use crate::views::learn::learn_session::{CardType, LearnCard, LearnStep, SimilarCard};
 
 #[component]
@@ -207,13 +207,12 @@ fn ExamplesSection(card: LearnCard, show_furigana: bool) -> Element {
     }
 
     rsx! {
-        div { class: "bg-slate-50 rounded-lg p-4 space-y-3",
-            H2 { class: Some("text-lg font-semibold text-slate-800".to_string()),
-                match card.card_type {
-                    CardType::Vocabulary => "Примеры использования:",
-                    CardType::Kanji => "Популярные слова:",
-                }
-            }
+        InfoSection {
+            title: match card.card_type {
+                CardType::Vocabulary => "Примеры использования:".to_string(),
+                CardType::Kanji => "Популярные слова:".to_string(),
+            },
+            tone: InfoSectionTone::Neutral,
             div { class: "space-y-2",
                 for example in card.example_phrases.iter() {
                     div { class: "flex flex-col gap-1",
@@ -246,9 +245,10 @@ fn KanjiInfoSection(
     show_furigana: bool,
 ) -> Element {
     rsx! {
-        div { class: "bg-blue-50 rounded-lg p-4 space-y-3",
-            H2 { class: Some("text-lg font-semibold text-blue-800".to_string()), "Радикалы:" }
-            div { class: "grid grid-cols-1 md:grid-cols-2 gap-3",
+        InfoSection {
+            title: "Радикалы:".to_string(),
+            tone: InfoSectionTone::Blue,
+            InfoGrid {
                 for kanji in kanji_info.iter() {
                     div { class: "bg-white rounded p-3 space-y-2",
                         div { class: "flex items-center gap-2",
@@ -279,11 +279,10 @@ fn KanjiInfoSection(
 #[component]
 fn RadicalsSection(radicals: Vec<keikaku::domain::dictionary::RadicalInfo>) -> Element {
     rsx! {
-        div { class: "bg-purple-50 rounded-lg p-4 space-y-3",
-            H2 { class: Some("text-lg font-semibold text-purple-800".to_string()),
-                "Радикалы:"
-            }
-            div { class: "grid grid-cols-1 md:grid-cols-2 gap-3",
+        InfoSection {
+            title: "Радикалы:".to_string(),
+            tone: InfoSectionTone::Purple,
+            InfoGrid {
                 for radical in radicals.iter() {
                     div { class: "bg-white rounded p-3 space-y-2",
                         div { class: "flex items-center gap-2",
@@ -302,10 +301,9 @@ fn RadicalsSection(radicals: Vec<keikaku::domain::dictionary::RadicalInfo>) -> E
 #[component]
 fn SimilarityPanel(cards: Vec<SimilarCard>) -> Element {
     rsx! {
-        div { class: "bg-yellow-50 rounded-lg p-4 space-y-3",
-            H2 { class: Some("text-lg font-semibold text-yellow-800".to_string()),
-                "Связанные карточки:"
-            }
+        InfoSection {
+            title: "Связанные карточки:".to_string(),
+            tone: InfoSectionTone::Yellow,
             div { class: "space-y-2",
                 for card in cards.iter() {
                     div { class: "flex flex-col gap-1 p-2 bg-white rounded",
@@ -321,8 +319,7 @@ fn SimilarityPanel(cards: Vec<SimilarCard>) -> Element {
 #[component]
 fn HomonymsPanel(cards: Vec<SimilarCard>) -> Element {
     rsx! {
-        div { class: "bg-blue-50 rounded-lg p-4 space-y-3",
-            H2 { class: Some("text-lg font-semibold text-blue-800".to_string()), "Омонимы:" }
+        InfoSection { title: "Омонимы:".to_string(), tone: InfoSectionTone::Blue,
             div { class: "space-y-2",
                 for card in cards.iter() {
                     div { class: "flex flex-col gap-1 p-2 bg-white rounded",

@@ -36,11 +36,12 @@ impl<'a, R: UserRepository, L: LlmService, D: DuolingoClient>
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let jwt_token = user
-            .duolingo_jwt_token()
-            .ok_or_else(|| JeersError::RepositoryError {
-                reason: "Duolingo JWT token not set".to_string(),
-            })?;
+        let jwt_token =
+            user.settings()
+                .duolingo_jwt_token()
+                .ok_or_else(|| JeersError::RepositoryError {
+                    reason: "Duolingo JWT token not set".to_string(),
+                })?;
 
         let words = self.duolingo_client.get_words(jwt_token).await?;
 

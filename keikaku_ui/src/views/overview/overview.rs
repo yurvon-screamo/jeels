@@ -4,10 +4,10 @@ use keikaku::application::use_cases::{
     list_cards::ListCardsUseCase,
 };
 use keikaku::domain::VocabularyCard;
+use keikaku::settings::ApplicationEnvironment;
 
 use crate::{
-    ensure_user, init_env, to_error, ui::ErrorCard, views::overview::OverviewCharts,
-    DEFAULT_USERNAME,
+    ensure_user, to_error, ui::ErrorCard, views::overview::OverviewCharts, DEFAULT_USERNAME,
 };
 use crate::{
     ui::{ChartDataPoint, StateTone},
@@ -87,7 +87,7 @@ fn build_charts(
 }
 
 async fn fetch_profile() -> Result<UserProfile, String> {
-    let env = init_env().await?;
+    let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     GetUserInfoUseCase::new(repo)
@@ -97,7 +97,7 @@ async fn fetch_profile() -> Result<UserProfile, String> {
 }
 
 async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
-    let env = init_env().await?;
+    let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     ListCardsUseCase::new(repo)

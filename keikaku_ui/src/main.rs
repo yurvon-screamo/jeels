@@ -1,5 +1,4 @@
 use dioxus::prelude::*;
-use tokio::sync::OnceCell;
 use ulid::Ulid;
 
 use keikaku::{
@@ -12,22 +11,10 @@ use keikaku::{
 };
 
 use views::{
-    Anki, Cards, Duolingo, Jlpt, Kanji, Learn, Migii, Navbar, Overview, Rebuild, Translate,
+    Anki, Cards, Duolingo, Jlpt, Kanji, Learn, Migii, Navbar, Overview, Profile, Rebuild, Translate,
 };
 
 pub const DEFAULT_USERNAME: &str = "yurvon_screamo";
-
-static ENV_INIT: OnceCell<Result<(), String>> = OnceCell::const_new();
-
-pub async fn init_env() -> Result<&'static ApplicationEnvironment, String> {
-    let res = ENV_INIT
-        .get_or_init(|| async { ApplicationEnvironment::load().await.map_err(to_error) })
-        .await;
-    match res {
-        Ok(_) => Ok(ApplicationEnvironment::get()),
-        Err(err) => Err(err.clone()),
-    }
-}
 
 pub async fn ensure_user(
     env: &'static ApplicationEnvironment,
@@ -70,11 +57,11 @@ fn main() {
 enum Route {
     #[layout(Navbar)]
         #[route("/")]
+        Learn {},
+        #[route("/overview")]
         Overview {},
         #[route("/cards")]
         Cards {},
-        #[route("/learn")]
-        Learn {},
         #[route("/translate")]
         Translate {},
         #[route("/kanji")]
@@ -85,6 +72,8 @@ enum Route {
         Duolingo {},
         #[route("/migii")]
         Migii {},
+        #[route("/profile")]
+        Profile {},
         #[route("/anki")]
         Anki {},
         #[route("/rebuild")]
@@ -99,7 +88,6 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         document::Link { rel: "stylesheet", href: UI_STYLES }
         style { {global_styles()} }
-
         Router::<Route> {}
     }
 }

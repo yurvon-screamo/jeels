@@ -1,7 +1,8 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Switch, TextInput};
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
+use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::export_anki_pack::ExportAnkiPackUseCase;
+use keikaku::settings::ApplicationEnvironment;
 
 #[component]
 pub fn Anki() -> Element {
@@ -119,12 +120,12 @@ async fn run_anki_dry(
     word_tag: String,
     translation_tag: String,
 ) -> Result<String, String> {
-    let env = init_env().await?;
-    ensure_user(env, DEFAULT_USERNAME).await?;
+    let env = ApplicationEnvironment::get();
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
 
     let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service().await.map_err(to_error)?;
-    let use_case = ExportAnkiPackUseCase::new(repo, llm);
+    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
+    let use_case = ExportAnkiPackUseCase::new(repo, &llm);
     let cards = use_case
         .extract_cards(&file_path, &word_tag, Some(translation_tag.as_str()))
         .await
@@ -137,11 +138,11 @@ async fn run_anki(
     word_tag: String,
     translation_tag: String,
 ) -> Result<String, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service().await.map_err(to_error)?;
+    let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    let use_case = ExportAnkiPackUseCase::new(repo, llm);
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
+    let use_case = ExportAnkiPackUseCase::new(repo, &llm);
     let result = use_case
         .execute(user_id, file_path, word_tag, Some(translation_tag))
         .await

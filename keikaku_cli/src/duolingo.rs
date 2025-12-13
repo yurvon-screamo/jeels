@@ -26,7 +26,7 @@ pub async fn handle_sync_duolingo_words(
         .await?
         .ok_or(JeersError::UserNotFound { user_id })?;
 
-    if user.duolingo_jwt_token().is_none() {
+    if user.settings().duolingo_jwt_token().is_none() {
         return Err(JeersError::RepositoryError {
             reason: "Duolingo JWT token not set. Please set it first.".to_string(),
         });
@@ -50,9 +50,10 @@ pub async fn handle_sync_duolingo_words(
     )?;
 
     let duolingo_client = keikaku::infrastructure::HttpDuolingoClient::new();
+    let llm_service = settings.get_llm_service(user_id).await?;
     let use_case = SyncDuolingoWordsUseCase::new(
         settings.get_repository().await?,
-        settings.get_llm_service().await?,
+        &llm_service,
         &duolingo_client,
     );
 
