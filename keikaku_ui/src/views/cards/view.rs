@@ -1,91 +1,75 @@
 use dioxus::prelude::*;
-use keikaku::application::use_cases::{
-    create_card::CreateCardUseCase, delete_card::DeleteCardUseCase, edit_card::EditCardUseCase,
-    list_cards::ListCardsUseCase,
+use keikaku::application::use_cases::list_cards::ListCardsUseCase;
+use keikaku::domain::VocabularyCard;
+
+use crate::ui::ErrorCard;
+use crate::views::cards::create::CreateModal;
+use crate::views::cards::delete::{delete_card_with_handlers, DeleteConfirmModal};
+use crate::views::cards::edit::EditModal;
+use crate::views::cards::notification::{Notification, NotificationArea};
+use crate::{
+    domain::{FilterStatus, SortBy, UiCard},
+    ensure_user, init_env, to_error,
+    views::cards::{
+        filters::CardsFilters, grid::CardsGrid, header::CardsHeader, stats::CardsStats,
+    },
+    DEFAULT_USERNAME,
 };
-use keikaku::domain::{value_objects::CardContent, VocabularyCard};
-use ulid::Ulid;
-
-use crate::domain::{CardFilters, CardHeader, CardStats, CardsList, FilterStatus, SortBy, UiCard};
-use crate::ui::{Button, ButtonVariant, Modal, NotificationBanner, NotificationType, TextInput};
-use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
-
-use super::use_cases::map_card;
-
-async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    ListCardsUseCase::new(repo)
-        .execute(user_id)
-        .await
-        .map_err(to_error)
-}
-
-async fn create_card(question: String, answer: String) -> Result<VocabularyCard, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm_service = env.get_llm_service().await.map_err(to_error)?;
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-
-    let card_content = CardContent::new(
-        keikaku::domain::value_objects::Answer::new(answer).map_err(to_error)?,
-        Vec::new(),
-    );
-
-    CreateCardUseCase::new(repo, llm_service)
-        .execute(user_id, question, Some(card_content))
-        .await
-        .map_err(to_error)
-}
-
-async fn edit_card(
-    card_id: String,
-    question: String,
-    answer: String,
-) -> Result<VocabularyCard, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-
-    let card_id_ulid = card_id.parse::<Ulid>().map_err(|e| e.to_string())?;
-
-    EditCardUseCase::new(repo)
-        .execute(user_id, card_id_ulid, question, answer, Vec::new())
-        .await
-        .map_err(to_error)
-}
-
-async fn delete_card(card_id: String) -> Result<VocabularyCard, String> {
-    let env = init_env().await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-
-    let card_id_ulid = card_id.parse::<Ulid>().map_err(|e| e.to_string())?;
-
-    DeleteCardUseCase::new(repo)
-        .execute(user_id, card_id_ulid)
-        .await
-        .map_err(to_error)
-}
 
 #[derive(Clone, PartialEq)]
-enum ModalState {
+pub enum ModalState {
     None,
     Create,
-    Edit { card_id: String },
-}
-
-#[derive(Clone, PartialEq)]
-enum Notification {
-    None,
-    Success(String),
-    Error(String),
+    Edit {
+        card_id: String,
+        question: String,
+        answer: String,
+    },
 }
 
 #[component]
 pub fn Cards() -> Element {
-    let mut cards = use_signal(Vec::<UiCard>::new);
+    let mut cards_resource = use_resource(fetch_cards);
+
+    // Read resources once and store results
+    let cards_read = cards_resource.read();
+
+    match cards_read.as_ref() {
+        Some(Ok(cards)) => {
+            let mapped_cards = cards.iter().map(map_card).collect::<Vec<_>>();
+            let processed_data = process_cards_data(mapped_cards);
+
+            rsx! {
+                CardsContent {
+                    cards_data: processed_data.clone(),
+                    on_refresh: move || cards_resource.restart(),
+                }
+            }
+        }
+        Some(Err(err)) => rsx! {
+            ErrorCard { message: format!("Ошибка загрузки карточек: {}", err) }
+        },
+        None => rsx! {
+            div { class: "bg-bg min-h-screen text-text-main px-6 py-8", "Загрузка..." }
+        },
+    }
+}
+
+#[derive(Clone, PartialEq)]
+struct ProcessedCardsData {
+    pub cards: Vec<UiCard>,
+    pub stats: CardsStatsData,
+}
+
+#[derive(Clone, PartialEq)]
+struct CardsStatsData {
+    pub total_count: usize,
+    pub due_count: usize,
+    pub filtered_count: usize,
+}
+
+#[component]
+fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) -> Element {
     let search = use_signal(String::new);
     let filter_status = use_signal(|| FilterStatus::All);
     let sort_by = use_signal(|| SortBy::Date);
@@ -94,55 +78,13 @@ pub fn Cards() -> Element {
     let mut delete_confirm = use_signal(|| None::<String>);
     let loading = use_signal(|| false);
 
-    let cards_resource = use_resource(fetch_cards);
-
-    use_effect(move || {
-        if let Some(Ok(remote)) = cards_resource.read().as_ref() {
-            let mapped = remote.iter().map(map_card).collect::<Vec<_>>();
-            cards.set(mapped);
-        }
-    });
-
     let filtered_and_sorted = move || {
-        let q = search().to_lowercase();
-        let mut result: Vec<UiCard> = cards()
-            .into_iter()
-            .filter(|c| {
-                let matches_search = q.is_empty()
-                    || c.question.to_lowercase().contains(&q)
-                    || c.answer.to_lowercase().contains(&q);
-
-                let matches_status = match filter_status() {
-                    FilterStatus::All => true,
-                    FilterStatus::Due => c.due,
-                    FilterStatus::NotDue => !c.due,
-                };
-
-                matches_search && matches_status
-            })
-            .collect::<Vec<_>>();
-
-        match sort_by() {
-            SortBy::Date => {
-                result.sort_by(|a, b| {
-                    if a.due && !b.due {
-                        std::cmp::Ordering::Less
-                    } else if !a.due && b.due {
-                        std::cmp::Ordering::Greater
-                    } else {
-                        a.next_review.cmp(&b.next_review)
-                    }
-                });
-            }
-            SortBy::Question => {
-                result.sort_by(|a, b| a.question.cmp(&b.question));
-            }
-            SortBy::Answer => {
-                result.sort_by(|a, b| a.answer.cmp(&b.answer));
-            }
-        }
-
-        result
+        filter_and_sort_cards(
+            cards_data.cards.clone(),
+            search(),
+            filter_status(),
+            sort_by(),
+        )
     };
 
     rsx! {
@@ -152,257 +94,171 @@ pub fn Cards() -> Element {
                 on_close: move |_| notification.set(Notification::None),
             }
 
-            CardHeader {
-                total_count: cards().len(),
-                due_count: cards().iter().filter(|c| c.due).count(),
+            CardsHeader {
+                total_count: cards_data.stats.total_count,
+                due_count: cards_data.stats.due_count,
+                on_create_click: move |_| modal_state.set(ModalState::Create),
             }
 
-            CardStats {
-                total_count: cards().len(),
-                due_count: cards().iter().filter(|c| c.due).count(),
+            CardsStats {
+                total_count: cards_data.stats.total_count,
+                due_count: cards_data.stats.due_count,
                 filtered_count: filtered_and_sorted().len(),
             }
 
-            CardFilters { search, filter_status, sort_by }
+            CardsFilters { search, filter_status, sort_by }
 
-            CardsList {
+            CardsGrid {
                 cards: filtered_and_sorted(),
-                loading: cards_resource.read().is_none()
-                    || cards_resource.read().as_ref().map(|r| r.is_err()).unwrap_or(false),
-                on_edit: move |card_id| modal_state.set(ModalState::Edit { card_id }),
-                on_delete: move |card_id: String| delete_confirm.set(Some(card_id)),
+                loading: loading(),
+                on_edit: move |card: UiCard| {
+                    modal_state
+                        .set(ModalState::Edit {
+                            card_id: card.id,
+                            question: card.question,
+                            answer: card.answer,
+                        })
+                },
+                on_delete: move |card: UiCard| delete_confirm.set(Some(card.id)),
+                on_create_click: move |_| modal_state.set(ModalState::Create),
             }
 
-            CreateEditModal {
-                modal_state,
-                on_close: move || modal_state.set(ModalState::None),
-                on_success: move |msg| notification.set(Notification::Success(msg)),
-                on_error: move |msg| notification.set(Notification::Error(msg)),
-                loading,
+            match modal_state() {
+                ModalState::Create => rsx! {
+                    CreateModal {
+                        on_close: move |_| modal_state.set(ModalState::None),
+                        on_success: move |msg| {
+                            notification.set(Notification::Success(msg));
+                            on_refresh.call(());
+                        },
+                        on_error: move |msg| notification.set(Notification::Error(msg)),
+                        loading: loading(),
+                    }
+                },
+                ModalState::Edit { card_id, question, answer } => rsx! {
+                    EditModal {
+                        card_id,
+                        initial_question: question,
+                        initial_answer: answer,
+                        on_close: move |_| modal_state.set(ModalState::None),
+                        on_success: move |msg| {
+                            notification.set(Notification::Success(msg));
+                            on_refresh.call(());
+                        },
+                        on_error: move |msg| notification.set(Notification::Error(msg)),
+                        loading: loading(),
+                    }
+                },
+                ModalState::None => rsx! {},
             }
 
             DeleteConfirmModal {
                 card_id: delete_confirm(),
                 on_close: move || delete_confirm.set(None),
-                on_confirm: move |card_id: String| {
-                    let mut cards = cards;
-                    let mut notification = notification;
-                    let mut delete_confirm = delete_confirm;
-                    let mut loading = loading;
-
-                    spawn(async move {
-                        loading.set(true);
-                        match delete_card(card_id.clone()).await {
-                            Ok(_) => {
-                                cards.write().retain(|c| c.id != card_id);
-                                delete_confirm.set(None);
-                                notification
-                                    .set(
-                                        Notification::Success(
-                                            "Карточка удалена".to_string(),
-                                        ),
-                                    );
-                            }
-                            Err(e) => {
-                                notification
-                                    .set(Notification::Error(format!("Ошибка: {}", e)));
-                            }
-                        }
-                        loading.set(false);
-                    });
-                },
+                on_confirm: delete_card_with_handlers(notification, delete_confirm, loading, on_refresh),
             }
         }
     }
 }
 
-#[component]
-fn NotificationArea(notification: Signal<Notification>, on_close: EventHandler<()>) -> Element {
-    match notification() {
-        Notification::Success(msg) => rsx! {
-            NotificationBanner {
-                message: msg,
-                notification_type: NotificationType::Success,
-                on_close,
+fn map_card(card: &VocabularyCard) -> UiCard {
+    let next_review = card
+        .memory()
+        .next_review_date()
+        .map(|d| {
+            let now = chrono::Utc::now();
+            let diff = (*d - now).num_days();
+
+            if diff < 0 {
+                "Просрочено".to_string()
+            } else if diff == 0 {
+                "Сегодня".to_string()
+            } else if diff == 1 {
+                "Завтра".to_string()
+            } else if diff < 7 {
+                format!("Через {} дн.", diff)
+            } else {
+                d.format("%d.%m.%Y").to_string()
             }
+        })
+        .unwrap_or_else(|| "—".to_string());
+
+    UiCard {
+        id: card.id().to_string(),
+        question: card.word().text().to_string(),
+        answer: card.meaning().text().to_string(),
+        next_review,
+        due: card.memory().is_due(),
+    }
+}
+
+fn process_cards_data(cards: Vec<UiCard>) -> ProcessedCardsData {
+    let total_count = cards.len();
+    let due_count = cards.iter().filter(|c| c.due).count();
+
+    ProcessedCardsData {
+        cards,
+        stats: CardsStatsData {
+            total_count,
+            due_count,
+            filtered_count: total_count, // Will be updated after filtering
         },
-        Notification::Error(msg) => rsx! {
-            NotificationBanner {
-                message: msg,
-                notification_type: NotificationType::Error,
-                on_close,
-            }
-        },
-        Notification::None => rsx! {},
     }
 }
 
-#[component]
-fn CreateEditModal(
-    modal_state: Signal<ModalState>,
-    on_close: EventHandler<()>,
-    on_success: EventHandler<String>,
-    on_error: EventHandler<String>,
-    loading: Signal<bool>,
-) -> Element {
-    let mut question = use_signal(String::new);
-    let mut answer = use_signal(String::new);
+fn filter_and_sort_cards(
+    cards: Vec<UiCard>,
+    search: String,
+    filter_status: FilterStatus,
+    sort_by: SortBy,
+) -> Vec<UiCard> {
+    let q = search.to_lowercase();
+    let mut result: Vec<UiCard> = cards
+        .into_iter()
+        .filter(|c| {
+            let matches_search = q.is_empty()
+                || c.question.to_lowercase().contains(&q)
+                || c.answer.to_lowercase().contains(&q);
 
-    match modal_state() {
-        ModalState::Create => {
-            rsx! {
-                Modal { title: "Создать карточку", on_close,
-                    div { class: "space-y-4",
-                        TextInput {
-                            label: "Вопрос",
-                            value: question,
-                            placeholder: "Введите вопрос...",
-                        }
-                        TextInput {
-                            label: "Ответ",
-                            value: answer,
-                            placeholder: "Введите ответ...",
-                        }
-                        div { class: "flex gap-2 justify-end",
-                            Button {
-                                variant: ButtonVariant::Outline,
-                                onclick: move |_| on_close.call(()),
-                                "Отмена"
-                            }
-                            Button {
-                                variant: ButtonVariant::Rainbow,
-                                onclick: move |_| {
-                                    let q = question();
-                                    let a = answer();
-                                    if q.trim().is_empty() || a.trim().is_empty() {
-                                        return;
-                                    }
+            let matches_status = match filter_status {
+                FilterStatus::All => true,
+                FilterStatus::Due => c.due,
+                FilterStatus::NotDue => !c.due,
+            };
 
-                                    let on_success = on_success;
-                                    let on_error = on_error;
-                                    let mut modal_state = modal_state;
-                                    let mut loading = loading;
+            matches_search && matches_status
+        })
+        .collect::<Vec<_>>();
 
-                                    spawn(async move {
-                                        loading.set(true);
-                                        match create_card(q, a).await {
-                                            Ok(_) => {
-                                                question.set(String::new());
-                                                answer.set(String::new());
-                                                modal_state.set(ModalState::None);
-                                                on_success.call("Карточка создана".to_string());
-                                            }
-                                            Err(e) => {
-                                                on_error.call(format!("Ошибка: {}", e));
-                                            }
-                                        }
-                                        loading.set(false);
-                                    });
-                                },
-                                disabled: Some(loading()),
-                                "Создать"
-                            }
-                        }
-                    }
+    match sort_by {
+        SortBy::Date => {
+            result.sort_by(|a, b| {
+                if a.due && !b.due {
+                    std::cmp::Ordering::Less
+                } else if !a.due && b.due {
+                    std::cmp::Ordering::Greater
+                } else {
+                    a.next_review.cmp(&b.next_review)
                 }
-            }
+            });
         }
-        ModalState::Edit { card_id } => {
-            rsx! {
-                Modal {
-                    title: "Редактировать карточку",
-                    on_close,
-                    div { class: "space-y-4",
-                        TextInput {
-                            label: "Вопрос",
-                            value: question,
-                            placeholder: "Введите вопрос...",
-                        }
-                        TextInput {
-                            label: "Ответ",
-                            value: answer,
-                            placeholder: "Введите ответ...",
-                        }
-                        div { class: "flex gap-2 justify-end",
-                            Button {
-                                variant: ButtonVariant::Outline,
-                                onclick: move |_| on_close.call(()),
-                                "Отмена"
-                            }
-                            Button {
-                                variant: ButtonVariant::Rainbow,
-                                onclick: move |_| {
-                                    let q = question();
-                                    let a = answer();
-                                    if q.trim().is_empty() || a.trim().is_empty() {
-                                        return;
-                                    }
-
-                                    let card_id = card_id.clone();
-                                    let on_success = on_success;
-                                    let on_error = on_error;
-                                    let mut modal_state = modal_state;
-                                    let mut loading = loading;
-
-                                    spawn(async move {
-                                        loading.set(true);
-                                        match edit_card(card_id, q, a).await {
-                                            Ok(_) => {
-                                                question.set(String::new());
-                                                answer.set(String::new());
-                                                modal_state.set(ModalState::None);
-                                                on_success.call("Карточка обновлена".to_string());
-                                            }
-                                            Err(e) => {
-                                                on_error.call(format!("Ошибка: {}", e));
-                                            }
-                                        }
-                                        loading.set(false);
-                                    });
-                                },
-                                disabled: Some(loading()),
-                                "Сохранить"
-                            }
-                        }
-                    }
-                }
-            }
+        SortBy::Question => {
+            result.sort_by(|a, b| a.question.cmp(&b.question));
         }
-        ModalState::None => rsx! {},
+        SortBy::Answer => {
+            result.sort_by(|a, b| a.answer.cmp(&b.answer));
+        }
     }
+
+    result
 }
 
-#[component]
-fn DeleteConfirmModal(
-    card_id: Option<String>,
-    on_close: EventHandler<()>,
-    on_confirm: EventHandler<String>,
-) -> Element {
-    if let Some(card_id) = card_id {
-        rsx! {
-            Modal { title: "Удалить карточку", on_close,
-                div { class: "space-y-4",
-                    p {
-                        "Вы действительно хотите удалить эту карточку?"
-                    }
-                    div { class: "flex gap-2 justify-end",
-                        Button {
-                            variant: ButtonVariant::Outline,
-                            onclick: move |_| on_close.call(()),
-                            "Отмена"
-                        }
-                        Button {
-                            variant: ButtonVariant::Rainbow,
-                            onclick: move |_| {
-                                on_confirm.call(card_id.clone());
-                            },
-                            "Удалить"
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        rsx! {}
-    }
+async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
+    let env = init_env().await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    ListCardsUseCase::new(repo)
+        .execute(user_id)
+        .await
+        .map_err(to_error)
 }

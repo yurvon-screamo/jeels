@@ -1,4 +1,4 @@
-use crate::ui::{Button, ButtonVariant, Card, LoadingState, StateTone, Paragraph, Pill};
+use crate::ui::{Button, ButtonVariant, Card, LoadingState, Paragraph, Pill, StateTone};
 use dioxus::prelude::*;
 
 #[derive(Clone, PartialEq)]

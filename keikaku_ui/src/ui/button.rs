@@ -19,7 +19,7 @@ pub fn Button(
     let base_classes = match variant {
         ButtonVariant::Rainbow => "w-full py-3.5 rounded-xl bg-rainbow-vibrant text-white font-bold shadow-lg shadow-accent-purple/30 hover:scale-[1.02] hover:shadow-accent-pink/40 active:scale-95 transition-all duration-300 ease-elastic relative overflow-hidden group",
         ButtonVariant::Pearlescent => "w-full py-3.5 rounded-xl bg-pink-50 text-accent-pink font-bold hover:bg-cyan-50 hover:text-accent-cyan hover:shadow-soft active:scale-95 transition-all duration-300 ease-elastic",
-        ButtonVariant::Outline => "w-full py-3.5 rounded-xl border-2 border-slate-100 text-slate-500 font-bold hover:border-accent-pink hover:text-accent-pink hover:shadow-soft active:scale-95 group transition-all duration-300 ease-elastic relative overflow-hidden",
+        ButtonVariant::Outline => "w-full py-3.5 rounded-xl border-2 border-slate-100 text-slate-500 font-bold hover:border-accent-pink hover:text-accent-pink hover:shadow-soft hover:scale-[1.02] active:scale-95 group transition-all duration-300 ease-elastic relative overflow-hidden",
     };
 
     rsx! {
