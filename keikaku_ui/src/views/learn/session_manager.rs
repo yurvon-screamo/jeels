@@ -1,7 +1,12 @@
+use crate::views::learn::learn_session::{CardType, SimilarCard};
 use dioxus::prelude::*;
-use keikaku::application::use_cases::select_cards_to_learn::SelectCardsToLearnUseCase;
+use keikaku::application::use_cases::{
+    complete_lesson::CompleteLessonUseCase, rate_card::RateCardUseCase,
+    select_cards_to_learn::SelectCardsToLearnUseCase,
+};
 use keikaku::domain::study_session::StudySessionItem;
 use std::rc::Rc;
+use ulid::Ulid;
 
 use crate::{ensure_user, init_env, to_error, DEFAULT_USERNAME};
 
@@ -12,8 +17,12 @@ pub struct LearnSessionData {
     pub cards: Vec<LearnCard>,
     pub current_index: usize,
     pub current_step: LearnStep,
-    pub limit: String,
+    pub limit: Option<String>,
     pub show_furigana: bool,
+    pub similarity_shown: bool,
+    pub new_cards_force: bool,
+    pub similarity_force: bool,
+    pub loop_mod: bool,
 }
 
 impl Default for LearnSessionData {
@@ -22,8 +31,12 @@ impl Default for LearnSessionData {
             cards: vec![],
             current_index: 0,
             current_step: LearnStep::Question,
-            limit: "7".to_string(),
+            limit: Some("7".to_string()),
             show_furigana: false,
+            similarity_shown: false,
+            new_cards_force: false,
+            similarity_force: false,
+            loop_mod: false,
         }
     }
 }
@@ -35,40 +48,51 @@ pub fn use_learn_session() -> LearnSessionSignals {
     LearnSessionSignals {
         state: state.clone(),
         session_data: session_data.clone(),
-        start_session: Rc::new(move |limit: usize, show_furigana: bool| {
-            let mut state = state.clone();
-            let mut session_data = session_data.clone();
+        start_session: Rc::new(
+            move |limit: Option<usize>,
+                  show_furigana: bool,
+                  similarity_shown: bool,
+                  new_cards_force: bool,
+                  similarity_force: bool,
+                  loop_mod: bool| {
+                let mut state = state.clone();
+                let mut session_data = session_data.clone();
 
-            spawn(async move {
-                state.set(SessionState::Loading);
+                spawn(async move {
+                    state.set(SessionState::Loading);
 
-                match fetch_cards_to_learn(limit).await {
-                    Ok(items) => {
-                        if items.is_empty() {
-                            state.set(SessionState::Settings);
+                    match fetch_cards_to_learn(limit, new_cards_force, loop_mod).await {
+                        Ok(items) => {
+                            if items.is_empty() {
+                                state.set(SessionState::Settings);
+                                session_data.write().cards = vec![];
+                            } else {
+                                let learn_cards = items
+                                    .into_iter()
+                                    .map(map_study_item_to_learn_card)
+                                    .collect::<Vec<_>>();
+                                session_data.write().cards = learn_cards;
+                                session_data.write().current_index = 0;
+                                session_data.write().current_step = LearnStep::Question;
+                                session_data.write().limit = limit.map(|l| l.to_string());
+                                session_data.write().show_furigana = show_furigana;
+                                session_data.write().similarity_shown = similarity_force;
+                                session_data.write().new_cards_force = new_cards_force;
+                                session_data.write().similarity_force = similarity_force;
+                                session_data.write().loop_mod = loop_mod;
+                                state.set(SessionState::Active);
+                            }
+                        }
+                        Err(e) => {
                             session_data.write().cards = vec![];
-                        } else {
-                            let learn_cards = items
-                                .into_iter()
-                                .map(map_study_item_to_learn_card)
-                                .collect::<Vec<_>>();
-                            session_data.write().cards = learn_cards;
-                            session_data.write().current_index = 0;
+                            state.set(SessionState::Settings);
                             session_data.write().current_step = LearnStep::Question;
-                            session_data.write().limit = limit.to_string();
-                            session_data.write().show_furigana = show_furigana;
-                            state.set(SessionState::Active);
+                            error!("learn fetch error: {}", e);
                         }
                     }
-                    Err(e) => {
-                        session_data.write().cards = vec![];
-                        state.set(SessionState::Settings);
-                        session_data.write().current_step = LearnStep::Question;
-                        error!("learn fetch error: {}", e);
-                    }
-                }
-            });
-        }),
+                });
+            },
+        ),
         next_card: Rc::new(move || {
             let mut state = state.clone();
             let mut session_data = session_data.clone();
@@ -102,6 +126,59 @@ pub fn use_learn_session() -> LearnSessionSignals {
                 data.current_step = LearnStep::Answer;
             }
         }),
+        rate_card: Rc::new(move |rating: crate::domain::Rating| {
+            let state = state.clone();
+            let mut session_data = session_data.clone();
+
+            spawn(async move {
+                let data = session_data.read();
+                let current_index = data.current_index;
+                let cards_len = data.cards.len();
+                let card_id = data.cards.get(current_index).map(|c| c.id.clone());
+
+                if let Some(card_id_str) = card_id {
+                    if let Ok(card_ulid) = ulid::Ulid::from_string(&card_id_str) {
+                        // Rate the card
+                        if let Err(e) = rate_card_impl(card_ulid, rating).await {
+                            error!("Failed to rate card: {:?}", e);
+                        }
+
+                        // Move to next card or complete session
+                        drop(data);
+                        let mut data = session_data.write();
+                        data.current_step = LearnStep::Completed;
+
+                        // Auto-advance immediately
+                        drop(data);
+                        let mut data = session_data.write();
+                        if data.current_index + 1 < cards_len {
+                            data.current_index += 1;
+                            data.current_step = LearnStep::Question;
+                        } else {
+                            drop(data);
+                            let mut state = state.clone();
+                            state.set(SessionState::Completed);
+                            // Complete lesson
+                            spawn(async move {
+                                if let Err(e) = complete_lesson_impl().await {
+                                    error!("Failed to complete lesson: {:?}", e);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }),
+        toggle_furigana: Rc::new(move || {
+            let mut session_data = session_data.clone();
+            let mut data = session_data.write();
+            data.show_furigana = !data.show_furigana;
+        }),
+        toggle_similarity: Rc::new(move || {
+            let mut session_data = session_data.clone();
+            let mut data = session_data.write();
+            data.similarity_shown = !data.similarity_shown;
+        }),
     }
 }
 
@@ -109,19 +186,26 @@ pub fn use_learn_session() -> LearnSessionSignals {
 pub struct LearnSessionSignals {
     pub state: Signal<SessionState>,
     pub session_data: Signal<LearnSessionData>,
-    pub start_session: Rc<dyn Fn(usize, bool)>,
+    pub start_session: Rc<dyn Fn(Option<usize>, bool, bool, bool, bool, bool)>,
     pub next_card: Rc<dyn Fn()>,
     pub restart_session: Rc<dyn Fn()>,
     pub show_answer: Rc<dyn Fn()>,
     pub prev_card: Rc<dyn Fn()>,
+    pub rate_card: Rc<dyn Fn(crate::domain::Rating)>,
+    pub toggle_furigana: Rc<dyn Fn()>,
+    pub toggle_similarity: Rc<dyn Fn()>,
 }
 
-async fn fetch_cards_to_learn(limit: usize) -> Result<Vec<StudySessionItem>, String> {
+async fn fetch_cards_to_learn(
+    limit: Option<usize>,
+    new_cards_force: bool,
+    loop_mod: bool,
+) -> Result<Vec<StudySessionItem>, String> {
     let env = init_env().await?;
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectCardsToLearnUseCase::new(repo)
-        .execute(user_id, false, false, Some(limit))
+        .execute(user_id, new_cards_force, loop_mod, limit)
         .await
         .map_err(to_error)
 }
@@ -130,13 +214,70 @@ fn map_study_item_to_learn_card(item: StudySessionItem) -> LearnCard {
     match item {
         StudySessionItem::Vocabulary(v) => LearnCard {
             id: v.card_id().to_string(),
+            card_type: CardType::Vocabulary,
             question: v.word().to_string(),
             answer: v.meaning().to_string(),
+            example_phrases: v.example_phrases().to_vec(),
+            similarity: v
+                .similarity()
+                .iter()
+                .map(|s| SimilarCard {
+                    word: s.word().to_string(),
+                    meaning: s.meaning().to_string(),
+                })
+                .collect(),
+            homonyms: v
+                .homonyms()
+                .iter()
+                .map(|h| SimilarCard {
+                    word: h.word().to_string(),
+                    meaning: h.meaning().to_string(),
+                })
+                .collect(),
+            kanji_info: v.kanji().to_vec(),
+            example_words: vec![],
+            radicals: vec![],
+            jlpt_level: v.level().clone(),
         },
         StudySessionItem::Kanji(k) => LearnCard {
             id: k.card_id().to_string(),
+            card_type: CardType::Kanji,
             question: k.kanji().to_string(),
             answer: k.description().to_string(),
+            example_phrases: vec![],
+            similarity: vec![],
+            homonyms: vec![],
+            kanji_info: vec![],
+            example_words: k.example_words().to_vec(),
+            radicals: k.radicals().to_vec(),
+            jlpt_level: k.level().clone(),
         },
     }
+}
+
+async fn rate_card_impl(card_id: Ulid, rating: crate::domain::Rating) -> Result<(), String> {
+    let env = init_env().await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let srs_service = env.get_srs_service().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    let rate_usecase = RateCardUseCase::new(repo, srs_service);
+    // Convert UI Rating to domain Rating
+    let domain_rating = match rating {
+        crate::domain::Rating::Easy => keikaku::domain::Rating::Easy,
+        crate::domain::Rating::Good => keikaku::domain::Rating::Good,
+        crate::domain::Rating::Hard => keikaku::domain::Rating::Hard,
+        crate::domain::Rating::Again => keikaku::domain::Rating::Again,
+    };
+    rate_usecase
+        .execute(user_id, card_id, domain_rating)
+        .await
+        .map_err(to_error)
+}
+
+pub async fn complete_lesson_impl() -> Result<(), String> {
+    let env = init_env().await?;
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    let complete_usecase = CompleteLessonUseCase::new(repo);
+    complete_usecase.execute(user_id).await.map_err(to_error)
 }

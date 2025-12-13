@@ -8,12 +8,17 @@ pub fn LearnActive(
     current_index: usize,
     current_step: super::LearnStep,
     show_furigana: bool,
+    similarity_shown: bool,
     on_next: EventHandler<()>,
     on_show_answer: EventHandler<()>,
     on_prev: Option<EventHandler<()>>,
+    on_rate: EventHandler<crate::domain::Rating>,
+    on_toggle_similarity: EventHandler<()>,
+    on_skip: EventHandler<()>,
+    on_quit: EventHandler<()>,
 ) -> Element {
     let progress = {
-        let current = current_index + 1;
+        let current = current_index;
         let total = cards.len();
         if total > 0 {
             (current as f64 / total as f64) * 100.0
@@ -36,14 +41,9 @@ pub fn LearnActive(
                             e.prevent_default();
                             if current_step_clone == super::LearnStep::Question {
                                 on_show_answer.call(());
-                            } else {
+                            } else if current_step_clone == super::LearnStep::Answer {
                                 on_next.call(());
                             }
-                        }
-                        Code::Enter => {
-                            // Enter - перейти дальше
-                            e.prevent_default();
-                            on_next.call(());
                         }
                         Code::Backspace => {
                             // Backspace - вернуться к предыдущей карточке
@@ -55,6 +55,49 @@ pub fn LearnActive(
                                     e.prevent_default();
                                     on_prev.call(());
                                 }
+                            }
+                        }
+                        Code::KeyH => {
+                            // H - переключить связанные карточки
+                            e.prevent_default();
+                            on_toggle_similarity.call(());
+                        }
+                        Code::KeyS => {
+                            // S - пропустить карточку
+                            e.prevent_default();
+                            on_skip.call(());
+                        }
+                        Code::KeyQ => {
+                            // Q - выйти из сессии
+                            e.prevent_default();
+                            on_quit.call(());
+                        }
+                        Code::Digit1 => {
+                            // 1 - оценить как "Легко"
+                            e.prevent_default();
+                            if current_step_clone == super::LearnStep::Answer {
+                                on_rate.call(crate::domain::Rating::Easy);
+                            }
+                        }
+                        Code::Digit2 => {
+                            // 2 - оценить как "Хорошо"
+                            e.prevent_default();
+                            if current_step_clone == super::LearnStep::Answer {
+                                on_rate.call(crate::domain::Rating::Good);
+                            }
+                        }
+                        Code::Digit3 => {
+                            // 3 - оценить как "Сложно"
+                            e.prevent_default();
+                            if current_step_clone == super::LearnStep::Answer {
+                                on_rate.call(crate::domain::Rating::Hard);
+                            }
+                        }
+                        Code::Digit4 => {
+                            // 4 - оценить как "Снова"
+                            e.prevent_default();
+                            if current_step_clone == super::LearnStep::Answer {
+                                on_rate.call(crate::domain::Rating::Again);
                             }
                         }
                         _ => {}
@@ -73,8 +116,11 @@ pub fn LearnActive(
                 current_index,
                 current_step: current_step.clone(),
                 show_furigana,
+                similarity_shown,
                 on_show_answer,
                 on_next,
+                on_rate,
+                on_toggle_similarity,
             }
 
             LearnNavigation {

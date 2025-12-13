@@ -25,16 +25,12 @@ pub fn LearnNavigation(
                 }
             }
 
-            if current_step != super::LearnStep::Question {
+            if current_step == super::LearnStep::Completed && current_index + 1 < total_cards {
                 crate::ui::Button {
                     variant: crate::ui::ButtonVariant::Rainbow,
                     class: Some("flex-1".to_string()),
                     onclick: move |_| on_next.call(()),
-                    if current_index + 1 < total_cards {
-                        "Далее (Enter)"
-                    } else {
-                        "Завершить сессию"
-                    }
+                    "Следующая карточка"
                 }
             }
         }

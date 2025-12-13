@@ -61,7 +61,7 @@ impl IsJapaneseText for str {
     fn as_furigana(&self) -> String {
         ANNOTATOR
             .annotate(self)
-            .render(&select::heuristic::All, &format::Markdown)
+            .render(&select::heuristic::All, &format::Html)
     }
 
     fn has_furigana(&self) -> bool {
