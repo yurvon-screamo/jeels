@@ -1,11 +1,11 @@
 use ulid::Ulid;
 
+use crate::cli::render_once;
 use keikaku::{
     application::{ExportJlptRecommendedUseCase, UserRepository},
     domain::{JeersError, value_objects::JapaneseLevel},
     settings::ApplicationEnvironment,
 };
-use crate::cli::render_once;
 use ratatui::{
     layout::Alignment,
     style::{Color, Stylize},
@@ -27,7 +27,7 @@ pub async fn handle_export_jlpt_recommended(
         .ok_or(JeersError::UserNotFound { user_id })?;
 
     let selected_levels = if levels.is_empty() {
-        vec![user.current_japanese_level().clone()]
+        vec![*user.current_japanese_level()]
     } else {
         levels
     };

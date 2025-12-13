@@ -7,7 +7,9 @@ use ratatui::{
 };
 use ulid::Ulid;
 
-use keikaku::{application::TranslateUseCase, domain::JeersError, settings::ApplicationEnvironment};
+use keikaku::{
+    application::TranslateUseCase, domain::JeersError, settings::ApplicationEnvironment,
+};
 
 use crate::cli::render_once;
 

@@ -19,9 +19,9 @@ ordered-float.workspace = true
 zip.workspace = true
 rusqlite.workspace = true
 regex.workspace = true
-rand.workspace = true
 libz-sys.workspace = true
 flate2.workspace = true
+rand.workspace = true
 
 # Logging
 tracing.workspace = true

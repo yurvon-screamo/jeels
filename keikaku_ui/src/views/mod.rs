@@ -1,21 +1,32 @@
-//! The views module contains the components for all Layouts and Routes for our app. Each layout and route in our [`Route`]
-//! enum will render one of these components.
-//!
-//!
-//! The [`Home`] and [`Blog`] components will be rendered when the current route is [`Route::Home`] or [`Route::Blog`] respectively.
-//!
-//!
-//! The [`Navbar`] component will be rendered on all pages of our app since every page is under the layout. The layout defines
-//! a common wrapper around all child routes.
-
-mod home;
-pub use home::Home;
-
-mod blog;
-pub use blog::Blog;
-
 mod navbar;
 pub use navbar::Navbar;
 
-mod showcase;
-pub use showcase::Showcase;
+mod overview;
+pub use overview::Overview;
+
+mod cards;
+pub use cards::Cards;
+
+mod learn;
+pub use learn::Learn;
+
+mod translate;
+pub use translate::Translate;
+
+mod kanji;
+pub use kanji::Kanji;
+
+mod jlpt;
+pub use jlpt::Jlpt;
+
+mod duolingo;
+pub use duolingo::Duolingo;
+
+mod migii;
+pub use migii::Migii;
+
+mod anki;
+pub use anki::Anki;
+
+mod rebuild;
+pub use rebuild::Rebuild;

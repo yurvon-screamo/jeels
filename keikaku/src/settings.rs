@@ -296,7 +296,11 @@ impl ApplicationEnvironment {
     }
 
     fn find_config_file() -> Result<PathBuf, Box<dyn std::error::Error>> {
-        let possible_paths = vec![PathBuf::from("config.toml")];
+        let possible_paths = vec![
+            PathBuf::from("config.toml"),
+            PathBuf::from("D:\\github\\keikaku\\config.toml"),
+            PathBuf::from("keikaku.toml"),
+        ];
 
         for path in possible_paths {
             if path.exists() {

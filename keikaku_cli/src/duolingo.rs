@@ -1,11 +1,11 @@
 use ulid::Ulid;
 
+use crate::cli::render_once;
 use keikaku::{
     application::{SyncDuolingoWordsUseCase, UserRepository},
     domain::JeersError,
     settings::ApplicationEnvironment,
 };
-use crate::cli::render_once;
 use ratatui::{
     layout::Alignment,
     style::{Color, Stylize},

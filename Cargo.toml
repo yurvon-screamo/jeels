@@ -21,9 +21,9 @@ ordered-float = "5.1"
 zip = "6.0"
 rusqlite = { version = "0.37", features = ["bundled"] }
 regex = "1.12"
-rand = "0.9"
 libz-sys = "*"
 flate2 = { version = "*", features = ["zlib"] }
+imp = { version = "0.1" }
 
 # Logging
 tracing = "0.1"
@@ -35,6 +35,7 @@ async-openai = "0.30"
 ulid = { version = "1.2", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", features = ["std", "clock", "serde"] }
+rand = "0.9"
 
 # Japan
 fsrs = "5.2"
@@ -60,6 +61,9 @@ clap = { version = "4.5", features = ["derive"] }
 # TUI
 ratatui = "0.29"
 crossterm = "0.29"
+
+# UI
+dioxus = { version = "0.7", features = ["router"] }
 
 # Testing
 rstest = "0.26"

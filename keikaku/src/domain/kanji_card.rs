@@ -73,20 +73,20 @@ impl KanjiCard {
 
     pub fn jlpt(&self) -> JapaneseLevel {
         KANJI_DB
-            .get_kanji_info(&self.kanji.text())
+            .get_kanji_info(self.kanji.text())
             .map(|kanji_info| kanji_info.jlpt().to_owned())
             .unwrap_or(JapaneseLevel::N1)
     }
 
     pub fn used_in(&self) -> u32 {
         KANJI_DB
-            .get_kanji_info(&self.kanji.text())
+            .get_kanji_info(self.kanji.text())
             .map(|kanji_info| kanji_info.used_in())
             .unwrap_or(0)
     }
 
     pub fn radicals_info(&self) -> Result<Vec<&RadicalInfo>, JeersError> {
-        Ok(KANJI_DB.get_kanji_info(&self.kanji.text())?.radicals())
+        Ok(KANJI_DB.get_kanji_info(self.kanji.text())?.radicals())
     }
 
     pub fn memory_history(&self) -> &MemoryHistory {

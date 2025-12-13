@@ -8,12 +8,6 @@ pub mod study_session;
 pub mod value_objects;
 pub mod vocabulary_card;
 
-pub use error::JeersError;
-use rand::{Rng, seq::SliceRandom};
-pub use review::Review;
-pub use value_objects::Rating;
-pub use vocabulary_card::VocabularyCard;
-
 use crate::domain::{
     daily_history::DailyHistoryItem,
     japanese::IsJapaneseText,
@@ -23,9 +17,14 @@ use crate::domain::{
     value_objects::{Answer, CardContent, ExamplePhrase, JapaneseLevel, NativeLanguage, Question},
 };
 use chrono::{DateTime, Duration, Utc};
+pub use error::JeersError;
+use rand::{Rng, seq::SliceRandom};
+pub use review::Review;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ulid::Ulid;
+pub use value_objects::Rating;
+pub use vocabulary_card::VocabularyCard;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -363,6 +362,7 @@ impl User {
 
     fn card_to_study_item(&self, card: &VocabularyCard) -> Result<StudySessionItem, JeersError> {
         let shuffle = rand::rng().random_bool(0.65);
+
         let similarity = self.find_similarity(card.id())?;
         let homonyms = self.find_homonyms(card.id())?;
 
@@ -379,7 +379,7 @@ impl User {
                     .into_iter()
                     .cloned()
                     .collect(),
-                self.current_japanese_level.clone(),
+                self.current_japanese_level,
             ),
         ))
     }
@@ -390,6 +390,7 @@ impl User {
             .into_iter()
             .cloned()
             .collect::<Vec<_>>();
+
         Ok(StudySessionItem::Kanji(KanjiStudySessionItem::new(
             card.id(),
             card.kanji().text().chars().next().unwrap_or_default(),

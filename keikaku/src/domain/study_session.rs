@@ -79,7 +79,7 @@ impl VocabularyStudySessionItem {
             vec![],
             card.example_phrases().to_vec(),
             card.get_kanji_cards(level).into_iter().cloned().collect(),
-            level.clone(),
+            *level,
         )
     }
 

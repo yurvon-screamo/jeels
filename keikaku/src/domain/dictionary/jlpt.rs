@@ -38,13 +38,11 @@ impl JlptDatabase {
 
         for (level_str, words) in stored.levels {
             let level = parse_jlpt_level(&level_str);
-            let level_words = level_to_words.entry(level.clone()).or_default();
+            let level_words = level_to_words.entry(level).or_default();
 
             for word in words {
                 // If word already exists, keep the first encountered level.
-                word_to_level
-                    .entry(word.clone())
-                    .or_insert_with(|| level.clone());
+                word_to_level.entry(word.clone()).or_insert_with(|| level);
                 level_words.push(word);
             }
         }

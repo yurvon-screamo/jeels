@@ -11,6 +11,7 @@ use ratatui::{
 };
 use ulid::Ulid;
 
+use crate::{cli::render_once, furigana_renderer};
 use keikaku::{
     application::{CompleteLessonUseCase, RateCardUseCase, SelectCardsToLearnUseCase},
     domain::{
@@ -22,7 +23,6 @@ use keikaku::{
     },
     settings::ApplicationEnvironment,
 };
-use crate::{cli::render_once, furigana_renderer};
 
 enum CardState {
     Question,

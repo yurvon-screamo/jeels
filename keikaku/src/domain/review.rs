@@ -48,6 +48,12 @@ pub struct MemoryHistory {
     reviews: VecDeque<Review>,
 }
 
+impl Default for MemoryHistory {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MemoryHistory {
     pub fn new() -> Self {
         Self {

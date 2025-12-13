@@ -7,7 +7,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dioxus = { version = "0.7", features = ["router"] }
+keikaku = { path = "../keikaku" }
+dioxus.workspace = true
+tokio.workspace = true
+ulid.workspace = true
+imp.workspace = true
+chrono.workspace = true
 
 [features]
 default = ["web"]

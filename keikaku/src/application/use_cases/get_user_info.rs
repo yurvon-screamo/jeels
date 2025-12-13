@@ -33,7 +33,7 @@ impl<'a, R: UserRepository> GetUserInfoUseCase<'a, R> {
         Ok(UserProfile {
             id: user.id(),
             username: user.username().to_string(),
-            current_japanese_level: user.current_japanese_level().clone(),
+            current_japanese_level: *user.current_japanese_level(),
             native_language: user.native_language().clone(),
             lesson_history: user.lesson_history().to_vec(),
         })
