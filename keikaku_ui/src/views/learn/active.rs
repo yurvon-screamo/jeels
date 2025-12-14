@@ -4,7 +4,8 @@ use super::{LearnCardDisplay, LearnProgress};
 
 #[component]
 pub fn LearnActive(
-    cards: Vec<super::LearnCard>,
+    current_card: Option<super::LearnCard>,
+    total_cards: usize,
     current_index: usize,
     current_step: super::LearnStep,
     show_furigana: bool,
@@ -17,7 +18,7 @@ pub fn LearnActive(
 ) -> Element {
     let progress = {
         let current = current_index;
-        let total = cards.len();
+        let total = total_cards;
         if total > 0 {
             (current as f64 / total as f64) * 100.0
         } else {
@@ -98,8 +99,7 @@ pub fn LearnActive(
                 }
             },
             LearnCardDisplay {
-                cards: cards.clone(),
-                current_index,
+                card: current_card,
                 current_step: current_step.clone(),
                 show_furigana,
                 on_show_answer,
@@ -110,7 +110,7 @@ pub fn LearnActive(
 
             LearnProgress {
                 current: current_index + 1,
-                total: cards.len(),
+                total: total_cards,
                 progress,
             }
         }

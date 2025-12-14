@@ -30,12 +30,19 @@ pub fn Learn() -> Element {
                         }
                     }
                     SessionState::Active => {
+                        let session_data = (session.session_data)();
+                        let current_card = session_data
+
+                            .cards
+                            .get(session_data.current_index)
+                            .cloned();
                         rsx! {
                             LearnActive {
-                                cards: (session.session_data)().cards.clone(),
-                                current_index: (session.session_data)().current_index,
-                                current_step: (session.session_data)().current_step.clone(),
-                                show_furigana: (session.session_data)().show_furigana,
+                                current_card,
+                                total_cards: session_data.cards.len(),
+                                current_index: session_data.current_index,
+                                current_step: session_data.current_step.clone(),
+                                show_furigana: session_data.show_furigana,
                                 on_next: EventHandler::new({
                                     let next_card = session.next_card.clone();
                                     move |_| next_card()

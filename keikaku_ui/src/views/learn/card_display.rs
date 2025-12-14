@@ -6,16 +6,13 @@ use crate::views::learn::learn_session::{CardType, LearnCard, LearnStep, Similar
 
 #[component]
 pub fn LearnCardDisplay(
-    cards: Vec<super::LearnCard>,
-    current_index: usize,
+    card: Option<super::LearnCard>,
     current_step: super::LearnStep,
     show_furigana: bool,
     on_show_answer: EventHandler<()>,
     on_next: EventHandler<()>,
     on_rate: EventHandler<Rating>,
 ) -> Element {
-    let card = cards.get(current_index).cloned();
-
     if let Some(card) = card {
         rsx! {
             Card { class: Some("space-y-4 transition-all duration-300".to_string()),

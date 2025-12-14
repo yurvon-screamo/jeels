@@ -23,15 +23,15 @@ pub fn Chart(
 
     // Состояние для tooltip
     let tooltip_visible = use_signal(|| false);
-    let tooltip_text = use_signal(|| String::new());
+    let tooltip_text = use_signal(String::new);
     let tooltip_x = use_signal(|| 0.0);
     let tooltip_y = use_signal(|| 0.0);
 
     // Клонируем сигналы для использования в обработчиках
-    let mut tooltip_visible_clone = tooltip_visible.clone();
-    let mut tooltip_text_clone = tooltip_text.clone();
-    let mut tooltip_x_clone = tooltip_x.clone();
-    let mut tooltip_y_clone = tooltip_y.clone();
+    let mut tooltip_visible_clone = tooltip_visible;
+    let mut tooltip_text_clone = tooltip_text;
+    let mut tooltip_x_clone = tooltip_x;
+    let mut tooltip_y_clone = tooltip_y;
 
     if data.is_empty() {
         return rsx! {
