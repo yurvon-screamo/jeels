@@ -13,12 +13,11 @@ pub fn Learn() -> Element {
                     SessionState::Settings => {
                         rsx! {
                             LearnSettings {
-                                limit: (session.session_data)().limit.clone().unwrap_or_else(|| "7".to_string()),
+                                limit: (session.session_data)().limit,
                                 show_furigana: (session.session_data)().show_furigana,
                                 loading: false,
-                                on_start: move |(limit_opt, show_furigana_val): (Option<String>, bool)| {
-                                    let limit_val = limit_opt.and_then(|s| s.parse::<usize>().ok());
-                                    (session.start_session)(limit_val, show_furigana_val);
+                                on_start: move |(limit_opt, show_furigana_val): (Option<usize>, bool)| {
+                                    (session.start_session)(limit_opt, show_furigana_val);
                                 },
                             }
                         }

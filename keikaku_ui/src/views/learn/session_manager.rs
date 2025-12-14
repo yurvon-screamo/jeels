@@ -18,8 +18,8 @@ pub struct LearnSessionData {
     pub cards: Vec<LearnCard>,
     pub current_index: usize,
     pub current_step: LearnStep,
-    pub limit: Option<String>,
     pub show_furigana: bool,
+    pub limit: Option<usize>,
 }
 
 impl Default for LearnSessionData {
@@ -61,7 +61,7 @@ pub fn use_learn_session() -> LearnSessionSignals {
                             session_data.write().cards = learn_cards;
                             session_data.write().current_index = 0;
                             session_data.write().current_step = LearnStep::Question;
-                            session_data.write().limit = limit.map(|l| l.to_string());
+                            session_data.write().limit = limit;
                             session_data.write().show_furigana = show_furigana;
                             state.set(SessionState::Active);
                         }

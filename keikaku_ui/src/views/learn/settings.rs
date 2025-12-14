@@ -4,14 +4,15 @@ use crate::ui::{Button, ButtonVariant, Card, Checkbox, Paragraph, Switch, TextIn
 
 #[component]
 pub fn LearnSettings(
-    limit: String,
     show_furigana: bool,
     loading: bool,
-    on_start: EventHandler<(Option<String>, bool)>,
+    limit: Option<usize>,
+    on_start: EventHandler<(Option<usize>, bool)>,
 ) -> Element {
-    let mut limit_signal = use_signal(|| limit.clone());
+    let mut limit_signal = use_signal(|| limit.map(|l| l.to_string()).unwrap_or_default());
     let mut limit_enabled_signal = use_signal(|| true);
     let mut show_furigana_signal = use_signal(|| show_furigana);
+
     rsx! {
         Card { class: Some("space-y-6".to_string()),
             H2 { class: Some("text-2xl font-bold text-slate-800".to_string()),
@@ -32,7 +33,7 @@ pub fn LearnSettings(
                         TextInput {
                             label: Some("Лимит карточек".to_string()),
                             placeholder: Some("7".to_string()),
-                            value: Some(limit_signal),
+                            value: limit_signal,
                             oninput: Some(EventHandler::new(move |e: Event<FormData>| limit_signal.set(e.value()))),
                             class: None,
                             r#type: None,
@@ -53,7 +54,7 @@ pub fn LearnSettings(
                 class: Some("w-full".to_string()),
                 onclick: move |_| {
                     let limit_value = if limit_enabled_signal() {
-                        Some(limit_signal())
+                        limit_signal().parse::<usize>().ok()
                     } else {
                         None
                     };

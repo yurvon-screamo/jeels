@@ -82,7 +82,7 @@ fn CardQuestionView(
                     }
                 }
 
-                div { class: "space-y-4",
+                div { class: "space-y-4 flex flex-col h-full",
                     QuestionActionButtons { on_show_answer }
                 }
             }
@@ -122,7 +122,7 @@ fn CardAnswerView(card: LearnCard, show_furigana: bool, on_rate: EventHandler<Ra
                                     WordCard {
                                         text: card.answer.clone(),
                                         show_furigana,
-                                        class: Some("text-2xl md:text-3xl".to_string()),
+                                        class: Some("text-lg md:text-xl".to_string()),
                                     }
                                 }
                             }
@@ -219,7 +219,7 @@ fn ExamplesSection(card: LearnCard, show_furigana: bool) -> Element {
                         FuriganaText {
                             text: example.text().to_string(),
                             show_furigana,
-                            class: None,
+                            class: Some("text-lg".to_string()),
                         }
                         div { class: "text-slate-600 text-sm", "{example.translation()}" }
                     }
@@ -229,7 +229,7 @@ fn ExamplesSection(card: LearnCard, show_furigana: bool) -> Element {
                         FuriganaText {
                             text: example.word().to_string(),
                             show_furigana,
-                            class: None,
+                            class: Some("text-lg".to_string()),
                         }
                         div { class: "text-slate-600 text-sm", "{example.meaning()}" }
                     }
