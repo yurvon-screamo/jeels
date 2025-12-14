@@ -18,7 +18,7 @@ pub fn Chart(
     class: Option<String>,
 ) -> Element {
     let color = color.unwrap_or("#22D3EE".to_string()); // cyan-400 из палитры Uwuwu
-    let height = height.unwrap_or(200.0);
+    let height = height.unwrap_or(300.0);
     let class_str = class.unwrap_or_else(|| "".to_string());
 
     if data.is_empty() {
@@ -66,7 +66,7 @@ pub fn Chart(
 
     // Используем фиксированный viewBox для масштабирования
     let chart_width = 400.0;
-    let chart_height = height - 40.0f64; // Отступ для оси X
+    let chart_height = height - 30.0; // График занимает основную высоту
 
     // Создаем точки для линии
     let points: Vec<String> = data
@@ -147,8 +147,8 @@ pub fn Chart(
                     }
                     svg {
                         width: "100%",
-                        height: "{height}",
-                        view_box: "0 0 {chart_width} {height}",
+                        height: "{height + 40.0}",
+                        view_box: "0 0 {chart_width} {height + 40.0}",
                         preserve_aspect_ratio: "xMidYMid meet",
                         class: "chart-svg w-full",
 
@@ -244,10 +244,10 @@ pub fn Chart(
                             if i % (data.len() / 5 + 1).max(1) == 0 || i == data.len() - 1 {
                                 text {
                                     x: "{x}",
-                                    y: "{height - 5.0}",
+                                    y: "{height}",
                                     text_anchor: "middle",
                                     class: "text-xs fill-slate-500 font-medium",
-                                    transform: "rotate(-45, {x}, {height - 5.0})",
+                                    transform: "rotate(-45, {x}, {height})",
                                     {label.clone()}
                                 }
                             }
