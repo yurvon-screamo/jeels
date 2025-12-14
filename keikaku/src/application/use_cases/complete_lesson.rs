@@ -1,5 +1,6 @@
 use crate::application::user_repository::UserRepository;
 use crate::domain::error::JeersError;
+use chrono::Duration;
 use ulid::Ulid;
 
 #[derive(Clone)]
@@ -12,14 +13,18 @@ impl<'a, R: UserRepository> CompleteLessonUseCase<'a, R> {
         Self { repository }
     }
 
-    pub async fn execute(&self, user_id: Ulid) -> Result<(), JeersError> {
+    pub async fn execute(
+        &self,
+        user_id: Ulid,
+        lesson_duration: Duration,
+    ) -> Result<(), JeersError> {
         let mut user = self
             .repository
             .find_by_id(user_id)
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        user.update_daily_history();
+        user.update_daily_history(lesson_duration);
 
         self.repository.save(&user).await?;
 

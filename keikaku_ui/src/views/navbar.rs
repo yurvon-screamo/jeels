@@ -3,6 +3,8 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn Navbar() -> Element {
+    let route = use_route::<Route>();
+
     rsx! {
         nav { class: "bg-surface shadow-soft sticky top-0 z-50 backdrop-blur-md bg-white/80",
             div { class: "max-w-7xl mx-auto px-8 py-4",
@@ -17,12 +19,12 @@ pub fn Navbar() -> Element {
                     div { class: "flex items-center gap-4",
                         Link {
                             to: Route::Learn {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
+                            class: if matches!(route, Route::Learn {}) { "text-text-main hover:text-accent-cyan transition-colors font-medium pb-1 border-b-2 border-accent-cyan" } else { "text-text-main hover:text-accent-cyan transition-colors font-medium" },
                             "Обучение"
                         }
                         Link {
                             to: Route::Overview {},
-                            class: "text-text-main hover:text-accent-pink transition-colors font-medium",
+                            class: if matches!(route, Route::Overview {}) { "text-text-main hover:text-accent-pink transition-colors font-medium pb-1 border-b-2 border-accent-pink" } else { "text-text-main hover:text-accent-pink transition-colors font-medium" },
                             "Статистика"
                         }
                         Link {

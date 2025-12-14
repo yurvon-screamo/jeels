@@ -1,5 +1,6 @@
 use std::io;
 
+use chrono::Duration;
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{
     Frame,
@@ -871,7 +872,10 @@ async fn process_cards(
 async fn complete_lesson(user_id: Ulid, settings: &'static ApplicationEnvironment) {
     let complete_lesson_usecase =
         CompleteLessonUseCase::new(settings.get_repository().await.unwrap());
-    if let Err(e) = complete_lesson_usecase.execute(user_id).await {
+    if let Err(e) = complete_lesson_usecase
+        .execute(user_id, Duration::zero())
+        .await
+    {
         eprintln!("Error completing lesson: {:?}", e);
     }
 }

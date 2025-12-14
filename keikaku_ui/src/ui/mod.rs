@@ -3,7 +3,7 @@
 //! They can be used to defined common UI elements like buttons, forms, and modals.
 
 mod typography;
-pub use typography::{Paragraph, H1, H2};
+pub use typography::{Paragraph, Size, Tag, H1, H2, H3, H4};
 
 mod button;
 pub use button::{Button, ButtonVariant};
@@ -66,3 +66,6 @@ pub use labeled_select::LabeledSelect;
 
 mod empty_state;
 pub use empty_state::EmptyState;
+
+mod heatmap;
+pub use heatmap::{Heatmap, HeatmapDataPoint};

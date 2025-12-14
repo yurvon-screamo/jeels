@@ -46,7 +46,6 @@ pub fn StatCard(
 ) -> Element {
     let class_str = class.unwrap_or_default();
 
-    // Если есть заголовок - используем расширенный режим (MetricCard стиль)
     if let Some(card_title) = title {
         let tone = tone.unwrap_or(MetricTone::Neutral);
         let base_classes = "p-4";

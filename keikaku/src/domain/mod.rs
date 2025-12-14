@@ -276,7 +276,7 @@ impl User {
         Ok(())
     }
 
-    pub fn update_daily_history(&mut self) {
+    pub fn update_daily_history(&mut self, lesson_duration: Duration) {
         let stability_cards: Vec<_> = self
             .vocabulary_cards
             .values()
@@ -337,6 +337,7 @@ impl User {
                 total_words,
                 known_words,
                 new_words,
+                lesson_duration,
             );
         } else {
             let daily_history_item = DailyHistoryItem::new(
@@ -346,6 +347,7 @@ impl User {
                 total_words,
                 known_words,
                 new_words,
+                lesson_duration,
             );
 
             self.lesson_history.push(daily_history_item);
@@ -367,8 +369,10 @@ impl User {
     fn card_to_study_item(&self, card: &VocabularyCard) -> Result<StudySessionItem, JeersError> {
         let shuffle = rand::rng().random_bool(0.65);
 
-        let similarity = self.find_similarity(card.id())?;
-        let homonyms = self.find_homonyms(card.id())?;
+        // TODO: Skip expensive similarity/homonyms calculation for performance
+        // TODO: These fields are not currently used in the UI
+        let similarity = vec![];
+        let homonyms = vec![];
 
         Ok(StudySessionItem::Vocabulary(
             VocabularyStudySessionItem::new(

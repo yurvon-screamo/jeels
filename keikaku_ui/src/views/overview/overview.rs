@@ -8,7 +8,10 @@ use keikaku::domain::VocabularyCard;
 use keikaku::settings::ApplicationEnvironment;
 
 use crate::{
-    ensure_user, to_error, ui::ErrorCard, views::overview::OverviewCharts, DEFAULT_USERNAME,
+    ensure_user, to_error,
+    ui::{ErrorCard, HeatmapDataPoint},
+    views::overview::OverviewCharts,
+    DEFAULT_USERNAME,
 };
 use crate::{
     ui::{ChartDataPoint, StateTone},
@@ -33,12 +36,11 @@ pub fn Overview() -> Element {
         },
         (Some(Ok(profile)), Some(Ok(cards))) => {
             let stats = calculate_stats(cards);
-            let primary_metrics = build_primary_metrics(&stats);
-            let card_status_metrics = build_card_status_metrics(&stats);
             let charts = build_charts(&profile.lesson_history[..]);
+            let heatmap_data = build_heatmap_data(&profile.lesson_history[..]);
 
             rsx! {
-                OverviewMetrics { primary_metrics, card_status_metrics }
+                OverviewMetrics { stats, heatmap_data }
                 OverviewChartsComponent { charts }
             }
         }
@@ -130,80 +132,35 @@ fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
         .filter(|card| card.memory().is_known_card())
         .count();
 
-    let streak_days = 0; // TODO: Implement streak calculation
-
     OverviewStats {
         total_cards,
         due_cards,
         new_cards,
         learning_cards,
         known_cards,
-        streak_days,
     }
 }
 
-fn build_primary_metrics(stats: &OverviewStats) -> Vec<MetricData> {
-    vec![
-        (
-            "Всего карточек".to_string(),
-            stats.total_cards.to_string(),
-            "Общее количество изучаемых карточек".to_string(),
-            StateTone::Neutral,
-        ),
-        (
-            "Дней подряд".to_string(),
-            stats.streak_days.to_string(),
-            "Количество дней непрерывного обучения".to_string(),
-            if stats.streak_days > 0 {
-                StateTone::Success
-            } else {
-                StateTone::Neutral
-            },
-        ),
-    ]
-}
-
-fn build_card_status_metrics(stats: &OverviewStats) -> Vec<MetricData> {
-    vec![
-        (
-            "Для повторения".to_string(),
-            stats.due_cards.to_string(),
-            "Карточки, готовые к повторению".to_string(),
-            if stats.due_cards > 0 {
-                StateTone::Warning
-            } else {
-                StateTone::Success
-            },
-        ),
-        (
-            "Новые".to_string(),
-            stats.new_cards.to_string(),
-            "Карточки, которые еще не изучались".to_string(),
-            StateTone::Info,
-        ),
-        (
-            "Изучаемые".to_string(),
-            stats.learning_cards.to_string(),
-            "Карточки в процессе изучения".to_string(),
-            StateTone::Neutral,
-        ),
-        (
-            "Изученные".to_string(),
-            stats.known_cards.to_string(),
-            "Карточки, которые хорошо запомнены".to_string(),
-            StateTone::Success,
-        ),
-    ]
-}
-
-#[derive(Default)]
-struct OverviewStats {
+#[derive(Clone, PartialEq, Default)]
+pub struct OverviewStats {
     pub total_cards: usize,
     pub due_cards: usize,
     pub new_cards: usize,
     pub learning_cards: usize,
     pub known_cards: usize,
-    pub streak_days: usize,
 }
 
-type MetricData = (String, String, String, StateTone);
+fn build_heatmap_data(
+    lesson_history: &[keikaku::domain::daily_history::DailyHistoryItem],
+) -> Vec<HeatmapDataPoint> {
+    lesson_history
+        .iter()
+        .map(|item| {
+            let date = item.timestamp().date_naive();
+            let minutes = item.total_duration().num_minutes() as u32;
+            HeatmapDataPoint::new(date, minutes)
+        })
+        .collect()
+}
+
+pub type MetricData = (String, String, String, StateTone);

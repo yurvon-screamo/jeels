@@ -27,77 +27,7 @@ pub fn LearnActive(
     };
 
     rsx! {
-        div {
-            class: "space-y-6",
-            tabindex: "0",
-            onkeydown: {
-                let current_step_clone = current_step.clone();
-                move |e: KeyboardEvent| {
-                    use dioxus::prelude::Code;
-                    match e.code() {
-                        Code::Space => {
-                            // Пробел - показать ответ или перейти дальше
-                            e.prevent_default();
-                            if current_step_clone == super::LearnStep::Question {
-                                on_show_answer.call(());
-                            } else if current_step_clone == super::LearnStep::Answer {
-                                on_next.call(());
-                            }
-                        }
-                        Code::Backspace => {
-                            // Backspace - вернуться к предыдущей карточке
-                            if let Some(on_prev) = on_prev {
-                                let is_first_card = current_index == 0;
-                                let can_go_prev = !is_first_card
-                                    && current_step_clone == super::LearnStep::Answer;
-                                if can_go_prev {
-                                    e.prevent_default();
-                                    on_prev.call(());
-                                }
-                            }
-                        }
-                        Code::KeyS => {
-                            // S - пропустить карточку
-                            e.prevent_default();
-                            on_skip.call(());
-                        }
-                        Code::KeyQ => {
-                            // Q - выйти из сессии
-                            e.prevent_default();
-                            on_quit.call(());
-                        }
-                        Code::Digit1 => {
-                            // 1 - оценить как "Легко"
-                            e.prevent_default();
-                            if current_step_clone == super::LearnStep::Answer {
-                                on_rate.call(crate::domain::Rating::Easy);
-                            }
-                        }
-                        Code::Digit2 => {
-                            // 2 - оценить как "Хорошо"
-                            e.prevent_default();
-                            if current_step_clone == super::LearnStep::Answer {
-                                on_rate.call(crate::domain::Rating::Good);
-                            }
-                        }
-                        Code::Digit3 => {
-                            // 3 - оценить как "Сложно"
-                            e.prevent_default();
-                            if current_step_clone == super::LearnStep::Answer {
-                                on_rate.call(crate::domain::Rating::Hard);
-                            }
-                        }
-                        Code::Digit4 => {
-                            // 4 - оценить как "Снова"
-                            e.prevent_default();
-                            if current_step_clone == super::LearnStep::Answer {
-                                on_rate.call(crate::domain::Rating::Again);
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            },
+        div { class: "space-y-6",
             LearnCardDisplay {
                 card: current_card,
                 current_step: current_step.clone(),

@@ -1,4 +1,5 @@
 use crate::views::learn::learn_session::{CardType, SimilarCard};
+use chrono::{DateTime, Duration, Utc};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::{
     complete_lesson::CompleteLessonUseCase, rate_card::RateCardUseCase,
@@ -20,6 +21,7 @@ pub struct LearnSessionData {
     pub current_step: LearnStep,
     pub show_furigana: bool,
     pub limit: Option<usize>,
+    pub session_start_time: DateTime<Utc>,
 }
 
 impl Default for LearnSessionData {
@@ -30,6 +32,7 @@ impl Default for LearnSessionData {
             current_step: LearnStep::Question,
             show_furigana: true,
             limit: None,
+            session_start_time: Utc::now(),
         }
     }
 }
@@ -63,6 +66,7 @@ pub fn use_learn_session() -> LearnSessionSignals {
                             session_data.write().current_step = LearnStep::Question;
                             session_data.write().limit = limit;
                             session_data.write().show_furigana = show_furigana;
+                            session_data.write().session_start_time = Utc::now();
                             state.set(SessionState::Active);
                         }
                     }
@@ -137,12 +141,15 @@ pub fn use_learn_session() -> LearnSessionSignals {
                             data.current_index += 1;
                             data.current_step = LearnStep::Question;
                         } else {
+                            let session_start_time = data.session_start_time;
                             drop(data);
                             let mut state = state;
                             state.set(SessionState::Completed);
                             // Complete lesson
+                            let session_duration =
+                                Utc::now().signed_duration_since(session_start_time);
                             spawn(async move {
-                                if let Err(e) = complete_lesson_impl().await {
+                                if let Err(e) = complete_lesson_impl(session_duration).await {
                                     error!("Failed to complete lesson: {:?}", e);
                                 }
                             });
@@ -240,10 +247,13 @@ async fn rate_card_impl(card_id: Ulid, rating: crate::domain::Rating) -> Result<
         .map_err(to_error)
 }
 
-pub async fn complete_lesson_impl() -> Result<(), String> {
+pub async fn complete_lesson_impl(lesson_duration: Duration) -> Result<(), String> {
     let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     let complete_usecase = CompleteLessonUseCase::new(repo);
-    complete_usecase.execute(user_id).await.map_err(to_error)
+    complete_usecase
+        .execute(user_id, lesson_duration)
+        .await
+        .map_err(to_error)
 }

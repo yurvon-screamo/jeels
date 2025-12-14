@@ -1,13 +1,112 @@
-use dioxus::prelude::*;
+use chrono::Utc;
+use dioxus::{document::eval, prelude::*};
 
 use super::{use_learn_session, LearnActive, LearnCompleted, LearnSettings, SessionState};
+use crate::views::learn::session_manager::complete_lesson_impl;
 
 #[component]
 pub fn Learn() -> Element {
     let session = use_learn_session();
 
+    let keyboard_handler = {
+        let session_clone = session.clone();
+        move |e: KeyboardEvent| {
+            use dioxus::prelude::Code;
+            match e.code() {
+                Code::Space => {
+                    // Пробел - показать ответ или перейти дальше
+                    e.prevent_default();
+                    let session_data = (session_clone.session_data)();
+                    if session_data.current_step == super::LearnStep::Question {
+                        (session_clone.show_answer)();
+                    } else if session_data.current_step == super::LearnStep::Answer {
+                        (session_clone.next_card)();
+                    }
+                }
+                Code::Backspace => {
+                    // Backspace - вернуться к предыдущей карточке
+                    let session_data = (session_clone.session_data)();
+                    let is_first_card = session_data.current_index == 0;
+                    let can_go_prev =
+                        !is_first_card && session_data.current_step == super::LearnStep::Answer;
+                    if can_go_prev {
+                        e.prevent_default();
+                        (session_clone.prev_card)();
+                    }
+                }
+                Code::KeyS => {
+                    // S - пропустить карточку
+                    e.prevent_default();
+                    (session_clone.next_card)();
+                }
+                Code::KeyQ => {
+                    // Q - выйти из сессии
+                    e.prevent_default();
+                    let session_duration = Utc::now()
+                        .signed_duration_since((session_clone.session_data)().session_start_time);
+                    spawn(async move {
+                        let _ = complete_lesson_impl(session_duration).await;
+                    });
+                    (session_clone.restart_session)();
+                }
+                Code::Digit1 => {
+                    // 1 - оценить как "Легко"
+                    e.prevent_default();
+                    let session_data = (session_clone.session_data)();
+                    if session_data.current_step == super::LearnStep::Answer {
+                        (session_clone.rate_card)(crate::domain::Rating::Easy);
+                    }
+                }
+                Code::Digit2 => {
+                    // 2 - оценить как "Хорошо"
+                    e.prevent_default();
+                    let session_data = (session_clone.session_data)();
+                    if session_data.current_step == super::LearnStep::Answer {
+                        (session_clone.rate_card)(crate::domain::Rating::Good);
+                    }
+                }
+                Code::Digit3 => {
+                    // 3 - оценить как "Сложно"
+                    e.prevent_default();
+                    let session_data = (session_clone.session_data)();
+                    if session_data.current_step == super::LearnStep::Answer {
+                        (session_clone.rate_card)(crate::domain::Rating::Hard);
+                    }
+                }
+                Code::Digit4 => {
+                    // 4 - оценить как "Снова"
+                    e.prevent_default();
+                    let session_data = (session_clone.session_data)();
+                    if session_data.current_step == super::LearnStep::Answer {
+                        (session_clone.rate_card)(crate::domain::Rating::Again);
+                    }
+                }
+                _ => {}
+            }
+        }
+    };
+
+    // Автоматический фокус при смене состояния
+    use_effect(move || {
+        let eval = eval(
+            r#"
+            setTimeout(() => {
+                const element = document.querySelector('[data-learn-container]');
+                if (element) {
+                    element.focus();
+                }
+            }, 100);
+        "#,
+        );
+        eval.send(()).unwrap();
+    });
+
     rsx! {
-        div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
+        div {
+            class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6 focus:outline-none",
+            tabindex: "0",
+            "data-learn-container": "",
+            onkeydown: keyboard_handler,
             {
                 match (session.state)() {
                     SessionState::Settings => {
@@ -55,9 +154,10 @@ pub fn Learn() -> Element {
                                     move |_| next_card()
                                 }),
                                 on_quit: move |_| {
+                                    let session_duration = Utc::now()
+                                        .signed_duration_since((session.session_data)().session_start_time);
                                     spawn(async move {
-                                        use crate::views::learn::session_manager::complete_lesson_impl;
-                                        let _ = complete_lesson_impl().await;
+                                        let _ = complete_lesson_impl(session_duration).await;
                                     });
                                     (session.restart_session)();
                                 },

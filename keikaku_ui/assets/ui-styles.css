@@ -173,6 +173,11 @@ body {
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Focus styles */
+.focus\:outline-none:focus {
+    outline: none;
+}
+
 /* Selection styles */
 .selection\:bg-accent-pink\/30::selection {
     background-color: rgba(244, 114, 182, 0.3);
