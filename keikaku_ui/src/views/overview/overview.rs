@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::{
     get_user_info::{GetUserInfoUseCase, UserProfile},
@@ -47,42 +48,52 @@ pub fn Overview() -> Element {
     }
 }
 
+fn format_date(date: DateTime<Utc>) -> String {
+    date.naive_local().format("%m.%d %H:%M").to_string()
+}
+
 fn build_charts(
     lesson_history: &[keikaku::domain::daily_history::DailyHistoryItem],
 ) -> OverviewCharts {
     let stability_data = lesson_history
         .iter()
-        .enumerate()
-        .map(|(i, item)| ChartDataPoint {
-            label: format!("День {}", i + 1),
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
             value: item.avg_stability().unwrap_or(0.0),
         })
         .collect();
 
-    let words_progress_data = lesson_history
+    let difficulty_data = lesson_history
         .iter()
-        .enumerate()
-        .map(|(i, item)| ChartDataPoint {
-            label: format!("День {}", i + 1),
-            value: item.total_words() as f64,
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
+            value: item.avg_difficulty().unwrap_or(0.0),
         })
         .collect();
 
-    let lessons_data = lesson_history
+    let new_words_data = lesson_history
         .iter()
-        .enumerate()
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
+            value: item.new_words() as f64,
+        })
+        .collect();
+
+    let learned_words_data = lesson_history
+        .iter()
         .rev()
         .take(7)
-        .map(|(i, item)| ChartDataPoint {
-            label: format!("День {}", 7 - i),
-            value: item.total_words() as f64, // Using total_words as lesson count approximation
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
+            value: item.known_words() as f64,
         })
         .collect();
 
     OverviewCharts {
         stability_data,
-        words_progress_data,
-        lessons_data,
+        difficulty_data,
+        new_words_data,
+        learned_words_data,
     }
 }
 

@@ -10,6 +10,7 @@ use crate::ui::ChartDataPoint;
 #[derive(Clone, PartialEq, Default)]
 pub(crate) struct OverviewCharts {
     pub stability_data: Vec<ChartDataPoint>,
-    pub words_progress_data: Vec<ChartDataPoint>,
-    pub lessons_data: Vec<ChartDataPoint>,
+    pub difficulty_data: Vec<ChartDataPoint>,
+    pub new_words_data: Vec<ChartDataPoint>,
+    pub learned_words_data: Vec<ChartDataPoint>,
 }

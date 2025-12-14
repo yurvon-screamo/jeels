@@ -899,6 +899,9 @@
   .fill-slate-500 {
     fill: var(--color-slate-500);
   }
+  .fill-white {
+    fill: var(--color-white);
+  }
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }

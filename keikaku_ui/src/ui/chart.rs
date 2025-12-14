@@ -21,6 +21,18 @@ pub fn Chart(
     let height = height.unwrap_or(300.0);
     let class_str = class.unwrap_or_else(|| "".to_string());
 
+    // Состояние для tooltip
+    let tooltip_visible = use_signal(|| false);
+    let tooltip_text = use_signal(|| String::new());
+    let tooltip_x = use_signal(|| 0.0);
+    let tooltip_y = use_signal(|| 0.0);
+
+    // Клонируем сигналы для использования в обработчиках
+    let mut tooltip_visible_clone = tooltip_visible.clone();
+    let mut tooltip_text_clone = tooltip_text.clone();
+    let mut tooltip_x_clone = tooltip_x.clone();
+    let mut tooltip_y_clone = tooltip_y.clone();
+
     if data.is_empty() {
         return rsx! {
             Card {
@@ -66,7 +78,7 @@ pub fn Chart(
 
     // Используем фиксированный viewBox для масштабирования
     let chart_width = 400.0;
-    let chart_height = height - 30.0; // График занимает основную высоту
+    let chart_height = height - 40.0; // График занимает основную высоту
 
     // Создаем точки для линии
     let points: Vec<String> = data
@@ -87,13 +99,8 @@ pub fn Chart(
         })
         .collect();
 
-    let path_data = if points.len() > 1 {
+    let path_data = if !points.is_empty() {
         format!("M {}", points.join(" L "))
-    } else if points.len() == 1 {
-        format!(
-            "M {} {} L {} {}",
-            points[0], chart_height, points[0], points[0]
-        )
     } else {
         "".to_string()
     };
@@ -109,12 +116,25 @@ pub fn Chart(
             } else {
                 chart_height - ((point.value - chart_min) / (chart_max - chart_min)) * chart_height
             };
-            let short_label = if point.label.len() > 10 {
-                format!("{}...", &point.label[..7])
+            let short_label = if point.label.len() > 12 {
+                format!("{}...", &point.label[..12])
             } else {
                 point.label.clone()
             };
             (x, y, short_label)
+        })
+        .collect();
+
+    // Вычисляем метки для Y оси (5 меток)
+    let y_labels: Vec<(f64, String)> = (0..5)
+        .map(|i| {
+            let value = chart_min + (chart_max - chart_min) * (i as f64 / 4.0);
+            let y = if chart_max == chart_min {
+                chart_height / 2.0
+            } else {
+                chart_height - ((value - chart_min) / (chart_max - chart_min)) * chart_height
+            };
+            (y, format!("{:.0}", value))
         })
         .collect();
 
@@ -226,17 +246,61 @@ pub fn Chart(
                             }
                         }
 
-                        // Точки данных с hover эффектами
-                        for (x , y , _) in chart_points.iter() {
-                            circle {
-                                cx: "{x}",
-                                cy: "{y}",
-                                r: "5",
-                                fill: "{color}",
-                                stroke: "white",
-                                stroke_width: "3",
-                                class: "transition-all duration-300 hover:r-7 hover:drop-shadow-lg cursor-pointer",
+                        // Горизонтальные линии сетки Y оси
+                        for (y_pos , _) in y_labels.iter() {
+                            line {
+                                x1: "0",
+                                y1: "{y_pos}",
+                                x2: "{chart_width}",
+                                y2: "{y_pos}",
+                                stroke: "#e2e8f0",
+                                stroke_width: "0.5",
+                                stroke_dasharray: "2,2",
                             }
+                        }
+
+                        // Метки Y оси
+                        for (y_pos , label) in y_labels.iter() {
+                            text {
+                                x: "-10",
+                                y: "{y_pos}",
+                                text_anchor: "end",
+                                class: "text-xs fill-slate-500 font-medium",
+                                {label.clone()}
+                            }
+                        }
+
+                        // Точки данных с hover эффектами
+                        {
+                            chart_points
+                                .iter()
+                                .enumerate()
+                                .map(|(i, (x, y, label))| {
+                                    let value = data[i].value;
+                                    let label_clone = label.clone();
+                                    let x_clone = *x;
+                                    let y_clone = *y;
+                                    rsx! {
+                                        circle {
+                                            cx: "{x}",
+                                            cy: "{y}",
+                                            r: "5",
+                                            fill: "{color}",
+                                            stroke: "white",
+                                            stroke_width: "3",
+                                            class: "transition-all duration-300 hover:r-7 hover:drop-shadow-lg cursor-pointer",
+                                            onmouseover: move |_| {
+                                                tooltip_visible_clone.set(true);
+                                                tooltip_text_clone.set(format!("{}: {:.1}", label_clone, value));
+                                                tooltip_x_clone.set(x_clone);
+                                                tooltip_y_clone.set(y_clone);
+                                            },
+                                            onmouseout: move |_| {
+                                                tooltip_visible_clone.set(false);
+                                            },
+                                        }
+                                    }
+                                })
                         }
 
                         // Ось X с метками
@@ -247,8 +311,52 @@ pub fn Chart(
                                     y: "{height}",
                                     text_anchor: "middle",
                                     class: "text-xs fill-slate-500 font-medium",
-                                    transform: "rotate(-45, {x}, {height})",
+                                    transform: "rotate(-25, {x}, {height})",
                                     {label.clone()}
+                                }
+                            }
+                        }
+
+                        // Tooltip
+                        if *tooltip_visible.read() {
+                            g {
+                                rect {
+                                    x: "{tooltip_x() - 45.0}",
+                                    y: "{tooltip_y() - 25.0}",
+                                    width: "140",
+                                    height: "20",
+                                    fill: "#1f2937",
+                                    rx: "4",
+                                    opacity: "0.9",
+                                }
+                                text {
+                                    x: "{tooltip_x() + 25.0}",
+                                    y: "{tooltip_y() - 10.0}",
+                                    text_anchor: "middle",
+                                    class: "text-xs fill-white font-medium",
+                                    {tooltip_text()}
+                                }
+                            }
+                        }
+
+                        // Значение последней точки
+                        if let Some((x, y, _)) = chart_points.last() {
+                            g {
+                                rect {
+                                    x: "{x + 10.0}",
+                                    y: "{y - 10.0}",
+                                    width: "45",
+                                    height: "20",
+                                    fill: "{color}",
+                                    rx: "4",
+                                    opacity: "0.9",
+                                }
+                                text {
+                                    x: "{x + 32.5}",
+                                    y: "{y + 5.0}",
+                                    text_anchor: "middle",
+                                    class: "text-xs fill-white font-bold",
+                                    {format!("{:.1}", data.last().unwrap().value)}
                                 }
                             }
                         }

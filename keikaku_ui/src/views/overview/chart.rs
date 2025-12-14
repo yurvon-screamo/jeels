@@ -19,14 +19,20 @@ pub fn OverviewChartsComponent(charts: OverviewCharts) -> Element {
                     delay: Some("100".to_string()),
                 }
                 Chart {
-                    title: "Общее количество слов".to_string(),
-                    data: charts.words_progress_data,
+                    title: "Сложность знаний".to_string(),
+                    data: charts.difficulty_data,
+                    color: Some("#ef4444".to_string()), // red-500
+                    delay: Some("100".to_string()),
+                }
+                Chart {
+                    title: "Новых слов".to_string(),
+                    data: charts.new_words_data,
                     color: Some("#3b82f6".to_string()), // blue-500
                     delay: Some("200".to_string()),
                 }
                 Chart {
-                    title: "Завершенные уроки".to_string(),
-                    data: charts.lessons_data,
+                    title: "Изученных слов".to_string(),
+                    data: charts.learned_words_data,
                     color: Some("#f59e0b".to_string()), // amber-500
                     delay: Some("300".to_string()),
                 }
