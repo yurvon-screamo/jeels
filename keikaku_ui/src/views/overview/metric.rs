@@ -33,7 +33,7 @@ pub fn OverviewMetrics(stats: OverviewStats, heatmap_data: Vec<HeatmapDataPoint>
             // Правая колонка: статус карточек
             Section { title: "Карточки".to_string(),
                 Card { class: "p-6",
-                    div { class: "space-y-4",
+                    div { class: "space-y-1",
                         for (title , value , hint , tone) in card_status_metrics {
                             div { class: "flex items-center justify-between",
                                 div { class: "flex-1",
@@ -80,6 +80,12 @@ fn build_card_status_metrics(stats: &OverviewStats) -> Vec<MetricData> {
             stats.learning_cards.to_string(),
             "Карточки в процессе изучения".to_string(),
             StateTone::Neutral,
+        ),
+        (
+            "Низкая стабильность".to_string(),
+            stats.low_stability_cards.to_string(),
+            "Карточки, требующие особого внимания".to_string(),
+            StateTone::Warning,
         ),
         (
             "Изученные".to_string(),

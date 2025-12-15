@@ -13,4 +13,6 @@ pub(crate) struct OverviewCharts {
     pub difficulty_data: Vec<ChartDataPoint>,
     pub new_words_data: Vec<ChartDataPoint>,
     pub learned_words_data: Vec<ChartDataPoint>,
+    pub in_progress_words_data: Vec<ChartDataPoint>,
+    pub low_stability_words_data: Vec<ChartDataPoint>,
 }

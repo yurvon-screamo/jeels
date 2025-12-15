@@ -19,4 +19,8 @@ pub struct UiCard {
     pub answer: String,
     pub next_review: String,
     pub due: bool,
+    pub is_new: bool,
+    pub is_in_progress: bool,
+    pub is_learned: bool,
+    pub is_low_stability: bool,
 }

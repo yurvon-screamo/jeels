@@ -12,7 +12,7 @@ pub enum Size {
 pub fn H1(class: Option<String>, children: Element) -> Element {
     let class_str = class.unwrap_or_default();
     rsx! {
-        h1 { class: "text-3xl font-bold mb-2 text-slate-800 {class_str}", {children} }
+        h1 { class: "text-3xl font-bold mb-1 text-slate-800 {class_str}", {children} }
     }
 }
 
@@ -20,7 +20,7 @@ pub fn H1(class: Option<String>, children: Element) -> Element {
 pub fn H2(class: Option<String>, children: Element) -> Element {
     let class_str = class.unwrap_or_default();
     rsx! {
-        h2 { class: "text-2xl font-bold mb-2 text-slate-700 {class_str}", {children} }
+        h2 { class: "text-2xl font-bold mb-1 text-slate-700 {class_str}", {children} }
     }
 }
 
@@ -28,7 +28,7 @@ pub fn H2(class: Option<String>, children: Element) -> Element {
 pub fn H3(class: Option<String>, children: Element) -> Element {
     let class_str = class.unwrap_or_default();
     rsx! {
-        h3 { class: "text-xl font-bold mb-4 text-slate-600 {class_str}", {children} }
+        h3 { class: "text-xl font-bold mb-1 text-slate-600 {class_str}", {children} }
     }
 }
 
@@ -36,7 +36,7 @@ pub fn H3(class: Option<String>, children: Element) -> Element {
 pub fn H4(class: Option<String>, children: Element) -> Element {
     let class_str = class.unwrap_or_default();
     rsx! {
-        h4 { class: "text-lg font-bold mb-4 text-slate-500 {class_str}", {children} }
+        h4 { class: "text-lg font-bold mb-1 text-slate-500 {class_str}", {children} }
     }
 }
 

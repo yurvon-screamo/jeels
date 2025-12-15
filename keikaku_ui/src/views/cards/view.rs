@@ -190,6 +190,10 @@ fn map_card(card: &VocabularyCard) -> UiCard {
         answer: card.meaning().text().to_string(),
         next_review,
         due: card.memory().is_due(),
+        is_new: card.memory().is_new(),
+        is_in_progress: card.memory().is_in_progress(),
+        is_learned: card.memory().is_known_card(),
+        is_low_stability: card.memory().is_low_stability(),
     }
 }
 

@@ -36,6 +36,18 @@ pub fn OverviewChartsComponent(charts: OverviewCharts) -> Element {
                     color: Some("#f59e0b".to_string()), // amber-500
                     delay: Some("300".to_string()),
                 }
+                Chart {
+                    title: "В процессе изучения".to_string(),
+                    data: charts.in_progress_words_data,
+                    color: Some("#8b5cf6".to_string()), // violet-500
+                    delay: Some("500".to_string()),
+                }
+                Chart {
+                    title: "Низкая стабильность".to_string(),
+                    data: charts.low_stability_words_data,
+                    color: Some("#ec4899".to_string()), // pink-500
+                    delay: Some("600".to_string()),
+                }
             }
         }
     }

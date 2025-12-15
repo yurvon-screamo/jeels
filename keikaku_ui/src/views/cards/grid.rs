@@ -87,12 +87,26 @@ fn CardItem(
 
                 div { class: "flex items-center gap-2 flex-wrap",
                     Pill {
-                        text: format!("Повтор: {}", card_rc.next_review),
-                        tone: Some(if card_rc.due { StateTone::Warning } else { StateTone::Info }),
+                        text: if card_rc.is_new { "Новая".to_string() } else if card_rc.is_low_stability { "Низкая стабильность".to_string() } else if card_rc.is_learned { "Изучено".to_string() } else if card_rc.is_in_progress { "В процессе".to_string() } else { "???".to_string() },
+                        tone: Some(
+                            if card_rc.is_new {
+                                StateTone::Info
+                            } else if card_rc.is_low_stability {
+                                StateTone::Warning
+                            } else if card_rc.is_learned {
+                                StateTone::Success
+                            } else if card_rc.due {
+                                StateTone::Warning
+                            } else {
+                                StateTone::Neutral
+                            },
+                        ),
                     }
-                    Pill {
-                        text: if card_rc.due { "К повторению".to_string() } else { "Запланирована".to_string() },
-                        tone: Some(if card_rc.due { StateTone::Warning } else { StateTone::Neutral }),
+                    if !card_rc.is_new {
+                        Pill {
+                            text: format!("Повтор: {}", card_rc.next_review),
+                            tone: Some(if card_rc.due { StateTone::Warning } else { StateTone::Info }),
+                        }
                     }
                 }
 

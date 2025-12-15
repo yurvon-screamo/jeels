@@ -1,11 +1,14 @@
 use chrono::{DateTime, Utc};
 use dioxus::prelude::*;
-use keikaku::application::use_cases::{
-    get_user_info::{GetUserInfoUseCase, UserProfile},
-    list_cards::ListCardsUseCase,
-};
 use keikaku::domain::VocabularyCard;
 use keikaku::settings::ApplicationEnvironment;
+use keikaku::{
+    application::use_cases::{
+        get_user_info::{GetUserInfoUseCase, UserProfile},
+        list_cards::ListCardsUseCase,
+    },
+    domain::daily_history::DailyHistoryItem,
+};
 
 use crate::{
     ensure_user, to_error,
@@ -54,9 +57,11 @@ fn format_date(date: DateTime<Utc>) -> String {
     date.naive_local().format("%m.%d %H:%M").to_string()
 }
 
-fn build_charts(
-    lesson_history: &[keikaku::domain::daily_history::DailyHistoryItem],
-) -> OverviewCharts {
+fn build_charts(lesson_history: &[DailyHistoryItem]) -> OverviewCharts {
+    let mut lesson_history = lesson_history.to_vec();
+    lesson_history.sort_by_key(|item| item.timestamp());
+    lesson_history.truncate(14);
+
     let stability_data = lesson_history
         .iter()
         .map(|item| ChartDataPoint {
@@ -83,11 +88,25 @@ fn build_charts(
 
     let learned_words_data = lesson_history
         .iter()
-        .rev()
-        .take(7)
         .map(|item| ChartDataPoint {
             label: format_date(item.timestamp()),
             value: item.known_words() as f64,
+        })
+        .collect();
+
+    let in_progress_words_data = lesson_history
+        .iter()
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
+            value: item.in_progress_words() as f64,
+        })
+        .collect();
+
+    let low_stability_words_data = lesson_history
+        .iter()
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
+            value: item.low_stability_words() as f64,
         })
         .collect();
 
@@ -96,6 +115,8 @@ fn build_charts(
         difficulty_data,
         new_words_data,
         learned_words_data,
+        in_progress_words_data,
+        low_stability_words_data,
     }
 }
 
@@ -131,6 +152,10 @@ fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
         .iter()
         .filter(|card| card.memory().is_known_card())
         .count();
+    let low_stability_cards = cards
+        .iter()
+        .filter(|card| card.memory().is_low_stability())
+        .count();
 
     OverviewStats {
         total_cards,
@@ -138,6 +163,7 @@ fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
         new_cards,
         learning_cards,
         known_cards,
+        low_stability_cards,
     }
 }
 
@@ -148,6 +174,7 @@ pub struct OverviewStats {
     pub new_cards: usize,
     pub learning_cards: usize,
     pub known_cards: usize,
+    pub low_stability_cards: usize,
 }
 
 fn build_heatmap_data(

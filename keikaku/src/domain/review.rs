@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
 const LOW_STABILITY_THRESHOLD: f64 = 1.5;
-const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 4.0;
+const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 6.0;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct MemoryState {

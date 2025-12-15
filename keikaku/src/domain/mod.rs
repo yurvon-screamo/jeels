@@ -322,6 +322,16 @@ impl User {
             .values()
             .filter(|card| card.memory().is_new())
             .count();
+        let in_progress_words = self
+            .vocabulary_cards
+            .values()
+            .filter(|card| card.memory().is_in_progress())
+            .count();
+        let low_stability_words = self
+            .vocabulary_cards
+            .values()
+            .filter(|card| card.memory().is_low_stability())
+            .count();
 
         let now = Utc::now();
         let today = now.date_naive();
@@ -337,6 +347,8 @@ impl User {
                 total_words,
                 known_words,
                 new_words,
+                in_progress_words,
+                low_stability_words,
                 lesson_duration,
             );
         } else {
@@ -347,6 +359,8 @@ impl User {
                 total_words,
                 known_words,
                 new_words,
+                in_progress_words,
+                low_stability_words,
                 lesson_duration,
             );
 
