@@ -4,14 +4,37 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::{
     JeersError,
-    dictionary::radical::{RADICAL_DB, RadicalInfo},
-    value_objects::JapaneseLevel,
+    dictionary::{
+        radical::{RADICAL_DB, RadicalInfo},
+        vocabulary::VOCABULARY_DB,
+    },
+    value_objects::{JapaneseLevel, NativeLanguage},
 };
 
 const KANJI_DATA: &str = include_str!("./kanji.json");
 pub static KANJI_DB: LazyLock<KanjiDatabase> = LazyLock::new(KanjiDatabase::new);
 pub struct KanjiDatabase {
     kanji_map: HashMap<String, KanjiInfo>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct PopularWord {
+    word: String,
+    translation: String,
+}
+
+impl PopularWord {
+    pub fn new(word: String, translation: String) -> Self {
+        Self { word, translation }
+    }
+
+    pub fn word(&self) -> &str {
+        &self.word
+    }
+
+    pub fn translation(&self) -> &str {
+        &self.translation
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -50,6 +73,21 @@ impl KanjiInfo {
 
     pub fn popular_words(&self) -> &[String] {
         &self.popular_words
+    }
+
+    pub fn popular_words_with_translations(
+        &self,
+        native_language: &NativeLanguage,
+    ) -> Vec<PopularWord> {
+        self.popular_words
+            .iter()
+            .map(|word| {
+                let translation = VOCABULARY_DB
+                    .get_translation(word, native_language)
+                    .unwrap_or_else(|| "Перевод не найден".to_string());
+                PopularWord::new(word.clone(), translation)
+            })
+            .collect()
     }
 }
 

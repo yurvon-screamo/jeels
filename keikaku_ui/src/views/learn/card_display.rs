@@ -1,14 +1,19 @@
 use dioxus::prelude::*;
 
-use crate::domain::{AnswerActionButtons, FuriganaText, QuestionActionButtons, Rating, WordCard};
-use crate::ui::{Card, InfoGrid, InfoSection, InfoSectionTone, Pill};
+use crate::domain::{
+    AnswerActionButtons, FuriganaText, KanjiCard, QuestionActionButtons, RadicalGrid, Rating,
+    WordCard,
+};
+use crate::ui::{Card, InfoSection, InfoSectionTone};
 use crate::views::learn::learn_session::{CardType, LearnCard, LearnStep, SimilarCard};
+use keikaku::domain::value_objects::NativeLanguage;
 
 #[component]
 pub fn LearnCardDisplay(
     card: Option<super::LearnCard>,
     current_step: super::LearnStep,
     show_furigana: bool,
+    native_language: NativeLanguage,
     on_show_answer: EventHandler<()>,
     on_next: EventHandler<()>,
     on_rate: EventHandler<Rating>,
@@ -27,10 +32,15 @@ pub fn LearnCardDisplay(
                     CardAnswerView {
                         card: card.clone(),
                         show_furigana,
+                        native_language: native_language.clone(),
                         on_rate: move |rating| on_rate.call(rating),
                     }
                 } else {
-                    CardCompletedView { card: card.clone(), show_furigana }
+                    CardCompletedView {
+                        card: card.clone(),
+                        show_furigana,
+                        native_language: native_language.clone(),
+                    }
                 }
             }
         }
@@ -88,7 +98,12 @@ fn CardQuestionView(
 }
 
 #[component]
-fn CardAnswerView(card: LearnCard, show_furigana: bool, on_rate: EventHandler<Rating>) -> Element {
+fn CardAnswerView(
+    card: LearnCard,
+    show_furigana: bool,
+    native_language: NativeLanguage,
+    on_rate: EventHandler<Rating>,
+) -> Element {
     rsx! {
         div { class: "space-y-6",
             div { class: "grid grid-cols-1 lg:grid-cols-3 gap-6",
@@ -128,7 +143,7 @@ fn CardAnswerView(card: LearnCard, show_furigana: bool, on_rate: EventHandler<Ra
                         // Middle column: Examples
                         ExamplesSection { card: card.clone(), show_furigana }
                     }
-
+                
                 }
 
                 // Right column: Action buttons
@@ -140,7 +155,11 @@ fn CardAnswerView(card: LearnCard, show_furigana: bool, on_rate: EventHandler<Ra
             div { class: "space-y-4",
                 // Kanji info for vocabulary cards
                 if matches!(card.card_type, CardType::Vocabulary) && !card.kanji_info.is_empty() {
-                    KanjiInfoSection { kanji_info: card.kanji_info, show_furigana }
+                    KanjiInfoSection {
+                        kanji_info: card.kanji_info,
+                        show_furigana,
+                        native_language: native_language.clone(),
+                    }
                 }
 
                 // Radicals for kanji cards
@@ -153,7 +172,11 @@ fn CardAnswerView(card: LearnCard, show_furigana: bool, on_rate: EventHandler<Ra
 }
 
 #[component]
-fn CardCompletedView(card: LearnCard, show_furigana: bool) -> Element {
+fn CardCompletedView(
+    card: LearnCard,
+    show_furigana: bool,
+    native_language: NativeLanguage,
+) -> Element {
     rsx! {
         div { class: "space-y-6",
             // First row: Answer on left (same width as Question), empty space on right
@@ -185,7 +208,11 @@ fn CardCompletedView(card: LearnCard, show_furigana: bool) -> Element {
             div { class: "space-y-4",
                 // Kanji info for vocabulary cards
                 if matches!(card.card_type, CardType::Vocabulary) && !card.kanji_info.is_empty() {
-                    KanjiInfoSection { kanji_info: card.kanji_info, show_furigana }
+                    KanjiInfoSection {
+                        kanji_info: card.kanji_info,
+                        show_furigana,
+                        native_language: native_language.clone(),
+                    }
                 }
 
                 // Radicals for kanji cards
@@ -240,32 +267,17 @@ fn ExamplesSection(card: LearnCard, show_furigana: bool) -> Element {
 fn KanjiInfoSection(
     kanji_info: Vec<keikaku::domain::dictionary::KanjiInfo>,
     show_furigana: bool,
+    native_language: NativeLanguage,
 ) -> Element {
     rsx! {
-        InfoSection {
-            title: "Радикалы:".to_string(),
-            tone: InfoSectionTone::Blue,
-            InfoGrid {
+        InfoSection { title: "Кандзи:".to_string(), tone: InfoSectionTone::Blue,
+            div { class: "space-y-4",
                 for kanji in kanji_info.iter() {
-                    div { class: "bg-white rounded p-3 space-y-2",
-                        div { class: "flex items-center gap-2",
-                            span { class: "text-2xl font-bold text-blue-600", "{kanji.kanji()}" }
-                            Pill {
-                                text: format!("N{}", kanji.jlpt().as_number()),
-                                tone: None,
-                            }
-                        }
-                        p { class: "text-sm text-slate-700", "{kanji.description()}" }
-                        if !kanji.radicals().is_empty() {
-                            div { class: "flex flex-wrap gap-1",
-                                for radical in kanji.radicals() {
-                                    Pill {
-                                        text: format!("{} - {}", radical.radical(), radical.name()),
-                                        tone: None,
-                                    }
-                                }
-                            }
-                        }
+                    KanjiCard {
+                        kanji_info: kanji.clone(),
+                        show_furigana,
+                        native_language: native_language.clone(),
+                        class: Some("border border-slate-200".to_string()),
                     }
                 }
             }
@@ -276,22 +288,7 @@ fn KanjiInfoSection(
 #[component]
 fn RadicalsSection(radicals: Vec<keikaku::domain::dictionary::RadicalInfo>) -> Element {
     rsx! {
-        InfoSection {
-            title: "Радикалы:".to_string(),
-            tone: InfoSectionTone::Purple,
-            InfoGrid {
-                for radical in radicals.iter() {
-                    div { class: "bg-white rounded p-3 space-y-2",
-                        div { class: "flex items-center gap-2",
-                            span { class: "text-xl font-bold text-purple-600", "{radical.radical()}" }
-                            span { class: "text-sm text-slate-600", "{radical.stroke_count()} черт" }
-                        }
-                        p { class: "font-medium text-slate-800", "{radical.name()}" }
-                        p { class: "text-sm text-slate-700", "{radical.description()}" }
-                    }
-                }
-            }
-        }
+        RadicalGrid { radicals: radicals.clone(), show_kanji_list: true }
     }
 }
 

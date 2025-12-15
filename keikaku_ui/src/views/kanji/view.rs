@@ -1,7 +1,8 @@
-use crate::ui::{Button, ButtonVariant, Card, ErrorCard, Paragraph, TextInput, H1};
+use crate::domain::KanjiCard;
+use crate::ui::{Button, ButtonVariant, Card, ErrorCard, TextInput, H1};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::get_kanji_info::GetKanjiInfoUseCase;
-use keikaku::domain::dictionary::KanjiInfo;
+use keikaku::domain::{dictionary::KanjiInfo, value_objects::NativeLanguage};
 
 pub async fn fetch_kanji_info(query: String) -> Result<Option<KanjiInfo>, String> {
     if query.trim().is_empty() {
@@ -51,67 +52,38 @@ fn KanjiContent(
             H1 { "Кандзи" }
 
             Card {
-                div { class: "space-y-4",
-                    TextInput {
-                        label: "Кандзи",
-                        value: query,
-                        placeholder: "Введите кандзи для поиска...",
+                div { class: "grid grid-cols-9 gap-3",
+                    div { class: "col-span-8",
+                        TextInput {
+                            label: "Кандзи",
+                            value: query,
+                            placeholder: "Введите кандзи для поиска...",
+                        }
                     }
 
-                    Button {
-                        variant: ButtonVariant::Rainbow,
-                        onclick: move |_| {
-                            loading.set(true);
-                            let search_query = query();
-                            on_search.call(search_query);
-                            loading.set(false);
-                        },
-                        disabled: Some(loading()),
-                        "Поиск"
+                    div { class: "col-span-1 flex items-end",
+                        Button {
+                            variant: ButtonVariant::Rainbow,
+                            class: Some("w-full px-2 py-1.5 text-xs".to_string()),
+                            onclick: move |_| {
+                                loading.set(true);
+                                let search_query = query();
+                                on_search.call(search_query);
+                                loading.set(false);
+                            },
+                            disabled: Some(loading()),
+                            "Поиск"
+                        }
                     }
                 }
             }
 
             if let Some(info) = initial_kanji_info {
-                Card {
-                    div { class: "space-y-4",
-                        div { class: "text-4xl font-bold text-center", "{info.kanji()}" }
-
-                        div { class: "space-y-2",
-                            h3 { class: "font-semibold", "Описание:" }
-                            Paragraph { "{info.description()}" }
-                        }
-
-                        div { class: "space-y-2",
-                            h3 { class: "font-semibold", "JLPT уровень:" }
-                            Paragraph { "{info.jlpt()}" }
-                        }
-
-                        div { class: "space-y-2",
-                            h3 { class: "font-semibold", "Используется в словах:" }
-                            Paragraph { "{info.used_in()}" }
-                        }
-
-                        if !info.radicals().is_empty() {
-                            div { class: "space-y-2",
-                                h3 { class: "font-semibold", "Радикалы:" }
-                                p {
-                                    "{info.radicals().iter().map(|r| r.radical().to_string()).collect::<Vec<_>>().join(\", \")}"
-                                }
-                            }
-                        }
-
-                        if !info.popular_words().is_empty() {
-                            div { class: "space-y-2",
-                                h3 { class: "font-semibold", "Популярные слова:" }
-                                ul { class: "list-disc list-inside",
-                                    for word in info.popular_words() {
-                                        li { "{word}" }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                KanjiCard {
+                    kanji_info: info.clone(),
+                    show_furigana: true,
+                    native_language: NativeLanguage::Russian,
+                    class: None,
                 }
             }
         }
