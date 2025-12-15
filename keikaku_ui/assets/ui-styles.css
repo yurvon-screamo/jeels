@@ -62,8 +62,18 @@ body {
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: none;
     }
+}
+
+.kk-card {
+    /* Ensure cards participate in the same stacking context with predictable z-index. */
+    z-index: 0;
+}
+
+.kk-card:focus-within {
+    /* When interacting with inputs/selects inside a card, lift the whole card above siblings. */
+    z-index: 100;
 }
 
 .animate-enter {

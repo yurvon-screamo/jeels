@@ -60,6 +60,7 @@ pub fn EmbeddingSettingsForm(
         EmbeddingSettings::Candle => EmbeddingType::Candle,
         EmbeddingSettings::OpenAi { .. } => EmbeddingType::OpenAi,
     });
+    let selected_embedding_type = use_memo(move || Some(embedding_type()));
 
     let (openai_model_init, openai_base_url_init, openai_env_var_init) =
         extract_openai_fields(&settings);
@@ -89,7 +90,7 @@ pub fn EmbeddingSettingsForm(
             Select {
                 label: Some("Тип Embedding".to_string()),
                 options: vec![EmbeddingType::None, EmbeddingType::Candle, EmbeddingType::OpenAi],
-                selected: use_signal(|| Some(embedding_type())),
+                selected: selected_embedding_type,
                 onselect: move |new_type: EmbeddingType| {
                     embedding_type.set(new_type.clone());
                     update_settings();

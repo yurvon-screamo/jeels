@@ -20,6 +20,7 @@ pub struct LearnSessionData {
     pub current_index: usize,
     pub current_step: LearnStep,
     pub show_furigana: bool,
+    pub low_stability_mode: bool,
     pub limit: Option<usize>,
     pub session_start_time: DateTime<Utc>,
 }
@@ -31,6 +32,7 @@ impl Default for LearnSessionData {
             current_index: 0,
             current_step: LearnStep::Question,
             show_furigana: true,
+            low_stability_mode: false,
             limit: None,
             session_start_time: Utc::now(),
         }
@@ -44,41 +46,43 @@ pub fn use_learn_session() -> LearnSessionSignals {
     LearnSessionSignals {
         state,
         session_data,
-        start_session: Rc::new(move |limit: Option<usize>, show_furigana: bool| {
-            let mut state = state;
-            let mut session_data = session_data;
+        start_session: Rc::new(
+            move |limit: Option<usize>, show_furigana: bool, low_stability_mode: bool| {
+                let mut state = state;
+                let mut session_data = session_data;
 
-            spawn(async move {
-                state.set(SessionState::Loading);
+                spawn(async move {
+                    state.set(SessionState::Loading);
 
-                match fetch_cards_to_learn(limit).await {
-                    Ok(items) => {
-                        if items.is_empty() {
-                            state.set(SessionState::Settings);
+                    match fetch_cards_to_learn(limit, low_stability_mode).await {
+                        Ok(items) => {
+                            if items.is_empty() {
+                                state.set(SessionState::Settings);
+                                session_data.write().cards = vec![];
+                            } else {
+                                let learn_cards = items
+                                    .into_iter()
+                                    .map(map_study_item_to_learn_card)
+                                    .collect::<Vec<_>>();
+                                session_data.write().cards = learn_cards;
+                                session_data.write().current_index = 0;
+                                session_data.write().current_step = LearnStep::Question;
+                                session_data.write().limit = limit;
+                                session_data.write().show_furigana = show_furigana;
+                                session_data.write().session_start_time = Utc::now();
+                                state.set(SessionState::Active);
+                            }
+                        }
+                        Err(e) => {
                             session_data.write().cards = vec![];
-                        } else {
-                            let learn_cards = items
-                                .into_iter()
-                                .map(map_study_item_to_learn_card)
-                                .collect::<Vec<_>>();
-                            session_data.write().cards = learn_cards;
-                            session_data.write().current_index = 0;
+                            state.set(SessionState::Settings);
                             session_data.write().current_step = LearnStep::Question;
-                            session_data.write().limit = limit;
-                            session_data.write().show_furigana = show_furigana;
-                            session_data.write().session_start_time = Utc::now();
-                            state.set(SessionState::Active);
+                            error!("learn fetch error: {}", e);
                         }
                     }
-                    Err(e) => {
-                        session_data.write().cards = vec![];
-                        state.set(SessionState::Settings);
-                        session_data.write().current_step = LearnStep::Question;
-                        error!("learn fetch error: {}", e);
-                    }
-                }
-            });
-        }),
+                });
+            },
+        ),
         next_card: Rc::new(move || {
             let mut state = state;
             let mut session_data = session_data;
@@ -165,7 +169,7 @@ pub fn use_learn_session() -> LearnSessionSignals {
 pub struct LearnSessionSignals {
     pub state: Signal<SessionState>,
     pub session_data: Signal<LearnSessionData>,
-    pub start_session: Rc<dyn Fn(Option<usize>, bool)>,
+    pub start_session: Rc<dyn Fn(Option<usize>, bool, bool)>,
     pub next_card: Rc<dyn Fn()>,
     pub restart_session: Rc<dyn Fn()>,
     pub show_answer: Rc<dyn Fn()>,
@@ -173,12 +177,15 @@ pub struct LearnSessionSignals {
     pub rate_card: Rc<dyn Fn(crate::domain::Rating)>,
 }
 
-async fn fetch_cards_to_learn(limit: Option<usize>) -> Result<Vec<StudySessionItem>, String> {
+async fn fetch_cards_to_learn(
+    limit: Option<usize>,
+    low_stability_mode: bool,
+) -> Result<Vec<StudySessionItem>, String> {
     let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectCardsToLearnUseCase::new(repo)
-        .execute(user_id, false, false, limit)
+        .execute(user_id, false, low_stability_mode, limit)
         .await
         .map_err(to_error)
 }

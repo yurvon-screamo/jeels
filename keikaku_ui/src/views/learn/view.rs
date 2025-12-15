@@ -114,9 +114,16 @@ pub fn Learn() -> Element {
                             LearnSettings {
                                 limit: (session.session_data)().limit,
                                 show_furigana: (session.session_data)().show_furigana,
+                                low_stability_mode: (session.session_data)().low_stability_mode,
                                 loading: false,
-                                on_start: move |(limit_opt, show_furigana_val): (Option<usize>, bool)| {
-                                    (session.start_session)(limit_opt, show_furigana_val);
+                                on_start: move |
+                                    (
+                                        limit_opt,
+                                        show_furigana_val,
+                                        low_stability_mode_val,
+                                    ): (Option<usize>, bool, bool)|
+                                {
+                                    (session.start_session)(limit_opt, show_furigana_val, low_stability_mode_val);
                                 },
                             }
                         }
@@ -131,7 +138,6 @@ pub fn Learn() -> Element {
                     SessionState::Active => {
                         let session_data = (session.session_data)();
                         let current_card = session_data
-
                             .cards
                             .get(session_data.current_index)
                             .cloned();

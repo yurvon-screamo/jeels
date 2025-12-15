@@ -146,7 +146,9 @@ fn calculate_background_style(minutes: u32) -> (&'static str, String) {
     } else if minutes >= MAX_MINUTES as u32 {
         1.0
     } else {
-        (minutes as f32 - MIN_MINUTES) / (MAX_MINUTES - MIN_MINUTES)
+        // Используем квадратный корень для более быстрого начального перехода
+        let linear_ratio = (minutes as f32 - MIN_MINUTES) / (MAX_MINUTES - MIN_MINUTES);
+        linear_ratio.sqrt().min(1.0)
     };
 
     if ratio <= 0.0 {
@@ -170,8 +172,8 @@ fn interpolate_color(ratio: f32) -> String {
     // Цвета для интерполяции
     // Красный: #f0888f -> RGB(240, 136, 143)
     let red_rgb = (240, 136, 143);
-    // Зеленый: #D1FAE5 -> RGB(209, 250, 229)
-    let green_rgb = (209, 250, 229);
+    // Зеленый:rgb(52, 255, 150) -> RGB(209, 250, 229) 10b981
+    let green_rgb = (52, 255, 150);
     // Золото: #FDE68A -> RGB(253, 230, 138)
     let gold_rgb = (253, 230, 138);
 

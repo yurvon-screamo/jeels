@@ -54,7 +54,11 @@ pub fn CardsFilters(
                             FilterStatus::Due => "due",
                             FilterStatus::NotDue => "not_due",
                         },
-                        label: "",
+                        label: match filter_status() {
+                            FilterStatus::All => "Все",
+                            FilterStatus::Due => "К повторению",
+                            FilterStatus::NotDue => "Запланированы",
+                        },
                     }),
                     onselect: move |selected: FilterOption| {
                         filter_status
@@ -89,7 +93,11 @@ pub fn CardsFilters(
                             SortBy::Question => "question",
                             SortBy::Answer => "answer",
                         },
-                        label: "",
+                        label: match sort_by() {
+                            SortBy::Date => "По дате",
+                            SortBy::Question => "По вопросу",
+                            SortBy::Answer => "По ответу",
+                        },
                     }),
                     onselect: move |selected: FilterOption| {
                         sort_by

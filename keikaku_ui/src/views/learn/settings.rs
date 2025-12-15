@@ -5,13 +5,15 @@ use crate::ui::{Button, ButtonVariant, Card, Checkbox, Paragraph, Switch, TextIn
 #[component]
 pub fn LearnSettings(
     show_furigana: bool,
+    low_stability_mode: bool,
     loading: bool,
     limit: Option<usize>,
-    on_start: EventHandler<(Option<usize>, bool)>,
+    on_start: EventHandler<(Option<usize>, bool, bool)>,
 ) -> Element {
     let mut limit_signal = use_signal(|| limit.map(|l| l.to_string()).unwrap_or_default());
     let mut limit_enabled_signal = use_signal(|| true);
     let mut show_furigana_signal = use_signal(|| show_furigana);
+    let mut low_stability_mode_signal = use_signal(|| low_stability_mode);
 
     rsx! {
         Card { class: Some("space-y-6".to_string()),
@@ -47,6 +49,11 @@ pub fn LearnSettings(
                     label: Some("Показывать фуригану".to_string()),
                 }
 
+                Switch {
+                    checked: low_stability_mode_signal(),
+                    onchange: move |v| low_stability_mode_signal.set(v),
+                    label: Some("Режим низкой стабильности".to_string()),
+                }
             }
 
             Button {
@@ -58,7 +65,7 @@ pub fn LearnSettings(
                     } else {
                         None
                     };
-                    on_start.call((limit_value, show_furigana_signal()))
+                    on_start.call((limit_value, show_furigana_signal(), low_stability_mode_signal()))
                 },
                 disabled: Some(loading),
                 if loading {

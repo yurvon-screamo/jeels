@@ -11,12 +11,23 @@ pub fn Select<T: Clone + PartialEq + std::fmt::Display + 'static>(
     let options_signal = use_signal(move || options);
 
     rsx! {
-        div { class: "relative w-full z-30",
+        div { class: if is_open() { "relative w-full z-50 overflow-visible" } else { "relative w-full z-10 overflow-visible" },
+            // Click outside to close the dropdown.
+            if is_open() {
+                div {
+                    // Use inline z-index to avoid relying on tailwind generation and to ensure
+                    // the overlay is below the dropdown menu.
+                    style: "position: fixed; inset: 0; z-index: 9998; background: transparent;",
+                    onmousedown: move |_| is_open.set(false),
+                }
+            }
             if let Some(label_text) = label {
                 label { class: "block text-xs font-bold text-slate-400 mb-2 ml-1", {label_text} }
             }
             button {
                 class: "relative w-full px-5 py-4 rounded-xl bg-slate-50 text-left cursor-pointer outline-none focus:bg-white focus:ring-4 focus:ring-purple-50 focus:shadow-lg transition-all duration-300 group",
+                // Keep the trigger above the click-outside overlay for consistent behavior.
+                style: "z-index: 9999;",
                 onclick: move |_| {
                     is_open.set(!is_open());
                 },
@@ -52,13 +63,17 @@ pub fn Select<T: Clone + PartialEq + std::fmt::Display + 'static>(
                 }
             }
             if is_open() {
-                div { class: "absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-soft-hover border border-slate-100 z-40",
+                div {
+                    class: "absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-soft-hover border border-slate-100",
+                    // Ensure the dropdown is above the click-outside overlay.
+                    style: "z-index: 10000;",
                     ul { class: "flex flex-col p-2",
                         for idx in 0..options_signal().len() {
                             li {
                                 key: "{idx}",
                                 class: "px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-purple-50 hover:text-accent-purple cursor-pointer transition-colors duration-200",
-                                onclick: move |_| {
+                                onmousedown: move |e| {
+                                    e.stop_propagation();
                                     let options = options_signal();
                                     if let Some(opt) = options.get(idx).cloned() {
                                         onselect.call(opt);

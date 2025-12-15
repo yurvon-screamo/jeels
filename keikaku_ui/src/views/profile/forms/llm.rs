@@ -146,6 +146,7 @@ pub fn LlmSettingsForm(settings: LlmSettings, on_change: EventHandler<LlmSetting
         LlmSettings::OpenAi { .. } => LlmType::OpenAi,
         LlmSettings::Candle { .. } => LlmType::Candle,
     });
+    let selected_llm_type = use_memo(move || Some(llm_type()));
 
     let (gemini_temp_init, gemini_model_init) = extract_gemini_fields(&settings);
     let gemini_temperature = use_signal(|| gemini_temp_init);
@@ -221,7 +222,7 @@ pub fn LlmSettingsForm(settings: LlmSettings, on_change: EventHandler<LlmSetting
             Select {
                 label: Some("Тип LLM".to_string()),
                 options: vec![LlmType::None, LlmType::Gemini, LlmType::OpenAi, LlmType::Candle],
-                selected: use_signal(|| Some(llm_type())),
+                selected: selected_llm_type,
                 onselect: move |new_type: LlmType| {
                     llm_type.set(new_type.clone());
                     update_settings();
