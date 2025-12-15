@@ -7434,5 +7434,31 @@
     ],
     "part_of_speech": "Noun",
     "level": "N5"
+  },
+  "しょく": {
+    "russian_translation": "Еда; пища.",
+    "english_translation": "Food; meal.",
+    "russian_examples": [
+      {
+        "text": "毎日、三度のしょくを食べます。",
+        "translation": "Каждый день я ем три раза."
+      },
+      {
+        "text": "このしょくはおいしいです。",
+        "translation": "Эта еда вкусная."
+      }
+    ],
+    "english_examples": [
+      {
+        "text": "毎日、三度のしょくを食べます。",
+        "translation": "I eat three meals a day."
+      },
+      {
+        "text": "このしょくはおいしいです。",
+        "translation": "This food is delicious."
+      }
+    ],
+    "part_of_speech": "Noun",
+    "level": "N5"
   }
 }
