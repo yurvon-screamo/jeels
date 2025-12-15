@@ -17,12 +17,12 @@ impl<'a, R: UserRepository> SelectCardsToLearnUseCase<'a, R> {
         &self,
         user_id: Ulid,
         force_new_cards: bool,
-        low_stability_cards: bool,
+        low_stability_mode: bool,
         limit: Option<usize>,
     ) -> Result<Vec<StudySessionItem>, JeersError> {
-        if force_new_cards && low_stability_cards {
+        if force_new_cards && low_stability_mode {
             return Err(JeersError::InvalidValues {
-                reason: "Force new cards and low stability cards cannot be used together"
+                reason: "Force new cards and low stability mode cannot be used together"
                     .to_string(),
             });
         }
@@ -33,7 +33,7 @@ impl<'a, R: UserRepository> SelectCardsToLearnUseCase<'a, R> {
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let study_session_items = if low_stability_cards {
+        let study_session_items = if low_stability_mode {
             user.start_low_stability_cards_session(limit)
         } else {
             user.start_study_session(force_new_cards, limit)
