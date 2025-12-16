@@ -1,7 +1,7 @@
 use chrono::Utc;
 use dioxus::{document::eval, prelude::*};
 
-use super::{use_learn_session, LearnActive, LearnCompleted, SessionState};
+use super::{use_learn_session, LearnActive, LearnCompleted, SessionState, StartFeedback};
 use crate::views::learn::session_manager::complete_lesson_impl;
 
 #[component]
@@ -101,10 +101,7 @@ pub fn Learn() -> Element {
         eval.send(()).unwrap();
     });
 
-    let show_start_button = !matches!(
-        (session.state)(),
-        SessionState::Loading | SessionState::Active
-    );
+    let show_start_button = matches!((session.state)(), SessionState::Start);
 
     rsx! {
         div {
@@ -113,21 +110,41 @@ pub fn Learn() -> Element {
             "data-learn-container": "",
             onkeydown: keyboard_handler,
             if show_start_button {
-                div { class: "flex justify-center",
-                    crate::ui::Button {
-                        variant: crate::ui::ButtonVariant::Rainbow,
-                        class: Some("px-8 py-3".to_string()),
-                        onclick: {
-                            let session_clone = session.clone();
-                            move |_| {
-                                let session_clone = session_clone.clone();
-                                spawn(async move {
-                                    (session_clone.restart_session)();
-                                });
-                            }
-                        },
-                        disabled: None,
-                        "Начать обучение"
+                div { class: "space-y-4 max-w-xl mx-auto",
+                    div { class: "flex justify-center",
+                        crate::ui::Button {
+                            variant: crate::ui::ButtonVariant::Rainbow,
+                            class: Some("px-8 py-3".to_string()),
+                            onclick: {
+                                let session_clone = session.clone();
+                                move |_| {
+                                    (session_clone.start_session)();
+                                }
+                            },
+                            disabled: None,
+                            "Начать обучение"
+                        }
+                    }
+
+                    {
+                        let data = (session.session_data)();
+                        match data.start_feedback {
+                            StartFeedback::None => rsx! {},
+                            StartFeedback::Empty => rsx! {
+                                crate::ui::Card { class: Some("border-slate-200 bg-slate-50".to_string()),
+                                    crate::ui::Paragraph { class: Some("text-slate-700".to_string()),
+                                        "Нет карточек для обучения — похоже, вы всё выучили (или на сегодня ничего не запланировано)."
+                                    }
+                                }
+                            },
+                            StartFeedback::Error(ref msg) => rsx! {
+                                crate::ui::Card { class: Some("border-red-200 bg-red-50".to_string()),
+                                    crate::ui::Paragraph { class: Some("text-red-800".to_string()),
+                                        "Не удалось загрузить карточки: {msg}"
+                                    }
+                                }
+                            },
+                        }
                     }
                 }
             }
@@ -184,6 +201,7 @@ pub fn Learn() -> Element {
                             }
                         }
                     }
+                    _ => rsx! {},
                 }
             }
         }

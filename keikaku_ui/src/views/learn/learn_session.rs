@@ -6,9 +6,17 @@ use keikaku::domain::{
 
 #[derive(Clone, PartialEq)]
 pub enum SessionState {
+    Start,
     Loading,
     Active,
     Completed,
+}
+
+#[derive(Clone, PartialEq)]
+pub enum StartFeedback {
+    None,
+    Empty,
+    Error(String),
 }
 
 #[derive(Clone, PartialEq)]

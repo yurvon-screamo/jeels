@@ -17,4 +17,4 @@ mod session_manager;
 use session_manager::use_learn_session;
 
 mod learn_session;
-use learn_session::{LearnCard, LearnStep, SessionState};
+use learn_session::{LearnCard, LearnStep, SessionState, StartFeedback};
