@@ -184,10 +184,19 @@ fn map_card(card: &VocabularyCard) -> UiCard {
         })
         .unwrap_or_else(|| "—".to_string());
 
+    let examples = card
+        .example_phrases()
+        .iter()
+        .map(|ex| (ex.text().clone(), ex.translation().clone()))
+        .collect();
+
     UiCard {
         id: card.id().to_string(),
         question: card.word().text().to_string(),
         answer: card.meaning().text().to_string(),
+        examples,
+        difficulty: card.memory().difficulty().map(|d| d.value()),
+        stability: card.memory().stability().map(|s| s.value()),
         next_review,
         due: card.memory().is_due(),
         is_new: card.memory().is_new(),
@@ -227,8 +236,10 @@ fn filter_and_sort_cards(
 
             let matches_status = match filter_status {
                 FilterStatus::All => true,
-                FilterStatus::Due => c.due,
-                FilterStatus::NotDue => !c.due,
+                FilterStatus::New => c.is_new,
+                FilterStatus::LowStability => c.is_low_stability,
+                FilterStatus::InProgress => c.is_in_progress,
+                FilterStatus::Learned => c.is_learned,
             };
 
             matches_search && matches_status
@@ -252,6 +263,22 @@ fn filter_and_sort_cards(
         }
         SortBy::Answer => {
             result.sort_by(|a, b| a.answer.cmp(&b.answer));
+        }
+        SortBy::Difficulty => {
+            result.sort_by(|a, b| match (a.difficulty, b.difficulty) {
+                (Some(da), Some(db)) => da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
+        }
+        SortBy::Stability => {
+            result.sort_by(|a, b| match (a.stability, b.stability) {
+                (Some(sa), Some(sb)) => sa.partial_cmp(&sb).unwrap_or(std::cmp::Ordering::Equal),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
         }
     }
 

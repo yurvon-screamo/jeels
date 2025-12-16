@@ -40,32 +40,46 @@ pub fn CardsFilters(
                             label: "Все",
                         },
                         FilterOption {
-                            value: "due",
-                            label: "К повторению",
+                            value: "new",
+                            label: "Новые",
                         },
                         FilterOption {
-                            value: "not_due",
-                            label: "Запланированы",
+                            value: "low_stability",
+                            label: "Низкая стабильность",
+                        },
+                        FilterOption {
+                            value: "in_progress",
+                            label: "В процессе",
+                        },
+                        FilterOption {
+                            value: "learned",
+                            label: "Изученные",
                         },
                     ],
                     selected: Some(FilterOption {
                         value: match filter_status() {
                             FilterStatus::All => "all",
-                            FilterStatus::Due => "due",
-                            FilterStatus::NotDue => "not_due",
+                            FilterStatus::New => "new",
+                            FilterStatus::LowStability => "low_stability",
+                            FilterStatus::InProgress => "in_progress",
+                            FilterStatus::Learned => "learned",
                         },
                         label: match filter_status() {
                             FilterStatus::All => "Все",
-                            FilterStatus::Due => "К повторению",
-                            FilterStatus::NotDue => "Запланированы",
+                            FilterStatus::New => "Новые",
+                            FilterStatus::LowStability => "Низкая стабильность",
+                            FilterStatus::InProgress => "В процессе",
+                            FilterStatus::Learned => "Изученные",
                         },
                     }),
                     onselect: move |selected: FilterOption| {
                         filter_status
                             .set(
                                 match selected.value {
-                                    "due" => FilterStatus::Due,
-                                    "not_due" => FilterStatus::NotDue,
+                                    "new" => FilterStatus::New,
+                                    "low_stability" => FilterStatus::LowStability,
+                                    "in_progress" => FilterStatus::InProgress,
+                                    "learned" => FilterStatus::Learned,
                                     _ => FilterStatus::All,
                                 },
                             );
@@ -86,17 +100,29 @@ pub fn CardsFilters(
                             value: "answer",
                             label: "По ответу",
                         },
+                        FilterOption {
+                            value: "difficulty",
+                            label: "По сложности",
+                        },
+                        FilterOption {
+                            value: "stability",
+                            label: "По стабильности",
+                        },
                     ],
                     selected: Some(FilterOption {
                         value: match sort_by() {
                             SortBy::Date => "date",
                             SortBy::Question => "question",
                             SortBy::Answer => "answer",
+                            SortBy::Difficulty => "difficulty",
+                            SortBy::Stability => "stability",
                         },
                         label: match sort_by() {
                             SortBy::Date => "По дате",
                             SortBy::Question => "По вопросу",
                             SortBy::Answer => "По ответу",
+                            SortBy::Difficulty => "По сложности",
+                            SortBy::Stability => "По стабильности",
                         },
                     }),
                     onselect: move |selected: FilterOption| {
@@ -105,6 +131,8 @@ pub fn CardsFilters(
                                 match selected.value {
                                     "question" => SortBy::Question,
                                     "answer" => SortBy::Answer,
+                                    "difficulty" => SortBy::Difficulty,
+                                    "stability" => SortBy::Stability,
                                     _ => SortBy::Date,
                                 },
                             );

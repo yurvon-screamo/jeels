@@ -64,13 +64,13 @@ impl SrsService for FsrsSrsService {
             Rating::Easy => &next_states.easy,
         };
 
-        let interval_days = next_state.interval.round() as i64;
-        let next_review_date = Utc::now() + Duration::days(interval_days);
+        // FSRS returns interval as f32 in *days*. Convert days -> milliseconds and keep fractional part.
+        let interval_ms = (next_state.interval.max(0.0) as f64 * 86_400_000.0).round() as i64;
+        let interval = Duration::milliseconds(interval_ms);
+        let next_review_date = Utc::now() + interval;
         let stability = Stability::new(next_state.memory.stability as f64)?;
         let difficulty = Difficulty::new(next_state.memory.difficulty as f64)?;
         let memory_state = MemoryState::new(stability, difficulty, next_review_date);
-
-        let interval = Duration::days(interval_days);
 
         Ok(NextReview {
             interval,
