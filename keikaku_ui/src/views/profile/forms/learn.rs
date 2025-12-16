@@ -30,7 +30,7 @@ pub fn LearnSettingsForm(
     on_change: EventHandler<LearnSettings>,
 ) -> Element {
     let mut limit_enabled = use_signal(|| settings.limit().is_some());
-    let mut limit = use_signal(|| settings.limit().unwrap_or(30).to_string());
+    let mut limit = use_signal(|| settings.limit().unwrap_or(8).to_string());
     let mut show_furigana = use_signal(|| settings.show_furigana());
     let mut low_stability_mode = use_signal(|| settings.low_stability_mode());
     let mut force_new_cards = use_signal(|| settings.force_new_cards());
@@ -68,7 +68,7 @@ pub fn LearnSettingsForm(
                 if limit_enabled() {
                     TextInput {
                         label: Some("Лимит карточек".to_string()),
-                        placeholder: Some("30".to_string()),
+                        placeholder: Some("8".to_string()),
                         value: limit,
                         oninput: Some(
                             EventHandler::new({

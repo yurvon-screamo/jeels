@@ -70,11 +70,7 @@ impl SrsService for FsrsSrsService {
         let difficulty = Difficulty::new(next_state.memory.difficulty as f64)?;
         let memory_state = MemoryState::new(stability, difficulty, next_review_date);
 
-        let interval = if interval_days == 0 && rating != Rating::Again {
-            Duration::hours(1)
-        } else {
-            Duration::days(interval_days)
-        };
+        let interval = Duration::days(interval_days);
 
         Ok(NextReview {
             interval,

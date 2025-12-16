@@ -4,9 +4,6 @@ pub use view::Learn;
 mod active;
 use active::LearnActive;
 
-mod completed;
-use completed::LearnCompleted;
-
 mod progress;
 use progress::LearnProgress;
 

@@ -206,11 +206,20 @@ impl User {
     }
 
     pub fn start_low_stability_cards_session(&self, limit: Option<usize>) -> Vec<StudySessionItem> {
-        self.collect_study_cards(limit)
+        let mut cards = self
+            .collect_study_cards()
             .into_iter()
             .filter(|card| card.is_low_stability)
-            .map(|card| card.item)
-            .collect()
+            .collect::<Vec<_>>();
+
+        cards.sort_by_key(|card| card.next_review_date);
+        cards.reverse();
+
+        if let Some(limit) = limit {
+            cards.truncate(limit);
+        }
+
+        cards.into_iter().map(|card| card.item).collect()
     }
 
     pub fn start_study_session(
@@ -218,7 +227,9 @@ impl User {
         force_new_cards: bool,
         limit: Option<usize>,
     ) -> Vec<StudySessionItem> {
-        let all_cards = self.collect_study_cards(limit);
+        let mut all_cards = self.collect_study_cards();
+        all_cards.sort_by_key(|card| card.next_review_date);
+
         let mut due_cards: Vec<_> = all_cards
             .iter()
             .filter(|card| card.is_due && (card.is_in_progress || card.is_known))
@@ -230,16 +241,28 @@ impl User {
             .cloned()
             .collect();
 
-        if force_new_cards || priority_cards.len() < self.new_cards_limit {
-            let mut new_cards: Vec<_> = all_cards.into_iter().filter(|card| card.is_new).collect();
-            new_cards.sort_by_key(|card| card.next_review_date);
+        let try_new = if let Some(limit) = limit
+            && priority_cards.len() < limit
+        {
+            true
+        } else if limit.is_none() {
+            true
+        } else {
+            false
+        };
 
-            if !force_new_cards {
-                let available = self.new_cards_limit.saturating_sub(priority_cards.len());
-                new_cards.truncate(available);
+        if try_new {
+            if force_new_cards || priority_cards.len() < self.new_cards_limit {
+                let mut new_cards: Vec<_> =
+                    all_cards.into_iter().filter(|card| card.is_new).collect();
+
+                if !force_new_cards {
+                    let available = self.new_cards_limit.saturating_sub(priority_cards.len());
+                    new_cards.truncate(available);
+                }
+
+                priority_cards.extend(new_cards);
             }
-
-            priority_cards.extend(new_cards);
         }
 
         due_cards.sort_by_key(|card| card.next_review_date);
@@ -425,24 +448,18 @@ impl User {
         )))
     }
 
-    fn collect_study_cards(&self, limit: Option<usize>) -> Vec<StudyCard> {
+    fn collect_study_cards(&self) -> Vec<StudyCard> {
         let vocabulary_cards = self
             .vocabulary_cards
             .values()
             .filter_map(|card| self.vocabulary_to_study_card(card).ok());
+
         let kanji_cards = self
             .kanji_cards
             .values()
             .filter_map(|card| self.kanji_to_study_card(card).ok());
 
-        let mut cards: Vec<_> = vocabulary_cards.chain(kanji_cards).collect();
-        cards.sort_by_key(|card| card.next_review_date);
-
-        if let Some(limit) = limit {
-            cards.truncate(limit);
-        }
-
-        cards
+        vocabulary_cards.chain(kanji_cards).collect()
     }
 
     fn vocabulary_to_study_card(&self, card: &VocabularyCard) -> Result<StudyCard, JeersError> {
@@ -476,7 +493,7 @@ impl User {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct StudyCard {
     item: StudySessionItem,
     next_review_date: Option<DateTime<Utc>>,

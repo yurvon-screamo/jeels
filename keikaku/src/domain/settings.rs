@@ -179,7 +179,7 @@ impl LearnSettings {
 
     pub fn default() -> Self {
         Self {
-            limit: Some(30),
+            limit: Some(8),
             show_furigana: true,
             low_stability_mode: false,
             force_new_cards: false,

@@ -1,7 +1,7 @@
 use chrono::Utc;
 use dioxus::{document::eval, prelude::*};
 
-use super::{use_learn_session, LearnActive, LearnCompleted, SessionState, StartFeedback};
+use super::{use_learn_session, LearnActive, SessionState, StartFeedback};
 use crate::views::learn::session_manager::complete_lesson_impl;
 
 #[component]
@@ -9,76 +9,74 @@ pub fn Learn() -> Element {
     let session = use_learn_session();
 
     let keyboard_handler = {
-        let session_clone = session.clone();
+        let session = session.clone();
         move |e: KeyboardEvent| {
             use dioxus::prelude::Code;
             match e.code() {
                 Code::Space => {
-                    // Пробел - показать ответ или перейти дальше
-                    e.prevent_default();
-                    let session_data = (session_clone.session_data)();
+                    // Space - show answer on Question.
+                    let session_data = (session.session_data)();
                     if session_data.current_step == super::LearnStep::Question {
-                        (session_clone.show_answer)();
-                    } else if session_data.current_step == super::LearnStep::Answer {
-                        (session_clone.next_card)();
+                        e.prevent_default();
+                        (session.show_answer)();
                     }
                 }
                 Code::Backspace => {
                     // Backspace - вернуться к предыдущей карточке
-                    let session_data = (session_clone.session_data)();
+                    let session_data = (session.session_data)();
                     let is_first_card = session_data.current_index == 0;
                     let can_go_prev =
                         !is_first_card && session_data.current_step == super::LearnStep::Answer;
                     if can_go_prev {
                         e.prevent_default();
-                        (session_clone.prev_card)();
+                        (session.prev_card)();
                     }
                 }
                 Code::KeyS => {
                     // S - пропустить карточку
                     e.prevent_default();
-                    (session_clone.next_card)();
+                    (session.next_card)();
                 }
                 Code::KeyQ => {
                     // Q - выйти из сессии
                     e.prevent_default();
                     let session_duration = Utc::now()
-                        .signed_duration_since((session_clone.session_data)().session_start_time);
+                        .signed_duration_since((session.session_data)().session_start_time);
                     spawn(async move {
                         let _ = complete_lesson_impl(session_duration).await;
                     });
-                    (session_clone.restart_session)();
+                    (session.restart_session)();
                 }
                 Code::Digit1 => {
                     // 1 - оценить как "Легко"
                     e.prevent_default();
-                    let session_data = (session_clone.session_data)();
+                    let session_data = (session.session_data)();
                     if session_data.current_step == super::LearnStep::Answer {
-                        (session_clone.rate_card)(crate::domain::Rating::Easy);
+                        (session.rate_card)(crate::domain::Rating::Easy);
                     }
                 }
                 Code::Digit2 => {
                     // 2 - оценить как "Хорошо"
                     e.prevent_default();
-                    let session_data = (session_clone.session_data)();
+                    let session_data = (session.session_data)();
                     if session_data.current_step == super::LearnStep::Answer {
-                        (session_clone.rate_card)(crate::domain::Rating::Good);
+                        (session.rate_card)(crate::domain::Rating::Good);
                     }
                 }
                 Code::Digit3 => {
                     // 3 - оценить как "Сложно"
                     e.prevent_default();
-                    let session_data = (session_clone.session_data)();
+                    let session_data = (session.session_data)();
                     if session_data.current_step == super::LearnStep::Answer {
-                        (session_clone.rate_card)(crate::domain::Rating::Hard);
+                        (session.rate_card)(crate::domain::Rating::Hard);
                     }
                 }
                 Code::Digit4 => {
                     // 4 - оценить как "Снова"
                     e.prevent_default();
-                    let session_data = (session_clone.session_data)();
+                    let session_data = (session.session_data)();
                     if session_data.current_step == super::LearnStep::Answer {
-                        (session_clone.rate_card)(crate::domain::Rating::Again);
+                        (session.rate_card)(crate::domain::Rating::Again);
                     }
                 }
                 _ => {}
@@ -194,12 +192,12 @@ pub fn Learn() -> Element {
                         }
                     }
                     SessionState::Completed => {
-                        rsx! {
-                            LearnCompleted {
-                                total_cards: (session.session_data)().cards.len(),
-                                on_restart: move |_| (session.restart_session)(),
-                            }
-                        }
+                        // Automatically restart session when completed
+                        let session_clone = session.clone();
+                        spawn(async move {
+                            (session_clone.restart_session)();
+                        });
+                        rsx! {}
                     }
                     _ => rsx! {},
                 }
