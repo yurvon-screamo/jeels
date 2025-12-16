@@ -132,6 +132,7 @@ async fn save_user_settings(settings: UserSettings) -> Result<(), String> {
         embedding: Some(settings.embedding().clone()),
         translation: Some(settings.translation().clone()),
         duolingo_jwt_token: Some(settings.duolingo_jwt_token().map(|s| s.to_string())),
+        learn: Some(settings.learn().clone()),
     };
 
     UpdateUserSettingsUseCase::new(repo)

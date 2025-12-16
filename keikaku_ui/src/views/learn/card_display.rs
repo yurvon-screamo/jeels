@@ -143,7 +143,7 @@ fn CardAnswerView(
                         // Middle column: Examples
                         ExamplesSection { card: card.clone(), show_furigana }
                     }
-                
+
                 }
 
                 // Right column: Action buttons

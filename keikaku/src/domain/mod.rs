@@ -22,7 +22,9 @@ pub use error::JeersError;
 use rand::{Rng, seq::SliceRandom};
 pub use review::Review;
 use serde::{Deserialize, Serialize};
-pub use settings::{EmbeddingSettings, LlmSettings, TranslationSettings, UserSettings};
+pub use settings::{
+    EmbeddingSettings, LearnSettings, LlmSettings, TranslationSettings, UserSettings,
+};
 use std::collections::HashMap;
 use ulid::Ulid;
 pub use value_objects::Rating;

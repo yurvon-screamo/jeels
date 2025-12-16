@@ -1,6 +1,6 @@
 use crate::application::UserRepository;
 use crate::domain::error::JeersError;
-use crate::domain::{EmbeddingSettings, LlmSettings, TranslationSettings};
+use crate::domain::{EmbeddingSettings, LearnSettings, LlmSettings, TranslationSettings};
 use ulid::Ulid;
 
 #[derive(Clone)]
@@ -14,6 +14,7 @@ pub struct UpdateUserSettingsRequest {
     pub embedding: Option<EmbeddingSettings>,
     pub translation: Option<TranslationSettings>,
     pub duolingo_jwt_token: Option<Option<String>>,
+    pub learn: Option<LearnSettings>,
 }
 
 impl<'a, R: UserRepository> UpdateUserSettingsUseCase<'a, R> {
@@ -34,7 +35,6 @@ impl<'a, R: UserRepository> UpdateUserSettingsUseCase<'a, R> {
 
         let settings = user.settings_mut();
 
-        // Обновляем только переданные настройки
         if let Some(llm) = request.llm {
             settings.set_llm(llm);
         }
@@ -49,6 +49,10 @@ impl<'a, R: UserRepository> UpdateUserSettingsUseCase<'a, R> {
 
         if let Some(duolingo_jwt_token) = request.duolingo_jwt_token {
             settings.set_duolingo_jwt_token(duolingo_jwt_token);
+        }
+
+        if let Some(learn) = request.learn {
+            settings.set_learn(learn);
         }
 
         self.repository.save(&user).await?;

@@ -1,11 +1,8 @@
-use crate::views::learn::learn_session::{CardType, SimilarCard};
 use chrono::{DateTime, Duration, Utc};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::{
     complete_lesson::CompleteLessonUseCase, rate_card::RateCardUseCase,
-    select_cards_to_learn::SelectCardsToLearnUseCase,
 };
-use keikaku::domain::study_session::StudySessionItem;
 use keikaku::settings::ApplicationEnvironment;
 use std::rc::Rc;
 use ulid::Ulid;
@@ -40,49 +37,12 @@ impl Default for LearnSessionData {
 }
 
 pub fn use_learn_session() -> LearnSessionSignals {
-    let state = use_signal(|| SessionState::Settings);
+    let state = use_signal(|| SessionState::Completed);
     let session_data = use_signal(LearnSessionData::default);
 
     LearnSessionSignals {
         state,
         session_data,
-        start_session: Rc::new(
-            move |limit: Option<usize>, show_furigana: bool, low_stability_mode: bool| {
-                let mut state = state;
-                let mut session_data = session_data;
-
-                spawn(async move {
-                    state.set(SessionState::Loading);
-
-                    match fetch_cards_to_learn(limit, low_stability_mode).await {
-                        Ok(items) => {
-                            if items.is_empty() {
-                                state.set(SessionState::Settings);
-                                session_data.write().cards = vec![];
-                            } else {
-                                let learn_cards = items
-                                    .into_iter()
-                                    .map(map_study_item_to_learn_card)
-                                    .collect::<Vec<_>>();
-                                session_data.write().cards = learn_cards;
-                                session_data.write().current_index = 0;
-                                session_data.write().current_step = LearnStep::Question;
-                                session_data.write().limit = limit;
-                                session_data.write().show_furigana = show_furigana;
-                                session_data.write().session_start_time = Utc::now();
-                                state.set(SessionState::Active);
-                            }
-                        }
-                        Err(e) => {
-                            session_data.write().cards = vec![];
-                            state.set(SessionState::Settings);
-                            session_data.write().current_step = LearnStep::Question;
-                            error!("learn fetch error: {}", e);
-                        }
-                    }
-                });
-            },
-        ),
         next_card: Rc::new(move || {
             let mut state = state;
             let mut session_data = session_data;
@@ -102,7 +62,7 @@ pub fn use_learn_session() -> LearnSessionSignals {
             let mut state = state;
             let mut session_data = session_data;
             *session_data.write() = LearnSessionData::default();
-            state.set(SessionState::Settings);
+            state.set(SessionState::Completed);
         }),
         show_answer: Rc::new(move || {
             let mut session_data = session_data;
@@ -169,70 +129,11 @@ pub fn use_learn_session() -> LearnSessionSignals {
 pub struct LearnSessionSignals {
     pub state: Signal<SessionState>,
     pub session_data: Signal<LearnSessionData>,
-    pub start_session: Rc<dyn Fn(Option<usize>, bool, bool)>,
     pub next_card: Rc<dyn Fn()>,
     pub restart_session: Rc<dyn Fn()>,
     pub show_answer: Rc<dyn Fn()>,
     pub prev_card: Rc<dyn Fn()>,
     pub rate_card: Rc<dyn Fn(crate::domain::Rating)>,
-}
-
-async fn fetch_cards_to_learn(
-    limit: Option<usize>,
-    low_stability_mode: bool,
-) -> Result<Vec<StudySessionItem>, String> {
-    let env = ApplicationEnvironment::get();
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    SelectCardsToLearnUseCase::new(repo)
-        .execute(user_id, false, low_stability_mode, limit)
-        .await
-        .map_err(to_error)
-}
-
-fn map_study_item_to_learn_card(item: StudySessionItem) -> LearnCard {
-    match item {
-        StudySessionItem::Vocabulary(v) => LearnCard {
-            id: v.card_id().to_string(),
-            card_type: CardType::Vocabulary,
-            question: v.word().to_string(),
-            answer: v.meaning().to_string(),
-            example_phrases: v.example_phrases().to_vec(),
-            similarity: v
-                .similarity()
-                .iter()
-                .map(|s| SimilarCard {
-                    word: s.word().to_string(),
-                    meaning: s.meaning().to_string(),
-                })
-                .collect(),
-            homonyms: v
-                .homonyms()
-                .iter()
-                .map(|h| SimilarCard {
-                    word: h.word().to_string(),
-                    meaning: h.meaning().to_string(),
-                })
-                .collect(),
-            kanji_info: v.kanji().to_vec(),
-            example_words: vec![],
-            radicals: vec![],
-            jlpt_level: *v.level(),
-        },
-        StudySessionItem::Kanji(k) => LearnCard {
-            id: k.card_id().to_string(),
-            card_type: CardType::Kanji,
-            question: k.kanji().to_string(),
-            answer: k.description().to_string(),
-            example_phrases: vec![],
-            similarity: vec![],
-            homonyms: vec![],
-            kanji_info: vec![],
-            example_words: k.example_words().to_vec(),
-            radicals: k.radicals().to_vec(),
-            jlpt_level: *k.level(),
-        },
-    }
 }
 
 async fn rate_card_impl(card_id: Ulid, rating: crate::domain::Rating) -> Result<(), String> {
@@ -241,7 +142,6 @@ async fn rate_card_impl(card_id: Ulid, rating: crate::domain::Rating) -> Result<
     let srs_service = env.get_srs_service().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     let rate_usecase = RateCardUseCase::new(repo, srs_service);
-    // Convert UI Rating to domain Rating
     let domain_rating = match rating {
         crate::domain::Rating::Easy => keikaku::domain::Rating::Easy,
         crate::domain::Rating::Good => keikaku::domain::Rating::Good,

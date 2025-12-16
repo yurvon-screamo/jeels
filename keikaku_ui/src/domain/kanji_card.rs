@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::domain::{FuriganaText, PopularWordsGrid, RadicalGrid};
+use crate::domain::{PopularWordsGrid, RadicalGrid};
 use crate::ui::{Card, InfoSection, InfoSectionTone, Pill};
 use keikaku::domain::{dictionary::KanjiInfo, value_objects::NativeLanguage};
 
@@ -61,7 +61,7 @@ pub fn KanjiCard(
                 if !radicals.is_empty() {
                     rsx! {
                         RadicalGrid {
-                            radicals: radicals.into_iter().map(|r| r.clone()).collect(),
+                            radicals: radicals.into_iter().cloned().collect(),
                             show_kanji_list: false,
                         }
                     }

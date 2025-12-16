@@ -13,30 +13,19 @@ impl<'a, R: UserRepository> SelectCardsToLearnUseCase<'a, R> {
         Self { repository }
     }
 
-    pub async fn execute(
-        &self,
-        user_id: Ulid,
-        force_new_cards: bool,
-        low_stability_mode: bool,
-        limit: Option<usize>,
-    ) -> Result<Vec<StudySessionItem>, JeersError> {
-        if force_new_cards && low_stability_mode {
-            return Err(JeersError::InvalidValues {
-                reason: "Force new cards and low stability mode cannot be used together"
-                    .to_string(),
-            });
-        }
-
+    pub async fn execute(&self, user_id: Ulid) -> Result<Vec<StudySessionItem>, JeersError> {
         let user = self
             .repository
             .find_by_id(user_id)
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let study_session_items = if low_stability_mode {
-            user.start_low_stability_cards_session(limit)
+        let learn_settings = user.settings().learn();
+
+        let study_session_items = if learn_settings.low_stability_mode() {
+            user.start_low_stability_cards_session(learn_settings.limit())
         } else {
-            user.start_study_session(force_new_cards, limit)
+            user.start_study_session(learn_settings.force_new_cards(), learn_settings.limit())
         };
 
         Ok(study_session_items)

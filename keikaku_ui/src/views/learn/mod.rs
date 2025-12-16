@@ -1,9 +1,6 @@
 mod view;
 pub use view::Learn;
 
-mod settings;
-use settings::LearnSettings;
-
 mod active;
 use active::LearnActive;
 

@@ -3,7 +3,7 @@ use keikaku::domain::UserSettings;
 
 use crate::ui::{Button, ButtonVariant, Card, SectionHeader, TextInput};
 use crate::views::profile::forms::{
-    EmbeddingSettingsForm, LlmSettingsForm, TranslationSettingsForm,
+    EmbeddingSettingsForm, LearnSettingsForm, LlmSettingsForm, TranslationSettingsForm,
 };
 
 #[component]
@@ -15,6 +15,7 @@ pub fn SettingsForm(
     let mut llm_settings = use_signal(|| settings.llm().clone());
     let mut embedding_settings = use_signal(|| settings.embedding().clone());
     let mut translation_settings = use_signal(|| settings.translation().clone());
+    let mut learn_settings = use_signal(|| settings.learn().clone());
     let duolingo_token = use_signal(|| {
         settings
             .duolingo_jwt_token()
@@ -70,6 +71,19 @@ pub fn SettingsForm(
 
             Card { class: Some("space-y-4".to_string()),
                 SectionHeader {
+                    title: "Настройки обучения".to_string(),
+                    subtitle: Some("Параметры сессии обучения".to_string()),
+                    actions: None,
+                }
+
+                LearnSettingsForm {
+                    settings: learn_settings(),
+                    on_change: move |new_settings| learn_settings.set(new_settings),
+                }
+            }
+
+            Card { class: Some("space-y-4".to_string()),
+                SectionHeader {
                     title: "Duolingo".to_string(),
                     subtitle: Some("JWT токен для синхронизации слов".to_string()),
                     actions: None,
@@ -91,6 +105,7 @@ pub fn SettingsForm(
                             embedding_settings(),
                             translation_settings(),
                             Some(duolingo_token()).filter(|s| !s.trim().is_empty()),
+                            learn_settings(),
                         );
                         on_save.call(new_settings);
                     },

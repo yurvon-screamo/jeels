@@ -1,7 +1,7 @@
 use chrono::Utc;
 use dioxus::{document::eval, prelude::*};
 
-use super::{use_learn_session, LearnActive, LearnCompleted, LearnSettings, SessionState};
+use super::{use_learn_session, LearnActive, LearnCompleted, SessionState};
 use crate::views::learn::session_manager::complete_lesson_impl;
 
 #[component]
@@ -101,33 +101,38 @@ pub fn Learn() -> Element {
         eval.send(()).unwrap();
     });
 
+    let show_start_button = !matches!(
+        (session.state)(),
+        SessionState::Loading | SessionState::Active
+    );
+
     rsx! {
         div {
             class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6 focus:outline-none",
             tabindex: "0",
             "data-learn-container": "",
             onkeydown: keyboard_handler,
+            if show_start_button {
+                div { class: "flex justify-center",
+                    crate::ui::Button {
+                        variant: crate::ui::ButtonVariant::Rainbow,
+                        class: Some("px-8 py-3".to_string()),
+                        onclick: {
+                            let session_clone = session.clone();
+                            move |_| {
+                                let session_clone = session_clone.clone();
+                                spawn(async move {
+                                    (session_clone.restart_session)();
+                                });
+                            }
+                        },
+                        disabled: None,
+                        "Начать обучение"
+                    }
+                }
+            }
             {
                 match (session.state)() {
-                    SessionState::Settings => {
-                        rsx! {
-                            LearnSettings {
-                                limit: (session.session_data)().limit,
-                                show_furigana: (session.session_data)().show_furigana,
-                                low_stability_mode: (session.session_data)().low_stability_mode,
-                                loading: false,
-                                on_start: move |
-                                    (
-                                        limit_opt,
-                                        show_furigana_val,
-                                        low_stability_mode_val,
-                                    ): (Option<usize>, bool, bool)|
-                                {
-                                    (session.start_session)(limit_opt, show_furigana_val, low_stability_mode_val);
-                                },
-                            }
-                        }
-                    }
                     SessionState::Loading => {
                         rsx! {
                             div { class: "flex items-center justify-center py-12",
