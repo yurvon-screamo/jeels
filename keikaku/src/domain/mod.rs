@@ -245,24 +245,19 @@ impl User {
             && priority_cards.len() < limit
         {
             true
-        } else if limit.is_none() {
-            true
         } else {
-            false
+            limit.is_none()
         };
 
-        if try_new {
-            if force_new_cards || priority_cards.len() < self.new_cards_limit {
-                let mut new_cards: Vec<_> =
-                    all_cards.into_iter().filter(|card| card.is_new).collect();
+        if try_new && (force_new_cards || priority_cards.len() < self.new_cards_limit) {
+            let mut new_cards: Vec<_> = all_cards.into_iter().filter(|card| card.is_new).collect();
 
-                if !force_new_cards {
-                    let available = self.new_cards_limit.saturating_sub(priority_cards.len());
-                    new_cards.truncate(available);
-                }
-
-                priority_cards.extend(new_cards);
+            if !force_new_cards {
+                let available = self.new_cards_limit.saturating_sub(priority_cards.len());
+                new_cards.truncate(available);
             }
+
+            priority_cards.extend(new_cards);
         }
 
         due_cards.sort_by_key(|card| card.next_review_date);

@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::domain::{PopularWordsGrid, RadicalGrid};
-use crate::ui::{Card, InfoSection, InfoSectionTone, Pill};
+use crate::ui::Card;
+use crate::ui::Pill;
 use keikaku::domain::{dictionary::KanjiInfo, value_objects::NativeLanguage};
 
 #[component]
@@ -12,20 +13,29 @@ pub fn KanjiCard(
     class: Option<String>,
 ) -> Element {
     let class_str = class.unwrap_or_default();
+    let radicals = kanji_info
+        .radicals()
+        .into_iter()
+        .cloned()
+        .collect::<Vec<_>>();
+    let popular_words = kanji_info.popular_words_with_translations(&native_language);
+    let has_radicals = !radicals.is_empty();
+    let has_popular_words = !popular_words.is_empty();
 
     rsx! {
-        Card { class: Some(format!("space-y-6 {}", class_str)),
-            // Header section with kanji and description in 3:1 grid
-            div { class: "grid grid-cols-4 gap-6",
-                // Left column (3 parts): Kanji character and metadata
-                div { class: "col-span-3 space-y-4",
-                    // Main kanji character
-                    div { class: "text-5xl md:text-6xl font-bold text-slate-800",
-                        "{kanji_info.kanji()}"
+        Card { class: Some(format!("p-6 md:p-8 space-y-4 {}", class_str)),
+            // Compact header: kanji on the left, description + metadata on the right
+            div { class: "grid grid-cols-1 md:grid-cols-[auto,1fr] gap-x-6 gap-y-2 items-start",
+                div { class: "text-5xl md:text-6xl font-bold leading-none text-slate-800",
+                    "{kanji_info.kanji()}"
+                }
+
+                div { class: "min-w-0",
+                    div { class: "text-base md:text-lg font-semibold text-slate-800 leading-snug",
+                        "{kanji_info.description()}"
                     }
 
-                    // Metadata: JLPT level and usage count
-                    div { class: "flex items-center gap-3 flex-wrap",
+                    div { class: "mt-2 flex items-center gap-2 flex-wrap",
                         Pill {
                             text: format!("JLPT N{}", kanji_info.jlpt().as_number()),
                             tone: Some(
@@ -37,48 +47,37 @@ pub fn KanjiCard(
                                 },
                             ),
                         }
-                        span { class: "text-sm text-slate-600 font-medium",
+                        span { class: "text-xs md:text-sm text-slate-600 font-medium",
                             "Используется в {kanji_info.used_in()} словах"
-                        }
-                    }
-                }
-
-                // Right column (1 part): Description
-                div { class: "col-span-1",
-                    InfoSection {
-                        title: "Значение".to_string(),
-                        tone: InfoSectionTone::Neutral,
-                        p { class: "text-slate-700 leading-relaxed text-sm",
-                            "{kanji_info.description()}"
                         }
                     }
                 }
             }
 
             // Radicals section
-            {
-                let radicals = kanji_info.radicals();
-                if !radicals.is_empty() {
-                    rsx! {
-                        RadicalGrid {
-                            radicals: radicals.into_iter().cloned().collect(),
-                            show_kanji_list: false,
+            if has_radicals || has_popular_words {
+                div { class: "grid grid-cols-1 md:grid-cols-2 gap-3",
+                    // Radicals section
+                    if has_radicals {
+                        div { class: if !has_popular_words { "md:col-span-2" } else { "" },
+                            RadicalGrid {
+                                radicals,
+                                show_kanji_list: false,
+                                dense: Some(true),
+                            }
                         }
                     }
-                } else {
-                    rsx! {}
-                }
-            }
 
-            // Popular words section with translations
-            {
-                let popular_words = kanji_info.popular_words_with_translations(&native_language);
-                if !popular_words.is_empty() {
-                    rsx! {
-                        PopularWordsGrid { popular_words, show_furigana }
+                    // Popular words section with translations
+                    if has_popular_words {
+                        div { class: if !has_radicals { "md:col-span-2" } else { "" },
+                            PopularWordsGrid {
+                                popular_words,
+                                show_furigana,
+                                dense: Some(true),
+                            }
+                        }
                     }
-                } else {
-                    rsx! {}
                 }
             }
         }

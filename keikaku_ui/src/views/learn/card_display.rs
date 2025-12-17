@@ -20,7 +20,7 @@ pub fn LearnCardDisplay(
 ) -> Element {
     if let Some(card) = card {
         rsx! {
-            Card { class: Some("space-y-4 transition-all duration-300".to_string()),
+            Card { class: Some("space-y-2 transition-all duration-300".to_string()),
 
                 if current_step == super::LearnStep::Question {
                     CardQuestionView {
@@ -46,7 +46,7 @@ pub fn LearnCardDisplay(
         }
     } else {
         rsx! {
-            Card { class: Some("space-y-4".to_string()),
+            Card { class: Some("space-y-2".to_string()),
                 crate::ui::Paragraph { class: Some("text-sm text-slate-500 text-center".to_string()),
                     "Нет карточек для отображения"
                 }
@@ -62,7 +62,7 @@ pub fn QuestionView(
     on_show_answer: EventHandler<MouseEvent>,
 ) -> Element {
     rsx! {
-        div { class: "space-y-4",
+        div { class: "space-y-2",
             WordCard { text: question, show_furigana, class: None }
         }
     }
@@ -79,7 +79,7 @@ fn CardQuestionView(
             // Main content: Question on left, buttons on right
             div { class: "grid grid-cols-1 lg:grid-cols-3 gap-6",
                 // Left column: Question
-                div { class: "lg:col-span-2 space-y-4",
+                div { class: "lg:col-span-2 space-y-2",
                     // Question
                     div { class: "space-y-2",
                         div { class: "text-xs text-slate-500 uppercase tracking-wide font-semibold",
@@ -89,7 +89,7 @@ fn CardQuestionView(
                     }
                 }
 
-                div { class: "space-y-4 flex flex-col h-full",
+                div { class: "space-y-2 flex flex-col h-full",
                     QuestionActionButtons { on_show_answer }
                 }
             }
@@ -108,7 +108,7 @@ fn CardAnswerView(
         div { class: "space-y-6",
             div { class: "grid grid-cols-1 lg:grid-cols-3 gap-6",
                 // Left column: Question + Answer
-                div { class: "lg:col-span-2 space-y-4",
+                div { class: "lg:col-span-2 space-y-2",
                     // first row: Question to full width
                     div { class: "space-y-2",
                         div { class: "text-xs text-slate-500 uppercase tracking-wide font-semibold",
@@ -124,7 +124,7 @@ fn CardAnswerView(
                     // second row: Answer on left, Examples on right (together same width as Question)
                     div { class: "grid grid-cols-1 lg:grid-cols-2 gap-6",
                         // Left column: Answer
-                        div { class: "space-y-4",
+                        div { class: "space-y-2",
                             // Answer
                             div { class: "space-y-2",
                                 div { class: "text-xs text-slate-500 uppercase tracking-wide font-semibold",
@@ -147,12 +147,12 @@ fn CardAnswerView(
                 }
 
                 // Right column: Action buttons
-                div { class: "space-y-4",
+                div { class: "space-y-2",
                     AnswerActionButtons { on_rate }
                 }
             }
 
-            div { class: "space-y-4",
+            div { class: "space-y-2",
                 // Kanji info for vocabulary cards
                 if matches!(card.card_type, CardType::Vocabulary) && !card.kanji_info.is_empty() {
                     KanjiInfoSection {
@@ -182,7 +182,7 @@ fn CardCompletedView(
             // First row: Answer on left (same width as Question), empty space on right
             div { class: "grid grid-cols-1 lg:grid-cols-3 gap-6",
                 // Left column: Answer
-                div { class: "lg:col-span-2 space-y-4",
+                div { class: "lg:col-span-2 space-y-2",
                     WordCard {
                         text: card.answer.clone(),
                         show_furigana,
@@ -191,7 +191,7 @@ fn CardCompletedView(
                 }
 
                 // Right column: Empty for consistency
-                div { class: "space-y-4" }
+                div { class: "space-y-2" }
             }
 
             // Second row: Examples on left, empty on right (same layout as Answer+Examples in active view)
@@ -200,12 +200,12 @@ fn CardCompletedView(
                 ExamplesSection { card: card.clone(), show_furigana }
 
                 // Middle and right columns: Empty for balance
-                div { class: "space-y-4" }
-                div { class: "space-y-4" }
+                div { class: "space-y-2" }
+                div { class: "space-y-2" }
             }
 
             // Third row: Kanji info on full width
-            div { class: "space-y-4",
+            div { class: "space-y-2",
                 // Kanji info for vocabulary cards
                 if matches!(card.card_type, CardType::Vocabulary) && !card.kanji_info.is_empty() {
                     KanjiInfoSection {
@@ -270,15 +270,13 @@ fn KanjiInfoSection(
     native_language: NativeLanguage,
 ) -> Element {
     rsx! {
-        InfoSection { title: "Кандзи:".to_string(), tone: InfoSectionTone::Blue,
-            div { class: "space-y-4",
-                for kanji in kanji_info.iter() {
-                    KanjiCard {
-                        kanji_info: kanji.clone(),
-                        show_furigana,
-                        native_language: native_language.clone(),
-                        class: Some("border border-slate-200".to_string()),
-                    }
+        div { class: "space-y-2",
+            for kanji in kanji_info.iter() {
+                KanjiCard {
+                    kanji_info: kanji.clone(),
+                    show_furigana,
+                    native_language: native_language.clone(),
+                    class: Some("border border-slate-200".to_string()),
                 }
             }
         }
@@ -288,7 +286,7 @@ fn KanjiInfoSection(
 #[component]
 fn RadicalsSection(radicals: Vec<keikaku::domain::dictionary::RadicalInfo>) -> Element {
     rsx! {
-        RadicalGrid { radicals: radicals.clone(), show_kanji_list: true }
+        RadicalGrid { radicals: radicals.clone(), show_kanji_list: true, dense: None }
     }
 }
 
