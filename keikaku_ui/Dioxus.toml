@@ -21,6 +21,6 @@ script = []
 script = []
 
 [bundle]
-identifier = "keikaku"
+identifier = "net.uwuwu.keikaku"
 publisher = "uwuwu.net"
 icon = ["assets/favicon.ico"]
