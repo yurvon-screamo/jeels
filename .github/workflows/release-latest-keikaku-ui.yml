@@ -38,8 +38,12 @@ jobs:
       - name: Bundle (Windows .exe)
         working-directory: keikaku_ui
         run: |
-          dx bundle --desktop --release --package-types "exe" --features desktop --verbose `
-            || dx bundle --platform desktop --release --package-types "exe" --features desktop --verbose
+          dx bundle --desktop --release --package-types "msi" --features desktop --verbose `
+            || dx bundle --desktop --release --package-types "nsis" --features desktop --verbose `
+            || dx bundle --desktop --release --features desktop --verbose `
+            || dx bundle --platform desktop --release --package-types "msi" --features desktop --verbose `
+            || dx bundle --platform desktop --release --package-types "nsis" --features desktop --verbose `
+            || dx bundle --platform desktop --release --features desktop --verbose
 
       - name: Collect bundles
         run: |
@@ -131,8 +135,8 @@ jobs:
       - name: Bundle (Android .apk)
         working-directory: keikaku_ui
         run: |
-          dx bundle --platform android --release --package-types "apk" --features mobile --verbose \
-            || dx bundle --android --release --package-types "apk" --features mobile --verbose
+          dx bundle --platform android --release --features mobile --verbose \
+            || dx bundle --android --release --features mobile --verbose
 
       - name: Collect bundles
         run: |
