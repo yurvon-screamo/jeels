@@ -11,12 +11,17 @@ pub enum Direction {
 }
 
 pub fn use_translate() -> UseTranslate {
-    use_hook(|| UseTranslate {
-        text: use_signal(String::new),
-        direction: use_signal(|| Direction::Auto),
-        result: use_signal(|| None as Option<String>),
-        loading: use_signal(|| false),
-    })
+    let text = use_signal(String::new);
+    let direction = use_signal(|| Direction::Auto);
+    let result = use_signal(|| None as Option<String>);
+    let loading = use_signal(|| false);
+
+    UseTranslate {
+        text,
+        direction,
+        result,
+        loading,
+    }
 }
 
 #[derive(Clone, PartialEq)]
