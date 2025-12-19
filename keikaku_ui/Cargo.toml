@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 keikaku = { path = "../keikaku" }
 dioxus.workspace = true
+dioxus-heroicons.workspace = true
 tokio.workspace = true
 ulid.workspace = true
 imp.workspace = true

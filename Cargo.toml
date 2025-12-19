@@ -64,6 +64,7 @@ crossterm = "0.29"
 
 # UI
 dioxus = { version = "0.7", features = ["router"] }
+dioxus-heroicons = "0.4.1"
 
 # Testing
 rstest = "0.26"

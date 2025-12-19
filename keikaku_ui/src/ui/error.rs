@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_heroicons::{solid, Icon};
 
 use super::Card;
 
@@ -20,17 +21,10 @@ pub fn ErrorCard(message: String, class: Option<String>) -> Element {
             div { class: "relative z-10 flex items-center space-x-4 p-2",
                 div { class: "flex-shrink-0",
                     div { class: "w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shadow-md",
-                        svg {
-                            class: "w-6 h-6 text-accent-pink",
-                            fill: "none",
-                            stroke: "currentColor",
-                            view_box: "0 0 24 24",
-                            path {
-                                stroke_linecap: "round",
-                                stroke_linejoin: "round",
-                                stroke_width: "2",
-                                d: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                            }
+                        Icon {
+                            icon: solid::Shape::ExclamationCircle,
+                            size: 24,
+                            class: Some("w-6 h-6 text-accent-pink".to_string()),
                         }
                     }
                 }
@@ -42,7 +36,7 @@ pub fn ErrorCard(message: String, class: Option<String>) -> Element {
                         {message}
                     }
                 }
-
+            
             }
         }
     }

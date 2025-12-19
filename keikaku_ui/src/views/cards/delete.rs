@@ -1,9 +1,10 @@
 use dioxus::prelude::*;
+use dioxus_heroicons::{solid, Icon};
 use keikaku::application::use_cases::delete_card::DeleteCardUseCase;
 use keikaku::domain::VocabularyCard;
 use ulid::Ulid;
 
-use crate::ui::{Button, ButtonVariant, Card, Icon, Modal, Paragraph};
+use crate::ui::{Button, ButtonVariant, Card, Modal, Paragraph};
 use crate::views::cards::notification::Notification;
 use crate::{ensure_user, to_error, DEFAULT_USERNAME};
 use keikaku::settings::ApplicationEnvironment;
@@ -21,9 +22,9 @@ pub fn DeleteConfirmModal(
                     Card { class: Some("bg-red-50 border-red-200".to_string()),
                         div { class: "flex items-center gap-3",
                             Icon {
-                                size: Some("text-2xl".to_string()),
-                                color: Some("text-red-500".to_string()),
-                                icon: rsx! { "⚠️" },
+                                icon: solid::Shape::ExclamationTriangle,
+                                size: 32,
+                                class: Some("text-red-500".to_string()),
                             }
                             div { class: "flex-1",
                                 div { class: "text-sm font-semibold text-red-800", "Внимание!" }

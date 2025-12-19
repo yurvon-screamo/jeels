@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_heroicons::{outline, Icon};
 
 #[component]
 pub fn Select<T: Clone + PartialEq + std::fmt::Display + 'static>(
@@ -48,17 +49,10 @@ pub fn Select<T: Clone + PartialEq + std::fmt::Display + 'static>(
                             "absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300"
                         }
                     },
-                    svg {
-                        class: "w-5 h-5 text-slate-400",
-                        fill: "none",
-                        stroke: "currentColor",
-                        view_box: "0 0 24 24",
-                        path {
-                            d: "M19 9l-7 7-7-7",
-                            stroke_linecap: "round",
-                            stroke_linejoin: "round",
-                            stroke_width: "2",
-                        }
+                    Icon {
+                        icon: outline::Shape::ChevronDown,
+                        size: 20,
+                        class: Some("w-5 h-5 text-slate-400".to_string()),
                     }
                 }
             }

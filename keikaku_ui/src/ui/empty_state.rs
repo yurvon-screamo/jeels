@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_heroicons::{solid, Icon};
 
 use super::{Button, ButtonVariant, Paragraph};
 
@@ -18,7 +19,7 @@ use super::{Button, ButtonVariant, Paragraph};
 /// - Дополнительный контент (советы, подсказки)
 #[component]
 pub fn EmptyState(
-    icon: Option<String>,
+    icon: Option<Element>,
     title: String,
     description: Option<String>,
     action_text: Option<String>,
@@ -27,8 +28,8 @@ pub fn EmptyState(
 ) -> Element {
     rsx! {
         div { class: "text-center space-y-6 py-12",
-            if let Some(icon_text) = icon {
-                div { class: "text-6xl mb-6", "{icon_text}" }
+            if let Some(icon_el) = icon {
+                div { class: "flex justify-center mb-6", {icon_el} }
             }
 
             Paragraph { class: Some("text-xl font-bold text-slate-700".to_string()), "{title}" }
@@ -50,6 +51,17 @@ pub fn EmptyState(
                         }
                         if let Some(extra) = additional_content {
                             {extra}
+                        } else {
+                            div { class: "flex items-center justify-center gap-2 text-xs text-slate-400",
+                                Icon {
+                                    icon: solid::Shape::LightBulb,
+                                    size: 16,
+                                    class: Some("text-slate-400".to_string()),
+                                }
+                                span {
+                                    "Начните с 5-10 карточек для лучшего запоминания"
+                                }
+                            }
                         }
                     }
                 }

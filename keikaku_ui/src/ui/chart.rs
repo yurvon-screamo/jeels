@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_heroicons::{solid, Icon};
 
 use super::Card;
 
@@ -40,17 +41,10 @@ pub fn Chart(
                 class: Some(format!("{} {}", class_str, "")),
                 div { class: "flex flex-col items-center justify-center h-48 text-center relative z-10",
                     div { class: "w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mb-4 shadow-md",
-                        svg {
-                            class: "w-8 h-8 text-accent-pink",
-                            fill: "none",
-                            stroke: "currentColor",
-                            view_box: "0 0 24 24",
-                            path {
-                                stroke_linecap: "round",
-                                stroke_linejoin: "round",
-                                stroke_width: "2",
-                                d: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-                            }
+                        Icon {
+                            icon: solid::Shape::ChartBar,
+                            size: 32,
+                            class: Some("w-8 h-8 text-accent-pink".to_string()),
                         }
                     }
                     div { class: "text-xs font-bold text-accent-purple uppercase tracking-widest mb-2",
@@ -150,17 +144,10 @@ pub fn Chart(
                 div { class: "chart-container relative z-10 w-full overflow-visible",
                     div { class: "flex items-center gap-3 mb-4",
                         div { class: "w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-100 to-purple-100 flex items-center justify-center shadow-md",
-                            svg {
-                                class: "w-4 h-4 text-accent-cyan",
-                                fill: "none",
-                                stroke: "currentColor",
-                                view_box: "0 0 24 24",
-                                path {
-                                    stroke_linecap: "round",
-                                    stroke_linejoin: "round",
-                                    stroke_width: "2",
-                                    d: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-                                }
+                            Icon {
+                                icon: solid::Shape::ChartBar,
+                                size: 16,
+                                class: Some("w-4 h-4 text-accent-cyan".to_string()),
                             }
                         }
                         h3 { class: "text-sm font-bold text-slate-700", {title} }

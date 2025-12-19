@@ -8,12 +8,6 @@ pub use typography::{Paragraph, Size, Tag, H1, H2, H3, H4};
 mod button;
 pub use button::{Button, ButtonVariant};
 
-mod icon;
-pub use icon::Icon;
-
-mod icon_button;
-pub use icon_button::IconButton;
-
 mod input;
 pub use input::{SearchInput, TextInput, Textarea};
 

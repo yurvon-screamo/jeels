@@ -1,6 +1,8 @@
 use crate::Route;
 use dioxus::prelude::*;
 
+const NAVBAR_LOGO: Asset = asset!("/assets/logo_white.png");
+
 #[component]
 pub fn Navbar() -> Element {
     let route = use_route::<Route>();
@@ -12,8 +14,15 @@ pub fn Navbar() -> Element {
                     div { class: "flex items-center gap-2",
                         Link {
                             to: Route::Learn {},
-                            class: "text-2xl font-bold bg-clip-text text-transparent bg-rainbow-vibrant",
-                            "Keikaku"
+                            class: "flex items-center gap-3",
+                            img {
+                                class: "h-7 w-7 object-contain",
+                                src: NAVBAR_LOGO,
+                                alt: "Keikaku",
+                            }
+                            span { class: "text-2xl font-bold bg-clip-text text-transparent bg-rainbow-vibrant",
+                                "Keikaku"
+                            }
                         }
                     }
                     div { class: "flex items-center gap-4",

@@ -1,8 +1,9 @@
 use dioxus::prelude::*;
+use dioxus_heroicons::{solid, IconButton};
 use std::rc::Rc;
 
 use crate::{
-    ui::{Card, EmptyState, Grid, IconButton, LoadingState, Paragraph, Pill, StateTone, H3},
+    ui::{Card, EmptyState, Grid, LoadingState, Paragraph, Pill, StateTone, H3},
     views::cards::UiCard,
 };
 
@@ -43,7 +44,13 @@ pub fn CardsGrid(
 fn EmptyCardsState(on_create_click: EventHandler<()>) -> Element {
     rsx! {
         EmptyState {
-            icon: Some("🎯".to_string()),
+            icon: Some(rsx! {
+                dioxus_heroicons::Icon {
+                    icon: solid::Shape::Flag,
+                    size: 56,
+                    class: Some("text-accent-pink".to_string()),
+                }
+            }),
             title: "Добро пожаловать в Keikaku!".to_string(),
             description: Some(
                 "Начните свое путешествие по изучению японского языка. Создайте свою первую карточку и откройте для себя эффективный метод повторений."
@@ -51,11 +58,7 @@ fn EmptyCardsState(on_create_click: EventHandler<()>) -> Element {
             ),
             action_text: Some("+ Создать первую карточку".to_string()),
             on_action: Some(on_create_click),
-            additional_content: Some(rsx! {
-                div { class: "text-xs text-slate-400",
-                    "💡 Начните с 5-10 карточек для лучшего запоминания"
-                }
-            }),
+            additional_content: None,
         }
     }
 }
@@ -77,33 +80,24 @@ fn CardItem(
             // Иконочные кнопки в правом верхнем углу
             div { class: "absolute top-2 right-2 flex gap-1",
                 IconButton {
-                    icon: rsx! {
-                        svg { fill: "currentColor", view_box: "0 0 4 4",
-                            path { d: "M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" }
-                        }
-                    },
+                    icon: solid::Shape::Pencil,
                     onclick: {
                         let card_clone = Rc::clone(&card_rc);
                         move |_| on_edit.call((*card_clone).clone())
                     },
-                    class: Some("w-8 h-8 bg-blue-500 hover:bg-blue-600".to_string()),
+                    class: "w-8 h-8 rounded-xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center shadow-md shadow-accent-pink/15 hover:scale-110 hover:shadow-glow active:scale-95 transition-all duration-300 ease-elastic",
+                    title: "Редактировать",
+                    size: 16,
                 }
                 IconButton {
-                    icon: rsx! {
-                        svg { fill: "currentColor", view_box: "0 0 4 4",
-                            path { d: "M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" }
-                            path {
-                                "fill-rule": "evenodd",
-                                d: "M10 5a3 3 0 100 6h.007a.75.75 0 01.75.75V12a1 1 0 01-1 1H9a1 1 0 01-1-1v-1.25a.75.75 0 01.75-.75H10a1.5 1.5 0 000-3H9a.75.75 0 010-1.5h1zm-.75 7.5a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5h-1.5z",
-                                clip_rule: "evenodd",
-                            }
-                        }
-                    },
+                    icon: solid::Shape::Trash,
                     onclick: {
                         let card_clone = Rc::clone(&card_rc);
                         move |_| on_delete.call((*card_clone).clone())
                     },
-                    class: Some("w-8 h-8 bg-red-500 hover:bg-red-600".to_string()),
+                    class: "w-8 h-8 rounded-xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md shadow-accent-pink/15 hover:scale-110 hover:shadow-glow active:scale-95 transition-all duration-300 ease-elastic",
+                    title: "Удалить",
+                    size: 16,
                 }
             }
 
