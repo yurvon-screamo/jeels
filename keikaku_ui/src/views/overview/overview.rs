@@ -11,10 +11,9 @@ use keikaku::{
 };
 
 use crate::{
-    ensure_user, to_error,
+    DEFAULT_USERNAME, ensure_user, to_error,
     ui::{ErrorCard, HeatmapDataPoint},
     views::overview::OverviewCharts,
-    DEFAULT_USERNAME,
 };
 use crate::{
     ui::{ChartDataPoint, StateTone},

@@ -5,16 +5,15 @@ use keikaku::settings::ApplicationEnvironment;
 
 use crate::ui::ErrorCard;
 use crate::views::cards::create::CreateModal;
-use crate::views::cards::delete::{delete_card_with_handlers, DeleteConfirmModal};
+use crate::views::cards::delete::{DeleteConfirmModal, delete_card_with_handlers};
 use crate::views::cards::edit::EditModal;
 use crate::views::cards::notification::{Notification, NotificationArea};
 use crate::{
-    ensure_user, to_error,
+    DEFAULT_USERNAME, ensure_user, to_error,
     views::cards::{
-        filters::CardsFilters, grid::CardsGrid, header::CardsHeader, stats::CardsStats,
-        FilterStatus, SortBy, UiCard,
+        FilterStatus, SortBy, UiCard, filters::CardsFilters, grid::CardsGrid, header::CardsHeader,
+        stats::CardsStats,
     },
-    DEFAULT_USERNAME,
 };
 
 #[derive(Clone, PartialEq)]

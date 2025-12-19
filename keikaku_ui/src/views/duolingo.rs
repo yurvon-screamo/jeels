@@ -1,5 +1,5 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Switch};
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::sync_duolingo_words::SyncDuolingoWordsUseCase;
 use keikaku::infrastructure::HttpDuolingoClient;

@@ -23,9 +23,15 @@ impl Rating {
     fn color(&self) -> &'static str {
         match self {
             Rating::Easy => "bg-status-perfect hover:opacity-90 text-white shadow-glow-perfect",
-            Rating::Good => "bg-status-good-soft hover:bg-emerald-100 text-status-good border border-emerald-200",
-            Rating::Hard => "bg-slate-100 hover:bg-slate-200 text-status-neutral border border-slate-300",
-            Rating::Again => "bg-status-error-soft hover:bg-red-100 text-status-error border border-red-200",
+            Rating::Good => {
+                "bg-status-good-soft hover:bg-emerald-100 text-status-good border border-emerald-200"
+            }
+            Rating::Hard => {
+                "bg-slate-100 hover:bg-slate-200 text-status-neutral border border-slate-300"
+            }
+            Rating::Again => {
+                "bg-status-error-soft hover:bg-red-100 text-status-error border border-red-200"
+            }
         }
     }
 

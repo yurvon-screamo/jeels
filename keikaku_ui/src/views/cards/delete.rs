@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
-use dioxus_heroicons::{solid, Icon};
+use dioxus_heroicons::{Icon, solid};
 use keikaku::application::use_cases::delete_card::DeleteCardUseCase;
 use keikaku::domain::VocabularyCard;
 use ulid::Ulid;
 
 use crate::ui::{Button, ButtonVariant, Card, Modal, Paragraph};
 use crate::views::cards::notification::Notification;
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use keikaku::settings::ApplicationEnvironment;
 
 #[component]

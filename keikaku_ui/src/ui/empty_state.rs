@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_heroicons::{solid, Icon};
+use dioxus_heroicons::{Icon, solid};
 
 use super::{Button, ButtonVariant, Paragraph};
 

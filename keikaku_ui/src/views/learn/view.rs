@@ -1,7 +1,7 @@
 use chrono::Utc;
 use dioxus::{document::eval, prelude::*};
 
-use super::{use_learn_session, LearnActive, SessionState, StartFeedback};
+use super::{LearnActive, SessionState, StartFeedback, use_learn_session};
 use crate::views::learn::session_manager::complete_lesson_impl;
 
 #[component]

@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
-use dioxus_heroicons::{solid, IconButton};
+use dioxus_heroicons::{IconButton, solid};
 use std::rc::Rc;
 
 use crate::{
-    ui::{Card, EmptyState, Grid, LoadingState, Paragraph, Pill, StateTone, H3},
+    ui::{Card, EmptyState, Grid, H3, LoadingState, Paragraph, Pill, StateTone},
     views::cards::UiCard,
 };
 

@@ -78,7 +78,7 @@ pub fn EditModal(
 }
 
 async fn edit_card(card_id: String, question: String, answer: String) -> Result<(), String> {
-    use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+    use crate::{DEFAULT_USERNAME, ensure_user, to_error};
     use keikaku::application::use_cases::edit_card::EditCardUseCase;
     use ulid::Ulid;
 

@@ -72,7 +72,7 @@ pub fn CreateModal(
 }
 
 async fn create_card(question: String, answer: String) -> Result<(), String> {
-    use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+    use crate::{DEFAULT_USERNAME, ensure_user, to_error};
     use keikaku::application::use_cases::create_card::CreateCardUseCase;
     use keikaku::domain::value_objects::CardContent;
 

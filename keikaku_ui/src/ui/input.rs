@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_heroicons::{outline, Icon};
+use dioxus_heroicons::{Icon, outline};
 
 #[component]
 pub fn TextInput(

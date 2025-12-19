@@ -1,17 +1,17 @@
 use crate::views::learn::learn_session::{CardType, SimilarCard};
 use chrono::{DateTime, Duration, Utc};
 use dioxus::prelude::*;
+use keikaku::application::UserRepository;
 use keikaku::application::use_cases::{
     complete_lesson::CompleteLessonUseCase, rate_card::RateCardUseCase,
     select_cards_to_learn::SelectCardsToLearnUseCase,
 };
-use keikaku::application::UserRepository;
 use keikaku::domain::study_session::StudySessionItem;
 use keikaku::settings::ApplicationEnvironment;
 use std::rc::Rc;
 use ulid::Ulid;
 
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 
 use super::{LearnCard, LearnStep, SessionState, StartFeedback};
 
@@ -74,15 +74,13 @@ pub fn use_learn_session() -> LearnSessionSignals {
                             session_data.write().session_start_time = Utc::now();
 
                             let env = ApplicationEnvironment::get();
-                            if let Ok(repo) = env.get_repository().await {
-                                if let Ok(user_id) = ensure_user(env, DEFAULT_USERNAME).await {
-                                    if let Ok(user) = repo.find_by_id(user_id).await {
-                                        if let Some(user) = user {
-                                            session_data.write().show_furigana =
-                                                user.settings().learn().show_furigana();
-                                        }
-                                    }
-                                }
+                            if let Ok(repo) = env.get_repository().await
+                                && let Ok(user_id) = ensure_user(env, DEFAULT_USERNAME).await
+                                && let Ok(user) = repo.find_by_id(user_id).await
+                                && let Some(user) = user
+                            {
+                                session_data.write().show_furigana =
+                                    user.settings().learn().show_furigana();
                             }
 
                             state.set(SessionState::Active);
@@ -141,38 +139,37 @@ pub fn use_learn_session() -> LearnSessionSignals {
                 let cards_len = data.cards.len();
                 let card_id = data.cards.get(current_index).map(|c| c.id.clone());
 
-                if let Some(card_id_str) = card_id {
-                    if let Ok(card_ulid) = ulid::Ulid::from_string(&card_id_str) {
-                        // Rate the card
-                        if let Err(e) = rate_card_impl(card_ulid, rating).await {
-                            error!("Failed to rate card: {:?}", e);
-                        }
+                if let Some(card_id_str) = card_id
+                    && let Ok(card_ulid) = ulid::Ulid::from_string(&card_id_str)
+                {
+                    // Rate the card
+                    if let Err(e) = rate_card_impl(card_ulid, rating).await {
+                        error!("Failed to rate card: {:?}", e);
+                    }
 
-                        // Move to next card or complete session
-                        drop(data);
-                        let mut data = session_data.write();
-                        data.current_step = LearnStep::Completed;
+                    // Move to next card or complete session
+                    drop(data);
+                    let mut data = session_data.write();
+                    data.current_step = LearnStep::Completed;
 
-                        // Auto-advance immediately
+                    // Auto-advance immediately
+                    drop(data);
+                    let mut data = session_data.write();
+                    if data.current_index + 1 < cards_len {
+                        data.current_index += 1;
+                        data.current_step = LearnStep::Question;
+                    } else {
+                        let session_start_time = data.session_start_time;
                         drop(data);
-                        let mut data = session_data.write();
-                        if data.current_index + 1 < cards_len {
-                            data.current_index += 1;
-                            data.current_step = LearnStep::Question;
-                        } else {
-                            let session_start_time = data.session_start_time;
-                            drop(data);
-                            let mut state = state;
-                            state.set(SessionState::Completed);
-                            // Complete lesson
-                            let session_duration =
-                                Utc::now().signed_duration_since(session_start_time);
-                            spawn(async move {
-                                if let Err(e) = complete_lesson_impl(session_duration).await {
-                                    error!("Failed to complete lesson: {:?}", e);
-                                }
-                            });
-                        }
+                        let mut state = state;
+                        state.set(SessionState::Completed);
+                        // Complete lesson
+                        let session_duration = Utc::now().signed_duration_since(session_start_time);
+                        spawn(async move {
+                            if let Err(e) = complete_lesson_impl(session_duration).await {
+                                error!("Failed to complete lesson: {:?}", e);
+                            }
+                        });
                     }
                 }
             });

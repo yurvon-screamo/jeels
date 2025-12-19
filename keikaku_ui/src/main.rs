@@ -4,8 +4,8 @@ use ulid::Ulid;
 use keikaku::{
     application::UserRepository,
     domain::{
-        value_objects::{JapaneseLevel, NativeLanguage},
         User,
+        value_objects::{JapaneseLevel, NativeLanguage},
     },
     settings::ApplicationEnvironment,
 };

@@ -4,7 +4,7 @@ use keikaku::domain::UserSettings;
 
 use crate::ui::{Card, ErrorCard, Paragraph, SectionHeader};
 use crate::views::profile::SettingsForm;
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use keikaku::settings::ApplicationEnvironment;
 
 #[component]

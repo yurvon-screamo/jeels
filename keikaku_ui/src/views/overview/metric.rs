@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    ui::{Card, Heatmap, HeatmapDataPoint, Paragraph, Pill, Section, Size, StateTone, Tag, H2, H4},
+    ui::{Card, H2, H4, Heatmap, HeatmapDataPoint, Paragraph, Pill, Section, Size, StateTone, Tag},
     views::overview::overview::{MetricData, OverviewStats},
 };
 

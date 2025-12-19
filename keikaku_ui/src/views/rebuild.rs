@@ -1,5 +1,5 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, Radio, SectionHeader};
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::rebuild_database::{
     RebuildDatabaseOptions, RebuildDatabaseUseCase,

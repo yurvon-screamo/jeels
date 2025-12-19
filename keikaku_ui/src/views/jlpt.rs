@@ -1,5 +1,5 @@
 use crate::ui::{Button, ButtonVariant, Card, Checkbox, Paragraph, SectionHeader};
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::export_jlpt_recommended::ExportJlptRecommendedUseCase;
 use keikaku::domain::value_objects::JapaneseLevel;

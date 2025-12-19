@@ -1,5 +1,5 @@
 use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Switch, TextInput};
-use crate::{ensure_user, to_error, DEFAULT_USERNAME};
+use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::export_migii_pack::ExportMigiiPackUseCase;
 use keikaku::settings::ApplicationEnvironment;

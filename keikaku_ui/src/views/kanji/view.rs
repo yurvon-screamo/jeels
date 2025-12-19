@@ -1,5 +1,5 @@
 use crate::domain::KanjiCard;
-use crate::ui::{Button, ButtonVariant, Card, ErrorCard, TextInput, H1};
+use crate::ui::{Button, ButtonVariant, Card, ErrorCard, H1, TextInput};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::get_kanji_info::GetKanjiInfoUseCase;
 use keikaku::domain::{dictionary::KanjiInfo, value_objects::NativeLanguage};
