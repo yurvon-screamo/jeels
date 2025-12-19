@@ -9,14 +9,14 @@ pub fn Navbar() -> Element {
 
     rsx! {
         nav { class: "bg-surface shadow-soft sticky top-0 z-50 backdrop-blur-md bg-white/80",
-            div { class: "max-w-7xl mx-auto px-8 py-4",
+            div { class: "max-w-7xl",
                 div { class: "flex items-center justify-between",
                     div { class: "flex items-center gap-2",
                         Link {
                             to: Route::Learn {},
                             class: "flex items-center gap-3",
                             img {
-                                class: "h-7 w-7 object-contain",
+                                class: "h-24 w-24 object-contain",
                                 src: NAVBAR_LOGO,
                                 alt: "Keikaku",
                             }
