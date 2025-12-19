@@ -1,7 +1,7 @@
 [application]
 
 [web.app]
-title = "keikaku_ui"
+title = "keikaku"
 
 [web.resource]
 style = []
@@ -22,4 +22,4 @@ icon = [
     "assets/icons/icon.icns",
     "assets/icons/icon.ico",
 ]
-resources = ["assets/icons", "assets/logo_white.png"]
+# resources = ["assets/icons", "assets/logo_white.png"]

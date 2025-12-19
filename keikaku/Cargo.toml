@@ -41,13 +41,13 @@ wana_kana.workspace = true
 
 # Machine Learning
 hf-hub.workspace = true
-intel-mkl-src.workspace = true
 candle-core.workspace = true
 candle-transformers.workspace = true
 candle-nn.workspace = true
 text-embeddings-backend-core.workspace = true
 text-embeddings-backend-candle.workspace = true
 tokenizers.workspace = true
+# intel-mkl-src.workspace = true
 
 # CLI utilities (for ValueEnum)
 clap.workspace = true
