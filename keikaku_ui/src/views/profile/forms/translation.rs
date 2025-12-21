@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use keikaku::domain::TranslationSettings;
 
-use crate::ui::TextInput;
+use crate::components::input::Input;
 
 fn create_translation_settings(temperature: String, seed: String) -> TranslationSettings {
     let temp = temperature.parse().unwrap_or(0.0);
@@ -29,39 +29,33 @@ pub fn TranslationSettingsForm(
 
     rsx! {
         div { class: "grid grid-cols-1 md:grid-cols-2 gap-4",
-            TextInput {
-                label: Some("Temperature".to_string()),
-                value: Some(temperature),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Temperature" }
+                Input {
+                    value: temperature(),
+                    oninput: {
                         let mut temperature = temperature;
                         let update_settings = update_settings;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             temperature.set(e.value());
                             update_settings();
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Seed".to_string()),
-                value: Some(seed),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Seed" }
+                Input {
+                    value: seed(),
+                    oninput: {
                         let mut seed = seed;
                         let update_settings = update_settings;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             seed.set(e.value());
                             update_settings();
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
         }
     }

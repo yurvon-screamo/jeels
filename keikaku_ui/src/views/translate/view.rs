@@ -1,4 +1,6 @@
-use crate::ui::{Button, ButtonVariant, Card, Paragraph, SectionHeader, Textarea};
+use crate::components::app_ui::{Card, Paragraph, SectionHeader};
+use crate::components::button::{Button, ButtonVariant};
+use crate::components::textarea::{Textarea, TextareaVariant};
 use dioxus::prelude::*;
 
 use super::use_cases::translate::{Direction, UseTranslate, use_translate};
@@ -27,12 +29,15 @@ pub fn Translate() -> Element {
 #[component]
 fn TranslationInput(mut translator: UseTranslate) -> Element {
     rsx! {
-        Textarea {
-            label: Some("ТЕКСТ".to_string()),
-            placeholder: Some("日本語 или русский текст".to_string()),
-            value: Some(translator.text),
-            oninput: Some(EventHandler::new(move |e: Event<FormData>| translator.text.set(e.value()))),
-            rows: Some(8),
+        div { class: "space-y-2",
+            label { class: "text-sm font-medium", "ТЕКСТ" }
+            Textarea {
+                variant: TextareaVariant::Default,
+                rows: 8,
+                placeholder: "日本語 или русский текст",
+                value: (translator.text)(),
+                oninput: move |e: FormEvent| translator.text.set(e.value()),
+            }
         }
     }
 }
@@ -72,9 +77,9 @@ fn DirectionSelector(mut translator: UseTranslate) -> Element {
 fn DirectionButton(label: String, active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     rsx! {
         Button {
-            variant: if active { ButtonVariant::Rainbow } else { ButtonVariant::Outline },
-            class: Some("w-full text-sm".to_string()),
-            onclick,
+            variant: if active { ButtonVariant::Primary } else { ButtonVariant::Outline },
+            class: "w-full text-sm",
+            onclick: move |e| onclick.call(e),
             {label}
         }
     }
@@ -88,8 +93,8 @@ fn TranslateButton(mut translator: UseTranslate) -> Element {
             let is_loading = (translator.loading)();
             rsx! {
                 Button {
-                    variant: ButtonVariant::Rainbow,
-                    class: Some("w-full".to_string()),
+                    variant: ButtonVariant::Primary,
+                    class: "w-full",
                     onclick: move |_| translator_clone.translate(),
                     {if is_loading { "Перевод..." } else { "Перевести" }}
                 }

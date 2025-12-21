@@ -1,7 +1,11 @@
 use dioxus::prelude::*;
 use keikaku::domain::EmbeddingSettings;
 
-use crate::ui::{Paragraph, Select, TextInput};
+use crate::components::app_ui::Paragraph;
+use crate::components::input::Input;
+use crate::components::select::{
+    Select, SelectItemIndicator, SelectList, SelectOption, SelectTrigger, SelectValue,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EmbeddingType {
@@ -60,7 +64,6 @@ pub fn EmbeddingSettingsForm(
         EmbeddingSettings::Candle => EmbeddingType::Candle,
         EmbeddingSettings::OpenAi { .. } => EmbeddingType::OpenAi,
     });
-    let selected_embedding_type = use_memo(move || Some(embedding_type()));
 
     let (openai_model_init, openai_base_url_init, openai_env_var_init) =
         extract_openai_fields(&settings);
@@ -85,16 +88,47 @@ pub fn EmbeddingSettingsForm(
         }
     };
 
+    let embedding_type_value = match embedding_type() {
+        EmbeddingType::None => "none",
+        EmbeddingType::Candle => "candle",
+        EmbeddingType::OpenAi => "openai",
+    }
+    .to_string();
+
     rsx! {
         div { class: "space-y-4",
-            Select {
-                label: Some("Тип Embedding".to_string()),
-                options: vec![EmbeddingType::None, EmbeddingType::Candle, EmbeddingType::OpenAi],
-                selected: selected_embedding_type,
-                onselect: move |new_type: EmbeddingType| {
-                    embedding_type.set(new_type.clone());
-                    update_settings();
-                },
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Тип Embedding" }
+                Select::<String> {
+                    value: Some(Some(embedding_type_value)),
+                    on_value_change: move |v: Option<String>| {
+                        if let Some(v) = v {
+                            let next = match v.as_str() {
+                                "candle" => EmbeddingType::Candle,
+                                "openai" => EmbeddingType::OpenAi,
+                                _ => EmbeddingType::None,
+                            };
+                            embedding_type.set(next);
+                            update_settings();
+                        }
+                    },
+                    placeholder: "Выберите...",
+                    SelectTrigger { aria_label: "Тип Embedding", width: "100%", SelectValue {} }
+                    SelectList { aria_label: "Тип Embedding",
+                        SelectOption::<String> { index: 0usize, value: "none".to_string(),
+                            "Отключено"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<String> { index: 1usize, value: "candle".to_string(),
+                            "Candle"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<String> { index: 2usize, value: "openai".to_string(),
+                            "OpenAI"
+                            SelectItemIndicator {}
+                        }
+                    }
+                }
             }
 
             match embedding_type() {
@@ -126,56 +160,47 @@ fn OpenAiEmbeddingFields(
 ) -> Element {
     rsx! {
         div { class: "grid grid-cols-1 md:grid-cols-3 gap-4",
-            TextInput {
-                label: Some("Model".to_string()),
-                value: Some(model),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Model" }
+                Input {
+                    value: model(),
+                    oninput: {
                         let mut model = model;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             model.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Base URL".to_string()),
-                value: Some(base_url),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Base URL" }
+                Input {
+                    value: base_url(),
+                    oninput: {
                         let mut base_url = base_url;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             base_url.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("API Key Env Var".to_string()),
-                value: Some(env_var),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "API Key Env Var" }
+                Input {
+                    value: env_var(),
+                    oninput: {
                         let mut env_var = env_var;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             env_var.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
         }
     }

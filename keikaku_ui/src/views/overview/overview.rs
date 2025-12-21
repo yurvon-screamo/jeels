@@ -11,12 +11,13 @@ use keikaku::{
 };
 
 use crate::{
-    DEFAULT_USERNAME, ensure_user, to_error,
-    ui::{ErrorCard, HeatmapDataPoint},
+    DEFAULT_USERNAME,
+    components::app_ui::{ErrorCard, HeatmapDataPoint},
+    ensure_user, to_error,
     views::overview::OverviewCharts,
 };
 use crate::{
-    ui::{ChartDataPoint, StateTone},
+    components::app_ui::{ChartDataPoint, StateTone},
     views::overview::{chart::OverviewChartsComponent, metric::OverviewMetrics},
 };
 
@@ -47,7 +48,7 @@ pub fn Overview() -> Element {
             }
         }
         _ => rsx! {
-            div { class: "bg-bg min-h-screen text-text-main px-6 py-8", "Загрузка..." }
+            div { class: "text-text-main", "Загрузка..." }
         },
     }
 }

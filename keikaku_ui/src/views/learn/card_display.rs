@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
 
+use crate::components::app_ui::{Card, InfoSection, InfoSectionTone, Paragraph};
 use crate::domain::{
     AnswerActionButtons, FuriganaText, KanjiCard, QuestionActionButtons, RadicalGrid, Rating,
     WordCard,
 };
-use crate::ui::{Card, InfoSection, InfoSectionTone};
 use crate::views::learn::learn_session::{CardType, LearnCard, LearnStep, SimilarCard};
 use keikaku::domain::value_objects::NativeLanguage;
 
@@ -47,7 +47,7 @@ pub fn LearnCardDisplay(
     } else {
         rsx! {
             Card { class: Some("space-y-2".to_string()),
-                crate::ui::Paragraph { class: Some("text-sm text-slate-500 text-center".to_string()),
+                Paragraph { class: Some("text-sm text-slate-500 text-center".to_string()),
                     "Нет карточек для отображения"
                 }
             }

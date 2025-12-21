@@ -1,7 +1,11 @@
 use dioxus::prelude::*;
 use keikaku::domain::LlmSettings;
 
-use crate::ui::{Paragraph, Select, TextInput};
+use crate::components::app_ui::Paragraph;
+use crate::components::input::Input;
+use crate::components::select::{
+    Select, SelectItemIndicator, SelectList, SelectOption, SelectTrigger, SelectValue,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum LlmType {
@@ -146,7 +150,13 @@ pub fn LlmSettingsForm(settings: LlmSettings, on_change: EventHandler<LlmSetting
         LlmSettings::OpenAi { .. } => LlmType::OpenAi,
         LlmSettings::Candle { .. } => LlmType::Candle,
     });
-    let selected_llm_type = use_memo(move || Some(llm_type()));
+    let llm_value = match llm_type() {
+        LlmType::None => "none",
+        LlmType::Gemini => "gemini",
+        LlmType::OpenAi => "openai",
+        LlmType::Candle => "candle",
+    }
+    .to_string();
 
     let (gemini_temp_init, gemini_model_init) = extract_gemini_fields(&settings);
     let gemini_temperature = use_signal(|| gemini_temp_init);
@@ -219,14 +229,43 @@ pub fn LlmSettingsForm(settings: LlmSettings, on_change: EventHandler<LlmSetting
 
     rsx! {
         div { class: "space-y-4",
-            Select {
-                label: Some("Тип LLM".to_string()),
-                options: vec![LlmType::None, LlmType::Gemini, LlmType::OpenAi, LlmType::Candle],
-                selected: selected_llm_type,
-                onselect: move |new_type: LlmType| {
-                    llm_type.set(new_type.clone());
-                    update_settings();
-                },
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Тип LLM" }
+                Select::<String> {
+                    value: Some(Some(llm_value)),
+                    on_value_change: move |v: Option<String>| {
+                        if let Some(v) = v {
+                            let next = match v.as_str() {
+                                "gemini" => LlmType::Gemini,
+                                "openai" => LlmType::OpenAi,
+                                "candle" => LlmType::Candle,
+                                _ => LlmType::None,
+                            };
+                            llm_type.set(next);
+                            update_settings();
+                        }
+                    },
+                    placeholder: "Выберите...",
+                    SelectTrigger { aria_label: "Тип LLM", width: "100%", SelectValue {} }
+                    SelectList { aria_label: "Тип LLM",
+                        SelectOption::<String> { index: 0usize, value: "none".to_string(),
+                            "Отключено"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<String> { index: 1usize, value: "gemini".to_string(),
+                            "Gemini"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<String> { index: 2usize, value: "openai".to_string(),
+                            "OpenAI"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<String> { index: 3usize, value: "candle".to_string(),
+                            "Candle"
+                            SelectItemIndicator {}
+                        }
+                    }
+                }
             }
 
             match llm_type() {
@@ -275,39 +314,33 @@ fn GeminiFields(
 ) -> Element {
     rsx! {
         div { class: "grid grid-cols-1 md:grid-cols-2 gap-4",
-            TextInput {
-                label: Some("Temperature".to_string()),
-                value: Some(temperature),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Temperature" }
+                Input {
+                    value: temperature(),
+                    oninput: {
                         let mut temperature = temperature;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             temperature.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Model".to_string()),
-                value: Some(model),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Model" }
+                Input {
+                    value: model(),
+                    oninput: {
                         let mut model = model;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             model.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
         }
     }
@@ -323,73 +356,61 @@ fn OpenAiFields(
 ) -> Element {
     rsx! {
         div { class: "grid grid-cols-1 md:grid-cols-2 gap-4",
-            TextInput {
-                label: Some("Temperature".to_string()),
-                value: Some(temperature),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Temperature" }
+                Input {
+                    value: temperature(),
+                    oninput: {
                         let mut temperature = temperature;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             temperature.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Model".to_string()),
-                value: Some(model),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Model" }
+                Input {
+                    value: model(),
+                    oninput: {
                         let mut model = model;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             model.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Base URL".to_string()),
-                value: Some(base_url),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Base URL" }
+                Input {
+                    value: base_url(),
+                    oninput: {
                         let mut base_url = base_url;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             base_url.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("API Key Env Var".to_string()),
-                value: Some(env_var),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "API Key Env Var" }
+                Input {
+                    value: env_var(),
+                    oninput: {
                         let mut env_var = env_var;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             env_var.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
         }
     }
@@ -409,141 +430,117 @@ fn CandleFields(
 ) -> Element {
     rsx! {
         div { class: "grid grid-cols-1 md:grid-cols-2 gap-4",
-            TextInput {
-                label: Some("Max Sample Length".to_string()),
-                value: Some(max_sample_len),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Max Sample Length" }
+                Input {
+                    value: max_sample_len(),
+                    oninput: {
                         let mut max_sample_len = max_sample_len;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             max_sample_len.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Temperature".to_string()),
-                value: Some(temperature),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Temperature" }
+                Input {
+                    value: temperature(),
+                    oninput: {
                         let mut temperature = temperature;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             temperature.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Seed".to_string()),
-                value: Some(seed),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Seed" }
+                Input {
+                    value: seed(),
+                    oninput: {
                         let mut seed = seed;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             seed.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Model Repo".to_string()),
-                value: Some(model_repo),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Model Repo" }
+                Input {
+                    value: model_repo(),
+                    oninput: {
                         let mut model_repo = model_repo;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             model_repo.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Model Filename".to_string()),
-                value: Some(model_filename),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Model Filename" }
+                Input {
+                    value: model_filename(),
+                    oninput: {
                         let mut model_filename = model_filename;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             model_filename.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Model Revision".to_string()),
-                value: Some(model_revision),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Model Revision" }
+                Input {
+                    value: model_revision(),
+                    oninput: {
                         let mut model_revision = model_revision;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             model_revision.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Tokenizer Repo".to_string()),
-                value: Some(tokenizer_repo),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Tokenizer Repo" }
+                Input {
+                    value: tokenizer_repo(),
+                    oninput: {
                         let mut tokenizer_repo = tokenizer_repo;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             tokenizer_repo.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
-            TextInput {
-                label: Some("Tokenizer Filename".to_string()),
-                value: Some(tokenizer_filename),
-                placeholder: None,
-                oninput: Some(
-                    EventHandler::new({
+            div { class: "space-y-2",
+                label { class: "text-sm font-medium", "Tokenizer Filename" }
+                Input {
+                    value: tokenizer_filename(),
+                    oninput: {
                         let mut tokenizer_filename = tokenizer_filename;
                         let on_change = on_change;
-                        move |e: Event<FormData>| {
+                        move |e: FormEvent| {
                             tokenizer_filename.set(e.value());
                             on_change.call(());
                         }
-                    }),
-                ),
-                class: None,
-                r#type: None,
+                    },
+                }
             }
         }
     }

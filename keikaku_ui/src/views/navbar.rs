@@ -1,91 +1,92 @@
 use crate::Route;
+use crate::components::avatar::{Avatar, AvatarFallback, AvatarImage};
+use crate::components::navbar::{Navbar as DxNavbar, NavbarItem};
+use crate::components::toast::ToastProvider;
 use dioxus::prelude::*;
 
 const NAVBAR_LOGO: Asset = asset!("/assets/logo_white.png");
 
 #[component]
 pub fn Navbar() -> Element {
-    let route = use_route::<Route>();
-
     rsx! {
-        nav { class: "bg-surface shadow-soft sticky top-0 z-50 backdrop-blur-md bg-white/80",
-            div { class: "max-w-7xl",
-                div { class: "flex items-center justify-between",
-                    div { class: "flex items-center gap-2",
-                        Link {
-                            to: Route::Learn {},
-                            class: "flex items-center gap-3",
-                            img {
-                                class: "h-24 w-24 object-contain",
-                                src: NAVBAR_LOGO,
-                                alt: "Keikaku",
+        ToastProvider {
+            nav {
+                class: "bg-surface shadow-soft fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80",
+                style: "height: var(--kk-navbar-height);",
+                div { class: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full",
+                    div { class: "flex items-center justify-between h-full",
+                        div { class: "flex items-center gap-2",
+                            Link {
+                                to: Route::Learn {},
+                                class: "flex items-center gap-3",
+                                Avatar { class: "h-10 w-10",
+                                    AvatarImage { src: NAVBAR_LOGO, alt: "Keikaku" }
+                                    AvatarFallback { "K" }
+                                }
+                                span { class: "text-2xl font-bold bg-clip-text text-transparent bg-rainbow-vibrant",
+                                    "Keikaku"
+                                }
                             }
-                            span { class: "text-2xl font-bold bg-clip-text text-transparent bg-rainbow-vibrant",
-                                "Keikaku"
+                        }
+
+                        DxNavbar {
+                            aria_label: "Keikaku navigation",
+                            class: "flex items-center gap-2",
+
+                            NavbarItem {
+                                index: 0usize,
+                                value: "learn".to_string(),
+                                to: Route::Learn {},
+                                class: Some("px-3 py-2 rounded-md".to_string()),
+                                active_class: Some("bg-muted".to_string()),
+                                "Учиться"
                             }
-                        }
-                    }
-                    div { class: "flex items-center gap-4",
-                        Link {
-                            to: Route::Learn {},
-                            class: if matches!(route, Route::Learn {}) { "text-text-main hover:text-accent-cyan transition-colors font-medium pb-1 border-b-2 border-accent-cyan" } else { "text-text-main hover:text-accent-cyan transition-colors font-medium" },
-                            "Обучение"
-                        }
-                        Link {
-                            to: Route::Overview {},
-                            class: if matches!(route, Route::Overview {}) { "text-text-main hover:text-accent-pink transition-colors font-medium pb-1 border-b-2 border-accent-pink" } else { "text-text-main hover:text-accent-pink transition-colors font-medium" },
-                            "Статистика"
-                        }
-                        Link {
-                            to: Route::Cards {},
-                            class: "text-text-main hover:text-accent-purple transition-colors font-medium",
-                            "Карточки"
-                        }
-                        Link {
-                            to: Route::Translate {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Перевод"
-                        }
-                        Link {
-                            to: Route::Kanji {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Кандзи"
-                        }
-                        Link {
-                            to: Route::Jlpt {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "JLPT"
-                        }
-                        Link {
-                            to: Route::Duolingo {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Duolingo"
-                        }
-                        Link {
-                            to: Route::Migii {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Migii"
-                        }
-                        Link {
-                            to: Route::Anki {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Anki"
-                        }
-                        Link {
-                            to: Route::Rebuild {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Перестроить"
-                        }
-                        Link {
-                            to: Route::Profile {},
-                            class: "text-text-main hover:text-accent-cyan transition-colors font-medium",
-                            "Профиль"
+                            NavbarItem {
+                                index: 1usize,
+                                value: "cards".to_string(),
+                                to: Route::Cards {},
+                                class: Some("px-3 py-2 rounded-md".to_string()),
+                                active_class: Some("bg-muted".to_string()),
+                                "Карточки"
+                            }
+                            NavbarItem {
+                                index: 2usize,
+                                value: "import".to_string(),
+                                to: Route::Import {},
+                                class: Some("px-3 py-2 rounded-md".to_string()),
+                                active_class: Some("bg-muted".to_string()),
+                                "Импорт"
+                            }
+                            NavbarItem {
+                                index: 3usize,
+                                value: "translate".to_string(),
+                                to: Route::Translate {},
+                                class: Some("px-3 py-2 rounded-md".to_string()),
+                                active_class: Some("bg-muted".to_string()),
+                                "Перевод"
+                            }
+                            NavbarItem {
+                                index: 4usize,
+                                value: "kanji".to_string(),
+                                to: Route::Kanji {},
+                                class: Some("px-3 py-2 rounded-md".to_string()),
+                                active_class: Some("bg-muted".to_string()),
+                                "Кандзи"
+                            }
+                            NavbarItem {
+                                index: 5usize,
+                                value: "profile".to_string(),
+                                to: Route::Profile {},
+                                class: Some("px-3 py-2 rounded-md".to_string()),
+                                active_class: Some("bg-muted".to_string()),
+                                "Профиль"
+                            }
                         }
                     }
                 }
             }
-        }
 
-        Outlet::<Route> {}
+            main { style: "padding-top: var(--kk-navbar-height);", Outlet::<Route> {} }
+        }
     }
 }

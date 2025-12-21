@@ -1,6 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Modal, TextInput};
+use crate::components::button::{Button, ButtonVariant};
+use crate::components::input::Input;
+use crate::components::sheet::{
+    Sheet, SheetContent, SheetFooter, SheetHeader, SheetSide, SheetTitle,
+};
 use keikaku::settings::ApplicationEnvironment;
 
 #[component]
@@ -13,32 +17,56 @@ pub fn EditModal(
     on_error: EventHandler<String>,
     loading: bool,
 ) -> Element {
-    let mut question = use_signal(|| initial_question.clone());
-    let mut answer = use_signal(|| initial_answer.clone());
+    let question = use_signal(|| initial_question.clone());
+    let answer = use_signal(|| initial_answer.clone());
 
     rsx! {
-        Modal {
-            title: "Редактировать карточку",
-            on_close,
-            div { class: "space-y-4",
-                TextInput {
-                    label: "Вопрос",
-                    value: question,
-                    placeholder: "Введите вопрос...",
+        Sheet {
+            open: true,
+            on_open_change: move |v: bool| {
+                if !v {
+                    on_close.call(())
                 }
-                TextInput {
-                    label: "Ответ",
-                    value: answer,
-                    placeholder: "Введите ответ...",
+            },
+            SheetContent { side: SheetSide::Right,
+                SheetHeader {
+                    SheetTitle { "Редактировать карточку" }
                 }
-                div { class: "flex gap-2 justify-end",
+
+                div { class: "space-y-4",
+                    div { class: "space-y-2",
+                        label { class: "text-sm font-medium", "Вопрос" }
+                        Input {
+                            placeholder: "Введите вопрос...",
+                            value: question(),
+                            oninput: {
+                                let mut question = question;
+                                move |e: FormEvent| question.set(e.value())
+                            },
+                        }
+                    }
+                    div { class: "space-y-2",
+                        label { class: "text-sm font-medium", "Ответ" }
+                        Input {
+                            placeholder: "Введите ответ...",
+                            value: answer(),
+                            oninput: {
+                                let mut answer = answer;
+                                move |e: FormEvent| answer.set(e.value())
+                            },
+                        }
+                    }
+                }
+
+                SheetFooter {
                     Button {
                         variant: ButtonVariant::Outline,
                         onclick: move |_| on_close.call(()),
                         "Отмена"
                     }
                     Button {
-                        variant: ButtonVariant::Rainbow,
+                        variant: ButtonVariant::Primary,
+                        disabled: loading,
                         onclick: move |_| {
                             let q = question();
                             let a = answer();
@@ -49,27 +77,16 @@ pub fn EditModal(
                             let card_id = card_id.clone();
                             let on_success = on_success;
                             let on_error = on_error;
-
                             spawn(async move {
-                                // Note: loading state is managed by parent component
                                 match edit_card(card_id, q, a).await {
                                     Ok(_) => {
-                                        question.set(String::new());
-                                        answer.set(String::new());
-                                        on_success.call("Карточка обновлена".to_string());
+                                        on_success.call("Карточка обновлена".to_string())
                                     }
-                                    Err(e) => {
-                                        on_error.call(format!("Ошибка: {}", e));
-                                    }
+                                    Err(e) => on_error.call(format!("Ошибка: {}", e)),
                                 }
                             });
                         },
-                        disabled: Some(loading),
-                        if loading {
-                            "Сохранение..."
-                        } else {
-                            "Сохранить"
-                        }
+                        {if loading { "Сохранение..." } else { "Сохранить" }}
                     }
                 }
             }

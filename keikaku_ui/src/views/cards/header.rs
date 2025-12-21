@@ -1,6 +1,8 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, SectionHeader};
+use crate::Route;
+use crate::components::app_ui::SectionHeader;
+use crate::components::button::{Button, ButtonVariant};
 
 #[component]
 pub fn CardsHeader(
@@ -15,9 +17,12 @@ pub fn CardsHeader(
                 "Управление карточками для изучения".to_string(),
             ),
             actions: Some(rsx! {
+                Link { to: Route::Learn {},
+                    Button { variant: ButtonVariant::Outline, class: "w-auto px-6", "Учиться" }
+                }
                 Button {
-                    variant: ButtonVariant::Rainbow,
-                    class: Some("w-auto px-6".to_string()),
+                    variant: ButtonVariant::Primary,
+                    class: "w-auto px-6",
                     onclick: move |_| on_create_click.call(()),
                     "+ Создать карточку"
                 }

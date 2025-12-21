@@ -1,0 +1,60 @@
+.switch-example {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  gap: 15px;
+}
+
+.switch {
+  all: unset;
+  position: relative;
+  width: 2rem;
+  height: 1.15rem;
+  border-radius: 9999px;
+  background-color: rgba(226, 232, 240, 0.95);
+  cursor: pointer;
+  transition: transform 220ms cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 150ms;
+  box-shadow: inset 0 0 0 1px var(--kk-border), var(--kk-shadow-3d);
+}
+
+.switch[data-state="checked"] {
+  background-image: var(--kk-gradient-benzine);
+}
+
+.switch-thumb {
+  display: block;
+  width: calc(1.15rem - 2px);
+  height: calc(1.15rem - 2px);
+  border-radius: 9999px;
+  background-color: var(--kk-surface);
+  transform: translateX(1px);
+  transition: transform 220ms cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  box-shadow: 0 6px 14px -10px rgba(0, 0, 0, 0.25);
+}
+
+.switch[data-state="checked"] .switch-thumb {
+  background-color: var(--kk-surface);
+  transform: translateX(calc(2rem - 1px - (1.15rem - 2px)));
+}
+
+.switch:hover:not([data-disabled="true"]) {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px var(--kk-border), var(--kk-shadow-3d-hover);
+}
+
+.switch:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--kk-border),
+    0 0 0 4px var(--kk-focus),
+    var(--kk-shadow-3d-hover);
+}
+
+/* Only apply disabled styles when data-disabled is "true" */
+.switch[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

@@ -1,16 +1,20 @@
 use dioxus::prelude::*;
 
 use crate::{
-    ui::{Chart, Section},
+    components::app_ui::{Card, Chart, H4, Paragraph},
     views::overview::OverviewCharts,
 };
 
 #[component]
 pub fn OverviewChartsComponent(charts: OverviewCharts) -> Element {
     rsx! {
-        Section {
-            title: "Графики прогресса".to_string(),
-            description: Some("Визуализация обучения по времени".to_string()),
+        Card { class: Some("p-6 min-w-0".to_string()),
+            div { class: "flex flex-col gap-1 mb-4",
+                H4 { class: Some("text-slate-800".to_string()), "Графики прогресса" }
+                Paragraph { class: Some("text-slate-500 text-sm".to_string()),
+                    "Визуализация обучения по времени"
+                }
+            }
             div { class: "grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0",
                 Chart {
                     title: "Стабильность знаний".to_string(),

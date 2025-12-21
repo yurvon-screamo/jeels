@@ -3,7 +3,7 @@ use dioxus_heroicons::{IconButton, solid};
 use std::rc::Rc;
 
 use crate::{
-    ui::{Card, EmptyState, Grid, H3, LoadingState, Paragraph, Pill, StateTone},
+    components::app_ui::{Card, EmptyState, Grid, H3, LoadingState, Paragraph, Pill, StateTone},
     views::cards::UiCard,
 };
 

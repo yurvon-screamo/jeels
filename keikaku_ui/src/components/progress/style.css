@@ -1,0 +1,33 @@
+.progress {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    height: .5rem;
+    box-sizing: border-box;
+    border-radius: 9999px;
+    background: rgba(226, 232, 240, 0.95);
+    box-shadow: inset 0 0 0 1px var(--kk-border), var(--kk-shadow-soft);
+}
+
+.progress[data-state='indeterminate'] .progress-indicator {
+    width: 50%;
+    animation: indeterminate 1s infinite linear;
+}
+
+.progress-indicator {
+    width: var(--progress-value, 0%);
+    height: 100%;
+    background-image: var(--kk-gradient-benzine);
+    transition: width 250ms ease;
+}
+
+@keyframes indeterminate {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}

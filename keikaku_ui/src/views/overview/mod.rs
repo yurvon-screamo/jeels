@@ -5,7 +5,7 @@ mod overview;
 
 pub use overview::Overview;
 
-use crate::ui::ChartDataPoint;
+use crate::components::app_ui::ChartDataPoint;
 
 #[derive(Clone, PartialEq, Default)]
 pub(crate) struct OverviewCharts {

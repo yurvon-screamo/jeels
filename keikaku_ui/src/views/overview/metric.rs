@@ -1,7 +1,9 @@
 use dioxus::prelude::*;
 
 use crate::{
-    ui::{Card, H2, H4, Heatmap, HeatmapDataPoint, Paragraph, Pill, Section, Size, StateTone, Tag},
+    components::app_ui::{
+        Card, H2, H4, Heatmap, HeatmapDataPoint, Paragraph, Pill, Size, StateTone, Tag,
+    },
     views::overview::overview::{MetricData, OverviewStats},
 };
 
@@ -10,11 +12,11 @@ pub fn OverviewMetrics(stats: OverviewStats, heatmap_data: Vec<HeatmapDataPoint>
     let card_status_metrics = build_card_status_metrics(&stats);
 
     rsx! {
-        div { class: "grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 mt-4",
+        div { class: "grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 min-w-0",
             // Левая колонка: метрики и тепловая карта
-            div { class: "space-y-6",
+            div { class: "space-y-6 min-w-0",
 
-                Card { class: "p-2",
+                Card { class: Some("p-4".to_string()),
                     H2 { class: Some("text-slate-800 flex items-center justify-between".to_string()),
                         "Всего карточек"
                         Tag { size: Some(Size::ExtraLarge),
@@ -23,31 +25,34 @@ pub fn OverviewMetrics(stats: OverviewStats, heatmap_data: Vec<HeatmapDataPoint>
                     }
                 }
 
-                Section { title: "Тепловая карта обучения".to_string(),
-                    Card { class: "p-3",
-                        Heatmap { data: heatmap_data }
+                Card { class: Some("p-4 min-w-0".to_string()),
+                    div { class: "flex items-center justify-between mb-2",
+                        H4 { class: Some("text-slate-700".to_string()),
+                            "Тепловая карта обучения"
+                        }
+                    }
+                    Heatmap {
+                        data: heatmap_data,
+                        class: Some("min-w-0".to_string()),
                     }
                 }
             }
 
             // Правая колонка: статус карточек
-            Section { title: "Карточки".to_string(),
-                Card { class: "p-6",
-                    div { class: "space-y-1",
-                        for (title , value , hint , tone) in card_status_metrics {
-                            div { class: "flex items-center justify-between",
-                                div { class: "flex-1",
-                                    H4 { class: Some("text-slate-700".to_string()),
-                                        {title}
-                                    }
-                                    Paragraph { class: Some("text-slate-500".to_string()),
-                                        {hint}
-                                    }
+            Card { class: Some("p-6 min-w-0".to_string()),
+                H4 { class: Some("text-slate-700 mb-3".to_string()), "Карточки" }
+                div { class: "space-y-3",
+                    for (title , value , hint , tone) in card_status_metrics {
+                        div { class: "flex items-start justify-between gap-3",
+                            div { class: "flex-1 min-w-0",
+                                H4 { class: Some("text-slate-700".to_string()), {title} }
+                                Paragraph { class: Some("text-slate-500 text-sm".to_string()),
+                                    {hint}
                                 }
-                                Pill {
-                                    text: format!("{} шт.", value),
-                                    tone: Some(tone),
-                                }
+                            }
+                            Pill {
+                                text: format!("{} шт.", value),
+                                tone: Some(tone),
                             }
                         }
                     }

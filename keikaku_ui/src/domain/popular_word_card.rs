@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::components::app_ui::Card;
 use crate::domain::FuriganaText;
-use crate::ui::Card;
 use keikaku::domain::dictionary::PopularWord;
 
 #[component]

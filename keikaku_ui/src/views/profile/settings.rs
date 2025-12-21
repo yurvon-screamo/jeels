@@ -1,7 +1,9 @@
 use dioxus::prelude::*;
 use keikaku::domain::UserSettings;
 
-use crate::ui::{Button, ButtonVariant, Card, SectionHeader, TextInput};
+use crate::components::app_ui::{Card, SectionHeader};
+use crate::components::button::{Button, ButtonVariant};
+use crate::components::input::Input;
 use crate::views::profile::forms::{
     EmbeddingSettingsForm, LearnSettingsForm, LlmSettingsForm, TranslationSettingsForm,
 };
@@ -89,16 +91,23 @@ pub fn SettingsForm(
                     actions: None,
                 }
 
-                TextInput {
-                    label: "JWT Token",
-                    value: duolingo_token,
-                    placeholder: "Введите JWT токен...",
+                div { class: "space-y-2",
+                    label { class: "text-sm font-medium", "JWT Token" }
+                    Input {
+                        placeholder: "Введите JWT токен...",
+                        value: duolingo_token(),
+                        oninput: {
+                            let mut duolingo_token = duolingo_token;
+                            move |e: FormEvent| duolingo_token.set(e.value())
+                        },
+                    }
                 }
             }
 
             div { class: "flex justify-end",
                 Button {
-                    variant: ButtonVariant::Rainbow,
+                    variant: ButtonVariant::Primary,
+                    disabled: loading,
                     onclick: move |_| {
                         let new_settings = UserSettings::new(
                             llm_settings(),
@@ -109,7 +118,6 @@ pub fn SettingsForm(
                         );
                         on_save.call(new_settings);
                     },
-                    disabled: Some(loading),
                     if loading {
                         "Сохранение..."
                     } else {

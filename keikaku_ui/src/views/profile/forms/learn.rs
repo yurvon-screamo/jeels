@@ -1,7 +1,10 @@
 use dioxus::prelude::*;
+use dioxus_primitives::checkbox::CheckboxState;
 use keikaku::domain::LearnSettings;
 
-use crate::ui::{Checkbox, Switch, TextInput};
+use crate::components::checkbox::Checkbox;
+use crate::components::input::Input;
+use crate::components::switch::{Switch, SwitchThumb};
 
 fn create_learn_settings(
     limit_enabled: bool,
@@ -57,60 +60,75 @@ pub fn LearnSettingsForm(
     rsx! {
         div { class: "space-y-4",
             div { class: "space-y-2",
-                Checkbox {
-                    checked: limit_enabled(),
-                    onchange: move |v| {
-                        limit_enabled.set(v);
-                        update_settings();
-                    },
-                    label: Some("Ограничить количество карточек".to_string()),
+                label { class: "flex items-center gap-3 cursor-pointer",
+                    Checkbox {
+                        checked: if limit_enabled() { CheckboxState::Checked } else { CheckboxState::Unchecked },
+                        on_checked_change: move |state: CheckboxState| {
+                            let v: bool = state.into();
+                            limit_enabled.set(v);
+                            update_settings();
+                        },
+                    }
+                    span { class: "text-sm",
+                        "Ограничить количество карточек"
+                    }
                 }
                 if limit_enabled() {
-                    TextInput {
-                        label: Some("Лимит карточек".to_string()),
-                        placeholder: Some("8".to_string()),
-                        value: limit,
-                        oninput: Some(
-                            EventHandler::new({
+                    div { class: "space-y-2",
+                        label { class: "text-sm font-medium", "Лимит карточек" }
+                        Input {
+                            placeholder: "8",
+                            value: limit(),
+                            oninput: {
                                 let mut limit = limit;
                                 let update_settings = update_settings;
-                                move |e: Event<FormData>| {
+                                move |e: FormEvent| {
                                     limit.set(e.value());
                                     update_settings();
                                 }
-                            }),
-                        ),
-                        class: None,
-                        r#type: None,
+                            },
+                        }
                     }
                 }
             }
 
-            Switch {
-                checked: show_furigana(),
-                onchange: move |v| {
-                    show_furigana.set(v);
-                    update_settings();
-                },
-                label: Some("Показывать фуригану".to_string()),
+            div { class: "flex items-center justify-between gap-4",
+                span { class: "text-sm", "Показывать фуригану" }
+                Switch {
+                    aria_label: "Показывать фуригану",
+                    checked: show_furigana(),
+                    on_checked_change: move |v| {
+                        show_furigana.set(v);
+                        update_settings();
+                    },
+                    SwitchThumb {}
+                }
             }
 
-            Switch {
-                checked: low_stability_mode(),
-                onchange: move |v| {
-                    low_stability_mode.set(v);
-                    update_settings();
-                },
-                label: Some("Режим низкой стабильности".to_string()),
+            div { class: "flex items-center justify-between gap-4",
+                span { class: "text-sm", "Режим низкой стабильности" }
+                Switch {
+                    aria_label: "Режим низкой стабильности",
+                    checked: low_stability_mode(),
+                    on_checked_change: move |v| {
+                        low_stability_mode.set(v);
+                        update_settings();
+                    },
+                    SwitchThumb {}
+                }
             }
 
-            Switch {
-                checked: force_new_cards(),
-                onchange: move |v| {
-                    force_new_cards.set(v);
-                    update_settings();
-                },
-                label: Some("Принудительно новые карточки".to_string()),
+            div { class: "flex items-center justify-between gap-4",
+                span { class: "text-sm", "Принудительно новые карточки" }
+                Switch {
+                    aria_label: "Принудительно новые карточки",
+                    checked: force_new_cards(),
+                    on_checked_change: move |v| {
+                        force_new_cards.set(v);
+                        update_settings();
+                    },
+                    SwitchThumb {}
+                }
             }
         }
     }

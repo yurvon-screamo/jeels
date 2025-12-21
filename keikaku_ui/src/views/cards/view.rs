@@ -3,11 +3,10 @@ use keikaku::application::use_cases::list_cards::ListCardsUseCase;
 use keikaku::domain::VocabularyCard;
 use keikaku::settings::ApplicationEnvironment;
 
-use crate::ui::ErrorCard;
+use crate::components::app_ui::ErrorCard;
 use crate::views::cards::create::CreateModal;
 use crate::views::cards::delete::{DeleteConfirmModal, delete_card_with_handlers};
 use crate::views::cards::edit::EditModal;
-use crate::views::cards::notification::{Notification, NotificationArea};
 use crate::{
     DEFAULT_USERNAME, ensure_user, to_error,
     views::cards::{
@@ -15,6 +14,7 @@ use crate::{
         stats::CardsStats,
     },
 };
+use dioxus_primitives::toast::{ToastOptions, use_toast};
 
 #[derive(Clone, PartialEq)]
 pub enum ModalState {
@@ -74,9 +74,9 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
     let filter_status = use_signal(|| FilterStatus::All);
     let sort_by = use_signal(|| SortBy::Date);
     let mut modal_state = use_signal(|| ModalState::None);
-    let mut notification = use_signal(|| Notification::None);
     let mut delete_confirm = use_signal(|| None::<String>);
     let loading = use_signal(|| false);
+    let toast = use_toast();
 
     let filtered_and_sorted = move || {
         filter_and_sort_cards(
@@ -89,11 +89,6 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
 
     rsx! {
         div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
-            NotificationArea {
-                notification,
-                on_close: move |_| notification.set(Notification::None),
-            }
-
             CardsHeader {
                 total_count: cards_data.stats.total_count,
                 due_count: cards_data.stats.due_count,
@@ -128,10 +123,10 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
                     CreateModal {
                         on_close: move |_| modal_state.set(ModalState::None),
                         on_success: move |msg| {
-                            notification.set(Notification::Success(msg));
+                            toast.success(msg, ToastOptions::new());
                             on_refresh.call(());
                         },
-                        on_error: move |msg| notification.set(Notification::Error(msg)),
+                        on_error: move |msg| toast.error(msg, ToastOptions::new()),
                         loading: loading(),
                     }
                 },
@@ -142,10 +137,10 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
                         initial_answer: answer,
                         on_close: move |_| modal_state.set(ModalState::None),
                         on_success: move |msg| {
-                            notification.set(Notification::Success(msg));
+                            toast.success(msg, ToastOptions::new());
                             on_refresh.call(());
                         },
-                        on_error: move |msg| notification.set(Notification::Error(msg)),
+                        on_error: move |msg| toast.error(msg, ToastOptions::new()),
                         loading: loading(),
                     }
                 },
@@ -155,7 +150,7 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
             DeleteConfirmModal {
                 card_id: delete_confirm(),
                 on_close: move || delete_confirm.set(None),
-                on_confirm: delete_card_with_handlers(notification, delete_confirm, loading, on_refresh),
+                on_confirm: delete_card_with_handlers(toast, delete_confirm, loading, on_refresh),
             }
         }
     }

@@ -1,11 +1,14 @@
 use dioxus::prelude::*;
 use dioxus_heroicons::{Icon, solid};
+use dioxus_primitives::toast::{ToastOptions, Toasts};
 use keikaku::application::use_cases::delete_card::DeleteCardUseCase;
 use keikaku::domain::VocabularyCard;
 use ulid::Ulid;
 
-use crate::ui::{Button, ButtonVariant, Card, Modal, Paragraph};
-use crate::views::cards::notification::Notification;
+use crate::components::alert_dialog::{
+    AlertDialogAction, AlertDialogActions, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogRoot, AlertDialogTitle,
+};
 use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use keikaku::settings::ApplicationEnvironment;
 
@@ -17,40 +20,36 @@ pub fn DeleteConfirmModal(
 ) -> Element {
     if let Some(card_id) = card_id {
         rsx! {
-            Modal { title: "Удалить карточку", on_close,
-                div { class: "space-y-4",
-                    Card { class: Some("bg-red-50 border-red-200".to_string()),
-                        div { class: "flex items-center gap-3",
+            AlertDialogRoot {
+                open: true,
+                on_open_change: move |v: bool| {
+                    if !v {
+                        on_close.call(())
+                    }
+                },
+                AlertDialogContent {
+                    AlertDialogTitle { "Удалить карточку" }
+                    AlertDialogDescription {
+                        div { class: "flex items-start gap-3",
                             Icon {
                                 icon: solid::Shape::ExclamationTriangle,
-                                size: 32,
-                                class: Some("text-red-500".to_string()),
+                                size: 20,
+                                class: Some("text-destructive".to_string()),
                             }
-                            div { class: "flex-1",
-                                div { class: "text-sm font-semibold text-red-800", "Внимание!" }
-                                Paragraph { class: Some("text-red-700 text-sm".to_string()),
+                            div { class: "space-y-2",
+                                div { class: "text-sm font-semibold", "Внимание!" }
+                                div { class: "text-sm text-muted-foreground",
                                     "Удаление карточки необратимо. Вся история повторений будет потеряна."
+                                }
+                                div { class: "text-sm",
+                                    "Вы действительно хотите удалить эту карточку?"
                                 }
                             }
                         }
                     }
-                    Paragraph { class: Some("text-slate-600 text-sm".to_string()),
-                        "Вы действительно хотите удалить эту карточку?"
-                    }
-                    div { class: "flex gap-2 justify-end",
-                        Button {
-                            variant: ButtonVariant::Outline,
-                            onclick: move |_| on_close.call(()),
-                            "Отмена"
-                        }
-                        Button {
-                            variant: ButtonVariant::Outline,
-                            class: Some(
-                                "text-red-600 border-red-200 hover:border-red-300 hover:text-red-700".to_string(),
-                            ),
-                            onclick: move |_| {
-                                on_confirm.call(card_id.clone());
-                            },
+                    AlertDialogActions {
+                        AlertDialogCancel { "Отмена" }
+                        AlertDialogAction { on_click: move |_| on_confirm.call(card_id.clone()),
                             "Удалить навсегда"
                         }
                     }
@@ -63,13 +62,12 @@ pub fn DeleteConfirmModal(
 }
 
 pub fn delete_card_with_handlers(
-    notification: Signal<Notification>,
+    toast: Toasts,
     delete_confirm: Signal<Option<String>>,
     loading: Signal<bool>,
     on_refresh: EventHandler<()>,
 ) -> impl Fn(String) {
     move |card_id: String| {
-        let mut notification = notification;
         let mut delete_confirm = delete_confirm;
         let mut loading = loading;
         let on_refresh = on_refresh;
@@ -79,11 +77,11 @@ pub fn delete_card_with_handlers(
             match delete_card(card_id.clone()).await {
                 Ok(_) => {
                     delete_confirm.set(None);
-                    notification.set(Notification::Success("Карточка удалена".to_string()));
+                    toast.success("Карточка удалена".to_string(), ToastOptions::new());
                     on_refresh.call(());
                 }
                 Err(e) => {
-                    notification.set(Notification::Error(format!("Ошибка: {}", e)));
+                    toast.error(format!("Ошибка: {}", e), ToastOptions::new());
                 }
             }
             loading.set(false);

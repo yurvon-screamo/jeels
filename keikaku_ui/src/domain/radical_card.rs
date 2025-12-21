@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Card, Pill};
+use crate::components::app_ui::{Card, Pill, StateTone};
 use keikaku::domain::dictionary::RadicalInfo;
 
 #[component]
@@ -37,10 +37,10 @@ pub fn RadicalCard(
                             text: format!("JLPT N{}", radical_info.jlpt().as_number()),
                             tone: Some(
                                 match radical_info.jlpt().as_number() {
-                                    5 => crate::ui::StateTone::Success,
-                                    4 => crate::ui::StateTone::Info,
-                                    3 => crate::ui::StateTone::Warning,
-                                    _ => crate::ui::StateTone::Neutral,
+                                    5 => StateTone::Success,
+                                    4 => StateTone::Info,
+                                    3 => StateTone::Warning,
+                                    _ => StateTone::Neutral,
                                 },
                             ),
                         }

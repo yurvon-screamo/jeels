@@ -1,8 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::components::app_ui::{Card, Pill, StateTone};
 use crate::domain::{PopularWordsGrid, RadicalGrid};
-use crate::ui::Card;
-use crate::ui::Pill;
 use keikaku::domain::{dictionary::KanjiInfo, value_objects::NativeLanguage};
 
 #[component]
@@ -40,10 +39,10 @@ pub fn KanjiCard(
                             text: format!("JLPT N{}", kanji_info.jlpt().as_number()),
                             tone: Some(
                                 match kanji_info.jlpt().as_number() {
-                                    5 => crate::ui::StateTone::Success,
-                                    4 => crate::ui::StateTone::Info,
-                                    3 => crate::ui::StateTone::Warning,
-                                    _ => crate::ui::StateTone::Neutral,
+                                    5 => StateTone::Success,
+                                    4 => StateTone::Info,
+                                    3 => StateTone::Warning,
+                                    _ => StateTone::Neutral,
                                 },
                             ),
                         }

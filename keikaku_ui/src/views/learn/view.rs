@@ -2,6 +2,9 @@ use chrono::Utc;
 use dioxus::{document::eval, prelude::*};
 
 use super::{LearnActive, SessionState, StartFeedback, use_learn_session};
+use crate::components::app_ui::{Card, LoadingState, Paragraph, SectionHeader};
+use crate::components::button::{Button, ButtonVariant};
+use crate::views::Overview;
 use crate::views::learn::session_manager::complete_lesson_impl;
 
 #[component]
@@ -99,45 +102,48 @@ pub fn Learn() -> Element {
         eval.send(()).unwrap();
     });
 
-    let show_start_button = matches!((session.state)(), SessionState::Start);
+    let show_start_view = matches!((session.state)(), SessionState::Start);
 
     rsx! {
         div {
-            class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6 focus:outline-none",
+            class: "bg-bg min-h-screen text-text-main px-2 py-2 space-y-3 focus:outline-none",
             tabindex: "0",
             "data-learn-container": "",
             onkeydown: keyboard_handler,
-            if show_start_button {
-                div { class: "space-y-4 max-w-xl mx-auto",
-                    div { class: "flex justify-center",
-                        crate::ui::Button {
-                            variant: crate::ui::ButtonVariant::Rainbow,
-                            class: Some("px-8 py-3".to_string()),
-                            onclick: {
-                                let session_clone = session.clone();
-                                move |_| {
-                                    (session_clone.start_session)();
-                                }
-                            },
-                            disabled: None,
-                            "Начать обучение"
-                        }
+            if show_start_view {
+                div { class: "space-y-2 max-w-7xl mx-auto",
+                    SectionHeader {
+                        title: "Статистика".to_string(),
+                        subtitle: Some("Нажми «Учиться», чтобы начать урок".to_string()),
+                        actions: Some(rsx! {
+                            Button {
+                                variant: ButtonVariant::Primary,
+                                class: "w-auto px-10",
+                                onclick: {
+                                    let session_clone = session.clone();
+                                    move |_| (session_clone.start_session)()
+                                },
+                                "Учиться"
+                            }
+                        }),
                     }
+
+                    Overview {}
 
                     {
                         let data = (session.session_data)();
                         match data.start_feedback {
                             StartFeedback::None => rsx! {},
                             StartFeedback::Empty => rsx! {
-                                crate::ui::Card { class: Some("border-slate-200 bg-slate-50".to_string()),
-                                    crate::ui::Paragraph { class: Some("text-slate-700".to_string()),
+                                Card { class: Some("border-slate-200 bg-slate-50".to_string()),
+                                    Paragraph { class: Some("text-slate-700".to_string()),
                                         "Нет карточек для обучения — похоже, вы всё выучили (или на сегодня ничего не запланировано)."
                                     }
                                 }
                             },
                             StartFeedback::Error(ref msg) => rsx! {
-                                crate::ui::Card { class: Some("border-red-200 bg-red-50".to_string()),
-                                    crate::ui::Paragraph { class: Some("text-red-800".to_string()),
+                                Card { class: Some("border-red-200 bg-red-50".to_string()),
+                                    Paragraph { class: Some("text-red-800".to_string()),
                                         "Не удалось загрузить карточки: {msg}"
                                     }
                                 }
@@ -151,7 +157,7 @@ pub fn Learn() -> Element {
                     SessionState::Loading => {
                         rsx! {
                             div { class: "flex items-center justify-center py-12",
-                                crate::ui::LoadingState { message: Some("Загрузка карточек...".to_string()) }
+                                LoadingState { message: Some("Загрузка карточек...".to_string()) }
                             }
                         }
                     }

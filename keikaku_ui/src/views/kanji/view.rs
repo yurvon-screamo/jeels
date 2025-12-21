@@ -1,5 +1,7 @@
+use crate::components::app_ui::{Card, ErrorCard, H1};
+use crate::components::button::{Button, ButtonVariant};
+use crate::components::input::Input;
 use crate::domain::KanjiCard;
-use crate::ui::{Button, ButtonVariant, Card, ErrorCard, H1, TextInput};
 use dioxus::prelude::*;
 use keikaku::application::use_cases::get_kanji_info::GetKanjiInfoUseCase;
 use keikaku::domain::{dictionary::KanjiInfo, value_objects::NativeLanguage};
@@ -54,24 +56,30 @@ fn KanjiContent(
             Card {
                 div { class: "grid grid-cols-9 gap-3",
                     div { class: "col-span-8",
-                        TextInput {
-                            label: "Кандзи",
-                            value: query,
-                            placeholder: "Введите кандзи для поиска...",
+                        div { class: "space-y-2",
+                            label { class: "text-sm font-medium", "Кандзи" }
+                            Input {
+                                placeholder: "Введите кандзи для поиска...",
+                                value: query(),
+                                oninput: {
+                                    let mut query = query;
+                                    move |e: FormEvent| query.set(e.value())
+                                },
+                            }
                         }
                     }
 
                     div { class: "col-span-1 flex items-end",
                         Button {
-                            variant: ButtonVariant::Rainbow,
-                            class: Some("w-full px-2 py-1.5 text-xs".to_string()),
+                            variant: ButtonVariant::Primary,
+                            class: "w-full px-2 py-1.5 text-xs",
+                            disabled: loading(),
                             onclick: move |_| {
                                 loading.set(true);
                                 let search_query = query();
                                 on_search.call(search_query);
                                 loading.set(false);
                             },
-                            disabled: Some(loading()),
                             "Поиск"
                         }
                     }

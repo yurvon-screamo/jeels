@@ -1,6 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Modal, TextInput};
+use crate::components::button::{Button, ButtonVariant};
+use crate::components::input::Input;
+use crate::components::sheet::{
+    Sheet, SheetContent, SheetFooter, SheetHeader, SheetSide, SheetTitle,
+};
 use keikaku::settings::ApplicationEnvironment;
 
 #[component]
@@ -10,30 +14,56 @@ pub fn CreateModal(
     on_error: EventHandler<String>,
     loading: bool,
 ) -> Element {
-    let mut question = use_signal(String::new);
-    let mut answer = use_signal(String::new);
+    let question = use_signal(String::new);
+    let answer = use_signal(String::new);
 
     rsx! {
-        Modal { title: "Создать карточку", on_close,
-            div { class: "space-y-4",
-                TextInput {
-                    label: "Вопрос",
-                    value: question,
-                    placeholder: "Введите вопрос...",
+        Sheet {
+            open: true,
+            on_open_change: move |v: bool| {
+                if !v {
+                    on_close.call(())
                 }
-                TextInput {
-                    label: "Ответ",
-                    value: answer,
-                    placeholder: "Введите ответ...",
+            },
+            SheetContent { side: SheetSide::Right,
+                SheetHeader {
+                    SheetTitle { "Создать карточку" }
                 }
-                div { class: "flex gap-2 justify-end",
+
+                div { class: "space-y-4",
+                    div { class: "space-y-2",
+                        label { class: "text-sm font-medium", "Вопрос" }
+                        Input {
+                            placeholder: "Введите вопрос...",
+                            value: question(),
+                            oninput: {
+                                let mut question = question;
+                                move |e: FormEvent| question.set(e.value())
+                            },
+                        }
+                    }
+                    div { class: "space-y-2",
+                        label { class: "text-sm font-medium", "Ответ" }
+                        Input {
+                            placeholder: "Введите ответ...",
+                            value: answer(),
+                            oninput: {
+                                let mut answer = answer;
+                                move |e: FormEvent| answer.set(e.value())
+                            },
+                        }
+                    }
+                }
+
+                SheetFooter {
                     Button {
                         variant: ButtonVariant::Outline,
                         onclick: move |_| on_close.call(()),
                         "Отмена"
                     }
                     Button {
-                        variant: ButtonVariant::Rainbow,
+                        variant: ButtonVariant::Primary,
+                        disabled: loading,
                         onclick: move |_| {
                             let q = question();
                             let a = answer();
@@ -43,13 +73,9 @@ pub fn CreateModal(
 
                             let on_success = on_success;
                             let on_error = on_error;
-
                             spawn(async move {
-                                // Note: loading state is managed by parent component
                                 match create_card(q, a).await {
                                     Ok(_) => {
-                                        question.set(String::new());
-                                        answer.set(String::new());
                                         on_success.call("Карточка создана".to_string());
                                     }
                                     Err(e) => {
@@ -58,12 +84,7 @@ pub fn CreateModal(
                                 }
                             });
                         },
-                        disabled: Some(loading),
-                        if loading {
-                            "Создание..."
-                        } else {
-                            "Создать"
-                        }
+                        {if loading { "Создание..." } else { "Создать" }}
                     }
                 }
             }

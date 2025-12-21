@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::ui::{Button, ButtonVariant, Paragraph};
+use crate::components::app_ui::Paragraph;
+use crate::components::button::{Button, ButtonVariant};
 
 #[derive(Clone, PartialEq)]
 pub enum Rating {
@@ -143,7 +144,7 @@ fn ActionButton(
     rsx! {
         Button {
             variant: ButtonVariant::Outline,
-            class: Some(format!("{} text-left {}", color_class_str, additional_class)),
+            class: "{color_class_str} text-left {additional_class}",
             onclick: Some(onclick),
             div { class: "space-y-1",
                 span { class: "block text-xs opacity-90", "Клавиша {key_hint}" }

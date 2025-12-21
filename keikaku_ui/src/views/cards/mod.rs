@@ -4,7 +4,6 @@ mod edit;
 mod filters;
 mod grid;
 mod header;
-mod notification;
 mod stats;
 mod types;
 mod view;

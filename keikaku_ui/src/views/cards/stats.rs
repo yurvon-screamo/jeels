@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::{MetricTone, StatCard};
+use crate::components::app_ui::{MetricTone, StatCard};
 
 #[component]
 pub fn CardsStats(total_count: usize, due_count: usize, filtered_count: usize) -> Element {

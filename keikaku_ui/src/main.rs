@@ -10,9 +10,7 @@ use keikaku::{
     settings::ApplicationEnvironment,
 };
 
-use views::{
-    Anki, Cards, Duolingo, Jlpt, Kanji, Learn, Migii, Navbar, Overview, Profile, Rebuild, Translate,
-};
+use views::{Cards, Import, Kanji, Learn, Navbar, Overview, Profile, Translate};
 
 pub const DEFAULT_USERNAME: &str = "yurvon_screamo";
 
@@ -39,14 +37,16 @@ pub fn to_error(err: impl std::fmt::Display) -> String {
     err.to_string()
 }
 
+mod components;
 mod domain;
-mod ui;
 mod views;
 
 const APP_ICON: Asset = asset!("/assets/icons/32x32.png");
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
-const UI_STYLES: Asset = asset!("/assets/ui-styles.css");
+const UI_TOKENS_CSS: Asset = asset!("/assets/styles/tokens.css");
+const UI_BASE_CSS: Asset = asset!("/assets/styles/base.css");
+const UI_UTILITIES_CSS: Asset = asset!("/assets/styles/utilities.css");
 
 fn main() {
     dioxus::launch(App);
@@ -58,6 +58,8 @@ enum Route {
     #[layout(Navbar)]
         #[route("/")]
         Learn {},
+        #[route("/import")]
+        Import {},
         #[route("/overview")]
         Overview {},
         #[route("/cards")]
@@ -66,18 +68,8 @@ enum Route {
         Translate {},
         #[route("/kanji")]
         Kanji {},
-        #[route("/jlpt")]
-        Jlpt {},
-        #[route("/duolingo")]
-        Duolingo {},
-        #[route("/migii")]
-        Migii {},
         #[route("/profile")]
         Profile {},
-        #[route("/anki")]
-        Anki {},
-        #[route("/rebuild")]
-        Rebuild {},
 }
 
 #[component]
@@ -86,7 +78,9 @@ fn App() -> Element {
         document::Link { rel: "icon", href: APP_ICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
-        document::Link { rel: "stylesheet", href: UI_STYLES }
+        document::Link { rel: "stylesheet", href: UI_TOKENS_CSS }
+        document::Link { rel: "stylesheet", href: UI_BASE_CSS }
+        document::Link { rel: "stylesheet", href: UI_UTILITIES_CSS }
         style { {global_styles()} }
         Router::<Route> {}
     }
@@ -94,31 +88,6 @@ fn App() -> Element {
 
 fn global_styles() -> &'static str {
     r#"
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    border: none;
-                    outline: none;
-                    box-sizing: border-box;
-                }
-                
-                html {
-                    background-color: #F8F9FD;
-                    font-family: 'Maple Mono', monospace;
-                }
-                
-                body {
-                    background-color: #F8F9FD;
-                    color: #334155;
-                    font-family: 'Maple Mono', monospace;
-                    margin: 0;
-                    padding: 0;
-                    min-height: 100vh;
-                    overflow-x: hidden;
-                }
-                
-                * {
-                    box-sizing: border-box;
-                }
+                /* moved to assets/styles/base.css */
     "#
 }
