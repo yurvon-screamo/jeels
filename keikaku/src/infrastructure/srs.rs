@@ -4,24 +4,22 @@ use crate::domain::error::JeersError;
 use crate::domain::review::{MemoryState, Review};
 use crate::domain::value_objects::{Difficulty, Rating, Stability};
 use chrono::{Duration, Utc};
-use fsrs::FSRS;
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use rs_fsrs::{Card as FsrsCard, FSRS, Parameters, Rating as FsrsRating, State as FsrsState};
 
 pub struct FsrsSrsService {
-    fsrs: Arc<Mutex<FSRS>>,
-    desired_retention: f64,
+    fsrs: FSRS,
 }
 
 impl FsrsSrsService {
     pub fn new() -> Result<Self, JeersError> {
+        let mut parameters = Parameters::default();
+        parameters.request_retention = 0.9;
+        parameters.maximum_interval = 36500;
+        parameters.enable_short_term = true;
+        parameters.enable_fuzz = false;
+
         Ok(Self {
-            fsrs: Arc::new(Mutex::new(FSRS::new(Some(&[])).map_err(|e| {
-                JeersError::SrsCalculationFailed {
-                    reason: format!("Failed to create FSRS: {:?}", e),
-                }
-            })?)),
-            desired_retention: 0.9,
+            fsrs: FSRS::new(parameters),
         })
     }
 }
@@ -33,43 +31,74 @@ impl SrsService for FsrsSrsService {
         previous_memory_state: Option<&MemoryState>,
         reviews: &[Review],
     ) -> Result<NextReview, JeersError> {
-        let elapsed_days = if let Some(last_review) = reviews.last() {
-            (Utc::now() - last_review.timestamp()).num_days().max(0) as u32
+        let now = Utc::now();
+
+        let last_review_date = reviews
+            .last()
+            .map(|review| review.timestamp())
+            .unwrap_or(now);
+
+        let elapsed_days = now
+            .signed_duration_since(last_review_date)
+            .num_days()
+            .max(0);
+
+        let reps = reviews.len() as i32;
+        let lapses = reviews
+            .iter()
+            .filter(|review| matches!(review.rating(), Rating::Again))
+            .count() as i32;
+
+        let (due, stability, difficulty, scheduled_days, state) =
+            if let Some(previous_memory_state) = previous_memory_state {
+                let due = *previous_memory_state.next_review_date();
+                let scheduled_days = due
+                    .signed_duration_since(last_review_date)
+                    .num_days()
+                    .max(0);
+
+                (
+                    due,
+                    previous_memory_state.stability().value(),
+                    previous_memory_state.difficulty().value(),
+                    scheduled_days,
+                    FsrsState::Review,
+                )
+            } else {
+                (now, 0.0, 0.0, 0, FsrsState::New)
+            };
+
+        let card = FsrsCard {
+            due,
+            stability,
+            difficulty,
+            elapsed_days,
+            scheduled_days,
+            reps,
+            lapses,
+            state,
+            last_review: last_review_date,
+        };
+
+        let fsrs_rating = match rating {
+            Rating::Again => FsrsRating::Again,
+            Rating::Hard => FsrsRating::Hard,
+            Rating::Good => FsrsRating::Good,
+            Rating::Easy => FsrsRating::Easy,
+        };
+
+        let scheduling_info = self.fsrs.next(card, now, fsrs_rating);
+        let next_review_date = scheduling_info.card.due;
+
+        let interval = next_review_date.signed_duration_since(now);
+        let interval = if interval < Duration::zero() {
+            Duration::zero()
         } else {
-            0
+            interval
         };
 
-        let fsrs_memory_state =
-            previous_memory_state.map(|previous_memory_state| fsrs::MemoryState {
-                stability: previous_memory_state.stability().value() as f32,
-                difficulty: previous_memory_state.difficulty().value() as f32,
-            });
-
-        let fsrs = self.fsrs.lock().await;
-
-        let next_states = fsrs
-            .next_states(
-                fsrs_memory_state,
-                self.desired_retention as f32,
-                elapsed_days,
-            )
-            .map_err(|e| JeersError::SrsCalculationFailed {
-                reason: format!("Failed to calculate next states: {:?}", e),
-            })?;
-
-        let next_state = match rating {
-            Rating::Again => &next_states.again,
-            Rating::Hard => &next_states.hard,
-            Rating::Good => &next_states.good,
-            Rating::Easy => &next_states.easy,
-        };
-
-        // FSRS returns interval as f32 in *days*. Convert days -> milliseconds and keep fractional part.
-        let interval_ms = (next_state.interval.max(0.0) as f64 * 86_400_000.0).round() as i64;
-        let interval = Duration::milliseconds(interval_ms);
-        let next_review_date = Utc::now() + interval;
-        let stability = Stability::new(next_state.memory.stability as f64)?;
-        let difficulty = Difficulty::new(next_state.memory.difficulty as f64)?;
+        let stability = Stability::new(scheduling_info.card.stability)?;
+        let difficulty = Difficulty::new(scheduling_info.card.difficulty)?;
         let memory_state = MemoryState::new(stability, difficulty, next_review_date);
 
         Ok(NextReview {

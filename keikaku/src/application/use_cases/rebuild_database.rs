@@ -2,7 +2,6 @@ use super::generate_card_content::GenerateCardContentUseCase;
 use crate::application::{LlmService, UserRepository};
 use crate::domain::error::JeersError;
 use crate::domain::value_objects::{CardContent, Question};
-use clap::ValueEnum;
 use tracing::error;
 use ulid::Ulid;
 
@@ -12,7 +11,7 @@ pub struct RebuildDatabaseUseCase<'a, R: UserRepository, L: LlmService> {
     generate_content_use_case: GenerateCardContentUseCase<'a, L>,
 }
 
-#[derive(Debug, Clone, PartialEq, ValueEnum)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum RebuildDatabaseOptions {
     Content,
     All,

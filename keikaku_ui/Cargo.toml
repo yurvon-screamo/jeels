@@ -14,7 +14,7 @@ tokio.workspace = true
 ulid.workspace = true
 imp.workspace = true
 chrono.workspace = true
-dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version = "0.0.1", default-features = false, features = ["router"] }
+dioxus-primitives.workspace = true
 
 [features]
 default = ["web"]

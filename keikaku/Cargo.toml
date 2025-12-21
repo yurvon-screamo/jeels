@@ -35,7 +35,7 @@ serde.workspace = true
 chrono.workspace = true
 
 # Japan
-fsrs.workspace = true
+rs-fsrs.workspace = true
 autoruby.workspace = true
 wana_kana.workspace = true
 
@@ -48,9 +48,6 @@ text-embeddings-backend-core.workspace = true
 text-embeddings-backend-candle.workspace = true
 tokenizers.workspace = true
 # intel-mkl-src.workspace = true
-
-# CLI utilities (for ValueEnum)
-clap.workspace = true
 
 [dev-dependencies]
 rstest.workspace = true
