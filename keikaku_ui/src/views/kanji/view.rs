@@ -1,4 +1,4 @@
-use crate::components::app_ui::{Card, ErrorCard, H1};
+use crate::components::app_ui::{Card, ErrorCard, H2};
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::input::Input;
 use crate::domain::KanjiCard;
@@ -51,15 +51,15 @@ fn KanjiContent(
 
     rsx! {
         div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
-            H1 { "Кандзи" }
+            H2 { "Кандзи" }
 
             Card {
                 div { class: "grid grid-cols-9 gap-3",
                     div { class: "col-span-8",
                         div { class: "space-y-2",
-                            label { class: "text-sm font-medium", "Кандзи" }
                             Input {
                                 placeholder: "Введите кандзи для поиска...",
+                                class: "w-full",
                                 value: query(),
                                 oninput: {
                                     let mut query = query;
