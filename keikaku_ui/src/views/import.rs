@@ -77,7 +77,7 @@ fn ImportDuolingoTool() -> Element {
         Card { class: Some("space-y-4".to_string()),
             ToolHeader {
                 title: "Duolingo синхронизация",
-                subtitle: "cli: duolingo_sync --question-only",
+                subtitle: "Импорт изученных слов из Duolingo",
             }
 
             Paragraph { class: Some("text-sm text-slate-600".to_string()),
@@ -125,7 +125,7 @@ fn ImportJlptTool() -> Element {
         Card { class: Some("space-y-4".to_string()),
             ToolHeader {
                 title: "JLPT импорт",
-                subtitle: "cli: jlpt_create --levels N5 N4 ...",
+                subtitle: "Импорт слов для указанных уровней JLPT",
             }
 
             Paragraph { class: Some("text-sm text-slate-600".to_string()),
@@ -201,7 +201,7 @@ fn ImportAnkiTool() -> Element {
         Card { class: Some("space-y-4".to_string()),
             ToolHeader {
                 title: "Anki импорт",
-                subtitle: "cli: anki_create --file path --word-tag Word --translation-tag Translation",
+                subtitle: "Импорт слов из Anki файла",
             }
 
             div { class: "space-y-2",
@@ -296,7 +296,7 @@ fn ImportMigiiTool() -> Element {
         Card { class: Some("space-y-4".to_string()),
             ToolHeader {
                 title: "Migii импорт",
-                subtitle: "cli: migii_create --lessons 1 2 3",
+                subtitle: "Импорт слов из указанных уроков Migii",
             }
 
             div { class: "space-y-2",
@@ -356,7 +356,7 @@ fn ImportRebuildTool() -> Element {
         Card { class: Some("space-y-4".to_string()),
             ToolHeader {
                 title: "Пересборка базы",
-                subtitle: "cli: rebuild_database --options <all|content>",
+                subtitle: "Пересборка базы данных",
             }
 
             RadioGroup {
