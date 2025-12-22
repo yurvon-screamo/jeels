@@ -45,14 +45,8 @@ fn expand_tilde(path: &str) -> String {
             format!("{}/data/{}/files", android_data, package_name)
         };
 
-        let base = PathBuf::from(&base_path);
-
-        if path == "~" {
-            base.to_string_lossy().to_string()
-        } else {
-            let relative_path = path.strip_prefix("~/").unwrap_or(path);
-            base.join(relative_path).to_string_lossy().to_string()
-        }
+        println!("base_path: {}", &base_path);
+        PathBuf::from(&base_path).to_string_lossy().to_string()
     } else {
         // Non-Android platforms - use standard home directory
         // Try multiple methods to get home directory for cross-platform support
@@ -67,6 +61,8 @@ fn expand_tilde(path: &str) -> String {
                     .and_then(|hp| std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp)))
             })
             .unwrap_or_else(|_| "~".to_string());
+
+        println!("home: {}", &home);
 
         if path == "~" {
             home

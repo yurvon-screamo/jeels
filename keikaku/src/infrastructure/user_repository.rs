@@ -15,7 +15,11 @@ impl FileSystemUserRepository {
         fs::create_dir_all(&users_dir)
             .await
             .map_err(|e| JeersError::RepositoryError {
-                reason: format!("Failed to create users directory: {}", e),
+                reason: format!(
+                    "Failed to create users directory {}: {}",
+                    users_dir.display(),
+                    e
+                ),
             })?;
 
         Ok(Self { users_dir })
