@@ -28,27 +28,55 @@ fn expand_tilde(path: &str) -> String {
         return path.to_string();
     }
 
-    // Try multiple methods to get home directory for cross-platform support
-    // 1. HOME - standard on Unix/Linux/Android (Termux)
-    // 2. USERPROFILE - standard on Windows
-    // 3. HOMEDRIVE + HOMEPATH - alternative Windows method
-    let home = std::env::var("HOME")
-        .or_else(|_| std::env::var("USERPROFILE")) // Windows
-        .or_else(|_| {
-            // Windows fallback: HOMEPATH is relative to HOMEDRIVE
-            std::env::var("HOMEPATH")
-                .and_then(|hp| std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp)))
-        })
-        .unwrap_or_else(|_| "~".to_string());
+    // On Android, use app's internal files directory instead of HOME
+    // HOME on Android may point to a read-only location
+    if std::env::var("ANDROID_DATA").is_ok() {
+        // Try to get app files directory from environment variable first
+        // This is typically set by the Android runtime or framework
+        let base_path = if let Ok(app_path) = std::env::var("ANDROID_APP_PATH") {
+            app_path
+        } else {
+            // Fallback: construct path using ANDROID_DATA and package name
+            // Format: /data/data/<package>/files
+            let android_data =
+                std::env::var("ANDROID_DATA").unwrap_or_else(|_| "/data".to_string());
+            let package_name =
+                std::env::var("ANDROID_PACKAGE_NAME").unwrap_or_else(|_| "keikaku".to_string());
+            format!("{}/data/{}/files", android_data, package_name)
+        };
 
-    if path == "~" {
-        home
+        let base = PathBuf::from(&base_path);
+
+        if path == "~" {
+            base.to_string_lossy().to_string()
+        } else {
+            let relative_path = path.strip_prefix("~/").unwrap_or(path);
+            base.join(relative_path).to_string_lossy().to_string()
+        }
     } else {
-        // Use PathBuf for proper path joining across platforms
-        // This handles Windows backslashes and Unix forward slashes correctly
-        let home_path = PathBuf::from(&home);
-        let relative_path = path.strip_prefix("~/").unwrap_or(path);
-        home_path.join(relative_path).to_string_lossy().to_string()
+        // Non-Android platforms - use standard home directory
+        // Try multiple methods to get home directory for cross-platform support
+        // 1. HOME - standard on Unix/Linux
+        // 2. USERPROFILE - standard on Windows
+        // 3. HOMEDRIVE + HOMEPATH - alternative Windows method
+        let home = std::env::var("HOME")
+            .or_else(|_| std::env::var("USERPROFILE")) // Windows
+            .or_else(|_| {
+                // Windows fallback: HOMEPATH is relative to HOMEDRIVE
+                std::env::var("HOMEPATH")
+                    .and_then(|hp| std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp)))
+            })
+            .unwrap_or_else(|_| "~".to_string());
+
+        if path == "~" {
+            home
+        } else {
+            // Use PathBuf for proper path joining across platforms
+            // This handles Windows backslashes and Unix forward slashes correctly
+            let home_path = PathBuf::from(&home);
+            let relative_path = path.strip_prefix("~/").unwrap_or(path);
+            home_path.join(relative_path).to_string_lossy().to_string()
+        }
     }
 }
 
