@@ -8,7 +8,7 @@ edition = "2024"
 
 [workspace.dependencies]
 # System
-tokio = { version = "1.48", features = ["full"] }
+tokio = { version = "1.48", features = ["rt", "macros", "time"] }
 async-trait = "0.1"
 futures = "0.3"
 indicatif = "0.18"
@@ -18,8 +18,8 @@ tempfile = "3.23"
 serde_json = "1.0"
 reqwest = { version = "0.12", features = ["json"] }
 ordered-float = "5.1"
-zip = "6.0"
-rusqlite = { version = "0.37", features = ["bundled"] }
+zip = "7.0"
+rusqlite = { version = "0.38", features = ["bundled"] }
 regex = "1.12"
 libz-sys = "*"
 flate2 = { version = "*", features = ["zlib"] }
@@ -29,13 +29,20 @@ imp = { version = "0.1" }
 tracing = "0.1"
 
 # OpenAI
-async-openai = "0.30"
+async-openai-wasm = { version = "0.31", features = [
+    "embedding",
+    "responses",
+    "batch",
+    "model",
+    "chat-completion",
+] }
 
 # Domain
 ulid = { version = "1.2", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", features = ["std", "clock", "serde"] }
 rand = "0.9"
+getrandom = { version = "0.3.4", features = ["wasm_js"] }
 
 # Japan
 rs-fsrs = "1.2"
@@ -43,16 +50,18 @@ autoruby = { version = "0.5", features = ["integrated"] }
 wana_kana = "4"
 
 # Machine Learning
-hf-hub = "0.4"
-candle-core = { version = "0.9.2-alpha.1" }
-candle-transformers = { version = "0.9.2-alpha.1" }
-candle-nn = { version = "0.9.2-alpha.1" }
-text-embeddings-backend-core = { git = "https://github.com/huggingface/text-embeddings-inference.git", version = "1.8.3" }
-text-embeddings-backend-candle = { git = "https://github.com/huggingface/text-embeddings-inference.git", version = "1.8.3" }
-tokenizers = { version = "0.22", default-features = false, features = [
-    "onig",
-    "esaxx_fast",
-] }
+# hf-hub = { version = "0.4", default-features = false, features = [
+#     "default-tls",
+# ] }
+# candle-core = { version = "0.9.2-alpha.1" }
+# candle-transformers = { version = "0.9.2-alpha.1" }
+# candle-nn = { version = "0.9.2-alpha.1" }
+# text-embeddings-backend-core = { git = "https://github.com/huggingface/text-embeddings-inference.git", version = "1.8.3" }
+# text-embeddings-backend-candle = { git = "https://github.com/huggingface/text-embeddings-inference.git", version = "1.8.3" }
+# tokenizers = { version = "0.22", default-features = false, features = [
+#     "onig",
+#     "esaxx_fast",
+# ] }
 # intel-mkl-src = { version = "0.8" }
 
 # UI

@@ -4,13 +4,13 @@
 //! while the rest of the app migrates to `crate::components::*`.
 
 mod typography;
-pub use typography::{H1, H2, H3, H4, Paragraph, Size, Tag};
+pub use typography::{H2, H3, H4, Paragraph, Size, Tag};
 
 mod card;
 pub use card::Card;
 
 mod layout;
-pub use layout::{Section, SectionHeader};
+pub use layout::SectionHeader;
 
 mod error;
 pub use error::ErrorCard;

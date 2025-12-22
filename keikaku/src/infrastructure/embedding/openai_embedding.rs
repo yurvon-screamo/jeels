@@ -1,5 +1,6 @@
 use crate::domain::error::JeersError;
-use async_openai::{Client, config::OpenAIConfig, types::CreateEmbeddingRequestArgs};
+use async_openai_wasm::types::embeddings::CreateEmbeddingRequestArgs;
+use async_openai_wasm::{Client, config::OpenAIConfig};
 use std::sync::Arc;
 
 pub struct OpenAiEmbeddingService {

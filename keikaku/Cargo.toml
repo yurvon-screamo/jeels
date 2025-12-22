@@ -22,12 +22,13 @@ regex.workspace = true
 libz-sys.workspace = true
 flate2.workspace = true
 rand.workspace = true
+getrandom = { version = "0.2.16", features = ["js"] }
 
 # Logging
 tracing.workspace = true
 
 # OpenAI
-async-openai.workspace = true
+async-openai-wasm.workspace = true
 
 # Domain
 ulid.workspace = true
@@ -39,15 +40,8 @@ rs-fsrs.workspace = true
 autoruby.workspace = true
 wana_kana.workspace = true
 
-# Machine Learning
-hf-hub.workspace = true
-candle-core.workspace = true
-candle-transformers.workspace = true
-candle-nn.workspace = true
-text-embeddings-backend-core.workspace = true
-text-embeddings-backend-candle.workspace = true
-tokenizers.workspace = true
-# intel-mkl-src.workspace = true
-
 [dev-dependencies]
 rstest.workspace = true
+
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"']

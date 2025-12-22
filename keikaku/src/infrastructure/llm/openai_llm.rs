@@ -1,10 +1,9 @@
 use crate::application::LlmService;
 use crate::domain::error::JeersError;
-use async_openai::{
-    Client,
-    config::OpenAIConfig,
-    types::{ChatCompletionRequestMessage, CreateChatCompletionRequestArgs},
+use async_openai_wasm::types::chat::{
+    ChatCompletionRequestMessage, CreateChatCompletionRequestArgs,
 };
+use async_openai_wasm::{Client, config::OpenAIConfig};
 use async_trait::async_trait;
 use std::sync::Arc;
 
