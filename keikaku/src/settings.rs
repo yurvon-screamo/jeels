@@ -145,7 +145,7 @@ impl ApplicationEnvironment {
             .find_by_id(user_id)
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
-        let translation_settings = user.settings().translation();
+        let _translation_settings = user.settings().translation();
 
         Ok(CandleTranslationService {})
     }
