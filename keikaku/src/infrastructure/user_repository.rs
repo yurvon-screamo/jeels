@@ -9,20 +9,20 @@ pub struct FileSystemUserRepository {
 }
 
 impl FileSystemUserRepository {
-    pub async fn new(database_path: &str) -> Result<Self, JeersError> {
-        let users_dir = PathBuf::from(database_path);
-
-        fs::create_dir_all(&users_dir)
+    pub async fn new(database_path: PathBuf) -> Result<Self, JeersError> {
+        fs::create_dir_all(&database_path)
             .await
             .map_err(|e| JeersError::RepositoryError {
                 reason: format!(
                     "Failed to create users directory {}: {}",
-                    users_dir.display(),
+                    database_path.display(),
                     e
                 ),
             })?;
 
-        Ok(Self { users_dir })
+        Ok(Self {
+            users_dir: database_path,
+        })
     }
 
     fn user_file_path(&self, user_id: Ulid) -> PathBuf {
@@ -43,12 +43,12 @@ impl UserRepository for FileSystemUserRepository {
             fs::read_to_string(&file_path)
                 .await
                 .map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to read user file: {}", e),
+                    reason: format!("Failed to read user file {}: {}", file_path.display(), e),
                 })?;
 
         let user: User =
             serde_json::from_str(&content).map_err(|e| JeersError::RepositoryError {
-                reason: format!("Failed to deserialize user: {}", e),
+                reason: format!("Failed to deserialize user {}: {}", file_path.display(), e),
             })?;
 
         Ok(Some(user))
@@ -59,7 +59,11 @@ impl UserRepository for FileSystemUserRepository {
             fs::read_dir(&self.users_dir)
                 .await
                 .map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to read users directory: {}", e),
+                    reason: format!(
+                        "Failed to read users directory {}: {}",
+                        self.users_dir.display(),
+                        e
+                    ),
                 })?;
 
         while let Some(entry) =
@@ -79,7 +83,7 @@ impl UserRepository for FileSystemUserRepository {
                 fs::read_to_string(&path)
                     .await
                     .map_err(|e| JeersError::RepositoryError {
-                        reason: format!("Failed to read user file: {}", e),
+                        reason: format!("Failed to read user file {}: {}", path.display(), e),
                     })?;
 
             let user: User =
@@ -104,7 +108,7 @@ impl UserRepository for FileSystemUserRepository {
         fs::write(&file_path, json)
             .await
             .map_err(|e| JeersError::RepositoryError {
-                reason: format!("Failed to write user file: {}", e),
+                reason: format!("Failed to write user file {}: {}", file_path.display(), e),
             })?;
 
         Ok(())
@@ -117,7 +121,7 @@ impl UserRepository for FileSystemUserRepository {
             fs::remove_file(&file_path)
                 .await
                 .map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to delete user file: {}", e),
+                    reason: format!("Failed to delete user file {}: {}", file_path.display(), e),
                 })?;
         }
 

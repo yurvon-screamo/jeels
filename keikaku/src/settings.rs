@@ -10,7 +10,6 @@ use crate::infrastructure::{
 };
 use tokio::sync::OnceCell;
 
-const DB_PATH: &str = "~/.keikaku";
 static SETTINGS: LazyLock<ApplicationEnvironment> = LazyLock::new(|| ApplicationEnvironment {
     lazy_repository: Arc::new(OnceCell::new()),
     lazy_srs_service: Arc::new(OnceCell::new()),
@@ -23,36 +22,11 @@ pub struct ApplicationEnvironment {
     lazy_migii_client: Arc<OnceCell<EmbeddedMigiiClient>>,
 }
 
-fn expand_tilde(path: &str) -> String {
-    if !path.starts_with("~/") && path != "~" {
-        return path.to_string();
-    }
-
-    // On Android, use app's internal files directory instead of HOME
-    // HOME on Android may point to a read-only location
+fn expand_tilde() -> PathBuf {
     if std::env::var("ANDROID_DATA").is_ok() {
-        // Try to get app files directory from environment variable first
-        // This is typically set by the Android runtime or framework
-        let base_path = if let Ok(app_path) = std::env::var("ANDROID_APP_PATH") {
-            app_path
-        } else {
-            // Fallback: construct path using ANDROID_DATA and package name
-            // Format: /data/data/<package>/files
-            let android_data =
-                std::env::var("ANDROID_DATA").unwrap_or_else(|_| "/data".to_string());
-            let package_name =
-                std::env::var("ANDROID_PACKAGE_NAME").unwrap_or_else(|_| "keikaku".to_string());
-            format!("{}/data/{}/files", android_data, package_name)
-        };
-
-        println!("base_path: {}", &base_path);
-        PathBuf::from(&base_path).to_string_lossy().to_string()
+        PathBuf::from(format!("/data/data/{}/files", "net.uwuwu.keikaku"))
     } else {
         // Non-Android platforms - use standard home directory
-        // Try multiple methods to get home directory for cross-platform support
-        // 1. HOME - standard on Unix/Linux
-        // 2. USERPROFILE - standard on Windows
-        // 3. HOMEDRIVE + HOMEPATH - alternative Windows method
         let home = std::env::var("HOME")
             .or_else(|_| std::env::var("USERPROFILE")) // Windows
             .or_else(|_| {
@@ -62,17 +36,8 @@ fn expand_tilde(path: &str) -> String {
             })
             .unwrap_or_else(|_| "~".to_string());
 
-        println!("home: {}", &home);
-
-        if path == "~" {
-            home
-        } else {
-            // Use PathBuf for proper path joining across platforms
-            // This handles Windows backslashes and Unix forward slashes correctly
-            let home_path = PathBuf::from(&home);
-            let relative_path = path.strip_prefix("~/").unwrap_or(path);
-            home_path.join(relative_path).to_string_lossy().to_string()
-        }
+        let home_path = PathBuf::from(&home);
+        home_path.join(".keikaku")
     }
 }
 
@@ -84,11 +49,11 @@ pub struct AuthSettings {
 
 impl ApplicationEnvironment {
     pub async fn get_repository(&self) -> Result<&FileSystemUserRepository, JeersError> {
-        let path = expand_tilde(DB_PATH);
+        let path = expand_tilde();
 
         self.lazy_repository
             .get_or_try_init(|| async {
-                FileSystemUserRepository::new(&path)
+                FileSystemUserRepository::new(path)
                     .await
                     .map_err(|e| JeersError::SettingsError {
                         reason: e.to_string(),
