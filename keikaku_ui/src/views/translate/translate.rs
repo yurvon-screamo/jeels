@@ -3,22 +3,13 @@ use dioxus::prelude::*;
 use keikaku::application::use_cases::translate::TranslateUseCase;
 use keikaku::settings::ApplicationEnvironment;
 
-#[derive(Clone, Copy, PartialEq)]
-pub enum Direction {
-    Auto,
-    JpToRu,
-    RuToJp,
-}
-
 pub fn use_translate() -> UseTranslate {
     let text = use_signal(String::new);
-    let direction = use_signal(|| Direction::Auto);
     let result = use_signal(|| None as Option<String>);
     let loading = use_signal(|| false);
 
     UseTranslate {
         text,
-        direction,
         result,
         loading,
     }
@@ -27,7 +18,6 @@ pub fn use_translate() -> UseTranslate {
 #[derive(Clone, PartialEq)]
 pub struct UseTranslate {
     pub text: Signal<String>,
-    pub direction: Signal<Direction>,
     pub result: Signal<Option<String>>,
     pub loading: Signal<bool>,
 }

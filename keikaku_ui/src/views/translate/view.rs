@@ -3,7 +3,7 @@ use crate::components::button::{Button, ButtonVariant};
 use crate::components::textarea::{Textarea, TextareaVariant};
 use dioxus::prelude::*;
 
-use super::use_cases::translate::{Direction, UseTranslate, use_translate};
+use super::translate::{UseTranslate, use_translate};
 
 #[component]
 pub fn Translate() -> Element {
@@ -15,7 +15,6 @@ pub fn Translate() -> Element {
 
             Card { class: Some("grid grid-cols-1 md:grid-cols-3 gap-4".to_string()),
                 TranslationInput { translator: translator.clone() }
-                TranslationControls { translator: translator.clone() }
                 TranslationResult { translator }
             }
         }
@@ -26,7 +25,6 @@ pub fn Translate() -> Element {
 fn TranslationInput(mut translator: UseTranslate) -> Element {
     rsx! {
         div { class: "space-y-2",
-            label { class: "text-sm font-medium", "ТЕКСТ" }
             Textarea {
                 variant: TextareaVariant::Default,
                 rows: 8,
@@ -34,37 +32,8 @@ fn TranslationInput(mut translator: UseTranslate) -> Element {
                 value: (translator.text)(),
                 oninput: move |e: FormEvent| translator.text.set(e.value()),
             }
-        }
-    }
-}
 
-#[component]
-fn TranslationControls(mut translator: UseTranslate) -> Element {
-    rsx! {
-        div { class: "space-y-3",
-            DirectionSelector { translator: translator.clone() }
-            TranslateButton { translator }
-        }
-    }
-}
-
-#[component]
-fn DirectionSelector(mut translator: UseTranslate) -> Element {
-    let directions = vec![
-        (Direction::Auto, "Авто".to_string()),
-        (Direction::JpToRu, "JA → RU".to_string()),
-        (Direction::RuToJp, "RU → JA".to_string()),
-    ];
-
-    rsx! {
-        div { class: "grid grid-cols-3 gap-2",
-            for (direction , label) in directions {
-                DirectionButton {
-                    label,
-                    active: (translator.direction)() == direction,
-                    onclick: move |_| translator.direction.set(direction),
-                }
-            }
+            TranslateButton { translator: translator.clone() }
         }
     }
 }

@@ -1,4 +1,3 @@
 mod view;
+mod translate;
 pub use view::Translate;
-
-pub mod use_cases;
