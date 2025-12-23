@@ -2,35 +2,90 @@ use crate::domain::JeersError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TokenInfo {
-    pub orthographic_base_form: String,
-    pub phonological_base_form: String,
-    pub orthographic_surface_form: String,
-    pub phonological_surface_form: String,
-    pub part_of_speech: PartOfSpeech,
+    orthographic_base_form: String,
+    phonological_base_form: String,
+    orthographic_surface_form: String,
+    phonological_surface_form: String,
+    part_of_speech: PartOfSpeech,
+}
+
+impl TokenInfo {
+    pub fn orthographic_base_form(&self) -> &str {
+        &self.orthographic_base_form
+    }
+
+    pub fn phonological_base_form(&self) -> &str {
+        &self.phonological_base_form
+    }
+
+    pub fn orthographic_surface_form(&self) -> &str {
+        &self.orthographic_surface_form
+    }
+
+    pub fn phonological_surface_form(&self) -> &str {
+        &self.phonological_surface_form
+    }
+
+    pub fn part_of_speech(&self) -> &PartOfSpeech {
+        &self.part_of_speech
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum PartOfSpeech {
-    Verb,              // Глагол
-    Noun,              // Существительное
-    IAdjective,        // И-прилагательное
-    NaAdjective,       // На-прилагательное
+    Verb,        // Глагол
+    Noun,        // Существительное
+    IAdjective,  // И-прилагательное
+    NaAdjective, // На-прилагательное
+
     Adverb,            // Детерминатив
     PreNounAdjectival, // Предикатив
-    Conjunction,       // Союз
-    Interjection,      // Междометие
-    Prefix,            // Префикс
-    Suffix,            // Суффикс
-    Particle,          // Частица
-    AuxiliaryVerb,     // Вспомогательный глагол
-    Pronoun,           // Местоимение
-    Numeral,           // Числительное
-    Determiner,        // Определитель
-    Unspecified,       // Неизвестно
-    Other,             // Другое
-    Symbol,            // Символ
-    Whitespace,        // Пробел
-    AuxiliarySymbol,   // Вспомогательный символ
+
+    Conjunction,     // Союз
+    Interjection,    // Междометие
+    Prefix,          // Префикс
+    Suffix,          // Суффикс
+    Particle,        // Частица
+    AuxiliaryVerb,   // Вспомогательный глагол
+    Pronoun,         // Местоимение
+    Numeral,         // Числительное
+    Determiner,      // Определитель
+    Unspecified,     // Неизвестно
+    Other,           // Другое
+    Symbol,          // Символ
+    Whitespace,      // Пробел
+    AuxiliarySymbol, // Вспомогательный символ
+}
+
+impl PartOfSpeech {
+    /// Проверяет, является ли часть речи "словарным словом" (лексической единицей)
+    /// для изучения в контексте JLPT.
+    ///
+    /// Включает:
+    /// - Все самостоятельные части речи (существительные, глаголы, прилагательные)
+    /// - Наречия и предикативные прилагательные (ключевые для построения предложений)
+    /// - Местоимения и числительные (базовая лексика всех уровней)
+    /// - Предикативные определители (например: この, その, あの)
+    ///
+    /// Исключает:
+    /// - Служебные части речи (частицы, вспомогательные глаголы)
+    /// - Грамматические символы и пробелы
+    /// - Редкие/архаичные категории
+    pub fn is_vocabulary_word(&self) -> bool {
+        matches!(
+            self,
+            PartOfSpeech::Noun
+                | PartOfSpeech::Verb
+                | PartOfSpeech::IAdjective
+                | PartOfSpeech::NaAdjective
+                | PartOfSpeech::Adverb
+                | PartOfSpeech::PreNounAdjectival
+                | PartOfSpeech::Pronoun
+                | PartOfSpeech::Numeral
+                | PartOfSpeech::Determiner
+                | PartOfSpeech::Conjunction
+        )
+    }
 }
 
 impl std::str::FromStr for PartOfSpeech {

@@ -2,7 +2,9 @@ use super::generate_card_content::GenerateCardContentUseCase;
 use crate::application::UserRepository;
 use crate::domain::VocabularyCard;
 use crate::domain::error::JeersError;
+use crate::domain::tokenizer::Tokenizer;
 use crate::domain::value_objects::{CardContent, Question};
+use tracing::error;
 use ulid::Ulid;
 
 #[derive(Clone)]
@@ -24,7 +26,7 @@ impl<'a, R: UserRepository, L: crate::application::LlmService> CreateCardUseCase
         user_id: Ulid,
         question_text: String,
         content: Option<CardContent>,
-    ) -> Result<VocabularyCard, JeersError> {
+    ) -> Result<Vec<VocabularyCard>, JeersError> {
         let mut user = self
             .repository
             .find_by_id(user_id)
@@ -41,23 +43,53 @@ impl<'a, R: UserRepository, L: crate::application::LlmService> CreateCardUseCase
             });
         }
 
-        let card_content = if let Some(content) = content {
-            content
-        } else {
-            self.generate_content_use_case
-                .generate_content(
-                    question_text.as_str(),
-                    user.native_language(),
-                    user.current_japanese_level(),
-                )
-                .await?
-        };
+        let cards = self.create(&mut user, question_text, content).await?;
 
-        let question = Question::new(question_text)?;
-
-        let card = user.create_card(question, card_content)?;
         self.repository.save(&user).await?;
 
-        Ok(card)
+        Ok(cards)
+    }
+
+    async fn create(
+        &self,
+        user: &mut crate::domain::User,
+        question_text: String,
+        content: Option<CardContent>,
+    ) -> Result<Vec<VocabularyCard>, JeersError> {
+        if let Some(content) = content {
+            let question = Question::new(question_text)?;
+            let card = user.create_card(question, content)?;
+            return Ok(vec![card]);
+        }
+
+        let tokenizer = Tokenizer::new()?;
+        let tokens = tokenizer.tokenize(question_text.as_str())?;
+        let mut cards = Vec::new();
+
+        for token in tokens {
+            if !token.part_of_speech().is_vocabulary_word() {
+                continue;
+            }
+
+            let question_text = token.orthographic_base_form();
+            let card_result = user.create_card(
+                Question::new(question_text.to_string())?,
+                self.generate_content_use_case
+                    .generate_content(
+                        question_text,
+                        user.native_language(),
+                        user.current_japanese_level(),
+                    )
+                    .await?,
+            );
+
+            if let Ok(card) = card_result {
+                cards.push(card);
+            } else {
+                error!("Failed to create card: {}", card_result.err().unwrap());
+            }
+        }
+
+        Ok(cards)
     }
 }

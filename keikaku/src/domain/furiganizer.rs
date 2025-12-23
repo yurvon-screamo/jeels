@@ -25,19 +25,19 @@ impl Furiganizer {
         let mut result = String::new();
 
         for token in tokens {
-            let furigana = if token.orthographic_surface_form.as_str().contains_kanji() {
+            let furigana = if token.orthographic_surface_form().contains_kanji() {
                 match self.format {
                     FuriganaFormat::Html => self.format_html(
-                        token.orthographic_surface_form.as_str(),
-                        token.phonological_surface_form.as_str(),
+                        token.orthographic_surface_form(),
+                        token.phonological_surface_form(),
                     ),
                     FuriganaFormat::Markdown => self.format_md(
-                        token.orthographic_surface_form.as_str(),
-                        token.phonological_surface_form.as_str(),
+                        token.orthographic_surface_form(),
+                        token.phonological_surface_form(),
                     ),
                 }
             } else {
-                token.orthographic_surface_form.as_str().to_string()
+                token.orthographic_surface_form().to_string()
             };
 
             result.push_str(&furigana);
