@@ -123,7 +123,7 @@ impl ApplicationEnvironment {
             .ok_or(JeersError::UserNotFound { user_id })?;
         let _translation_settings = user.settings().translation();
 
-        Ok(CandleTranslationService {})
+        Ok(CandleTranslationService::new()?)
     }
 
     pub async fn get_migii_client(&self) -> Result<&EmbeddedMigiiClient, JeersError> {
