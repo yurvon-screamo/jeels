@@ -95,13 +95,13 @@ impl Tokenizer {
                 reason: e.to_string(),
             })?;
 
+        let debug = tokens.iter_mut().map(|t| t.as_value()).collect::<Vec<_>>();
+        dbg!(debug);
+
         let token_infos = tokens
             .iter_mut()
             .map(|token| TokenInfo {
-                orthographic_base_form: token
-                    .get("orthographic_base_form")
-                    .unwrap_or_default()
-                    .to_string(),
+                orthographic_base_form: token.get("lexeme").unwrap_or_default().to_string(),
                 phonological_base_form: token
                     .get("phonological_base_form")
                     .unwrap_or_default()
@@ -123,5 +123,82 @@ impl Tokenizer {
             .collect();
 
         Ok(token_infos)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn should_return_base_form_for_verb() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("食べます").unwrap();
+        assert_eq!(tokens.len(), 2);
+        assert_eq!(tokens[0].orthographic_base_form, "食べる");
+        assert_eq!(tokens[0].phonological_base_form, "タベル");
+    }
+
+    #[test]
+    fn should_return_base_form_for_noun() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("食べ物").unwrap();
+        assert_eq!(tokens.len(), 1);
+        assert_eq!(tokens[0].orthographic_base_form, "食べ物");
+        assert_eq!(tokens[0].phonological_base_form, "タベモノ");
+    }
+
+    #[test]
+    fn should_return_base_form_for_adjective() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("美味しい").unwrap();
+        assert_eq!(tokens.len(), 1);
+        assert_eq!(tokens[0].orthographic_base_form, "美味しい");
+        assert_eq!(tokens[0].phonological_base_form, "オイシー");
+    }
+
+    #[test]
+    fn should_return_base_form_for_hiragana() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("たべます").unwrap();
+        assert_eq!(tokens.len(), 2);
+        assert_eq!(tokens[0].orthographic_base_form, "食べる");
+        assert_eq!(tokens[0].phonological_base_form, "タベル");
+    }
+
+    #[test]
+    fn should_return_surface_form_for_verb() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("食べます").unwrap();
+        assert_eq!(tokens.len(), 2);
+        assert_eq!(tokens[0].orthographic_surface_form, "食べ");
+        assert_eq!(tokens[0].phonological_surface_form, "タベ");
+    }
+
+    #[test]
+    fn should_return_surface_form_for_noun() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("食べ物").unwrap();
+        assert_eq!(tokens.len(), 1);
+        assert_eq!(tokens[0].orthographic_surface_form, "食べ物");
+        assert_eq!(tokens[0].phonological_surface_form, "タベモノ");
+    }
+
+    #[test]
+    fn should_return_surface_form_for_adjective() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("美味しい").unwrap();
+        assert_eq!(tokens.len(), 1);
+        assert_eq!(tokens[0].orthographic_surface_form, "美味しい");
+        assert_eq!(tokens[0].phonological_surface_form, "オイシー");
+    }
+
+    #[test]
+    fn should_return_surface_form_for_hiragana() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("たべます").unwrap();
+        assert_eq!(tokens.len(), 2);
+        assert_eq!(tokens[0].orthographic_surface_form, "たべ");
+        assert_eq!(tokens[0].phonological_surface_form, "タベ");
     }
 }
