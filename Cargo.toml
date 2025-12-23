@@ -51,7 +51,7 @@ getrandom = { version = "0.3.4", features = ["wasm_js"] }
 
 # Japan
 rs-fsrs = "1.2"
-lindera = { version = "1.2.0", features = ["embedded-unidic"] }
+lindera = { version = "1.4", features = ["embedded-unidic"] }
 
 # Machine Learning
 # hf-hub = { version = "0.4", default-features = false, features = [
