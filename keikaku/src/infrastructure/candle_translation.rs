@@ -140,7 +140,7 @@ impl CandleTranslationService {
     }
 
     async fn encode_input(&self, tokens: &[u32]) -> Result<Tensor, JeersError> {
-        let input_token_ids = Tensor::new(&tokens[..], &self.device)
+        let input_token_ids = Tensor::new(tokens, &self.device)
             .and_then(|x| x.unsqueeze(0))
             .map_err(|e| JeersError::TranslationError {
                 reason: format!("Failed to unsqueeze input token ids: {}", e),
@@ -163,7 +163,7 @@ impl CandleTranslationService {
         self.model
             .lock()
             .await
-            .decode(&decoder_token_ids, &encoder_output)
+            .decode(decoder_token_ids, encoder_output)
             .and_then(|x| x.squeeze(0))
             .map_err(|e| JeersError::TranslationError {
                 reason: format!("Failed to squeeze logits: {}", e),
@@ -192,7 +192,7 @@ impl CandleTranslationService {
                 let last_token = *output_token_ids
                     .last()
                     .ok_or(JeersError::TranslationError {
-                        reason: format!("Failed to get last token"),
+                        reason: "Failed to get last token".to_string(),
                     })?;
                 Tensor::new(&[last_token], &self.device).and_then(|x| x.unsqueeze(0))
             }
