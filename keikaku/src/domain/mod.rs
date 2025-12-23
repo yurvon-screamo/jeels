@@ -114,6 +114,7 @@ impl User {
                 card.word()
                     .text()
                     .equals_by_reading(original_card.word().text())
+                    .unwrap_or(false)
             })
             .cloned()
             .collect::<Vec<_>>();

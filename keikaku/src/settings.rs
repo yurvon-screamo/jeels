@@ -5,8 +5,8 @@ use std::sync::{Arc, LazyLock};
 use crate::application::UserRepository;
 use crate::domain::{JeersError, LlmSettings};
 use crate::infrastructure::{
-    CandleLlm, CandleTranslationService, EmbeddedMigiiClient, FileSystemUserRepository,
-    FsrsSrsService, GeminiLlm, LlmServiceInvoker, OpenAiLlm,
+    CandleTranslationService, EmbeddedMigiiClient, FileSystemUserRepository, FsrsSrsService,
+    GeminiLlm, LlmServiceInvoker, OpenAiLlm,
 };
 use tokio::sync::OnceCell;
 
@@ -92,30 +92,6 @@ impl ApplicationEnvironment {
                     model.clone(),
                     base_url.clone(),
                     env_var_name.clone(),
-                )
-                .map_err(|e| JeersError::SettingsError {
-                    reason: e.to_string(),
-                })?,
-            ),
-            LlmSettings::Candle {
-                max_sample_len,
-                temperature,
-                seed,
-                model_repo,
-                model_filename,
-                model_revision,
-                tokenizer_repo,
-                tokenizer_filename,
-            } => LlmServiceInvoker::Candle(
-                CandleLlm::new(
-                    *max_sample_len,
-                    *temperature,
-                    *seed,
-                    model_repo.clone(),
-                    model_filename.clone(),
-                    model_revision.clone(),
-                    tokenizer_repo.clone(),
-                    tokenizer_filename.clone(),
                 )
                 .map_err(|e| JeersError::SettingsError {
                     reason: e.to_string(),

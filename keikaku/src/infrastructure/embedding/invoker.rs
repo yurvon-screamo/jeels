@@ -1,9 +1,8 @@
 use crate::domain::error::JeersError;
 
-use crate::infrastructure::{CandleEmbeddingService, OpenAiEmbeddingService};
+use crate::infrastructure::OpenAiEmbeddingService;
 
 pub enum EmbeddingServiceInvoker {
-    Candle(CandleEmbeddingService),
     OpenAi(OpenAiEmbeddingService),
 }
 
@@ -14,9 +13,6 @@ impl EmbeddingServiceInvoker {
         input: &str,
     ) -> Result<Vec<f32>, JeersError> {
         match self {
-            EmbeddingServiceInvoker::Candle(service) => {
-                service.generate_embedding(instruction, input).await
-            }
             EmbeddingServiceInvoker::OpenAi(service) => {
                 service.generate_embedding(instruction, input).await
             }
@@ -29,9 +25,6 @@ impl EmbeddingServiceInvoker {
         inputs: &[String],
     ) -> Result<Vec<Vec<f32>>, JeersError> {
         match self {
-            EmbeddingServiceInvoker::Candle(service) => {
-                service.generate_embeddings(instruction, inputs).await
-            }
             EmbeddingServiceInvoker::OpenAi(service) => {
                 service.generate_embeddings(instruction, inputs).await
             }

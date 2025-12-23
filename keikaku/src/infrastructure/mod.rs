@@ -8,10 +8,8 @@ pub mod user_repository;
 
 pub use candle_translation::CandleTranslationService;
 pub use duolingo_client::HttpDuolingoClient;
-pub use embedding::CandleEmbeddingService;
 pub use embedding::EmbeddingServiceInvoker;
 pub use embedding::OpenAiEmbeddingService;
-pub use llm::CandleLlm;
 pub use llm::GeminiLlm;
 pub use llm::LlmServiceInvoker;
 pub use llm::OpenAiLlm;

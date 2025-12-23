@@ -9,8 +9,8 @@ pub struct CandleTranslationService {}
 impl TranslationService for CandleTranslationService {
     async fn translate_to_ja(
         &self,
-        text: &str,
-        source_language: &NativeLanguage,
+        _text: &str,
+        _source_language: &NativeLanguage,
     ) -> Result<String, JeersError> {
         Err(JeersError::TranslationError {
             reason: "Not implemented".to_string(),
@@ -19,8 +19,8 @@ impl TranslationService for CandleTranslationService {
 
     async fn translate_from_ja(
         &self,
-        text: &str,
-        target_language: &NativeLanguage,
+        _text: &str,
+        _target_language: &NativeLanguage,
     ) -> Result<String, JeersError> {
         Err(JeersError::TranslationError {
             reason: "Not implemented".to_string(),

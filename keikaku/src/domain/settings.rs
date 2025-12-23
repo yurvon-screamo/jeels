@@ -95,23 +95,12 @@ pub enum LlmSettings {
         base_url: String,
         env_var_name: String,
     },
-    Candle {
-        max_sample_len: usize,
-        temperature: f32,
-        seed: u64,
-        model_repo: String,
-        model_filename: String,
-        model_revision: String,
-        tokenizer_repo: String,
-        tokenizer_filename: String,
-    },
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub enum EmbeddingSettings {
     #[default]
     None,
-    Candle,
     OpenAi {
         model: String,
         base_url: String,

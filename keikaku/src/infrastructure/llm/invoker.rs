@@ -1,11 +1,10 @@
 use crate::application::LlmService;
 use crate::domain::error::JeersError;
 
-use super::{CandleLlm, GeminiLlm, OpenAiLlm};
+use super::{GeminiLlm, OpenAiLlm};
 
 pub enum LlmServiceInvoker {
     None,
-    Candle(CandleLlm),
     OpenAi(OpenAiLlm),
     Gemini(GeminiLlm),
 }
@@ -17,7 +16,6 @@ impl LlmService for LlmServiceInvoker {
             LlmServiceInvoker::None => Err(JeersError::InvalidValues {
                 reason: "Please set LLM settings in your profile".to_string(),
             }),
-            LlmServiceInvoker::Candle(service) => service.generate_text(question).await,
             LlmServiceInvoker::OpenAi(service) => service.generate_text(question).await,
             LlmServiceInvoker::Gemini(service) => service.generate_text(question).await,
         }

@@ -10,7 +10,6 @@ use crate::components::select::{
 #[derive(Debug, Clone, PartialEq)]
 pub enum EmbeddingType {
     None,
-    Candle,
     OpenAi,
 }
 
@@ -18,7 +17,6 @@ impl std::fmt::Display for EmbeddingType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             EmbeddingType::None => write!(f, "Отключено"),
-            EmbeddingType::Candle => write!(f, "Candle"),
             EmbeddingType::OpenAi => write!(f, "OpenAI"),
         }
     }
@@ -45,7 +43,6 @@ fn create_embedding_settings(
 ) -> EmbeddingSettings {
     match embedding_type {
         EmbeddingType::None => EmbeddingSettings::None,
-        EmbeddingType::Candle => EmbeddingSettings::Candle,
         EmbeddingType::OpenAi => EmbeddingSettings::OpenAi {
             model: openai_model,
             base_url: openai_base_url,
@@ -61,7 +58,6 @@ pub fn EmbeddingSettingsForm(
 ) -> Element {
     let mut embedding_type = use_signal(|| match &settings {
         EmbeddingSettings::None => EmbeddingType::None,
-        EmbeddingSettings::Candle => EmbeddingType::Candle,
         EmbeddingSettings::OpenAi { .. } => EmbeddingType::OpenAi,
     });
 
@@ -90,7 +86,6 @@ pub fn EmbeddingSettingsForm(
 
     let embedding_type_value = match embedding_type() {
         EmbeddingType::None => "none",
-        EmbeddingType::Candle => "candle",
         EmbeddingType::OpenAi => "openai",
     }
     .to_string();
@@ -104,7 +99,6 @@ pub fn EmbeddingSettingsForm(
                     on_value_change: move |v: Option<String>| {
                         if let Some(v) = v {
                             let next = match v.as_str() {
-                                "candle" => EmbeddingType::Candle,
                                 "openai" => EmbeddingType::OpenAi,
                                 _ => EmbeddingType::None,
                             };
@@ -119,10 +113,6 @@ pub fn EmbeddingSettingsForm(
                             "Отключено"
                             SelectItemIndicator {}
                         }
-                        SelectOption::<String> { index: 1usize, value: "candle".to_string(),
-                            "Candle"
-                            SelectItemIndicator {}
-                        }
                         SelectOption::<String> { index: 2usize, value: "openai".to_string(),
                             "OpenAI"
                             SelectItemIndicator {}
@@ -134,9 +124,6 @@ pub fn EmbeddingSettingsForm(
             match embedding_type() {
                 EmbeddingType::None => rsx! {
                     Paragraph { class: Some("text-slate-500".to_string()), "Embedding отключен" }
-                },
-                EmbeddingType::Candle => rsx! {
-                    Paragraph { class: Some("text-slate-500".to_string()), "Используется Candle embedding" }
                 },
                 EmbeddingType::OpenAi => rsx! {
                     OpenAiEmbeddingFields {

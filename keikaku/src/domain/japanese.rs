@@ -1,6 +1,9 @@
 use std::sync::LazyLock;
 
-use crate::domain::furiganizer::{FuriganaFormat, Furiganizer};
+use crate::domain::{
+    JeersError,
+    furiganizer::{FuriganaFormat, Furiganizer},
+};
 
 pub trait IsJapanese {
     fn is_japanese(&self) -> bool;
@@ -14,10 +17,9 @@ pub trait IsJapaneseText {
     fn contains_japanese(&self) -> bool;
     fn contains_kanji(&self) -> bool;
 
-    fn has_furigana(&self) -> bool;
-    fn as_furigana(&self) -> String;
-
-    fn equals_by_reading(&self, other: &Self) -> bool;
+    fn has_furigana(&self) -> Result<bool, JeersError>;
+    fn as_furigana(&self) -> Result<String, JeersError>;
+    fn equals_by_reading(&self, other: &Self) -> Result<bool, JeersError>;
 }
 
 impl IsJapanese for char {
@@ -52,16 +54,18 @@ impl IsJapaneseText for str {
         self.chars().any(|c| c.is_japanese())
     }
 
-    fn as_furigana(&self) -> String {
-        FURIGANIZER.furiganize(self).unwrap_or_default()
+    fn as_furigana(&self) -> Result<String, JeersError> {
+        FURIGANIZER.furiganize(self)
     }
 
-    fn has_furigana(&self) -> bool {
-        self.as_furigana() != self
+    fn has_furigana(&self) -> Result<bool, JeersError> {
+        self.as_furigana().map(|furigana| furigana != self)
     }
 
-    fn equals_by_reading(&self, other: &Self) -> bool {
-        self.as_furigana() == other.as_furigana()
+    fn equals_by_reading(&self, other: &Self) -> Result<bool, JeersError> {
+        let left = self.as_furigana()?;
+        let right = other.as_furigana()?;
+        Ok(left == right)
     }
 
     fn contains_kanji(&self) -> bool {
