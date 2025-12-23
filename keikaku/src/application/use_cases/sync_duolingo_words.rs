@@ -1,6 +1,5 @@
 use crate::application::{CreateCardUseCase, DuolingoClient, LlmService, UserRepository};
 use crate::domain::error::JeersError;
-use crate::domain::value_objects::{Answer, CardContent};
 use ulid::Ulid;
 
 pub struct SyncDuolingoWordsResult {

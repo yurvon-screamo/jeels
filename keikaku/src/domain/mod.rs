@@ -13,7 +13,6 @@ pub mod vocabulary_card;
 
 use crate::domain::{
     daily_history::DailyHistoryItem,
-    japanese::IsJapaneseText,
     kanji_card::KanjiCard,
     review::MemoryState,
     study_session::{KanjiStudySessionItem, StudySessionItem, VocabularyStudySessionItem},
@@ -98,49 +97,6 @@ impl User {
 
     pub fn settings_mut(&mut self) -> &mut UserSettings {
         &mut self.settings
-    }
-
-    pub fn find_homonyms(&self, card_id: Ulid) -> Result<Vec<VocabularyCard>, JeersError> {
-        let original_card = self
-            .vocabulary_cards
-            .get(&card_id)
-            .ok_or(JeersError::CardNotFound { card_id })?;
-
-        let homonyms = self
-            .vocabulary_cards
-            .values()
-            .filter(|card| card.id() != card_id)
-            .filter(|card| {
-                card.word()
-                    .text()
-                    .equals_by_reading(original_card.word().text())
-                    .unwrap_or(false)
-            })
-            .cloned()
-            .collect::<Vec<_>>();
-
-        Ok(homonyms)
-    }
-
-    pub fn find_similarity(&self, card_id: Ulid) -> Result<Vec<VocabularyCard>, JeersError> {
-        let card = self
-            .vocabulary_cards
-            .get(&card_id)
-            .ok_or(JeersError::CardNotFound { card_id })?;
-
-        let similarity = self
-            .vocabulary_cards
-            .iter()
-            .filter(|(id, c)| {
-                if *id == &card_id {
-                    return false;
-                }
-                c.word().text() == card.word().text()
-            })
-            .map(|(_, card)| card.clone())
-            .collect::<Vec<_>>();
-
-        Ok(similarity)
     }
 
     pub fn create_card(
@@ -275,6 +231,10 @@ impl User {
         due_cards.append(&mut priority_cards);
 
         let mut study_session_items: Vec<_> = due_cards.into_iter().map(|card| card.item).collect();
+        if let Some(limit) = limit {
+            study_session_items.truncate(limit);
+        }
+
         study_session_items.shuffle(&mut rand::rng());
         study_session_items
     }
