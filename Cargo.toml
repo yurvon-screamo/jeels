@@ -5,6 +5,11 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+authors = ["yurvon-screamo <yurvon@ya.ru>"]
+license = "AGPL-3.0"
+license-file = "LICENSE"
+repository = "https://github.com/yurvon-screamo/keikaku"
+readme = "README.md"
 
 [workspace.dependencies]
 # System
@@ -46,8 +51,7 @@ getrandom = { version = "0.3.4", features = ["wasm_js"] }
 
 # Japan
 rs-fsrs = "1.2"
-autoruby = { version = "0.5", features = ["integrated"] }
-wana_kana = "4"
+lindera = { version = "1.2.0", features = ["embedded-unidic"] }
 
 # Machine Learning
 # hf-hub = { version = "0.4", default-features = false, features = [

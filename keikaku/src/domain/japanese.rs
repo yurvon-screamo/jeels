@@ -1,7 +1,6 @@
 use std::sync::LazyLock;
 
-use autoruby::{annotate::Annotator, format, select};
-use wana_kana::ConvertJapanese;
+use crate::domain::furiganizer::{FuriganaFormat, Furiganizer};
 
 pub trait IsJapanese {
     fn is_japanese(&self) -> bool;
@@ -13,11 +12,10 @@ pub trait IsJapanese {
 pub trait IsJapaneseText {
     fn is_japanese(&self) -> bool;
     fn contains_japanese(&self) -> bool;
+    fn contains_kanji(&self) -> bool;
 
     fn has_furigana(&self) -> bool;
     fn as_furigana(&self) -> String;
-
-    fn as_hiragana(&self) -> String;
 
     fn equals_by_reading(&self, other: &Self) -> bool;
 }
@@ -42,8 +40,8 @@ impl IsJapanese for char {
     }
 }
 
-static ANNOTATOR: LazyLock<Annotator<'static>> =
-    LazyLock::new(Annotator::new_with_integrated_dictionary);
+static FURIGANIZER: LazyLock<Furiganizer> =
+    LazyLock::new(|| Furiganizer::new(FuriganaFormat::Html).unwrap());
 
 impl IsJapaneseText for str {
     fn is_japanese(&self) -> bool {
@@ -54,14 +52,8 @@ impl IsJapaneseText for str {
         self.chars().any(|c| c.is_japanese())
     }
 
-    fn as_hiragana(&self) -> String {
-        self.to_hiragana()
-    }
-
     fn as_furigana(&self) -> String {
-        ANNOTATOR
-            .annotate(self)
-            .render(&select::heuristic::All, &format::Html)
+        FURIGANIZER.furiganize(self).unwrap_or_default()
     }
 
     fn has_furigana(&self) -> bool {
@@ -69,6 +61,10 @@ impl IsJapaneseText for str {
     }
 
     fn equals_by_reading(&self, other: &Self) -> bool {
-        self.to_hiragana() == other.to_hiragana()
+        self.as_furigana() == other.as_furigana()
+    }
+
+    fn contains_kanji(&self) -> bool {
+        self.chars().any(|c| c.is_kanji())
     }
 }

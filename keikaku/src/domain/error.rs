@@ -22,6 +22,7 @@ pub enum JeersError {
     TranslationError { reason: String },
     KradfileError { reason: String },
     InvalidValues { reason: String },
+    TokenizerError { reason: String },
 }
 
 impl fmt::Display for JeersError {
@@ -80,6 +81,9 @@ impl fmt::Display for JeersError {
             }
             JeersError::InvalidValues { reason } => {
                 write!(f, "Invalid values: {}", reason)
+            }
+            JeersError::TokenizerError { reason } => {
+                write!(f, "Tokenizer error: {}", reason)
             }
         }
     }

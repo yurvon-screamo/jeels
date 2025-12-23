@@ -1,11 +1,13 @@
 pub mod daily_history;
 pub mod dictionary;
 pub mod error;
+pub mod furiganizer;
 pub mod japanese;
 pub mod kanji_card;
 pub mod review;
 pub mod settings;
 pub mod study_session;
+pub mod tokenizer;
 pub mod value_objects;
 pub mod vocabulary_card;
 
