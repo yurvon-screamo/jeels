@@ -11,7 +11,11 @@ pub fn Translate() -> Element {
 
     rsx! {
         div { class: "bg-bg min-h-screen text-text-main px-6 py-8 space-y-6",
-            SectionHeader { title: "Перевод".to_string(), actions: None }
+            SectionHeader {
+                title: "Перевод".to_string(),
+                subtitle: "Переводчик предназначен для перевода предложений и текстов, работа с одиночными словами может быть некорректной.",
+                actions: None,
+            }
 
             Card { class: Some("grid grid-cols-1 md:grid-cols-3 gap-4".to_string()),
                 TranslationInput { translator: translator.clone() }
