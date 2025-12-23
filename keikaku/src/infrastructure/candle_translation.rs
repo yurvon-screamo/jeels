@@ -125,7 +125,7 @@ impl CandleTranslationService {
     }
 
     fn create_prompt(&self, text: &str, target_language: &str) -> Result<String, JeersError> {
-        Ok(format!("<2{target_language}> {text}"))
+        Ok(format!("<2{target_language}>{text}"))
     }
 
     fn tokenize_prompt(&self, prompt: &str) -> Result<Vec<u32>, JeersError> {
@@ -223,6 +223,6 @@ impl CandleTranslationService {
             }
         }
 
-        Ok(translation_result)
+        Ok(translation_result.trim().trim_matches('.').to_string())
     }
 }
