@@ -113,7 +113,6 @@ fn LogsCard(log: Signal<Vec<String>>) -> Element {
 
 #[component]
 fn ImportDuolingoTool() -> Element {
-    let mut question_only = use_signal(|| false);
     let log = use_signal(Vec::<String>::new);
     let status = use_signal(|| OperationStatus::Idle);
 
@@ -134,16 +133,6 @@ fn ImportDuolingoTool() -> Element {
                 "Синхронизация слов, нужен JWT в настройках CLI."
             }
 
-            div { class: "flex items-center justify-between gap-4",
-                span { class: "text-sm font-medium", "Только вопросы" }
-                Switch {
-                    aria_label: "Только вопросы",
-                    checked: question_only(),
-                    on_checked_change: move |v| question_only.set(v),
-                    disabled: matches!(status(), OperationStatus::Loading),
-                    SwitchThumb {}
-                }
-            }
 
             if matches!(status(), OperationStatus::Loading) {
                 LoadingState { message: Some("Синхронизация с Duolingo...".to_string()) }
@@ -153,12 +142,11 @@ fn ImportDuolingoTool() -> Element {
                     class: "w-full",
                     disabled: matches!(status(), OperationStatus::Loading),
                     onclick: move |_| {
-                        let question_only = question_only();
                         let mut log = log;
                         let mut status = status;
                         status.set(OperationStatus::Loading);
                         spawn(async move {
-                            match run_duolingo(question_only).await {
+                            match run_duolingo().await {
                                 Ok(msg) => {
                                     status.set(OperationStatus::Success(msg.clone()));
                                     log.write().push(msg);
@@ -402,7 +390,6 @@ fn ImportAnkiTool() -> Element {
 #[component]
 fn ImportMigiiTool() -> Element {
     let lessons = use_signal(|| "1,2,3".to_string());
-    let mut question_only = use_signal(|| false);
     let log = use_signal(Vec::<String>::new);
     let status = use_signal(|| OperationStatus::Idle);
 
@@ -432,17 +419,6 @@ fn ImportMigiiTool() -> Element {
                 }
             }
 
-            div { class: "flex items-center justify-between gap-4",
-                span { class: "text-sm font-medium", "Только вопросы" }
-                Switch {
-                    aria_label: "Только вопросы",
-                    checked: question_only(),
-                    on_checked_change: move |v| question_only.set(v),
-                    disabled: matches!(status(), OperationStatus::Loading),
-                    SwitchThumb {}
-                }
-            }
-
             if matches!(status(), OperationStatus::Loading) {
                 LoadingState { message: Some("Импорт из Migii...".to_string()) }
             } else {
@@ -452,17 +428,15 @@ fn ImportMigiiTool() -> Element {
                     disabled: matches!(status(), OperationStatus::Loading),
                     onclick: {
                         let lessons_calc = lessons;
-                        let question_only = question_only;
                         let log = log;
                         let status = status;
                         move |_| {
                             let lessons_str = lessons_calc();
-                            let question_only = question_only();
                             let mut log = log;
                             let mut status = status;
                             status.set(OperationStatus::Loading);
                             spawn(async move {
-                                match run_migii(lessons_str, question_only).await {
+                                match run_migii(lessons_str).await {
                                     Ok(msg) => {
                                         status.set(OperationStatus::Success(msg.clone()));
                                         log.write().push(msg);
@@ -553,17 +527,14 @@ fn ImportRebuildTool() -> Element {
     }
 }
 
-async fn run_duolingo(question_only: bool) -> Result<String, String> {
+async fn run_duolingo() -> Result<String, String> {
     let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     let repo = env.get_repository().await.map_err(to_error)?;
     let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
     let client = HttpDuolingoClient::new();
     let use_case = SyncDuolingoWordsUseCase::new(repo, &llm, &client);
-    let res = use_case
-        .execute(user_id, question_only)
-        .await
-        .map_err(to_error)?;
+    let res = use_case.execute(user_id).await.map_err(to_error)?;
     Ok(format!(
         "Duolingo: создано {}, пропущено {}",
         res.total_created_count,
@@ -633,7 +604,7 @@ async fn run_anki(
     ))
 }
 
-async fn run_migii(lessons: String, question_only: bool) -> Result<String, String> {
+async fn run_migii(lessons: String) -> Result<String, String> {
     let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     let repo = env.get_repository().await.map_err(to_error)?;
@@ -649,7 +620,7 @@ async fn run_migii(lessons: String, question_only: bool) -> Result<String, Strin
     }
 
     let res = ExportMigiiPackUseCase::new(repo, &llm, migii_client)
-        .execute(user_id, lesson_numbers, question_only)
+        .execute(user_id, lesson_numbers)
         .await
         .map_err(to_error)?;
 

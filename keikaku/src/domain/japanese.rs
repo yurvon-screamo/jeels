@@ -72,3 +72,80 @@ impl IsJapaneseText for str {
         self.chars().any(|c| c.is_kanji())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn japanese_character_classification() {
+        // Arrange
+        let hiragana = 'あ';
+        let katakana = 'ア';
+        let kanji = '日';
+        let latin = 'A';
+
+        // Act + Assert
+        assert!(hiragana.is_hiragana());
+        assert!(hiragana.is_japanese());
+
+        assert!(katakana.is_katakana());
+        assert!(katakana.is_japanese());
+
+        assert!(kanji.is_kanji());
+        assert!(kanji.is_japanese());
+
+        assert!(!latin.is_japanese());
+        assert!(!latin.is_hiragana());
+        assert!(!latin.is_katakana());
+        assert!(!latin.is_kanji());
+    }
+
+    #[test]
+    fn japanese_text_predicates() {
+        // Arrange
+        let pure_japanese = "こんにちは";
+        let mixed = "Hello日";
+        let no_japanese = "Hello";
+        let with_kanji = "日本";
+
+        // Act + Assert
+        assert!(pure_japanese.is_japanese());
+        assert!(pure_japanese.contains_japanese());
+        assert!(!pure_japanese.contains_kanji());
+
+        assert!(!mixed.is_japanese());
+        assert!(mixed.contains_japanese());
+        assert!(mixed.contains_kanji());
+
+        assert!(!no_japanese.contains_japanese());
+        assert!(!no_japanese.contains_kanji());
+
+        assert!(with_kanji.contains_japanese());
+        assert!(with_kanji.contains_kanji());
+    }
+
+    #[test]
+    fn hiragana_text_has_no_furigana() {
+        // Arrange
+        let input = "こんにちは";
+
+        // Act
+        let has_furigana = input.has_furigana().unwrap();
+
+        // Assert
+        assert!(!has_furigana);
+    }
+
+    #[test]
+    fn kanji_text_has_furigana() {
+        // Arrange
+        let input = "日本語";
+
+        // Act
+        let has_furigana = input.has_furigana().unwrap();
+
+        // Assert
+        assert!(has_furigana);
+    }
+}

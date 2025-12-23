@@ -27,7 +27,6 @@ impl<'a, R: UserRepository, L: LlmService, M: MigiiClient> ExportMigiiPackUseCas
         &self,
         user_id: Ulid,
         lessons: Vec<u32>,
-        question_only: bool,
     ) -> Result<ExportMigiiPackResult, JeersError> {
         let user = self
             .repository
@@ -48,7 +47,7 @@ impl<'a, R: UserRepository, L: LlmService, M: MigiiClient> ExportMigiiPackUseCas
                 )
                 .await?;
 
-            let (created, skipped) = self.process_words(user_id, words, question_only).await?;
+            let (created, skipped) = self.process_words(user_id, words).await?;
 
             total_created_count += created;
             total_skipped_words.extend(skipped);
@@ -64,28 +63,23 @@ impl<'a, R: UserRepository, L: LlmService, M: MigiiClient> ExportMigiiPackUseCas
         &self,
         user_id: Ulid,
         words: Vec<MigiiWord>,
-        question_only: bool,
     ) -> Result<(usize, Vec<String>), JeersError> {
         let mut created_count = 0;
         let mut skipped_words = Vec::new();
 
         for word_data in words {
             let question = word_data.word.clone();
-            let answer = Self::extract_answer_from_word(word_data, question_only);
-
-            if answer.is_none() && !question_only {
-                continue;
-            }
-
-            let content = if let Some(answer_text) = answer {
-                Some(CardContent::new(Answer::new(answer_text)?, Vec::new()))
-            } else {
-                None
-            };
 
             match self
                 .create_card_use_case
-                .execute(user_id, question.clone(), content)
+                .execute(
+                    user_id,
+                    question.clone(),
+                    Some(CardContent::new(
+                        Answer::new(word_data.short_mean)?,
+                        Vec::new(),
+                    )),
+                )
                 .await
             {
                 Ok(_) => {
@@ -102,20 +96,5 @@ impl<'a, R: UserRepository, L: LlmService, M: MigiiClient> ExportMigiiPackUseCas
         }
 
         Ok((created_count, skipped_words))
-    }
-
-    fn extract_answer_from_word(word_data: MigiiWord, question_only: bool) -> Option<String> {
-        if question_only {
-            return None;
-        }
-
-        if !word_data.short_mean.is_empty() {
-            Some(word_data.short_mean)
-        } else {
-            word_data
-                .mean
-                .first()
-                .map(|first_meaning| first_meaning.mean.clone())
-        }
     }
 }

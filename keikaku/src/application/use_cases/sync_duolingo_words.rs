@@ -25,11 +25,7 @@ impl<'a, R: UserRepository, L: LlmService, D: DuolingoClient>
         }
     }
 
-    pub async fn execute(
-        &self,
-        user_id: Ulid,
-        question_only: bool,
-    ) -> Result<SyncDuolingoWordsResult, JeersError> {
+    pub async fn execute(&self, user_id: Ulid) -> Result<SyncDuolingoWordsResult, JeersError> {
         let user = self
             .repository
             .find_by_id(user_id)
@@ -50,21 +46,10 @@ impl<'a, R: UserRepository, L: LlmService, D: DuolingoClient>
 
         for word in words {
             let question = word.text.clone();
-            let answer = if question_only {
-                None
-            } else {
-                Some(word.translations.join(", "))
-            };
-
-            let content = if let Some(answer_text) = answer {
-                Some(CardContent::new(Answer::new(answer_text)?, Vec::new()))
-            } else {
-                None
-            };
 
             match self
                 .create_card_use_case
-                .execute(user_id, question.clone(), content)
+                .execute(user_id, question.clone(), None)
                 .await
             {
                 Ok(_) => {
