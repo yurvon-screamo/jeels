@@ -58,9 +58,16 @@ fn format_date(date: DateTime<Utc>) -> String {
 }
 
 fn build_charts(lesson_history: &[DailyHistoryItem]) -> OverviewCharts {
-    let mut lesson_history = lesson_history.to_vec();
+    let now = Utc::now();
+    let ten_days_ago = now - chrono::Duration::days(10);
+
+    let mut lesson_history: Vec<_> = lesson_history
+        .iter()
+        .filter(|item| item.timestamp() >= ten_days_ago)
+        .cloned()
+        .collect();
+
     lesson_history.sort_by_key(|item| item.timestamp());
-    lesson_history.truncate(14);
 
     let stability_data = lesson_history
         .iter()
