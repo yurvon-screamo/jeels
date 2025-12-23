@@ -102,25 +102,20 @@ mod tests {
     #[test]
     fn mixed_text_keeps_non_japanese_parts_intact() {
         // Arrange
-        let furiganizer = Furiganizer::new(FuriganaFormat::Html).unwrap();
+        let furiganizer = Furiganizer::new(FuriganaFormat::Markdown).unwrap();
         let input = "Hello 日本語 world";
 
         // Act
         let output = furiganizer.furiganize(input).unwrap();
 
         // Assert
-        assert!(output.starts_with("Hello "));
-        assert!(output.ends_with(" world"));
-        assert!(output.contains("日本"));
-        assert!(output.contains("語"));
-        assert!(output.contains("<ruby>"));
-        assert_ne!(output, input);
+        assert_eq!(output, "Hello [日本](ニッポン)[語](ゴ) world");
     }
 
     #[test]
     fn mixed_text_without_kanji_remains_unchanged() {
         // Arrange
-        let furiganizer = Furiganizer::new(FuriganaFormat::Html).unwrap();
+        let furiganizer = Furiganizer::new(FuriganaFormat::Markdown).unwrap();
         let input = "Hello こんにちは world";
 
         // Act
@@ -133,7 +128,7 @@ mod tests {
     #[test]
     fn non_japanese_text_is_returned_as_is() {
         // Arrange
-        let furiganizer = Furiganizer::new(FuriganaFormat::Html).unwrap();
+        let furiganizer = Furiganizer::new(FuriganaFormat::Markdown).unwrap();
         let input = "Hello, world! 123";
 
         // Act
@@ -146,16 +141,13 @@ mod tests {
     #[test]
     fn japanese_is_processed_only_inside_japanese_segments() {
         // Arrange
-        let furiganizer = Furiganizer::new(FuriganaFormat::Html).unwrap();
+        let furiganizer = Furiganizer::new(FuriganaFormat::Markdown).unwrap();
         let input = "A日B本C";
 
         // Act
         let output = furiganizer.furiganize(input).unwrap();
 
         // Assert
-        assert!(output.starts_with("A"));
-        assert!(output.contains("B"));
-        assert!(output.ends_with("C"));
-        assert!(output.contains("<ruby>"));
+        assert_eq!(output, "A[日](ヒ)B[本](ホン)C");
     }
 }
