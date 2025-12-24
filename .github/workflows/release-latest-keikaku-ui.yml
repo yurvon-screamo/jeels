@@ -147,9 +147,9 @@ jobs:
           curl -L -o bundletool.jar \
             https://github.com/google/bundletool/releases/download/1.16.0/bundletool-all-1.16.0.jar
 
-      - name: Convert AAB → APK (${{ matrix.abi }})
+      - name: Collect AAB
         run: |
-          mkdir -p artifacts/android/${{ matrix.abi }}
+          mkdir -p artifacts/android/${{ matrix.abi }}/aab
 
           AAB=$(find target/dx dist target -type f -name "*.aab" | head -n 1)
           if [ -z "$AAB" ]; then
@@ -157,7 +157,13 @@ jobs:
             exit 1
           fi
 
-          echo "Using AAB: $AAB"
+          cp "$AAB" artifacts/android/${{ matrix.abi }}/aab/
+
+      - name: Convert AAB → APK (${{ matrix.abi }})
+        run: |
+          mkdir -p artifacts/android/${{ matrix.abi }}/apk
+
+          AAB=$(find artifacts/android/${{ matrix.abi }}/aab -name "*.aab" | head -n 1)
 
           java -jar bundletool.jar build-apks \
             --bundle="$AAB" \
@@ -168,9 +174,10 @@ jobs:
 
           unzip -o app.apks -d apks
 
-          find apks -name "*${{ matrix.abi }}*.apk" -exec cp {} artifacts/android/${{ matrix.abi }}/ \;
+          find apks -name "*${{ matrix.abi }}*.apk" \
+            -exec cp {} artifacts/android/${{ matrix.abi }}/apk/ \;
 
-          if ! ls artifacts/android/${{ matrix.abi }}/*.apk 1> /dev/null 2>&1; then
+          if ! ls artifacts/android/${{ matrix.abi }}/apk/*.apk 1> /dev/null 2>&1; then
             echo "❌ APK for ABI ${{ matrix.abi }} not found"
             exit 1
           fi
@@ -179,7 +186,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: keikaku_ui-android-${{ matrix.abi }}
-          path: artifacts/android/${{ matrix.abi }}/*.apk
+          path: artifacts/android/${{ matrix.abi }}/
           if-no-files-found: error
 
   publish_latest:
