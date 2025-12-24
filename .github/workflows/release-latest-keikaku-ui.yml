@@ -82,18 +82,28 @@ jobs:
           if-no-files-found: error
 
   build_android:
-    name: Build Android (apk)
+    name: Build Android (${{ matrix.abi }})
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-linux-android
+            abi: arm64-v8a
+          - target: armv7-linux-androideabi
+            abi: armeabi-v7a
+          - target: x86_64-linux-android
+            abi: x86_64
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android
+          targets: ${{ matrix.target }}
 
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
@@ -107,9 +117,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android packages (platforms/build-tools/ndk)
+      - name: Install Android packages
         run: |
-          sdkmanager --version
           yes | sdkmanager --licenses
           sdkmanager \
             "platform-tools" \
@@ -127,31 +136,52 @@ jobs:
           cargo install dioxus-cli --locked
           cargo install cargo-ndk --locked
 
-      - name: Bundle (Android .apk)
+      - name: Build AAB (${{ matrix.abi }})
         working-directory: keikaku_ui
         run: |
-          dx bundle --android --release
+          dx bundle \
+            --android \
+            --release \
+            --target ${{ matrix.target }}
 
-      - name: Collect bundles
+      - name: Download bundletool
         run: |
-          mkdir -p artifacts/android
+          curl -L -o bundletool.jar \
+            https://github.com/google/bundletool/releases/download/1.16.0/bundletool-all-1.16.0.jar
 
-          # Prefer dx bundle outputs if present
-          mapfile -t APKs < <(find target/dx dist target -type f -name "*.apk" 2>/dev/null || true)
-          if [ "${#APKs[@]}" -eq 0 ]; then
-            echo "No .apk files found."
+      - name: Convert AAB → APK (${{ matrix.abi }})
+        run: |
+          mkdir -p artifacts/android/${{ matrix.abi }}
+
+          AAB=$(find target/dx dist target -type f -name "*.aab" | head -n 1)
+          if [ -z "$AAB" ]; then
+            echo "❌ AAB not found"
             exit 1
           fi
 
-          for f in "${APKs[@]}"; do
-            cp -f "$f" "artifacts/android/$(basename "$f")"
-          done
+          echo "Using AAB: $AAB"
 
-      - name: Upload artifact (Android)
+          java -jar bundletool.jar build-apks \
+            --bundle="$AAB" \
+            --output=app.apks \
+            --mode=default \
+            --overwrite \
+            --local-testing
+
+          unzip -o app.apks -d apks
+
+          find apks -name "*${{ matrix.abi }}*.apk" -exec cp {} artifacts/android/${{ matrix.abi }}/ \;
+
+          if ! ls artifacts/android/${{ matrix.abi }}/*.apk 1> /dev/null 2>&1; then
+            echo "❌ APK for ABI ${{ matrix.abi }} not found"
+            exit 1
+          fi
+
+      - name: Upload artifact (Android ${{ matrix.abi }})
         uses: actions/upload-artifact@v4
         with:
-          name: keikaku_ui-android
-          path: artifacts/android/*
+          name: keikaku_ui-android-${{ matrix.abi }}
+          path: artifacts/android/${{ matrix.abi }}/*.apk
           if-no-files-found: error
 
   publish_latest:
