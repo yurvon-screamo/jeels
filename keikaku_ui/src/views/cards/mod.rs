@@ -4,6 +4,7 @@ mod edit;
 mod filters;
 mod grid;
 mod header;
+mod history_drawer;
 mod stats;
 mod types;
 mod view;

@@ -20,10 +20,7 @@ impl<'a, R: UserRepository> SelectCardsToLearnUseCase<'a, R> {
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let learn_settings = user.settings().learn();
-
-        let study_session_items =
-            user.start_study_session(learn_settings.force_new_cards(), learn_settings.limit());
+        let study_session_items = user.start_study_session();
 
         Ok(study_session_items)
     }

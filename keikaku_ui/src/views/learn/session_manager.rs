@@ -300,7 +300,7 @@ async fn fetch_low_stability_cards() -> Result<Vec<StudySessionItem>, String> {
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectLowStabilityCardsUseCase::new(repo)
-        .execute(user_id, None)
+        .execute(user_id)
         .await
         .map_err(to_error)
 }
@@ -310,7 +310,7 @@ async fn fetch_high_difficulty_cards() -> Result<Vec<StudySessionItem>, String> 
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectHighDifficultyCardsUseCase::new(repo)
-        .execute(user_id, None)
+        .execute(user_id)
         .await
         .map_err(to_error)
 }

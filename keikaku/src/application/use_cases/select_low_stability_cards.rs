@@ -13,18 +13,14 @@ impl<'a, R: UserRepository> SelectLowStabilityCardsUseCase<'a, R> {
         Self { repository }
     }
 
-    pub async fn execute(
-        &self,
-        user_id: Ulid,
-        limit: Option<usize>,
-    ) -> Result<Vec<StudySessionItem>, JeersError> {
+    pub async fn execute(&self, user_id: Ulid) -> Result<Vec<StudySessionItem>, JeersError> {
         let user = self
             .repository
             .find_by_id(user_id)
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let study_session_items = user.start_low_stability_cards_session(limit);
+        let study_session_items = user.start_low_stability_cards_session();
 
         Ok(study_session_items)
     }

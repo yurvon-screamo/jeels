@@ -1,3 +1,13 @@
+use chrono::{DateTime, Duration, Utc};
+use keikaku::domain::value_objects::Rating;
+
+#[derive(Clone, PartialEq)]
+pub struct ReviewInfo {
+    pub timestamp: DateTime<Utc>,
+    pub rating: Rating,
+    pub interval: Duration,
+}
+
 #[derive(Clone, PartialEq)]
 pub enum FilterStatus {
     All,
@@ -32,4 +42,5 @@ pub struct UiCard {
     pub is_learned: bool,
     pub is_low_stability: bool,
     pub is_high_difficulty: bool,
+    pub reviews: Vec<ReviewInfo>,
 }

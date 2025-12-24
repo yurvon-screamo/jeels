@@ -150,9 +150,6 @@ impl Tokenizer {
                 reason: e.to_string(),
             })?;
 
-        let debug = tokens.iter_mut().map(|t| t.as_value()).collect::<Vec<_>>();
-        dbg!(debug);
-
         let token_infos = tokens
             .iter_mut()
             .map(|token| TokenInfo {

@@ -11,7 +11,7 @@ use crate::{
     DEFAULT_USERNAME, ensure_user, to_error,
     views::cards::{
         FilterStatus, SortBy, UiCard, filters::CardsFilters, grid::CardsGrid, header::CardsHeader,
-        stats::CardsStats,
+        history_drawer::CardHistoryDrawer, stats::CardsStats, types::ReviewInfo,
     },
 };
 use dioxus_primitives::toast::{ToastOptions, use_toast};
@@ -75,6 +75,7 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
     let sort_by = use_signal(|| SortBy::Date);
     let mut modal_state = use_signal(|| ModalState::None);
     let mut delete_confirm = use_signal(|| None::<String>);
+    let mut selected_card_for_history = use_signal(|| None::<UiCard>);
     let loading = use_signal(|| false);
     let toast = use_toast();
 
@@ -116,6 +117,7 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
                 },
                 on_delete: move |card: UiCard| delete_confirm.set(Some(card.id)),
                 on_create_click: move |_| modal_state.set(ModalState::Create),
+                on_card_click: move |card: UiCard| selected_card_for_history.set(Some(card)),
             }
 
             match modal_state() {
@@ -152,6 +154,16 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
                 on_close: move || delete_confirm.set(None),
                 on_confirm: delete_card_with_handlers(toast, delete_confirm, loading, on_refresh),
             }
+
+            CardHistoryDrawer {
+                card: selected_card_for_history(),
+                open: selected_card_for_history().is_some(),
+                on_open_change: move |open: bool| {
+                    if !open {
+                        selected_card_for_history.set(None);
+                    }
+                },
+            }
         }
     }
 }
@@ -184,6 +196,17 @@ fn map_card(card: &VocabularyCard) -> UiCard {
         .map(|ex| (ex.text().clone(), ex.translation().clone()))
         .collect();
 
+    let reviews = card
+        .memory()
+        .reviews()
+        .iter()
+        .map(|review| ReviewInfo {
+            timestamp: review.timestamp(),
+            rating: review.rating(),
+            interval: review.interval(),
+        })
+        .collect();
+
     UiCard {
         id: card.id().to_string(),
         question: card.word().text().to_string(),
@@ -198,6 +221,7 @@ fn map_card(card: &VocabularyCard) -> UiCard {
         is_learned: card.memory().is_known_card(),
         is_low_stability: card.memory().is_low_stability(),
         is_high_difficulty: card.memory().is_high_difficulty(),
+        reviews,
     }
 }
 

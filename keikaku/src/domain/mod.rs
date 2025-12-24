@@ -163,7 +163,7 @@ impl User {
         Ok(card)
     }
 
-    pub fn start_low_stability_cards_session(&self, limit: Option<usize>) -> Vec<StudySessionItem> {
+    pub fn start_low_stability_cards_session(&self) -> Vec<StudySessionItem> {
         let mut cards = self
             .collect_study_cards()
             .into_iter()
@@ -173,17 +173,14 @@ impl User {
         cards.sort_by_key(|card| card.next_review_date);
         cards.reverse();
 
-        if let Some(limit) = limit {
+        if let Some(limit) = self.settings().learn().limit() {
             cards.truncate(limit);
         }
 
         cards.into_iter().map(|card| card.item).collect()
     }
 
-    pub fn start_high_difficulty_cards_session(
-        &self,
-        limit: Option<usize>,
-    ) -> Vec<StudySessionItem> {
+    pub fn start_high_difficulty_cards_session(&self) -> Vec<StudySessionItem> {
         let mut cards = self
             .collect_study_cards()
             .into_iter()
@@ -193,18 +190,15 @@ impl User {
         cards.sort_by_key(|card| card.next_review_date);
         cards.reverse();
 
-        if let Some(limit) = limit {
+        if let Some(limit) = self.settings().learn().limit() {
             cards.truncate(limit);
         }
 
         cards.into_iter().map(|card| card.item).collect()
     }
 
-    pub fn start_study_session(
-        &self,
-        force_new_cards: bool,
-        limit: Option<usize>,
-    ) -> Vec<StudySessionItem> {
+    pub fn start_study_session(&self) -> Vec<StudySessionItem> {
+        let force_new_cards = self.settings().learn().force_new_cards();
         let mut all_cards = self.collect_study_cards();
         all_cards.sort_by_key(|card| card.next_review_date);
 
@@ -219,12 +213,12 @@ impl User {
             .cloned()
             .collect();
 
-        let try_new = if let Some(limit) = limit
+        let try_new = if let Some(limit) = self.settings().learn().limit()
             && priority_cards.len() < limit
         {
             true
         } else {
-            limit.is_none()
+            self.settings().learn().limit().is_none()
         };
 
         if try_new && (force_new_cards || priority_cards.len() < self.new_cards_limit) {
@@ -250,7 +244,7 @@ impl User {
         due_cards.append(&mut priority_cards);
 
         let mut study_session_items: Vec<_> = due_cards.into_iter().map(|card| card.item).collect();
-        if let Some(limit) = limit {
+        if let Some(limit) = self.settings().learn().limit() {
             study_session_items.truncate(limit);
         }
 
