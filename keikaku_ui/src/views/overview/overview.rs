@@ -117,6 +117,14 @@ fn build_charts(lesson_history: &[DailyHistoryItem]) -> OverviewCharts {
         })
         .collect();
 
+    let high_difficulty_words_data = lesson_history
+        .iter()
+        .map(|item| ChartDataPoint {
+            label: format_date(item.timestamp()),
+            value: item.high_difficulty_words() as f64,
+        })
+        .collect();
+
     OverviewCharts {
         stability_data,
         difficulty_data,
@@ -124,6 +132,7 @@ fn build_charts(lesson_history: &[DailyHistoryItem]) -> OverviewCharts {
         learned_words_data,
         in_progress_words_data,
         low_stability_words_data,
+        high_difficulty_words_data,
     }
 }
 
@@ -163,6 +172,10 @@ fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
         .iter()
         .filter(|card| card.memory().is_low_stability())
         .count();
+    let high_difficulty_cards = cards
+        .iter()
+        .filter(|card| card.memory().is_high_difficulty())
+        .count();
 
     OverviewStats {
         total_cards,
@@ -171,6 +184,7 @@ fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
         learning_cards,
         known_cards,
         low_stability_cards,
+        high_difficulty_cards,
     }
 }
 
@@ -182,6 +196,7 @@ pub struct OverviewStats {
     pub learning_cards: usize,
     pub known_cards: usize,
     pub low_stability_cards: usize,
+    pub high_difficulty_cards: usize,
 }
 
 fn build_heatmap_data(

@@ -10,7 +10,6 @@ fn create_learn_settings(
     limit_enabled: bool,
     limit: String,
     show_furigana: bool,
-    low_stability_mode: bool,
     force_new_cards: bool,
 ) -> LearnSettings {
     let limit_value = if limit_enabled {
@@ -19,12 +18,7 @@ fn create_learn_settings(
         None
     };
 
-    LearnSettings::new(
-        limit_value,
-        show_furigana,
-        low_stability_mode,
-        force_new_cards,
-    )
+    LearnSettings::new(limit_value, show_furigana, force_new_cards)
 }
 
 #[component]
@@ -35,24 +29,17 @@ pub fn LearnSettingsForm(
     let mut limit_enabled = use_signal(|| settings.limit().is_some());
     let limit = use_signal(|| settings.limit().unwrap_or(8).to_string());
     let mut show_furigana = use_signal(|| settings.show_furigana());
-    let mut low_stability_mode = use_signal(|| settings.low_stability_mode());
     let mut force_new_cards = use_signal(|| settings.force_new_cards());
 
     let update_settings = {
         let limit_enabled = limit_enabled;
         let limit = limit;
         let show_furigana = show_furigana;
-        let low_stability_mode = low_stability_mode;
         let force_new_cards = force_new_cards;
         let on_change = on_change;
         move || {
-            let new_settings = create_learn_settings(
-                limit_enabled(),
-                limit(),
-                show_furigana(),
-                low_stability_mode(),
-                force_new_cards(),
-            );
+            let new_settings =
+                create_learn_settings(limit_enabled(), limit(), show_furigana(), force_new_cards());
             on_change.call(new_settings);
         }
     };
@@ -105,18 +92,6 @@ pub fn LearnSettingsForm(
                 }
             }
 
-            div { class: "flex items-center justify-between gap-4",
-                span { class: "text-sm", "Режим низкой стабильности" }
-                Switch {
-                    aria_label: "Режим низкой стабильности",
-                    checked: low_stability_mode(),
-                    on_checked_change: move |v| {
-                        low_stability_mode.set(v);
-                        update_settings();
-                    },
-                    SwitchThumb {}
-                }
-            }
 
             div { class: "flex items-center justify-between gap-4",
                 span { class: "text-sm", "Принудительно новые карточки" }

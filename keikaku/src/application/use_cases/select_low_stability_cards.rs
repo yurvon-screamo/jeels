@@ -4,26 +4,27 @@ use crate::domain::study_session::StudySessionItem;
 use ulid::Ulid;
 
 #[derive(Clone)]
-pub struct SelectCardsToLearnUseCase<'a, R: UserRepository> {
+pub struct SelectLowStabilityCardsUseCase<'a, R: UserRepository> {
     repository: &'a R,
 }
 
-impl<'a, R: UserRepository> SelectCardsToLearnUseCase<'a, R> {
+impl<'a, R: UserRepository> SelectLowStabilityCardsUseCase<'a, R> {
     pub fn new(repository: &'a R) -> Self {
         Self { repository }
     }
 
-    pub async fn execute(&self, user_id: Ulid) -> Result<Vec<StudySessionItem>, JeersError> {
+    pub async fn execute(
+        &self,
+        user_id: Ulid,
+        limit: Option<usize>,
+    ) -> Result<Vec<StudySessionItem>, JeersError> {
         let user = self
             .repository
             .find_by_id(user_id)
             .await?
             .ok_or(JeersError::UserNotFound { user_id })?;
 
-        let learn_settings = user.settings().learn();
-
-        let study_session_items =
-            user.start_study_session(learn_settings.force_new_cards(), learn_settings.limit());
+        let study_session_items = user.start_low_stability_cards_session(limit);
 
         Ok(study_session_items)
     }

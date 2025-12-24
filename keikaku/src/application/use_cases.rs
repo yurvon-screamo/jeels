@@ -12,6 +12,8 @@ pub mod list_cards;
 pub mod rate_card;
 pub mod rebuild_database;
 pub mod select_cards_to_learn;
+pub mod select_high_difficulty_cards;
+pub mod select_low_stability_cards;
 pub mod sync_duolingo_words;
 pub mod translate;
 pub mod update_user_settings;

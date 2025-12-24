@@ -116,14 +116,34 @@ pub fn Learn() -> Element {
                         title: "Статистика".to_string(),
                         subtitle: Some("Нажми «Учиться», чтобы начать урок".to_string()),
                         actions: Some(rsx! {
-                            Button {
-                                variant: ButtonVariant::Primary,
-                                class: "w-auto px-10",
-                                onclick: {
-                                    let session_clone = session.clone();
-                                    move |_| (session_clone.start_session)()
-                                },
-                                "Учиться"
+                            div { class: "flex gap-3",
+                                Button {
+                                    variant: ButtonVariant::Primary,
+                                    class: "w-auto px-6",
+                                    onclick: {
+                                        let session_clone = session.clone();
+                                        move |_| (session_clone.start_session)()
+                                    },
+                                    "Учиться"
+                                }
+                                Button {
+                                    variant: ButtonVariant::Outline,
+                                    class: "w-auto px-6",
+                                    onclick: {
+                                        let session_clone = session.clone();
+                                        move |_| (session_clone.start_low_stability_session)()
+                                    },
+                                    "Нестабильные"
+                                }
+                                Button {
+                                    variant: ButtonVariant::Outline,
+                                    class: "w-auto px-6",
+                                    onclick: {
+                                        let session_clone = session.clone();
+                                        move |_| (session_clone.start_high_difficulty_session)()
+                                    },
+                                    "Сложные"
+                                }
                             }
                         }),
                     }

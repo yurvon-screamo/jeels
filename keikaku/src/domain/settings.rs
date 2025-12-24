@@ -6,7 +6,6 @@ pub struct UserSettings {
     embedding: EmbeddingSettings,
     translation: TranslationSettings,
     duolingo_jwt_token: Option<String>,
-    #[serde(default)]
     learn: LearnSettings,
 }
 
@@ -147,21 +146,14 @@ impl TranslationSettings {
 pub struct LearnSettings {
     limit: Option<usize>,
     show_furigana: bool,
-    low_stability_mode: bool,
     force_new_cards: bool,
 }
 
 impl LearnSettings {
-    pub fn new(
-        limit: Option<usize>,
-        show_furigana: bool,
-        low_stability_mode: bool,
-        force_new_cards: bool,
-    ) -> Self {
+    pub fn new(limit: Option<usize>, show_furigana: bool, force_new_cards: bool) -> Self {
         Self {
             limit,
             show_furigana,
-            low_stability_mode,
             force_new_cards,
         }
     }
@@ -170,7 +162,6 @@ impl LearnSettings {
         Self {
             limit: Some(8),
             show_furigana: true,
-            low_stability_mode: false,
             force_new_cards: false,
         }
     }
@@ -189,14 +180,6 @@ impl LearnSettings {
 
     pub fn set_show_furigana(&mut self, show_furigana: bool) {
         self.show_furigana = show_furigana;
-    }
-
-    pub fn low_stability_mode(&self) -> bool {
-        self.low_stability_mode
-    }
-
-    pub fn set_low_stability_mode(&mut self, low_stability_mode: bool) {
-        self.low_stability_mode = low_stability_mode;
     }
 
     pub fn force_new_cards(&self) -> bool {

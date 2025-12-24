@@ -3,6 +3,7 @@ pub enum FilterStatus {
     All,
     New,
     LowStability,
+    HighDifficulty,
     InProgress,
     Learned,
 }
@@ -30,4 +31,5 @@ pub struct UiCard {
     pub is_in_progress: bool,
     pub is_learned: bool,
     pub is_low_stability: bool,
+    pub is_high_difficulty: bool,
 }

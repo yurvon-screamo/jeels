@@ -40,7 +40,6 @@ pub struct User {
     current_japanese_level: JapaneseLevel,
     lesson_history: Vec<DailyHistoryItem>,
 
-    #[serde(default)]
     settings: UserSettings,
 
     vocabulary_cards: HashMap<Ulid, VocabularyCard>,
@@ -169,6 +168,26 @@ impl User {
             .collect_study_cards()
             .into_iter()
             .filter(|card| card.is_low_stability)
+            .collect::<Vec<_>>();
+
+        cards.sort_by_key(|card| card.next_review_date);
+        cards.reverse();
+
+        if let Some(limit) = limit {
+            cards.truncate(limit);
+        }
+
+        cards.into_iter().map(|card| card.item).collect()
+    }
+
+    pub fn start_high_difficulty_cards_session(
+        &self,
+        limit: Option<usize>,
+    ) -> Vec<StudySessionItem> {
+        let mut cards = self
+            .collect_study_cards()
+            .into_iter()
+            .filter(|card| card.is_high_difficulty)
             .collect::<Vec<_>>();
 
         cards.sort_by_key(|card| card.next_review_date);
@@ -315,6 +334,11 @@ impl User {
             .values()
             .filter(|card| card.memory().is_low_stability())
             .count();
+        let high_difficulty_words = self
+            .vocabulary_cards
+            .values()
+            .filter(|card| card.memory().is_high_difficulty())
+            .count();
 
         let now = Utc::now();
         let today = now.date_naive();
@@ -332,6 +356,7 @@ impl User {
                 new_words,
                 in_progress_words,
                 low_stability_words,
+                high_difficulty_words,
                 lesson_duration,
             );
         } else {
@@ -344,6 +369,7 @@ impl User {
                 new_words,
                 in_progress_words,
                 low_stability_words,
+                high_difficulty_words,
                 lesson_duration,
             );
 
@@ -429,6 +455,7 @@ impl User {
             reviews_len: memory.reviews().len(),
             is_due: memory.is_due(),
             is_low_stability: memory.is_low_stability(),
+            is_high_difficulty: memory.is_high_difficulty(),
             is_in_progress: memory.is_in_progress(),
             is_known: memory.is_known_card(),
             is_new: memory.is_new(),
@@ -444,6 +471,7 @@ impl User {
             reviews_len: memory.reviews().len(),
             is_due: memory.is_due(),
             is_low_stability: memory.is_low_stability(),
+            is_high_difficulty: memory.is_high_difficulty(),
             is_in_progress: memory.is_in_progress(),
             is_known: memory.is_known_card(),
             is_new: memory.is_new(),
@@ -458,6 +486,7 @@ struct StudyCard {
     reviews_len: usize,
     is_due: bool,
     is_low_stability: bool,
+    is_high_difficulty: bool,
     is_in_progress: bool,
     is_known: bool,
     is_new: bool,

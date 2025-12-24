@@ -5,6 +5,8 @@ use keikaku::application::UserRepository;
 use keikaku::application::use_cases::{
     complete_lesson::CompleteLessonUseCase, rate_card::RateCardUseCase,
     select_cards_to_learn::SelectCardsToLearnUseCase,
+    select_high_difficulty_cards::SelectHighDifficultyCardsUseCase,
+    select_low_stability_cards::SelectLowStabilityCardsUseCase,
 };
 use keikaku::domain::study_session::StudySessionItem;
 use keikaku::settings::ApplicationEnvironment;
@@ -21,7 +23,6 @@ pub struct LearnSessionData {
     pub current_index: usize,
     pub current_step: LearnStep,
     pub show_furigana: bool,
-    pub low_stability_mode: bool,
     pub limit: Option<usize>,
     pub session_start_time: DateTime<Utc>,
     pub start_feedback: StartFeedback,
@@ -34,7 +35,6 @@ impl Default for LearnSessionData {
             current_index: 0,
             current_step: LearnStep::Question,
             show_furigana: true,
-            low_stability_mode: false,
             limit: None,
             session_start_time: Utc::now(),
             start_feedback: StartFeedback::None,
@@ -129,6 +129,100 @@ pub fn use_learn_session() -> LearnSessionSignals {
                 data.current_step = LearnStep::Answer;
             }
         }),
+        start_low_stability_session: Rc::new(move || {
+            let mut state = state;
+            let mut session_data = session_data;
+
+            spawn(async move {
+                state.set(SessionState::Loading);
+                session_data.write().start_feedback = StartFeedback::None;
+
+                match fetch_low_stability_cards().await {
+                    Ok(items) => {
+                        if items.is_empty() {
+                            state.set(SessionState::Start);
+                            session_data.write().cards = vec![];
+                            session_data.write().start_feedback = StartFeedback::Empty;
+                        } else {
+                            let learn_cards = items
+                                .into_iter()
+                                .map(map_study_item_to_learn_card)
+                                .collect::<Vec<_>>();
+                            session_data.write().cards = learn_cards;
+                            session_data.write().current_index = 0;
+                            session_data.write().current_step = LearnStep::Question;
+                            session_data.write().session_start_time = Utc::now();
+
+                            let env = ApplicationEnvironment::get();
+                            if let Ok(repo) = env.get_repository().await
+                                && let Ok(user_id) = ensure_user(env, DEFAULT_USERNAME).await
+                                && let Ok(user) = repo.find_by_id(user_id).await
+                                && let Some(user) = user
+                            {
+                                session_data.write().show_furigana =
+                                    user.settings().learn().show_furigana();
+                            }
+
+                            state.set(SessionState::Active);
+                        }
+                    }
+                    Err(e) => {
+                        session_data.write().cards = vec![];
+                        state.set(SessionState::Start);
+                        session_data.write().current_step = LearnStep::Question;
+                        session_data.write().start_feedback = StartFeedback::Error(e.clone());
+                        error!("low stability fetch error: {}", e);
+                    }
+                }
+            });
+        }),
+        start_high_difficulty_session: Rc::new(move || {
+            let mut state = state;
+            let mut session_data = session_data;
+
+            spawn(async move {
+                state.set(SessionState::Loading);
+                session_data.write().start_feedback = StartFeedback::None;
+
+                match fetch_high_difficulty_cards().await {
+                    Ok(items) => {
+                        if items.is_empty() {
+                            state.set(SessionState::Start);
+                            session_data.write().cards = vec![];
+                            session_data.write().start_feedback = StartFeedback::Empty;
+                        } else {
+                            let learn_cards = items
+                                .into_iter()
+                                .map(map_study_item_to_learn_card)
+                                .collect::<Vec<_>>();
+                            session_data.write().cards = learn_cards;
+                            session_data.write().current_index = 0;
+                            session_data.write().current_step = LearnStep::Question;
+                            session_data.write().session_start_time = Utc::now();
+
+                            let env = ApplicationEnvironment::get();
+                            if let Ok(repo) = env.get_repository().await
+                                && let Ok(user_id) = ensure_user(env, DEFAULT_USERNAME).await
+                                && let Ok(user) = repo.find_by_id(user_id).await
+                                && let Some(user) = user
+                            {
+                                session_data.write().show_furigana =
+                                    user.settings().learn().show_furigana();
+                            }
+
+                            state.set(SessionState::Active);
+                        }
+                    }
+                    Err(e) => {
+                        session_data.write().cards = vec![];
+                        state.set(SessionState::Start);
+                        session_data.write().current_step = LearnStep::Question;
+                        session_data.write().start_feedback = StartFeedback::Error(e.clone());
+                        error!("high difficulty fetch error: {}", e);
+                    }
+                }
+            });
+        }),
         rate_card: Rc::new(move |rating: crate::domain::Rating| {
             let state = state;
             let mut session_data = session_data;
@@ -187,6 +281,8 @@ pub struct LearnSessionSignals {
     pub show_answer: Rc<dyn Fn()>,
     pub prev_card: Rc<dyn Fn()>,
     pub rate_card: Rc<dyn Fn(crate::domain::Rating)>,
+    pub start_low_stability_session: Rc<dyn Fn()>,
+    pub start_high_difficulty_session: Rc<dyn Fn()>,
 }
 
 async fn fetch_cards_to_learn() -> Result<Vec<StudySessionItem>, String> {
@@ -195,6 +291,26 @@ async fn fetch_cards_to_learn() -> Result<Vec<StudySessionItem>, String> {
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
     SelectCardsToLearnUseCase::new(repo)
         .execute(user_id)
+        .await
+        .map_err(to_error)
+}
+
+async fn fetch_low_stability_cards() -> Result<Vec<StudySessionItem>, String> {
+    let env = ApplicationEnvironment::get();
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    SelectLowStabilityCardsUseCase::new(repo)
+        .execute(user_id, None)
+        .await
+        .map_err(to_error)
+}
+
+async fn fetch_high_difficulty_cards() -> Result<Vec<StudySessionItem>, String> {
+    let env = ApplicationEnvironment::get();
+    let repo = env.get_repository().await.map_err(to_error)?;
+    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
+    SelectHighDifficultyCardsUseCase::new(repo)
+        .execute(user_id, None)
         .await
         .map_err(to_error)
 }

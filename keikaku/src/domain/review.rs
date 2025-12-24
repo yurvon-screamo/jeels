@@ -6,8 +6,9 @@ use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
-const LOW_STABILITY_THRESHOLD: f64 = 1.5;
-const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 6.0;
+const LOW_STABILITY_THRESHOLD: f64 = 2.0;
+const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 7.0;
+const HIGH_DIFFICULTY_THRESHOLD: f64 = 1.5;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct MemoryState {
@@ -107,6 +108,13 @@ impl MemoryHistory {
     pub fn is_low_stability(&self) -> bool {
         self.stability()
             .map(|stability| stability.value() < LOW_STABILITY_THRESHOLD)
+            .unwrap_or(false)
+    }
+
+    /// Карта которая имеет высокую сложность
+    pub fn is_high_difficulty(&self) -> bool {
+        self.difficulty()
+            .map(|difficulty| difficulty.value() >= HIGH_DIFFICULTY_THRESHOLD)
             .unwrap_or(false)
     }
 

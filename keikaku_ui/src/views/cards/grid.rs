@@ -125,11 +125,13 @@ fn CardItem(
                 // Теги статуса, сложности и стабильности
                 div { class: "flex items-center gap-2 flex-wrap",
                     Pill {
-                        text: if card_rc.is_new { "Новая".to_string() } else if card_rc.is_low_stability { "Низкая стабильность".to_string() } else if card_rc.is_learned { "Изучено".to_string() } else if card_rc.is_in_progress { "В процессе".to_string() } else { "???".to_string() },
+                        text: if card_rc.is_new { "Новая".to_string() } else if card_rc.is_low_stability { "Низкая стабильность".to_string() } else if card_rc.is_high_difficulty { "Высокая сложность".to_string() } else if card_rc.is_learned { "Изучено".to_string() } else if card_rc.is_in_progress { "В процессе".to_string() } else { "???".to_string() },
                         tone: Some(
                             if card_rc.is_new {
                                 StateTone::Info
                             } else if card_rc.is_low_stability {
+                                StateTone::Warning
+                            } else if card_rc.is_high_difficulty {
                                 StateTone::Warning
                             } else if card_rc.is_learned {
                                 StateTone::Success
