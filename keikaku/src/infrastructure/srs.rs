@@ -13,10 +13,9 @@ pub struct FsrsSrsService {
 impl FsrsSrsService {
     pub fn new() -> Result<Self, JeersError> {
         let mut parameters = Parameters::default();
-        parameters.request_retention = 0.9;
-        parameters.maximum_interval = 36500;
-        parameters.enable_short_term = true;
-        parameters.enable_fuzz = false;
+        parameters.request_retention = 0.95;
+        parameters.enable_fuzz = true;
+        parameters.enable_short_term = false;
 
         Ok(Self {
             fsrs: FSRS::new(parameters),
@@ -32,52 +31,42 @@ impl SrsService for FsrsSrsService {
         reviews: &[Review],
     ) -> Result<NextReview, JeersError> {
         let now = Utc::now();
+        let card = if let Some(memory_state) = previous_memory_state {
+            let last_review_date = reviews
+                .last()
+                .map(|review| review.timestamp())
+                .unwrap_or(now);
 
-        let last_review_date = reviews
-            .last()
-            .map(|review| review.timestamp())
-            .unwrap_or(now);
+            let elapsed_days = now
+                .signed_duration_since(last_review_date)
+                .num_days()
+                .max(0);
 
-        let elapsed_days = now
-            .signed_duration_since(last_review_date)
-            .num_days()
-            .max(0);
+            let scheduled_days = memory_state
+                .next_review_date()
+                .signed_duration_since(last_review_date)
+                .num_days()
+                .max(0);
 
-        let reps = reviews.len() as i32;
-        let lapses = reviews
-            .iter()
-            .filter(|review| matches!(review.rating(), Rating::Again))
-            .count() as i32;
+            let reps = reviews.len() as i32;
+            let lapses = reviews
+                .iter()
+                .filter(|review| matches!(review.rating(), Rating::Again))
+                .count() as i32;
 
-        let (due, stability, difficulty, scheduled_days, state) =
-            if let Some(previous_memory_state) = previous_memory_state {
-                let due = *previous_memory_state.next_review_date();
-                let scheduled_days = due
-                    .signed_duration_since(last_review_date)
-                    .num_days()
-                    .max(0);
-
-                (
-                    due,
-                    previous_memory_state.stability().value(),
-                    previous_memory_state.difficulty().value(),
-                    scheduled_days,
-                    FsrsState::Review,
-                )
-            } else {
-                (now, 0.0, 0.0, 0, FsrsState::New)
-            };
-
-        let card = FsrsCard {
-            due,
-            stability,
-            difficulty,
-            elapsed_days,
-            scheduled_days,
-            reps,
-            lapses,
-            state,
-            last_review: last_review_date,
+            FsrsCard {
+                due: *memory_state.next_review_date(),
+                stability: memory_state.stability().value(),
+                difficulty: memory_state.difficulty().value(),
+                elapsed_days,
+                scheduled_days,
+                reps,
+                lapses,
+                state: FsrsState::Review,
+                last_review: last_review_date,
+            }
+        } else {
+            FsrsCard::new()
         };
 
         let fsrs_rating = match rating {
