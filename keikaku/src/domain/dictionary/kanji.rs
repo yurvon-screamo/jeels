@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::LazyLock};
 use serde::{Deserialize, Serialize};
 
 use crate::domain::{
-    JeersError,
+    KeikakuError,
     dictionary::{
         radical::{RADICAL_DB, RadicalInfo},
         vocabulary::VOCABULARY_DB,
@@ -130,10 +130,12 @@ impl KanjiDatabase {
         Self { kanji_map }
     }
 
-    pub fn get_kanji_info(&self, kanji: &str) -> Result<&KanjiInfo, JeersError> {
-        self.kanji_map.get(kanji).ok_or(JeersError::KradfileError {
-            reason: format!("Kanji {} not found in kanji database", kanji),
-        })
+    pub fn get_kanji_info(&self, kanji: &str) -> Result<&KanjiInfo, KeikakuError> {
+        self.kanji_map
+            .get(kanji)
+            .ok_or(KeikakuError::KradfileError {
+                reason: format!("Kanji {} not found in kanji database", kanji),
+            })
     }
 }
 

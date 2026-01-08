@@ -1,12 +1,11 @@
-use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::{Arc, LazyLock};
 
 use crate::application::UserRepository;
-use crate::domain::{JeersError, LlmSettings};
+use crate::domain::{KeikakuError, LlmSettings};
 use crate::infrastructure::{
-    CandleTranslationService, EmbeddedMigiiClient, FileSystemUserRepository, FsrsSrsService,
-    GeminiLlm, LlmServiceInvoker, OpenAiLlm,
+    EmbeddedMigiiClient, FileSystemUserRepository, FsrsSrsService, GeminiLlm, LlmServiceInvoker,
+    OpenAiLlm,
 };
 use tokio::sync::OnceCell;
 
@@ -26,36 +25,23 @@ fn expand_tilde() -> PathBuf {
     if std::env::var("ANDROID_DATA").is_ok() {
         PathBuf::from(format!("/data/data/{}/files", "net.uwuwu.keikaku"))
     } else {
-        // Non-Android platforms - use standard home directory
         let home = std::env::var("HOME")
             .or_else(|_| std::env::var("USERPROFILE")) // Windows
-            .or_else(|_| {
-                // Windows fallback: HOMEPATH is relative to HOMEDRIVE
-                std::env::var("HOMEPATH")
-                    .and_then(|hp| std::env::var("HOMEDRIVE").map(|hd| format!("{}{}", hd, hp)))
-            })
             .unwrap_or_else(|_| "~".to_string());
 
-        let home_path = PathBuf::from(&home);
-        home_path.join(".keikaku")
+        PathBuf::from(&home).join(".keikaku")
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AuthSettings {
-    pub username: String,
-    pub password: String,
-}
-
 impl ApplicationEnvironment {
-    pub async fn get_repository(&self) -> Result<&FileSystemUserRepository, JeersError> {
+    pub async fn get_repository(&self) -> Result<&FileSystemUserRepository, KeikakuError> {
         let path = expand_tilde();
 
         self.lazy_repository
             .get_or_try_init(|| async {
                 FileSystemUserRepository::new(path)
                     .await
-                    .map_err(|e| JeersError::SettingsError {
+                    .map_err(|e| KeikakuError::SettingsError {
                         reason: e.to_string(),
                     })
             })
@@ -65,18 +51,18 @@ impl ApplicationEnvironment {
     pub async fn get_llm_service(
         &self,
         user_id: ulid::Ulid,
-    ) -> Result<LlmServiceInvoker, JeersError> {
+    ) -> Result<LlmServiceInvoker, KeikakuError> {
         let repository = self.get_repository().await?;
         let user = repository
             .find_by_id(user_id)
             .await?
-            .ok_or(JeersError::UserNotFound { user_id })?;
+            .ok_or(KeikakuError::UserNotFound { user_id })?;
         let llm_settings = user.settings().llm();
 
         let service = match llm_settings {
             LlmSettings::Gemini { temperature, model } => {
                 LlmServiceInvoker::Gemini(GeminiLlm::new(*temperature, model.clone()).map_err(
-                    |e| JeersError::SettingsError {
+                    |e| KeikakuError::SettingsError {
                         reason: e.to_string(),
                     },
                 )?)
@@ -93,7 +79,7 @@ impl ApplicationEnvironment {
                     base_url.clone(),
                     env_var_name.clone(),
                 )
-                .map_err(|e| JeersError::SettingsError {
+                .map_err(|e| KeikakuError::SettingsError {
                     reason: e.to_string(),
                 })?,
             ),
@@ -102,31 +88,17 @@ impl ApplicationEnvironment {
         Ok(service)
     }
 
-    pub async fn get_srs_service(&self) -> Result<&FsrsSrsService, JeersError> {
+    pub async fn get_srs_service(&self) -> Result<&FsrsSrsService, KeikakuError> {
         self.lazy_srs_service
             .get_or_try_init(|| async {
-                FsrsSrsService::new().map_err(|e| JeersError::SettingsError {
+                FsrsSrsService::new().map_err(|e| KeikakuError::SettingsError {
                     reason: e.to_string(),
                 })
             })
             .await
     }
 
-    pub async fn get_translation_service(
-        &self,
-        user_id: ulid::Ulid,
-    ) -> Result<CandleTranslationService, JeersError> {
-        let repository = self.get_repository().await?;
-        let user = repository
-            .find_by_id(user_id)
-            .await?
-            .ok_or(JeersError::UserNotFound { user_id })?;
-        let _translation_settings = user.settings().translation();
-
-        CandleTranslationService::new()
-    }
-
-    pub async fn get_migii_client(&self) -> Result<&EmbeddedMigiiClient, JeersError> {
+    pub async fn get_migii_client(&self) -> Result<&EmbeddedMigiiClient, KeikakuError> {
         self.lazy_migii_client
             .get_or_try_init(|| async { Ok(EmbeddedMigiiClient::new()) })
             .await

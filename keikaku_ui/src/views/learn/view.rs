@@ -131,15 +131,6 @@ pub fn Learn() -> Element {
                                     class: "w-auto px-6",
                                     onclick: {
                                         let session_clone = session.clone();
-                                        move |_| (session_clone.start_low_stability_session)()
-                                    },
-                                    "Нестабильные"
-                                }
-                                Button {
-                                    variant: ButtonVariant::Outline,
-                                    class: "w-auto px-6",
-                                    onclick: {
-                                        let session_clone = session.clone();
                                         move |_| (session_clone.start_high_difficulty_session)()
                                     },
                                     "Сложные"

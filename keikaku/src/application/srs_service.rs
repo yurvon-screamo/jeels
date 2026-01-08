@@ -1,6 +1,6 @@
-use crate::domain::error::JeersError;
+use crate::domain::error::KeikakuError;
+use crate::domain::review::MemoryHistory;
 use crate::domain::review::MemoryState;
-use crate::domain::review::Review;
 use crate::domain::value_objects::Rating;
 use chrono::Duration;
 
@@ -9,11 +9,16 @@ pub struct NextReview {
     pub memory_state: MemoryState,
 }
 
+pub enum RateMode {
+    Standard,
+    Fixation,
+}
+
 pub trait SrsService: Send + Sync {
-    fn calculate_next_review(
+    fn rate(
         &self,
+        mode: RateMode,
         rating: Rating,
-        previous_memory_state: Option<&MemoryState>,
-        reviews: &[Review],
-    ) -> impl Future<Output = Result<NextReview, JeersError>> + Send;
+        memory_history: &MemoryHistory,
+    ) -> impl Future<Output = Result<NextReview, KeikakuError>> + Send;
 }

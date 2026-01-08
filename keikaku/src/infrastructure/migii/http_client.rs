@@ -1,5 +1,5 @@
 use crate::application::{MigiiClient, MigiiMeaning, MigiiWord};
-use crate::domain::JeersError;
+use crate::domain::KeikakuError;
 use crate::domain::value_objects::{JapaneseLevel, NativeLanguage};
 use async_trait::async_trait;
 use serde::Deserialize;
@@ -42,7 +42,7 @@ impl MigiiClient for HttpMigiiClient {
         native_lang: &NativeLanguage,
         level: &JapaneseLevel,
         lesson: u32,
-    ) -> Result<Vec<MigiiWord>, JeersError> {
+    ) -> Result<Vec<MigiiWord>, KeikakuError> {
         let level_num = level.as_number() as u32;
         let native_lang_str = match native_lang {
             NativeLanguage::Russian => "ru",
@@ -56,7 +56,7 @@ impl MigiiClient for HttpMigiiClient {
 
         let response = reqwest::get(&url)
             .await
-            .map_err(|e| JeersError::RepositoryError {
+            .map_err(|e| KeikakuError::RepositoryError {
                 reason: format!("Failed to fetch Migii data: {}", e),
             })?;
 
@@ -64,7 +64,7 @@ impl MigiiClient for HttpMigiiClient {
             response
                 .json()
                 .await
-                .map_err(|e| JeersError::RepositoryError {
+                .map_err(|e| KeikakuError::RepositoryError {
                     reason: format!("Failed to parse Migii JSON: {}", e),
                 })?;
 

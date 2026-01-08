@@ -1,5 +1,5 @@
 use crate::domain::{
-    JeersError,
+    KeikakuError,
     value_objects::{JapaneseLevel, NativeLanguage},
 };
 
@@ -22,5 +22,5 @@ pub trait MigiiClient: Send + Sync {
         native_lang: &NativeLanguage,
         level: &JapaneseLevel,
         lesson: u32,
-    ) -> Result<Vec<MigiiWord>, JeersError>;
+    ) -> Result<Vec<MigiiWord>, KeikakuError>;
 }

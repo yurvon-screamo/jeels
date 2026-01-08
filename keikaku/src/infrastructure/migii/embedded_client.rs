@@ -2,14 +2,14 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use crate::application::{MigiiClient, MigiiMeaning, MigiiWord};
-use crate::domain::JeersError;
+use crate::domain::KeikakuError;
 use crate::domain::value_objects::{JapaneseLevel, NativeLanguage};
 use async_trait::async_trait;
 
 type MigiiLessons = HashMap<String, Vec<String>>;
 type MigiiLevels = HashMap<String, MigiiLessons>;
 
-fn load_embedded_data() -> Result<&'static MigiiLevels, JeersError> {
+fn load_embedded_data() -> Result<&'static MigiiLevels, KeikakuError> {
     static DATA: OnceLock<Result<MigiiLevels, String>> = OnceLock::new();
 
     DATA.get_or_init(|| {
@@ -17,7 +17,7 @@ fn load_embedded_data() -> Result<&'static MigiiLevels, JeersError> {
             .map_err(|e| format!("Failed to parse embedded Migii JSON: {e}"))
     })
     .as_ref()
-    .map_err(|reason| JeersError::RepositoryError {
+    .map_err(|reason| KeikakuError::RepositoryError {
         reason: reason.clone(),
     })
 }
@@ -57,19 +57,19 @@ impl MigiiClient for EmbeddedMigiiClient {
         _native_lang: &NativeLanguage,
         level: &JapaneseLevel,
         lesson: u32,
-    ) -> Result<Vec<MigiiWord>, JeersError> {
+    ) -> Result<Vec<MigiiWord>, KeikakuError> {
         let data = load_embedded_data()?;
 
         let lessons = data
             .get(level_key(level))
-            .ok_or_else(|| JeersError::RepositoryError {
+            .ok_or_else(|| KeikakuError::RepositoryError {
                 reason: format!("Level {:?} not found in embedded Migii data", level),
             })?;
 
         let lesson_words =
             lessons
                 .get(&lesson_key(lesson))
-                .ok_or_else(|| JeersError::RepositoryError {
+                .ok_or_else(|| KeikakuError::RepositoryError {
                     reason: format!("Lesson {} not found in embedded Migii data", lesson),
                 })?;
 

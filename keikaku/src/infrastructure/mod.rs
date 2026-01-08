@@ -1,15 +1,10 @@
-pub mod candle_translation;
 pub mod duolingo_client;
-pub mod embedding;
 pub mod llm;
 pub mod migii;
 pub mod srs;
 pub mod user_repository;
 
-pub use candle_translation::CandleTranslationService;
 pub use duolingo_client::HttpDuolingoClient;
-pub use embedding::EmbeddingServiceInvoker;
-pub use embedding::OpenAiEmbeddingService;
 pub use llm::GeminiLlm;
 pub use llm::LlmServiceInvoker;
 pub use llm::OpenAiLlm;

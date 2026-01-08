@@ -1,5 +1,5 @@
-use crate::application::{CreateCardUseCase, DuolingoClient, LlmService, UserRepository};
-use crate::domain::error::JeersError;
+use crate::application::{CreateVocabularyCardUseCase, DuolingoClient, LlmService, UserRepository};
+use crate::domain::error::KeikakuError;
 use ulid::Ulid;
 
 pub struct SyncDuolingoWordsResult {
@@ -9,7 +9,7 @@ pub struct SyncDuolingoWordsResult {
 
 pub struct SyncDuolingoWordsUseCase<'a, R: UserRepository, L: LlmService, D: DuolingoClient> {
     repository: &'a R,
-    create_card_use_case: CreateCardUseCase<'a, R, L>,
+    create_card_use_case: CreateVocabularyCardUseCase<'a, R, L>,
     duolingo_client: &'a D,
 }
 
@@ -19,22 +19,22 @@ impl<'a, R: UserRepository, L: LlmService, D: DuolingoClient>
     pub fn new(repository: &'a R, llm_service: &'a L, duolingo_client: &'a D) -> Self {
         Self {
             repository,
-            create_card_use_case: CreateCardUseCase::new(repository, llm_service),
+            create_card_use_case: CreateVocabularyCardUseCase::new(repository, llm_service),
             duolingo_client,
         }
     }
 
-    pub async fn execute(&self, user_id: Ulid) -> Result<SyncDuolingoWordsResult, JeersError> {
+    pub async fn execute(&self, user_id: Ulid) -> Result<SyncDuolingoWordsResult, KeikakuError> {
         let user = self
             .repository
             .find_by_id(user_id)
             .await?
-            .ok_or(JeersError::UserNotFound { user_id })?;
+            .ok_or(KeikakuError::UserNotFound { user_id })?;
 
         let jwt_token =
             user.settings()
                 .duolingo_jwt_token()
-                .ok_or_else(|| JeersError::RepositoryError {
+                .ok_or_else(|| KeikakuError::RepositoryError {
                     reason: "Duolingo JWT token not set".to_string(),
                 })?;
 
@@ -48,13 +48,13 @@ impl<'a, R: UserRepository, L: LlmService, D: DuolingoClient>
 
             match self
                 .create_card_use_case
-                .execute(user_id, question.clone(), None)
+                .execute(user_id, question.clone())
                 .await
             {
                 Ok(_) => {
                     total_created_count += 1;
                 }
-                Err(JeersError::DuplicateCard { .. }) => {
+                Err(KeikakuError::DuplicateCard { .. }) => {
                     skipped_words.push(question);
                 }
                 Err(e) => {

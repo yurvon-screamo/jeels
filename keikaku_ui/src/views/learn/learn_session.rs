@@ -1,6 +1,6 @@
 use keikaku::domain::{
     dictionary::{KanjiInfo, RadicalInfo},
-    kanji_card::ExampleKanjiWord,
+    knowledge::ExampleKanjiWord,
     value_objects::{ExamplePhrase, JapaneseLevel},
 };
 
@@ -30,12 +30,7 @@ pub enum LearnStep {
 pub enum CardType {
     Vocabulary,
     Kanji,
-}
-
-#[derive(Clone, PartialEq)]
-pub struct SimilarCard {
-    pub word: String,
-    pub meaning: String,
+    Grammar,
 }
 
 #[derive(Clone, PartialEq)]
@@ -46,11 +41,11 @@ pub struct LearnCard {
     pub answer: String,
     // Для vocabulary:
     pub example_phrases: Vec<ExamplePhrase>,
-    pub similarity: Vec<SimilarCard>,
-    pub homonyms: Vec<SimilarCard>,
     pub kanji_info: Vec<KanjiInfo>,
     // Для kanji:
     pub example_words: Vec<ExampleKanjiWord>,
     pub radicals: Vec<RadicalInfo>,
     pub jlpt_level: JapaneseLevel,
+    // Для grammar:
+    pub markdown_description: Option<String>,
 }

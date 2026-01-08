@@ -1,5 +1,5 @@
 use crate::domain::{
-    JeersError,
+    KeikakuError,
     japanese::{IsJapanese, IsJapaneseText},
     tokenizer::Tokenizer,
 };
@@ -15,7 +15,7 @@ pub enum FuriganaFormat {
 }
 
 impl Furiganizer {
-    pub fn new(format: FuriganaFormat) -> Result<Self, JeersError> {
+    pub fn new(format: FuriganaFormat) -> Result<Self, KeikakuError> {
         Ok(Self {
             tokenizer: Tokenizer::new()?,
             format,
@@ -24,7 +24,7 @@ impl Furiganizer {
 }
 
 impl Furiganizer {
-    pub fn furiganize(&self, text: &str) -> Result<String, JeersError> {
+    pub fn furiganize(&self, text: &str) -> Result<String, KeikakuError> {
         let mut result = String::new();
         let mut current_segment = String::new();
         let mut is_current_japanese = false;
@@ -60,7 +60,7 @@ impl Furiganizer {
         Ok(result)
     }
 
-    fn furiganize_clear_japanese(&self, text: &str) -> Result<String, JeersError> {
+    fn furiganize_clear_japanese(&self, text: &str) -> Result<String, KeikakuError> {
         let tokens = self.tokenizer.tokenize(text)?;
         let mut result = String::new();
 

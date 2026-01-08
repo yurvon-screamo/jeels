@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
 const LOW_STABILITY_THRESHOLD: f64 = 2.0;
-const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 7.0;
-const HIGH_DIFFICULTY_THRESHOLD: f64 = 1.5;
+const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 10.0;
+const HIGH_DIFFICULTY_THRESHOLD: f64 = 1.75;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct MemoryState {
@@ -133,6 +133,7 @@ impl MemoryHistory {
         self.stability()
             .map(|stability| stability.value() > KNOWN_CARD_STABILITY_THRESHOLD)
             .unwrap_or(false)
+            && !self.is_high_difficulty()
     }
 }
 

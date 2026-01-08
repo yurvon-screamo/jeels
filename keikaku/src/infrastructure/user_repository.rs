@@ -1,5 +1,5 @@
 use crate::application::user_repository::UserRepository;
-use crate::domain::{JeersError, User};
+use crate::domain::{KeikakuError, User};
 use std::path::PathBuf;
 use tokio::fs;
 use ulid::Ulid;
@@ -9,10 +9,10 @@ pub struct FileSystemUserRepository {
 }
 
 impl FileSystemUserRepository {
-    pub async fn new(database_path: PathBuf) -> Result<Self, JeersError> {
+    pub async fn new(database_path: PathBuf) -> Result<Self, KeikakuError> {
         fs::create_dir_all(&database_path)
             .await
-            .map_err(|e| JeersError::RepositoryError {
+            .map_err(|e| KeikakuError::RepositoryError {
                 reason: format!(
                     "Failed to create users directory {}: {}",
                     database_path.display(),
@@ -32,7 +32,7 @@ impl FileSystemUserRepository {
 
 #[async_trait::async_trait]
 impl UserRepository for FileSystemUserRepository {
-    async fn find_by_id(&self, user_id: Ulid) -> Result<Option<User>, JeersError> {
+    async fn find_by_id(&self, user_id: Ulid) -> Result<Option<User>, KeikakuError> {
         let file_path = self.user_file_path(user_id);
 
         if !file_path.exists() {
@@ -42,23 +42,23 @@ impl UserRepository for FileSystemUserRepository {
         let content =
             fs::read_to_string(&file_path)
                 .await
-                .map_err(|e| JeersError::RepositoryError {
+                .map_err(|e| KeikakuError::RepositoryError {
                     reason: format!("Failed to read user file {}: {}", file_path.display(), e),
                 })?;
 
         let user: User =
-            serde_json::from_str(&content).map_err(|e| JeersError::RepositoryError {
+            serde_json::from_str(&content).map_err(|e| KeikakuError::RepositoryError {
                 reason: format!("Failed to deserialize user {}: {}", file_path.display(), e),
             })?;
 
         Ok(Some(user))
     }
 
-    async fn find_by_username(&self, username: &str) -> Result<Option<User>, JeersError> {
+    async fn find_by_username(&self, username: &str) -> Result<Option<User>, KeikakuError> {
         let mut entries =
             fs::read_dir(&self.users_dir)
                 .await
-                .map_err(|e| JeersError::RepositoryError {
+                .map_err(|e| KeikakuError::RepositoryError {
                     reason: format!(
                         "Failed to read users directory {}: {}",
                         self.users_dir.display(),
@@ -70,7 +70,7 @@ impl UserRepository for FileSystemUserRepository {
             entries
                 .next_entry()
                 .await
-                .map_err(|e| JeersError::RepositoryError {
+                .map_err(|e| KeikakuError::RepositoryError {
                     reason: format!("Failed to read directory entry: {}", e),
                 })?
         {
@@ -82,13 +82,17 @@ impl UserRepository for FileSystemUserRepository {
             let content =
                 fs::read_to_string(&path)
                     .await
-                    .map_err(|e| JeersError::RepositoryError {
+                    .map_err(|e| KeikakuError::RepositoryError {
                         reason: format!("Failed to read user file {}: {}", path.display(), e),
                     })?;
 
             let user: User =
-                serde_json::from_str(&content).map_err(|e| JeersError::RepositoryError {
-                    reason: format!("Failed to deserialize user: {}", e),
+                serde_json::from_str(&content).map_err(|e| KeikakuError::RepositoryError {
+                    reason: format!(
+                        "Failed to deserialize user {}: {}",
+                        &self.users_dir.display(),
+                        e
+                    ),
                 })?;
 
             if user.username() == username {
@@ -99,28 +103,29 @@ impl UserRepository for FileSystemUserRepository {
         Ok(None)
     }
 
-    async fn save(&self, user: &User) -> Result<(), JeersError> {
+    async fn save(&self, user: &User) -> Result<(), KeikakuError> {
         let file_path = self.user_file_path(user.id());
-        let json = serde_json::to_string_pretty(user).map_err(|e| JeersError::RepositoryError {
-            reason: format!("Failed to serialize user: {}", e),
-        })?;
+        let json =
+            serde_json::to_string_pretty(user).map_err(|e| KeikakuError::RepositoryError {
+                reason: format!("Failed to serialize user: {}", e),
+            })?;
 
         fs::write(&file_path, json)
             .await
-            .map_err(|e| JeersError::RepositoryError {
+            .map_err(|e| KeikakuError::RepositoryError {
                 reason: format!("Failed to write user file {}: {}", file_path.display(), e),
             })?;
 
         Ok(())
     }
 
-    async fn delete(&self, user_id: Ulid) -> Result<(), JeersError> {
+    async fn delete(&self, user_id: Ulid) -> Result<(), KeikakuError> {
         let file_path = self.user_file_path(user_id);
 
         if file_path.exists() {
             fs::remove_file(&file_path)
                 .await
-                .map_err(|e| JeersError::RepositoryError {
+                .map_err(|e| KeikakuError::RepositoryError {
                     reason: format!("Failed to delete user file {}: {}", file_path.display(), e),
                 })?;
         }

@@ -1,0 +1,53 @@
+/* ===== Base / reset ===== */
+@font-face {
+    font-family: "Maple Mono";
+    src: url("https://cdn.jsdelivr.net/gh/subframe7536/maple-font@v6.4/woff2/MapleMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Maple Mono";
+    src: url("https://cdn.jsdelivr.net/gh/subframe7536/maple-font@v6.4/woff2/MapleMono-Bold.woff2") format("woff2");
+    font-weight: 700;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background-color: var(--kk-bg);
+    font-family: "Maple Mono", monospace;
+    scroll-padding-top: var(--kk-navbar-height);
+}
+
+body {
+    background-color: var(--kk-bg);
+    color: var(--kk-text-main);
+    font-family: "Maple Mono", monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Scrollbar (webkit) */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}

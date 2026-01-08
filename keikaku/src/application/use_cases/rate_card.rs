@@ -1,8 +1,7 @@
 use crate::application::SrsService;
-use crate::application::srs_service::NextReview;
+use crate::application::srs_service::{NextReview, RateMode};
 use crate::application::user_repository::UserRepository;
-use crate::domain::error::JeersError;
-use crate::domain::review::Review;
+use crate::domain::error::KeikakuError;
 use crate::domain::value_objects::Rating;
 use ulid::Ulid;
 
@@ -24,43 +23,24 @@ impl<'a, R: UserRepository, S: SrsService> RateCardUseCase<'a, R, S> {
         &self,
         user_id: Ulid,
         card_id: Ulid,
+        mode: RateMode,
         rating: Rating,
-    ) -> Result<(), JeersError> {
+    ) -> Result<(), KeikakuError> {
         let mut user = self
             .repository
             .find_by_id(user_id)
             .await?
-            .ok_or(JeersError::UserNotFound { user_id })?;
+            .ok_or(KeikakuError::UserNotFound { user_id })?;
 
-        let (reviews, previous_memory_state) = if let Some(card) = user.get_card(card_id) {
-            (
-                card.memory()
-                    .reviews()
-                    .iter()
-                    .cloned()
-                    .collect::<Vec<Review>>(),
-                card.memory().memory_state(),
-            )
-        } else if let Some(card) = user.get_kanji_card(card_id) {
-            (
-                card.memory_history()
-                    .reviews()
-                    .iter()
-                    .cloned()
-                    .collect::<Vec<Review>>(),
-                card.memory_history().memory_state(),
-            )
-        } else {
-            return Err(JeersError::CardNotFound { card_id });
-        };
+        let card = user
+            .knowledge_set()
+            .get_card(card_id)
+            .ok_or(KeikakuError::CardNotFound { card_id })?;
 
         let NextReview {
             interval,
             memory_state,
-        } = self
-            .srs_service
-            .calculate_next_review(rating, previous_memory_state, &reviews)
-            .await?;
+        } = self.srs_service.rate(mode, rating, card.memory()).await?;
 
         user.rate_card(card_id, rating, interval, memory_state)?;
 

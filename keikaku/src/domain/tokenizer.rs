@@ -1,4 +1,4 @@
-use crate::domain::JeersError;
+use crate::domain::KeikakuError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TokenInfo {
@@ -58,8 +58,7 @@ pub enum PartOfSpeech {
 }
 
 impl PartOfSpeech {
-    /// Проверяет, является ли часть речи "словарным словом" (лексической единицей)
-    /// для изучения в контексте JLPT.
+    /// Является ли часть речи "словарным словом" (лексической единицей) для изучения в контексте JLPT.
     ///
     /// Включает:
     /// - Все самостоятельные части речи (существительные, глаголы, прилагательные)
@@ -89,7 +88,7 @@ impl PartOfSpeech {
 }
 
 impl std::str::FromStr for PartOfSpeech {
-    fn from_str(japanese: &str) -> Result<Self, JeersError> {
+    fn from_str(japanese: &str) -> Result<Self, KeikakuError> {
         Ok(match japanese {
             "動詞" => PartOfSpeech::Verb,
             "名詞" => PartOfSpeech::Noun,
@@ -112,14 +111,14 @@ impl std::str::FromStr for PartOfSpeech {
             "空白" => PartOfSpeech::Whitespace,
             "補助記号" => PartOfSpeech::AuxiliarySymbol,
             _ => {
-                return Err(JeersError::TokenizerError {
+                return Err(KeikakuError::TokenizerError {
                     reason: format!("Unknown part of speech: '{japanese}'"),
                 });
             }
         })
     }
 
-    type Err = JeersError;
+    type Err = KeikakuError;
 }
 
 pub struct Tokenizer {
@@ -127,10 +126,10 @@ pub struct Tokenizer {
 }
 
 impl Tokenizer {
-    pub fn new() -> Result<Self, JeersError> {
+    pub fn new() -> Result<Self, KeikakuError> {
         let dictionary =
             lindera::dictionary::load_dictionary("embedded://unidic").map_err(|e| {
-                JeersError::TokenizerError {
+                KeikakuError::TokenizerError {
                     reason: e.to_string(),
                 }
             })?;
@@ -142,13 +141,13 @@ impl Tokenizer {
         Ok(Self { tokenizer })
     }
 
-    pub fn tokenize(&self, text: &str) -> Result<Vec<TokenInfo>, JeersError> {
-        let mut tokens = self
-            .tokenizer
-            .tokenize(text)
-            .map_err(|e| JeersError::TokenizerError {
-                reason: e.to_string(),
-            })?;
+    pub fn tokenize(&self, text: &str) -> Result<Vec<TokenInfo>, KeikakuError> {
+        let mut tokens =
+            self.tokenizer
+                .tokenize(text)
+                .map_err(|e| KeikakuError::TokenizerError {
+                    reason: e.to_string(),
+                })?;
 
         let token_infos = tokens
             .iter_mut()

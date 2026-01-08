@@ -4,17 +4,13 @@ use crate::components::app_ui::{Card, LoadingState, Paragraph, Pill, SectionHead
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::checkbox::Checkbox;
 use crate::components::input::Input;
-use crate::components::radio_group::{RadioGroup, RadioItem};
 use crate::components::switch::{Switch, SwitchThumb};
 use crate::components::tabs::{TabContent, TabList, TabTrigger, Tabs};
 use crate::{DEFAULT_USERNAME, ensure_user, to_error};
 use dioxus_primitives::checkbox::CheckboxState;
 use keikaku::application::use_cases::{
-    export_anki_pack::ExportAnkiPackUseCase,
-    export_jlpt_recommended::ExportJlptRecommendedUseCase,
-    export_migii_pack::ExportMigiiPackUseCase,
-    rebuild_database::{RebuildDatabaseOptions, RebuildDatabaseUseCase},
-    sync_duolingo_words::SyncDuolingoWordsUseCase,
+    import_anki_pack::ExportAnkiPackUseCase, import_jlpt_recommended::ExportJlptRecommendedUseCase,
+    import_migii_pack::ExportMigiiPackUseCase, sync_duolingo_words::SyncDuolingoWordsUseCase,
 };
 use keikaku::domain::value_objects::JapaneseLevel;
 use keikaku::infrastructure::HttpDuolingoClient;
@@ -73,14 +69,12 @@ pub fn Import() -> Element {
                     TabTrigger { value: "jlpt".to_string(), index: 1usize, "JLPT" }
                     TabTrigger { value: "anki".to_string(), index: 2usize, "Anki" }
                     TabTrigger { value: "migii".to_string(), index: 3usize, "Migii" }
-                    TabTrigger { value: "rebuild".to_string(), index: 4usize, "Пересборка" }
                 }
 
                 TabContent { value: "duolingo".to_string(), index: 0usize, ImportDuolingoTool {} }
                 TabContent { value: "jlpt".to_string(), index: 1usize, ImportJlptTool {} }
                 TabContent { value: "anki".to_string(), index: 2usize, ImportAnkiTool {} }
                 TabContent { value: "migii".to_string(), index: 3usize, ImportMigiiTool {} }
-                TabContent { value: "rebuild".to_string(), index: 4usize, ImportRebuildTool {} }
             }
         }
     }
@@ -459,74 +453,6 @@ fn ImportMigiiTool() -> Element {
     }
 }
 
-#[component]
-fn ImportRebuildTool() -> Element {
-    let mut option = use_signal(|| "content".to_string());
-    let log = use_signal(Vec::<String>::new);
-    let status = use_signal(|| OperationStatus::Idle);
-
-    rsx! {
-        Card { class: Some("space-y-4".to_string()),
-            div { class: "flex items-center justify-between",
-                ToolHeader {
-                    title: "Пересборка базы",
-                    subtitle: "Пересборка базы данных",
-                }
-                Pill {
-                    text: status().to_pill_text(),
-                    tone: Some(status().to_tone()),
-                }
-            }
-
-            RadioGroup {
-                aria_label: "Rebuild options",
-                value: Some(option()),
-                on_value_change: move |v| option.set(v),
-                class: "grid gap-2",
-                disabled: matches!(status(), OperationStatus::Loading),
-                RadioItem { index: 0usize, value: "content".to_string(),
-                    span { class: "ml-2", "Только контент (ответы/примеры)" }
-                }
-                RadioItem { index: 1usize, value: "all".to_string(),
-                    span { class: "ml-2", "Полная пересборка" }
-                }
-            }
-
-            if matches!(status(), OperationStatus::Loading) {
-                LoadingState { message: Some("Пересборка базы данных...".to_string()) }
-            } else {
-                Button {
-                    variant: ButtonVariant::Primary,
-                    class: "w-full",
-                    disabled: matches!(status(), OperationStatus::Loading),
-                    onclick: move |_| {
-                        let option = option();
-                        let mut log = log;
-                        let mut status = status;
-                        status.set(OperationStatus::Loading);
-                        spawn(async move {
-                            match run_rebuild(&option).await {
-                                Ok(msg) => {
-                                    status.set(OperationStatus::Success(msg.clone()));
-                                    log.write().push(msg);
-                                }
-                                Err(e) => {
-                                    let error_msg = format!("Ошибка: {e}");
-                                    status.set(OperationStatus::Error(e.to_string()));
-                                    log.write().push(error_msg);
-                                }
-                            }
-                        });
-                    },
-                    "Пересобрать"
-                }
-            }
-
-            LogsCard { log }
-        }
-    }
-}
-
 async fn run_duolingo() -> Result<String, String> {
     let env = ApplicationEnvironment::get();
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
@@ -628,27 +554,5 @@ async fn run_migii(lessons: String) -> Result<String, String> {
         "Migii: создано {}, пропущено {}",
         res.total_created_count,
         res.skipped_words.len()
-    ))
-}
-
-async fn run_rebuild(option: &str) -> Result<String, String> {
-    let env = ApplicationEnvironment::get();
-    let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    let repo = env.get_repository().await.map_err(to_error)?;
-    let llm = env.get_llm_service(user_id).await.map_err(to_error)?;
-
-    let opt = match option.to_lowercase().as_str() {
-        "all" => RebuildDatabaseOptions::All,
-        _ => RebuildDatabaseOptions::Content,
-    };
-
-    let count = RebuildDatabaseUseCase::new(repo, &llm)
-        .execute(user_id, opt)
-        .await
-        .map_err(to_error)?;
-
-    Ok(format!(
-        "Пересборка завершена, обработано карточек: {}",
-        count
     ))
 }

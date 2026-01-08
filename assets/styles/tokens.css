@@ -1,0 +1,75 @@
+:root {
+    /* ===== Keikaku design tokens (single source of truth) ===== */
+    --kk-bg: #f8f9fd;
+    --kk-surface: #ffffff;
+
+    --kk-text-main: #334155;
+    --kk-text-muted: #94a3b8;
+
+    --kk-border: #e2e8f0;
+    /* slate-200 */
+    --kk-border-strong: #cbd5e1;
+    /* slate-300 */
+
+    --kk-accent-pink: #f472b6;
+    --kk-accent-purple: #a78bfa;
+    --kk-accent-cyan: #22d3ee;
+
+    --kk-focus: rgba(244, 114, 182, 0.55);
+
+    --kk-shadow-soft: 0 20px 40px -15px rgba(200, 100, 200, 0.05);
+    --kk-shadow-soft-hover: 0 30px 60px -12px rgba(200, 100, 255, 0.1);
+    --kk-shadow-glow: 0 0 25px rgba(244, 114, 182, 0.4),
+        0 0 10px rgba(34, 211, 238, 0.3);
+
+    /* Soft-UI / 3D */
+    --kk-shadow-3d: 0 14px 28px -18px rgba(200, 100, 200, 0.35);
+    --kk-shadow-3d-hover: 0 30px 60px -20px rgba(200, 100, 255, 0.22);
+
+    /* “Benzine” gradient */
+    --kk-gradient-benzine: linear-gradient(90deg, #ffd39a 0%, #ff79c6 32%, #a78bfa 62%, #22d3ee 100%);
+    --kk-gradient-benzine-soft: linear-gradient(90deg, rgba(255, 211, 154, 0.35) 0%, rgba(255, 121, 198, 0.30) 32%, rgba(167, 139, 250, 0.28) 62%, rgba(34, 211, 238, 0.28) 100%);
+
+    /* Layout */
+    --kk-navbar-height: 64px;
+
+    /* Rate/status */
+    --kk-status-perfect-bg: linear-gradient(135deg, #fde68a 0%, #f472b6 50%, #22d3ee 100%);
+    --kk-status-good-bg: #d1fae5;
+    --kk-status-error-bg: #f0888f;
+
+    /* ===== dx-components compatibility layer =====
+     We keep dx variable names but map them onto Keikaku tokens to avoid
+     rewriting every component stylesheet and to prevent conflicts with dx theme.
+  */
+    --primary-color: var(--kk-surface);
+    --primary-color-1: var(--kk-surface);
+    --primary-color-2: var(--kk-surface);
+    --primary-color-3: var(--kk-bg);
+    --primary-color-4: #f1f5f9;
+    /* slate-100 */
+    --primary-color-5: #f1f5f9;
+    /* slate-100 */
+    --primary-color-6: var(--kk-border);
+    --primary-color-7: var(--kk-border-strong);
+
+    --secondary-color: var(--kk-text-main);
+    --secondary-color-1: var(--kk-text-main);
+    --secondary-color-2: var(--kk-text-main);
+    --secondary-color-3: var(--kk-text-muted);
+    --secondary-color-4: var(--kk-text-main);
+    --secondary-color-5: var(--kk-text-muted);
+    --secondary-color-6: var(--kk-border-strong);
+
+    --focused-border-color: var(--kk-focus);
+
+    --primary-success-color: #ecfdf5;
+    --secondary-success-color: #10b981;
+    --primary-warning-color: #fffbeb;
+    --secondary-warning-color: #f59e0b;
+    --primary-error-color: #dc2626;
+    --secondary-error-color: #ef4444;
+    --contrast-error-color: var(--kk-surface);
+    --primary-info-color: #f1f5f9;
+    --secondary-info-color: var(--kk-text-main);
+}

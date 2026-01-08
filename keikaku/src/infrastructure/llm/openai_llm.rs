@@ -1,5 +1,5 @@
 use crate::application::LlmService;
-use crate::domain::error::JeersError;
+use crate::domain::error::KeikakuError;
 use async_openai_wasm::types::chat::{
     ChatCompletionRequestMessage, CreateChatCompletionRequestArgs,
 };
@@ -19,8 +19,8 @@ impl OpenAiLlm {
         model: String,
         base_url: String,
         env_var_name: String,
-    ) -> Result<Self, JeersError> {
-        let api_key = std::env::var(&env_var_name).map_err(|_| JeersError::LlmError {
+    ) -> Result<Self, KeikakuError> {
+        let api_key = std::env::var(&env_var_name).map_err(|_| KeikakuError::LlmError {
             reason: format!("{} environment variable not set", env_var_name),
         })?;
 
@@ -37,13 +37,13 @@ impl OpenAiLlm {
         })
     }
 
-    async fn make_request(&self, prompt: &str) -> Result<String, JeersError> {
+    async fn make_request(&self, prompt: &str) -> Result<String, KeikakuError> {
         let request = CreateChatCompletionRequestArgs::default()
             .model(&self.model)
             .messages(vec![ChatCompletionRequestMessage::User(prompt.into())])
             .temperature(self.temperature)
             .build()
-            .map_err(|e| JeersError::LlmError {
+            .map_err(|e| KeikakuError::LlmError {
                 reason: format!("Failed to build chat completion request: {}", e),
             })?;
 
@@ -52,7 +52,7 @@ impl OpenAiLlm {
                 .chat()
                 .create(request)
                 .await
-                .map_err(|e| JeersError::LlmError {
+                .map_err(|e| KeikakuError::LlmError {
                     reason: format!("Failed to send request to LLM: {}", e),
                 })?;
 
@@ -60,7 +60,7 @@ impl OpenAiLlm {
             .choices
             .first()
             .and_then(|choice| choice.message.content.as_ref())
-            .ok_or_else(|| JeersError::LlmError {
+            .ok_or_else(|| KeikakuError::LlmError {
                 reason: "No content in LLM response".to_string(),
             })?;
 
@@ -70,7 +70,7 @@ impl OpenAiLlm {
 
 #[async_trait]
 impl LlmService for OpenAiLlm {
-    async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
+    async fn generate_text(&self, question: &str) -> Result<String, KeikakuError> {
         self.make_request(question).await
     }
 }

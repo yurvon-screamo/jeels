@@ -1,39 +1,47 @@
 use crate::application::SrsService;
-use crate::application::srs_service::NextReview;
-use crate::domain::error::JeersError;
-use crate::domain::review::{MemoryState, Review};
+use crate::application::srs_service::{NextReview, RateMode};
+use crate::domain::error::KeikakuError;
+use crate::domain::review::{MemoryHistory, MemoryState};
 use crate::domain::value_objects::{Difficulty, Rating, Stability};
 use chrono::{Duration, Utc};
 use rs_fsrs::{Card as FsrsCard, FSRS, Parameters, Rating as FsrsRating, State as FsrsState};
 
 pub struct FsrsSrsService {
-    fsrs: FSRS,
+    short_term_fsrs: FSRS,
+    long_term_fsrs: FSRS,
 }
 
 impl FsrsSrsService {
-    pub fn new() -> Result<Self, JeersError> {
-        let mut parameters = Parameters::default();
-        parameters.request_retention = 0.95;
-        parameters.enable_fuzz = true;
-        parameters.enable_short_term = false;
+    pub fn new() -> Result<Self, KeikakuError> {
+        let mut short_term_parameters = Parameters::default();
+        short_term_parameters.request_retention = 0.95;
+        short_term_parameters.enable_fuzz = true;
+        short_term_parameters.enable_short_term = false;
+
+        let mut long_term_parameters = Parameters::default();
+        long_term_parameters.request_retention = 0.90;
+        long_term_parameters.enable_fuzz = true;
+        long_term_parameters.enable_short_term = true;
 
         Ok(Self {
-            fsrs: FSRS::new(parameters),
+            long_term_fsrs: FSRS::new(long_term_parameters),
+            short_term_fsrs: FSRS::new(short_term_parameters),
         })
     }
 }
 
 impl SrsService for FsrsSrsService {
-    async fn calculate_next_review(
+    async fn rate(
         &self,
+        mode: RateMode,
         rating: Rating,
-        previous_memory_state: Option<&MemoryState>,
-        reviews: &[Review],
-    ) -> Result<NextReview, JeersError> {
+        memory_history: &MemoryHistory,
+    ) -> Result<NextReview, KeikakuError> {
         let now = Utc::now();
-        let card = if let Some(memory_state) = previous_memory_state {
-            let last_review_date = reviews
-                .last()
+        let card = if let Some(memory_state) = memory_history.memory_state() {
+            let last_review_date = memory_history
+                .reviews()
+                .back()
                 .map(|review| review.timestamp())
                 .unwrap_or(now);
 
@@ -48,8 +56,9 @@ impl SrsService for FsrsSrsService {
                 .num_days()
                 .max(0);
 
-            let reps = reviews.len() as i32;
-            let lapses = reviews
+            let reps = memory_history.reviews().len() as i32;
+            let lapses = memory_history
+                .reviews()
                 .iter()
                 .filter(|review| matches!(review.rating(), Rating::Again))
                 .count() as i32;
@@ -76,7 +85,11 @@ impl SrsService for FsrsSrsService {
             Rating::Easy => FsrsRating::Easy,
         };
 
-        let scheduling_info = self.fsrs.next(card, now, fsrs_rating);
+        let scheduling_info = match mode {
+            RateMode::Fixation => self.short_term_fsrs.next(card, now, fsrs_rating),
+            RateMode::Standard => self.long_term_fsrs.next(card, now, fsrs_rating),
+        };
+
         let next_review_date = scheduling_info.card.due;
 
         let interval = next_review_date.signed_duration_since(now);

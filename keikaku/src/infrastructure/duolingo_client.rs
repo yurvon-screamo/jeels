@@ -1,5 +1,5 @@
 use crate::application::{DuolingoClient, DuolingoWord};
-use crate::domain::JeersError;
+use crate::domain::KeikakuError;
 use async_trait::async_trait;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use serde::{Deserialize, Serialize};
@@ -96,7 +96,7 @@ impl HttpDuolingoClient {
 
 #[async_trait]
 impl DuolingoClient for HttpDuolingoClient {
-    async fn get_words(&self, jwt_token: &str) -> Result<Vec<DuolingoWord>, JeersError> {
+    async fn get_words(&self, jwt_token: &str) -> Result<Vec<DuolingoWord>, KeikakuError> {
         let user_id = extract_user_id_from_jwt(jwt_token)?;
 
         let profile = get_user_profile(&self.client, &user_id, jwt_token).await?;
@@ -124,10 +124,10 @@ impl DuolingoClient for HttpDuolingoClient {
     }
 }
 
-fn extract_user_id_from_jwt(jwt_token: &str) -> Result<String, JeersError> {
+fn extract_user_id_from_jwt(jwt_token: &str) -> Result<String, KeikakuError> {
     let parts: Vec<&str> = jwt_token.split('.').collect();
     if parts.len() != 3 {
-        return Err(JeersError::RepositoryError {
+        return Err(KeikakuError::RepositoryError {
             reason: "Invalid JWT token format".to_string(),
         });
     }
@@ -135,25 +135,27 @@ fn extract_user_id_from_jwt(jwt_token: &str) -> Result<String, JeersError> {
     let payload = parts[1];
     let decoded = URL_SAFE_NO_PAD
         .decode(payload)
-        .map_err(|e| JeersError::RepositoryError {
+        .map_err(|e| KeikakuError::RepositoryError {
             reason: format!("Failed to decode JWT payload: {}", e),
         })?;
 
     let json: Value =
-        serde_json::from_slice(&decoded).map_err(|e| JeersError::RepositoryError {
+        serde_json::from_slice(&decoded).map_err(|e| KeikakuError::RepositoryError {
             reason: format!("Failed to parse JWT payload: {}", e),
         })?;
 
-    let sub = json.get("sub").ok_or_else(|| JeersError::RepositoryError {
-        reason: format!("JWT token does not contain 'sub' field: {}", json),
-    })?;
+    let sub = json
+        .get("sub")
+        .ok_or_else(|| KeikakuError::RepositoryError {
+            reason: format!("JWT token does not contain 'sub' field: {}", json),
+        })?;
 
     let sub_str = sub
         .as_str()
         .map(|s| s.to_string())
         .or_else(|| sub.as_u64().map(|n| n.to_string()))
         .or_else(|| sub.as_i64().map(|n| n.to_string()))
-        .ok_or_else(|| JeersError::RepositoryError {
+        .ok_or_else(|| KeikakuError::RepositoryError {
             reason: format!("JWT token 'sub' field is not a string or number: {}", json),
         })?;
 
@@ -164,7 +166,7 @@ async fn get_user_profile(
     client: &reqwest::Client,
     user_id: &str,
     jwt_token: &str,
-) -> Result<DuolingoUserProfileResponse, JeersError> {
+) -> Result<DuolingoUserProfileResponse, KeikakuError> {
     let url = format!(
         "https://www.duolingo.com/2023-05-23/users/{}?email,fromLanguage,learningLanguage,googleId,currentCourse,username&_={}",
         user_id,
@@ -178,14 +180,14 @@ async fn get_user_profile(
         .header("Accept", "*/*")
         .send()
         .await
-        .map_err(|e| JeersError::RepositoryError {
+        .map_err(|e| KeikakuError::RepositoryError {
             reason: format!("Failed to fetch Duolingo profile: {}", e),
         })?;
 
     if !response.status().is_success() {
         let status = response.status();
         let text = response.text().await.unwrap_or_default();
-        return Err(JeersError::RepositoryError {
+        return Err(KeikakuError::RepositoryError {
             reason: format!("Duolingo API error: {} {}", status, text),
         });
     }
@@ -194,7 +196,7 @@ async fn get_user_profile(
         response
             .json()
             .await
-            .map_err(|e| JeersError::RepositoryError {
+            .map_err(|e| KeikakuError::RepositoryError {
                 reason: format!("Failed to parse Duolingo profile: {}", e),
             })?;
 
@@ -230,7 +232,7 @@ async fn get_learned_lexemes(
     from_lang: &str,
     jwt_token: &str,
     progressed_skills: &[DuolingoProgressedSkillPayload],
-) -> Result<Vec<DuolingoWord>, JeersError> {
+) -> Result<Vec<DuolingoWord>, KeikakuError> {
     let base_url = format!(
         "https://www.duolingo.com/2017-06-30/users/{}/courses/{}/{}/learned-lexemes",
         user_id, learning_lang, from_lang
@@ -245,39 +247,38 @@ async fn get_learned_lexemes(
             progressed_skills: progressed_skills.to_vec(),
         };
 
-        let response = client
-            .post(&base_url)
+        let url = format!(
+            "{}?limit={}&sortBy=LEARNED_DATE&startIndex={}",
+            base_url, limit, start_index
+        );
+
+        let response: reqwest::Response = client
+            .post(&url)
             .header("authorization", format!("Bearer {}", jwt_token))
             .header("content-type", "application/json; charset=UTF-8")
             .header("User-Agent", "curl/8.16.0")
             .header("Accept", "*/*")
-            .query(&[
-                ("limit", limit.to_string()),
-                ("sortBy", "LEARNED_DATE".to_string()),
-                ("startIndex", start_index.to_string()),
-            ])
             .json(&payload)
             .send()
             .await
-            .map_err(|e| JeersError::RepositoryError {
+            .map_err(|e| KeikakuError::RepositoryError {
                 reason: format!("Failed to fetch Duolingo lexemes: {}", e),
             })?;
 
-        if !response.status().is_success() {
-            let status = response.status();
+        let status = response.status();
+        let data: LearnedLexemesResponse = if !status.is_success() {
             let text = response.text().await.unwrap_or_default();
-            return Err(JeersError::RepositoryError {
+            return Err(KeikakuError::RepositoryError {
                 reason: format!("Duolingo API error: {} {}", status, text),
             });
-        }
-
-        let data: LearnedLexemesResponse =
+        } else {
             response
                 .json()
                 .await
-                .map_err(|e| JeersError::RepositoryError {
+                .map_err(|e| KeikakuError::RepositoryError {
                     reason: format!("Failed to parse Duolingo lexemes: {}", e),
-                })?;
+                })?
+        };
 
         all_words.extend(data.learned_lexemes.into_iter().map(|lexeme| DuolingoWord {
             text: lexeme.text,

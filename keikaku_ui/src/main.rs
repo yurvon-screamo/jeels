@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_logger::tracing::Level;
 use ulid::Ulid;
 
 use keikaku::{
@@ -10,7 +11,7 @@ use keikaku::{
     settings::ApplicationEnvironment,
 };
 
-use views::{Cards, Import, Kanji, Learn, Navbar, Overview, Profile, Translate};
+use views::{Cards, Import, Kanji, Learn, Navbar, Overview, Profile};
 
 pub const DEFAULT_USERNAME: &str = "yurvon_screamo";
 
@@ -26,7 +27,6 @@ pub async fn ensure_user(
         username.to_string(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
-        7,
     );
     let id = new_user.id();
     repo.save(&new_user).await.map_err(to_error)?;
@@ -49,6 +49,7 @@ const UI_BASE_CSS: Asset = asset!("/assets/styles/base.css");
 const UI_UTILITIES_CSS: Asset = asset!("/assets/styles/utilities.css");
 
 fn main() {
+    dioxus_logger::init(Level::INFO).expect("failed to init logger");
     dioxus::launch(App);
 }
 
@@ -64,8 +65,6 @@ enum Route {
         Overview {},
         #[route("/cards")]
         Cards {},
-        #[route("/translate")]
-        Translate {},
         #[route("/kanji")]
         Kanji {},
         #[route("/profile")]

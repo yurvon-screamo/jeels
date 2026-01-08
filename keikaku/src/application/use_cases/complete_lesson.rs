@@ -1,5 +1,5 @@
 use crate::application::user_repository::UserRepository;
-use crate::domain::error::JeersError;
+use crate::domain::error::KeikakuError;
 use chrono::Duration;
 use ulid::Ulid;
 
@@ -17,14 +17,14 @@ impl<'a, R: UserRepository> CompleteLessonUseCase<'a, R> {
         &self,
         user_id: Ulid,
         lesson_duration: Duration,
-    ) -> Result<(), JeersError> {
+    ) -> Result<(), KeikakuError> {
         let mut user = self
             .repository
             .find_by_id(user_id)
             .await?
-            .ok_or(JeersError::UserNotFound { user_id })?;
+            .ok_or(KeikakuError::UserNotFound { user_id })?;
 
-        user.update_daily_history(lesson_duration);
+        user.add_lesson_duration(lesson_duration);
 
         self.repository.save(&user).await?;
 

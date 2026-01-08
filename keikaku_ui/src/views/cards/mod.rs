@@ -1,6 +1,5 @@
 mod create;
 mod delete;
-mod edit;
 mod filters;
 mod grid;
 mod header;

@@ -13,9 +13,6 @@ pub use learn::Learn;
 mod import;
 pub use import::Import;
 
-mod translate;
-pub use translate::Translate;
-
 mod kanji;
 pub use kanji::Kanji;
 

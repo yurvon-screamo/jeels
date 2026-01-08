@@ -1,5 +1,5 @@
 use crate::application::LlmService;
-use crate::domain::error::JeersError;
+use crate::domain::error::KeikakuError;
 use async_trait::async_trait;
 use serde_json::{Value, json};
 use std::env;
@@ -12,8 +12,8 @@ pub struct GeminiLlm {
 }
 
 impl GeminiLlm {
-    pub fn new(temperature: f32, model: String) -> Result<Self, JeersError> {
-        let api_key = env::var("GEMINI_API_KEY").map_err(|_| JeersError::LlmError {
+    pub fn new(temperature: f32, model: String) -> Result<Self, KeikakuError> {
+        let api_key = env::var("GEMINI_API_KEY").map_err(|_| KeikakuError::LlmError {
             reason: "GEMINI_API_KEY environment variable not set".to_string(),
         })?;
 
@@ -27,7 +27,7 @@ impl GeminiLlm {
         })
     }
 
-    async fn make_request(&self, prompt: &str) -> Result<String, JeersError> {
+    async fn make_request(&self, prompt: &str) -> Result<String, KeikakuError> {
         let url = format!(
             "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent",
             self.model
@@ -51,19 +51,19 @@ impl GeminiLlm {
             .json(&request_body)
             .send()
             .await
-            .map_err(|e| JeersError::LlmError {
+            .map_err(|e| KeikakuError::LlmError {
                 reason: format!("Failed to send request to Gemini: {}", e),
             })?;
 
         if !response.status().is_success() {
             let status = response.status();
             let error_text = response.text().await.unwrap_or_default();
-            return Err(JeersError::LlmError {
+            return Err(KeikakuError::LlmError {
                 reason: format!("Gemini API error ({}): {}", status, error_text),
             });
         }
 
-        let response_json: Value = response.json().await.map_err(|e| JeersError::LlmError {
+        let response_json: Value = response.json().await.map_err(|e| KeikakuError::LlmError {
             reason: format!("Failed to parse Gemini response JSON: {}", e),
         })?;
 
@@ -74,7 +74,7 @@ impl GeminiLlm {
             .and_then(|parts| parts.get(0))
             .and_then(|part| part.get("text"))
             .and_then(|text| text.as_str())
-            .ok_or_else(|| JeersError::LlmError {
+            .ok_or_else(|| KeikakuError::LlmError {
                 reason: "No content or unexpected format in Gemini response".to_string(),
             })?;
 
@@ -84,7 +84,7 @@ impl GeminiLlm {
 
 #[async_trait]
 impl LlmService for GeminiLlm {
-    async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
+    async fn generate_text(&self, question: &str) -> Result<String, KeikakuError> {
         self.make_request(question).await
     }
 }

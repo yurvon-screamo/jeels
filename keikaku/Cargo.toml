@@ -39,13 +39,6 @@ chrono.workspace = true
 rs-fsrs.workspace = true
 lindera.workspace = true
 
-# Machine Learning
-hf-hub.workspace = true
-candle-core.workspace = true
-candle-transformers.workspace = true
-candle-nn.workspace = true
-tokenizers.workspace = true
-
 [dev-dependencies]
 rstest.workspace = true
 

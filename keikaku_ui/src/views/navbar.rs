@@ -58,14 +58,6 @@ pub fn Navbar() -> Element {
                                 "Импорт"
                             }
                             NavbarItem {
-                                index: 3usize,
-                                value: "translate".to_string(),
-                                to: Route::Translate {},
-                                class: Some("px-3 py-2 rounded-md".to_string()),
-                                active_class: Some("bg-muted".to_string()),
-                                "Перевод"
-                            }
-                            NavbarItem {
                                 index: 4usize,
                                 value: "kanji".to_string(),
                                 to: Route::Kanji {},

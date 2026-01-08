@@ -1,29 +1,6 @@
-use crate::domain::error::JeersError;
+use crate::domain::error::KeikakuError;
 use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CardContent {
-    answer: Answer,
-    example_phrases: Vec<ExamplePhrase>,
-}
-
-impl CardContent {
-    pub fn new(answer: Answer, example_phrases: Vec<ExamplePhrase>) -> Self {
-        Self {
-            answer,
-            example_phrases,
-        }
-    }
-
-    pub fn answer(&self) -> &Answer {
-        &self.answer
-    }
-
-    pub fn example_phrases(&self) -> &[ExamplePhrase] {
-        &self.example_phrases
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Question {
@@ -31,13 +8,17 @@ pub struct Question {
 }
 
 impl Question {
-    pub fn new(text: String) -> Result<Self, JeersError> {
-        if text.trim().is_empty() {
-            return Err(JeersError::InvalidQuestion {
+    pub fn new(text: String) -> Result<Self, KeikakuError> {
+        let text = text.trim();
+        if text.is_empty() {
+            return Err(KeikakuError::InvalidQuestion {
                 reason: "Question text cannot be empty".to_string(),
             });
         }
-        Ok(Self { text })
+
+        Ok(Self {
+            text: text.to_string(),
+        })
     }
 
     pub fn text(&self) -> &str {
@@ -51,13 +32,17 @@ pub struct Answer {
 }
 
 impl Answer {
-    pub fn new(text: String) -> Result<Self, JeersError> {
-        if text.trim().is_empty() {
-            return Err(JeersError::InvalidAnswer {
+    pub fn new(text: String) -> Result<Self, KeikakuError> {
+        let text = text.trim();
+        if text.is_empty() {
+            return Err(KeikakuError::InvalidAnswer {
                 reason: "Answer text cannot be empty".to_string(),
             });
         }
-        Ok(Self { text })
+
+        Ok(Self {
+            text: text.to_string(),
+        })
     }
 
     pub fn text(&self) -> &str {
@@ -79,9 +64,9 @@ pub struct Stability {
 }
 
 impl Stability {
-    pub fn new(value: f64) -> Result<Self, JeersError> {
+    pub fn new(value: f64) -> Result<Self, KeikakuError> {
         if value < 0.0 {
-            return Err(JeersError::InvalidStability {
+            return Err(KeikakuError::InvalidStability {
                 reason: "Stability cannot be negative".to_string(),
             });
         }
@@ -105,9 +90,9 @@ pub struct Difficulty {
 }
 
 impl Difficulty {
-    pub fn new(value: f64) -> Result<Self, JeersError> {
+    pub fn new(value: f64) -> Result<Self, KeikakuError> {
         if value < 0.0 {
-            return Err(JeersError::InvalidDifficulty {
+            return Err(KeikakuError::InvalidDifficulty {
                 reason: "Difficulty cannot be negative".to_string(),
             });
         }

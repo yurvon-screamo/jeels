@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::LazyLock};
 use serde::{Deserialize, Serialize};
 
 use crate::domain::{
-    JeersError, dictionary::kanji::parse_jlpt_level, value_objects::JapaneseLevel,
+    KeikakuError, dictionary::kanji::parse_jlpt_level, value_objects::JapaneseLevel,
 };
 
 const RADKFILE_DATA: &str = include_str!("./radicals.json");
@@ -92,10 +92,10 @@ impl RadicalDatabase {
         }
     }
 
-    pub fn get_radical_info(&self, radical: &char) -> Result<&RadicalInfo, JeersError> {
+    pub fn get_radical_info(&self, radical: &char) -> Result<&RadicalInfo, KeikakuError> {
         self.radical_map
             .get(radical)
-            .ok_or(JeersError::KradfileError {
+            .ok_or(KeikakuError::KradfileError {
                 reason: format!("Radical {} not found in radkfile", radical),
             })
     }

@@ -3,7 +3,7 @@ use std::fmt;
 use ulid::Ulid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum JeersError {
+pub enum KeikakuError {
     UserNotFound { user_id: Ulid },
     UserNotFoundByUsername { username: String },
     CardNotFound { card_id: Ulid },
@@ -23,70 +23,74 @@ pub enum JeersError {
     KradfileError { reason: String },
     InvalidValues { reason: String },
     TokenizerError { reason: String },
+    GrammarFormatError { reason: String },
 }
 
-impl fmt::Display for JeersError {
+impl fmt::Display for KeikakuError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            JeersError::UserNotFound { user_id } => {
+            KeikakuError::UserNotFound { user_id } => {
                 write!(f, "User with id {} not found", user_id)
             }
-            JeersError::UserNotFoundByUsername { username } => {
+            KeikakuError::UserNotFoundByUsername { username } => {
                 write!(f, "User with username {} not found", username)
             }
-            JeersError::CardNotFound { card_id } => {
+            KeikakuError::CardNotFound { card_id } => {
                 write!(f, "Card with id {} not found", card_id)
             }
-            JeersError::DuplicateCard { question } => {
+            KeikakuError::DuplicateCard { question } => {
                 write!(f, "Card with question '{}' already exists", question)
             }
-            JeersError::InvalidQuestion { reason } => {
+            KeikakuError::InvalidQuestion { reason } => {
                 write!(f, "Invalid question: {}", reason)
             }
-            JeersError::InvalidAnswer { reason } => {
+            KeikakuError::InvalidAnswer { reason } => {
                 write!(f, "Invalid answer: {}", reason)
             }
-            JeersError::InvalidStability { reason } => {
+            KeikakuError::InvalidStability { reason } => {
                 write!(f, "Invalid stability: {}", reason)
             }
-            JeersError::InvalidDifficulty { reason } => {
+            KeikakuError::InvalidDifficulty { reason } => {
                 write!(f, "Invalid difficulty: {}", reason)
             }
-            JeersError::InvalidMemoryState { reason } => {
+            KeikakuError::InvalidMemoryState { reason } => {
                 write!(f, "Invalid memory state: {}", reason)
             }
-            JeersError::SrsCalculationFailed { reason } => {
+            KeikakuError::SrsCalculationFailed { reason } => {
                 write!(f, "SRS calculation failed: {}", reason)
             }
-            JeersError::RepositoryError { reason } => {
+            KeikakuError::RepositoryError { reason } => {
                 write!(f, "Repository error: {}", reason)
             }
-            JeersError::EmbeddingError { reason } => {
+            KeikakuError::EmbeddingError { reason } => {
                 write!(f, "Embedding error: {}", reason)
             }
-            JeersError::LlmError { reason } => {
+            KeikakuError::LlmError { reason } => {
                 write!(f, "LLM error: {}", reason)
             }
-            JeersError::SettingsError { reason } => {
+            KeikakuError::SettingsError { reason } => {
                 write!(f, "Settings error: {}", reason)
             }
-            JeersError::FuriganaError { reason } => {
+            KeikakuError::FuriganaError { reason } => {
                 write!(f, "Furigana error: {}", reason)
             }
-            JeersError::TranslationError { reason } => {
+            KeikakuError::TranslationError { reason } => {
                 write!(f, "Translation error: {}", reason)
             }
-            JeersError::KradfileError { reason } => {
+            KeikakuError::KradfileError { reason } => {
                 write!(f, "Kradfile error: {}", reason)
             }
-            JeersError::InvalidValues { reason } => {
+            KeikakuError::InvalidValues { reason } => {
                 write!(f, "Invalid values: {}", reason)
             }
-            JeersError::TokenizerError { reason } => {
+            KeikakuError::TokenizerError { reason } => {
                 write!(f, "Tokenizer error: {}", reason)
+            }
+            KeikakuError::GrammarFormatError { reason } => {
+                write!(f, "Grammar rule format error: {}", reason)
             }
         }
     }
 }
 
-impl std::error::Error for JeersError {}
+impl std::error::Error for KeikakuError {}

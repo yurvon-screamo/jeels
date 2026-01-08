@@ -4,9 +4,7 @@ use keikaku::domain::UserSettings;
 use crate::components::app_ui::{Card, SectionHeader};
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::input::Input;
-use crate::views::profile::forms::{
-    EmbeddingSettingsForm, LearnSettingsForm, LlmSettingsForm, TranslationSettingsForm,
-};
+use crate::views::profile::forms::LlmSettingsForm;
 
 #[component]
 pub fn SettingsForm(
@@ -15,9 +13,6 @@ pub fn SettingsForm(
     loading: bool,
 ) -> Element {
     let mut llm_settings = use_signal(|| settings.llm().clone());
-    let mut embedding_settings = use_signal(|| settings.embedding().clone());
-    let mut translation_settings = use_signal(|| settings.translation().clone());
-    let mut learn_settings = use_signal(|| settings.learn().clone());
     let duolingo_token = use_signal(|| {
         settings
             .duolingo_jwt_token()
@@ -43,46 +38,6 @@ pub fn SettingsForm(
                 }
             }
 
-            Card { class: Some("space-y-4".to_string()),
-                SectionHeader {
-                    title: "Настройки Embedding".to_string(),
-                    subtitle: Some(
-                        "Модель для векторных представлений".to_string(),
-                    ),
-                    actions: None,
-                }
-
-                EmbeddingSettingsForm {
-                    settings: embedding_settings(),
-                    on_change: move |new_settings| embedding_settings.set(new_settings),
-                }
-            }
-
-            Card { class: Some("space-y-4".to_string()),
-                SectionHeader {
-                    title: "Настройки перевода".to_string(),
-                    subtitle: Some("Параметры для сервиса перевода".to_string()),
-                    actions: None,
-                }
-
-                TranslationSettingsForm {
-                    settings: translation_settings(),
-                    on_change: move |new_settings| translation_settings.set(new_settings),
-                }
-            }
-
-            Card { class: Some("space-y-4".to_string()),
-                SectionHeader {
-                    title: "Настройки обучения".to_string(),
-                    subtitle: Some("Параметры сессии обучения".to_string()),
-                    actions: None,
-                }
-
-                LearnSettingsForm {
-                    settings: learn_settings(),
-                    on_change: move |new_settings| learn_settings.set(new_settings),
-                }
-            }
 
             Card { class: Some("space-y-4".to_string()),
                 SectionHeader {
@@ -111,10 +66,7 @@ pub fn SettingsForm(
                     onclick: move |_| {
                         let new_settings = UserSettings::new(
                             llm_settings(),
-                            embedding_settings(),
-                            translation_settings(),
                             Some(duolingo_token()).filter(|s| !s.trim().is_empty()),
-                            learn_settings(),
                         );
                         on_save.call(new_settings);
                     },

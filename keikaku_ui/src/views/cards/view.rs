@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
-use keikaku::application::use_cases::list_cards::ListCardsUseCase;
-use keikaku::domain::VocabularyCard;
+use keikaku::application::use_cases::knowledge_set_cards::KnowledgeSetCardsUseCase;
+use keikaku::domain::knowledge::StudyCard;
+use keikaku::domain::value_objects::{Difficulty, Stability};
 use keikaku::settings::ApplicationEnvironment;
 
 use crate::components::app_ui::ErrorCard;
 use crate::views::cards::create::CreateModal;
 use crate::views::cards::delete::{DeleteConfirmModal, delete_card_with_handlers};
-use crate::views::cards::edit::EditModal;
 use crate::{
     DEFAULT_USERNAME, ensure_user, to_error,
     views::cards::{
@@ -20,11 +20,6 @@ use dioxus_primitives::toast::{ToastOptions, use_toast};
 pub enum ModalState {
     None,
     Create,
-    Edit {
-        card_id: String,
-        question: String,
-        answer: String,
-    },
 }
 
 #[component]
@@ -36,7 +31,10 @@ pub fn Cards() -> Element {
 
     match cards_read.as_ref() {
         Some(Ok(cards)) => {
-            let mapped_cards = cards.iter().map(map_card).collect::<Vec<_>>();
+            let mapped_cards = cards
+                .iter()
+                .map(|card: &StudyCard| map_card(card))
+                .collect::<Vec<_>>();
             let processed_data = process_cards_data(mapped_cards);
 
             rsx! {
@@ -107,14 +105,7 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
             CardsGrid {
                 cards: filtered_and_sorted(),
                 loading: loading(),
-                on_edit: move |card: UiCard| {
-                    modal_state
-                        .set(ModalState::Edit {
-                            card_id: card.id,
-                            question: card.question,
-                            answer: card.answer,
-                        })
-                },
+                on_edit: move |_card: UiCard| {},
                 on_delete: move |card: UiCard| delete_confirm.set(Some(card.id)),
                 on_create_click: move |_| modal_state.set(ModalState::Create),
                 on_card_click: move |card: UiCard| selected_card_for_history.set(Some(card)),
@@ -123,20 +114,6 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
             match modal_state() {
                 ModalState::Create => rsx! {
                     CreateModal {
-                        on_close: move |_| modal_state.set(ModalState::None),
-                        on_success: move |msg| {
-                            toast.success(msg, ToastOptions::new());
-                            on_refresh.call(());
-                        },
-                        on_error: move |msg| toast.error(msg, ToastOptions::new()),
-                        loading: loading(),
-                    }
-                },
-                ModalState::Edit { card_id, question, answer } => rsx! {
-                    EditModal {
-                        card_id,
-                        initial_question: question,
-                        initial_answer: answer,
                         on_close: move |_| modal_state.set(ModalState::None),
                         on_success: move |msg| {
                             toast.success(msg, ToastOptions::new());
@@ -168,7 +145,7 @@ fn CardsContent(cards_data: ProcessedCardsData, on_refresh: EventHandler<()>) ->
     }
 }
 
-fn map_card(card: &VocabularyCard) -> UiCard {
+fn map_card(card: &StudyCard) -> UiCard {
     let next_review = card
         .memory()
         .next_review_date()
@@ -190,17 +167,35 @@ fn map_card(card: &VocabularyCard) -> UiCard {
         })
         .unwrap_or_else(|| "—".to_string());
 
-    let examples = card
-        .example_phrases()
-        .iter()
-        .map(|ex| (ex.text().clone(), ex.translation().clone()))
-        .collect();
+    // Extract data based on card type
+    let (question, answer, examples) = match card.card() {
+        keikaku::domain::knowledge::Card::Vocabulary(v) => (
+            v.word().text().to_string(),
+            v.meaning().text().to_string(),
+            v.example_phrases()
+                .iter()
+                .map(|ex: &keikaku::domain::value_objects::ExamplePhrase| {
+                    (ex.text().clone(), ex.translation().clone())
+                })
+                .collect(),
+        ),
+        keikaku::domain::knowledge::Card::Kanji(k) => (
+            k.kanji().text().to_string(),
+            k.description().text().to_string(),
+            Vec::new(), // Kanji cards don't have examples in the same format
+        ),
+        keikaku::domain::knowledge::Card::Grammar(g) => (
+            g.title().text().to_string(),
+            g.description().text().to_string(),
+            Vec::new(), // Grammar cards don't have examples in the same format
+        ),
+    };
 
     let reviews = card
         .memory()
         .reviews()
         .iter()
-        .map(|review| ReviewInfo {
+        .map(|review: &keikaku::domain::review::Review| ReviewInfo {
             timestamp: review.timestamp(),
             rating: review.rating(),
             interval: review.interval(),
@@ -208,12 +203,12 @@ fn map_card(card: &VocabularyCard) -> UiCard {
         .collect();
 
     UiCard {
-        id: card.id().to_string(),
-        question: card.word().text().to_string(),
-        answer: card.meaning().text().to_string(),
+        id: card.card_id().to_string(),
+        question,
+        answer,
         examples,
-        difficulty: card.memory().difficulty().map(|d| d.value()),
-        stability: card.memory().stability().map(|s| s.value()),
+        difficulty: card.memory().difficulty().map(|d: &Difficulty| d.value()),
+        stability: card.memory().stability().map(|s: &Stability| s.value()),
         next_review,
         due: card.memory().is_due(),
         is_new: card.memory().is_new(),
@@ -305,11 +300,11 @@ fn filter_and_sort_cards(
     result
 }
 
-async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
+async fn fetch_cards() -> Result<Vec<StudyCard>, String> {
     let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    ListCardsUseCase::new(repo)
+    KnowledgeSetCardsUseCase::new(repo)
         .execute(user_id)
         .await
         .map_err(to_error)

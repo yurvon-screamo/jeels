@@ -1,0 +1,188 @@
+/* ===== Animations ===== */
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.animate-enter {
+    animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-400 {
+    animation-delay: 400ms;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
+
+/* ===== Card stacking helpers ===== */
+.kk-card {
+    z-index: 0;
+}
+
+.kk-card:focus-within {
+    z-index: 100;
+}
+
+/* ===== Legacy custom check/radio (if still used anywhere) ===== */
+.custom-check:checked {
+    background-color: var(--kk-accent-pink);
+    border-color: var(--kk-accent-pink);
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
+.custom-radio:checked {
+    background-color: var(--kk-accent-pink);
+    border-color: var(--kk-accent-pink);
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+}
+
+.bg-rainbow-switch:checked {
+    background-image: linear-gradient(to right,
+            var(--kk-accent-pink),
+            var(--kk-accent-purple),
+            var(--kk-accent-cyan));
+    opacity: 1;
+}
+
+/* ===== Utilities (compat with existing markup) ===== */
+.bg-bg {
+    background-color: var(--kk-bg);
+}
+
+.bg-surface {
+    background-color: var(--kk-surface);
+}
+
+.text-text-main {
+    color: var(--kk-text-main);
+}
+
+.text-text-muted {
+    color: var(--kk-text-muted);
+}
+
+.text-accent-pink {
+    color: var(--kk-accent-pink);
+}
+
+.text-accent-purple {
+    color: var(--kk-accent-purple);
+}
+
+.text-accent-cyan {
+    color: var(--kk-accent-cyan);
+}
+
+.bg-rainbow-soft {
+    background-image: linear-gradient(to right top, #ffc3a0, #ffafbd, #c9afff, #a0e9ff);
+}
+
+.bg-rainbow-vibrant {
+    background-image: linear-gradient(to right,
+            var(--kk-accent-pink),
+            var(--kk-accent-purple),
+            #60a5fa);
+}
+
+.shadow-soft {
+    box-shadow: var(--kk-shadow-soft);
+}
+
+.shadow-soft-hover {
+    box-shadow: var(--kk-shadow-soft-hover);
+}
+
+.shadow-glow {
+    box-shadow: var(--kk-shadow-glow);
+}
+
+.ease-elastic {
+    transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ease-smooth {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Selection */
+.selection\:bg-accent-pink\/30::selection {
+    background-color: rgba(244, 114, 182, 0.3);
+}
+
+.selection\:text-text-main::selection {
+    color: var(--kk-text-main);
+}
+
+/* Group focus-within helpers (fix previous broken selectors) */
+.group:focus-within .group-focus-within\:text-accent-pink {
+    color: var(--kk-accent-pink);
+}
+
+.group:focus-within .group-focus-within\:text-accent-cyan {
+    color: var(--kk-accent-cyan);
+}
+
+.group:focus-within .group-focus-within\:text-accent-purple {
+    color: var(--kk-accent-purple);
+}
+
+/* Rate status */
+.bg-status-perfect {
+    background-image: var(--kk-status-perfect-bg);
+}
+
+.text-status-perfect {
+    background: linear-gradient(135deg, #f59e0b 0%, #db2777 50%, #0891b2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-status-good {
+    color: var(--kk-text-main);
+}
+
+.bg-status-good-soft {
+    background-color: var(--kk-status-good-bg);
+}
+
+.text-status-neutral {
+    color: var(--kk-text-main);
+}
+
+.text-status-error {
+    color: var(--kk-text-main);
+}
+
+.bg-status-error-soft {
+    background-color: var(--kk-status-error-bg);
+}
+
+.shadow-glow-perfect {
+    box-shadow: 0 0 20px rgba(253, 230, 138, 0.4), 0 0 10px rgba(34, 211, 238, 0.2);
+}
+
+.shadow-glow-good {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
+}

@@ -1,0 +1,12 @@
+[application]
+name = "keikaku"
+default_platform = "web"
+out_dir = "dist"
+asset_dir = "assets"
+
+[web.app]
+title = "Keikaku"
+
+[web.watcher]
+reload_html = true
+watch_path = ["keikaku_ui", "keikaku", "assets"]

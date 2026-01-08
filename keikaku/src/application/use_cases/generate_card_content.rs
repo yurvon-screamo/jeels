@@ -1,9 +1,7 @@
 use crate::application::LlmService;
 use crate::domain::dictionary::VOCABULARY_DB;
-use crate::domain::error::JeersError;
-use crate::domain::value_objects::{
-    Answer, CardContent, ExamplePhrase, JapaneseLevel, NativeLanguage,
-};
+use crate::domain::error::KeikakuError;
+use crate::domain::value_objects::{Answer, ExamplePhrase, JapaneseLevel, NativeLanguage};
 use serde::Deserialize;
 
 const MAX_RETRIES: usize = 3;
@@ -19,6 +17,12 @@ struct LlmResponse {
     examples: Vec<ExamplePhrase>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct CardContent {
+    pub answer: Answer,
+    pub examples: Vec<ExamplePhrase>,
+}
+
 impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
     pub fn new(llm_service: &'a L) -> Self {
         Self { llm_service }
@@ -29,7 +33,7 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         question_text: &str,
         native_language: &NativeLanguage,
         japanese_level: &JapaneseLevel,
-    ) -> Result<CardContent, JeersError> {
+    ) -> Result<CardContent, KeikakuError> {
         if let Some(result) = self.try_get_from_dictionary(question_text, native_language)? {
             return Ok(result);
         }
@@ -42,13 +46,13 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         &self,
         question_text: &str,
         native_language: &NativeLanguage,
-    ) -> Result<Option<CardContent>, JeersError> {
+    ) -> Result<Option<CardContent>, KeikakuError> {
         if let Some(translation) = VOCABULARY_DB.get_translation(question_text, native_language) {
             let answer = Answer::new(translation)?;
             if let Some(examples) = VOCABULARY_DB.get_examples(question_text, native_language)
                 && !examples.is_empty()
             {
-                return Ok(Some(CardContent::new(answer, examples)));
+                return Ok(Some(CardContent { answer, examples }));
             }
         }
 
@@ -60,7 +64,7 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         question_text: &str,
         native_language: &NativeLanguage,
         japanese_level: &JapaneseLevel,
-    ) -> Result<CardContent, JeersError> {
+    ) -> Result<CardContent, KeikakuError> {
         let prompt = build_prompt(question_text, native_language, japanese_level);
         let mut last_error = None;
 
@@ -86,7 +90,7 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
             }
         }
 
-        Err(last_error.unwrap_or_else(|| JeersError::LlmError {
+        Err(last_error.unwrap_or_else(|| KeikakuError::LlmError {
             reason: "Failed to generate content after all retries".to_string(),
         }))
     }
@@ -95,11 +99,14 @@ impl<'a, L: LlmService> GenerateCardContentUseCase<'a, L> {
         &self,
         response: &str,
         attempt: usize,
-    ) -> Result<CardContent, JeersError> {
+    ) -> Result<CardContent, KeikakuError> {
         let response_cleaned = clean_json_response(response);
         let llm_response = parse_json_response(&response_cleaned, attempt)?;
         let answer = validate_and_create_answer(&llm_response.translation, attempt)?;
-        Ok(CardContent::new(answer, llm_response.examples))
+        Ok(CardContent {
+            answer,
+            examples: llm_response.examples,
+        })
     }
 }
 
@@ -158,8 +165,8 @@ fn clean_response_text(response: &str) -> String {
     response.trim_matches(['\n', '\r', '.', ' ']).to_string()
 }
 
-fn parse_json_response(response: &str, attempt: usize) -> Result<LlmResponse, JeersError> {
-    serde_json::from_str::<LlmResponse>(response).map_err(|e| JeersError::LlmError {
+fn parse_json_response(response: &str, attempt: usize) -> Result<LlmResponse, KeikakuError> {
+    serde_json::from_str::<LlmResponse>(response).map_err(|e| KeikakuError::LlmError {
         reason: format!(
             "Failed to parse JSON (attempt {}/{}): {}. Response: {}",
             attempt, MAX_RETRIES, e, response
@@ -167,9 +174,9 @@ fn parse_json_response(response: &str, attempt: usize) -> Result<LlmResponse, Je
     })
 }
 
-fn validate_and_create_answer(translation: &str, attempt: usize) -> Result<Answer, JeersError> {
+fn validate_and_create_answer(translation: &str, attempt: usize) -> Result<Answer, KeikakuError> {
     let answer_text = clean_response_text(translation);
-    Answer::new(answer_text).map_err(|e| JeersError::LlmError {
+    Answer::new(answer_text).map_err(|e| KeikakuError::LlmError {
         reason: format!(
             "Invalid answer format (attempt {}/{}): {}",
             attempt, MAX_RETRIES, e
@@ -177,8 +184,8 @@ fn validate_and_create_answer(translation: &str, attempt: usize) -> Result<Answe
     })
 }
 
-fn create_generation_error(attempt: usize, error: &dyn std::fmt::Display) -> JeersError {
-    JeersError::LlmError {
+fn create_generation_error(attempt: usize, error: &dyn std::fmt::Display) -> KeikakuError {
+    KeikakuError::LlmError {
         reason: format!(
             "Failed to generate content (attempt {}/{}): {}",
             attempt, MAX_RETRIES, error

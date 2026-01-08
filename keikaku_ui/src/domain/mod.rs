@@ -9,7 +9,7 @@ mod word_card;
 pub use word_card::WordCard;
 
 mod rating_buttons;
-pub use rating_buttons::{AnswerActionButtons, QuestionActionButtons, Rating};
+pub use rating_buttons::{AnswerActionButtons, Rating};
 
 mod kanji_card;
 pub use kanji_card::KanjiCard;

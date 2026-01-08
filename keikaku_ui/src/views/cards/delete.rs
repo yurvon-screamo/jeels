@@ -2,7 +2,6 @@ use dioxus::prelude::*;
 use dioxus_heroicons::{Icon, solid};
 use dioxus_primitives::toast::{ToastOptions, Toasts};
 use keikaku::application::use_cases::delete_card::DeleteCardUseCase;
-use keikaku::domain::VocabularyCard;
 use ulid::Ulid;
 
 use crate::components::alert_dialog::{
@@ -89,7 +88,7 @@ pub fn delete_card_with_handlers(
     }
 }
 
-async fn delete_card(card_id: String) -> Result<VocabularyCard, String> {
+async fn delete_card(card_id: String) -> Result<(), String> {
     let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;

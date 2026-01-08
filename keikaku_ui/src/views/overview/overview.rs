@@ -1,13 +1,13 @@
 use chrono::{DateTime, Utc};
 use dioxus::prelude::*;
-use keikaku::domain::VocabularyCard;
+use keikaku::domain::knowledge::DailyHistoryItem;
 use keikaku::settings::ApplicationEnvironment;
 use keikaku::{
     application::use_cases::{
         get_user_info::{GetUserInfoUseCase, UserProfile},
-        list_cards::ListCardsUseCase,
+        knowledge_set_cards::KnowledgeSetCardsUseCase,
     },
-    domain::daily_history::DailyHistoryItem,
+    domain::knowledge::StudyCard,
 };
 
 use crate::{
@@ -146,17 +146,17 @@ async fn fetch_profile() -> Result<UserProfile, String> {
         .map_err(to_error)
 }
 
-async fn fetch_cards() -> Result<Vec<VocabularyCard>, String> {
+async fn fetch_cards() -> Result<Vec<StudyCard>, String> {
     let env = ApplicationEnvironment::get();
     let repo = env.get_repository().await.map_err(to_error)?;
     let user_id = ensure_user(env, DEFAULT_USERNAME).await?;
-    ListCardsUseCase::new(repo)
+    KnowledgeSetCardsUseCase::new(repo)
         .execute(user_id)
         .await
         .map_err(to_error)
 }
 
-fn calculate_stats(cards: &Vec<VocabularyCard>) -> OverviewStats {
+fn calculate_stats(cards: &[StudyCard]) -> OverviewStats {
     let total_cards = cards.len();
     let due_cards = cards.iter().filter(|card| card.memory().is_due()).count();
     let new_cards = cards.iter().filter(|card| card.memory().is_new()).count();
@@ -199,9 +199,7 @@ pub struct OverviewStats {
     pub high_difficulty_cards: usize,
 }
 
-fn build_heatmap_data(
-    lesson_history: &[keikaku::domain::daily_history::DailyHistoryItem],
-) -> Vec<HeatmapDataPoint> {
+fn build_heatmap_data(lesson_history: &[DailyHistoryItem]) -> Vec<HeatmapDataPoint> {
     lesson_history
         .iter()
         .map(|item| {

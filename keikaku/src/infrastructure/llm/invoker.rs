@@ -1,5 +1,5 @@
 use crate::application::LlmService;
-use crate::domain::error::JeersError;
+use crate::domain::error::KeikakuError;
 
 use super::{GeminiLlm, OpenAiLlm};
 
@@ -11,9 +11,9 @@ pub enum LlmServiceInvoker {
 
 #[async_trait::async_trait]
 impl LlmService for LlmServiceInvoker {
-    async fn generate_text(&self, question: &str) -> Result<String, JeersError> {
+    async fn generate_text(&self, question: &str) -> Result<String, KeikakuError> {
         match self {
-            LlmServiceInvoker::None => Err(JeersError::InvalidValues {
+            LlmServiceInvoker::None => Err(KeikakuError::InvalidValues {
                 reason: "Please set LLM settings in your profile".to_string(),
             }),
             LlmServiceInvoker::OpenAi(service) => service.generate_text(question).await,
