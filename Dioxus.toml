@@ -10,3 +10,7 @@ title = "Keikaku"
 [web.watcher]
 reload_html = true
 watch_path = ["keikaku_ui", "keikaku", "assets"]
+
+[bundle]
+identifier = "new.uwuwu.keikaku"
+publisher = "yurvon_screamo"
