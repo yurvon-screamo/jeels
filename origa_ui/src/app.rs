@@ -55,6 +55,10 @@ pub fn App() -> impl IntoView {
     // (physical keyboard) they reload the WebView instead of leaking the
     // tauri.localhost origin to the system browser. No-op in the browser.
     crate::hooks::keyboard_shortcuts::install_reload_guard();
+    // Unlock HTMLMediaElement/speechSynthesis autoplay on the first user
+    // gesture so lesson-card audio (auto-played from a gesture-less Effect)
+    // is not blocked. See hooks::audio_unlock.
+    crate::hooks::audio_unlock::install_audio_unlock();
 
     let update_info = RwSignal::new(None::<updater::UpdateInfo>);
     let download_progress = RwSignal::new(None::<f32>);
