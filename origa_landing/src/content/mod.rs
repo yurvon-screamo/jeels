@@ -109,6 +109,7 @@ pub struct Content {
     pub header_download: &'static str,
     pub header_integrations: &'static str,
     pub header_blog: &'static str,
+    pub header_docs: &'static str,
 
     // Blog index page (/blog)
     pub blog_index_meta_title: &'static str,
@@ -118,6 +119,8 @@ pub struct Content {
     pub blog_index_empty: &'static str,
     pub blog_updated_label: &'static str,
     pub breadcrumb_blog: &'static str,
+    pub breadcrumb_docs: &'static str,
+    pub docs_updated_label: &'static str,
 
     // Footer
     pub footer_product: &'static str,

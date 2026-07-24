@@ -76,6 +76,9 @@ pub fn Layout(locale: Locale) -> impl IntoView {
                 <NavLink prefix href="blog" class="landing-header__link">
                     {c.header_blog}
                 </NavLink>
+                <NavLink prefix href="docs" class="landing-header__link">
+                    {c.header_docs}
+                </NavLink>
                 <NavLink prefix href="download" class="landing-header__link">
                     {c.header_download}
                 </NavLink>
@@ -130,6 +133,9 @@ pub fn Layout(locale: Locale) -> impl IntoView {
                 </div>
                 <div>
                     <p class="landing-footer__heading">{c.footer_resources}</p>
+                    <NavLink prefix href="docs" class="landing-footer__link">
+                        {c.header_docs}
+                    </NavLink>
                     <a
                         href="https://github.com/yurvon-screamo/origa"
                         class="landing-footer__link"

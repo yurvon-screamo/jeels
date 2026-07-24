@@ -53,6 +53,8 @@ pub fn App() -> impl IntoView {
                     <Route path=path!("terms") view=TermsPage />
                     <Route path=path!("blog") view=BlogIndexPage />
                     <Route path=path!("blog/:slug") view=BlogPostPage />
+                    <Route path=path!("docs") view=DocsIndexPage />
+                    <Route path=path!("docs/:slug") view=DocsArticlePage />
                 </ParentRoute>
                 <ParentRoute path=path!("ru") view=move || view! { <Layout locale=Locale::Ru /> }>
                     <Route path=path!("") view=HomePage />
@@ -64,6 +66,8 @@ pub fn App() -> impl IntoView {
                     <Route path=path!("terms") view=TermsPage />
                     <Route path=path!("blog") view=BlogIndexPage />
                     <Route path=path!("blog/:slug") view=BlogPostPage />
+                    <Route path=path!("docs") view=DocsIndexPage />
+                    <Route path=path!("docs/:slug") view=DocsArticlePage />
                 </ParentRoute>
                 <ParentRoute path=path!("ko") view=move || view! { <Layout locale=Locale::Ko /> }>
                     <Route path=path!("") view=HomePage />
@@ -75,6 +79,8 @@ pub fn App() -> impl IntoView {
                     <Route path=path!("terms") view=TermsPage />
                     <Route path=path!("blog") view=BlogIndexPage />
                     <Route path=path!("blog/:slug") view=BlogPostPage />
+                    <Route path=path!("docs") view=DocsIndexPage />
+                    <Route path=path!("docs/:slug") view=DocsArticlePage />
                 </ParentRoute>
                 <ParentRoute path=path!("vi") view=move || view! { <Layout locale=Locale::Vi /> }>
                     <Route path=path!("") view=HomePage />
@@ -86,6 +92,8 @@ pub fn App() -> impl IntoView {
                     <Route path=path!("terms") view=TermsPage />
                     <Route path=path!("blog") view=BlogIndexPage />
                     <Route path=path!("blog/:slug") view=BlogPostPage />
+                    <Route path=path!("docs") view=DocsIndexPage />
+                    <Route path=path!("docs/:slug") view=DocsArticlePage />
                 </ParentRoute>
             </Routes>
         </Router>

@@ -125,6 +125,28 @@ Targets: Windows x86_64, Linux x86_64, macOS aarch64. Релиз при push `ma
 - Sans-serif шрифты (только Cormorant Garamond + DM Mono)
 - `border-radius` на основных UI / `box-shadow` с blur (только жёсткие offset-тени)
 
+## Документация лендинга (`/docs/*`)
+
+Раздел `/docs` — markdown-driven (как `content/blog/`), контент в `content/docs/{en,ru}/*.md`,
+2 языка (EN+RU). Landing = единственный LLM-facing surface для Origa (GPTBot/ClaudeBot/PerplexityBot
+не индексируют GitHub для японских запросов), поэтому критична актуальность и точность.
+
+### Tone rules (наследуются от лендинга + дополнения)
+
+- Те же правила, что в `docs/landing-content-plan.md §10`: без pricing, open source, license, BSL,
+  без superlatives, без humor, прямое обращение "you"/"вы".
+- **Без сравнений с конкурентами.** `/compare` уже это закрывает. docs = "как работает + как пользоваться",
+  не "чем лучше".
+- **Без конкретных чисел**, которые могут меняться между релизами: cards/day, FSRS-параметры, размеры
+  корпусов в точных значениях, latency в мс. Качественные описания вместо цифр.
+- Числа разрешены только если они стабильны: JLPT levels N5–N1, форматы файлов (`.apk`, `.deb`),
+  версии моделей.
+
+### Definition of Done (релиз)
+
+Если в релизе меняется behavior фичи, упомянутой в `/docs/*`, контент соответствующей doc-страницы
+обновляется в том же PR. Markdown-файлы коммитятся вместе с кодом.
+
 ## Git
 
 Коммиты на английском. Ветка: `master`. Теги: `v*.*.*` для релизов.

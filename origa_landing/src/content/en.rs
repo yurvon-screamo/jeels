@@ -14,6 +14,7 @@ pub static CONTENT: Content = Content {
     header_download: "Download",
     header_integrations: "Content",
     header_blog: "Blog",
+    header_docs: "Docs",
 
     blog_index_meta_title: "Origa Blog — Japanese Learning Field Notes",
     blog_index_meta_description: "Field guides on learning Japanese: Anki alternatives, app selection, vocabulary, kanji, and study workflows. Written by the Origa team.",
@@ -22,6 +23,8 @@ pub static CONTENT: Content = Content {
     blog_index_empty: "No articles published yet. Check back soon.",
     blog_updated_label: "Updated:",
     breadcrumb_blog: "Blog",
+    breadcrumb_docs: "Docs",
+    docs_updated_label: "Updated:",
 
     footer_product: "Product",
     footer_resources: "Resources",

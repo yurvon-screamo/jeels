@@ -14,6 +14,7 @@ pub static CONTENT: Content = Content {
     header_download: "Tải xuống",
     header_integrations: "Nội dung",
     header_blog: "Blog",
+    header_docs: "Tài liệu",
 
     blog_index_meta_title: "Blog Origa — Ghi chú thực tế về học tiếng Nhật",
     blog_index_meta_description: "Hướng dẫn thực tế về học tiếng Nhật: lựa chọn ứng dụng, thay thế Anki, từ vựng, kanji và quy trình học. Viết bởi đội ngũ Origa.",
@@ -22,6 +23,8 @@ pub static CONTENT: Content = Content {
     blog_index_empty: "Chưa có bài viết. Vui lòng quay lại sau.",
     blog_updated_label: "Cập nhật:",
     breadcrumb_blog: "Blog",
+    breadcrumb_docs: "Tài liệu",
+    docs_updated_label: "Cập nhật:",
 
     footer_product: "Sản phẩm",
     footer_resources: "Tài nguyên",

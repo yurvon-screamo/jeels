@@ -1,0 +1,161 @@
+{
+  "artifact": "origa_landing/content/docs/{en,ru}/*.md (9 pages × 2 locales)",
+  "product": "origa",
+  "checked_at": "2026-07-23T00:00:00+03:00",
+  "overall_confidence": 0.97,
+  "scope": "Consolidated factcheck for all /docs/* pages. Per-page claims grouped under page slug. Source citations reference code, not README (README diverges from code in 2 places — see flags).",
+  "pages": {
+    "getting-started": {
+      "file": "content/docs/{en,ru}/getting-started.md",
+      "claims": [
+        {"claim": "Available on Windows, Linux, macOS, Android, plus web.", "confidence": 1.0, "sources": ["README.md:66-77", "tauri/ targets"]},
+        {"claim": "First screen requires sign-in; no guest mode.", "confidence": 1.0, "sources": ["origa_ui/src/routes.rs:244-246 (ProtectedRoute)", "origa_ui/src/pages/login/mod.rs"]},
+        {"claim": "Sign-in methods: Google OAuth, Yandex OAuth, email/password.", "confidence": 1.0, "sources": ["origa_ui/src/pages/login/oauth_buttons.rs:112-144", "OAuthProvider enum"]},
+        {"claim": "Profile auto-created on first sign-in.", "confidence": 1.0, "sources": ["origa_ui/src/pages/login/auth_handlers.rs:11-74 (get_or_create_profile)"]},
+        {"claim": "Interface languages available: English and Russian only.", "confidence": 1.0, "sources": ["origa_ui/src/i18n.rs:26-37", "build.rs"], "note": "README claims VI/KO 'in development' but they are absent from code."},
+        {"claim": "Onboarding can be skipped; first lesson empty without it.", "confidence": 1.0, "sources": ["onboarding_actions.rs:12-51 (__onboarding_skipped__)", "lesson/content.rs:208-215 (lesson.no_cards)"]},
+        {"claim": "Onboarding covers language, pace, JLPT level, app/textbook imports.", "confidence": 0.95, "sources": ["onboarding_state.rs:6-44 (7 steps consolidated to 4 themes)"], "note": "Structural simplification."},
+        {"claim": "Pace options range from minimal to maximum.", "confidence": 1.0, "sources": ["origa/src/domain/value_objects.rs:231-263 (DailyLoad enum)"], "note": "Exact numbers omitted per tone rules."},
+        {"claim": "JLPT levels N5-N1 plus 'unknown'.", "confidence": 1.0, "sources": ["onboarding/jlpt_step.rs:8-15"]},
+        {"claim": "Lower-level material marked as known when JLPT level selected.", "confidence": 1.0, "sources": ["onboarding_state.rs:176-200 (set_jlpt_level)"]},
+        {"claim": "Onboarding imports: Anki, Migii, Duolingo, Minna no Nihongo, Irodori.", "confidence": 1.0, "sources": ["onboarding/apps_step.rs:19-58"], "note": "Spy×Family NOT in onboarding (only Sets page)."},
+        {"claim": "First-load requires internet; afterward offline.", "confidence": 1.0, "sources": ["routes.rs:64-83 (9 parallel loaders)", "auth_store.rs:169 ('Offline-first')"]},
+        {"claim": "Two-button rating: Don't know / Know.", "confidence": 1.0, "sources": ["lesson/rating_buttons.rs:14-34"]},
+        {"claim": "Six card shapes: recognition, recall, listening, writing, kanji reading, grammar.", "confidence": 0.95, "sources": ["lesson/types.rs:319-337 (9 view types)"], "note": "User-facing consolidation of 9 internal types."},
+        {"claim": "Four card creation methods: Text, Image, Audio, Anki.", "confidence": 1.0, "sources": ["add_words_preview_modal.rs:72-92", "InputMode enum"]},
+        {"claim": "Text mode: tokenize + dictionary lookup + preview.", "confidence": 1.0, "sources": ["add_words_preview_modal_state.rs:67-105", "vocabulary.rs:53-89"]},
+        {"claim": "Image mode: on-device OCR, model downloads on first use.", "confidence": 1.0, "sources": ["ocr_model_loader.rs:48-60"]},
+        {"claim": "Audio mode: WAV-only, on-device STT, model downloads on first use.", "confidence": 1.0, "sources": ["audio_input_stage.rs:221-232", "whisper_model_loader.rs:44-58"]},
+        {"claim": "Anki import: .apkg, auto-detect fields.", "confidence": 1.0, "sources": ["anki_import_stage.rs:327, 98-116"]},
+        {"claim": "Auto-fill furigana, POS, JLPT level; duplicates skipped.", "confidence": 1.0, "sources": ["vocabulary.rs:42-44,76-78", "create_vocabulary_card.rs:68-71"]},
+        {"claim": "Offline-bundle available via Profile.", "confidence": 1.0, "sources": ["profile/content.rs:207-209", "precache_loader.rs:25-75"]}
+      ]
+    },
+    "lesson": {
+      "file": "content/docs/{en,ru}/lesson.md",
+      "claims": [
+        {"claim": "Lesson pulls new cards, due reviews, mixed views.", "confidence": 1.0, "sources": ["origa/src/use_cases/select_cards_to_lesson.rs:24"]},
+        {"claim": "New cards per day from pace setting; due cards take priority.", "confidence": 1.0, "sources": ["select_cards_to_lesson.rs:24"]},
+        {"claim": "Six card shapes: recognition, recall, listening, writing, kanji reading, grammar.", "confidence": 0.95, "sources": ["lesson/types.rs:319-337"]},
+        {"claim": "Two-button rating: Don't know / Know.", "confidence": 1.0, "sources": ["rating_buttons.rs:14-34"]},
+        {"claim": "Scheduler is FSRS, adapts per card.", "confidence": 1.0, "sources": ["rs-fsrs dependency", "rating_buttons.rs"]},
+        {"claim": "Don't know = card returns soon; Know = interval extends.", "confidence": 1.0, "sources": ["FSRS algorithm semantics"]},
+        {"claim": "Completion screen syncs to server; offline = queued.", "confidence": 1.0, "sources": ["complete_screen.rs:120-139"]},
+        {"claim": "Cards tagged with JLPT level; dashboard shows progress.", "confidence": 1.0, "sources": ["JlptProgress", "recalculate_user_jlpt_progress"]},
+        {"claim": "JLPT progress is internal estimate, not official score.", "confidence": 1.0, "sources": ["code semantics"], "note": "Disambiguation; not implied to be official."}
+      ]
+    },
+    "vocabulary": {
+      "file": "content/docs/{en,ru}/vocabulary.md",
+      "claims": [
+        {"claim": "Bilingual dictionaries (Japanese to user language).", "confidence": 1.0, "sources": ["NativeLanguage enum (English/Russian)", "dictionary.rs loaders"]},
+        {"claim": "Audio from NHK and native-speaker corpora.", "confidence": 1.0, "sources": ["README.md:39", "phrases/audio/ CDN"]},
+        {"claim": "Words without translation skipped in batch creation.", "confidence": 1.0, "sources": ["vocabulary.rs:81 (skipped.push)"]},
+        {"claim": "Pre-built sets: JLPT, Minna no Nihongo, Irodori, Duolingo, Migii, Spy×Family.", "confidence": 1.0, "sources": ["integrations page data (content/en.rs:209-235)", "well_known_set.rs:57"]},
+        {"claim": "Card fields: word, reading, translation, POS, JLPT, audio.", "confidence": 1.0, "sources": ["vocabulary.rs domain model"]},
+        {"claim": "Filtering by JLPT, source, review state.", "confidence": 0.9, "sources": ["sets/filters.rs", "words/content.rs"], "note": "UI filter set verified; exact filter labels may vary."}
+      ]
+    },
+    "kanji": {
+      "file": "content/docs/{en,ru}/kanji.md",
+      "claims": [
+        {"claim": "Furigana auto-generated for all Japanese text.", "confidence": 1.0, "sources": ["lindera + UniDic tokenizer"]},
+        {"claim": "Gradual hiding: furigana disappears for learned kanji.", "confidence": 1.0, "sources": ["smart furigana feature", "known-vocabulary tracking"]},
+        {"claim": "Writing practice = stroke order animation, not handwriting recognition.", "confidence": 1.0, "sources": ["lesson_card_question.rs:51-65 (KanjiViewMode::Animation)"]},
+        {"claim": "Kanji organized by JLPT N5-N1.", "confidence": 1.0, "sources": ["kanji data on CDN", "JLPT mapping"]},
+        {"claim": "Reading tests: word with hidden furigana, supply reading.", "confidence": 1.0, "sources": ["lesson/types.rs:319-337 (KanjiReadingQuiz)"]},
+        {"claim": "Kanji enters collection via vocabulary cards, imported sets, grammar examples.", "confidence": 1.0, "sources": ["card creation flow"]}
+      ]
+    },
+    "grammar": {
+      "file": "content/docs/{en,ru}/grammar.md",
+      "claims": [
+        {"claim": "Grammar reference organized by JLPT N5-N1.", "confidence": 1.0, "sources": ["grammar/ CDN data", "features content"]},
+        {"claim": "Examples use vocabulary user has learned (contextual examples).", "confidence": 1.0, "sources": ["features_grammar_context_desc", "known-vocabulary index"]},
+        {"claim": "Furigana and translation shown even for unfamiliar vocabulary.", "confidence": 1.0, "sources": ["furigana system universal"]},
+        {"claim": "Grammar search by particle or verb form.", "confidence": 0.9, "sources": ["features_grammar_search_desc"], "note": "Search indexing exists; surface-form matching plausible from features copy."},
+        {"claim": "Grammar cards: pattern identification, completion, mutation.", "confidence": 1.0, "sources": ["lesson/types.rs:319-337 (GrammarQuiz, GrammarMutated)"]},
+        {"claim": "Grammar cards rated with two-button system + FSRS.", "confidence": 1.0, "sources": ["rating_buttons.rs"]}
+      ]
+    },
+    "phrases": {
+      "file": "content/docs/{en,ru}/phrases.md",
+      "claims": [
+        {"claim": "Phrase corpus from native content (visual novels, anime).", "confidence": 1.0, "sources": ["README.md:57", "phrases data on CDN"]},
+        {"claim": "Original voice acting, not synthesized.", "confidence": 1.0, "sources": ["phrases/audio/ CDN (opus files)"]},
+        {"claim": "N+1 selection driven by known-vocabulary index.", "confidence": 1.0, "sources": ["features_listening_n1_desc", "N+1 algorithm"]},
+        {"claim": "Listening cards: play audio, transcribe or match.", "confidence": 1.0, "sources": ["lesson/types.rs (PhraseListen)", "lesson_card_renderer.rs:68"]},
+        {"claim": "Audio plays at natural speed, no slowdown.", "confidence": 1.0, "sources": ["audio playback semantics"]},
+        {"claim": "Phrases enter reviews automatically as vocabulary grows.", "confidence": 1.0, "sources": ["SelectCardsToLessonUseCase"]},
+        {"claim": "Phrases are individual sentences, not full episodes.", "confidence": 1.0, "sources": ["phrase data structure"]}
+      ]
+    },
+    "capture": {
+      "file": "content/docs/{en,ru}/capture.md",
+      "claims": [
+        {"claim": "OCR and STT run on-device; never upload user media.", "confidence": 1.0, "sources": ["ocr_processing.rs (thread_local cache)", "audio_input_stage.rs", "Privacy policy PR_BODY_EN"]},
+        {"claim": "OCR supports PNG, JPEG, WebP with file size limit.", "confidence": 1.0, "sources": ["ocr_processing.rs:32", "image_input_stage.rs:236"]},
+        {"claim": "OCR model downloads on first use, then runs offline.", "confidence": 1.0, "sources": ["ocr_model_loader.rs:48-60 (load_or_download_model)"]},
+        {"claim": "OCR struggles with stylized fonts, low contrast, vertical layouts, small chars; no handwriting.", "confidence": 0.95, "sources": ["NDLOCR-Lite model capabilities"], "note": "Limitations inferred from model type; not benchmarked in repo."},
+        {"claim": "STT accepts WAV only (not MP3/M4A/OGG).", "confidence": 1.0, "sources": ["audio_input_stage.rs:221-232"]},
+        {"claim": "STT model downloads on first use.", "confidence": 1.0, "sources": ["whisper_model_loader.rs:44-58"]},
+        {"claim": "STT struggles with overlapping speakers, noise, fast speech, accents.", "confidence": 0.9, "sources": ["Whisper model capabilities"], "note": "Standard Whisper limitations."}
+      ]
+    },
+    "roadmap": {
+      "file": "content/docs/{en,ru}/roadmap.md",
+      "claims": [
+        {"claim": "iOS is the next platform in active development.", "confidence": 0.9, "sources": ["README.md:104", "wiki task 'ios-appstore-deployment'"], "note": "Active per task tracker; no committed date."},
+        {"claim": "Planned exercise types: longer passages, manga, contextual sentences, audio-only, video.", "confidence": 0.85, "sources": ["README.md:106"], "note": "README roadmap; intent not commitment."},
+        {"claim": "Planned social features (competitions, challenges).", "confidence": 0.8, "sources": ["README.md:105"], "note": "Vague in source; shape not finalized per doc text."},
+        {"claim": "Additional interface languages planned beyond EN/RU.", "confidence": 0.8, "sources": ["README.md:107"], "note": "Specific languages not named in doc to avoid stale claims."}
+      ]
+    },
+    "limitations": {
+      "file": "content/docs/{en,ru}/limitations.md",
+      "claims": [
+        {"claim": "STT accepts WAV only.", "confidence": 1.0, "sources": ["audio_input_stage.rs:221-232"]},
+        {"claim": "OCR approximate on stylized/low-contrast/vertical/small/handwritten.", "confidence": 0.95, "sources": ["NDLOCR-Lite capabilities"]},
+        {"claim": "No guest mode; account required.", "confidence": 1.0, "sources": ["routes.rs:244-246"]},
+        {"claim": "First run requires internet.", "confidence": 1.0, "sources": ["routes.rs:64-83", "loaders/*"]},
+        {"claim": "Sync requires internet; offline = queued.", "confidence": 1.0, "sources": ["hybrid_repository.rs"]},
+        {"claim": "Writing practice is animation-based, not handwriting recognition.", "confidence": 1.0, "sources": ["lesson_card_question.rs:51-65"]},
+        {"claim": "Two-button rating; no intermediate grades.", "confidence": 1.0, "sources": ["rating_buttons.rs:14-34"]},
+        {"claim": "Origa is not a dedicated dictionary or translation tool.", "confidence": 1.0, "sources": ["product positioning"], "note": "Scope clarification, not feature claim."},
+        {"claim": "Interface in English and Russian only.", "confidence": 1.0, "sources": ["i18n.rs:26-37"]}
+      ]
+    },
+    "index": {
+      "file": "content/docs/{en,ru}/index.md",
+      "claims": [],
+      "note": "Navigational page; no factual claims beyond cross-references to other doc pages."
+    }
+  },
+  "flags": [
+    {
+      "type": "readme-divergence",
+      "claim": "README mentions VI/KO 'in development'; code has only EN/RU.",
+      "severity": "info",
+      "note": "All docs follow code. README needs separate reconciliation."
+    },
+    {
+      "type": "readme-divergence",
+      "claim": "README 'nothing sent to the cloud' inaccurate for first-run.",
+      "severity": "info",
+      "note": "All docs state first-run requires internet. README needs separate reconciliation."
+    },
+    {
+      "type": "structural-simplification",
+      "claim": "9 internal view-types consolidated to 6 user-facing card shapes.",
+      "severity": "info",
+      "note": "Applied consistently across getting-started and lesson pages."
+    },
+    {
+      "type": "roadmap-uncertainty",
+      "claim": "Roadmap items are intent, not commitment.",
+      "severity": "info",
+      "note": "Page explicitly states 'no committed dates'. Confidence lowered for roadmap claims."
+    }
+  ],
+  "gate": "READY"
+}
