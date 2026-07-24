@@ -23,7 +23,7 @@ pub fn LessonCardQuestion(
     view! {
         <div class="text-center">
             <Show when=move || kanji_stored.get_value().is_none()>
-                <div class="mb-2 sm:mb-4">
+                <div class="mb-2 sm:mb-4 lesson-question">
                     <Heading level=HeadingLevel::H2>
                         <Show
                             when=move || is_reversed
