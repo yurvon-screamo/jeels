@@ -91,6 +91,11 @@
     --text-label-sm: 11px;
     --text-body: 14px;
     --text-lg: 18px;
+
+    /* Shared by .heading-h2 and the lesson-question markdown override so the
+       two question-render paths (FuriganaText and MarkdownText) cannot drift
+       apart in size. */
+    --heading-h2-size: clamp(2.25rem, 5vw, 2.75rem);
 }
 
 * {
@@ -2056,6 +2061,19 @@ rt {
     font-size: var(--text-lg);
 }
 
+/* Lesson question block: raise markdown-text to heading-h2 size and rhythm so
+   the MarkdownText question path (reversed cards) matches the FuriganaText
+   path (non-reversed, inherits heading-h2 clamp). Without this the question
+   font-size jumps ~2× between card directions (markdown 18px vs furigana 36px).
+   Scoped to the lesson question wrapper so global .markdown-text/.prose-lg
+   (grammar, vocabulary, landing) stay untouched. Specificity (0,2,0) beats
+   .prose-lg (0,1,0). Shares --heading-h2-size with .heading-h2 to prevent
+   drift between the two render paths. */
+.lesson-question .markdown-text {
+    font-size: var(--heading-h2-size);
+    line-height: 1.2;
+}
+
 .spinner {
     width: 24px;
     height: 24px;
@@ -3134,7 +3152,7 @@ rt {
 .heading-h2 {
     font-family: var(--font-serif);
     font-weight: 400;
-    font-size: clamp(2.25rem, 5vw, 2.75rem);
+    font-size: var(--heading-h2-size);
     line-height: 1.2;
     word-break: break-words;
 }
