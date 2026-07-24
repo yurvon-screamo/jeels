@@ -53,28 +53,30 @@ fn is_iso_date(value: &str) -> bool {
 
 #[test]
 fn lastmod_appears_once_per_url() {
-    // Each <url> element carries exactly one <lastmod>. As of 2026-07-21 the
+    // Each <url> element carries exactly one <lastmod>. As of 2026-07-23 the
     // count is: 7 static page groups × 4 locales (28) + 4 blog index URLs +
-    // 7 articles × 4 locales (28) = 60 <url> entries. The count assertion
-    // catches drift in either direction — a missing locale variant or a
-    // duplicate entry.
+    // 7 articles × 4 locales (28) + docs (2 index + 9 articles × 2 locales = 20)
+    // = 80 <url> entries. The count assertion catches drift in either
+    // direction — a missing locale variant or a duplicate entry.
     let values = lastmod_values(&sitemap_contents());
-    assert_eq!(values.len(), 60, "expected one <lastmod> per <url>");
+    assert_eq!(values.len(), 80, "expected one <lastmod> per <url>");
 }
 
 #[test]
 fn every_url_block_has_full_hreflang_alternate_set() {
-    // Every URL — including blog index and blog articles — now carries the
-    // full 5-entry hreflang set (en/ru/ko/vi + x-default). The previous
-    // `is_blog ? 2 : 5` distinction is gone: every blog article is
-    // translated in all 4 locales, so the alternate set is uniform.
+    // Every URL carries the full hreflang set for its locale coverage:
+    // - Blog and static pages: 5 entries (en/ru/ko/vi + x-default) — all 4
+    //   locales are translated.
+    // - Docs pages: 3 entries (en/ru + x-default) — docs ship in EN and RU
+    //   only; KO/VI serve EN content with noindex and are not in the sitemap.
     let xml = sitemap_contents();
     for block in xml.split("<url>").skip(1) {
         let url_block = block.split("</url>").next().unwrap_or(block);
         let alternate_count = url_block.matches("<xhtml:link rel=\"alternate\"").count();
+        let expected = if url_block.contains("/docs") { 3 } else { 5 };
         assert_eq!(
-            alternate_count, 5,
-            "every <url> must have 5 hreflang alternates (en/ru/ko/vi/x-default); got {alternate_count} in:\n{url_block}"
+            alternate_count, expected,
+            "expected {expected} hreflang alternates for this URL; got {alternate_count} in:\n{url_block}"
         );
     }
 }

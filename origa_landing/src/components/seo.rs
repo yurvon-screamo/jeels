@@ -144,6 +144,45 @@ pub fn article_schema(locale: Locale, post: &crate::blog::BlogPost, canonical_ur
     .to_string()
 }
 
+/// Schema.org `TechArticle` JSON-LD for a documentation page. Mirrors
+/// [`article_schema`] but uses the `TechArticle` type, which is more accurate
+/// for reference/how-to documentation than the news-oriented `Article`.
+/// `datePublished` falls back to `lastmod` when the optional `published`
+/// frontmatter field is absent (same logic as `article_schema`).
+pub fn tech_article_schema(
+    locale: Locale,
+    doc: &crate::docs::DocPage,
+    canonical_url: &str,
+) -> String {
+    let date_published = doc
+        .frontmatter
+        .published
+        .as_deref()
+        .unwrap_or(&doc.frontmatter.lastmod);
+    serde_json::json!({
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": doc.frontmatter.title,
+        "description": doc.frontmatter.meta_description,
+        "inLanguage": locale.as_str(),
+        "datePublished": date_published,
+        "dateModified": doc.frontmatter.lastmod,
+        "mainEntityOfPage": canonical_url,
+        "image": format!("{BASE_URL}/og-image.png"),
+        "author": {
+            "@type": "Organization",
+            "name": "Origa",
+            "url": BASE_URL
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Origa",
+            "logo": format!("{BASE_URL}/favicon.png")
+        }
+    })
+    .to_string()
+}
+
 pub fn learning_resource_schema(locale: Locale) -> String {
     let c = locale.content();
     // `teaches` is localised per locale (schema.org treats it as free text, so
