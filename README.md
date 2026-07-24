@@ -8,7 +8,7 @@
 
 オリガ is a comprehensive app for learning Japanese and focused preparation for the JLPT exam.
 
-Spaced repetition algorithms (FSRS), built-in OCR, text and audio recognition — everything runs locally on your device, with no data sent to the cloud.
+Spaced repetition algorithms (FSRS), built-in OCR, text and audio recognition — AI processing runs locally on your device. An internet connection is needed only for the first sign-in and the initial content download.
 
 ![Origa main dashboard](.media/en.hero.png)
 
@@ -18,8 +18,8 @@ Spaced repetition algorithms (FSRS), built-in OCR, text and audio recognition �
 
 * **Learn from your own content** — you choose what to study. The app adapts to what you already know and what you're reading, watching, or listening to right now.
 * **Smart algorithms** — FSRS spaced repetition system (like Anki) optimizes review intervals for each word.
-* **Privacy** — all AI models and data processing run locally, nothing is sent to the cloud.
-* **Offline-first** — full functionality without internet.
+* **Privacy** — all AI models run locally on your device. Your photos, audio, and study activity are processed on-device and never uploaded.
+* **Offline-first** — full functionality without internet after the initial setup.
 * **Cross-platform** — Web, Windows, Linux, macOS, Android.
 * **Learn in your language** — interface and dictionaries in Russian and English (more languages planned).
 * **JLPT analytics** — track your current level and forecast your progress.
@@ -83,7 +83,7 @@ A web version is also available.
 | Languages | Status |
 | :--- | :--- |
 | **Russian, English** | ✅ Available |
-| **Vietnamese, Korean** | 🚧 In development |
+| **Vietnamese, Korean** | 📋 Planned |
 | **Indonesian, Spanish** | 📋 Planned |
 
 ---
@@ -104,7 +104,7 @@ The project is built on a modern stack that delivers native app performance with
 * Mobile platforms: iOS release.
 * Social features: competitions between users.
 * New exercise types: reading texts, manga, contextual sentences, audio, video.
-* Localization: finalize Vietnamese & Korean, then expand to Indonesian and Spanish.
+* Localization: add Vietnamese, Korean, Indonesian, and Spanish.
 
 ---
 
