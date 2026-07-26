@@ -99,21 +99,16 @@ When('пользователь открывает детали первой гр
 });
 
 Then('отображается страница деталей грамматики', async ({ page }) => {
-    await expect(page.getByTestId("grammar-detail-page")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("grammar-detail-container")).toBeVisible({ timeout: 10_000 });
 });
 
 Then('отображается содержимое деталей грамматики', async ({ page }) => {
-    await expect(page.getByTestId("grammar-detail-page")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId(/breadcrumb/).first()).toBeVisible();
+    await expect(page.getByTestId("grammar-detail-container")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("grammar-detail-breadcrumbs")).toBeVisible();
 });
 
 When('нажимает хлебные крошки', async ({ page }) => {
-    await page.getByTestId(/breadcrumb/).first().click();
-});
-
-Then('отображается кнопа отметки как известное', async ({ page }) => {
-    const card = page.getByTestId("grammar-card-item").first();
-    await expect(card.getByTestId("grammar-card-item-mark-known-btn")).toBeVisible();
+    await page.getByTestId("grammar-detail-breadcrumbs-back").click();
 });
 
 Given('у пользователя есть много грамматических карточек', async ({ page }) => {
@@ -131,29 +126,31 @@ Given('у пользователя есть много грамматическ�
 });
 
 When('нажимает кнопку практики', async ({ page }) => {
-    await page.getByTestId("grammar-detail-practice-btn").click();
+    await page.getByTestId("grammar-detail-actions").scrollIntoViewIfNeeded();
+    const practiceBtn = page.getByTestId("grammar-detail-actions").getByText(/practice|練習/i);
+    await practiceBtn.first().click();
 });
 
 Then('отображается сессия практики с вопросами', async ({ page }) => {
-    await expect(page.getByTestId("practice-question")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-practice-session").or(page.getByTestId(/grammar-practice-option/))).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается вопрос практики', async ({ page }) => {
-    await expect(page.getByTestId("practice-question")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-practice-progress")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображаются варианты ответа практики', async ({ page }) => {
-    await expect(page.getByTestId("practice-option").first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("grammar-practice-option-0")).toBeVisible({ timeout: 10_000 });
 });
 
 When('отвечает на все вопросы практики', async ({ page }) => {
     for (let i = 0; i < 20; i++) {
-        const complete = page.getByTestId("practice-complete");
+        const complete = page.getByTestId("grammar-practice-complete");
         if (await complete.isVisible().catch(() => false)) break;
-        const option = page.getByTestId("practice-option").first();
+        const option = page.getByTestId("grammar-practice-option-0");
         if (await option.isVisible({ timeout: 3_000 }).catch(() => false)) {
             await option.click();
-            const nextBtn = page.getByTestId("practice-next-btn");
+            const nextBtn = page.getByTestId("grammar-practice-next-btn");
             if (await nextBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
                 await nextBtn.click();
             }
@@ -162,5 +159,5 @@ When('отвечает на все вопросы практики', async ({ pa
 });
 
 Then('отображается завершение практики', async ({ page }) => {
-    await expect(page.getByTestId("practice-complete")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-practice-complete")).toBeVisible({ timeout: 15_000 });
 });

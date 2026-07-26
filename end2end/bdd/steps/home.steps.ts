@@ -38,6 +38,10 @@ When('нажимает кнопку начала урока', async ({ page }) =
     await homePage.startLesson();
 });
 
+When('нажимает нижнюю вкладку слов', async ({ page }) => {
+    await page.getByTestId("bottom-tab-tab-words").click();
+});
+
 Then('отображается карточка прогресса JLPT', async ({ page }) => {
     const homePage = new HomePage(page);
     await expect(homePage.jlptProgress).toBeVisible();

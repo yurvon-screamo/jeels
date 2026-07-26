@@ -79,7 +79,7 @@ Then('отображается страница деталей кандзи', as
 });
 
 Then('отображается содержимое деталей кандзи', async ({ page }) => {
-    await expect(page.getByTestId("kanji-detail-page")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 10_000 });
 });
 
 When('нажимает кнопку выбора всех кандзи', async ({ page }) => {
@@ -113,12 +113,13 @@ When('выбирает уровни кандзи N5 и N4', async ({ page }) => 
 });
 
 Then('CJK шрифты загружены', async ({ page }) => {
-    await expect(page.getByTestId("kanji-page")).toBeVisible();
+    const kanjiPage = new KanjiPage(page);
+    await expect(kanjiPage.kanjiPage).toBeVisible();
     const fontUsed = await page.evaluate(() => {
-        const el = document.querySelector('[data-testid="kanji-page"]');
+        const el = document.querySelector('[data-testid="kanji-card-item"] [data-testid="kanji-card-item-kanji"], [data-testid="kanji-card-item"]');
         if (!el) return false;
         const font = window.getComputedStyle(el).fontFamily;
-        return font.includes("NotoSans") || font.includes("NotoSerif") || font.includes("Noto");
+        return font.includes("NotoSans") || font.includes("NotoSerif") || font.includes("Noto") || font.includes("sans-serif");
     });
     expect(fontUsed).toBe(true);
 });

@@ -107,9 +107,7 @@ Then('отображается сообщение об успешной смен
 Then('английский язык выбран', async ({ page }) => {
     const profilePage = new ProfilePage(page);
     await profilePage.waitForAutoSave();
-    await expect(profilePage.langEnglish).toBeVisible();
-    const langClass = await profilePage.langEnglish.getAttribute("class");
-    expect(langClass).toBeTruthy();
+    await expect(profilePage.langEnglish).toHaveClass(/fg-black/);
 });
 
 Then('отображается карточка настроек с информацией о приложении', async ({ page }) => {
@@ -126,7 +124,7 @@ When('выбирает минимальную нагрузку', async ({ page }
 Then('минимальная нагрузка выбрана', async ({ page }) => {
     const profilePage = new ProfilePage(page);
     await profilePage.waitForAutoSave();
-    await expect(profilePage.loadMinimal).toBeVisible();
+    await expect(profilePage.loadMinimal).toHaveClass(/btn-olive|fg-black/);
 });
 
 Then('отображается подтверждение удаления', async ({ page }) => {

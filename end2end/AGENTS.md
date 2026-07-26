@@ -1,6 +1,8 @@
 # AGENTS.md — Origa E2E Tests (`end2end/`)
 
-Playwright E2E tests for Origa. TypeScript + `@playwright/test`.
+Playwright E2E tests for Origa. TypeScript + `@playwright/test` + `playwright-bdd` (Gherkin).
+
+All tests are written as Russian Gherkin `.feature` files in `bdd/features/`, with step definitions in `bdd/steps/` using Page Objects from `pages/`.
 
 ## npm Scripts
 
