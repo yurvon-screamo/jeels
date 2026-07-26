@@ -74,3 +74,8 @@ Then('отображается статистика завершения', async
     const lessonPage = new LessonPage(page);
     await expect(lessonPage.completeStats).toBeVisible();
 });
+
+When('нажимает кнопку возврата на главную с завершения', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await lessonPage.clickHome();
+});

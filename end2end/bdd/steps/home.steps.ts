@@ -51,3 +51,12 @@ Then('отображается приветственная карточка', a
     const homePage = new HomePage(page);
     await expect(homePage.welcomeCard).toBeVisible();
 });
+
+When('раскрывает детали прогресса JLPT', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.jlptProgress.click();
+});
+
+Then('отображаются категории прогресса', async ({ page }) => {
+    await expect(page.getByTestId(/jlpt.*categor/)).toBeVisible({ timeout: 5_000 });
+});

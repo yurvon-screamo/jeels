@@ -86,3 +86,21 @@ When('нажимает кнопку завершения онбординга', 
 When('пользователь пропускает онбординг', async ({ page }) => {
     await skipOnboarding(page);
 });
+
+When('пользователь доходит до шага приложений онбординга', async ({ page }) => {
+    const onboarding = new OnboardingPage(page);
+    await onboarding.goToNextStep();
+    await onboarding.goToNextStep();
+    await page.getByTestId("jlpt-option-n4").click();
+    await onboarding.goToNextStep();
+    await expect(onboarding.appsStep).toBeVisible({ timeout: 10_000 });
+});
+
+When('нажимает кнопку "Назад" в онбординге', async ({ page }) => {
+    const onboarding = new OnboardingPage(page);
+    await onboarding.goToPrevStep();
+});
+
+Then('отображается шаг выбора уровня JLPT', async ({ page }) => {
+    await expect(page.getByTestId("onboarding-jlpt-step")).toBeVisible({ timeout: 10_000 });
+});

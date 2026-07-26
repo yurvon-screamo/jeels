@@ -53,3 +53,20 @@ When('нажимает кнопку возврата с деталей', async (
     const backBtn = page.getByTestId(/detail.*back/).or(page.getByTestId("back-btn")).or(page.getByRole("button", { name: /Back|Назад|戻/ }));
     await backBtn.first().click();
 });
+
+When('удаляет карточку со страницы деталей', async ({ page }) => {
+    const deleteBtn = page.getByTestId(/detail.*delete/).or(page.getByTestId("delete-card-btn"));
+    await deleteBtn.first().click();
+    const confirm = page.getByTestId(/delete.*confirm/);
+    if (await confirm.isVisible().catch(() => false)) {
+        await confirm.click();
+    }
+});
+
+When('пользователь устанавливает мобильный размер экрана', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+});
+
+Then('метрики FSRS скрыты на мобильном устройстве', async ({ page }) => {
+    await expect(page.getByTestId(/fsrs.*metric/)).not.toBeVisible({ timeout: 5_000 });
+});
