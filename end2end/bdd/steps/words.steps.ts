@@ -119,3 +119,8 @@ When('нажимает кнопку перехода к наборам', async (
 Then('страница наборов отображается', async ({ page }) => {
     await expect(page.getByTestId("sets-page")).toBeVisible({ timeout: 15_000 });
 });
+
+When('нажимает кнопку возврата на главную', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.backButton.click();
+});

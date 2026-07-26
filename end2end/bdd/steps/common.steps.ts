@@ -41,3 +41,15 @@ Then('первая карточка отмечена избранной', async 
         .locator('[data-testid*="favorite"]').first();
     await expect(favBtn).toHaveClass(/active|selected|favorited/, { timeout: 5_000 });
 });
+
+// Generic filter + detail steps
+
+When('выбирает фильтр карточек {string}', async ({ page }, filter: string) => {
+    const filterBtn = page.getByTestId(`filter-${filter}`).or(page.getByRole("button", { name: filter }));
+    await filterBtn.first().click();
+});
+
+When('нажимает кнопку возврата с деталей', async ({ page }) => {
+    const backBtn = page.getByTestId(/detail.*back/).or(page.getByTestId("back-btn")).or(page.getByRole("button", { name: /Back|Назад|戻/ }));
+    await backBtn.first().click();
+});
