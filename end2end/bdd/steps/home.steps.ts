@@ -1,0 +1,39 @@
+import { expect } from "@playwright/test";
+import { When, Then } from "../fixtures";
+import { HomePage, GrammarPage } from "../../pages";
+
+When('пользователь открывает главную страницу', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.goto();
+    await expect(homePage.homePage).toBeVisible({ timeout: 15_000 });
+});
+
+Then('главная страница отображается', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await expect(homePage.homePage).toBeVisible();
+});
+
+When('нажимает навигацию к словам', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.sidebarWords.click();
+});
+
+When('нажимает навигацию к грамматике', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.sidebarGrammar.click();
+});
+
+Then('страница грамматики отображается', async ({ page }) => {
+    const grammarPage = new GrammarPage(page);
+    await expect(grammarPage.grammarPage).toBeVisible({ timeout: 15_000 });
+});
+
+Then('отображается кнопка начала урока', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await expect(homePage.lessonButton).toBeVisible();
+});
+
+Then('отображается карточка прогресса JLPT', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await expect(homePage.jlptProgress).toBeVisible();
+});

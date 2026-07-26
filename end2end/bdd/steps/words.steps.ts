@@ -65,3 +65,8 @@ Then('отображается пустое состояние', async ({ page }
     const wordsPage = new WordsPage(page);
     await expect(wordsPage.emptyState).toBeVisible();
 });
+
+Then('страница слов отображается', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.expectWordsVisible();
+});
