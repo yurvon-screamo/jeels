@@ -63,6 +63,25 @@ Then('отображается карточка настроек с информ
     await expect(profilePage.profileSettings).toBeVisible();
 });
 
+When('выбирает минимальную нагрузку', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await profilePage.loadMinimal.click();
+});
+
+Then('минимальная нагрузка выбрана', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await expect(profilePage.loadMinimal).toHaveClass(/selected|active/, { timeout: 10_000 });
+});
+
+Then('отображается подтверждение удаления', async ({ page }) => {
+    await expect(page.getByTestId(/delete.*confirm|confirm.*delete/)).toBeVisible({ timeout: 5_000 });
+});
+
+When('пользователь отменяет удаление аккаунта', async ({ page }) => {
+    const cancelBtn = page.getByTestId(/delete.*cancel|cancel.*delete/);
+    await cancelBtn.click();
+});
+
 When('нажимает кнопку выхода', async ({ page }) => {
     await page.getByTestId("profile-logout").click();
 });

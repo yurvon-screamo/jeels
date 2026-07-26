@@ -81,3 +81,19 @@ Then('кнопка импорта выбранных скрыта', async ({ pag
     const setsPage = new SetsPage(page);
     await expect(setsPage.importSelectedBtn).not.toBeVisible();
 });
+
+When('фильтрует наборы по уровню {string}', async ({ page }, level: string) => {
+    const filterBtn = page.getByTestId(`filter-level-${level}`).or(page.getByRole("button", { name: level }));
+    await filterBtn.first().click();
+});
+
+Then('отображаются наборы уровня {string}', async ({ page }, level: string) => {
+    const setsPage = new SetsPage(page);
+    const count = await setsPage.getSetCardCount();
+    expect(count, `expected sets for level ${level}`).toBeGreaterThan(0);
+});
+
+When('фильтрует наборы по статусу {string}', async ({ page }, status: string) => {
+    const filterBtn = page.getByTestId(`filter-status-${status}`).or(page.getByRole("button", { name: status }));
+    await filterBtn.first().click();
+});
