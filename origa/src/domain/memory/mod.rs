@@ -77,17 +77,17 @@ impl MemoryHistory {
         self.reviews.back().map(|review| review.timestamp())
     }
 
-    /// Карта которая требует повторения
+    /// Карточка которая требует повторения
     pub fn is_due(&self) -> bool {
         !self.is_new() && self.next_review_date() <= Some(&Utc::now())
     }
 
-    /// Карта, изучение которой еще не началось
+    /// Карточка, изучение которой еще не началось
     pub fn is_new(&self) -> bool {
         self.current_state.is_none()
     }
 
-    /// Карта которая имеет высокую сложность
+    /// Карточка которая имеет высокую сложность
     pub fn is_high_difficulty(&self) -> bool {
         self.difficulty()
             .map(|d| d.value() >= HIGH_DIFFICULTY_THRESHOLD)
@@ -98,7 +98,7 @@ impl MemoryHistory {
                 .unwrap_or(false)
     }
 
-    /// Карта которая уже изучена до стабильного уровня
+    /// Карточка которая уже изучена до стабильного уровня
     pub fn is_known_card(&self) -> bool {
         self.stability()
             .map(|stability| stability.value() > KNOWN_CARD_STABILITY_THRESHOLD)
@@ -106,7 +106,7 @@ impl MemoryHistory {
             && !self.is_high_difficulty()
     }
 
-    /// Карта которая еще не была изучена до стабильного уровня, но уже начала изучаться
+    /// Карточка которая еще не была изучена до стабильного уровня, но уже начала изучаться
     pub fn is_in_progress(&self) -> bool {
         !self.is_known_card() && !self.is_high_difficulty() && !self.is_new()
     }

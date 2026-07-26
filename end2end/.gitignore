@@ -7,3 +7,5 @@ dist/
 *.log
 .trailbase.pid
 .cdn.pid
+.features-gen/
+traildepot/

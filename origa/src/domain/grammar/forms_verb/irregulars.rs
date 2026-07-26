@@ -81,7 +81,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_main_view_irregular_suru() {
+    fn main_view_converts_suru_to_shi() {
         assert_eq!(
             get_irregular_form("する", MAIN_VIEW_IRREGULAR),
             Some("し".to_string())
@@ -89,7 +89,7 @@ mod tests {
     }
 
     #[test]
-    fn test_main_view_irregular_kuru() {
+    fn main_view_converts_kuru_to_ki() {
         assert_eq!(
             get_irregular_form("くる", MAIN_VIEW_IRREGULAR),
             Some("き".to_string())
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn test_regular_verb_returns_none() {
+    fn regular_verb_returns_none() {
         assert_eq!(get_irregular_form("食べる", NAI_IRREGULAR), None);
     }
 }

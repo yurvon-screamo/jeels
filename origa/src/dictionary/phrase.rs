@@ -358,21 +358,21 @@ pub fn is_chunk_loaded(chunk_id: u32) -> bool {
 mod tests {
     use super::*;
 
-    fn test_index_json() -> &'static str {
+    fn index_json() -> &'static str {
         r#"{"v":1,"h":"test","total":2,"phrases":[{"i":"01KPJ5S3N1DRFFD236Z4EZ03HJ","t":["hello","world"],"c":0},{"i":"01KPJ5S3N1DRFFD236Z4EZ03HK","t":["goodbye","world"],"c":0}]}"#
     }
 
-    fn test_index_json_with_grammar() -> &'static str {
+    fn index_json_with_grammar() -> &'static str {
         r#"{"v":1,"h":"test","total":1,"phrases":[{"i":"01KPJ5S3N1DRFFD236Z4EZ03HJ","t":["hello","world"],"c":0,"g":["01KPJ5S3N1DRFFD236Z4EZ03HK","01KPJ5S3N1DRFFD236Z4EZ03HM"]}]}"#
     }
 
-    fn test_chunk_json() -> &'static str {
+    fn chunk_json() -> &'static str {
         r#"[{"i":"01KPJ5S3N1DRFFD236Z4EZ03HJ","x":"Hello world","ru":"Привет мир","en":"Hello world"},{"i":"01KPJ5S3N1DRFFD236Z4EZ03HK","x":"Goodbye world","ru":"Прощай мир","en":"Goodbye world"}]"#
     }
 
     #[test]
     fn init_phrase_index_valid_json() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON should parse");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON should parse");
         let entries: Vec<_> = index.iter_entries().collect();
         assert_eq!(entries.len(), 2);
         assert_eq!(index.token_to_phrases.len(), 3);
@@ -386,7 +386,7 @@ mod tests {
 
     #[test]
     fn get_entry_found() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         let id = Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HJ").expect("valid ULID");
         let entry = index.get_entry(&id);
         assert!(entry.is_some());
@@ -395,35 +395,35 @@ mod tests {
 
     #[test]
     fn get_entry_not_found() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         let missing_id = Ulid::new();
         assert!(index.get_entry(&missing_id).is_none());
     }
 
     #[test]
     fn get_phrases_by_token_found() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         let results = index.get_phrases_by_token("world");
         assert_eq!(results.len(), 2);
     }
 
     #[test]
     fn get_phrases_by_token_not_found() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         let results = index.get_phrases_by_token(" nonexistent");
         assert!(results.is_empty());
     }
 
     #[test]
     fn all_ids_returns_all() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         let ids = index.all_ids();
         assert_eq!(ids.len(), 2);
     }
 
     #[test]
     fn index_version_returns_values() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         assert_eq!(index.version, 1);
         assert_eq!(index.hash, "test");
     }
@@ -452,7 +452,7 @@ mod tests {
     #[test]
     fn parse_chunk_json() {
         let raw_list: Vec<DetailRaw> =
-            serde_json::from_str(test_chunk_json()).expect("valid chunk JSON");
+            serde_json::from_str(chunk_json()).expect("valid chunk JSON");
         assert_eq!(raw_list.len(), 2);
         assert_eq!(raw_list[0].text, "Hello world");
         assert_eq!(raw_list[0].translation_ru, Some("Привет мир".to_string()));
@@ -461,7 +461,7 @@ mod tests {
 
     #[test]
     fn grammar_rules_parsed_from_g_field() {
-        let index = PhraseIndex::from_json(test_index_json_with_grammar()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json_with_grammar()).expect("valid JSON");
         let id = Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HJ").expect("valid ULID");
         let entry = index.get_entry(&id).expect("entry should exist");
         assert_eq!(entry.grammar_rules().len(), 2);
@@ -477,7 +477,7 @@ mod tests {
 
     #[test]
     fn grammar_rules_empty_when_g_field_absent() {
-        let index = PhraseIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json()).expect("valid JSON");
         let id = Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HJ").expect("valid ULID");
         let entry = index.get_entry(&id).expect("entry should exist");
         assert!(entry.grammar_rules().is_empty());
@@ -485,7 +485,7 @@ mod tests {
 
     #[test]
     fn grammar_rules_accessor_returns_slice() {
-        let index = PhraseIndex::from_json(test_index_json_with_grammar()).expect("valid JSON");
+        let index = PhraseIndex::from_json(index_json_with_grammar()).expect("valid JSON");
         let id = Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HJ").expect("valid ULID");
         let entry = index.get_entry(&id).expect("entry should exist");
         let rules = entry.grammar_rules();

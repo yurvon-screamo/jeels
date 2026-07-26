@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use tokio::fs;
 
 #[tokio::test]
-async fn test_japanese_ocr_e2e() {
+async fn japanese_ocr_e2e() {
     let _ = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::DEBUG)
         .with_test_writer()

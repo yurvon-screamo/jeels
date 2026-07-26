@@ -191,7 +191,7 @@ mod tests {
 
     // RadicalDatabase::from_json tests
     #[test]
-    fn test_radical_database_from_json_valid() {
+    fn radical_database_from_json_valid() {
         let json = r#"{
             "radicals": {
                 "日": {
@@ -212,21 +212,21 @@ mod tests {
     }
 
     #[test]
-    fn test_radical_database_from_json_multibyte_key() {
+    fn radical_database_from_json_multibyte_key() {
         let json = r#"{"radicals": {"山": {"strokeCount": 3, "kanji": [], "name": "mountain", "description": "Mountain", "jlpt": "N5"}}}"#;
         let db = RadicalDatabase::from_json(json).unwrap();
         assert!(db.get_radical_info(&'山').is_ok());
     }
 
     #[test]
-    fn test_radical_database_from_json_empty() {
+    fn radical_database_from_json_empty() {
         let json = r#"{"radicals": {}}"#;
         let db = RadicalDatabase::from_json(json).unwrap();
         assert!(db.radical_list().is_empty());
     }
 
     #[test]
-    fn test_radical_database_from_json_invalid_json() {
+    fn radical_database_from_json_invalid_json() {
         let json = "not valid json";
         let result = RadicalDatabase::from_json(json);
         assert!(result.is_err());
@@ -234,7 +234,7 @@ mod tests {
 
     // RadicalDatabase::radical_list tests
     #[test]
-    fn test_radical_database_radical_list() {
+    fn radical_database_radical_list() {
         let json = r#"{
             "radicals": {
                 "一": {"strokeCount": 1, "kanji": [], "name": "one", "description": "One", "jlpt": "N5"},
@@ -252,7 +252,7 @@ mod tests {
 
     // RadicalDatabase::known_radicals tests
     #[test]
-    fn test_radical_database_known_radicals() {
+    fn radical_database_known_radicals() {
         let json = r#"{
             "radicals": {
                 "日": {"strokeCount": 4, "kanji": [], "name": "sun", "description": "Sun", "jlpt": "N5"},
@@ -270,7 +270,7 @@ mod tests {
 
     // RadicalDatabase::get_radical_info tests
     #[test]
-    fn test_radical_database_get_radical_info_not_found() {
+    fn radical_database_get_radical_info_not_found() {
         let json = r#"{"radicals": {"日": {"strokeCount": 4, "kanji": [], "name": "sun", "description": "Sun", "jlpt": "N5"}}}"#;
         let db = RadicalDatabase::from_json(json).unwrap();
 
@@ -279,7 +279,7 @@ mod tests {
 
     // RadicalDatabase::get_radical_info all fields tests
     #[test]
-    fn test_radical_database_get_radical_info_all_fields() {
+    fn radical_database_get_radical_info_all_fields() {
         let json = r#"{
             "radicals": {
                 "木": {
@@ -308,7 +308,7 @@ mod tests {
 
     // Tests for public API functions
     #[test]
-    fn test_init_radicals_valid() {
+    fn init_radicals_valid() {
         // Test init_radicals with RadicalDatabase instead of global static to avoid OnceLock issues
         let data = RadicalData {
             radicals_json: r#"{
@@ -325,7 +325,7 @@ mod tests {
     }
 
     #[test]
-    fn test_init_radicals_invalid_json() {
+    fn init_radicals_invalid_json() {
         let data = RadicalData {
             radicals_json: "not valid json".to_string(),
         };
@@ -336,7 +336,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_radical_info_after_init() {
+    fn get_radical_info_after_init() {
         // Test using RadicalDatabase directly to avoid OnceLock issues
         let json = r#"{
             "radicals": {
@@ -354,7 +354,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_radical_info_not_loaded() {
+    fn get_radical_info_not_loaded() {
         // Test with a fresh RadicalDatabase instead of global static to avoid OnceLock issues
         let json = r#"{"radicals": {"日": {"strokeCount": 4, "kanji": [], "name": "sun", "description": "Sun", "jlpt": "N5"}}}"#;
         let db = RadicalDatabase::from_json(json).unwrap();
@@ -367,7 +367,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_radical_list_not_loaded_returns_empty() {
+    fn get_radical_list_not_loaded_returns_empty() {
         // Test that get_radical_list returns empty when dictionary is not loaded
         // Since we can't reset the global dictionary, we test the behavior with RadicalDatabase instead
         let json = r#"{"radicals": {}}"#;
@@ -376,7 +376,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_radical_list() {
+    fn get_radical_list() {
         // Test with a fresh RadicalDatabase instead of global static to avoid OnceLock issues
         let json = r#"{
             "radicals": {
@@ -400,7 +400,7 @@ mod tests {
     #[case('日', 4, "sun")]
     #[case('月', 4, "moon")]
     #[case('山', 3, "mountain")]
-    fn test_radical_database_stroke_count_and_name(
+    fn radical_database_stroke_count_and_name(
         #[case] radical_char: char,
         #[case] expected_stroke_count: u32,
         #[case] expected_name: &str,
@@ -427,7 +427,7 @@ mod tests {
     #[case("N3", JapaneseLevel::N3)]
     #[case("N2", JapaneseLevel::N2)]
     #[case("N1", JapaneseLevel::N1)]
-    fn test_radical_database_jlpt_parsing(
+    fn radical_database_jlpt_parsing(
         #[case] jlpt_str: &str,
         #[case] expected_level: JapaneseLevel,
     ) {
@@ -448,7 +448,7 @@ mod tests {
 
     #[rstest]
     #[case("invalid", JapaneseLevel::N1)] // defaults to N1
-    fn test_radical_database_jlpt_invalid_defaults(
+    fn radical_database_jlpt_invalid_defaults(
         #[case] jlpt_str: &str,
         #[case] expected_level: JapaneseLevel,
     ) {
@@ -469,7 +469,7 @@ mod tests {
 
     // Test kanji parsing from strings
     #[test]
-    fn test_radical_database_kanji_from_string() {
+    fn radical_database_kanji_from_string() {
         let json = r#"{
             "radicals": {
                 "火": {
@@ -493,7 +493,7 @@ mod tests {
 
     // Test multiple radicals in kanji list (edge case)
     #[test]
-    fn test_radical_database_multichar_kanji() {
+    fn radical_database_multichar_kanji() {
         let json = r#"{
             "radicals": {
                 "土": {
@@ -515,7 +515,7 @@ mod tests {
 
     // RadicalDatabase equality and cloning tests
     #[test]
-    fn test_radical_info_clone() {
+    fn radical_info_clone() {
         let json = r#"{
             "radicals": {
                 "日": {"strokeCount": 4, "kanji": [], "name": "sun", "description": "Sun", "jlpt": "N5"}
@@ -532,7 +532,7 @@ mod tests {
 
     // Test error messages
     #[test]
-    fn test_radical_database_error_message() {
+    fn radical_database_error_message() {
         let json = r#"{"radicals": {"日": {"strokeCount": 4, "kanji": [], "name": "sun", "description": "Sun", "jlpt": "N5"}}}"#;
         let db = RadicalDatabase::from_json(json).unwrap();
 

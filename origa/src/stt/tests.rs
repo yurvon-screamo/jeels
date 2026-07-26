@@ -1,40 +1,40 @@
 use super::common::strip_trailing_repeats;
 
 #[test]
-fn test_strip_trailing_repeats_no_repeat() {
+fn strip_trailing_repeats_no_repeat() {
     assert_eq!(strip_trailing_repeats("こんにちは"), "こんにちは");
 }
 
 #[test]
-fn test_strip_trailing_repeats_double_char() {
+fn strip_trailing_repeats_double_char() {
     assert_eq!(strip_trailing_repeats("hellooo"), "hell");
 }
 
 #[test]
-fn test_strip_trailing_repeats_triple_char() {
+fn strip_trailing_repeats_triple_char() {
     assert_eq!(strip_trailing_repeats("aaaa"), "");
 }
 
 #[test]
-fn test_strip_trailing_repeats_short() {
+fn strip_trailing_repeats_short() {
     assert_eq!(strip_trailing_repeats("ab"), "ab");
     assert_eq!(strip_trailing_repeats("a"), "a");
     assert_eq!(strip_trailing_repeats(""), "");
 }
 
 #[test]
-fn test_strip_trailing_repeats_different_last_chars() {
+fn strip_trailing_repeats_different_last_chars() {
     assert_eq!(strip_trailing_repeats("abc"), "abc");
 }
 
 #[test]
-fn test_strip_trailing_repeats_multiple_same() {
+fn strip_trailing_repeats_multiple_same() {
     assert_eq!(strip_trailing_repeats("ですですです"), "ですですです");
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
-fn test_whisper_transcriber_loads_models() {
+fn whisper_transcriber_loads_models() {
     let model_dir = std::path::Path::new("tauri/resources/whisper");
     if !model_dir.join("encoder_model.onnx").exists() {
         println!("Skipping: whisper models not found at {:?}", model_dir);
@@ -51,7 +51,7 @@ fn test_whisper_transcriber_loads_models() {
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
-fn test_whisper_transcribe_audio() {
+fn whisper_transcribe_audio() {
     let model_dir = std::path::Path::new("tauri/resources/whisper");
     let wav_path = std::path::Path::new("standard_sample1.wav");
 
@@ -71,7 +71,7 @@ fn test_whisper_transcribe_audio() {
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
-fn test_audio_load_wav_sample() {
+fn audio_load_wav_sample() {
     let wav_path = std::path::Path::new("standard_sample1.wav");
     if !wav_path.exists() {
         println!("Skipping: test WAV not found at {:?}", wav_path);

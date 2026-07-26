@@ -213,6 +213,7 @@ fn schedule_next_review(
 mod tests {
     use super::*;
     use chrono::Utc;
+    use rstest::rstest;
 
     fn engine_for(mode: RateMode, enable_fuzz: bool) -> FSRS {
         let mut parameters = SrsConfig::for_mode(mode).to_parameters();
@@ -239,13 +240,21 @@ mod tests {
         assert_eq!(result.memory_state.card_state(), CardState::Learning);
     }
 
-    #[test]
-    fn rate_memory_good_returns_future_next_review_date() {
+    #[rstest]
+    #[case(RateMode::StandardLesson)]
+    #[case(RateMode::PhraseReview)]
+    #[case(RateMode::GrammarReview)]
+    #[case(RateMode::KanjiReview)]
+    fn good_on_new_card_returns_positive_interval(#[case] mode: RateMode) {
         let memory_history = MemoryHistory::new();
 
-        let result = rate_memory(RateMode::StandardLesson, Rating::Good, &memory_history).unwrap();
+        let result = rate_memory(mode, Rating::Good, &memory_history).unwrap();
 
-        assert!(result.interval > Duration::zero());
+        assert!(
+            result.interval > Duration::zero(),
+            "Good rating in {mode:?} mode should produce a positive interval, got {:?}",
+            result.interval
+        );
     }
 
     #[test]
@@ -263,15 +272,6 @@ mod tests {
     }
 
     #[test]
-    fn phrase_review_good_returns_positive_interval() {
-        let memory_history = MemoryHistory::new();
-
-        let result = rate_memory(RateMode::PhraseReview, Rating::Good, &memory_history).unwrap();
-
-        assert!(result.interval > Duration::zero());
-    }
-
-    #[test]
     fn phrase_review_easy_gives_longer_interval_than_standard() {
         let memory_history = MemoryHistory::new();
 
@@ -282,40 +282,20 @@ mod tests {
         assert!(phrase.interval > standard.interval);
     }
 
-    #[test]
-    fn phrase_review_serde_roundtrip() {
-        let original = RateMode::PhraseReview;
-        let json = serde_json::to_string(&original).unwrap();
-        assert_eq!(json, "\"PhraseReview\"");
+    #[rstest]
+    #[case::phrase_review(RateMode::PhraseReview, "PhraseReview")]
+    #[case::onboarding_scoring(RateMode::OnboardingScoring, "OnboardingScoring")]
+    #[case::grammar_review(RateMode::GrammarReview, "GrammarReview")]
+    #[case::kanji_review(RateMode::KanjiReview, "KanjiReview")]
+    #[case::short_term_backcompat(RateMode::ShortTerm, "FixationLesson")]
+    fn rate_mode_serde_roundtrip_preserves_wire_format(
+        #[case] mode: RateMode,
+        #[case] expected_json: &str,
+    ) {
+        let json = serde_json::to_string(&mode).unwrap();
+        assert_eq!(json, format!("\"{expected_json}\""));
         let deserialized: RateMode = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, original);
-    }
-
-    #[test]
-    fn onboarding_scoring_serde_roundtrip() {
-        let original = RateMode::OnboardingScoring;
-        let json = serde_json::to_string(&original).unwrap();
-        assert_eq!(json, "\"OnboardingScoring\"");
-        let deserialized: RateMode = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, original);
-    }
-
-    #[test]
-    fn grammar_review_serde_roundtrip() {
-        let original = RateMode::GrammarReview;
-        let json = serde_json::to_string(&original).unwrap();
-        assert_eq!(json, "\"GrammarReview\"");
-        let deserialized: RateMode = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, original);
-    }
-
-    #[test]
-    fn kanji_review_serde_roundtrip() {
-        let original = RateMode::KanjiReview;
-        let json = serde_json::to_string(&original).unwrap();
-        assert_eq!(json, "\"KanjiReview\"");
-        let deserialized: RateMode = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized, original);
+        assert_eq!(deserialized, mode);
     }
 
     #[test]
@@ -342,24 +322,6 @@ mod tests {
             "New card with Again should have interval <= 1 minute, got {:?}",
             result.interval
         );
-    }
-
-    #[test]
-    fn grammar_review_good_returns_positive_interval() {
-        let memory_history = MemoryHistory::new();
-
-        let result = rate_memory(RateMode::GrammarReview, Rating::Good, &memory_history).unwrap();
-
-        assert!(result.interval > Duration::zero());
-    }
-
-    #[test]
-    fn kanji_review_good_returns_positive_interval() {
-        let memory_history = MemoryHistory::new();
-
-        let result = rate_memory(RateMode::KanjiReview, Rating::Good, &memory_history).unwrap();
-
-        assert!(result.interval > Duration::zero());
     }
 
     #[test]

@@ -17,6 +17,29 @@ async fn create_repo() -> InMemoryUserRepository {
     ))
 }
 
+fn user_with_card(word: &str) -> User {
+    let mut u = User::new(
+        "test@example.com".to_string(),
+        NativeLanguage::Russian,
+        None,
+    );
+    u.create_card(create_test_vocab_card(word)).unwrap();
+    u
+}
+
+async fn first_card_id(repo: &InMemoryUserRepository) -> Ulid {
+    *repo
+        .get_current_user()
+        .await
+        .unwrap()
+        .unwrap()
+        .knowledge_set()
+        .study_cards()
+        .keys()
+        .next()
+        .expect("repo must contain at least one card")
+}
+
 #[tokio::test]
 async fn well_known_set_minna_nihongo_serialization() {
     let meta = WellKnownSetMeta {
@@ -35,129 +58,89 @@ async fn well_known_set_minna_nihongo_serialization() {
 }
 
 #[tokio::test]
-async fn toggle_favorite_sets_favorite_true() {
-    let user = {
-        let mut u = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-        let card = create_test_vocab_card("word");
-        u.create_card(card).unwrap();
-        u
-    };
-    let repo = InMemoryUserRepository::with_user(user);
-
-    let card_id = *repo
-        .get_current_user()
-        .await
-        .unwrap()
-        .unwrap()
-        .knowledge_set()
-        .study_cards()
-        .keys()
-        .next()
-        .unwrap();
+async fn toggle_favorite_on_card_marks_it_as_favorite() {
+    // Arrange
+    let repo = InMemoryUserRepository::with_user(user_with_card("word"));
+    let card_id = first_card_id(&repo).await;
     let use_case = ToggleFavoriteUseCase::new(&repo);
 
+    // Act
     let is_favorite = use_case.execute(card_id).await.unwrap();
 
+    // Assert
     assert!(is_favorite);
 }
 
 #[tokio::test]
-async fn toggle_favorite_toggles_flag() {
-    let user = {
-        let mut u = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-        let card = create_test_vocab_card("word");
-        u.create_card(card).unwrap();
-        u
-    };
-    let repo = InMemoryUserRepository::with_user(user);
-    let card_id = *repo
-        .get_current_user()
-        .await
-        .unwrap()
-        .unwrap()
-        .knowledge_set()
-        .study_cards()
-        .keys()
-        .next()
-        .unwrap();
+async fn toggle_favorite_twice_returns_to_original_state() {
+    // Arrange
+    let repo = InMemoryUserRepository::with_user(user_with_card("word"));
+    let card_id = first_card_id(&repo).await;
     let use_case = ToggleFavoriteUseCase::new(&repo);
 
+    // Act
     let first = use_case.execute(card_id).await.unwrap();
     let second = use_case.execute(card_id).await.unwrap();
 
-    assert!(first);
-    assert!(!second);
+    // Assert
+    assert!(first, "first toggle turns favorite on");
+    assert!(!second, "second toggle turns favorite off");
 }
 
 #[tokio::test]
 async fn delete_card_removes_from_knowledge_set() {
-    let user = {
-        let mut u = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-        let card = create_test_vocab_card("word");
-        u.create_card(card).unwrap();
-        u
-    };
-    let repo = InMemoryUserRepository::with_user(user);
-    let card_id = *repo
-        .get_current_user()
-        .await
-        .unwrap()
-        .unwrap()
-        .knowledge_set()
-        .study_cards()
-        .keys()
-        .next()
-        .unwrap();
+    // Arrange
+    let repo = InMemoryUserRepository::with_user(user_with_card("word"));
+    let card_id = first_card_id(&repo).await;
     let use_case = DeleteCardUseCase::new(&repo);
 
+    // Act
     use_case.execute(card_id).await.unwrap();
 
+    // Assert
     let updated = repo.get_current_user().await.unwrap().unwrap();
     assert!(updated.knowledge_set().study_cards().is_empty());
 }
 
 #[tokio::test]
 async fn delete_nonexistent_card_returns_error() {
+    // Arrange
     let repo = create_repo().await;
     let use_case = DeleteCardUseCase::new(&repo);
     let non_existent_card_id = Ulid::new();
 
+    // Act
     let result = use_case.execute(non_existent_card_id).await;
 
+    // Assert
     assert!(matches!(result, Err(OrigaError::CardNotFound { .. })));
 }
 
 #[tokio::test]
 async fn toggle_favorite_nonexistent_card_returns_error() {
+    // Arrange
     let repo = create_repo().await;
     let use_case = ToggleFavoriteUseCase::new(&repo);
     let non_existent_card_id = Ulid::new();
 
+    // Act
     let result = use_case.execute(non_existent_card_id).await;
 
+    // Assert
     assert!(matches!(result, Err(OrigaError::CardNotFound { .. })));
 }
 
 #[tokio::test]
 async fn create_vocabulary_card_empty_text_returns_empty_result() {
+    // Arrange
     init_real_dictionaries();
     let repo = create_repo().await;
     let use_case = CreateVocabularyCardUseCase::new(&repo);
 
+    // Act
     let result = use_case.execute("".to_string()).await.unwrap();
 
+    // Assert
     assert!(result.created_cards.is_empty());
     assert!(result.skipped_no_translation.is_empty());
     assert!(result.skipped_duplicates.is_empty());
@@ -165,54 +148,44 @@ async fn create_vocabulary_card_empty_text_returns_empty_result() {
 
 #[tokio::test]
 async fn create_vocabulary_card_whitespace_only_returns_empty_result() {
+    // Arrange
     init_real_dictionaries();
     let repo = create_repo().await;
     let use_case = CreateVocabularyCardUseCase::new(&repo);
 
+    // Act
     let result = use_case.execute("   ".to_string()).await.unwrap();
 
+    // Assert
     assert!(result.created_cards.is_empty());
 }
 
 #[tokio::test]
 async fn create_kanji_card_duplicate_returns_error() {
+    // Arrange
     init_real_dictionaries();
     let repo = create_repo().await;
     let use_case = CreateKanjiCardUseCase::new(&repo);
 
+    // Act
     use_case.execute(vec!["人".to_string()]).await.unwrap();
     let result = use_case.execute(vec!["人".to_string()]).await;
 
+    // Assert
     assert!(matches!(result, Err(OrigaError::DuplicateCard { .. })));
 }
 
 #[tokio::test]
 async fn delete_card_already_deleted_returns_error() {
-    let user = {
-        let mut u = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-        let card = create_test_vocab_card("word");
-        u.create_card(card).unwrap();
-        u
-    };
-    let repo = InMemoryUserRepository::with_user(user);
-    let card_id = *repo
-        .get_current_user()
-        .await
-        .unwrap()
-        .unwrap()
-        .knowledge_set()
-        .study_cards()
-        .keys()
-        .next()
-        .unwrap();
+    // Arrange
+    let repo = InMemoryUserRepository::with_user(user_with_card("word"));
+    let card_id = first_card_id(&repo).await;
     let use_case = DeleteCardUseCase::new(&repo);
 
+    // Act
     use_case.execute(card_id).await.unwrap();
     let result = use_case.execute(card_id).await;
 
+    // Assert
     assert!(matches!(result, Err(OrigaError::CardNotFound { .. })));
 }
