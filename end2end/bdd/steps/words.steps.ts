@@ -124,3 +124,26 @@ When('нажимает кнопку возврата на главную', async
     const wordsPage = new WordsPage(page);
     await wordsPage.backButton.click();
 });
+
+When('переключает на вкладку Anki', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.switchToAnkiTab();
+});
+
+Then('отображается зона перетаскивания файлов Anki', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await expect(wordsPage.ankiDropZone).toBeVisible({ timeout: 10_000 });
+});
+
+When('загружает неверный файл Anki', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.ankiFileInput.setInputFiles({
+        name: "invalid.txt",
+        mimeType: "text/plain",
+        buffer: Buffer.from("not an anki file"),
+    });
+});
+
+Then('отображается ошибка импорта Anki', async ({ page }) => {
+    await expect(page.getByTestId(/anki.*error|error.*anki/)).toBeVisible({ timeout: 15_000 });
+});
