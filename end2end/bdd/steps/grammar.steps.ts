@@ -42,6 +42,16 @@ When('нажимает кнопку выбора всех правил', async (
     await grammarPage.drawerSelectAllBtn.click();
 });
 
+When('нажимает хлебные крошки', async ({ page }) => {
+    await page.getByTestId(/breadcrumb/).first().click();
+});
+
+Then('отображается кнопка отметки как известное', async ({ page }) => {
+    const markBtn = page.locator('[data-testid*="card-item"]').first()
+        .locator('[data-testid*="mark-as-known"]').first();
+    await expect(markBtn).toBeVisible();
+});
+
 Then('грамматическая карточка отображается в сетке', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
     await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });

@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
-import { OnboardingPage } from "../../pages";
+import { OnboardingPage, PhrasesPage } from "../../pages";
 import { skipOnboarding } from "../../helpers/navigation";
 
 Given('новый пользователь', async ({ page }) => {
@@ -69,4 +69,20 @@ When('пользователь устанавливает мобильный р�
 
 Then('метрики FSRS скрыты на мобильном устройстве', async ({ page }) => {
     await expect(page.getByTestId(/fsrs.*metric/)).not.toBeVisible({ timeout: 5_000 });
+});
+
+Then('кнопка отметки скрыта для первой карточки', async ({ page }) => {
+    const markBtn = page.locator('[data-testid*="card-item"]').first()
+        .locator('[data-testid*="mark-as-known"]').first();
+    await expect(markBtn).not.toBeVisible({ timeout: 5_000 });
+});
+
+When('отмечает первую фразу как известную', async ({ page }) => {
+    await page.locator('[data-testid*="card-item"]').first()
+        .locator('[data-testid*="mark-as-known"]').first().click();
+});
+
+When('отменяет удаление первой фразы', async ({ page }) => {
+    const phrasesPage = new PhrasesPage(page);
+    await phrasesPage.deleteCancelBtn.click();
 });

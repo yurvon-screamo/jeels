@@ -79,3 +79,17 @@ When('нажимает кнопку возврата на главную с за
     const lessonPage = new LessonPage(page);
     await lessonPage.clickHome();
 });
+
+When('нажимает кнопку следующего урока', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await lessonPage.clickNextLesson();
+    await lessonPage.lessonLoading.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
+    await lessonPage.lessonLoading.waitFor({ state: "hidden", timeout: 30_000 }).catch(() => {});
+});
+
+Then('начинается новый урок или ошибка', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    const hasContent = await lessonPage.lessonContent.isVisible({ timeout: 5_000 }).catch(() => false);
+    const hasError = await lessonPage.lessonError.isVisible({ timeout: 5_000 }).catch(() => false);
+    expect(hasContent || hasError).toBe(true);
+});

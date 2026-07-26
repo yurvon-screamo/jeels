@@ -67,3 +67,7 @@ Then('приветственная карточка содержит имя по
     const text = await homePage.welcomeCard.textContent();
     expect(text?.trim().length ?? 0).toBeGreaterThan(0);
 });
+
+Then('отображается график активности', async ({ page }) => {
+    await expect(page.getByTestId(/activity.*chart|chart.*activity/)).toBeVisible({ timeout: 10_000 });
+});

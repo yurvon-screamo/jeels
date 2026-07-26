@@ -30,6 +30,11 @@ When('подтверждает добавление кандзи', async ({ page
     await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
 });
 
+When('нажимает кнопку выбора всех кандзи', async ({ page }) => {
+    const kanjiPage = new KanjiPage(page);
+    await kanjiPage.drawerSelectAllBtn.click();
+});
+
 Then('кандзи отображается в сетке', async ({ page }) => {
     const kanjiPage = new KanjiPage(page);
     await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
