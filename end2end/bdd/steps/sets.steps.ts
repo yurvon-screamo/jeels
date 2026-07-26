@@ -45,3 +45,39 @@ Then('ни один набор не импортирован', async ({ page }) 
     const setsPage = new SetsPage(page);
     expect(await setsPage.getImportedCardCount()).toBe(0);
 });
+
+When('ищет наборы {string}', async ({ page }, query: string) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.searchSets(query);
+    await page.waitForTimeout(500);
+});
+
+Then('список наборов пуст', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getSetCardCount()).toBe(0);
+});
+
+When('выбирает первый набор', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.selectSetCheckbox(0);
+});
+
+When('выбирает второй набор', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.selectSetCheckbox(1);
+});
+
+Then('отображается кнопка импорта выбранных', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.importSelectedBtn).toBeVisible();
+});
+
+When('отменяет выбор наборов', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.cancelSelection();
+});
+
+Then('кнопка импорта выбранных скрыта', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.importSelectedBtn).not.toBeVisible();
+});

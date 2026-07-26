@@ -38,3 +38,39 @@ Then('отображается экран завершения урока', asyn
     const lessonPage = new LessonPage(page);
     await expect(lessonPage.completeScreen).toBeVisible({ timeout: 15_000 });
 });
+
+When('нажимает кнопку показа ответа', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await lessonPage.showAnswer();
+});
+
+Then('отображаются кнопки оценки', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.ratingAgain).toBeVisible();
+    await expect(lessonPage.ratingGood).toBeVisible();
+});
+
+When('нажимает кнопку возврата с урока', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await lessonPage.clickBack();
+});
+
+Then('отображается текст прогресса урока', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.progressText).toBeVisible();
+});
+
+When('нажимает кнопку звука', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await lessonPage.toggleMute();
+});
+
+Then('звук переключён', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.muteButton).toHaveAttribute("data-muted", "true");
+});
+
+Then('отображается статистика завершения', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.completeStats).toBeVisible();
+});

@@ -70,3 +70,34 @@ Then('страница слов отображается', async ({ page }) => {
     const wordsPage = new WordsPage(page);
     await wordsPage.expectWordsVisible();
 });
+
+When('пользователь ищет слово {string}', async ({ page }, query: string) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.searchInput.fill(query);
+    await page.waitForTimeout(500);
+});
+
+Then('сетка слов пуста', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await expect(wordsPage.wordsGrid).not.toBeVisible({ timeout: 10_000 });
+});
+
+When('выбирает фильтр слов {string}', async ({ page }, filter: string) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.selectFilter(filter as never);
+});
+
+When('пользователь отмечает первое слово как известное', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.markCardAsKnownByIndex(0);
+});
+
+When('пользователь нажимает кнопку избранного первого слова', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.toggleFavoriteByIndex(0);
+});
+
+Then('первое слово отмечено как избранное', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    expect(await wordsPage.isFavorited(0)).toBe(true);
+});
