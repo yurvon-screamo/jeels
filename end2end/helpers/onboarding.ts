@@ -19,8 +19,7 @@ export async function waitForScoringReady(page: Page, timeout = 30_000): Promise
  *
  * Returns `true` if scoring step was reached and is ready, `false` if redirected to /home.
  *
- * NOTE: Extracted from onboarding.spec.ts. The local copy in the spec file
- * was removed; both spec and BDD steps import from here.
+ * NOTE: Extracted from onboarding tests. Both spec and BDD steps import from here.
  */
 export async function completeOnboardingToScoring(page: Page): Promise<boolean> {
     await page.goto("/");

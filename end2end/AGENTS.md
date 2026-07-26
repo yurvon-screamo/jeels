@@ -30,7 +30,8 @@ end2end/
 ├── global-teardown.ts                     # Kills TrailBase process
 ├── playwright.config.ts                   # Playwright config + webServer definitions
 ├── pages/ {base,login,...}.page.ts → index.ts
-├── tests/                                 # *.spec.ts
+├── tests/tauri/                          # Tauri desktop setup
+├── bdd/                                  # BDD tests (Gherkin)
 ├── fixtures/                              # Auth, onboarding, test data
 └── helpers/                               # Navigation, auth, HTTP, cleanup
 ```
@@ -96,8 +97,8 @@ Complex multi-step user journeys can be described in Russian Gherkin `.feature` 
 
 ### When to use Gherkin vs native Playwright
 
-- **Gherkin**: multi-step flows spanning multiple pages (onboarding, lesson lifecycle, sync). The `.feature` file is a separable spec that can be reviewed before implementation.
-- **Native Playwright** (`.spec.ts`): single-page tests, DOM/CSS assertions, technical checks. Keep using `testWithFreshUser` + Page Objects.
+- **Gherkin** (`.feature`): all e2e tests. The `.feature` file is a separable spec that can be reviewed before implementation.
+- **Technical checks** (Tauri desktop, etc.): native Playwright `.spec.ts` if needed for non-web flows.
 
 ### Pipeline
 
@@ -117,7 +118,7 @@ Complex multi-step user journeys can be described in Russian Gherkin `.feature` 
 - **When = action, Then = assertion.** Don't hide assertions in When steps. The `.feature` reader sees what's verified in the Then line.
 - **Migration fidelity.** When converting `.spec.ts` → `.feature`, ALL original assertions must be preserved. Self-check against source.
 - **Dead step detection.** After removing a step from `.feature`, grep for unconsumed definitions in `bdd/steps/`. `bddgen`/ESLint do NOT catch orphans.
-- **Shared helpers.** Reusable test logic lives in `helpers/`. Both `.spec.ts` and `bdd/steps/*.ts` import from there — single source of truth.
+- **Shared helpers.** Reusable test logic lives in `helpers/`. `bdd/steps/*.ts` import from there — single source of truth.
 
 ## Rules
 
