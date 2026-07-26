@@ -101,3 +101,21 @@ Then('первое слово отмечено как избранное', async
     const wordsPage = new WordsPage(page);
     expect(await wordsPage.isFavorited(0)).toBe(true);
 });
+
+When('открывает модальное окно добавления слов', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.openAddModal();
+});
+
+Then('отображается вкладка Anki', async ({ page }) => {
+    await expect(page.getByTestId("drawer-tab-anki").or(page.getByText("Anki"))).toBeVisible({ timeout: 10_000 });
+});
+
+When('нажимает кнопку перехода к наборам', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.clickSets();
+});
+
+Then('страница наборов отображается', async ({ page }) => {
+    await expect(page.getByTestId("sets-page")).toBeVisible({ timeout: 15_000 });
+});

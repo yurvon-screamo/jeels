@@ -43,6 +43,26 @@ Then('отображаются опции нагрузки', async ({ page }) =>
     await expect(profilePage.loadMedium).toBeVisible();
 });
 
+Then('отображается минимальная нагрузка', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await expect(profilePage.loadMinimal).toBeVisible();
+});
+
+Then('отображается средняя нагрузка', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await expect(profilePage.loadMedium).toBeVisible();
+});
+
+Then('отображается максимальная нагрузка', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await expect(profilePage.loadMaximum).toBeVisible();
+});
+
+Then('отображается карточка настроек с информацией о приложении', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await expect(profilePage.profileSettings).toBeVisible();
+});
+
 When('нажимает кнопку выхода', async ({ page }) => {
     await page.getByTestId("profile-logout").click();
 });

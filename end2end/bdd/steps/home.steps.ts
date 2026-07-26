@@ -46,3 +46,8 @@ Then('отображается обзор активности', async ({ page }
 Then('отображается недавняя активность', async ({ page }) => {
     await expect(page.getByTestId("home-recent-study")).toBeVisible({ timeout: 10_000 });
 });
+
+Then('отображается приветственная карточка', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await expect(homePage.welcomeCard).toBeVisible();
+});
