@@ -39,7 +39,8 @@ When('переключает избранное первой карточки', 
 Then('первая карточка отмечена избранной', async ({ page }) => {
     const favBtn = page.locator('[data-testid*="card-item"]').first()
         .locator('[data-testid*="favorite"]').first();
-    await expect(favBtn).toHaveClass(/active|selected|favorited/, { timeout: 5_000 });
+    const filledPath = favBtn.locator('svg path[fill="currentColor"]');
+    await expect(filledPath).toBeVisible({ timeout: 5_000 });
 });
 
 // Generic filter + detail steps
@@ -78,7 +79,7 @@ Then('метрики FSRS скрыты на мобильном устройст�
 
 Then('кнопка отметки скрыта для первой карточки', async ({ page }) => {
     const markBtn = page.locator('[data-testid*="card-item"]').first()
-        .locator('[data-testid*="mark-as-known"]').first();
+        .locator('[data-testid*="mark-known"]').first();
     await expect(markBtn).not.toBeVisible({ timeout: 5_000 });
 });
 
@@ -90,7 +91,7 @@ Then('отображается кнопка отметки как известн
 
 When('отмечает первую фразу как известную', async ({ page }) => {
     await page.locator('[data-testid*="card-item"]').first()
-        .locator('[data-testid*="mark-as-known"]').first().click();
+        .locator('[data-testid*="mark-known"]').first().click();
 });
 
 When('отменяет удаление первой фразы', async ({ page }) => {

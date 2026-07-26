@@ -1,3 +1,4 @@
+import path from "path";
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
 import { WordsPage } from "../../pages";
@@ -79,12 +80,16 @@ When('пользователь ищет слово {string}', async ({ page }, q
 
 Then('сетка слов пуста', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await expect(wordsPage.wordsGrid).not.toBeVisible({ timeout: 10_000 });
+    await expect(wordsPage.emptyState).toBeVisible({ timeout: 10_000 });
 });
 
 When('выбирает фильтр слов {string}', async ({ page }, filter: string) => {
+    const filterMap: Record<string, string> = {
+        "all": "Все", "new": "Новые", "hard": "Сложные",
+        "learning": "В процессе", "learned": "Изученные",
+    };
     const wordsPage = new WordsPage(page);
-    await wordsPage.selectFilter(filter as never);
+    await wordsPage.selectFilter(filterMap[filter] as never);
 });
 
 When('пользователь отмечает первое слово как известное', async ({ page }) => {
@@ -161,7 +166,7 @@ When('переключает на вкладку изображения', async 
 
 When('загружает изображение для распознавания', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadImageFile("../../origa/src/ocr/ocr_example.jpg");
+    await wordsPage.uploadImageFile(path.resolve(__dirname, "../../../origa/src/ocr/ocr_example.jpg"));
     await page.waitForTimeout(5000);
 });
 
@@ -172,6 +177,6 @@ When('переключает на вкладку аудио', async ({ page }) =
 
 When('загружает аудио для транскрипции', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadAudioFile("../fixtures/standard_sample1.wav");
+    await wordsPage.uploadAudioFile(path.resolve(__dirname, "../../fixtures/standard_sample1.wav"));
     await page.waitForTimeout(5000);
 });

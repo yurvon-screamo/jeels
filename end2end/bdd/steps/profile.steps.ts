@@ -60,7 +60,7 @@ Then('отображается максимальная нагрузка', async
 });
 
 When('нажимает кнопку выхода', async ({ page }) => {
-    await page.getByTestId("profile-logout").click();
+    await page.getByTestId("profile-logout-btn").click();
 });
 
 Then('происходит переход на страницу входа', async ({ page }) => {
@@ -73,6 +73,7 @@ Then('отображается карточка смены пароля', async 
 
 When('вводит старый пароль {string}', async ({ page }, password: string) => {
     await page.getByTestId("profile-password").click();
+    await page.waitForTimeout(500);
     await page.getByTestId("current-password").fill(password);
 });
 
@@ -97,7 +98,7 @@ When('нажимает кнопку удаления аккаунта', async ({
 });
 
 When('подтверждает удаление', async ({ page }) => {
-    await page.getByTestId("delete-account-confirm-btn").click();
+    await page.getByTestId("profile-confirm-delete-btn").click();
 });
 
 Then('отображается сообщение об успешной смене пароля', async ({ page }) => {
@@ -128,11 +129,11 @@ Then('минимальная нагрузка выбрана', async ({ page }) 
 });
 
 Then('отображается подтверждение удаления', async ({ page }) => {
-    await expect(page.getByTestId(/delete.*confirm|confirm.*delete/)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId("profile-confirm-delete-btn")).toBeVisible({ timeout: 5_000 });
 });
 
 When('пользователь отменяет удаление аккаунта', async ({ page }) => {
-    await page.getByTestId("cancel-delete-btn").click();
+    await page.getByTestId("profile-cancel-delete-btn").click();
 });
 
 Then('отображается ошибка короткого пароля', async ({ page }) => {
