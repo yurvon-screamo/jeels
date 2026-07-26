@@ -147,3 +147,31 @@ When('загружает неверный файл Anki', async ({ page }) => {
 Then('отображается ошибка импорта Anki', async ({ page }) => {
     await expect(page.getByTestId(/anki.*error|error.*anki/)).toBeVisible({ timeout: 15_000 });
 });
+
+When('загружает валидный Anki файл', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.uploadAnkiFile("fixtures/sample.apkg");
+    await page.waitForTimeout(3000);
+});
+
+When('переключает на вкладку изображения', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.switchToImageTab();
+});
+
+When('загружает изображение для распознавания', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.uploadImageFile("../../origa/src/ocr/ocr_example.jpg");
+    await page.waitForTimeout(5000);
+});
+
+When('переключает на вкладку аудио', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.switchToAudioTab();
+});
+
+When('загружает аудио для транскрипции', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.uploadAudioFile("../fixtures/standard_sample1.wav");
+    await page.waitForTimeout(5000);
+});

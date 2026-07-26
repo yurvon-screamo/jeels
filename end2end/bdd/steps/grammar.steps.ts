@@ -52,6 +52,24 @@ Then('отображается кнопка отметки как известн
     await expect(markBtn).toBeVisible();
 });
 
+Given('у пользователя есть много грамматических карточек', async ({ page }) => {
+    const grammarPage = new GrammarPage(page);
+    await grammarPage.goto();
+    await expect(grammarPage.grammarPage).toBeVisible({ timeout: 15_000 });
+    await grammarPage.addBtn.click();
+    await expect(grammarPage.drawer).toBeVisible({ timeout: 10_000 });
+    await grammarPage.drawerAddBtn.click();
+    await expect(grammarPage.drawer).not.toBeVisible({ timeout: 60_000 });
+});
+
+When('нажимает кнопку практики', async ({ page }) => {
+    await page.getByTestId(/practice.*btn|btn.*practice/).first().click();
+});
+
+Then('отображается сессия практики с вопросами', async ({ page }) => {
+    await expect(page.getByTestId(/practice.*question|practice.*session/).first()).toBeVisible({ timeout: 15_000 });
+});
+
 Then('грамматическая карточка отображается в сетке', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
     await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });
