@@ -27,6 +27,10 @@ When('нажимает кнопку возврата с фраз', async ({ page
     await phrasesPage.backButton.click();
 });
 
+Then('отображаются кнопки фильтрации фраз', async ({ page }) => {
+    await expect(page.getByTestId(/phrase.*filter|filter.*phrase/).first()).toBeVisible({ timeout: 10_000 });
+});
+
 Then('карточки фраз имеют непустой текст', async ({ page }) => {
     const phrasesPage = new PhrasesPage(page);
     await expect(phrasesPage.phrasesGrid).toBeVisible({ timeout: 30_000 });

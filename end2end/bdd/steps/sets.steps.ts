@@ -97,3 +97,8 @@ When('фильтрует наборы по статусу {string}', async ({ pa
     const filterBtn = page.getByTestId(`filter-status-${status}`).or(page.getByRole("button", { name: status }));
     await filterBtn.first().click();
 });
+
+Then('отображается больше наборов', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getSetCardCount()).toBeGreaterThan(0);
+});

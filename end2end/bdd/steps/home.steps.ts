@@ -33,6 +33,11 @@ Then('отображается кнопка начала урока', async ({ p
     await expect(homePage.lessonButton).toBeVisible();
 });
 
+When('нажимает кнопку начала урока', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.startLesson();
+});
+
 Then('отображается карточка прогресса JLPT', async ({ page }) => {
     const homePage = new HomePage(page);
     await expect(homePage.jlptProgress).toBeVisible();
@@ -70,4 +75,8 @@ Then('приветственная карточка содержит имя по
 
 Then('отображается график активности', async ({ page }) => {
     await expect(page.getByTestId(/activity.*chart|chart.*activity/)).toBeVisible({ timeout: 10_000 });
+});
+
+Then('отображается нижняя панель навигации', async ({ page }) => {
+    await expect(page.getByTestId(/bottom.*nav|mobile.*tab/)).toBeVisible({ timeout: 10_000 });
 });

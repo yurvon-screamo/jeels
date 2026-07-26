@@ -70,6 +70,46 @@ Then('отображается сессия практики с вопросам
     await expect(page.getByTestId(/practice.*question|practice.*session/).first()).toBeVisible({ timeout: 15_000 });
 });
 
+When('выбирает уровни грамматики N5 и N4', async ({ page }) => {
+    const n5 = page.getByTestId("drawer-level-N5").first();
+    if (await n5.isVisible().catch(() => false)) await n5.click();
+    const n4 = page.getByTestId("drawer-level-N4").first();
+    if (await n4.isVisible().catch(() => false)) await n4.click();
+});
+
+Then('отображается более одной грамматической карточки', async ({ page }) => {
+    const cards = page.getByTestId("grammar-card-item");
+    await expect(cards.nth(1)).toBeVisible({ timeout: 30_000 });
+});
+
+Then('отображается вопрос практики', async ({ page }) => {
+    await expect(page.getByTestId(/practice.*question/).first()).toBeVisible({ timeout: 15_000 });
+});
+
+Then('отображаются варианты ответа практики', async ({ page }) => {
+    await expect(page.getByTestId(/practice.*option|practice.*answer/).first()).toBeVisible({ timeout: 10_000 });
+});
+
+When('отвечает на все вопросы практики', async ({ page }) => {
+    for (let i = 0; i < 20; i++) {
+        const option = page.getByTestId(/practice.*option/).first();
+        const complete = page.getByTestId(/practice.*complete/);
+        if (await complete.isVisible().catch(() => false)) break;
+        if (await option.isVisible().catch(() => false)) {
+            await option.click();
+            await page.waitForTimeout(500);
+        } else break;
+    }
+});
+
+Then('отображается завершение практики', async ({ page }) => {
+    await expect(page.getByTestId(/practice.*complete|practice.*result/).first()).toBeVisible({ timeout: 15_000 });
+});
+
+Then('отображается содержимое деталей грамматики', async ({ page }) => {
+    await expect(page.getByTestId(/grammar.*detail.*content|detail.*content/).first()).toBeVisible({ timeout: 10_000 });
+});
+
 Then('грамматическая карточка отображается в сетке', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
     await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });

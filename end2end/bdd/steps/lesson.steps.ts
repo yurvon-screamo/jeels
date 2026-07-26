@@ -93,3 +93,14 @@ Then('начинается новый урок или ошибка', async ({ pa
     const hasError = await lessonPage.lessonError.isVisible({ timeout: 5_000 }).catch(() => false);
     expect(hasContent || hasError).toBe(true);
 });
+
+When('пользователь устанавливает размер экрана планшета', async ({ page }) => {
+    await page.setViewportSize({ width: 820, height: 1180 });
+});
+
+Then('содержимое урока занимает полную высоту', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.lessonContent).toBeVisible();
+    const height = await lessonPage.lessonContent.evaluate((el) => (el as HTMLElement).clientHeight);
+    expect(height).toBeGreaterThan(700);
+});

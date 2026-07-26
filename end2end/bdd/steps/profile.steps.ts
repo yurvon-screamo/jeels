@@ -130,3 +130,7 @@ Then('английский язык выбран', async ({ page }) => {
     const profilePage = new ProfilePage(page);
     await expect(profilePage.langEnglish).toHaveClass(/selected|active/, { timeout: 10_000 });
 });
+
+Then('отображается ошибка короткого пароля', async ({ page }) => {
+    await expect(page.getByTestId(/password.*error|password.*short|error.*short/)).toBeVisible({ timeout: 10_000 });
+});
