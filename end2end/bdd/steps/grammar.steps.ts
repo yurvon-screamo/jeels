@@ -78,3 +78,16 @@ When('нажимает кнопку перехода на главную', async
     const grammarPage = new GrammarPage(page);
     await grammarPage.backBtn.click();
 });
+
+When('пользователь отмечает первую грамматику как известную', async ({ page }) => {
+    await page.getByTestId("grammar-card-item").first().locator('[data-testid*="mark-as-known"]').click();
+});
+
+When('пользователь открывает детали первой грамматики', async ({ page }) => {
+    await page.getByTestId("grammar-card-item").first().click();
+    await page.waitForURL(/\/grammar\//, { timeout: 10_000 });
+});
+
+Then('отображается страница деталей грамматики', async ({ page }) => {
+    await expect(page.getByTestId("grammar-detail-page")).toBeVisible({ timeout: 10_000 });
+});

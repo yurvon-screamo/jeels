@@ -37,3 +37,12 @@ Then('отображается карточка прогресса JLPT', async 
     const homePage = new HomePage(page);
     await expect(homePage.jlptProgress).toBeVisible();
 });
+
+Then('отображается обзор активности', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await expect(homePage.todayOverview).toBeVisible();
+});
+
+Then('отображается недавняя активность', async ({ page }) => {
+    await expect(page.getByTestId("home-recent-study")).toBeVisible({ timeout: 10_000 });
+});

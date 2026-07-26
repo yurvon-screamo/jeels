@@ -61,3 +61,16 @@ When('нажимает кнопку возврата на кандзи', async (
     const kanjiPage = new KanjiPage(page);
     await kanjiPage.backBtn.click();
 });
+
+When('пользователь отмечает первое кандзи как известное', async ({ page }) => {
+    await page.getByTestId("kanji-card-item").first().locator('[data-testid*="mark-as-known"]').click();
+});
+
+When('пользователь открывает детали первого кандзи', async ({ page }) => {
+    await page.getByTestId("kanji-card-item").first().click();
+    await page.waitForURL(/\/kanji\//, { timeout: 10_000 });
+});
+
+Then('отображается страница деталей кандзи', async ({ page }) => {
+    await expect(page.getByTestId("kanji-detail-page")).toBeVisible({ timeout: 10_000 });
+});

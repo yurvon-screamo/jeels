@@ -82,3 +82,12 @@ When('нажимает кнопку удаления аккаунта', async ({
 When('подтверждает удаление', async ({ page }) => {
     await page.getByTestId("delete-account-confirm").click();
 });
+
+Then('отображается сообщение об успешной смене пароля', async ({ page }) => {
+    await expect(page.getByTestId("password-change-success")).toBeVisible({ timeout: 10_000 });
+});
+
+Then('английский язык выбран', async ({ page }) => {
+    const profilePage = new ProfilePage(page);
+    await expect(profilePage.langEnglish).toHaveClass(/selected|active/, { timeout: 10_000 });
+});
