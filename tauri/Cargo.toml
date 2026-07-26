@@ -31,6 +31,7 @@ tauri-plugin-single-instance.workspace = true
 tauri-plugin-store.workspace = true
 tauri-plugin-updater.workspace = true
 tauri-plugin-process.workspace = true
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true

@@ -1,7 +1,7 @@
 # Uncomment the next line to define a global platform for your project
 
 target 'origa-app_iOS' do
-platform :ios, '14.0'
+platform :ios, '26.0'
   # Pods for origa-app_iOS
 end
 

@@ -25,6 +25,9 @@ fn get_current_deep_link(app: tauri::AppHandle) -> Option<String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let _ = rustls::crypto::ring::default_provider().install_default();
+
+    #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
     #[cfg(desktop)]
