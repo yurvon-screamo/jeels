@@ -60,3 +60,10 @@ When('раскрывает детали прогресса JLPT', async ({ page 
 Then('отображаются категории прогресса', async ({ page }) => {
     await expect(page.getByTestId(/jlpt.*categor/)).toBeVisible({ timeout: 5_000 });
 });
+
+Then('приветственная карточка содержит имя пользователя', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await expect(homePage.welcomeCard).toBeVisible();
+    const text = await homePage.welcomeCard.textContent();
+    expect(text?.trim().length ?? 0).toBeGreaterThan(0);
+});

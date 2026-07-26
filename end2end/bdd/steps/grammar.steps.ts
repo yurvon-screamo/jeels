@@ -37,6 +37,11 @@ When('подтверждает добавление грамматики', async
     await expect(grammarPage.drawer).not.toBeVisible({ timeout: 30_000 });
 });
 
+When('нажимает кнопку выбора всех правил', async ({ page }) => {
+    const grammarPage = new GrammarPage(page);
+    await grammarPage.drawerSelectAllBtn.click();
+});
+
 Then('грамматическая карточка отображается в сетке', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
     await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });
