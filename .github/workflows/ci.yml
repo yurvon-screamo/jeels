@@ -446,7 +446,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, docker-build-landing, docker-build-ui, build-tauri]
+        needs: [lint, test, e2e-bdd, e2e-report, docker-build-landing, docker-build-ui, build-tauri]
         if: always()
         runs-on: ubuntu-latest
         steps:
@@ -464,7 +464,8 @@ jobs:
 
                   check "lint" "${{ needs.lint.result }}" "success"
                   check "test" "${{ needs.test.result }}" "success"
-                  check "e2e" "${{ needs.e2e.result }}" "success"
+                  check "e2e-bdd" "${{ needs.e2e-bdd.result }}" "success"
+                  check "e2e-report" "${{ needs.e2e-report.result }}" "success"
                   check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
                   check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
                   check "build-tauri" "${{ needs.build-tauri.result }}" "success"
