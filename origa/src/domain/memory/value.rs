@@ -180,7 +180,7 @@ mod tests {
 
     // MemoryState tests
     #[test]
-    fn test_memory_state_new() {
+    fn memory_state_new_stores_all_fields() {
         let stability = Stability::new(0.8).unwrap();
         let difficulty = Difficulty::new(0.3).unwrap();
         let next_review_date = Utc::now();
@@ -193,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn test_memory_state_display() {
+    fn memory_state_display_includes_field_labels() {
         let stability = Stability::new(0.5).unwrap();
         let difficulty = Difficulty::new(0.5).unwrap();
         let next_review_date = Utc::now();
@@ -207,7 +207,7 @@ mod tests {
 
     // ReviewLog tests
     #[test]
-    fn test_review_log_new() {
+    fn review_log_new_assigns_id_rating_and_interval() {
         let log = ReviewLog::new(Rating::Good, Duration::days(1));
 
         assert!(log.id() > Ulid::nil());
@@ -216,7 +216,7 @@ mod tests {
     }
 
     #[test]
-    fn test_review_log_all_ratings() {
+    fn review_log_preserves_all_rating_variants() {
         let logs = [
             ReviewLog::new(Rating::Easy, Duration::days(1)),
             ReviewLog::new(Rating::Good, Duration::days(1)),
@@ -232,26 +232,26 @@ mod tests {
 
     // Stability tests - validation
     #[test]
-    fn test_stability_new_valid() {
+    fn stability_new_valid() {
         let stability = Stability::new(0.5).unwrap();
         assert_eq!(stability.value(), 0.5);
     }
 
     #[test]
-    fn test_stability_new_zero() {
+    fn stability_new_zero() {
         let stability = Stability::new(0.0).unwrap();
         assert_eq!(stability.value(), 0.0);
     }
 
     #[test]
-    fn test_stability_new_negative_fails() {
+    fn stability_new_negative_fails() {
         let result = Stability::new(-0.1);
         assert!(result.is_err());
         assert!(matches!(result, Err(OrigaError::InvalidStability { .. })));
     }
 
     #[test]
-    fn test_stability_display() {
+    fn stability_display_formats_to_two_decimals() {
         let stability = Stability::new(0.7).unwrap();
         let display = format!("{}", stability);
         assert_eq!(display, "0.70");
@@ -259,26 +259,26 @@ mod tests {
 
     // Difficulty tests - validation
     #[test]
-    fn test_difficulty_new_valid() {
+    fn difficulty_new_valid() {
         let difficulty = Difficulty::new(0.3).unwrap();
         assert_eq!(difficulty.value(), 0.3);
     }
 
     #[test]
-    fn test_difficulty_new_zero() {
+    fn difficulty_new_zero() {
         let difficulty = Difficulty::new(0.0).unwrap();
         assert_eq!(difficulty.value(), 0.0);
     }
 
     #[test]
-    fn test_difficulty_new_negative_fails() {
+    fn difficulty_new_negative_fails() {
         let result = Difficulty::new(-0.1);
         assert!(result.is_err());
         assert!(matches!(result, Err(OrigaError::InvalidDifficulty { .. })));
     }
 
     #[test]
-    fn test_difficulty_display() {
+    fn difficulty_display_formats_to_two_decimals() {
         let difficulty = Difficulty::new(0.5).unwrap();
         let display = format!("{}", difficulty);
         assert_eq!(display, "0.50");
@@ -290,7 +290,7 @@ mod tests {
     #[case(Rating::Good, "Good")]
     #[case(Rating::Hard, "Hard")]
     #[case(Rating::Again, "Again")]
-    fn test_rating_debug(#[case] rating: Rating, #[case] expected: &str) {
+    fn rating_debug_contains_variant_name(#[case] rating: Rating, #[case] expected: &str) {
         let debug = format!("{:?}", rating);
         assert!(debug.contains(expected));
     }

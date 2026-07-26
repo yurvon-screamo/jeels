@@ -6,6 +6,10 @@
         "trailbase:start": "cd trailbase-fixture && trail run --dev --address 127.0.0.1:4000",
         "trailbase:stop": "taskkill /f /im trail.exe 2>nul || true",
         "test": "playwright test",
+        "pretest": "bddgen",
+        "typecheck": "tsc --noEmit",
+        "bdd:gen": "bddgen",
+        "test:bdd": "bddgen && playwright test --project=bdd",
         "test:ui": "playwright test --ui",
         "test:headed": "playwright test --headed",
         "test:debug": "playwright test --debug",
@@ -16,6 +20,7 @@
         "@playwright/test": "^1.60.0",
         "@types/node": "^25.9.3",
         "eslint": "^10.5.0",
+        "playwright-bdd": "^9.2.0",
         "serve": "^14.2.6",
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.61.0"

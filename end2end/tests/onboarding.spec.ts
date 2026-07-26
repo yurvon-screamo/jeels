@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { testWithFreshUser } from "../fixtures";
-import { waitForScoringReady } from "../helpers/onboarding";
+import { completeOnboardingToScoring, waitForScoringReady } from "../helpers/onboarding";
 
 /**
  * Onboarding Flow E2E Tests
@@ -378,122 +378,6 @@ testWithFreshUser.describe("Onboarding Flow - N4 with ~50% Progress", () => {
         await expect(page.getByTestId("onboarding-intro-step")).toBeVisible();
     });
 });
-
-/**
- * Helper: completes onboarding from login through import, stops at scoring step.
- * Navigates: Intro → Load → JLPT (N4) → Apps → Progress → Summary → Import → Scoring
- *
- * Returns `true` if scoring step was reached and is ready, `false` if redirected to /home.
- */
-async function completeOnboardingToScoring(page: Page): Promise<boolean> {
-    await page.goto("/");
-
-    try {
-        await page.waitForURL(/\/onboarding$/, { timeout: 30_000 });
-    } catch {
-        if (page.url().includes("/home")) {
-            return false;
-        }
-    }
-
-    if (page.url().includes("/home")) {
-        return false;
-    }
-
-    await expect(page.getByTestId("onboarding-spinner")).not.toBeVisible({ timeout: 10_000 });
-
-    // Intro → Load
-    await page.getByTestId("onboarding-next").click();
-    await expect(page.getByTestId("onboarding-load-step")).toBeVisible();
-
-    // Load → JLPT (default medium load)
-    await page.getByTestId("onboarding-next").click();
-    await expect(page.getByTestId("onboarding-jlpt-step")).toBeVisible();
-
-    // JLPT: select N4
-    await page.getByTestId("jlpt-option-n4").click();
-    await expect(page.getByTestId("jlpt-option-n4")).toHaveClass(/selected/, { timeout: 5000 });
-    await page.getByTestId("onboarding-next").click();
-    await expect(page.getByTestId("onboarding-apps-step")).toBeVisible();
-
-    // Apps: select Migii, DuolingoRu, MinnaNoNihongo
-    const migiiCheckbox = page.getByTestId("apps-step-app-Migii-checkbox");
-    if (await migiiCheckbox.isVisible().catch(() => false)) {
-        await migiiCheckbox.click();
-    }
-
-    const duolingoRuCheckbox = page.getByTestId("apps-step-app-DuolingoRu-checkbox");
-    if (await duolingoRuCheckbox.isVisible().catch(() => false)) {
-        await duolingoRuCheckbox.click();
-    }
-
-    const minnaCheckbox = page.getByTestId("apps-step-app-MinnaNoNihongo-checkbox");
-    if (await minnaCheckbox.isVisible().catch(() => false)) {
-        await minnaCheckbox.click();
-    }
-
-    const irodoriCheckbox = page.getByTestId("apps-step-app-Irodori-checkbox");
-    if (await irodoriCheckbox.isVisible().catch(() => false)) {
-        await irodoriCheckbox.click();
-    }
-
-    await page.getByTestId("onboarding-next").click();
-    await expect(page.getByTestId("onboarding-progress-step")).toBeVisible();
-
-    // Progress: configure each selected app
-    const migiiLevelDropdown = page.getByTestId("migii-level-dropdown");
-    if (await migiiLevelDropdown.isVisible().catch(() => false)) {
-        await migiiLevelDropdown.click();
-        await page.getByTestId("migii-level-dropdown-option-N4").click();
-
-        const migiiLessonDropdown = page.getByTestId("migii-lesson-dropdown");
-        await migiiLessonDropdown.click();
-        await page.getByTestId("migii-lesson-dropdown-option-lesson_10").click();
-    }
-
-    const duolingoRuModuleDropdown = page.getByTestId("DuolingoRu-module-dropdown");
-    if (await duolingoRuModuleDropdown.isVisible().catch(() => false)) {
-        await duolingoRuModuleDropdown.click();
-        await page.getByTestId("DuolingoRu-module-dropdown-option-module_1").click();
-
-        const duolingoRuUnitDropdown = page.getByTestId("DuolingoRu-unit-dropdown");
-        await duolingoRuUnitDropdown.click();
-        await page.getByTestId("DuolingoRu-unit-dropdown-option-unit_10").click();
-    }
-
-    const minnaLevelDropdown = page.getByTestId("minna-level-dropdown");
-    if (await minnaLevelDropdown.isVisible().catch(() => false)) {
-        await minnaLevelDropdown.click();
-        await page.getByTestId("minna-level-dropdown-option-N4").click();
-
-        const minnaLessonDropdown = page.getByTestId("minna-lesson-dropdown");
-        await minnaLessonDropdown.click();
-        await page.getByTestId("minna-lesson-dropdown-option-lesson_38").click();
-    }
-
-    const irodoriBookDropdown = page.getByTestId("irodori-book-dropdown");
-    if (await irodoriBookDropdown.isVisible().catch(() => false)) {
-        await irodoriBookDropdown.click();
-        await page.getByTestId("irodori-book-dropdown-option-nyuumon").click();
-
-        const irodoriLessonDropdown = page.getByTestId("irodori-lesson-dropdown");
-        await irodoriLessonDropdown.click();
-        await page.getByTestId("irodori-lesson-dropdown-option-lesson_9").click();
-    }
-
-    await page.getByTestId("onboarding-next").click();
-    await expect(page.getByTestId("onboarding-summary-step")).toBeVisible();
-
-    // Summary → Import → Scoring
-    await page.getByTestId("onboarding-import").click();
-    await expect(page.getByTestId("onboarding-import")).toHaveAttribute("data-loading", "true", { timeout: 5000 });
-    await expect(page.getByTestId("onboarding-scoring-step")).toBeVisible({ timeout: 120_000 });
-
-    // Wait for scoring step to finish loading cards before returning
-    await waitForScoringReady(page);
-
-    return true;
-}
 
 testWithFreshUser.describe("Onboarding - Scoring Step", () => {
     testWithFreshUser("should display scoring step with cards after import", async ({ page }) => {

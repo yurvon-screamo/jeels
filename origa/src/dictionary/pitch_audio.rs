@@ -131,17 +131,17 @@ pub fn get_audio_entry_count() -> usize {
 mod tests {
     use super::*;
 
-    fn test_index_json() -> &'static str {
+    fn index_json() -> &'static str {
         r#"{"v":2,"total":3,"entries":{"猫":{"f":"a1b2c3d4.opus","p":1},"食べる":{"f":"e5f6a7b8.opus","p":0},"あ":{"f":"c9d0e1f2.opus","p":null}}}"#
     }
 
-    fn test_index_v3_json() -> &'static str {
+    fn index_v3_json() -> &'static str {
         r#"{"v":3,"total":5,"entries":{"役|やく":{"f":"yaku.opus","p":1},"役|えき":{"f":"eki.opus","p":0},"やく":{"f":"yaku_kana.opus","p":1},"えき":{"f":"eki_kana.opus","p":0},"役":{"f":"fallback.opus","p":0}}}"#
     }
 
     #[test]
     fn from_json_valid() {
-        let index = PitchAudioIndex::from_json(test_index_json()).expect("valid JSON should parse");
+        let index = PitchAudioIndex::from_json(index_json()).expect("valid JSON should parse");
         assert_eq!(index.version, 2);
         assert_eq!(index.entries.len(), 3);
     }
@@ -154,7 +154,7 @@ mod tests {
 
     #[test]
     fn get_entry_found() {
-        let index = PitchAudioIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_json()).expect("valid JSON");
         let entry = index.get_entry("猫").expect("entry should exist");
         assert_eq!(entry.file(), "a1b2c3d4.opus");
         assert_eq!(entry.pitch(), Some(1));
@@ -162,20 +162,20 @@ mod tests {
 
     #[test]
     fn get_entry_not_found() {
-        let index = PitchAudioIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_json()).expect("valid JSON");
         assert!(index.get_entry("犬").is_none());
     }
 
     #[test]
     fn entry_with_null_pitch() {
-        let index = PitchAudioIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_json()).expect("valid JSON");
         let entry = index.get_entry("あ").expect("entry should exist");
         assert_eq!(entry.pitch(), None);
     }
 
     #[test]
     fn cdn_path_format() {
-        let index = PitchAudioIndex::from_json(test_index_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_json()).expect("valid JSON");
         let entry = index.get_entry("猫").expect("entry should exist");
         assert_eq!(entry.cdn_path(), "pitch/audio/a1b2c3d4.opus");
     }
@@ -192,7 +192,7 @@ mod tests {
 
     #[test]
     fn get_audio_for_reading_composite_key() {
-        let index = PitchAudioIndex::from_json(test_index_v3_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_v3_json()).expect("valid JSON");
         let entry = index
             .get_entry("役|やく")
             .expect("composite key should match");
@@ -202,27 +202,27 @@ mod tests {
 
     #[test]
     fn get_audio_for_reading_fallback_to_kana() {
-        let index = PitchAudioIndex::from_json(test_index_v3_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_v3_json()).expect("valid JSON");
         let entry = index.get_entry("えき").expect("kana key should match");
         assert_eq!(entry.file(), "eki_kana.opus");
     }
 
     #[test]
     fn get_audio_for_reading_fallback_to_kanji() {
-        let index = PitchAudioIndex::from_json(test_index_v3_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_v3_json()).expect("valid JSON");
         let entry = index.get_entry("役").expect("kanji fallback should match");
         assert_eq!(entry.file(), "fallback.opus");
     }
 
     #[test]
     fn get_audio_for_reading_no_match() {
-        let index = PitchAudioIndex::from_json(test_index_v3_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_v3_json()).expect("valid JSON");
         assert!(index.get_entry("NotExist|xyz").is_none());
     }
 
     #[test]
     fn get_audio_for_reading_priority_chain() {
-        let index = PitchAudioIndex::from_json(test_index_v3_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_v3_json()).expect("valid JSON");
         // "役|やく" should return composite entry, not kanji fallback
         let composite = index.get_entry("役|やく").expect("should exist");
         assert_eq!(composite.file(), "yaku.opus");
@@ -233,7 +233,7 @@ mod tests {
 
     #[test]
     fn get_audio_for_reading_fallback_chain_integration() {
-        let index = PitchAudioIndex::from_json(test_index_v3_json()).expect("valid JSON");
+        let index = PitchAudioIndex::from_json(index_v3_json()).expect("valid JSON");
 
         let entry = index
             .find_audio_for_reading("役", "やく")

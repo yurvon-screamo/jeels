@@ -1,6 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import { defineBddConfig } from "playwright-bdd";
 
 const isCI = !!process.env.CI;
+
+const bddTestDir = defineBddConfig({
+    features: "./bdd/features",
+    steps: "./bdd/**/*.ts",
+});
 
 export default defineConfig({
     testDir: "./tests",
@@ -24,6 +30,13 @@ export default defineConfig({
     projects: [
         {
             name: "chromium",
+            use: {
+                ...devices["Desktop Chrome"],
+            },
+        },
+        {
+            name: "bdd",
+            testDir: bddTestDir,
             use: {
                 ...devices["Desktop Chrome"],
             },

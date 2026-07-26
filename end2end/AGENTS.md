@@ -13,6 +13,9 @@ npm run test:chrome          # Chromium only
 npm run test:chrome:headed   # Chromium, visible browser
 npm run test:chrome:ui       # Chromium, Playwright UI
 npm run report               # HTML report (0.0.0.0:9323)
+npm run bdd:gen              # Generate Playwright tests from .feature files
+npm run test:bdd             # bddgen + run BDD project only
+npm run typecheck            # TypeScript type check (tsc --noEmit)
 ```
 
 ## Structure
@@ -85,9 +88,39 @@ export class LoginPage {
 }
 ```
 
+## BDD Tests (Gherkin)
+
+Complex multi-step user journeys can be described in Russian Gherkin `.feature` files under `bdd/features/`. Step definitions live in `bdd/steps/` and reuse Page Objects.
+
+### When to use Gherkin vs native Playwright
+
+- **Gherkin**: multi-step flows spanning multiple pages (onboarding, lesson lifecycle, sync). The `.feature` file is a separable spec that can be reviewed before implementation.
+- **Native Playwright** (`.spec.ts`): single-page tests, DOM/CSS assertions, technical checks. Keep using `testWithFreshUser` + Page Objects.
+
+### Pipeline
+
+1. Write `.feature` file in `bdd/features/` (Russian, `# language: ru`).
+2. Write step definitions in `bdd/steps/` — import `{ Given, When, Then }` from `bdd/fixtures.ts`.
+3. Run `npm run bdd:gen` to generate Playwright tests into `.features-gen/`.
+4. Run `npm run test:bdd` (or `npx playwright test --project=bdd`).
+
+**Before `npm test` (all projects)**: run `npm run bdd:gen` first — the BDD project expects generated files in `.features-gen/`.
+
+### Conventions
+
+- `.feature` language: Russian (`# language: ru`). Keywords: `Функция`, `Сценарий`, `Допустим` (Given), `Когда` (When), `Тогда` (Then), `И` (And).
+- Domain terms in steps must match [`origa/docs/glossary.md`](../origa/docs/glossary.md).
+- Step definitions reuse Page Objects from `pages/`. Do not use raw selectors in steps.
+- The BDD fixture (`bdd/fixtures.ts`) provides the same authenticated `page` as `testWithFreshUser`.
+- **When = action, Then = assertion.** Don't hide assertions in When steps. The `.feature` reader sees what's verified in the Then line.
+- **Migration fidelity.** When converting `.spec.ts` → `.feature`, ALL original assertions must be preserved. Self-check against source.
+- **Dead step detection.** After removing a step from `.feature`, grep for unconsumed definitions in `bdd/steps/`. `bddgen`/ESLint do NOT catch orphans.
+- **Shared helpers.** Reusable test logic lives in `helpers/`. Both `.spec.ts` and `bdd/steps/*.ts` import from there — single source of truth.
+
 ## Rules
 
 - Headless by default; use `:headed` / `:ui` scripts for debugging
 - `async/await` everywhere — no raw Promises or `.then()`
 - Web-first assertions: `await expect(locator).toBeVisible()`
 - Tags: `test('name @smoke @critical', ...)`
+- Run `npm run typecheck` before committing — ESLint does NOT catch undefined references in TypeScript. Only `tsc --noEmit` catches missing imports.

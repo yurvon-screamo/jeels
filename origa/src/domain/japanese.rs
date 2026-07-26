@@ -116,7 +116,7 @@ mod tests {
     #[case('a', false, false, false, false)]
     #[case('Z', false, false, false, false)]
     #[case('1', false, false, false, false)]
-    fn test_japanese_char_classification(
+    fn classifies_char_by_script_type(
         #[case] input: char,
         #[case] is_hiragana: bool,
         #[case] is_katakana: bool,
@@ -137,7 +137,7 @@ mod tests {
     #[case('・', false, true, false, true)]
     #[case('々', false, false, false, true)]
     #[case('ー', false, true, false, true)]
-    fn test_cjk_punctuation_classification(
+    fn classifies_cjk_punctuation_by_script_type(
         #[case] input: char,
         #[case] is_hiragana: bool,
         #[case] is_katakana: bool,
@@ -151,7 +151,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cjk_punctuation_is_japanese() {
+    fn cjk_punctuation_classifies_as_japanese() {
         let chars = [
             '。', '、', '「', '」', '『', '』', '【', '】', '〜', '々', '・', 'ー',
         ];
@@ -166,7 +166,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cjk_punctuation_not_hiragana_katakana_kanji() {
+    fn cjk_punctuation_excludes_from_script_categories() {
         assert!(!'。'.is_hiragana());
         assert!(!'。'.is_katakana());
         assert!(!'。'.is_kanji());
@@ -180,7 +180,7 @@ mod tests {
     #[case("こんにちは日本語", true, true, true)]
     #[case("Hello", false, false, false)]
     #[case("", true, false, false)]
-    fn test_japanese_text_is_japanese(
+    fn detects_japanese_and_kanji_in_text(
         #[case] input: &str,
         #[case] expected_is_japanese: bool,
         #[case] expected_contains_japanese: bool,
@@ -197,7 +197,7 @@ mod tests {
     #[case('…', true)]
     #[case('～', true)]
     #[case('―', true)]
-    fn should_classify_fullwidth_common_symbols_as_japanese(
+    fn classifies_fullwidth_common_symbols_as_japanese(
         #[case] input: char,
         #[case] expected: bool,
     ) {
@@ -212,7 +212,7 @@ mod tests {
     }
 
     #[test]
-    fn should_not_break_segmentation_on_fullwidth_question_mark() {
+    fn does_not_break_segmentation_on_fullwidth_question_mark() {
         assert!('？'.is_japanese(), "？ should be classified as Japanese");
         assert!('！'.is_japanese(), "！ should be classified as Japanese");
         assert!('…'.is_japanese(), "… should be classified as Japanese");

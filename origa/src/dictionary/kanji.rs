@@ -441,14 +441,14 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_database_from_json_with_empty_kanji_array() {
+    fn kanji_database_from_json_with_empty_kanji_array() {
         let json = r#"{"kanji": []}"#;
         let db = KanjiDatabase::from_json(json).unwrap();
         assert!(db.get_kanji_list(&JapaneseLevel::N5).is_empty());
     }
 
     #[test]
-    fn test_kanji_database_from_json_missing_optional_fields() {
+    fn kanji_database_from_json_missing_optional_fields() {
         let json = r#"{
             "kanji": [{
                 "kanji": "測",
@@ -467,7 +467,7 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_database_from_json_multibyte_kanji() {
+    fn kanji_database_from_json_multibyte_kanji() {
         let json = r#"{
             "kanji": [{
                 "kanji": "一二三四五六七八九十",
@@ -487,7 +487,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_kanji_info_empty_string() {
+    fn get_kanji_info_empty_string() {
         let json = load_real_kanji_json();
         let db = KanjiDatabase::from_json(&json).unwrap();
         let result = db.get_kanji_info("");
@@ -495,7 +495,7 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_info_radicals_expanded_from_multichar_strings() {
+    fn kanji_info_radicals_expanded_from_multichar_strings() {
         let json = r#"{
             "kanji": [{
                 "kanji": "木",
@@ -516,7 +516,7 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_info_description_is_russian() {
+    fn kanji_info_description_is_russian() {
         let json = load_real_kanji_json();
         let db = KanjiDatabase::from_json(&json).unwrap();
         let info = db.get_kanji_info("日").unwrap();
@@ -524,7 +524,7 @@ mod tests {
     }
 
     #[test]
-    fn test_popular_words_with_translations_fallback() {
+    fn popular_words_with_translations_fallback() {
         let json = load_real_kanji_json();
         let db = KanjiDatabase::from_json(&json).unwrap();
         let info = db.get_kanji_info("日").unwrap();
@@ -536,7 +536,7 @@ mod tests {
     #[case("人", 2000)]
     #[case("一", 0)]
     #[case("日", 1000)]
-    fn test_kanji_used_in_frequency(#[case] kanji: &str, #[case] min_used_in: u32) {
+    fn kanji_used_in_frequency(#[case] kanji: &str, #[case] min_used_in: u32) {
         let json = load_real_kanji_json();
         let db = KanjiDatabase::from_json(&json).unwrap();
         let info = db.get_kanji_info(kanji).unwrap();
@@ -548,7 +548,7 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_database_clone() {
+    fn kanji_database_clone() {
         let json = load_real_kanji_json();
         let db1 = KanjiDatabase::from_json(&json).unwrap();
         let db2 = db1.clone();
@@ -558,7 +558,7 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_database_from_json_parsing_errors() {
+    fn kanji_database_from_json_parsing_errors() {
         let invalid_json_variants = vec![
             "not json at all",
             r#"{"kanji": invalid}"#,
@@ -573,7 +573,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_kanji_info_debug_logging() {
+    fn get_kanji_info_debug_logging() {
         let json = r#"{"kanji": []}"#;
         let db = KanjiDatabase::from_json(json).unwrap();
 
@@ -582,7 +582,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_kanji_list_filters_by_level() {
+    fn get_kanji_list_filters_by_level() {
         let json = load_real_kanji_json();
         let db = KanjiDatabase::from_json(&json).unwrap();
 
@@ -594,7 +594,7 @@ mod tests {
     }
 
     #[test]
-    fn test_kanji_info_all_readings_accessors() {
+    fn kanji_info_all_readings_accessors() {
         let json = r#"{
             "kanji": [{
                 "kanji": "会",
@@ -619,7 +619,7 @@ mod tests {
     }
 
     #[test]
-    fn test_module_public_functions_isolation() {
+    fn module_public_functions_isolation() {
         let json = load_real_kanji_json();
         let data = KanjiData { kanji_json: json };
 
@@ -630,7 +630,7 @@ mod tests {
     }
 
     #[test]
-    fn test_module_get_kanji_info_public_function() {
+    fn module_get_kanji_info_public_function() {
         let json = load_real_kanji_json();
         let data = KanjiData { kanji_json: json };
         let _ = init_kanji(data);
@@ -641,7 +641,7 @@ mod tests {
     }
 
     #[test]
-    fn test_module_get_kanji_list_public_function() {
+    fn module_get_kanji_list_public_function() {
         let json = load_real_kanji_json();
         let data = KanjiData { kanji_json: json };
         let _ = init_kanji(data);
@@ -651,7 +651,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_kanji_info_exact_match_required() {
+    fn get_kanji_info_exact_match_required() {
         let json = r#"{
             "kanji": [{
                 "kanji": "日",
@@ -675,7 +675,7 @@ mod tests {
     }
 
     #[test]
-    fn test_popular_word_clone() {
+    fn popular_word_clone() {
         let word = PopularWord::new("test".to_string(), "тест".to_string());
         let cloned = word.clone();
         assert_eq!(word.word(), cloned.word());
@@ -683,7 +683,7 @@ mod tests {
     }
 
     #[test]
-    fn test_backward_compat_string_description_deserializes_to_vec() {
+    fn backward_compat_string_description_deserializes_to_vec() {
         let json = r#"{
             "kanji": [{
                 "kanji": "日",
@@ -714,7 +714,7 @@ mod tests {
     }
 
     #[test]
-    fn test_description_joins_multiple_values() {
+    fn description_joins_multiple_values() {
         let json = r#"{
             "kanji": [{
                 "kanji": "可",

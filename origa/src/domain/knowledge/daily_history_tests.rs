@@ -1,5 +1,6 @@
 use super::*;
 use chrono::Duration;
+use rstest::rstest;
 
 fn create_test_item(
     timestamp: DateTime<Utc>,
@@ -29,8 +30,25 @@ fn create_test_item(
     item
 }
 
+fn filler_stats() -> DailyStatsUpdate {
+    DailyStatsUpdate {
+        avg_stability: 0.5,
+        avg_difficulty: 0.3,
+        total_words: 5,
+        known_words: 10,
+        new_words: 2,
+        in_progress_words: 3,
+        high_difficulty_words: 1,
+        positive_ratings: 0,
+        negative_ratings: 0,
+        total_ratings: 0,
+        new_cards_studied_today: 0,
+        phrase_cards_studied_today: 0,
+    }
+}
+
 #[test]
-fn test_daily_history_item_new() {
+fn daily_history_item_new_has_zero_defaults() {
     let item = DailyHistoryItem::new();
 
     assert_eq!(item.lessons_completed(), 0);
@@ -41,7 +59,7 @@ fn test_daily_history_item_new() {
 }
 
 #[test]
-fn test_daily_history_item_getters() {
+fn daily_history_item_getters_return_set_values() {
     let now = Utc::now();
     let item = create_test_item(now, 1, 3, 8);
 
@@ -53,7 +71,7 @@ fn test_daily_history_item_getters() {
 }
 
 #[test]
-fn test_daily_history_item_update() {
+fn update_with_good_rating_sets_all_fields() {
     let mut item = DailyHistoryItem::new();
 
     item.update(
@@ -88,7 +106,7 @@ fn test_daily_history_item_update() {
 }
 
 #[test]
-fn test_merge_with_takes_higher_lessons() {
+fn merge_with_takes_higher_lessons() {
     let now = Utc::now();
     let mut item1 = create_test_item(now, 2, 5, 10);
     let item2 = create_test_item(now, 5, 3, 8);
@@ -99,7 +117,7 @@ fn test_merge_with_takes_higher_lessons() {
 }
 
 #[test]
-fn test_merge_with_preserves_known_words_when_other_older() {
+fn merge_with_preserves_known_words_when_other_older() {
     let now = Utc::now();
     let older = now - Duration::seconds(100);
     let mut item1 = create_test_item(now, 2, 5, 10);
@@ -112,7 +130,7 @@ fn test_merge_with_preserves_known_words_when_other_older() {
 }
 
 #[test]
-fn test_merge_with_updates_timestamp_when_newer() {
+fn merge_with_updates_timestamp_when_newer() {
     let now = Utc::now();
     let newer = now + Duration::seconds(100);
     let mut item1 = create_test_item(now, 2, 5, 10);
@@ -126,7 +144,7 @@ fn test_merge_with_updates_timestamp_when_newer() {
 }
 
 #[test]
-fn test_merge_with_does_not_update_timestamp_when_older() {
+fn merge_with_does_not_update_timestamp_when_older() {
     let now = Utc::now();
     let older = now - Duration::seconds(100);
     let mut item1 = create_test_item(now, 2, 5, 10);
@@ -139,7 +157,7 @@ fn test_merge_with_does_not_update_timestamp_when_older() {
 }
 
 #[test]
-fn test_merge_with_updates_stats_when_newer() {
+fn merge_with_updates_stats_when_newer() {
     let now = Utc::now();
     let newer = now + Duration::seconds(100);
     let mut item1 = create_test_item(now, 2, 5, 10);
@@ -166,7 +184,7 @@ fn test_merge_with_updates_stats_when_newer() {
 }
 
 #[test]
-fn test_merge_with_preserves_stats_when_other_older() {
+fn merge_with_preserves_stats_when_other_older() {
     let now = Utc::now();
     let older = now - Duration::seconds(100);
     let mut item1 = create_test_item(now, 2, 5, 10);
@@ -194,130 +212,27 @@ fn test_merge_with_preserves_stats_when_other_older() {
     assert_eq!(item1.avg_difficulty(), difficulty_before);
 }
 
-#[test]
-fn test_update_increments_positive_ratings_on_good() {
+#[rstest]
+#[case(Rating::Good, true)]
+#[case(Rating::Easy, true)]
+#[case(Rating::Again, false)]
+#[case(Rating::Hard, false)]
+fn update_classifies_rating_sentiment(#[case] rating: Rating, #[case] positive: bool) {
     let mut item = DailyHistoryItem::new();
-    item.update(
-        DailyStatsUpdate {
-            avg_stability: 0.5,
-            avg_difficulty: 0.3,
-            total_words: 5,
-            known_words: 10,
-            new_words: 2,
-            in_progress_words: 3,
-            high_difficulty_words: 1,
-            positive_ratings: 0,
-            negative_ratings: 0,
-            total_ratings: 0,
-            new_cards_studied_today: 0,
-            phrase_cards_studied_today: 0,
-        },
-        Rating::Good,
-    );
+    item.update(filler_stats(), rating);
 
-    assert_eq!(item.positive_ratings(), 1);
-    assert_eq!(item.negative_ratings(), 0);
+    let (expected_positive, expected_negative) = if positive { (1, 0) } else { (0, 1) };
+    assert_eq!(item.positive_ratings(), expected_positive);
+    assert_eq!(item.negative_ratings(), expected_negative);
     assert_eq!(item.total_ratings(), 1);
 }
 
 #[test]
-fn test_update_increments_positive_ratings_on_easy() {
+fn update_accumulates_ratings() {
     let mut item = DailyHistoryItem::new();
-    item.update(
-        DailyStatsUpdate {
-            avg_stability: 0.5,
-            avg_difficulty: 0.3,
-            total_words: 5,
-            known_words: 10,
-            new_words: 2,
-            in_progress_words: 3,
-            high_difficulty_words: 1,
-            positive_ratings: 0,
-            negative_ratings: 0,
-            total_ratings: 0,
-            new_cards_studied_today: 0,
-            phrase_cards_studied_today: 0,
-        },
-        Rating::Easy,
-    );
-
-    assert_eq!(item.positive_ratings(), 1);
-    assert_eq!(item.negative_ratings(), 0);
-    assert_eq!(item.total_ratings(), 1);
-}
-
-#[test]
-fn test_update_increments_negative_ratings_on_again() {
-    let mut item = DailyHistoryItem::new();
-    item.update(
-        DailyStatsUpdate {
-            avg_stability: 0.5,
-            avg_difficulty: 0.3,
-            total_words: 5,
-            known_words: 10,
-            new_words: 2,
-            in_progress_words: 3,
-            high_difficulty_words: 1,
-            positive_ratings: 0,
-            negative_ratings: 0,
-            total_ratings: 0,
-            new_cards_studied_today: 0,
-            phrase_cards_studied_today: 0,
-        },
-        Rating::Again,
-    );
-
-    assert_eq!(item.positive_ratings(), 0);
-    assert_eq!(item.negative_ratings(), 1);
-    assert_eq!(item.total_ratings(), 1);
-}
-
-#[test]
-fn test_update_increments_negative_ratings_on_hard() {
-    let mut item = DailyHistoryItem::new();
-    item.update(
-        DailyStatsUpdate {
-            avg_stability: 0.5,
-            avg_difficulty: 0.3,
-            total_words: 5,
-            known_words: 10,
-            new_words: 2,
-            in_progress_words: 3,
-            high_difficulty_words: 1,
-            positive_ratings: 0,
-            negative_ratings: 0,
-            total_ratings: 0,
-            new_cards_studied_today: 0,
-            phrase_cards_studied_today: 0,
-        },
-        Rating::Hard,
-    );
-
-    assert_eq!(item.positive_ratings(), 0);
-    assert_eq!(item.negative_ratings(), 1);
-    assert_eq!(item.total_ratings(), 1);
-}
-
-#[test]
-fn test_update_accumulates_ratings() {
-    let mut item = DailyHistoryItem::new();
-    let make_stats = || DailyStatsUpdate {
-        avg_stability: 0.5,
-        avg_difficulty: 0.3,
-        total_words: 5,
-        known_words: 10,
-        new_words: 2,
-        in_progress_words: 3,
-        high_difficulty_words: 1,
-        positive_ratings: 0,
-        negative_ratings: 0,
-        total_ratings: 0,
-        new_cards_studied_today: 0,
-        phrase_cards_studied_today: 0,
-    };
-    item.update(make_stats(), Rating::Good);
-    item.update(make_stats(), Rating::Easy);
-    item.update(make_stats(), Rating::Again);
+    item.update(filler_stats(), Rating::Good);
+    item.update(filler_stats(), Rating::Easy);
+    item.update(filler_stats(), Rating::Again);
 
     assert_eq!(item.positive_ratings(), 2);
     assert_eq!(item.negative_ratings(), 1);
@@ -325,7 +240,7 @@ fn test_update_accumulates_ratings() {
 }
 
 #[test]
-fn test_merge_with_takes_max_ratings() {
+fn merge_with_takes_max_ratings() {
     let now = Utc::now();
     let mut item1 = DailyHistoryItem::new();
     item1.update_stats(DailyStatsUpdate {
@@ -369,13 +284,13 @@ fn test_merge_with_takes_max_ratings() {
 }
 
 #[test]
-fn test_new_cards_studied_today_default() {
+fn new_cards_studied_today_default_is_zero() {
     let item = DailyHistoryItem::new();
     assert_eq!(item.new_cards_studied_today(), 0);
 }
 
 #[test]
-fn test_increment_new_cards_studied() {
+fn increment_new_cards_studied_accumulates() {
     let mut item = DailyHistoryItem::new();
     item.increment_new_cards_studied();
     item.increment_new_cards_studied();
@@ -383,7 +298,7 @@ fn test_increment_new_cards_studied() {
 }
 
 #[test]
-fn test_merge_with_takes_max_new_cards_studied() {
+fn merge_with_takes_max_new_cards_studied() {
     let now = Utc::now();
     let mut item1 = create_test_item(now, 2, 5, 10);
     let mut item2 = create_test_item(now, 5, 3, 8);
@@ -395,13 +310,13 @@ fn test_merge_with_takes_max_new_cards_studied() {
 }
 
 #[test]
-fn test_phrase_cards_studied_today_default() {
+fn phrase_cards_studied_today_default_is_zero() {
     let item = DailyHistoryItem::new();
     assert_eq!(item.phrase_cards_studied_today(), 0);
 }
 
 #[test]
-fn test_increment_phrase_cards_studied() {
+fn increment_phrase_cards_studied_accumulates() {
     let mut item = DailyHistoryItem::new();
     item.increment_phrase_cards_studied();
     item.increment_phrase_cards_studied();
@@ -409,7 +324,7 @@ fn test_increment_phrase_cards_studied() {
 }
 
 #[test]
-fn test_merge_with_takes_max_phrase_cards_studied() {
+fn merge_with_takes_max_phrase_cards_studied() {
     let now = Utc::now();
     let mut item1 = create_test_item(now, 2, 5, 10);
     let mut item2 = create_test_item(now, 5, 3, 8);
@@ -432,7 +347,7 @@ fn create_test_item_with_new_studied(
 }
 
 #[test]
-fn test_estimate_returns_none_when_no_new_cards() {
+fn estimate_returns_none_when_no_new_cards() {
     let history = vec![create_test_item_with_new_studied(
         Utc::now() - Duration::days(1),
         5,
@@ -441,12 +356,12 @@ fn test_estimate_returns_none_when_no_new_cards() {
 }
 
 #[test]
-fn test_estimate_returns_none_when_no_history() {
+fn estimate_returns_none_when_no_history() {
     assert!(estimate_completion_date(&[], 100).is_none());
 }
 
 #[test]
-fn test_estimate_returns_none_when_all_zero_studied() {
+fn estimate_returns_none_when_all_zero_studied() {
     let history = vec![create_test_item_with_new_studied(
         Utc::now() - Duration::days(1),
         0,
@@ -455,13 +370,13 @@ fn test_estimate_returns_none_when_all_zero_studied() {
 }
 
 #[test]
-fn test_estimate_returns_none_when_excludes_today() {
+fn estimate_returns_none_when_excludes_today() {
     let history = vec![create_test_item_with_new_studied(Utc::now(), 10)];
     assert!(estimate_completion_date(&history, 100).is_none());
 }
 
 #[test]
-fn test_estimate_basic_calculation() {
+fn estimate_returns_expected_date_for_simple_history() {
     let history = vec![create_test_item_with_new_studied(
         Utc::now() - Duration::days(1),
         5,
@@ -473,7 +388,7 @@ fn test_estimate_basic_calculation() {
 }
 
 #[test]
-fn test_estimate_averages_over_multiple_days() {
+fn estimate_averages_over_multiple_days() {
     let history = vec![
         create_test_item_with_new_studied(Utc::now() - Duration::days(2), 10),
         create_test_item_with_new_studied(Utc::now() - Duration::days(1), 20),
@@ -485,7 +400,7 @@ fn test_estimate_averages_over_multiple_days() {
 }
 
 #[test]
-fn test_estimate_skips_zero_study_days() {
+fn estimate_skips_zero_study_days() {
     let history = vec![
         create_test_item_with_new_studied(Utc::now() - Duration::days(3), 10),
         create_test_item_with_new_studied(Utc::now() - Duration::days(2), 0),
@@ -498,7 +413,7 @@ fn test_estimate_skips_zero_study_days() {
 }
 
 #[test]
-fn test_estimate_uses_last_10_non_today_records() {
+fn estimate_uses_last_10_non_today_records() {
     let history: Vec<DailyHistoryItem> = (1..=15)
         .map(|i| create_test_item_with_new_studied(Utc::now() - Duration::days(i), 5))
         .collect();

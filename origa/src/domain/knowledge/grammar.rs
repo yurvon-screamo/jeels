@@ -452,7 +452,7 @@ mod tests {
         }
 
         #[test]
-        fn test_card_serialization_roundtrip() {
+        fn card_serialization_roundtrip() {
             let card = GrammarRuleCard::new_test();
 
             let json = serde_json::to_string(&card).expect("Failed to serialize");

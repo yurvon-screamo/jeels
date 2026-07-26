@@ -243,7 +243,7 @@ mod tests {
     #[case("irodori_shokyuu2_18", "Irodori")]
     #[case("unknown_id", "unknown")]
     #[case("some_random_set", "some")]
-    fn test_id_to_set_type_various_prefixes(#[case] id: &str, #[case] expected: &str) {
+    fn id_to_set_type_various_prefixes(#[case] id: &str, #[case] expected: &str) {
         assert_eq!(id_to_set_type(id), expected);
     }
 
@@ -301,12 +301,12 @@ mod tests {
         "well_known_set/spy_family/spy_family_s01_e12.json"
     )]
     #[case("random_id", "well_known_set/random_id.json")]
-    fn test_resolve_set_path_formats(#[case] id: &str, #[case] expected: &str) {
+    fn resolve_set_path_formats(#[case] id: &str, #[case] expected: &str) {
         assert_eq!(resolve_set_path(id), expected);
     }
 
     #[test]
-    fn test_resolve_set_path_returns_fallback_for_spy_family_prefix_without_episode_suffix() {
+    fn resolve_set_path_returns_fallback_for_spy_family_prefix_without_episode_suffix() {
         // Real spy_family ids always carry an episode suffix (spy_family_sNN_eNN), so a
         // bare prefix is not a valid id and intentionally falls through to the generic path.
         assert_eq!(
@@ -316,7 +316,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_set_path_handles_special_characters() {
+    fn resolve_set_path_handles_special_characters() {
         let id_with_dots = "test..dots";
         let path = resolve_set_path(id_with_dots);
         assert!(path.starts_with("well_known_set/"));
@@ -324,7 +324,7 @@ mod tests {
     }
 
     #[test]
-    fn test_types_meta_get_label_returns_correct_labels() {
+    fn types_meta_get_label_returns_correct_labels() {
         let meta = TypesMeta {
             types: vec![TypeMeta {
                 id: "Test".to_string(),
@@ -348,7 +348,7 @@ mod tests {
     }
 
     #[test]
-    fn test_well_known_set_meta_accessors() {
+    fn well_known_set_meta_accessors() {
         let meta = WellKnownSetMeta {
             id: "test_set".to_string(),
             set_type: "Test".to_string(),
@@ -371,7 +371,7 @@ mod tests {
     }
 
     #[test]
-    fn test_well_known_set_accessors() {
+    fn well_known_set_accessors() {
         let set = WellKnownSet::new(
             JapaneseLevel::N5,
             vec!["word1".to_string(), "word2".to_string()],

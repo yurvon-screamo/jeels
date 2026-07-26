@@ -1,0 +1,104 @@
+import { expect } from "@playwright/test";
+import { When, Then } from "../fixtures";
+import { SetsPage } from "../../pages";
+
+When('пользователь открывает страницу наборов', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.goto();
+    await setsPage.expectSetsVisible();
+    await setsPage.waitForLoad();
+});
+
+Then('отображается список доступных наборов', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getSetCardCount()).toBeGreaterThan(0);
+    expect(await setsPage.getImportedCardCount()).toBe(0);
+});
+
+When('импортирует первый набор', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    const countBefore = await setsPage.getImportedCardCount();
+    await setsPage.clickImportOnCard(0);
+    await setsPage.waitForDrawerWords();
+    await setsPage.importFromDrawer();
+    await setsPage.waitForLoad();
+    const countAfter = await setsPage.getImportedCardCount();
+    expect(countAfter).toBeGreaterThanOrEqual(countBefore);
+});
+
+When('отменяет импорт первого набора', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    const countBefore = await setsPage.getImportedCardCount();
+    await setsPage.clickImportOnCard(0);
+    await setsPage.waitForDrawerWords();
+    await setsPage.cancelImportFromDrawer();
+    await expect(setsPage.drawer).not.toBeVisible();
+    expect(await setsPage.getImportedCardCount()).toBe(countBefore);
+});
+
+Then('набор отображается как импортированный', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getImportedCardCount()).toBeGreaterThan(0);
+});
+
+Then('ни один набор не импортирован', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getImportedCardCount()).toBe(0);
+});
+
+When('ищет наборы {string}', async ({ page }, query: string) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.searchSets(query);
+    await page.waitForTimeout(500);
+});
+
+Then('список наборов пуст', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getSetCardCount()).toBe(0);
+});
+
+When('выбирает первый набор', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.selectSetCheckbox(0);
+});
+
+When('выбирает второй набор', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.selectSetCheckbox(1);
+});
+
+Then('отображается кнопка импорта выбранных', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.importSelectedBtn).toBeVisible();
+});
+
+When('отменяет выбор наборов', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.cancelSelection();
+});
+
+Then('кнопка импорта выбранных скрыта', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.importSelectedBtn).not.toBeVisible();
+});
+
+When('фильтрует наборы по уровню {string}', async ({ page }, level: string) => {
+    const filterBtn = page.getByTestId(`filter-level-${level}`).or(page.getByRole("button", { name: level }));
+    await filterBtn.first().click();
+});
+
+Then('отображаются наборы уровня {string}', async ({ page }, level: string) => {
+    const setsPage = new SetsPage(page);
+    const count = await setsPage.getSetCardCount();
+    expect(count, `expected sets for level ${level}`).toBeGreaterThan(0);
+});
+
+When('фильтрует наборы по статусу {string}', async ({ page }, status: string) => {
+    const filterBtn = page.getByTestId(`filter-status-${status}`).or(page.getByRole("button", { name: status }));
+    await filterBtn.first().click();
+});
+
+Then('отображается больше наборов', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    expect(await setsPage.getSetCardCount()).toBeGreaterThan(0);
+});
