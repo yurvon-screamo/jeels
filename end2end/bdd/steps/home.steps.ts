@@ -78,5 +78,5 @@ Then('отображается график активности', async ({ page
 });
 
 Then('отображается нижняя панель навигации', async ({ page }) => {
-    await expect(page.getByTestId(/bottom.*nav|mobile.*tab/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(".bottom-tab-bar")).toBeVisible({ timeout: 10_000 });
 });

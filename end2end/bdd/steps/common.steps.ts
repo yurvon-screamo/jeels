@@ -45,7 +45,12 @@ Then('первая карточка отмечена избранной', async 
 // Generic filter + detail steps
 
 When('выбирает фильтр карточек {string}', async ({ page }, filter: string) => {
-    const filterBtn = page.getByTestId(`filter-${filter}`).or(page.getByRole("button", { name: filter }));
+    const filterMap: Record<string, string> = {
+        "all": "all", "new": "new", "learning": "in-progress",
+        "hard": "hard", "learned": "learned",
+    };
+    const suffix = filterMap[filter] ?? filter;
+    const filterBtn = page.getByTestId(new RegExp(`filter-${suffix}`));
     await filterBtn.first().click();
 });
 
@@ -75,6 +80,12 @@ Then('кнопка отметки скрыта для первой карточ�
     const markBtn = page.locator('[data-testid*="card-item"]').first()
         .locator('[data-testid*="mark-as-known"]').first();
     await expect(markBtn).not.toBeVisible({ timeout: 5_000 });
+});
+
+Then('отображается кнопка отметки как известное', async ({ page }) => {
+    const markBtn = page.locator('[data-testid*="card-item"]').first()
+        .locator('[data-testid*="mark-known"]').first();
+    await expect(markBtn).toBeVisible({ timeout: 5_000 });
 });
 
 When('отмечает первую фразу как известную', async ({ page }) => {
