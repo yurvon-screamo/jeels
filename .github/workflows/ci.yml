@@ -306,7 +306,7 @@ jobs:
 
             - name: Run BDD tests
               working-directory: end2end
-              run: npx playwright test --project=bdd
+              run: npx playwright test --project=bdd --retries=0
 
             - name: Upload blob report
               if: always()
