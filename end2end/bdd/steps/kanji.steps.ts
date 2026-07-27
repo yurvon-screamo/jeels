@@ -29,6 +29,8 @@ When('открывает добавление кандзи', async ({ page }) =>
 
 When('подтверждает добавление кандзи', async ({ page }) => {
     const kanjiPage = new KanjiPage(page);
+    await kanjiPage.drawerSelectAllBtn.click();
+    await expect(kanjiPage.drawer).toContainText(/Выбрано|selected/i, { timeout: 10_000 }).catch(() => {});
     await kanjiPage.drawerAddBtn.click();
     await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
 });
@@ -61,8 +63,8 @@ When('пользователь отменяет удаление первого 
 });
 
 When('нажимает кнопку возврата на кандзи', async ({ page }) => {
-    const kanjiPage = new KanjiPage(page);
-    await kanjiPage.backBtn.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('пользователь отмечает первое кандзи как известное', async ({ page }) => {

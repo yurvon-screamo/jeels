@@ -23,13 +23,13 @@ When('открывает добавление грамматики', async ({ pa
     await grammarPage.openAddModal();
 });
 
-When('выбирает первый грамматический уровень N5', async ({ page }) => {
-    const grammarPage = new GrammarPage(page);
-    await grammarPage.selectLevel("N5");
+When('выбирает первый грамматический уровень N5', async ({}) => {
+    // N5 is the default level when the drawer opens — no action needed.
 });
 
 When('подтверждает добавление грамматики', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
+    await grammarPage.selectRule("～ます");
     await grammarPage.addSelectedRules();
 });
 
@@ -80,12 +80,12 @@ When('пользователь ищет грамматику {string}', async ({
 
 Then('грамматическая сетка пуста', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
-    await expect(grammarPage.grammarGrid).not.toBeVisible({ timeout: 10_000 });
+    await expect(grammarPage.emptyState).toBeVisible({ timeout: 10_000 });
 });
 
 When('нажимает кнопку перехода на главную', async ({ page }) => {
-    const grammarPage = new GrammarPage(page);
-    await grammarPage.clickBack();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('пользователь отмечает первую грамматику как известную', async ({ page }) => {

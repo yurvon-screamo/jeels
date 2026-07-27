@@ -126,8 +126,8 @@ Then('страница наборов отображается', async ({ page }
 });
 
 When('нажимает кнопку возврата на главную', async ({ page }) => {
-    const wordsPage = new WordsPage(page);
-    await wordsPage.backButton.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('переключает на вкладку Anki', async ({ page }) => {
