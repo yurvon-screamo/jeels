@@ -29,6 +29,15 @@ When('открывает добавление кандзи', async ({ page }) =>
 
 When('подтверждает добавление кандзи', async ({ page }) => {
     const kanjiPage = new KanjiPage(page);
+    // The "add" button stays disabled until at least one kanji is selected.
+    // If the upstream scenario skipped an explicit selection step (e.g. the
+    // "Добавление кандзи N5" path), fall back to "select all".
+    if (await kanjiPage.drawerAddBtn.isEnabled().catch(() => false)) {
+        // already enabled — something is selected
+    } else {
+        await kanjiPage.drawerSelectAllBtn.click();
+        await expect(kanjiPage.drawerAddBtn).toBeEnabled({ timeout: 10_000 });
+    }
     await kanjiPage.drawerAddBtn.click();
     await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
 });

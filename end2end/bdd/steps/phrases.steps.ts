@@ -19,8 +19,10 @@ Then('отображается поле поиска фраз', async ({ page })
 });
 
 Then('отображается вкладка фраз в навигации', async ({ page }) => {
-    await expect(page.getByTestId("bottom-tab-bar").or(page.locator(".bottom-tab-bar"))).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId(/tab-phrases/).or(page.getByRole("link", { name: /phrase/i }))).toBeVisible({ timeout: 10_000 });
+    // The bottom-tab nav is mobile-only (lg:hidden); switch viewport so it renders.
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect(page.getByTestId("bottom-tab")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("bottom-tab-tab-phrases")).toBeVisible({ timeout: 10_000 });
 });
 
 When('нажимает кнопку возврата с фраз', async ({ page }) => {

@@ -56,8 +56,18 @@ When('выбирает фильтр карточек {string}', async ({ page },
 });
 
 When('нажимает кнопку возврата с деталей', async ({ page }) => {
-    await page.goto("/home");
-    await page.waitForURL(/\/home$/, { timeout: 10_000 });
+    // "Back from detail" returns to the parent list page (e.g. /grammar/<id>
+    // → /grammar). Derive the parent path from the current URL so the step
+    // works for any detail page without per-feature variants.
+    const url = new URL(page.url());
+    const segments = url.pathname.split("/").filter(Boolean);
+    // Drop the trailing id segment; keep the rest as the parent path.
+    if (segments.length > 1) {
+        segments.pop();
+    }
+    const parent = "/" + segments.join("/");
+    await page.goto(parent);
+    await page.waitForURL(new RegExp(`${parent}$`), { timeout: 10_000 });
 });
 
 When('удаляет карточку со страницы деталей', async ({ page }) => {

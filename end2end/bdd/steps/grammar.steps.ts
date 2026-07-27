@@ -100,17 +100,18 @@ When('пользователь открывает детали первой гр
 
 Then('отображается страница деталей грамматики', async ({ page }) => {
     await page.waitForURL(/\/grammar\//, { timeout: 10_000 });
-    await expect(page.getByTestId("grammar-detail-container").or(page.getByTestId("grammar-detail-actions"))).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-detail-container")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается содержимое деталей грамматики', async ({ page }) => {
     await page.waitForURL(/\/grammar\//, { timeout: 10_000 });
-    await expect(page.getByTestId("grammar-detail-container").or(page.getByTestId("grammar-detail-actions"))).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId("grammar-detail-breadcrumbs").or(page.getByTestId(/breadcrumb/))).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId("grammar-detail-container")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-detail-breadcrumbs")).toBeVisible({ timeout: 5_000 });
 });
 
 When('нажимает хлебные крошки', async ({ page }) => {
-    await page.getByTestId("grammar-detail-breadcrumbs-back").or(page.getByTestId(/breadcrumb/).first()).click();
+    await page.getByTestId("grammar-detail-breadcrumbs-back").click();
+    await page.waitForURL(/\/grammar$/, { timeout: 10_000 });
 });
 
 Then('отображается кнопа отметки как известное', async ({ page }) => {
@@ -133,29 +134,37 @@ Given('у пользователя есть много грамматическ�
 });
 
 When('нажимает кнопку практики', async ({ page }) => {
-    await page.getByTestId("grammar-detail-practice-btn").click();
+    // On desktop the practice session is rendered inline (no tabs to click);
+    // on mobile it lives behind the "practice" tab. Pick whichever applies.
+    const practiceTab = page.getByTestId("grammar-detail-tabs-practice");
+    if (await practiceTab.isVisible().catch(() => false)) {
+        await practiceTab.click();
+    }
+    await expect(
+        page.getByTestId("grammar-practice-progress").or(page.getByTestId("grammar-practice-complete")).or(page.getByTestId("grammar-practice-no-words")),
+    ).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается сессия практики с вопросами', async ({ page }) => {
-    await expect(page.getByTestId("practice-question")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-practice-progress")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается вопрос практики', async ({ page }) => {
-    await expect(page.getByTestId("practice-question")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-practice-progress")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображаются варианты ответа практики', async ({ page }) => {
-    await expect(page.getByTestId("practice-option").first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("grammar-practice-option-0")).toBeVisible({ timeout: 10_000 });
 });
 
 When('отвечает на все вопросы практики', async ({ page }) => {
     for (let i = 0; i < 20; i++) {
-        const complete = page.getByTestId("practice-complete");
+        const complete = page.getByTestId("grammar-practice-complete");
         if (await complete.isVisible().catch(() => false)) break;
-        const option = page.getByTestId("practice-option").first();
+        const option = page.getByTestId("grammar-practice-option-0");
         if (await option.isVisible({ timeout: 3_000 }).catch(() => false)) {
             await option.click();
-            const nextBtn = page.getByTestId("practice-next-btn");
+            const nextBtn = page.getByTestId("grammar-practice-next-btn");
             if (await nextBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
                 await nextBtn.click();
             }
@@ -164,5 +173,5 @@ When('отвечает на все вопросы практики', async ({ pa
 });
 
 Then('отображается завершение практики', async ({ page }) => {
-    await expect(page.getByTestId("practice-complete")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-practice-complete")).toBeVisible({ timeout: 15_000 });
 });

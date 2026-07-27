@@ -15,12 +15,22 @@ Then('главная страница отображается', async ({ page }
 
 When('нажимает навигацию к словам', async ({ page }) => {
     const homePage = new HomePage(page);
-    await homePage.sidebarWords.click();
+    // Sidebar is hidden on mobile; bottom-tab is hidden on desktop. Pick the
+    // one actually rendered for the current viewport.
+    if (await homePage.bottomTabWords.isVisible().catch(() => false)) {
+        await homePage.bottomTabWords.click();
+    } else {
+        await homePage.sidebarWords.click();
+    }
 });
 
 When('нажимает навигацию к грамматике', async ({ page }) => {
     const homePage = new HomePage(page);
-    await homePage.sidebarGrammar.click();
+    if (await homePage.bottomTabGrammar.isVisible().catch(() => false)) {
+        await homePage.bottomTabGrammar.click();
+    } else {
+        await homePage.sidebarGrammar.click();
+    }
 });
 
 Then('страница грамматики отображается', async ({ page }) => {
@@ -78,5 +88,5 @@ Then('отображается график активности', async ({ page
 });
 
 Then('отображается нижняя панель навигации', async ({ page }) => {
-    await expect(page.locator(".bottom-tab-bar")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("bottom-tab")).toBeVisible({ timeout: 10_000 });
 });

@@ -11,10 +11,15 @@ import { withAuthenticatedPage } from "../helpers/auth";
  *
  * Step definitions import { Given, When, Then } from this file.
  */
-export const test = base.extend<object>({
-    page: async ({ browser }, use) => {
-        await withAuthenticatedPage(browser, use);
-    },
+export const test = base.extend<object, object>({
+    page: [
+        async ({ browser }, use) => {
+            await withAuthenticatedPage(browser, use);
+        },
+        // uiLogin can retry up to 3 times, each with a 60s waitForURL timeout,
+        // plus WASM cold load. Default fixture timeout (60s) is too tight.
+        { timeout: 180_000 },
+    ],
 });
 
 export const { Given, When, Then } = createBdd(test);
