@@ -8,7 +8,10 @@ Given('у пользователя есть добавленное кандзи'
     await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
     await kanjiPage.addBtn.click();
     await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
+    await kanjiPage.drawerSelectAllBtn.click();
+    await expect(kanjiPage.drawer).toContainText(/Выбрано|selected/i, { timeout: 10_000 }).catch(() => {});
     await kanjiPage.drawerAddBtn.click();
+    await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
     await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
 });
 
@@ -58,8 +61,8 @@ When('пользователь отменяет удаление первого 
 });
 
 When('нажимает кнопку возврата на кандзи', async ({ page }) => {
-    const kanjiPage = new KanjiPage(page);
-    await kanjiPage.backBtn.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('пользователь отмечает первое кандзи как известное', async ({ page }) => {

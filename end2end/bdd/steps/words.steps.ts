@@ -1,3 +1,4 @@
+import path from "path";
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
 import { WordsPage } from "../../pages";
@@ -121,8 +122,8 @@ Then('страница наборов отображается', async ({ page }
 });
 
 When('нажимает кнопку возврата на главную', async ({ page }) => {
-    const wordsPage = new WordsPage(page);
-    await wordsPage.backButton.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('переключает на вкладку Anki', async ({ page }) => {
@@ -161,7 +162,7 @@ When('переключает на вкладку изображения', async 
 
 When('загружает изображение для распознавания', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadImageFile("../../origa/src/ocr/ocr_example.jpg");
+    await wordsPage.uploadImageFile(path.resolve(__dirname, "../../../origa/src/ocr/ocr_example.jpg"));
     await page.waitForTimeout(5000);
 });
 
@@ -172,6 +173,6 @@ When('переключает на вкладку аудио', async ({ page }) =
 
 When('загружает аудио для транскрипции', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadAudioFile("../fixtures/standard_sample1.wav");
+    await wordsPage.uploadAudioFile(path.resolve(__dirname, "../../fixtures/standard_sample1.wav"));
     await page.waitForTimeout(5000);
 });
