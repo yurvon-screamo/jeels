@@ -8,8 +8,12 @@ Given('у пользователя есть добавленное кандзи'
     await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
     await kanjiPage.addBtn.click();
     await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
-    await kanjiPage.drawerSelectAllBtn.click();
-    await expect(kanjiPage.drawer).toContainText(/Выбрано|selected/i, { timeout: 10_000 }).catch(() => {});
+    // Pick exactly one kanji (the first in the current level) so scenarios
+    // like "Удаление кандзи" can reach the empty-state after a single delete.
+    // Tests that need many kanji use the separate "много кандзи" Given.
+    const firstItem = kanjiPage.drawer.getByTestId("kanji-drawer-item").first();
+    await expect(firstItem).toBeVisible({ timeout: 10_000 });
+    await firstItem.click();
     await kanjiPage.drawerAddBtn.click();
     await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
     await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });

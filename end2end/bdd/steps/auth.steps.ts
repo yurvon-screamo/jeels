@@ -3,8 +3,21 @@ import { Given, When, Then } from "../fixtures";
 import { LoginPage } from "../../pages";
 
 Given('пользователь вышел из аккаунта', async ({ page }) => {
+    // The BDD fixture logs the user in and stores the TrailBase auth token in
+    // localStorage. Clearing cookies alone is not enough — Leptos rehydrates
+    // the session from localStorage on next load. Wipe all client-side state
+    // so the app falls back to the public /login route.
     await page.context().clearCookies();
     await page.goto("/");
+    await page.evaluate(() => {
+        try {
+            window.localStorage.clear();
+            window.sessionStorage.clear();
+        } catch {
+            // ignore — some browsers block storage access in cross-origin iframes
+        }
+    });
+    await page.reload();
 });
 
 When('открывается страница входа', async ({ page }) => {

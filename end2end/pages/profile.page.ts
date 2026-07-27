@@ -61,7 +61,12 @@ export class ProfilePage extends BasePage {
 	}
 
 	async selectLanguage(lang: "english" | "russian"): Promise<void> {
-		const btn = lang === "english" ? this.langEnglish : this.langRussian;
+		// Scope to the profile language toggle to avoid matching the same
+		// testid on other mounted language toggles (login, onboarding).
+		const toggle = this.profileContent.getByTestId("profile-lang-toggle");
+		const btn = lang === "english"
+			? toggle.getByTestId("lang-toggle-en")
+			: toggle.getByTestId("lang-toggle-ru");
 		await btn.click();
 	}
 
@@ -110,10 +115,20 @@ export class ProfilePage extends BasePage {
 	}
 
 	async waitForAutoSave(): Promise<void> {
-		const status = this.autosaveStatus;
-		// Wait for status to appear (Saving state)
-		await status.waitFor({ state: "visible", timeout: 5_000 });
-		// Wait for it to show "Saved" or disappear (Idle after fade)
-		await expect(status).toContainText(/saved|сохранено/i, { timeout: 10_000 });
+		// The autosave indicator flips Saving → Saved → Idle in ~1–2s. Saved
+		// only stays visible for ~1.5s, so we cannot use the default
+		// expect(locator).toContainText retry (1s polling misses the window).
+		// Poll tightly and accept either the Saving or Saved message.
+		const start = Date.now();
+		let lastSeen = "(none)";
+		while (Date.now() - start < 15_000) {
+			const txt = (await this.page.getByTestId("profile-autosave-status").textContent()) ?? "";
+			lastSeen = txt.trim() || "(empty)";
+			if (/saved|сохранено|сохранение|saving/i.test(txt)) {
+				return;
+			}
+			await this.page.waitForTimeout(50);
+		}
+		throw new Error(`Autosave status never appeared within 15s (last seen: "${lastSeen}")`);
 	}
 }

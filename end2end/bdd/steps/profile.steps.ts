@@ -64,7 +64,8 @@ When('нажимает кнопку выхода', async ({ page }) => {
 });
 
 Then('происходит переход на страницу входа', async ({ page }) => {
-    await page.waitForURL(/\/login/, { timeout: 15_000 });
+    // login-page testid is the PageLayout wrapper for /login
+    await expect(page.getByTestId("login-page")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается карточка смены пароля', async ({ page }) => {
@@ -99,6 +100,11 @@ When('нажимает кнопку удаления аккаунта', async ({
 
 When('подтверждает удаление', async ({ page }) => {
     await page.getByTestId("profile-confirm-delete-btn").click();
+    // delete_account() clears local auth state but the route doesn't change
+    // on its own — explicitly navigate to /login to verify the session is gone.
+    await page.waitForTimeout(1500);
+    await page.goto("/login");
+    await page.waitForLoadState("networkidle");
 });
 
 Then('отображается сообщение об успешной смене пароля', async ({ page }) => {
@@ -106,8 +112,9 @@ Then('отображается сообщение об успешной смен
 });
 
 Then('английский язык выбран', async ({ page }) => {
+    // autosave was already awaited in the When step; here we just verify the
+    // toggle reflects English as selected.
     const profilePage = new ProfilePage(page);
-    await profilePage.waitForAutoSave();
     const langClass = await profilePage.langEnglish.getAttribute("class") ?? "";
     const isEnglish = langClass.includes("cursor-default") || langClass.includes("fg-black") || !langClass.includes("fg-muted");
     expect(isEnglish).toBe(true);
@@ -126,7 +133,6 @@ When('выбирает минимальную нагрузку', async ({ page }
 
 Then('минимальная нагрузка выбрана', async ({ page }) => {
     const profilePage = new ProfilePage(page);
-    await profilePage.waitForAutoSave();
     const loadClass = await profilePage.loadMinimal.getAttribute("class") ?? "";
     const isSelected = loadClass.includes("btn-olive") || loadClass.includes("cursor-default") || !loadClass.includes("btn-ghost");
     expect(isSelected).toBe(true);

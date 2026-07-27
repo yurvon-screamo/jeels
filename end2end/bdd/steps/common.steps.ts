@@ -32,8 +32,12 @@ When('нажимает кнопку загрузки ещё', async ({ page }) =
 });
 
 When('переключает избранное первой карточки', async ({ page }) => {
-    await page.locator('[data-testid*="card-item"]').first()
-        .locator('[data-testid*="favorite"]').first().click();
+    const favBtn = page.locator('[data-testid*="card-item"]').first()
+        .locator('[data-testid*="favorite"]').first();
+    await favBtn.click();
+    // Wait for the filled-heart SVG to render so the toggle actually landed
+    // before any subsequent navigation reloads the page state.
+    await expect(favBtn.locator('svg path[fill="currentColor"]')).toBeVisible({ timeout: 10_000 });
 });
 
 Then('первая карточка отмечена избранной', async ({ page }) => {

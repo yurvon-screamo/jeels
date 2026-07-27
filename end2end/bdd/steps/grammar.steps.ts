@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
-import { GrammarPage } from "../../pages";
+import { GrammarPage, WordsPage } from "../../pages";
 
 Given('у пользователя есть добавленная грамматическая карточка', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
@@ -10,6 +10,38 @@ Given('у пользователя есть добавленная грамма�
     await grammarPage.selectRule("～ます");
     await grammarPage.addSelectedRules();
     await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });
+});
+
+// Grammar practice (quiz) pulls questions from the user's own vocabulary that
+// matches the rule (e.g. ます needs verb vocabulary). Without a matching word
+// the practice session renders a "no words" empty state and the quiz tests
+// can't exercise the option/next/complete flow.
+Given('у пользователя есть слово для практики грамматики', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.goto();
+    await wordsPage.expectWordsVisible();
+    await wordsPage.openAddModal();
+    // "私は本を読みます" tokenizes to 私 / 本 / 読む. 読む (yomu, "to read") is a
+    // godan verb — the only token that conjugates with the ます rule, so we
+    // must pick it specifically rather than relying on selectFirstWord.
+    // Furigana annotations break pure-kanji matching (the item shows as
+    // "読(ヨ)む"), so match on the Russian translation gloss instead.
+    await wordsPage.enterText("私は本を読みます");
+    await wordsPage.analyzeText();
+
+    const yomuItem = wordsPage.drawer.getByTestId("words-drawer-item").filter({ hasText: "читать" }).first();
+    await expect(yomuItem).toBeVisible({ timeout: 10_000 });
+    // analyze_text() pre-selects every token; click once to be sure the item
+    // toggles to the desired state, then verify via its checkbox.
+    await yomuItem.click();
+    const yomuCheckbox = yomuItem.locator('input[type="checkbox"]');
+    if (!(await yomuCheckbox.isChecked().catch(() => false))) {
+        await yomuItem.click();
+    }
+    await expect(yomuCheckbox).toBeChecked({ timeout: 5_000 });
+
+    await wordsPage.addSelectedWords();
+    await expect(wordsPage.wordsGrid).toBeVisible({ timeout: 10_000 });
 });
 
 When('пользователь открывает страницу грамматики', async ({ page }) => {
@@ -29,8 +61,16 @@ When('выбирает первый грамматический уровень 
 
 When('подтверждает добавление грамматики', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
-    await grammarPage.selectRule("～ます");
-    await grammarPage.addSelectedRules();
+    // The "add" button is disabled until at least one rule is selected. If a
+    // previous step (e.g. "выбирает уровни грамматики N5 и N4") already
+    // selected rules via selectAll, just submit; otherwise pick the canonical
+    // first rule ("～ます") so the step is self-sufficient.
+    if (await grammarPage.drawerAddBtn.isEnabled().catch(() => false)) {
+        await grammarPage.addSelectedRules();
+    } else {
+        await grammarPage.selectRule("～ます");
+        await grammarPage.addSelectedRules();
+    }
 });
 
 When('нажимает кнопку выбора всех правил', async ({ page }) => {
@@ -94,6 +134,13 @@ When('пользователь отмечает первую грамматик�
 });
 
 When('пользователь открывает детали первой грамматики', async ({ page }) => {
+    // Other Given steps (e.g. word setup) may have left the user on /words;
+    // make sure we are on the grammar list before drilling into a card.
+    if (!page.url().includes("/grammar/")) {
+        const grammarPage = new GrammarPage(page);
+        await grammarPage.goto();
+        await expect(grammarPage.grammarPage).toBeVisible({ timeout: 15_000 });
+    }
     await page.getByTestId("grammar-card-item").first().click();
     await page.waitForURL(/\/grammar\//, { timeout: 10_000 });
 });
