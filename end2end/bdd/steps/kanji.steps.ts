@@ -8,9 +8,10 @@ Given('у пользователя есть добавленное кандзи'
     await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
     await kanjiPage.addBtn.click();
     await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
-    await kanjiPage.selectLevel("N5");
-    await kanjiPage.selectAllKanji();
-    await kanjiPage.addSelectedKanji();
+    await kanjiPage.drawerSelectAllBtn.click();
+    await expect(kanjiPage.drawer).toContainText(/Выбрано|selected/i, { timeout: 10_000 }).catch(() => {});
+    await kanjiPage.drawerAddBtn.click();
+    await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
     await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
 });
 

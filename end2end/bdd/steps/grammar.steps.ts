@@ -7,7 +7,7 @@ Given('у пользователя есть добавленная грамма�
     await grammarPage.goto();
     await expect(grammarPage.grammarPage).toBeVisible({ timeout: 15_000 });
     await grammarPage.openAddModal();
-    await grammarPage.selectAllRules();
+    await grammarPage.selectRule("～ます");
     await grammarPage.addSelectedRules();
     await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });
 });
