@@ -2,7 +2,7 @@ name: origa-app
 options:
   bundleIdPrefix: net.uwuwu.origa
   deploymentTarget:
-    iOS: 14.0
+    iOS: 26.0
 fileGroups: [../../src]
 configs:
   debug: debug

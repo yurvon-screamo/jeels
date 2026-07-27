@@ -5469,6 +5469,7 @@ dependencies = [
 name = "origa-app"
 version = "0.1.0"
 dependencies = [
+ "rustls",
  "serde",
  "serde_json",
  "tauri",
