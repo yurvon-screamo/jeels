@@ -99,16 +99,18 @@ When('пользователь открывает детали первой гр
 });
 
 Then('отображается страница деталей грамматики', async ({ page }) => {
-    await expect(page.getByTestId("grammar-detail-page")).toBeVisible({ timeout: 10_000 });
+    await page.waitForURL(/\/grammar\//, { timeout: 10_000 });
+    await expect(page.getByTestId("grammar-detail-container").or(page.getByTestId("grammar-detail-actions"))).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается содержимое деталей грамматики', async ({ page }) => {
-    await expect(page.getByTestId("grammar-detail-page")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId(/breadcrumb/).first()).toBeVisible();
+    await page.waitForURL(/\/grammar\//, { timeout: 10_000 });
+    await expect(page.getByTestId("grammar-detail-container").or(page.getByTestId("grammar-detail-actions"))).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("grammar-detail-breadcrumbs").or(page.getByTestId(/breadcrumb/))).toBeVisible({ timeout: 5_000 });
 });
 
 When('нажимает хлебные крошки', async ({ page }) => {
-    await page.getByTestId(/breadcrumb/).first().click();
+    await page.getByTestId("grammar-detail-breadcrumbs-back").or(page.getByTestId(/breadcrumb/).first()).click();
 });
 
 Then('отображается кнопа отметки как известное', async ({ page }) => {

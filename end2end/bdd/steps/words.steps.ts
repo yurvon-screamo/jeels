@@ -80,7 +80,7 @@ When('пользователь ищет слово {string}', async ({ page }, q
 
 Then('сетка слов пуста', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await expect(wordsPage.wordsGrid).not.toBeVisible({ timeout: 10_000 });
+    await expect(wordsPage.emptyState).toBeVisible({ timeout: 10_000 });
 });
 
 When('выбирает фильтр слов {string}', async ({ page }, filter: string) => {
