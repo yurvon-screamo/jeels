@@ -332,7 +332,7 @@ jobs:
                     profile-sync)
                       npx playwright test --project=bdd --retries=0 \
                         --grep "Профиль пользователя|Синхронизация данных" \
-                        --grep-exclude "@skip"
+                        --grep-invert "Аутентификация"
                       ;;
                     onboarding-lesson)
                       npx playwright test --project=bdd --retries=0 \
