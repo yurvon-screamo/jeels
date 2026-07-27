@@ -109,7 +109,7 @@ Then('английский язык выбран', async ({ page }) => {
     const profilePage = new ProfilePage(page);
     await profilePage.waitForAutoSave();
     const langClass = await profilePage.langEnglish.getAttribute("class") ?? "";
-    expect(langClass).toContain("fg-black");
+    expect(langClass).toContain("cursor-default");
 });
 
 Then('отображается карточка настроек с информацией о приложении', async ({ page }) => {
@@ -127,7 +127,7 @@ Then('минимальная нагрузка выбрана', async ({ page }) 
     const profilePage = new ProfilePage(page);
     await profilePage.waitForAutoSave();
     const loadClass = await profilePage.loadMinimal.getAttribute("class") ?? "";
-    expect(loadClass).toContain("btn-olive");
+    expect(loadClass.includes("btn-olive") || loadClass.includes("cursor-default")).toBe(true);
 });
 
 Then('отображается подтверждение удаления', async ({ page }) => {

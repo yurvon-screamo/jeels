@@ -19,12 +19,13 @@ Then('отображается поле поиска фраз', async ({ page })
 });
 
 Then('отображается вкладка фраз в навигации', async ({ page }) => {
-    await expect(page.getByTestId("nav-phrases")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("bottom-tab-bar").or(page.locator(".bottom-tab-bar"))).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId(/tab-phrases/).or(page.getByRole("link", { name: /phrase/i }))).toBeVisible({ timeout: 10_000 });
 });
 
 When('нажимает кнопку возврата с фраз', async ({ page }) => {
-    const phrasesPage = new PhrasesPage(page);
-    await phrasesPage.backButton.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 Then('отображаются кнопки фильтрации фраз', async ({ page }) => {

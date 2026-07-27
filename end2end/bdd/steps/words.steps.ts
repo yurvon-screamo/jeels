@@ -46,7 +46,9 @@ When('отменяет добавление', async ({ page }) => {
 
 When('пользователь удаляет первое слово', async ({ page }) => {
     const wordsPage = new WordsPage(page);
+    const countBefore = await wordsPage.getCardCount();
     await wordsPage.deleteCardByIndex(0);
+    await expect.poll(() => wordsPage.getCardCount()).toBe(countBefore - 1);
 });
 
 When('пользователь отменяет удаление первого слова', async ({ page }) => {
