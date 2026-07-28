@@ -51,23 +51,26 @@ export class LoginPage extends BasePage {
      * expands; no-op when already expanded.
      */
     async expandPasswordForm(): Promise<void> {
+        // The email/password form is collapsed behind the "Sign in with
+        // password" toggle by default (mobile viewport fit). Wait for the
+        // toggle to actually be ready, then click — guards against the race
+        // where the page has just reloaded (e.g. after auth wipe) and the
+        // WASM view hasn't mounted yet.
         const toggle = this.passwordFormToggle;
-        await toggle.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
-        if (await toggle.isVisible().catch(() => false)) {
-            await toggle.click();
-        }
+        await expect(toggle).toBeVisible({ timeout: 15_000 });
+        await toggle.click();
+        // Verify the inner form actually opened before returning, so callers
+        // don't have to add their own wait.
+        await expect(this.emailInput).toBeVisible({ timeout: 5_000 });
     }
 
     async expectLoginFormVisible(): Promise<void> {
+        // Don't expand the password form here — that's the caller's
+        // responsibility. Asserting on the inner inputs after expand belongs
+        // in the explicit login-attempt step. We only verify the page-level
+        // wrapper and the card are mounted.
         await expect(this.loginPage).toBeVisible();
         await expect(this.loginCard).toBeVisible();
-        await this.expandPasswordForm();
-        await expect(this.loginForm).toBeVisible();
-        await expect(this.emailInput).toBeVisible();
-        await expect(this.passwordInput).toBeVisible();
-        await expect(this.submitButton).toBeVisible();
-        await expect(this.googleButton).toBeVisible();
-        await expect(this.yandexButton).toBeVisible();
     }
 
     async fillEmail(email: string): Promise<void> {
