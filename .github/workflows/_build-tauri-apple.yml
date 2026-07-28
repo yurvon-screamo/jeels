@@ -1,0 +1,201 @@
+name: Build Tauri Apple Apps
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                type: string
+                required: true
+            version_base:
+                type: string
+                required: true
+            version_type:
+                type: string
+                required: true
+            commit_sha:
+                type: string
+                required: true
+            build_date:
+                type: string
+                required: true
+            wasm_artifact_name:
+                type: string
+                required: true
+            skip_apple:
+                type: boolean
+                default: false
+        secrets:
+            apple-api-issuer:
+                required: false
+            apple-api-key:
+                required: false
+            apple-api-key-content:
+                required: false
+            apple-team-id:
+                required: false
+            apple-mac-app-cert-p12:
+                required: false
+            apple-mac-installer-cert-p12:
+                required: false
+            apple-mac-cert-password:
+                required: false
+        outputs:
+            ios-upload-status:
+                description: "iOS App Store Connect upload result: success|failure|skipped"
+                value: ${{ jobs.build-ios.outputs.upload-status }}
+
+env:
+    CARGO_TERM_COLOR: always
+
+# Apple builds are gated on:
+#   - Not Dependabot (no access to repo secrets)
+#   - Not explicitly skipped via `skip_apple` input
+# This keeps macOS runner minutes free for tag-driven releases and
+# manual workflow_dispatch runs, where the Apple secrets are available.
+
+jobs:
+    build-ios:
+        name: Build iOS
+        if: github.actor != 'dependabot[bot]' && inputs.skip_apple != true
+        runs-on: macos-15
+        permissions:
+            contents: read
+        outputs:
+            upload-status: ${{ steps.upload-report.outputs.status }}
+        env:
+            ORIGA_VERSION: ${{ inputs.version }}
+            ORIGA_COMMIT: ${{ inputs.commit_sha }}
+            ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Select latest Xcode with iOS 26 SDK
+              shell: bash
+              run: |
+                  # deploymentTarget.iOS: 26.0 requires Xcode 26 with iOS 26 SDK.
+                  # GitHub macos-15 runner ships multiple Xcode versions; pick the
+                  # newest one and verify it has iphoneos26 SDK before continuing.
+                  LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+                  if [ -z "$LATEST_XCODE" ]; then
+                    echo "::error::No Xcode found in /Applications"
+                    exit 1
+                  fi
+                  echo "Selected Xcode: $LATEST_XCODE"
+                  sudo xcode-select -s "$LATEST_XCODE"
+                  if ! xcodebuild -showsdks | grep -q "iphoneos26"; then
+                    echo "::error::iOS 26 SDK not found in $LATEST_XCODE"
+                    echo "--- Available SDKs ---"
+                    xcodebuild -showsdks
+                    exit 1
+                  fi
+                  echo "iOS 26 SDK verified"
+
+            - name: Download WASM artifact
+              uses: actions/download-artifact@v8
+              with:
+                  name: ${{ inputs.wasm_artifact_name }}
+                  path: origa_ui/dist/
+
+            - name: Decode Apple API Key
+              env:
+                  APPLE_API_KEY_CONTENT: ${{ secrets.apple-api-key-content }}
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+              run: |
+                  # Tauri iOS build uses xcodebuild -allowProvisioningUpdates with
+                  # -authenticationKeyPath/ID/IssuerID to auto-create cert and
+                  # provisioning profile via App Store Connect API. The .p8 must
+                  # be on disk; GitHub secret holds base64 of the original .p8.
+                  KEY_PATH="/tmp/AuthKey_${APPLE_API_KEY}.p8"
+                  echo "$APPLE_API_KEY_CONTENT" | base64 --decode > "$KEY_PATH"
+                  echo "APPLE_API_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+                  echo "API key decoded to $KEY_PATH"
+
+            - name: Update version in config files
+              uses: ./.github/actions/update-version
+              with:
+                  version: ${{ inputs.version }}
+
+            - name: Setup Rust with caching
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: aarch64-apple-ios
+                  shared-key: origa-ios-v1
+                  save-if: ${{ github.ref == 'refs/heads/master' }}
+
+            - name: Setup frontend tools
+              uses: ./.github/actions/setup-frontend
+              with:
+                  tools: tauri-cli
+
+            - name: Build iOS .ipa (App Store export)
+              working-directory: tauri
+              env:
+                  APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+                  APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
+                  APPLE_TEAM_ID: ${{ secrets.apple-team-id }}
+              run: |
+                  # --no-default-features --features app-store disables updater,
+                  # single-instance, and release-devtools for App Store compliance
+                  # (Mac App Store 2.4.5(vii), 2.5.1).
+                  cargo tauri ios build \
+                    --no-default-features --features app-store \
+                    --export-method app-store-connect
+
+            - name: Locate .ipa
+              id: ipa
+              shell: bash
+              run: |
+                  IPA_PATH=$(find target -name "*.ipa" -type f | head -1)
+                  if [ -z "$IPA_PATH" ] || [ ! -f "$IPA_PATH" ]; then
+                    echo "::error::No .ipa produced by cargo tauri ios build"
+                    find target -type f -name "*.ipa" 2>/dev/null || true
+                    exit 1
+                  fi
+                  echo "path=$IPA_PATH" >> "$GITHUB_OUTPUT"
+                  ls -la "$IPA_PATH"
+
+            - name: Upload .ipa artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ios-build
+                  path: ${{ steps.ipa.outputs.path }}
+                  retention-days: 7
+
+            - name: Upload to App Store Connect
+              id: upload
+              continue-on-error: true
+              env:
+                  APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+              run: |
+                  # xcrun altool handles App Store Connect upload using the same
+                  # API key as signing. continue-on-error: true so a failed
+                  # upload does not block the workflow — the .ipa is preserved
+                  # as artifact for manual upload via Transporter.app.
+                  xcrun altool --upload-app --type ios \
+                    --file "${{ steps.ipa.outputs.path }}" \
+                    --apiKey "$APPLE_API_KEY" \
+                    --apiIssuer "$APPLE_API_ISSUER"
+
+            - name: Report upload result
+              id: upload-report
+              if: always()
+              shell: bash
+              run: |
+                  if [ "${{ steps.upload.outcome }}" = "success" ]; then
+                    echo "status=success" >> "$GITHUB_OUTPUT"
+                    echo "✅ iOS build uploaded to App Store Connect"
+                  else
+                    echo "status=failure" >> "$GITHUB_OUTPUT"
+                    echo "::warning::xcrun altool upload failed. Download the ios-build artifact and upload manually via Transporter.app (https://apps.apple.com/us/app/transporter/id1450874784)"
+                  fi
+
+            - name: Cleanup API key
+              if: always()
+              shell: bash
+              run: |
+                  rm -f /tmp/AuthKey_*.p8
+                  echo "API key cleaned up"
