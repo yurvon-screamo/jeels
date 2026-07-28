@@ -321,11 +321,17 @@ jobs:
                   APPLE_API_KEY_CONTENT: ${{ secrets.apple-api-key-content }}
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
               run: |
-                  # API key is used by `xcrun altool` upload later; the same
-                  # .p8 file works for both iOS and macOS App Store Connect.
-                  KEY_PATH="/tmp/AuthKey_${APPLE_API_KEY}.p8"
+                  # Same pattern as build-ios: write to ./private_keys/ so
+                  # xcrun altool finds the key (it searches ./private_keys/,
+                  # ~/private_keys/, ~/.private_keys/, ~/.appstoreconnect/
+                  # private_keys/, or $API_PRIVATE_KEYS_DIR — NOT /tmp/).
+                  # APPLE_API_KEY_PATH is unused by macOS build (codesign uses
+                  # keychain identity, not API key), but set for consistency.
+                  KEY_PATH="private_keys/AuthKey_${APPLE_API_KEY}.p8"
+                  mkdir -p private_keys
                   echo "$APPLE_API_KEY_CONTENT" | base64 --decode > "$KEY_PATH"
-                  echo "APPLE_API_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+                  echo "APPLE_API_KEY_PATH=$(pwd)/$KEY_PATH" >> "$GITHUB_ENV"
+                  echo "API key decoded to $KEY_PATH"
 
             - name: Update version in config files
               uses: ./.github/actions/update-version
