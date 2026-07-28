@@ -113,6 +113,7 @@ tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-store = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
+tauri-plugin-haptics = "2"
 tauri-build = { version = "2", features = [] }
 
 # Dev Dependencies
