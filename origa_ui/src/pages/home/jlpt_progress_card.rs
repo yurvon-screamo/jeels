@@ -46,13 +46,15 @@ pub fn JlptProgressCard(
                 >
                     {move || format!("JLPT {}", current_level.get().code())}
                 </Tag>
-                <div class="flex-1 progress-track">
+                <div
+                    class="flex-1 progress-track"
+                    data-testid=move || {
+                        let val = test_id.get();
+                        if val.is_empty() { None } else { Some(format!("{}-progress-projected", val)) }
+                    }
+                >
                     <div
                         class="progress-fill progress-fill-projected"
-                        data-testid=move || {
-                            let val = test_id.get();
-                            if val.is_empty() { None } else { Some(format!("{}-progress-projected", val)) }
-                        }
                         style=move || format!("width: {:.0}%", projected_pct.get().min(100.0))
                     ></div>
                     <div
