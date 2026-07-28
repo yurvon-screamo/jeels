@@ -5,4 +5,5 @@ pub struct CardCounts {
     pub hard: usize,
     pub in_progress: usize,
     pub learned: usize,
+    pub favorite: usize,
 }

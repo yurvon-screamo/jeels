@@ -80,6 +80,29 @@ pub fn get_all_kanji() -> Vec<char> {
         .unwrap_or_default()
 }
 
+/// Comparator that orders kanji by perceived learning difficulty.
+///
+/// Primary key: number of radicals (ascending) — fewer radicals are introduced
+/// first. Secondary key: `used_in` frequency (descending) — among kanji with
+/// the same radical count, the most frequently used ones come first because
+/// they pay back the learning effort sooner. `Iterator::sort_by` is stable,
+/// so kanji equal on both keys keep their source order.
+pub fn kanji_difficulty_cmp(a: &KanjiInfo, b: &KanjiInfo) -> std::cmp::Ordering {
+    a.radicals_chars()
+        .len()
+        .cmp(&b.radicals_chars().len())
+        .then_with(|| b.used_in().cmp(&a.used_in()))
+}
+
+/// Sorts a slice of `KanjiInfo` references in place by learning difficulty.
+///
+/// See [`kanji_difficulty_cmp`] for the ordering rules.
+pub fn sort_by_difficulty(list: &mut [&KanjiInfo]) {
+    // `slice::sort_by` on `[&KanjiInfo]` passes `&&KanjiInfo` to the comparator;
+    // dereference once to match `kanji_difficulty_cmp`'s `&KanjiInfo` signature.
+    list.sort_by(|a, b| kanji_difficulty_cmp(a, b));
+}
+
 #[derive(Clone)]
 pub struct KanjiDatabase {
     kanji_map: HashMap<String, KanjiInfo>,
@@ -130,7 +153,6 @@ impl KanjiInfo {
     pub fn used_in(&self) -> u32 {
         self.used_in
     }
-
     pub fn description(&self, lang: &NativeLanguage) -> String {
         let descs = match lang {
             NativeLanguage::Russian => &self.description_ru,
@@ -736,5 +758,91 @@ mod tests {
         );
         assert_eq!(info.description(&NativeLanguage::English), "good, possible");
         assert_eq!(info.descriptions(&NativeLanguage::Russian).len(), 2);
+    }
+
+    /// Test helper: build a `KanjiInfo` with only the fields the comparator reads.
+    fn make_kanji(kanji: char, radicals: Vec<char>, used_in: u32) -> KanjiInfo {
+        KanjiInfo {
+            kanji,
+            jlpt: JapaneseLevel::N5,
+            used_in,
+            description_ru: vec!["test".to_string()],
+            description_en: vec!["test".to_string()],
+            radicals,
+            popular_words: vec![],
+            on_readings: vec![],
+            kun_readings: vec![],
+        }
+    }
+
+    #[test]
+    fn kanji_difficulty_cmp_less_radicals_first() {
+        // Arrange
+        let one_radical = make_kanji('一', vec!['一'], 100);
+        let three_radicals = make_kanji('年', vec!['ノ', '一', '干'], 100);
+
+        // Act
+        let ordering = kanji_difficulty_cmp(&one_radical, &three_radicals);
+
+        // Assert
+        assert_eq!(ordering, std::cmp::Ordering::Less);
+    }
+
+    #[test]
+    fn kanji_difficulty_cmp_same_radicals_higher_used_in_first() {
+        // Arrange — same radical count, but `frequent` is used more often
+        let rare = make_kanji('甲', vec!['田'], 10);
+        let frequent = make_kanji('乙', vec!['田'], 1000);
+
+        // Act — `frequent` should come before `rare`
+        let ordering = kanji_difficulty_cmp(&frequent, &rare);
+
+        // Assert — desc by used_in: frequent (1000) < rare (10) in sort order
+        assert_eq!(ordering, std::cmp::Ordering::Less);
+    }
+
+    #[test]
+    fn kanji_difficulty_cmp_same_radicals_same_used_in_equal() {
+        // Arrange
+        let a = make_kanji('甲', vec!['田'], 500);
+        let b = make_kanji('乙', vec!['田'], 500);
+
+        // Act
+        let ordering = kanji_difficulty_cmp(&a, &b);
+
+        // Assert — equal on both keys, stable sort keeps source order
+        assert_eq!(ordering, std::cmp::Ordering::Equal);
+    }
+
+    #[test]
+    fn kanji_difficulty_cmp_radicals_take_priority_over_used_in() {
+        // Arrange — `few` has fewer radicals but lower used_in; `many` has more
+        // radicals but higher used_in. Radical count must win.
+        let few = make_kanji('一', vec!['一'], 10);
+        let many = make_kanji('森', vec!['木', '木', '木'], 9999);
+
+        // Act
+        let ordering = kanji_difficulty_cmp(&few, &many);
+
+        // Assert
+        assert_eq!(ordering, std::cmp::Ordering::Less);
+    }
+
+    #[test]
+    fn sort_by_difficulty_orders_simple_frequent_first() {
+        // Arrange — three kanji with deliberately mixed difficulty signals
+        let k0 = make_kanji('森', vec!['木', '木', '木'], 50);
+        let k1 = make_kanji('一', vec!['一'], 2077);
+        let k2 = make_kanji('本', vec!['一', '木'], 1040);
+        let mut list: Vec<&KanjiInfo> = vec![&k0, &k1, &k2];
+
+        // Act
+        sort_by_difficulty(&mut list);
+
+        // Assert — order: 一 (1 radical, used most) → 本 (2 radicals) → 森 (3 radicals)
+        assert_eq!(
+            list.iter().map(|k| k.kanji()).collect::<Vec<_>>(),
+            vec!['一', '本', '森']
+        );
     }
 }

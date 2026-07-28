@@ -12,6 +12,7 @@ pub enum Filter {
     Hard,
     InProgress,
     Learned,
+    Favorite,
 }
 
 impl Filter {
@@ -32,16 +33,28 @@ impl Filter {
                 .filter_learned()
                 .inner()
                 .to_string(),
+            Filter::Favorite => i18n
+                .get_keys()
+                .shared()
+                .filter_favorite()
+                .inner()
+                .to_string(),
         }
     }
 
-    pub fn matches(&self, status: CardStatus) -> bool {
+    /// Returns true if the card matches this filter.
+    ///
+    /// `is_favorite` is independent of `CardStatus` (a card can be both Learned
+    /// and favorite at once), so it is passed as a separate argument rather than
+    /// collapsed into the status enum.
+    pub fn matches(&self, status: CardStatus, is_favorite: bool) -> bool {
         match self {
             Filter::All => true,
             Filter::New => status == CardStatus::New,
             Filter::Hard => status == CardStatus::Hard,
             Filter::InProgress => status == CardStatus::InProgress,
             Filter::Learned => status == CardStatus::Learned,
+            Filter::Favorite => is_favorite,
         }
     }
 }
@@ -67,5 +80,61 @@ pub fn FilterBtn<F: Fn() -> usize + Send + 'static>(
         >
             {move || format!("{} ({})", filter.label(&i18n), count())}
         </Tag>
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn any_status() -> CardStatus {
+        CardStatus::New
+    }
+
+    #[test]
+    fn filter_favorite_matches_only_favorited_cards() {
+        // Arrange
+        let filter = Filter::Favorite;
+
+        // Assert
+        assert!(filter.matches(any_status(), true));
+        assert!(!filter.matches(any_status(), false));
+    }
+
+    #[test]
+    fn filter_favorite_ignores_card_status() {
+        // Arrange — favorite filter must not depend on card status
+        let filter = Filter::Favorite;
+
+        // Assert
+        assert!(filter.matches(CardStatus::Learned, true));
+        assert!(filter.matches(CardStatus::InProgress, true));
+        assert!(filter.matches(CardStatus::Hard, true));
+        assert!(filter.matches(CardStatus::New, true));
+    }
+
+    #[test]
+    fn filter_all_matches_anything() {
+        // Arrange
+        let filter = Filter::All;
+
+        // Assert — both status and is_favorite are irrelevant to Filter::All
+        assert!(filter.matches(CardStatus::Learned, true));
+        assert!(filter.matches(CardStatus::New, false));
+    }
+
+    #[test]
+    fn filter_status_variants_ignore_is_favorite() {
+        // Arrange
+        let new = Filter::New;
+        let learned = Filter::Learned;
+
+        // Assert — favorite state does not affect status-based filters
+        assert!(new.matches(CardStatus::New, true));
+        assert!(new.matches(CardStatus::New, false));
+        assert!(!new.matches(CardStatus::Learned, true));
+        assert!(learned.matches(CardStatus::Learned, true));
+        assert!(learned.matches(CardStatus::Learned, false));
+        assert!(!learned.matches(CardStatus::New, false));
     }
 }

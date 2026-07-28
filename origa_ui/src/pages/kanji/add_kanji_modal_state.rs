@@ -1,7 +1,7 @@
 use crate::repository::HybridUserRepository;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use origa::dictionary::kanji::{KanjiInfo, get_kanji_list};
+use origa::dictionary::kanji::{KanjiInfo, get_kanji_list, sort_by_difficulty};
 use origa::domain::{Card, JapaneseLevel};
 use origa::traits::UserRepository;
 use std::collections::HashSet;
@@ -78,12 +78,16 @@ impl ModalState {
                         })
                         .collect();
 
-                    let kanji_list: Vec<&'static KanjiInfo> = get_kanji_list(&level)
-                        .into_iter()
-                        .filter(|kanji_info| {
-                            !learned_kanji.contains(&kanji_info.kanji().to_string())
-                        })
-                        .collect();
+                    let kanji_list: Vec<&'static KanjiInfo> = {
+                        let mut list: Vec<&'static KanjiInfo> = get_kanji_list(&level)
+                            .into_iter()
+                            .filter(|kanji_info| {
+                                !learned_kanji.contains(&kanji_info.kanji().to_string())
+                            })
+                            .collect();
+                        sort_by_difficulty(&mut list);
+                        list
+                    };
 
                     available_kanji.set(kanji_list);
                     is_loading.set(false);

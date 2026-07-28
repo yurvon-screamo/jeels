@@ -20,6 +20,12 @@ pub fn JlptProgressCard(
             .map(|d| d.overall_percentage())
             .unwrap_or(0.0)
     });
+    let projected_pct = Signal::derive(move || {
+        level_detail
+            .get()
+            .map(|d| d.overall_projected_percentage())
+            .unwrap_or(0.0)
+    });
 
     view! {
         <Card
@@ -40,9 +46,19 @@ pub fn JlptProgressCard(
                 >
                     {move || format!("JLPT {}", current_level.get().code())}
                 </Tag>
-                <div class="flex-1 progress-track">
+                <div
+                    class="flex-1 progress-track"
+                    data-testid=move || {
+                        let val = test_id.get();
+                        if val.is_empty() { None } else { Some(format!("{}-progress-projected", val)) }
+                    }
+                >
                     <div
-                        class="progress-fill"
+                        class="progress-fill progress-fill-projected"
+                        style=move || format!("width: {:.0}%", projected_pct.get().min(100.0))
+                    ></div>
+                    <div
+                        class="progress-fill progress-fill-layered"
                         style=move || format!("width: {:.0}%", overall_pct.get().min(100.0))
                     ></div>
                 </div>

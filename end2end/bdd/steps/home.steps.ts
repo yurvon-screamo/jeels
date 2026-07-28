@@ -53,6 +53,10 @@ Then('отображается карточка прогресса JLPT', async 
     await expect(homePage.jlptProgress).toBeVisible();
 });
 
+Then('отображается призрачный прогресс', async ({ page }) => {
+    await expect(page.getByTestId("home-jlpt-progress-progress-projected")).toBeVisible();
+});
+
 Then('отображается обзор активности', async ({ page }) => {
     const homePage = new HomePage(page);
     await expect(homePage.todayOverview).toBeVisible();

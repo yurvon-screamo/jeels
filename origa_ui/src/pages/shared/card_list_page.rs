@@ -2,10 +2,12 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use super::{
-    CardCounts, CardStatus, DeleteRequest, Filter, FilterBtn, LoadMoreButton,
-    create_delete_callback, create_mark_as_known_callback, create_toggle_favorite_callback,
+    CardCounts, CardStatus, DeleteRequest, Filter, FilterBtn, GroupedGrid, LevelIndex,
+    ListGrouping, LoadMoreButton, create_delete_callback, create_mark_as_known_callback,
+    create_toggle_favorite_callback, order_cards_by_group,
 };
 use crate::i18n::use_i18n;
+use crate::loaders::get_jlpt_content;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
     Input, LoadingOverlay, Text, TextSize, ToastContainer, ToastData, TypographyVariant,
@@ -15,6 +17,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use origa::domain::{Card, CardAnswer, NativeLanguage, StudyCard, User};
 use origa::traits::UserRepository;
+use std::collections::HashMap;
 
 pub type CardsLoadedCallback = Arc<dyn Fn(&[StudyCard]) + Send + Sync>;
 
@@ -126,6 +129,7 @@ pub fn create_card_list_context(
 
 pub fn card_list_view<F>(
     ctx: CardListContext,
+    grouping: ListGrouping,
     sort_cards: bool,
     test_id_prefix: &'static str,
     empty_message: Signal<String>,
@@ -144,6 +148,26 @@ where
     let search = RwSignal::new(String::new());
     let filter = RwSignal::new(Filter::All);
     let visible_count: RwSignal<usize> = RwSignal::new(50);
+
+    // Build the card_id -> JLPT level lookup once when grouping is enabled.
+    // Computed only when `all_cards` changes — NOT on every filter/search tick.
+    // For `ListGrouping::Flat` we skip the work entirely (empty map).
+    let level_index: Memo<LevelIndex> = match grouping {
+        ListGrouping::Flat => Memo::new(move |_| HashMap::new()),
+        ListGrouping::ByJlptLevel { card_type } => Memo::new(move |_| {
+            let content = get_jlpt_content();
+            all_cards
+                .get()
+                .iter()
+                .map(|card| {
+                    (
+                        *card.card_id(),
+                        content.find_level(&card.card().content_key(), card_type),
+                    )
+                })
+                .collect()
+        }),
+    };
 
     let filtered_cards = Memo::new(move |_| {
         let query = search.get().to_lowercase();
@@ -180,13 +204,23 @@ where
 
                     matches_question || matches_answer
                 };
-                let matches_filter = current_filter.matches(CardStatus::from_study_card(card));
+                let matches_filter =
+                    current_filter.matches(CardStatus::from_study_card(card), card.is_favorite());
                 matches_search && matches_filter
             })
             .collect();
 
-        if sort_cards {
-            cards.sort_by_key(|c| *c.card_id());
+        match grouping {
+            ListGrouping::ByJlptLevel { .. } => {
+                // Clone the memo once here, not inside `sort_by`'s comparator.
+                let index = level_index.get();
+                cards = order_cards_by_group(&cards, &index);
+            },
+            ListGrouping::Flat => {
+                if sort_cards {
+                    cards.sort_by_key(|c| *c.card_id());
+                }
+            },
         }
         cards
     });
@@ -209,6 +243,9 @@ where
         let cards = all_cards.get();
         cards.iter().fold(CardCounts::default(), |mut acc, card| {
             acc.total += 1;
+            if card.is_favorite() {
+                acc.favorite += 1;
+            }
             match CardStatus::from_study_card(card) {
                 CardStatus::New => acc.new += 1,
                 CardStatus::Hard => acc.hard += 1,
@@ -224,6 +261,13 @@ where
     let search_id = Signal::derive(move || format!("{test_id_prefix}-search-input"));
     let load_more_id = Signal::derive(move || format!("{test_id_prefix}-load-more-btn"));
     let render_card = StoredValue::new(render_card);
+
+    // Snapshot the grouped index once per visible_cards change so GroupedGrid
+    // receives an owned HashMap it can read without re-tracking the memo.
+    let visible_index = Memo::new(move |_| level_index.get());
+    let flat_grid_classes = grid_classes.unwrap_or(
+        "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-start",
+    );
 
     view! {
         <div class="space-y-4">
@@ -243,33 +287,68 @@ where
                     <FilterBtn filter=Filter::Hard count=move || counts.get().hard active=filter test_id=format!("{test_id_prefix}-filter-hard") />
                     <FilterBtn filter=Filter::InProgress count=move || counts.get().in_progress active=filter test_id=format!("{test_id_prefix}-filter-in-progress") />
                     <FilterBtn filter=Filter::Learned count=move || counts.get().learned active=filter test_id=format!("{test_id_prefix}-filter-learned") />
+                    <FilterBtn filter=Filter::Favorite count=move || counts.get().favorite active=filter test_id=format!("{test_id_prefix}-filter-favorite") />
                 </div>
 
-                <div class=grid_classes.unwrap_or("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-start") data-testid=move || grid_id.get()>
-                    {move || {
-                        let cards = visible_cards.get();
-                        if cards.is_empty() {
-                            Either::Left(view! {
-                                <div class="col-span-full" data-testid=move || empty_id.get()>
-                                    <Text size=TextSize::Default variant=TypographyVariant::Muted>
-                                        {empty_message.get()}
-                                    </Text>
-                                </div>
-                            })
-                        } else {
-                            let render = render_card.with_value(|r| r.clone());
-                            Either::Right(view! {
-                                <For
-                                    each=move || visible_cards.get()
-                                    key=|card| format!("{}-{}", card.card_id(), card.is_favorite())
-                                    children=move |card| {
-                                        render(card)
-                                    }
-                                />
-                            })
-                        }
-                    }}
-                </div>
+                {match grouping {
+                    ListGrouping::Flat => view! {
+                        <div class=flat_grid_classes data-testid=move || grid_id.get()>
+                            {move || {
+                                let cards = visible_cards.get();
+                                if cards.is_empty() {
+                                    Either::Left(view! {
+                                        <div class="col-span-full" data-testid=move || empty_id.get()>
+                                            <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                                {empty_message.get()}
+                                            </Text>
+                                        </div>
+                                    })
+                                } else {
+                                    Either::Right(view! {
+                                        <For
+                                            each=move || visible_cards.get()
+                                            key=|card| format!("{}-{}", card.card_id(), card.is_favorite())
+                                            children=move |card| {
+                                                let render = render_card.with_value(|r| r.clone());
+                                                render(card)
+                                            }
+                                        />
+                                    })
+                                }
+                            }}
+                        </div>
+                    }
+                    .into_any(),
+                    ListGrouping::ByJlptLevel { .. } => view! {
+                        <div data-testid=move || grid_id.get() class="space-y-8">
+                            {move || {
+                                let cards = visible_cards.get();
+                                if cards.is_empty() {
+                                    Either::Left(view! {
+                                        <div data-testid=move || empty_id.get()>
+                                            <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                                {empty_message.get()}
+                                            </Text>
+                                        </div>
+                                    })
+                                } else {
+                                    let render = render_card.with_value(|r| r.clone());
+                                    Either::Right(view! {
+                                        <GroupedGrid
+                                            cards=visible_cards.get()
+                                            level_index=visible_index.get()
+                                            grid_classes=flat_grid_classes
+                                            test_id_prefix=test_id_prefix
+                                            render_card=render
+                                        />
+                                    })
+                                }
+                            }}
+                        </div>
+                    }
+                    .into_any(),
+                }}
+
                 <LoadMoreButton
                     visible_count=visible_count
                     total=Signal::derive(move || filtered_cards.get().len())

@@ -949,6 +949,33 @@ input[type="submit"],
     transition: width 0.5s ease;
 }
 
+/* "Ghost" layer that sits BEHIND the learned progress-fill. Renders the
+   projected share (learned + hard + in-progress, i.e. everything except
+   brand-new cards) as a faint same-color stripe. Both this layer and the
+   learned `.progress-fill` are positioned absolutely inside `.progress-track`
+   (which is `position: relative`); in DOM order this stripe comes BEFORE the
+   learned layer so the learned layer paints on top. */
+.progress-fill-projected {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    opacity: 0.22;
+    transition: width 0.5s ease;
+}
+
+/* When the learned fill is paired with a projected layer (e.g. on the JLPT
+   progress card and the home category grid), the learned layer must also be
+   absolutely positioned so the two layers stack rather than compete for
+   normal-flow width. Apply this class alongside `.progress-fill` on the
+   learned element whenever `.progress-fill-projected` is used. */
+.progress-fill-layered {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 /* Indeterminate fallback: CDN serves model GETs chunked without Content-Length,
    so the total is unknown — animate a segment instead of a fake percentage. */
 .progress-fill--indeterminate {

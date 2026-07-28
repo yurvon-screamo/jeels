@@ -1,4 +1,4 @@
-use super::super::shared::{card_list_view, create_card_list_context};
+use super::super::shared::{ListGrouping, card_list_view, create_card_list_context};
 use super::grammar_card_item::GrammarCardItem;
 use crate::i18n::{t_string, use_i18n};
 use crate::repository::HybridUserRepository;
@@ -21,7 +21,11 @@ pub fn GrammarContent(refresh_trigger: RwSignal<u32>) -> impl IntoView {
     let ctx_for_render = ctx.clone();
     let empty_message = Signal::derive(move || t_string!(i18n, grammar_page.not_found).to_string());
 
-    card_list_view(ctx, true, "grammar", empty_message, Some("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 items-start"), move |card| {
+    // S2 (JLPT grouping) is temporarily disabled — the grouped render path
+    // needs a reactive GroupedGrid (current buckets snapshot goes stale when
+    // cards prop changes after a favorite toggle + reload). Tracked in a
+    // follow-up; Flat mode keeps the page fully functional.
+    card_list_view(ctx, ListGrouping::Flat, true, "grammar", empty_message, Some("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 items-start"), move |card| {
         let ctx = ctx_for_render.clone();
         let card_id = *card.card_id();
         view! {

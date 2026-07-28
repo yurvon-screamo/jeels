@@ -278,40 +278,55 @@ impl User {
     }
 
     pub fn recalculate_jlpt_progress(&mut self, content: &JlptContent) {
-        let mut learned_kanji = HashMap::new();
-        let mut learned_words = HashMap::new();
-        let mut learned_grammar = HashMap::new();
+        use crate::domain::jlpt_progress::{CategoryCounts, ProgressUpdate};
+
+        let mut learned = CategoryCounts::default();
+        let mut projected = CategoryCounts::default();
 
         for study_card in self.knowledge_set.study_cards().values() {
-            if !study_card.memory().is_known_card() {
-                continue;
-            }
-
+            let memory = study_card.memory();
             let card = study_card.card();
             let Some(level) = content.find_level(&card.content_key(), CardType::from(card)) else {
                 continue;
             };
 
-            match card {
-                Card::Kanji(_) => *learned_kanji.entry(level).or_insert(0) += 1,
-                Card::Vocabulary(_) => *learned_words.entry(level).or_insert(0) += 1,
-                Card::Grammar(_) => *learned_grammar.entry(level).or_insert(0) += 1,
-                Card::Phrase(_) => *learned_words.entry(level).or_insert(0) += 1,
+            // `learned` counts cards stabilized past the known-card threshold.
+            // `projected` counts cards in flight — `hard` or `in-progress`, but
+            // explicitly NOT `learned` (otherwise `projected_percentage` would
+            // double-count them and exceed 100%).
+            let is_learned = memory.is_known_card();
+            let is_in_flight = !memory.is_new() && !is_learned;
+
+            if !is_learned && !is_in_flight {
+                continue;
+            }
+
+            // Pick the (learned, projected) bucket pair for this card type.
+            // Phrase cards roll up under `words` — see domain/jlpt_content.rs.
+            let (learned_map, projected_map) = match card {
+                Card::Kanji(_) => (&mut learned.kanji, &mut projected.kanji),
+                Card::Vocabulary(_) | Card::Phrase(_) => (&mut learned.words, &mut projected.words),
+                Card::Grammar(_) => (&mut learned.grammar, &mut projected.grammar),
+            };
+
+            if is_learned {
+                *learned_map.entry(level).or_insert(0) += 1;
+            } else {
+                *projected_map.entry(level).or_insert(0) += 1;
             }
         }
 
-        let total_kanji = Self::build_totals(&content.kanji_by_level);
-        let total_words = Self::build_totals(&content.words_by_level);
-        let total_grammar = Self::build_totals(&content.grammar_by_level);
+        let total = CategoryCounts {
+            kanji: Self::build_totals(&content.kanji_by_level),
+            words: Self::build_totals(&content.words_by_level),
+            grammar: Self::build_totals(&content.grammar_by_level),
+        };
 
-        self.jlpt_progress.recalculate(
-            &learned_kanji,
-            &learned_words,
-            &learned_grammar,
-            &total_kanji,
-            &total_words,
-            &total_grammar,
-        );
+        self.jlpt_progress.recalculate(ProgressUpdate {
+            learned,
+            projected,
+            total,
+        });
     }
 
     fn build_totals(
@@ -372,14 +387,17 @@ mod tests {
         let complete = crate::domain::jlpt_progress::LevelProgressDetail {
             kanji: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             words: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             grammar: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
         };
@@ -472,6 +490,63 @@ mod tests {
             .unwrap();
         assert_eq!(n5_progress.words.learned, 0);
         assert_eq!(n5_progress.words.total, 0);
+    }
+
+    #[test]
+    fn user_recalculate_jlpt_progress_separates_learned_from_in_flight() {
+        // Arrange — three N5 word cards: one untouched (new), one marked known,
+        // one rated once (in-progress). projected must contain ONLY the
+        // in-progress card; learned must NOT be double-counted into projected.
+        let mut user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+
+        let new_card = create_test_vocab_card("本");
+        let known_card = create_test_vocab_card("猫");
+        let in_progress_card = create_test_vocab_card("犬");
+
+        // `new_card` is intentionally left untouched — it is the control for
+        // "brand-new card contributes to neither learned nor projected".
+        let _ = user.create_card(new_card).unwrap();
+        let known_id = user.create_card(known_card).unwrap();
+        let in_progress_id = user.create_card(in_progress_card).unwrap();
+
+        user.knowledge_set_mut()
+            .mark_card_as_known(*known_id.card_id())
+            .unwrap();
+        user.rate_card(
+            *in_progress_id.card_id(),
+            Rating::Good,
+            RateMode::StandardLesson,
+        )
+        .unwrap();
+
+        let content = create_test_content_with_words(&[
+            ("本", JapaneseLevel::N5),
+            ("猫", JapaneseLevel::N5),
+            ("犬", JapaneseLevel::N5),
+        ]);
+
+        // Act
+        user.recalculate_jlpt_progress(&content);
+
+        // Assert — learned = 1, projected = 1 (in-progress only, no double count)
+        let n5_progress = user
+            .jlpt_progress()
+            .level_progress(JapaneseLevel::N5)
+            .unwrap();
+        assert_eq!(n5_progress.words.learned, 1, "only 猫 is known");
+        assert_eq!(n5_progress.words.projected, 1, "only 犬 is in-flight");
+        assert_eq!(n5_progress.words.total, 3);
+        // projected_percentage = (learned + projected) / total = 2/3
+        assert!(
+            (n5_progress.words.projected_percentage() - 66.6667).abs() < 0.01,
+            "projected_percentage must be (learned + projected) / total, got {}",
+            n5_progress.words.projected_percentage()
+        );
+        assert!(n5_progress.words.projected_percentage() <= 100.0);
     }
 
     #[test]
@@ -632,14 +707,17 @@ mod tests {
         let complete = crate::domain::jlpt_progress::LevelProgressDetail {
             kanji: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             words: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             grammar: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
         };
