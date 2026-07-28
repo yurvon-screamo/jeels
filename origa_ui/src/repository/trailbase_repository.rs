@@ -2,11 +2,17 @@ use super::session::{TrailBaseSession, get_session, set_session_async};
 use super::trailbase_client::{AuthError, TrailBaseClient};
 use super::trailbase_id::uuid_to_ulid;
 use chrono::{DateTime, Utc};
-use origa::domain::{DailyLoad, NativeLanguage, OrigaError, User};
+use origa::domain::{DailyLoad, KnowledgeSet, NativeLanguage, OrigaError, User};
 use origa::traits::UserRepository;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 use ulid::Ulid;
+
+use super::knowledge_set_codec;
+
+#[cfg(test)]
+#[path = "trailbase_repository_tests.rs"]
+mod tests;
 
 #[derive(Clone)]
 pub struct TrailBaseUserRepository {
@@ -117,10 +123,14 @@ impl UserRow {
             .and_then(|s| serde_json::from_str(s).ok())
             .unwrap_or_default();
 
-        let knowledge_set = self
+        // knowledge_set is the only field that switches wire format
+        // (plain JSON -> deflated). Its decode is recovering: a corrupt or
+        // legacy value resolves to an empty KnowledgeSet so the existing
+        // self-heal (merge no-op -> local overwrites remote) is preserved.
+        let knowledge_set: KnowledgeSet = self
             .knowledge_set
-            .as_ref()
-            .and_then(|s| serde_json::from_str(s).ok())
+            .as_deref()
+            .map(knowledge_set_codec::decode)
             .unwrap_or_default();
 
         let imported_sets: HashSet<String> = self
@@ -153,15 +163,18 @@ impl UserRow {
     }
 }
 
-fn user_to_json(user: &User, trailbase_id: &str) -> serde_json::Value {
+fn user_to_json(user: &User, trailbase_id: &str) -> Result<serde_json::Value, OrigaError> {
     let jlpt_progress_json =
-        serde_json::to_string(user.jlpt_progress()).unwrap_or_else(|_| "null".to_string());
-    let knowledge_set_json = serde_json::to_string(user.knowledge_set())
-        .unwrap_or_else(|_| "{\"study_cards\":{},\"lesson_history\":[]}".to_string());
+        serde_json::to_string(user.jlpt_progress()).map_err(|e| OrigaError::RepositoryError {
+            reason: format!("jlpt_progress encode failed: {e}"),
+        })?;
+    let knowledge_set_wire = knowledge_set_codec::encode(user.knowledge_set())?;
     let imported_sets_json =
-        serde_json::to_string(user.imported_sets()).unwrap_or_else(|_| "[]".to_string());
+        serde_json::to_string(user.imported_sets()).map_err(|e| OrigaError::RepositoryError {
+            reason: format!("imported_sets encode failed: {e}"),
+        })?;
 
-    serde_json::json!({
+    Ok(serde_json::json!({
         "trailbase_id": trailbase_id,
         "username": user.username(),
         "email": user.email(),
@@ -169,12 +182,12 @@ fn user_to_json(user: &User, trailbase_id: &str) -> serde_json::Value {
         "current_japanese_level": i32::from(user.current_japanese_level()),
         "jlpt_progress": jlpt_progress_json,
         "telegram_user_id": user.telegram_user_id().copied().map(|id| id as i64),
-        "knowledge_set": knowledge_set_json,
+        "knowledge_set": knowledge_set_wire,
         "updated_at": user.updated_at().to_rfc3339(),
         "imported_sets": imported_sets_json,
         "daily_load": i32::from(*user.daily_load()),
         "known_vocab_hash": user.known_vocab_hash() as i32,
-    })
+    }))
 }
 
 impl UserRepository for TrailBaseUserRepository {
@@ -196,7 +209,7 @@ impl UserRepository for TrailBaseUserRepository {
         }
 
         let api = self.client.records(&self.table_name);
-        let body = user_to_json(user, &session.trailbase_id);
+        let body = user_to_json(user, &session.trailbase_id)?;
 
         if let Some((_, record_id)) = self.find_current().await? {
             api.update(&record_id.to_string(), &body)

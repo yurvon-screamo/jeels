@@ -3,6 +3,7 @@ pub mod cdn_provider;
 mod dictionary_cache;
 mod file_repository;
 mod hybrid_repository;
+mod knowledge_set_codec;
 pub(crate) mod legacy_migration;
 mod session;
 pub mod trailbase_auth;
