@@ -13,7 +13,12 @@ runs:
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
+      # macOS uses BSD sed which requires an explicit backup suffix argument
+      # to `-i` (GNU sed treats the next arg as the script). `-i.bak` works
+      # on both BSD and GNU; the `.bak` file is removed after each edit.
+      # Without this, on macos-* runners sed fails with:
+      #   sed: 1: "Cargo.toml": invalid command code C
       run: |
-          sed -i 's/^version = ".*"/version = "'${VERSION}'"/' Cargo.toml
-          sed -i 's/"version": ".*"/"version": "'${VERSION}'"/' tauri/tauri.conf.json
+          sed -i.bak 's/^version = ".*"/version = "'${VERSION}'"/' Cargo.toml && rm -f Cargo.toml.bak
+          sed -i.bak 's/"version": ".*"/"version": "'${VERSION}'"/' tauri/tauri.conf.json && rm -f tauri/tauri.conf.json.bak
           echo "Updated version to ${VERSION}"
