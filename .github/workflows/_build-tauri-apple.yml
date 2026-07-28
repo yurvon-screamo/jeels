@@ -43,6 +43,12 @@ on:
             ios-upload-status:
                 description: "iOS App Store Connect upload result: success|failure|skipped"
                 value: ${{ jobs.build-ios.outputs.upload-status }}
+            macos-build-status:
+                description: "macOS .app build result: success|failure|skipped"
+                value: ${{ jobs.build-macos.outputs.build-status }}
+            macos-upload-status:
+                description: "macOS App Store Connect upload result: success|failure|skipped"
+                value: ${{ jobs.build-macos.outputs.upload-status }}
 
 env:
     CARGO_TERM_COLOR: always
@@ -199,3 +205,272 @@ jobs:
               run: |
                   rm -f /tmp/AuthKey_*.p8
                   echo "API key cleaned up"
+
+    build-macos:
+        name: Build macOS (Universal Binary)
+        if: github.actor != 'dependabot[bot]' && inputs.skip_apple != true
+        runs-on: macos-15
+        permissions:
+            contents: read
+        outputs:
+            build-status: ${{ steps.build-report.outputs.status }}
+            upload-status: ${{ steps.upload-report.outputs.status }}
+        env:
+            ORIGA_VERSION: ${{ inputs.version }}
+            ORIGA_COMMIT: ${{ inputs.commit_sha }}
+            ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Select latest Xcode
+              shell: bash
+              run: |
+                  LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+                  if [ -z "$LATEST_XCODE" ]; then
+                    echo "::error::No Xcode found in /Applications"
+                    exit 1
+                  fi
+                  echo "Selected Xcode: $LATEST_XCODE"
+                  sudo xcode-select -s "$LATEST_XCODE"
+
+            - name: Download WASM artifact
+              uses: actions/download-artifact@v8
+              with:
+                  name: ${{ inputs.wasm_artifact_name }}
+                  path: origa_ui/dist/
+
+            - name: Import Mac signing certificates
+              env:
+                  APPLE_MAC_APP_CERT_P12: ${{ secrets.apple-mac-app-cert-p12 }}
+                  APPLE_MAC_INSTALLER_CERT_P12: ${{ secrets.apple-mac-installer-cert-p12 }}
+                  APPLE_MAC_CERT_PASSWORD: ${{ secrets.apple-mac-cert-password }}
+              run: |
+                  # macOS desktop signing via tauri-bundler calls `codesign`
+                  # directly (NOT xcodebuild auto-provisioning like iOS).
+                  # The signing identity (cert + private key) must be in
+                  # login.keychain before the build starts. We import the
+                  # .p12 into a dedicated build.keychain to isolate from
+                  # the runner's default keychain and avoid races with
+                  # concurrent jobs.
+                  #
+                  # Requires 2 Mac Distribution certs from Apple Developer
+                  # Portal: "Mac App Distribution" (signs .app) and
+                  # "Mac Installer Distribution" (signs .pkg).
+                  if [ -z "$APPLE_MAC_APP_CERT_P12" ] || [ -z "$APPLE_MAC_INSTALLER_CERT_P12" ]; then
+                    echo "::error::Mac certificates not configured. Set APPLE_MAC_APP_CERT_P12 and APPLE_MAC_INSTALLER_CERT_P12 secrets."
+                    exit 1
+                  fi
+
+                  echo "$APPLE_MAC_APP_CERT_P12" | base64 --decode > /tmp/mac_app.p12
+                  echo "$APPLE_MAC_INSTALLER_CERT_P12" | base64 --decode > /tmp/mac_installer.p12
+
+                  KEYCHAIN=build.keychain
+                  security create-keychain -p "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
+                  security default-keychain -s "$KEYCHAIN"
+                  security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
+                  # Allow codesign/productbuild to access keys without per-call prompt
+                  security set-keychain-settings -t 3600 -u "$KEYCHAIN"
+                  security import /tmp/mac_app.p12 -k "$KEYCHAIN" \
+                    -P "$APPLE_MAC_CERT_PASSWORD" -T /usr/bin/codesign
+                  security import /tmp/mac_installer.p12 -k "$KEYCHAIN" \
+                    -P "$APPLE_MAC_CERT_PASSWORD" -T /usr/bin/productbuild
+                  # Without set-key-partition-list codesign fails with
+                  # errSecInternalComponent — the tool cannot access the
+                  # private key even though the cert is visible.
+                  security set-key-partition-list -S apple-tool:,apple: \
+                    -s -k "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
+                  # Append to keychain list so tools can search both
+                  security list-keychains -d user -s "$KEYCHAIN" login.keychain
+
+                  rm -f /tmp/mac_app.p12 /tmp/mac_installer.p12
+                  echo "Mac certificates imported into $KEYCHAIN"
+
+                  # Discover the signing identity CN for tauri-bundler.
+                  # tauri-bundler expects APPLE_SIGNING_IDENTITY env var
+                  # to be the exact CN as shown by `security find-identity`.
+                  APP_IDENTITY=$(security find-identity -v -p codesigning | grep "3rd Party Mac Developer Application" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
+                  if [ -z "$APP_IDENTITY" ]; then
+                    echo "::error::3rd Party Mac Developer Application identity not found after import"
+                    security find-identity -v -p codesigning
+                    exit 1
+                  fi
+                  echo "APPLE_SIGNING_IDENTITY=$APP_IDENTITY" >> "$GITHUB_ENV"
+                  echo "Signing identity: $APP_IDENTITY"
+
+            - name: Decode Apple API Key
+              env:
+                  APPLE_API_KEY_CONTENT: ${{ secrets.apple-api-key-content }}
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+              run: |
+                  # API key is used by `xcrun altool` upload later; the same
+                  # .p8 file works for both iOS and macOS App Store Connect.
+                  KEY_PATH="/tmp/AuthKey_${APPLE_API_KEY}.p8"
+                  echo "$APPLE_API_KEY_CONTENT" | base64 --decode > "$KEY_PATH"
+                  echo "APPLE_API_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+            - name: Update version in config files
+              uses: ./.github/actions/update-version
+              with:
+                  version: ${{ inputs.version }}
+
+            - name: Setup Rust with caching
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: aarch64-apple-darwin,x86_64-apple-darwin
+                  shared-key: origa-macos-v1
+                  save-if: ${{ github.ref == 'refs/heads/master' }}
+
+            - name: Setup frontend tools
+              uses: ./.github/actions/setup-frontend
+              with:
+                  tools: tauri-cli
+
+            - name: Build macOS Universal Binary (.app)
+              id: build
+              working-directory: tauri
+              env:
+                  APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
+              run: |
+                  # Universal Binary requires both arm64 and x86_64 targets;
+                  # tauri-bundler combines them via lipo automatically when
+                  # --target universal-apple-darwin is used.
+                  # --bundles app produces a signed .app (no .dmg), sufficient
+                  # for productbuild .pkg generation in the next step.
+                  cargo tauri build \
+                    --no-default-features --features app-store \
+                    --target universal-apple-darwin \
+                    --bundles app
+
+            - name: Verify Universal Binary
+              run: |
+                  APP_PATH=$(find target/universal-apple-darwin/release/bundle/macos -name "*.app" -type d | head -1)
+                  if [ -z "$APP_PATH" ] || [ ! -d "$APP_PATH" ]; then
+                    echo "::error::No .app found under bundle/macos/"
+                    find target/universal-apple-darwin/release/bundle -type d 2>/dev/null || true
+                    exit 1
+                  fi
+                  echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+                  BIN_PATH="$APP_PATH/Contents/MacOS/origa"
+                  if [ ! -f "$BIN_PATH" ]; then
+                    # Try alternative binary names ( productName lowercase )
+                    BIN_PATH=$(find "$APP_PATH/Contents/MacOS" -type f | head -1)
+                  fi
+                  echo "Binary: $BIN_PATH"
+                  lipo -info "$BIN_PATH"
+                  if ! lipo -info "$BIN_PATH" | grep -q "arm64.*x86_64\|x86_64.*arm64"; then
+                    echo "::error::Binary is not Universal (arm64 + x86_64)"
+                    exit 1
+                  fi
+                  echo "✅ Universal Binary verified"
+
+            - name: Verify entitlements
+              run: |
+                  codesign -d --entitlements - "$APP_PATH" 2>&1 | tee /tmp/entitlements.txt
+                  for KEY in com.apple.security.app-sandbox \
+                             com.apple.security.network.client \
+                             com.apple.security.device.camera \
+                             com.apple.security.device.microphone \
+                             com.apple.security.files.user-selected.read-write; do
+                    if ! grep -q "$KEY" /tmp/entitlements.txt; then
+                      echo "::error::Missing entitlement: $KEY"
+                      exit 1
+                    fi
+                  done
+                  echo "✅ All 5 entitlements present"
+                  rm -f /tmp/entitlements.txt
+
+            - name: Re-codesign with --requirements (Tauri #15230 workaround)
+              # Tauri-bundler prior to fix for https://github.com/tauri-apps/tauri/issues/15230
+              # omits --requirements on codesign, causing productbuild to fail
+              # the Requirement check for Mac App Store distribution. Re-sign
+              # the top-level bundle with --requirements to inject the
+              # designated requirement. --deep is intentionally NOT used:
+              # Apple deprecated it ("does not sign nested code correctly"),
+              # and Tauri already signed nested helpers/frameworks with
+              # correct per-component entitlements during `cargo tauri build`.
+              env:
+                  APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
+              run: |
+                  codesign --force --options runtime \
+                    --entitlements tauri/Entitlements.plist \
+                    --sign "$APPLE_SIGNING_IDENTITY" \
+                    --requirements 'designated => anchor apple generic and identifier "net.uwuwu.origa"' \
+                    "$APP_PATH"
+                  codesign --verify --verbose=4 "$APP_PATH"
+
+            - name: Build .pkg via productbuild
+              id: pkg
+              env:
+                  APPLE_MAC_CERT_PASSWORD: ${{ secrets.apple-mac-cert-password }}
+              run: |
+                  # productbuild signs the .pkg with Mac Installer
+                  # Distribution cert (separate from Application cert).
+                  INSTALLER_IDENTITY=$(security find-identity -v -p basic | grep "3rd Party Mac Developer Installer" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
+                  if [ -z "$INSTALLER_IDENTITY" ]; then
+                    echo "::error::3rd Party Mac Developer Installer identity not found"
+                    security find-identity -v -p basic
+                    exit 1
+                  fi
+                  echo "Installer identity: $INSTALLER_IDENTITY"
+
+                  PKG_PATH="$RUNNER_TEMP/Origa.pkg"
+                  productbuild --component "$APP_PATH" /Applications \
+                    --sign "$INSTALLER_IDENTITY" \
+                    "$PKG_PATH"
+                  echo "path=$PKG_PATH" >> "$GITHUB_OUTPUT"
+                  ls -la "$PKG_PATH"
+
+            - name: Upload .pkg artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: macos-pkg-build
+                  path: ${{ steps.pkg.outputs.path }}
+                  retention-days: 7
+
+            - name: Upload to App Store Connect
+              id: upload
+              continue-on-error: true
+              env:
+                  APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+              run: |
+                  xcrun altool --upload-app --type mac \
+                    --file "${{ steps.pkg.outputs.path }}" \
+                    --apiKey "$APPLE_API_KEY" \
+                    --apiIssuer "$APPLE_API_ISSUER"
+
+            - name: Report build result
+              id: build-report
+              if: always()
+              shell: bash
+              run: |
+                  if [ "${{ steps.build.outcome }}" = "success" ]; then
+                    echo "status=success" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "status=failure" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Report upload result
+              id: upload-report
+              if: always()
+              shell: bash
+              run: |
+                  if [ "${{ steps.upload.outcome }}" = "success" ]; then
+                    echo "status=success" >> "$GITHUB_OUTPUT"
+                    echo "✅ macOS build uploaded to App Store Connect"
+                  else
+                    echo "status=failure" >> "$GITHUB_OUTPUT"
+                    echo "::warning::xcrun altool upload failed. Download the macos-pkg-build artifact and upload manually via Transporter.app"
+                  fi
+
+            - name: Cleanup API key and keychain
+              if: always()
+              shell: bash
+              run: |
+                  rm -f /tmp/AuthKey_*.p8
+                  # Delete build.keychain to avoid leaking identity across jobs
+                  security delete-keychain build.keychain 2>/dev/null || true
+                  echo "Cleanup complete"
