@@ -126,7 +126,7 @@ jobs:
               run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
             - name: Cache cargo-xwin MSVC CRT
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ${{ github.workspace }}/.xwin-cache
                   key: xwin-${{ runner.os }}-x86_64-pc-windows-msvc-v17
@@ -463,7 +463,7 @@ jobs:
                   echo "ANDROID_NDK_ROOT=$NDK_PATH" >> $GITHUB_ENV
 
             - name: Cache Gradle
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: |
                       ~/.gradle/caches
