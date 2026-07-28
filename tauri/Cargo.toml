@@ -35,8 +35,13 @@ tauri-plugin-single-instance.workspace = true
 tauri-plugin-store.workspace = true
 tauri-plugin-updater.workspace = true
 tauri-plugin-process.workspace = true
-tauri-plugin-haptics.workspace = true
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
+
+# Mobile-only plugins — desktop compilation excludes them via target cfg.
+# Per Tauri plugin docs: haptics supports only Android/iOS (no desktop stubs
+# in the public API). Target-scoping keeps the desktop binary clean.
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+tauri-plugin-haptics.workspace = true

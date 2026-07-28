@@ -105,7 +105,7 @@ jobs:
             commit_sha: ${{ needs.version.outputs.commit_sha }}
             build_date: ${{ needs.version.outputs.build_date }}
             wasm_artifact_name: frontend-dist
-            platforms: "windows,linux,android"
+            platforms: "windows,linux,macos,android"
             skip_android: ${{ github.actor == 'dependabot[bot]' }}
         secrets:
             tauri-signing-private-key: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || vars.TAURI_CI_DUMMY_PRIVATE_KEY }}

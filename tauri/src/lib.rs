@@ -46,12 +46,16 @@ pub fn run() {
         builder = builder.manage(PendingUpdate::new());
     }
 
+    #[cfg(mobile)]
+    {
+        builder = builder.plugin(tauri_plugin_haptics::init());
+    }
+
     builder
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_tts::init())
-        .plugin(tauri_plugin_haptics::init())
         .invoke_handler(tauri::generate_handler![
             get_current_deep_link,
             auth_store_get,
