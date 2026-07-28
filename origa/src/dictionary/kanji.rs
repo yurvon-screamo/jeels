@@ -98,7 +98,9 @@ pub fn kanji_difficulty_cmp(a: &KanjiInfo, b: &KanjiInfo) -> std::cmp::Ordering 
 ///
 /// See [`kanji_difficulty_cmp`] for the ordering rules.
 pub fn sort_by_difficulty(list: &mut [&KanjiInfo]) {
-    list.sort_by(kanji_difficulty_cmp);
+    // `slice::sort_by` on `[&KanjiInfo]` passes `&&KanjiInfo` to the comparator;
+    // dereference once to match `kanji_difficulty_cmp`'s `&KanjiInfo` signature.
+    list.sort_by(|a, b| kanji_difficulty_cmp(a, b));
 }
 
 #[derive(Clone)]

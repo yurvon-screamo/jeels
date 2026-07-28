@@ -51,8 +51,10 @@ where
 {
     let mut sorted: Vec<C> = cards.to_vec();
     sorted.sort_by(|a, b| {
-        let rank_a = group_rank(index.get(&a.card_id()));
-        let rank_b = group_rank(index.get(&b.card_id()));
+        // `index.get` returns `Option<&Option<JL>>`; deref to `&Option<JL>`
+        // explicitly so the types align with `group_rank`.
+        let rank_a = index.get(&a.card_id()).map_or(5, group_rank);
+        let rank_b = index.get(&b.card_id()).map_or(5, group_rank);
         rank_a
             .cmp(&rank_b)
             .then_with(|| a.card_id().cmp(&b.card_id()))
@@ -64,6 +66,7 @@ where
 mod tests {
     use super::*;
 
+    #[derive(Clone)]
     struct Stub {
         id: Ulid,
     }

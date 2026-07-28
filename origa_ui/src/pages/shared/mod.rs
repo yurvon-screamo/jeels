@@ -22,7 +22,7 @@ pub use daily_load_list::DailyLoadList;
 pub use daily_load_selector::DailyLoadSelector;
 pub use delete_callback::{DeleteRequest, create_delete_callback};
 pub use grouped_grid::GroupedGrid;
-pub use grouping::{CardIdLike, LevelIndex, ListGrouping, group_rank, order_cards_by_group};
+pub use grouping::{LevelIndex, ListGrouping, order_cards_by_group};
 pub use mark_as_known_button::MarkAsKnownButton;
 pub use mark_known_callback::create_mark_as_known_callback;
 pub use pagination::LoadMoreButton;

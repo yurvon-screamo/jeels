@@ -387,14 +387,17 @@ mod tests {
         let complete = crate::domain::jlpt_progress::LevelProgressDetail {
             kanji: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             words: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             grammar: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
         };
@@ -504,7 +507,9 @@ mod tests {
         let known_card = create_test_vocab_card("猫");
         let in_progress_card = create_test_vocab_card("犬");
 
-        let new_id = user.create_card(new_card).unwrap();
+        // `new_card` is intentionally left untouched — it is the control for
+        // "brand-new card contributes to neither learned nor projected".
+        let _ = user.create_card(new_card).unwrap();
         let known_id = user.create_card(known_card).unwrap();
         let in_progress_id = user.create_card(in_progress_card).unwrap();
 
@@ -702,14 +707,17 @@ mod tests {
         let complete = crate::domain::jlpt_progress::LevelProgressDetail {
             kanji: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             words: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
             grammar: crate::domain::jlpt_progress::CategoryProgress {
                 learned: 100,
+                projected: 0,
                 total: 100,
             },
         };

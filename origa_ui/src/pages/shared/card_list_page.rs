@@ -2,9 +2,9 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use super::{
-    CardCounts, CardStatus, DeleteRequest, Filter, FilterBtn, LevelIndex, ListGrouping,
-    LoadMoreButton, create_delete_callback, create_mark_as_known_callback,
-    create_toggle_favorite_callback, group_rank, order_cards_by_group,
+    CardCounts, CardStatus, DeleteRequest, Filter, FilterBtn, GroupedGrid, LevelIndex,
+    ListGrouping, LoadMoreButton, create_delete_callback, create_mark_as_known_callback,
+    create_toggle_favorite_callback, order_cards_by_group,
 };
 use crate::i18n::use_i18n;
 use crate::loaders::get_jlpt_content;
