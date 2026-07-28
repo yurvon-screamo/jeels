@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use super::super::shared::{CardsLoadedCallback, card_list_view, create_card_list_context};
+use super::super::shared::{
+    CardsLoadedCallback, ListGrouping, card_list_view, create_card_list_context,
+};
 use super::phrase_card_item::PhraseCardItem;
 use crate::i18n::{td_string, use_i18n};
 use crate::loaders::phrase_data_loader::load_phrase_details_batch;
@@ -65,6 +67,7 @@ pub fn PhrasesContent(refresh_trigger: RwSignal<u32>) -> impl IntoView {
 
     card_list_view(
         ctx,
+        ListGrouping::Flat,
         true,
         "phrases",
         empty_message,

@@ -69,6 +69,7 @@ fn CategoryCard(
     #[prop(optional, into)] test_id: Signal<String>,
 ) -> impl IntoView {
     let pct = Signal::derive(move || progress.get().percentage().min(100.0));
+    let projected_pct = Signal::derive(move || progress.get().projected_percentage().min(100.0));
     let stats = Signal::derive(move || {
         let p = progress.get();
         format!("{} / {}", p.learned, p.total)
@@ -119,7 +120,11 @@ fn CategoryCard(
                     </div>
                     <div class="progress-track mt-3">
                         <div
-                            class=move || format!("progress-fill {}", fill_class.get())
+                            class=move || format!("progress-fill progress-fill-projected {}", fill_class.get())
+                            style=move || format!("width: {:.0}%", projected_pct.get().min(100.0))
+                        ></div>
+                        <div
+                            class=move || format!("progress-fill progress-fill-layered {}", fill_class.get())
                             style=move || format!("width: {:.0}%", pct.get())
                         ></div>
                     </div>

@@ -28,7 +28,9 @@ pub use grammar::{detect_format_map_rules, detect_grammar_rules_in_text, detect_
 pub use japanese::{JapaneseChar, JapaneseText};
 pub use japanese::{hiragana_to_katakana, katakana_to_hiragana};
 pub use jlpt_content::{JlptContent, JlptContentError};
-pub use jlpt_progress::{CategoryProgress, JlptProgress, LevelProgressDetail};
+pub use jlpt_progress::{
+    CategoryCounts, CategoryProgress, JlptProgress, LevelProgressDetail, ProgressUpdate,
+};
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,
     GrammarRuleCard, KanjiCard, KnowledgeSet, LessonCard, LessonCardView, LessonData,

@@ -52,7 +52,7 @@ Then('первая карточка отмечена избранной', async 
 When('выбирает фильтр карточек {string}', async ({ page }, filter: string) => {
     const filterMap: Record<string, string> = {
         "all": "all", "new": "new", "learning": "in-progress",
-        "hard": "hard", "learned": "learned",
+        "hard": "hard", "learned": "learned", "favorite": "favorite",
     };
     const suffix = filterMap[filter] ?? filter;
     const filterBtn = page.getByTestId(new RegExp(`filter-${suffix}`));
