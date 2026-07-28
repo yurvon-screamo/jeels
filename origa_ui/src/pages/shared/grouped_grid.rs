@@ -5,10 +5,16 @@ use crate::ui_components::{Heading, HeadingLevel};
 use leptos::prelude::*;
 use origa::domain::{JapaneseLevel, StudyCard};
 
-use super::grouping::group_rank;
+use super::grouping::{LevelIndex, group_rank};
 
 /// Renders a list of study cards split into JLPT-level groups (N5 first,
 /// "Other" last). Each group has a `Heading` followed by a grid of cards.
+///
+/// Takes `cards` and `level_index` as `Memo`s so a favorite-toggle + reload
+/// cycle that produces a new `cards` snapshot re-runs `bucket_by_group` and
+/// updates every group's `<For>` via keyed diff. The previous version took
+/// owned snapshots, which Leptos diffs in place without re-running setup —
+/// leaving `buckets` stale after the parent's reactive closure re-evaluates.
 ///
 /// Lives in the lib crate (which has `recursion_limit = 512`) so adding the
 /// nested `<For>` over groups does not tip the bin crate over its 128-query
@@ -16,8 +22,8 @@ use super::grouping::group_rank;
 /// ADR-027 §B3 for the bin-vs-lib trade-off.
 #[component]
 pub fn GroupedGrid<F>(
-    cards: Vec<StudyCard>,
-    level_index: HashMap<ulid::Ulid, Option<JapaneseLevel>>,
+    cards: Memo<Vec<StudyCard>>,
+    level_index: Memo<LevelIndex>,
     grid_classes: &'static str,
     test_id_prefix: &'static str,
     render_card: F,
@@ -25,29 +31,30 @@ pub fn GroupedGrid<F>(
 where
     F: Fn(StudyCard) -> AnyView + Clone + Send + Sync + 'static,
 {
-    // Snapshot the cards once — they're already in group/card_id order coming
-    // out of `card_list_view`. We bucket them by `group_rank` for the per-group
-    // `<For>` loops below.
-    let buckets = bucket_by_group(cards, &level_index);
+    let render_card_stored = StoredValue::new(render_card);
 
-    // The per-group rendering is delegated to a sub-component (GroupSection)
-    // because `<For children>` requires a `Fn` closure, and a `view! { ... }`
-    // block with nested `<Show>`/`<For>` inside the children closure degrades
-    // to `FnOnce`. Splitting it lets Leptos see each `GroupSection` invocation
-    // as a plain function call rather than a captured view-construction closure.
+    // Reactive buckets — re-bucket every time `cards` or `level_index`
+    // changes. The downstream `<For>` over GROUP_ORDER is itself reactive on
+    // `buckets`, so each group's section re-renders only when its bucket
+    // contents change (keyed by card_id + is_favorite).
+    let buckets = Memo::new(move |_| bucket_by_group(cards.get().as_slice(), &level_index.get()));
+
     view! {
         <For
             each=move || GROUP_ORDER.into_iter()
             key=|group| group.testid_suffix
             children=move |group| {
-                let bucket = buckets[group.rank as usize].clone();
+                let bucket_for_group = Memo::new(move |_| {
+                    buckets.with(|b| b[group.rank as usize].clone())
+                });
+                let render = render_card_stored.with_value(|r| r.clone());
                 view! {
                     <GroupSection
                         group=group
-                        bucket=bucket
+                        bucket=bucket_for_group
                         grid_classes=grid_classes
                         test_id_prefix=test_id_prefix
-                        render_card=render_card.clone()
+                        render_card=render
                     />
                 }
             }
@@ -58,7 +65,7 @@ where
 #[component]
 fn GroupSection<F>(
     group: GroupMeta,
-    bucket: Vec<StudyCard>,
+    bucket: Memo<Vec<StudyCard>>,
     grid_classes: &'static str,
     test_id_prefix: &'static str,
     render_card: F,
@@ -66,47 +73,41 @@ fn GroupSection<F>(
 where
     F: Fn(StudyCard) -> AnyView + Clone + Send + Sync + 'static,
 {
-    // Skip empty groups entirely — no heading, no empty grid. Returning early
-    // also keeps the macro-generated children closure for the surrounding
-    // `<For>` (in GroupedGrid) a plain `Fn` rather than `FnOnce`.
-    if bucket.is_empty() {
-        return ().into_any();
-    }
-
     let i18n = use_i18n();
-
-    // Render the bucket once into a static Vec<AnyView>. `bucket` is a snapshot
-    // taken at mount time (no per-card reactivity needed), so a plain iterator
-    // is both simpler and avoids the Fn/FnOnce dance that `<For children>`
-    // would force on a captured `render_card`.
-    let rendered_cards: Vec<AnyView> = bucket
-        .into_iter()
-        .map(|card| render_card.clone()(card))
-        .collect();
+    let render_card_stored = StoredValue::new(render_card);
 
     view! {
-        <section
-            class="grouped-section"
-            data-testid=format!("{}-grid-{}", test_id_prefix, group.testid_suffix)
-        >
-            <div class="border-b border-[var(--border-dark)] mb-4">
-                <Heading
-                    level=Signal::derive(|| HeadingLevel::H3)
-                    class=Signal::derive(|| "mb-2 font-mono text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]".to_string())
-                >
-                    {group.label(&i18n)}
-                </Heading>
-            </div>
-            <div class=grid_classes>
-                {rendered_cards}
-            </div>
-        </section>
+        <Show when=move || !bucket.with(Vec::is_empty)>
+            <section
+                class="grouped-section"
+                data-testid=format!("{}-grid-{}", test_id_prefix, group.testid_suffix)
+            >
+                <div class="border-b border-[var(--border-dark)] mb-4">
+                    <Heading
+                        level=Signal::derive(|| HeadingLevel::H3)
+                        class=Signal::derive(|| "mb-2 font-mono text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]".to_string())
+                    >
+                        {group.label(&i18n)}
+                    </Heading>
+                </div>
+                <div class=grid_classes>
+                    <For
+                        each=move || bucket.get()
+                        key=|card| format!("{}-{}", card.card_id(), card.is_favorite())
+                        children=move |card| {
+                            let render = render_card_stored.with_value(|r| r.clone());
+                            render(card)
+                        }
+                    />
+                </div>
+            </section>
+        </Show>
     }
     .into_any()
 }
 
 fn bucket_by_group(
-    cards: Vec<StudyCard>,
+    cards: &[StudyCard],
     level_index: &HashMap<ulid::Ulid, Option<JapaneseLevel>>,
 ) -> Vec<Vec<StudyCard>> {
     let mut buckets: Vec<Vec<StudyCard>> = (0..6).map(|_| Vec::new()).collect();
@@ -116,7 +117,7 @@ fn bucket_by_group(
             .get(card.card_id())
             .map_or(5usize, |l| group_rank(l) as usize)
             .min(5);
-        buckets[idx].push(card);
+        buckets[idx].push(card.clone());
     }
     buckets
 }

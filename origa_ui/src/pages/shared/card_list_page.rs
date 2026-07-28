@@ -262,9 +262,6 @@ where
     let load_more_id = Signal::derive(move || format!("{test_id_prefix}-load-more-btn"));
     let render_card = StoredValue::new(render_card);
 
-    // Snapshot the grouped index once per visible_cards change so GroupedGrid
-    // receives an owned HashMap it can read without re-tracking the memo.
-    let visible_index = Memo::new(move |_| level_index.get());
     let flat_grid_classes = grid_classes.unwrap_or(
         "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-start",
     );
@@ -335,8 +332,8 @@ where
                                     let render = render_card.with_value(|r| r.clone());
                                     Either::Right(view! {
                                         <GroupedGrid
-                                            cards=visible_cards.get()
-                                            level_index=visible_index.get()
+                                            cards=visible_cards
+                                            level_index=level_index
                                             grid_classes=flat_grid_classes
                                             test_id_prefix=test_id_prefix
                                             render_card=render
