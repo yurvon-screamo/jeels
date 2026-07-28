@@ -12,6 +12,7 @@ use crate::repository::HybridUserRepository;
 use crate::ui_components::{
     Input, LoadingOverlay, Text, TextSize, ToastContainer, ToastData, TypographyVariant,
 };
+use leptos::either::Either;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use origa::domain::{Card, CardAnswer, NativeLanguage, StudyCard, User};
@@ -293,52 +294,64 @@ where
                     <FilterBtn filter=Filter::Favorite count=move || counts.get().favorite active=filter test_id=format!("{test_id_prefix}-filter-favorite") />
                 </div>
 
-                <Show when=move || visible_cards.get().is_empty()>
-                    <div class=flat_grid_classes data-testid=move || grid_id.get()>
-                        <div class="col-span-full" data-testid=move || empty_id.get()>
-                            <Text size=TextSize::Default variant=TypographyVariant::Muted>
-                                {empty_message.get()}
-                            </Text>
+                {match grouping {
+                    ListGrouping::Flat => view! {
+                        <div class=flat_grid_classes data-testid=move || grid_id.get()>
+                            {move || {
+                                let cards = visible_cards.get();
+                                if cards.is_empty() {
+                                    Either::Left(view! {
+                                        <div class="col-span-full" data-testid=move || empty_id.get()>
+                                            <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                                {empty_message.get()}
+                                            </Text>
+                                        </div>
+                                    })
+                                } else {
+                                    Either::Right(view! {
+                                        <For
+                                            each=move || visible_cards.get()
+                                            key=|card| format!("{}-{}", card.card_id(), card.is_favorite())
+                                            children=move |card| {
+                                                let render = render_card.with_value(|r| r.clone());
+                                                render(card)
+                                            }
+                                        />
+                                    })
+                                }
+                            }}
                         </div>
-                    </div>
-                </Show>
-
-                <Show when=move || {
-                    let cards = visible_cards.get();
-                    !cards.is_empty() && matches!(grouping, ListGrouping::ByJlptLevel { .. })
-                }>
-                    <div data-testid=move || grid_id.get() class="space-y-8">
-                        {move || {
-                            let render = render_card.with_value(|r| r.clone());
-                            view! {
-                                <GroupedGrid
-                                    cards=visible_cards.get()
-                                    level_index=visible_index.get()
-                                    grid_classes=flat_grid_classes
-                                    test_id_prefix=test_id_prefix
-                                    render_card=render
-                                />
-                            }
-                            .into_any()
-                        }}
-                    </div>
-                </Show>
-
-                <Show when=move || {
-                    let cards = visible_cards.get();
-                    !cards.is_empty() && matches!(grouping, ListGrouping::Flat)
-                }>
-                    <div class=flat_grid_classes data-testid=move || grid_id.get()>
-                        <For
-                            each=move || visible_cards.get()
-                            key=|card| format!("{}-{}", card.card_id(), card.is_favorite())
-                            children=move |card| {
-                                let render = render_card.with_value(|r| r.clone());
-                                render(card)
-                            }
-                        />
-                    </div>
-                </Show>
+                    }
+                    .into_any(),
+                    ListGrouping::ByJlptLevel { .. } => view! {
+                        <div data-testid=move || grid_id.get() class="space-y-8">
+                            {move || {
+                                let cards = visible_cards.get();
+                                if cards.is_empty() {
+                                    Either::Left(view! {
+                                        <div data-testid=move || empty_id.get()>
+                                            <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                                {empty_message.get()}
+                                            </Text>
+                                        </div>
+                                    })
+                                } else {
+                                    let render = render_card.with_value(|r| r.clone());
+                                    Either::Right(view! {
+                                        <GroupedGrid
+                                            cards=visible_cards.get()
+                                            level_index=visible_index.get()
+                                            grid_classes=flat_grid_classes
+                                            test_id_prefix=test_id_prefix
+                                            render_card=render
+                                        />
+                                    })
+                                }
+                            }}
+                        </div>
+                    }
+                    .into_any(),
+                }}
 
                 <LoadMoreButton
                     visible_count=visible_count
