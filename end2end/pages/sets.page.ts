@@ -126,7 +126,11 @@ export class SetsPage extends BasePage {
     }
 
     async getImportedCardCount(): Promise<number> {
-        return this.page.getByTestId("sets-card-item").filter({ hasText: "Импортирован" }).count();
+        // is_imported renders a reimport button (sets-card-reimport-btn)
+        // instead of the regular import button. Counting those is more
+        // robust than matching on the i18n-translated "Импортирован" tag,
+        // which breaks if the test runner lands in an EN locale.
+        return this.page.getByTestId("sets-card-reimport-btn").count();
     }
 
     getFirstNonImportedCard(): Locator {
