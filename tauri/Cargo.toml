@@ -17,6 +17,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [features]
 default = ["release-devtools"]
 release-devtools = ["tauri/devtools"]
+# App Store builds: disables self-updater + single-instance + devtools for
+# Mac App Store compliance (Guideline 2.4.5(vii) — no self-update mechanisms,
+# 2.5.1 — no debug code). Use with `--no-default-features --features app-store`.
+app-store = []
 
 [build-dependencies]
 tauri-build.workspace = true
@@ -35,3 +39,9 @@ rustls = { version = "0.23", default-features = false, features = ["ring"] }
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
+
+# Mobile-only plugins — desktop compilation excludes them via target cfg.
+# Per Tauri plugin docs: haptics supports only Android/iOS (no desktop stubs
+# in the public API). Target-scoping keeps the desktop binary clean.
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+tauri-plugin-haptics.workspace = true

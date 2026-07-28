@@ -95,22 +95,58 @@ fn inject_csp_via_tauri_config(cdn: &str, landing: &str, trailbase: &str) {
     };
     let final_config_str = final_config.to_string();
 
-    // SAFETY: build scripts are single-threaded by Cargo's contract — exactly
-    // one `main()` runs per build script invocation, with no spawned threads.
-    // `tauri_build::build()` is a synchronous API (`pub fn build()`, no async,
-    // no `std::thread::spawn`) that reads `TAURI_CONFIG` via `env::var()` on
-    // the same thread as this `main()` — see `tauri-build/src/lib.rs::try_build()`.
-    // `set_var` is marked `unsafe` since Rust edition 2024 due to potential data
-    // races in multi-threaded contexts, which do not apply here. This is a
-    // sanctioned exception to the AGENTS.md "no unsafe" rule,
-    // with full rationale in ADR-009 ("Consequences → Negative").
-    // `tauri_build::build()` reads `TAURI_CONFIG` in-process, so this MUST be
-    // set BEFORE the call below.
-    unsafe {
-        env::set_var("TAURI_CONFIG", &final_config_str);
+    // App Store builds: disable updater artifact generation entirely.
+    // `bundle.createUpdaterArtifacts: true` in tauri.conf.json produces
+    // .sig signature files alongside every bundle, intended for the Tauri
+    // updater (desktop distribution via GitHub Releases latest.json).
+    // For App Store builds the updater plugin is gated out at compile time
+    // via the `app-store` cargo feature, so .sig files are dead weight in
+    // the bundle — and Apple reviewers may flag stray signature artifacts
+    // that reference an active self-update mechanism.
+    //
+    // This patch is applied AFTER the CSP patch (which may itself have
+    // merged into an externally-provided TAURI_CONFIG from `cargo tauri
+    // build --config <merge>`). RFC 7396 merge semantics: last write wins,
+    // so the `false` here overrides any earlier `true`.
+    #[cfg(feature = "app-store")]
+    {
+        let updater_patch = json!({
+            "bundle": {
+                "createUpdaterArtifacts": false
+            }
+        });
+        let mut cfg: serde_json::Value = serde_json::from_str(&final_config_str)
+            .expect("TAURI_CONFIG must be valid JSON for app-store patch");
+        build_config::apply_merge_patch(&mut cfg, updater_patch);
+        let patched = cfg.to_string();
+
+        // SAFETY: same single-threaded build-script contract as below.
+        unsafe {
+            env::set_var("TAURI_CONFIG", &patched);
+        }
+        println!("cargo:rustc-env=TAURI_CONFIG={patched}");
     }
 
-    println!("cargo:rustc-env=TAURI_CONFIG={final_config_str}");
+    // When NOT app-store: emit final_config_str unchanged (CSP-merged,
+    // createUpdaterArtifacts still true per tauri.conf.json — needed for
+    // desktop distribution via GitHub Releases updater manifest).
+    #[cfg(not(feature = "app-store"))]
+    {
+        // SAFETY: build scripts are single-threaded by Cargo's contract —
+        // exactly one `main()` runs per build script invocation, with no
+        // spawned threads. `tauri_build::build()` is a synchronous API
+        // (no async, no `std::thread::spawn`) that reads `TAURI_CONFIG`
+        // via `env::var()` on the same thread as this `main()`. `set_var`
+        // is marked `unsafe` since Rust edition 2024 due to potential data
+        // races in multi-threaded contexts, which do not apply here. This
+        // is a sanctioned exception to AGENTS.md "no unsafe" rule, with
+        // full rationale in ADR-009 ("Consequences → Negative").
+        unsafe {
+            env::set_var("TAURI_CONFIG", &final_config_str);
+        }
+        println!("cargo:rustc-env=TAURI_CONFIG={final_config_str}");
+    }
+
     println!("cargo:rerun-if-env-changed=ORIGA_CDN_BASE_URL");
     println!("cargo:rerun-if-env-changed=TRAILBASE_URL");
     println!("cargo:rerun-if-env-changed=ORIGA_LANDING_BASE_URL");

@@ -750,7 +750,7 @@ input[type="submit"],
         bottom: 0;
         left: 0;
         right: 0;
-        height: 80vh;
+        height: 80%;
         border-bottom: none;
         animation: drawerSlideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -770,7 +770,7 @@ input[type="submit"],
         top: 0;
         right: 0;
         bottom: 0;
-        width: 80vw;
+        width: 80%;
         max-width: 800px;
         border-right: none;
         animation: drawerSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1553,7 +1553,7 @@ input[type="submit"],
     top: 0;
     left: 0;
     width: 220px;
-    height: 100vh;
+    height: 100%;
     background-color: var(--bg-cream);
     border-right: 1px solid var(--border-dark);
     z-index: 40;

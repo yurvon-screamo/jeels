@@ -8,6 +8,7 @@
 		"core:event:default",
 		"tts:default",
 		"deep-link:default",
+		"haptics:default",
 		{
 			"identifier": "opener:default",
 			"allow": [

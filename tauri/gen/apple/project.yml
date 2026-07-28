@@ -32,6 +32,7 @@ targets:
       - path: Assets.xcassets
       - path: Externals
       - path: origa-app_iOS
+      - path: PrivacyInfo.xcprivacy
       - path: assets
         buildPhase: resources
         type: folder
@@ -53,6 +54,12 @@ targets:
           - UIInterfaceOrientationLandscapeRight
         CFBundleShortVersionString: 0.1.0
         CFBundleVersion: "0.1.0"
+        CFBundleDisplayName: Origa
+        LSApplicationCategoryType: public.app-category.education
+        ITSAppUsesNonExemptEncryption: false
+        NSCameraUsageDescription: "Origa uses the camera to capture Japanese text for OCR."
+        NSPhotoLibraryUsageDescription: "Origa reads photos to extract Japanese text via OCR."
+        NSMicrophoneUsageDescription: "Origa records audio to transcribe Japanese speech."
     entitlements:
       path: origa-app_iOS/origa-app_iOS.entitlements
     scheme:
