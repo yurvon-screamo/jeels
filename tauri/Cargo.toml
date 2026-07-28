@@ -17,6 +17,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [features]
 default = ["release-devtools"]
 release-devtools = ["tauri/devtools"]
+# App Store builds: disables self-updater + single-instance + devtools for
+# Mac App Store compliance (Guideline 2.4.5(vii) — no self-update mechanisms,
+# 2.5.1 — no debug code). Use with `--no-default-features --features app-store`.
+app-store = []
 
 [build-dependencies]
 tauri-build.workspace = true

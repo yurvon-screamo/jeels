@@ -1,11 +1,13 @@
 mod auth_store;
-#[cfg(desktop)]
+#[cfg(all(desktop, not(feature = "app-store")))]
 mod updater_commands;
 
 use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
-use tauri::{Emitter, Listener, Manager};
+use tauri::{Emitter, Listener};
+#[cfg(any(feature = "release-devtools", all(desktop, not(feature = "app-store"))))]
+use tauri::Manager;
 use tauri_plugin_deep_link::DeepLinkExt;
-#[cfg(desktop)]
+#[cfg(all(desktop, not(feature = "app-store")))]
 use updater_commands::{PendingUpdate, check_for_update, install_update};
 
 /// Returns the deep-link URL that launched (or last targeted) the current
@@ -30,7 +32,7 @@ pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
-    #[cfg(desktop)]
+    #[cfg(all(desktop, not(feature = "app-store")))]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             tracing::info!("[deep-link] single-instance activated (app was already running)");
@@ -54,9 +56,9 @@ pub fn run() {
             auth_store_get,
             auth_store_set,
             auth_store_delete,
-            #[cfg(desktop)]
+            #[cfg(all(desktop, not(feature = "app-store")))]
             check_for_update,
-            #[cfg(desktop)]
+            #[cfg(all(desktop, not(feature = "app-store")))]
             install_update
         ])
         .setup(|app| {
