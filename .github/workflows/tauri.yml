@@ -105,7 +105,7 @@ jobs:
             commit_sha: ${{ needs.version.outputs.commit_sha }}
             build_date: ${{ needs.version.outputs.build_date }}
             wasm_artifact_name: frontend-dist
-            platforms: "windows,linux,macos,android"
+            platforms: "windows,linux,android"
             skip_android: ${{ github.actor == 'dependabot[bot]' }}
         secrets:
             tauri-signing-private-key: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || vars.TAURI_CI_DUMMY_PRIVATE_KEY }}
@@ -114,6 +114,27 @@ jobs:
             android-keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
             android-key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
             android-key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+
+    build-apple:
+        name: Build Apple (iOS + macOS)
+        needs: [version, build-frontend]
+        uses: ./.github/workflows/_build-tauri-apple.yml
+        with:
+            version: ${{ needs.version.outputs.version }}
+            version_base: ${{ needs.version.outputs.version_base }}
+            version_type: ${{ needs.version.outputs.version_type }}
+            commit_sha: ${{ needs.version.outputs.commit_sha }}
+            build_date: ${{ needs.version.outputs.build_date }}
+            wasm_artifact_name: frontend-dist
+            skip_apple: ${{ github.actor == 'dependabot[bot]' }}
+        secrets:
+            apple-api-issuer: ${{ secrets.APPLE_API_ISSUER }}
+            apple-api-key: ${{ secrets.APPLE_API_KEY }}
+            apple-api-key-content: ${{ secrets.APPLE_API_KEY_CONTENT }}
+            apple-team-id: ${{ secrets.APPLE_TEAM_ID }}
+            apple-mac-app-cert-p12: ${{ secrets.APPLE_MAC_APP_CERT_P12 }}
+            apple-mac-installer-cert-p12: ${{ secrets.APPLE_MAC_INSTALLER_CERT_P12 }}
+            apple-mac-cert-password: ${{ secrets.APPLE_MAC_CERT_PASSWORD }}
 
     generate-latest-json:
         name: Generate latest.json
@@ -188,6 +209,7 @@ jobs:
             [
                 version,
                 build-tauri,
+                build-apple,
                 generate-latest-json,
             ]
         runs-on: ubuntu-latest
@@ -200,6 +222,8 @@ jobs:
                   path: artifacts
 
             - name: Prepare release assets
+              env:
+                  MACOS_UPLOAD_STATUS: ${{ needs.build-apple.outputs.macos-upload-status }}
               run: |
                   mkdir -p release_assets
                   # Keep only installable bundles + the updater manifest. Each
@@ -220,6 +244,20 @@ jobs:
                       -name '*.aab' -o \
                       -name 'latest.json' \
                   \) -exec cp -f {} release_assets/ \;
+
+                  # Dynamic cleanup: drop the legacy `Origa_macos-arm64.zip`
+                  # fallback ONLY when the new macOS App Store pipeline has
+                  # confirmed-successfully uploaded a build. If Apple builds
+                  # are skipped (e.g. Dependabot), secrets missing, or upload
+                  # failed, the fallback zip stays so macOS users always have
+                  # a downloadable artifact.
+                  if [ "$MACOS_UPLOAD_STATUS" = "success" ]; then
+                    rm -f release_assets/Origa_macos-arm64.zip
+                    echo "Apple macOS upload succeeded — Origa_macos-arm64.zip excluded from release"
+                  else
+                    echo "Apple macOS upload did not succeed (status: '$MACOS_UPLOAD_STATUS') — keeping Origa_macos-arm64.zip as fallback"
+                  fi
+
                   echo "Release assets content:"
                   ls -la release_assets/
 
@@ -241,7 +279,10 @@ jobs:
                       - `Origa_amd64.deb` — Debian/Ubuntu
 
                       ## macOS
-                      - `Origa_macos-arm64.zip` — Apple Silicon
+                      ${{ needs.build-apple.outputs.macos-upload-status == 'success' && '- App Store: install via TestFlight (see App Store Connect)' || '- `Origa_macos-arm64.zip` — Apple Silicon (fallback; App Store build pending)' }}
+
+                      ## iOS
+                      ${{ needs.build-apple.outputs.ios-upload-status == 'success' && '- App Store: install via TestFlight (see App Store Connect)' || '- iOS build pending (Apple pipeline did not upload)' }}
 
                       ## Android
                       - `origa.apk`
