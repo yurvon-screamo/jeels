@@ -5,10 +5,20 @@ use ulid::Ulid;
 
 /// Controls whether `card_list_view` renders a flat list or splits cards into
 /// JLPT-level groups (N5 first, Other last).
+///
+/// `ByJlptLevel` is currently unused at call sites — JLPT grouping was reverted
+/// from `/grammar` and `/kanji` because the `GroupedGrid` snapshot pattern
+/// goes stale on a favorite-toggle + reload cycle. The variant and the
+/// surrounding infrastructure (this file, `grouped_grid.rs`, the `ByJlptLevel`
+/// branch in `card_list_view`) are kept so a follow-up PR can ship a reactive
+/// `GroupedGrid` without rebuilding the scaffolding.
 #[derive(Clone, Copy)]
 pub enum ListGrouping {
     Flat,
-    ByJlptLevel { card_type: CardType },
+    #[allow(dead_code)]
+    ByJlptLevel {
+        card_type: CardType,
+    },
 }
 
 /// Stable sort rank for a card's JLPT level. Lower rank renders first.
