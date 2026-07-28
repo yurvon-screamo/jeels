@@ -36,9 +36,16 @@
             "icons/icon.icns",
             "icons/icon.ico"
         ],
+        "resources": {
+            "gen/apple/PrivacyInfo.xcprivacy": "PrivacyInfo.xcprivacy"
+        },
         "android": {},
         "iOS": {
             "minimumSystemVersion": "26.0"
+        },
+        "macOS": {
+            "entitlements": "Entitlements.plist",
+            "minimumSystemVersion": "13.0"
         }
     },
     "plugins": {
