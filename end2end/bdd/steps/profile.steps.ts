@@ -64,8 +64,12 @@ When('нажимает кнопку выхода', async ({ page }) => {
 });
 
 Then('происходит переход на страницу входа', async ({ page }) => {
-    // login-page testid is the PageLayout wrapper for /login
+    // After delete the app clears auth state and ProtectedRoute re-renders
+    // the Login view inline (it does not change the URL). Assert on the
+    // login form being visible — if clear_auth_state didn't run, the user
+    // would still see the profile content and this Then would fail.
     await expect(page.getByTestId("login-page")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("email-input").or(page.getByTestId("login-password-toggle"))).toBeVisible({ timeout: 5_000 });
 });
 
 Then('отображается карточка смены пароля', async ({ page }) => {
@@ -100,11 +104,10 @@ When('нажимает кнопку удаления аккаунта', async ({
 
 When('подтверждает удаление', async ({ page }) => {
     await page.getByTestId("profile-confirm-delete-btn").click();
-    // delete_account() clears local auth state but the route doesn't change
-    // on its own — explicitly navigate to /login to verify the session is gone.
-    await page.waitForTimeout(1500);
-    await page.goto("/login");
-    await page.waitForLoadState("networkidle");
+    // delete_account() clears local auth state. ProtectedRoute should redirect
+    // unauthenticated users to /login on the next route evaluation; reload
+    // forces that evaluation without faking the navigation ourselves.
+    await page.reload();
 });
 
 Then('отображается сообщение об успешной смене пароля', async ({ page }) => {

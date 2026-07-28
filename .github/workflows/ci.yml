@@ -331,8 +331,7 @@ jobs:
                       ;;
                     profile-sync)
                       npx playwright test --project=bdd --retries=0 \
-                        --grep "Профиль пользователя|Синхронизация данных" \
-                        --grep-invert "Аутентификация"
+                        --grep "Профиль пользователя|Синхронизация данных|Аутентификация"
                       ;;
                     onboarding-lesson)
                       npx playwright test --project=bdd --retries=0 \

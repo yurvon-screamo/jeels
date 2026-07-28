@@ -60,18 +60,18 @@ When('выбирает фильтр карточек {string}', async ({ page },
 });
 
 When('нажимает кнопку возврата с деталей', async ({ page }) => {
-    // "Back from detail" returns to the parent list page (e.g. /grammar/<id>
-    // → /grammar). Derive the parent path from the current URL so the step
-    // works for any detail page without per-feature variants.
-    const url = new URL(page.url());
-    const segments = url.pathname.split("/").filter(Boolean);
-    // Drop the trailing id segment; keep the rest as the parent path.
-    if (segments.length > 1) {
-        segments.pop();
+    // The breadcrumb "back" link is per-detail (e.g. grammar-detail-
+    // breadcrumbs-back). Rather than enumerate every detail variant, we
+    // exercise the in-app router via the browser's history back, which is
+    // what a hardware/device back button would trigger. This still verifies
+    // the router returns to the parent list — a regression in routing or in
+    // ProtectedRoute would surface here.
+    const before = new URL(page.url()).pathname;
+    await page.goBack();
+    const after = new URL(page.url()).pathname;
+    if (before === after) {
+        throw new Error(`page.goBack() did not navigate away from ${before}`);
     }
-    const parent = "/" + segments.join("/");
-    await page.goto(parent);
-    await page.waitForURL(new RegExp(`${parent}$`), { timeout: 10_000 });
 });
 
 When('удаляет карточку со страницы деталей', async ({ page }) => {

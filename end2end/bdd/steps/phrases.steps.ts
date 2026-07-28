@@ -19,8 +19,8 @@ Then('отображается поле поиска фраз', async ({ page })
 });
 
 Then('отображается вкладка фраз в навигации', async ({ page }) => {
-    // The bottom-tab nav is mobile-only (lg:hidden); switch viewport so it renders.
-    await page.setViewportSize({ width: 375, height: 812 });
+    // Viewport is set up by the 'пользователь устанавливает мобильный размер
+    // экрана' Given step — the bottom-tab nav is mobile-only (lg:hidden).
     await expect(page.getByTestId("bottom-tab")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("bottom-tab-tab-phrases")).toBeVisible({ timeout: 10_000 });
 });

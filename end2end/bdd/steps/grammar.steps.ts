@@ -224,7 +224,9 @@ When('отвечает на все вопросы практики', async ({ pa
     // events-none) and surfaces the Next button, so the loop has to prefer
     // Next over re-clicking an option. On the last question Next sets
     // is_completed and the completion screen replaces the question card.
-    for (let i = 0; i < 30; i++) {
+    // Upper bound is QUESTION_COUNT (20 in Rust) + buffer for retries.
+    const MAX_ANSWER_ITERATIONS = 30;
+    for (let i = 0; i < MAX_ANSWER_ITERATIONS; i++) {
         const complete = page.getByTestId("grammar-practice-complete");
         if (await complete.isVisible({ timeout: 1_000 }).catch(() => false)) break;
 

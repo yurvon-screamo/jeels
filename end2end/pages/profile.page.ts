@@ -115,20 +115,12 @@ export class ProfilePage extends BasePage {
 	}
 
 	async waitForAutoSave(): Promise<void> {
-		// The autosave indicator flips Saving → Saved → Idle in ~1–2s. Saved
-		// only stays visible for ~1.5s, so we cannot use the default
-		// expect(locator).toContainText retry (1s polling misses the window).
-		// Poll tightly and accept either the Saving or Saved message.
-		const start = Date.now();
-		let lastSeen = "(none)";
-		while (Date.now() - start < 15_000) {
-			const txt = (await this.page.getByTestId("profile-autosave-status").textContent()) ?? "";
-			lastSeen = txt.trim() || "(empty)";
-			if (/saved|сохранено|сохранение|saving/i.test(txt)) {
-				return;
-			}
-			await this.page.waitForTimeout(50);
-		}
-		throw new Error(`Autosave status never appeared within 15s (last seen: "${lastSeen}")`);
+		// The autosave indicator flips Saving → Saved → Idle in ~1–2s and the
+		// Saved window only lasts ~1.5s. expect.poll lets us control the
+		// sampling interval so we don't miss the Saved state.
+		await expect.poll(
+			async () => (await this.autosaveStatus.textContent()) ?? "",
+			{ timeout: 15_000, intervals: [50, 100, 250] },
+		).toMatch(/saved|сохранено|сохранение|saving/i);
 	}
 }
