@@ -18,7 +18,7 @@ export const test = base.extend<object, object>({
         },
         // uiLogin can retry up to 3 times, each with a 60s waitForURL timeout,
         // plus WASM cold load. Default fixture timeout (60s) is too tight.
-        { timeout: 180_000 },
+        { scope: "test", timeout: 180_000 },
     ],
 });
 

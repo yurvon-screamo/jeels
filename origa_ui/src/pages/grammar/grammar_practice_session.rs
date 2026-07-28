@@ -222,12 +222,6 @@ pub fn GrammarPracticeSession(
     let is_answered =
         Memo::new(move |_| matches!(answer_state.get(), AnswerState::Answered { .. }));
 
-    let is_last = Memo::new(move |_| {
-        let current = current_index.get();
-        let total = questions.get().len();
-        current + 1 >= total
-    });
-
     let progress_pct = Memo::new(move |_| {
         let total = questions.get().len();
         if total == 0 {
@@ -420,17 +414,20 @@ pub fn GrammarPracticeSession(
                         </Text>
                     </div>
 
-                    <Show when=move || !is_last.get()>
-                        <div class="flex justify-center gap-3 mt-4">
-                            <button
-                                class="px-4 py-2 bg-[var(--accent-olive)] text-[var(--bg-paper)] border border-[var(--accent-olive)] hover:bg-[var(--bg-paper)] hover:text-[var(--accent-olive)] transition-colors cursor-pointer"
-                                data-testid="grammar-practice-next-btn"
-                                on:click=move |_| on_next()
-                            >
-                                {next_text} <span class="kbd-hint">"[Space]"</span>
-                            </button>
-                        </div>
-                    </Show>
+                    // The Next button is always available after an answer;
+                    // on the final question its handler (on_next) sets
+                    // is_completed, which swaps the practice session for the
+                    // completion screen. Hiding it on is_last (the previous
+                    // behaviour) left the user stuck with no way to finish.
+                    <div class="flex justify-center gap-3 mt-4">
+                        <button
+                            class="px-4 py-2 bg-[var(--accent-olive)] text-[var(--bg-paper)] border border-[var(--accent-olive)] hover:bg-[var(--bg-paper)] hover:text-[var(--accent-olive)] transition-colors cursor-pointer"
+                            data-testid="grammar-practice-next-btn"
+                            on:click=move |_| on_next()
+                        >
+                            {next_text} <span class="kbd-hint">"[Space]"</span>
+                        </button>
+                    </div>
                 </Show>
             </Show>
 

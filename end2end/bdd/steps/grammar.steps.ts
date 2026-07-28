@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
-import { GrammarPage, WordsPage } from "../../pages";
+import { GrammarPage, HomePage, LessonPage, WordsPage } from "../../pages";
+import { rateCardUntilDone } from "../../helpers/lesson";
 
 Given('у пользователя есть добавленная грамматическая карточка', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
@@ -42,6 +43,19 @@ Given('у пользователя есть слово для практики �
 
     await wordsPage.addSelectedWords();
     await expect(wordsPage.wordsGrid).toBeVisible({ timeout: 10_000 });
+
+    // Practice session filters vocabulary by is_known_card || is_in_progress,
+    // which excludes fresh "new" cards. Rate the card via a one-shot lesson so
+    // it crosses into in_progress and shows up in quiz generation.
+    const homePage = new HomePage(page);
+    await homePage.goto();
+    await homePage.startLesson();
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.lessonPage).toBeVisible({ timeout: 15_000 });
+    await expect(lessonPage.lessonLoading).toBeHidden({ timeout: 30_000 });
+    await expect(lessonPage.lessonContent).toBeVisible({ timeout: 15_000 });
+    await rateCardUntilDone(lessonPage, "good");
+    await expect(lessonPage.completeScreen).toBeVisible({ timeout: 15_000 });
 });
 
 When('пользователь открывает страницу грамматики', async ({ page }) => {
@@ -205,17 +219,30 @@ Then('отображаются варианты ответа практики', 
 });
 
 When('отвечает на все вопросы практики', async ({ page }) => {
-    for (let i = 0; i < 20; i++) {
+    // Each question: pick the first option, then advance via Next. After an
+    // option is clicked the practice session locks all options (pointer-
+    // events-none) and surfaces the Next button, so the loop has to prefer
+    // Next over re-clicking an option. On the last question Next sets
+    // is_completed and the completion screen replaces the question card.
+    for (let i = 0; i < 30; i++) {
         const complete = page.getByTestId("grammar-practice-complete");
-        if (await complete.isVisible().catch(() => false)) break;
+        if (await complete.isVisible({ timeout: 1_000 }).catch(() => false)) break;
+
+        const nextBtn = page.getByTestId("grammar-practice-next-btn");
+        if (await nextBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+            await nextBtn.click();
+            continue;
+        }
+
         const option = page.getByTestId("grammar-practice-option-0");
-        if (await option.isVisible({ timeout: 3_000 }).catch(() => false)) {
-            await option.click();
-            const nextBtn = page.getByTestId("grammar-practice-next-btn");
-            if (await nextBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-                await nextBtn.click();
+        if (await option.isVisible({ timeout: 2_000 }).catch(() => false)) {
+            const klass = (await option.getAttribute("class")) ?? "";
+            if (!klass.includes("pointer-events-none")) {
+                await option.click();
+                continue;
             }
-        } else break;
+        }
+        await page.waitForTimeout(200);
     }
 });
 
