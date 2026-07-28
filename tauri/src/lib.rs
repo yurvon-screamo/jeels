@@ -3,9 +3,9 @@ mod auth_store;
 mod updater_commands;
 
 use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
-use tauri::{Emitter, Listener};
 #[cfg(any(feature = "release-devtools", all(desktop, not(feature = "app-store"))))]
 use tauri::Manager;
+use tauri::{Emitter, Listener};
 use tauri_plugin_deep_link::DeepLinkExt;
 #[cfg(all(desktop, not(feature = "app-store")))]
 use updater_commands::{PendingUpdate, check_for_update, install_update};
