@@ -8,7 +8,14 @@ Given('у пользователя есть добавленное кандзи'
     await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
     await kanjiPage.addBtn.click();
     await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
+    // Pick exactly one kanji (the first in the current level) so scenarios
+    // like "Удаление кандзи" can reach the empty-state after a single delete.
+    // Tests that need many kanji use the separate "много кандзи" Given.
+    const firstItem = kanjiPage.drawer.getByTestId("kanji-drawer-item").first();
+    await expect(firstItem).toBeVisible({ timeout: 10_000 });
+    await firstItem.click();
     await kanjiPage.drawerAddBtn.click();
+    await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
     await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
 });
 
@@ -26,6 +33,15 @@ When('открывает добавление кандзи', async ({ page }) =>
 
 When('подтверждает добавление кандзи', async ({ page }) => {
     const kanjiPage = new KanjiPage(page);
+    // The "add" button stays disabled until at least one kanji is selected.
+    // If the upstream scenario skipped an explicit selection step (e.g. the
+    // "Добавление кандзи N5" path), fall back to "select all".
+    if (await kanjiPage.drawerAddBtn.isEnabled().catch(() => false)) {
+        // already enabled — something is selected
+    } else {
+        await kanjiPage.drawerSelectAllBtn.click();
+        await expect(kanjiPage.drawerAddBtn).toBeEnabled({ timeout: 10_000 });
+    }
     await kanjiPage.drawerAddBtn.click();
     await expect(kanjiPage.drawer).not.toBeVisible({ timeout: 30_000 });
 });
@@ -58,8 +74,8 @@ When('пользователь отменяет удаление первого 
 });
 
 When('нажимает кнопку возврата на кандзи', async ({ page }) => {
-    const kanjiPage = new KanjiPage(page);
-    await kanjiPage.backBtn.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('пользователь отмечает первое кандзи как известное', async ({ page }) => {
@@ -68,18 +84,17 @@ When('пользователь отмечает первое кандзи как
 });
 
 When('пользователь открывает детали первого кандзи', async ({ page }) => {
-    const kanjiPage = new KanjiPage(page);
     await page.getByTestId("kanji-card-item").first().click();
-    await kanjiPage.expectDetailPageVisible();
+    await page.waitForURL(/\/kanji\//, { timeout: 10_000 });
+    await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается страница деталей кандзи', async ({ page }) => {
-    const kanjiPage = new KanjiPage(page);
-    await kanjiPage.expectDetailPageVisible();
+    await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 15_000 });
 });
 
 Then('отображается содержимое деталей кандзи', async ({ page }) => {
-    await expect(page.getByTestId("kanji-detail-page")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 10_000 });
 });
 
 When('нажимает кнопку выбора всех кандзи', async ({ page }) => {

@@ -159,7 +159,24 @@ export class WordsPage extends BasePage {
     async selectFirstWord(): Promise<void> {
         const firstItem = this.analyzedWordItems.first();
         await firstItem.waitFor({ state: "visible", timeout: 5000 });
+
+        // analyze_text() pre-selects every detected word. To pick ONLY the
+        // first one, deselect all currently-checked items first, then click
+        // the first to (re)select it.
+        const count = await this.analyzedWordItems.count();
+        for (let i = 0; i < count; i++) {
+            const item = this.analyzedWordItems.nth(i);
+            const checkbox = item.locator('input[type="checkbox"]');
+            if (await checkbox.isChecked()) {
+                await item.click();
+                await expect(checkbox).not.toBeChecked({ timeout: 2000 });
+            }
+        }
+
         await firstItem.click();
+        await expect(
+            firstItem.locator('input[type="checkbox"]'),
+        ).toBeChecked({ timeout: 2000 });
     }
 
     async selectAllAnalyzedWords(): Promise<void> {
@@ -218,14 +235,26 @@ export class WordsPage extends BasePage {
     }
 
     async selectFilter(name: WordsFilterType): Promise<void> {
-        const filterMap: Record<WordsFilterType, string> = {
+        // Accept both Russian (UI labels) and English (feature-file style) keys.
+        const filterMap: Record<string, string> = {
             "Все": "all",
+            "all": "all",
             "Новые": "new",
+            "new": "new",
             "Сложные": "hard",
+            "hard": "hard",
             "В процессе": "in-progress",
+            "in-progress": "in-progress",
+            "in_progress": "in-progress",
+            "learning": "in-progress",
             "Изученные": "learned",
+            "learned": "learned",
         };
-        await this.page.getByTestId("words-filter-" + filterMap[name]).click();
+        const suffix = filterMap[name];
+        if (!suffix) {
+            throw new Error(`Unknown filter name: ${name}`);
+        }
+        await this.page.getByTestId("words-filter-" + suffix).click();
     }
 
     async getCardCount(): Promise<number> {

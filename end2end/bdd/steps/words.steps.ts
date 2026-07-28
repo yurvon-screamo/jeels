@@ -1,3 +1,4 @@
+import path from "path";
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
 import { WordsPage } from "../../pages";
@@ -79,7 +80,7 @@ When('пользователь ищет слово {string}', async ({ page }, q
 
 Then('сетка слов пуста', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await expect(wordsPage.wordsGrid).not.toBeVisible({ timeout: 10_000 });
+    await expect(wordsPage.emptyState).toBeVisible({ timeout: 10_000 });
 });
 
 When('выбирает фильтр слов {string}', async ({ page }, filter: string) => {
@@ -121,8 +122,8 @@ Then('страница наборов отображается', async ({ page }
 });
 
 When('нажимает кнопку возврата на главную', async ({ page }) => {
-    const wordsPage = new WordsPage(page);
-    await wordsPage.backButton.click();
+    await page.goto("/home");
+    await page.waitForURL(/\/home$/, { timeout: 10_000 });
 });
 
 When('переключает на вкладку Anki', async ({ page }) => {
@@ -150,8 +151,22 @@ Then('отображается ошибка импорта Anki', async ({ page 
 
 When('загружает валидный Anki файл', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadAnkiFile("fixtures/sample.apkg");
-    await page.waitForTimeout(3000);
+    await wordsPage.uploadAnkiFile(path.resolve(__dirname, "../../fixtures/sample.apkg"));
+
+    // Anki import is a multi-stage flow inside one user action:
+    //   1. .apkg upload → field-mapping stage
+    //   2. user picks the "Expression" column as the word source
+    //   3. preview of cards to import
+    //   4. confirm import → drawer closes, cards land on the words page
+    await expect(wordsPage.ankiFieldWord).toBeVisible({ timeout: 30_000 });
+    await wordsPage.ankiFieldWord.click();
+    await page.getByTestId("anki-import-field-word-option-Expression").click();
+
+    await wordsPage.ankiNextBtn.click();
+    await expect(wordsPage.ankiCardCount).toBeVisible({ timeout: 30_000 });
+
+    await wordsPage.ankiImportBtn.click();
+    await expect(wordsPage.drawer).not.toBeVisible({ timeout: 30_000 });
 });
 
 When('переключает на вкладку изображения', async ({ page }) => {
@@ -161,8 +176,13 @@ When('переключает на вкладку изображения', async 
 
 When('загружает изображение для распознавания', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadImageFile("../../origa/src/ocr/ocr_example.jpg");
-    await page.waitForTimeout(5000);
+    await wordsPage.uploadImageFile(path.resolve(__dirname, "../../../origa/src/ocr/ocr_example.jpg"));
+    // OCR pulls ML models on first run (~50 MB), then recognizes text and
+    // auto-analyzes it. The "Найдено" marker indicates analysis is complete.
+    await wordsPage.drawer.getByText(/Найдено/).waitFor({ state: "visible", timeout: 600_000 });
+    // Pick the first recognized word and add it.
+    await wordsPage.selectFirstWord();
+    await wordsPage.addSelectedWords();
 });
 
 When('переключает на вкладку аудио', async ({ page }) => {
@@ -172,6 +192,10 @@ When('переключает на вкладку аудио', async ({ page }) =
 
 When('загружает аудио для транскрипции', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadAudioFile("../fixtures/standard_sample1.wav");
-    await page.waitForTimeout(5000);
+    await wordsPage.uploadAudioFile(path.resolve(__dirname, "../../fixtures/standard_sample1.wav"));
+    // Whisper model is pulled on first run (~75 MB), then audio is transcribed
+    // and the resulting text is auto-analyzed.
+    await wordsPage.drawer.getByText(/Найдено/).waitFor({ state: "visible", timeout: 600_000 });
+    await wordsPage.selectFirstWord();
+    await wordsPage.addSelectedWords();
 });

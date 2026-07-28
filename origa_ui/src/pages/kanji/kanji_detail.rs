@@ -190,7 +190,7 @@ pub fn KanjiDetail() -> impl IntoView {
     });
 
     view! {
-        <div class="kanji-detail-container">
+        <div class="kanji-detail-container" data-testid="kanji-detail">
             <Show when=move || is_loading.get()>
                 <LoadingOverlay message=loading_text />
             </Show>

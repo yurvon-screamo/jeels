@@ -220,7 +220,7 @@ jobs:
                   retention-days: 1
 
     e2e:
-        name: E2E (${{ matrix.spec }})
+        name: E2E ${{ matrix.group }}
         permissions:
             contents: read
         needs: e2e-build
@@ -228,108 +228,12 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                spec:
-                    - auth
-                    - grammar
-                    - home
-                    - kanji
-                    - lesson
-                    - navigation
-                    - onboarding
-                    - phrase
-                    - profile
-                    - session
-                    - sets
+                group:
+                    - core
                     - words
-        env:
-            ORIGA_CDN_BASE_URL: http://localhost:8080
-            TRAILBASE_URL: http://localhost:4000
-            ORIGA_ADMIN_EMAIL: admin@localhost
-            ORIGA_ADMIN_PASSWORD: secret
-            CI: "true"
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-
-            - name: Download WASM artifact
-              uses: actions/download-artifact@v8
-              with:
-                  name: wasm-dist
-                  path: origa_ui/dist/
-
-            - name: Download CDN artifact
-              uses: actions/download-artifact@v8
-              with:
-                  name: cdn-data
-                  path: cdn/
-
-            - name: Cache TrailBase CLI
-              id: cache-trailbase
-              uses: actions/cache@v4
-              with:
-                  path: ~/.local/bin/trail
-                  key: trailbase-v0.28.3-verified  # Keep in sync with origa_ui/Dockerfile FROM
-
-            - name: Add TrailBase to PATH
-              run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-            - name: Validate TrailBase CLI
-              id: validate-trailbase
-              run: |
-                  if command -v trail &> /dev/null && trail --version &> /dev/null; then
-                    echo "valid=true" >> $GITHUB_OUTPUT
-                  else
-                    echo "valid=false" >> $GITHUB_OUTPUT
-                  fi
-
-            - name: Install TrailBase CLI
-              if: steps.cache-trailbase.outputs.cache-hit != 'true' || steps.validate-trailbase.outputs.valid != 'true'
-              run: |
-                  for i in 1 2 3 4 5; do
-                    tmp=$(mktemp) && curl -sSfL --retry 3 --retry-delay 10 -o "$tmp" \
-                      https://trailbase.io/install.sh && bash "$tmp" && break
-                    echo "Attempt $i failed, retrying in 15s..."
-                    rm -f "$tmp"
-                    sleep 15
-                  done
-
-            - name: Verify TrailBase
-              run: trail --version
-
-            - name: Install Node.js dependencies
-              working-directory: end2end
-              run: npm ci
-
-            - name: Cache Playwright browsers
-              id: playwright-cache
-              uses: actions/cache@v4
-              with:
-                  path: ~/.cache/ms-playwright
-                  key: playwright-chromium-v1-${{ hashFiles('end2end/package-lock.json') }}
-
-            - name: Install Playwright browsers
-              if: steps.playwright-cache.outputs.cache-hit != 'true'
-              run: npx playwright install --with-deps chromium
-              working-directory: end2end
-
-            - name: Run E2E test (${{ matrix.spec }})
-              working-directory: end2end
-              run: npx playwright test tests/${{ matrix.spec }}.spec.ts --project=chromium
-
-            - name: Upload blob report
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: blob-report-${{ matrix.spec }}
-                  path: end2end/blob-report/
-                  retention-days: 7
-
-    e2e-bdd:
-        name: E2E BDD (Gherkin)
-        permissions:
-            contents: read
-        needs: e2e-build
-        runs-on: ubuntu-24.04
+                    - grammar-kanji
+                    - profile-sync
+                    - onboarding-lesson
         env:
             ORIGA_CDN_BASE_URL: http://localhost:8080
             TRAILBASE_URL: http://localhost:4000
@@ -409,15 +313,37 @@ jobs:
               run: npx playwright install --with-deps chromium
               working-directory: end2end
 
-            - name: Run BDD tests
+            - name: Run BDD tests (${{ matrix.group }})
               working-directory: end2end
-              run: npx playwright test --project=bdd
+              run: |
+                  case "${{ matrix.group }}" in
+                    core)
+                      npx playwright test --project=bdd --retries=0 \
+                        --grep "Дымовой тест|Сохранение сессии|Навигация|Главная страница"
+                      ;;
+                    words)
+                      npx playwright test --project=bdd --retries=0 \
+                        --grep "Управление словами|Управление наборами слов|Фразы$"
+                      ;;
+                    grammar-kanji)
+                      npx playwright test --project=bdd --retries=0 \
+                        --grep "Управление грамматикой|Управление кандзи"
+                      ;;
+                    profile-sync)
+                      npx playwright test --project=bdd --retries=0 \
+                        --grep "Профиль пользователя|Синхронизация данных|Аутентификация"
+                      ;;
+                    onboarding-lesson)
+                      npx playwright test --project=bdd --retries=0 \
+                        --grep "Прохождение онбординга|Оценивание карточек при онбординге|Прохождение урока|Фразы после онбординга"
+                      ;;
+                  esac
 
             - name: Upload blob report
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: blob-report-bdd
+                  name: blob-report-${{ matrix.group }}
                   path: end2end/blob-report/
                   retention-days: 7
 
@@ -425,8 +351,8 @@ jobs:
         name: E2E Report
         permissions:
             contents: read
-        needs: [e2e, e2e-bdd]
-        if: always() && needs.e2e.result != 'cancelled' && needs.e2e-bdd.result != 'cancelled'
+        needs: [e2e]
+        if: always() && needs.e2e.result != 'cancelled'
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
@@ -551,7 +477,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, docker-build-landing, docker-build-ui, build-tauri]
+        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri]
         if: always()
         runs-on: ubuntu-latest
         steps:
@@ -570,6 +496,7 @@ jobs:
                   check "lint" "${{ needs.lint.result }}" "success"
                   check "test" "${{ needs.test.result }}" "success"
                   check "e2e" "${{ needs.e2e.result }}" "success"
+                  check "e2e-report" "${{ needs.e2e-report.result }}" "success" "skipped"
                   check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
                   check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
                   check "build-tauri" "${{ needs.build-tauri.result }}" "success"

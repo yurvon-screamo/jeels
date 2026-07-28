@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
-import { OnboardingPage, PhrasesPage } from "../../pages";
+import { OnboardingPage } from "../../pages";
 import { skipOnboarding } from "../../helpers/navigation";
 
 Given('новый пользователь', async ({ page }) => {
@@ -32,14 +32,19 @@ When('нажимает кнопку загрузки ещё', async ({ page }) =
 });
 
 When('переключает избранное первой карточки', async ({ page }) => {
-    await page.locator('[data-testid*="card-item"]').first()
-        .locator('[data-testid*="favorite"]').first().click();
+    const favBtn = page.locator('[data-testid*="card-item"]').first()
+        .locator('[data-testid*="favorite"]').first();
+    await favBtn.click();
+    // Wait for the filled-heart SVG to render so the toggle actually landed
+    // before any subsequent navigation reloads the page state.
+    await expect(favBtn.locator('svg path[fill="currentColor"]')).toBeVisible({ timeout: 10_000 });
 });
 
 Then('первая карточка отмечена избранной', async ({ page }) => {
     const favBtn = page.locator('[data-testid*="card-item"]').first()
         .locator('[data-testid*="favorite"]').first();
-    await expect(favBtn).toHaveClass(/active|selected|favorited/, { timeout: 5_000 });
+    const filledPath = favBtn.locator('svg path[fill="currentColor"]');
+    await expect(filledPath).toBeVisible({ timeout: 5_000 });
 });
 
 // Generic filter + detail steps
@@ -55,8 +60,18 @@ When('выбирает фильтр карточек {string}', async ({ page },
 });
 
 When('нажимает кнопку возврата с деталей', async ({ page }) => {
-    const backBtn = page.getByTestId(/detail.*back/).or(page.getByTestId("back-btn")).or(page.getByRole("button", { name: /Back|Назад|戻/ }));
-    await backBtn.first().click();
+    // The breadcrumb "back" link is per-detail (e.g. grammar-detail-
+    // breadcrumbs-back). Rather than enumerate every detail variant, we
+    // exercise the in-app router via the browser's history back, which is
+    // what a hardware/device back button would trigger. This still verifies
+    // the router returns to the parent list — a regression in routing or in
+    // ProtectedRoute would surface here.
+    const before = new URL(page.url()).pathname;
+    await page.goBack();
+    const after = new URL(page.url()).pathname;
+    if (before === after) {
+        throw new Error(`page.goBack() did not navigate away from ${before}`);
+    }
 });
 
 When('удаляет карточку со страницы деталей', async ({ page }) => {
@@ -78,7 +93,7 @@ Then('метрики FSRS скрыты на мобильном устройст�
 
 Then('кнопка отметки скрыта для первой карточки', async ({ page }) => {
     const markBtn = page.locator('[data-testid*="card-item"]').first()
-        .locator('[data-testid*="mark-as-known"]').first();
+        .locator('[data-testid*="mark-known"]').first();
     await expect(markBtn).not.toBeVisible({ timeout: 5_000 });
 });
 
@@ -90,10 +105,10 @@ Then('отображается кнопка отметки как известн
 
 When('отмечает первую фразу как известную', async ({ page }) => {
     await page.locator('[data-testid*="card-item"]').first()
-        .locator('[data-testid*="mark-as-known"]').first().click();
+        .locator('[data-testid*="mark-known"]').first().click();
 });
 
 When('отменяет удаление первой фразы', async ({ page }) => {
-    const phrasesPage = new PhrasesPage(page);
-    await phrasesPage.deleteCancelBtn.click();
+    const cancelBtn = page.getByTestId(/cancel.*delete|delete.*cancel/);
+    await cancelBtn.first().click();
 });

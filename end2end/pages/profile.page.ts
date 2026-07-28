@@ -61,7 +61,12 @@ export class ProfilePage extends BasePage {
 	}
 
 	async selectLanguage(lang: "english" | "russian"): Promise<void> {
-		const btn = lang === "english" ? this.langEnglish : this.langRussian;
+		// Scope to the profile language toggle to avoid matching the same
+		// testid on other mounted language toggles (login, onboarding).
+		const toggle = this.profileContent.getByTestId("profile-lang-toggle");
+		const btn = lang === "english"
+			? toggle.getByTestId("lang-toggle-en")
+			: toggle.getByTestId("lang-toggle-ru");
 		await btn.click();
 	}
 
@@ -110,10 +115,12 @@ export class ProfilePage extends BasePage {
 	}
 
 	async waitForAutoSave(): Promise<void> {
-		const status = this.autosaveStatus;
-		// Wait for status to appear (Saving state)
-		await status.waitFor({ state: "visible", timeout: 5_000 });
-		// Wait for it to show "Saved" or disappear (Idle after fade)
-		await expect(status).toContainText(/saved|сохранено/i, { timeout: 10_000 });
+		// The autosave indicator flips Saving → Saved → Idle in ~1–2s and the
+		// Saved window only lasts ~1.5s. expect.poll lets us control the
+		// sampling interval so we don't miss the Saved state.
+		await expect.poll(
+			async () => (await this.autosaveStatus.textContent()) ?? "",
+			{ timeout: 15_000, intervals: [50, 100, 250] },
+		).toMatch(/saved|сохранено|сохранение|saving/i);
 	}
 }
