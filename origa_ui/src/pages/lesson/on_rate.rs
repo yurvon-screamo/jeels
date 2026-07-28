@@ -1,4 +1,5 @@
 use super::lesson_state::LessonContext;
+use crate::core::haptics;
 use crate::hooks::phrase_checker;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -104,6 +105,11 @@ pub fn create_on_rate_callback(
     };
 
     Callback::new(move |rating: Rating| {
+        // Fire haptic feedback immediately on the synchronous call stack so
+        // the user feels it at the moment of contact, before the async rating
+        // persistence begins. No-op on desktop and in plain browsers.
+        haptics::rating_feedback(rating);
+
         let state = lesson_state.get_untracked();
 
         let Some(slot_id) = state.card_ids.get(state.current_index) else {
