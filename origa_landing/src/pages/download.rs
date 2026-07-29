@@ -9,12 +9,15 @@ use crate::content::Locale;
 // between releases, so each platform links to its alias rather than the
 // versioned asset. Clicking starts the file download directly (GitHub serves
 // these with Content-Disposition: attachment), skipping the release UI.
+//
+// macOS distribution moved to the Mac App Store (ADR-033). The legacy
+// `Origa_macos-arm64.zip` direct-download asset is no longer produced by
+// CI — the macOS DownloadCard uses the same "coming soon" treatment as
+// iOS until the App Store listing goes live.
 const DOWNLOAD_WINDOWS: &str =
     "https://github.com/yurvon-screamo/origa/releases/latest/download/Origa_x64-setup.exe";
 const DOWNLOAD_LINUX_APPIMAGE: &str =
     "https://github.com/yurvon-screamo/origa/releases/latest/download/Origa_amd64.AppImage";
-const DOWNLOAD_MACOS: &str =
-    "https://github.com/yurvon-screamo/origa/releases/latest/download/Origa_macos-arm64.zip";
 const DOWNLOAD_ANDROID: &str =
     "https://github.com/yurvon-screamo/origa/releases/latest/download/origa.apk";
 const WEB_APP_URL: &str = env!("ORIGA_APP_BASE_URL");
@@ -80,8 +83,7 @@ pub fn DownloadPage() -> impl IntoView {
                     icon=view! { <IconApple /> }.into_any()
                     name=c.download_macos
                     formats=c.download_macos_formats
-                    href=DOWNLOAD_MACOS
-                    button_text=c.download_button
+                    badge=c.download_ios_coming_soon
                 />
                 <DownloadCard
                     icon=view! { <IconLinux /> }.into_any()
