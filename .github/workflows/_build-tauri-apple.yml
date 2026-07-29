@@ -500,6 +500,7 @@ jobs:
 
             - name: Build .pkg via productbuild
               id: pkg
+              timeout-minutes: 10
               env:
                   APPLE_MAC_CERT_PASSWORD: ${{ secrets.apple-mac-cert-password }}
               run: |
@@ -513,6 +514,16 @@ jobs:
                   # framework — `find-identity -p codesigning` returns
                   # only Application certs. `productbuild` itself accepts
                   # any identity visible in the keychain.
+                  #
+                  # productbuild can hang silently if the keychain blocks
+                  # private-key access (no GUI to prompt for passphrase on
+                  # headless runner). `set-key-partition-list` in the import
+                  # step should whitelist `apple-tool:` and `apple:`, but
+                  # if productbuild is the first tool to actually exercise
+                  # the installer identity's private key, the partition may
+                  # not cover it. timeout-minutes: 10 prevents the previous
+                  # >1h hang; the .app artifact remains valid for manual
+                  # packaging if this step times out.
                   INSTALLER_IDENTITY=$(security find-identity -v -p basic | grep -E "Mac Installer Distribution|3rd Party Mac Developer Installer" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
                   if [ -z "$INSTALLER_IDENTITY" ]; then
                     echo "::error::Mac Installer Distribution / 3rd Party Mac Developer Installer identity not found"
@@ -520,6 +531,11 @@ jobs:
                     exit 1
                   fi
                   echo "Installer identity: $INSTALLER_IDENTITY"
+
+                  # Pre-authorize the keychain for productbuild so it does
+                  # not block on a GUI passphrase prompt. Same password as
+                  # used for `security import` above.
+                  security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" build.keychain || true
 
                   PKG_PATH="$RUNNER_TEMP/Origa.pkg"
                   productbuild --component "$APP_PATH" /Applications \
