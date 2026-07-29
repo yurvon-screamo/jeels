@@ -155,12 +155,15 @@ jobs:
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
                   APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
                   APPLE_TEAM_ID: ${{ secrets.apple-team-id }}
+                  # ORIGA_APP_STORE signals tauri/build.rs to emit the
+                  # `app_store` rustc cfg, which gates out updater /
+                  # single-instance / release-devtools for Mac App Store
+                  # compliance (2.4.5(vii), 2.5.1). Env-var path is used
+                  # because `cargo tauri ios build` does NOT propagate
+                  # `--no-default-features --features` to cargo.
+                  ORIGA_APP_STORE: "1"
               run: |
-                  # --no-default-features --features app-store disables updater,
-                  # single-instance, and release-devtools for App Store compliance
-                  # (Mac App Store 2.4.5(vii), 2.5.1).
                   cargo tauri ios build \
-                    --no-default-features --features app-store \
                     --export-method app-store-connect
 
             - name: Locate .ipa
@@ -355,6 +358,8 @@ jobs:
               working-directory: tauri
               env:
                   APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
+                  # See build-ios job for rationale on ORIGA_APP_STORE.
+                  ORIGA_APP_STORE: "1"
               run: |
                   # Universal Binary requires both arm64 and x86_64 targets;
                   # tauri-bundler combines them via lipo automatically when
@@ -362,7 +367,6 @@ jobs:
                   # --bundles app produces a signed .app (no .dmg), sufficient
                   # for productbuild .pkg generation in the next step.
                   cargo tauri build \
-                    --no-default-features --features app-store \
                     --target universal-apple-darwin \
                     --bundles app
 
