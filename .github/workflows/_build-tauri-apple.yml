@@ -333,18 +333,13 @@ jobs:
                   name: ${{ inputs.wasm_artifact_name }}
                   path: origa_ui/dist/
 
-            - name: Import Mac App signing certificate
+            - name: Import Mac signing certificates
               uses: apple-actions/import-codesign-certs@v3
               with:
                   p12-file-base64: ${{ secrets.apple-mac-app-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
-                  keychain: build
-
-            - name: Import Mac Installer signing certificate
-              uses: apple-actions/import-codesign-certs@v3
-              with:
-                  p12-file-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
-                  p12-password: ${{ secrets.apple-mac-cert-password }}
+                  additional-p12-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
+                  additional-p12-password: ${{ secrets.apple-mac-cert-password }}
                   keychain: build
 
             - name: Discover signing identities
