@@ -362,8 +362,16 @@ jobs:
                   security create-keychain -p "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
                   security default-keychain -s "$KEYCHAIN"
                   security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
-                  # Allow codesign/productbuild to access keys without per-call prompt
-                  security set-keychain-settings -t 3600 -u "$KEYCHAIN"
+                  # Disable keychain auto-lock ENTIRELY for the duration of
+                  # this job. The previous `-t 3600 -u` form sets a 1h timeout
+                  # AFTER WHICH the keychain auto-locks, but the macOS build
+                  # (cargo tauri build) takes ~25 min and productbuild then
+                  # runs ~30+ min after import — by then the 1h window has
+                  # expired and productbuild blocks indefinitely waiting for
+                  # a GUI unlock prompt that never arrives on a headless
+                  # runner. Reference: tauri-apps/tauri-action#941.
+                  # Runner is ephemeral, so persistent-unlock is acceptable.
+                  security set-keychain-settings "$KEYCHAIN"
                   security import /tmp/mac_app.p12 -k "$KEYCHAIN" \
                     -P "$APPLE_MAC_CERT_PASSWORD" -T /usr/bin/codesign
                   security import /tmp/mac_installer.p12 -k "$KEYCHAIN" \
@@ -371,7 +379,10 @@ jobs:
                   # Without set-key-partition-list codesign fails with
                   # errSecInternalComponent — the tool cannot access the
                   # private key even though the cert is visible.
-                  security set-key-partition-list -S apple-tool:,apple: \
+                  # Include explicit tool group entries for codesign and
+                  # productbuild in addition to Apple's standard apple-tool:
+                  # to cover stricter Security framework versions.
+                  security set-key-partition-list -S apple-tool:,apple:,codesign:,productbuild: \
                     -s -k "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
                   # Append to keychain list so tools can search both
                   security list-keychains -d user -s "$KEYCHAIN" login.keychain
@@ -524,18 +535,32 @@ jobs:
                   # not cover it. timeout-minutes: 10 prevents the previous
                   # >1h hang; the .app artifact remains valid for manual
                   # packaging if this step times out.
-                  INSTALLER_IDENTITY=$(security find-identity -v -p basic | grep -E "Mac Installer Distribution|3rd Party Mac Developer Installer" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
-                  if [ -z "$INSTALLER_IDENTITY" ]; then
+                  # Use SHA-1 hash instead of CN — productbuild resolves
+                  # identity by hash more reliably than by CN string match
+                  # (CN matching can require keychain UI prompt on some
+                  # macOS versions even when partition list is correct).
+                  # Output of `find-identity -v -p basic` is:
+                  #   1) HASH "CN string" (TEAM)
+                  # We extract $1 = the SHA-1 hash.
+                  INSTALLER_LINE=$(security find-identity -v -p basic | grep -E "Mac Installer Distribution|3rd Party Mac Developer Installer" | head -1 || true)
+                  if [ -z "$INSTALLER_LINE" ]; then
                     echo "::error::Mac Installer Distribution / 3rd Party Mac Developer Installer identity not found"
                     security find-identity -v -p basic
                     exit 1
                   fi
-                  echo "Installer identity: $INSTALLER_IDENTITY"
+                  INSTALLER_IDENTITY=$(echo "$INSTALLER_LINE" | awk '{print $1}')
+                  echo "Installer identity (SHA-1): $INSTALLER_IDENTITY"
+                  echo "  from line: $INSTALLER_LINE"
 
-                  # Pre-authorize the keychain for productbuild so it does
-                  # not block on a GUI passphrase prompt. Same password as
-                  # used for `security import` above.
-                  security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" build.keychain || true
+                  # Re-unlock and re-confirm no auto-lock right before
+                  # productbuild — paranoia layer in case something
+                  # between the import step and here re-locked or
+                  # changed settings.
+                  security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" build.keychain
+                  security set-keychain-settings build.keychain
+                  security default-keychain -s build.keychain
+                  echo "Keychain state before productbuild:"
+                  security show-keychain-info build.keychain || true
 
                   PKG_PATH="$RUNNER_TEMP/Origa.pkg"
                   productbuild --component "$APP_PATH" /Applications \
