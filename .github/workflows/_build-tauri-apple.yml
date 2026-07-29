@@ -242,10 +242,14 @@ jobs:
               id: ipa
               shell: bash
               run: |
-                  IPA_PATH=$(find target -name "*.ipa" -type f | head -1)
+                  # tauri-cli may place the .ipa under target/ OR under
+                  # tauri/gen/apple/build/ depending on the export-method
+                  # and tauri-cli version. Search both trees.
+                  IPA_PATH=$(find target tauri/gen/apple -name "*.ipa" -type f 2>/dev/null | head -1)
                   if [ -z "$IPA_PATH" ] || [ ! -f "$IPA_PATH" ]; then
                     echo "::error::No .ipa produced by cargo tauri ios build"
-                    find target -type f -name "*.ipa" 2>/dev/null || true
+                    echo "--- Searching entire repo for *.ipa ---"
+                    find . -name "*.ipa" -type f 2>/dev/null | grep -v node_modules || true
                     exit 1
                   fi
                   echo "path=$IPA_PATH" >> "$GITHUB_OUTPUT"
