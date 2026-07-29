@@ -30,7 +30,7 @@ on:
                 required: true
             platforms:
                 type: string
-                default: "windows,linux,macos,android"
+                default: "windows,linux,android"
             skip_android:
                 type: boolean
                 default: false
@@ -52,8 +52,6 @@ on:
                 value: ${{ jobs.build-windows.outputs.signature }}
             linux-signature:
                 value: ${{ jobs.build-linux.outputs.signature }}
-            macos-signature:
-                value: ${{ jobs.build-macos.outputs.signature }}
 
 env:
     CARGO_TERM_COLOR: always
@@ -271,119 +269,6 @@ jobs:
                       **/bundle/appimage/*.AppImage
                       **/bundle/appimage/*.sig
                       **/bundle/deb/*.deb
-                  retention-days: 7
-
-    build-macos:
-        # Desktop-distribution macOS build via cargo-zigbuild (cross-compile on
-        # Linux, fast, free runner minutes). Produces the unsigned
-        # Origa_macos-arm64.zip used by the landing page's direct download
-        # link (`/releases/latest/download/Origa_macos-arm64.zip`, ADR-025).
-        #
-        # The signed Mac App Store .pkg comes from _build-tauri-apple.yml's
-        # build-macos job on a real macos-15 runner — completely separate
-        # distribution channel.
-        #
-        # Dynamic cleanup in tauri.yml's release job drops this asset when
-        # the App Store pipeline has confirmed-successfully uploaded; until
-        # then it remains as fallback.
-        name: Build macOS (desktop fallback)
-        if: contains(inputs.platforms, 'macos')
-        runs-on: ubuntu-latest
-        container:
-            image: ghcr.io/rust-cross/cargo-zigbuild
-        permissions:
-            contents: read
-        outputs:
-            signature: ${{ steps.signature.outputs.signature }}
-        env:
-            ORIGA_VERSION: ${{ inputs.version }}
-            ORIGA_COMMIT: ${{ inputs.commit_sha }}
-            ORIGA_BUILD_DATE: ${{ inputs.build_date }}
-            TAURI_SIGNING_PRIVATE_KEY: ${{ github.actor != 'dependabot[bot]' && secrets.tauri-signing-private-key || '' }}
-            TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ github.actor != 'dependabot[bot]' && secrets.tauri-signing-private-key-password || '' }}
-
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-
-            - name: Download WASM artifact
-              uses: actions/download-artifact@v8
-              with:
-                  name: ${{ inputs.wasm_artifact_name }}
-                  path: origa_ui/dist/
-
-            - name: Setup cargo cache
-              uses: Swatinem/rust-cache@v2
-              with:
-                  cache-all-crates: false
-                  cache-targets: false
-                  shared-key: origa-cross-build-v2
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
-
-            - name: Update version in config files
-              uses: ./.github/actions/update-version
-              with:
-                  version: ${{ inputs.version }}
-
-            - name: Install build dependencies
-              run: apt-get update && apt-get install -y zip protobuf-compiler
-
-            - name: Setup Rust targets
-              run: rustup target add aarch64-apple-darwin
-
-            - name: Install cargo-binstall
-              run: |
-                  tmp=$(mktemp) && curl -L --proto '=https' --tlsv1.2 -sSf -o "$tmp" https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh && bash "$tmp"
-                  cargo binstall tauri-cli --no-confirm --force
-
-            - name: Add cargo bin to PATH
-              run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-            - name: Build Tauri app for macOS (desktop)
-              working-directory: tauri
-              run: cargo tauri build --runner cargo-zigbuild --target aarch64-apple-darwin --no-bundle
-
-            - name: Extract signature
-              id: signature
-              shell: bash
-              run: echo "signature=" >> $GITHUB_OUTPUT
-
-            - name: Create macOS app bundle
-              run: |
-                  mkdir -p Origa.app/Contents/MacOS
-                  mkdir -p Origa.app/Contents/Resources
-                  cp target/aarch64-apple-darwin/release/origa-app Origa.app/Contents/MacOS/origa
-                  cat > Origa.app/Contents/Info.plist << EOF
-                  <?xml version="1.0" encoding="UTF-8"?>
-                  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-                  <plist version="1.0">
-                  <dict>
-                    <key>CFBundleIdentifier</key>
-                    <string>net.uwuwu.origa</string>
-                    <key>CFBundleName</key>
-                    <string>Origa</string>
-                    <key>CFBundleDisplayName</key>
-                    <string>Origa</string>
-                    <key>CFBundleVersion</key>
-                    <string>${{ inputs.version }}</string>
-                    <key>CFBundleShortVersionString</key>
-                    <string>${{ inputs.version }}</string>
-                    <key>CFBundleExecutable</key>
-                    <string>origa</string>
-                    <key>CFBundlePackageType</key>
-                    <string>APPL</string>
-                  </dict>
-                  </plist>
-                  EOF
-                  chmod +x Origa.app/Contents/MacOS/origa
-                  zip -r "Origa_macos-arm64.zip" Origa.app
-
-            - name: Upload macOS artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: macos-build
-                  path: |
-                      Origa_macos-arm64.zip
                   retention-days: 7
 
     build-android:

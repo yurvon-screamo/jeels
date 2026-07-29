@@ -485,32 +485,6 @@ jobs:
                   echo "✅ All 5 entitlements present"
                   rm -f /tmp/entitlements.txt
 
-            - name: Re-codesign with --requirements (Tauri #15230 workaround)
-              # Tauri-bundler prior to fix for https://github.com/tauri-apps/tauri/issues/15230
-              # omits --requirements on codesign, causing productbuild to fail
-              # the Requirement check for Mac App Store distribution. Re-sign
-              # the top-level bundle with --requirements to inject the
-              # designated requirement. --deep is intentionally NOT used:
-              # Apple deprecated it ("does not sign nested code correctly"),
-              # and Tauri already signed nested helpers/frameworks with
-              # correct per-component entitlements during `cargo tauri build`.
-              #
-              # The requirement string is passed via env var to avoid
-              # YAML/bash quoting pitfalls: inline single-quote form
-              # (`--requirements 'designated => anchor apple generic and
-              # identifier "X"'`) is parsed by codesign as a file path when
-              # the inner double quotes are stripped at the bash layer.
-              env:
-                  APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
-                  CODESIGN_REQUIREMENT: 'designated => anchor apple generic and identifier "net.uwuwu.origa"'
-              run: |
-                  codesign --force --options runtime \
-                    --entitlements tauri/Entitlements.plist \
-                    --sign "$APPLE_SIGNING_IDENTITY" \
-                    --requirements "$CODESIGN_REQUIREMENT" \
-                    "$APP_PATH"
-                  codesign --verify --verbose=4 "$APP_PATH"
-
             - name: Build .pkg via productbuild
               id: pkg
               env:
