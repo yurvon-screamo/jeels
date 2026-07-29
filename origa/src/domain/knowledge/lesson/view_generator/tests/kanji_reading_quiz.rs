@@ -239,13 +239,18 @@ fn fallback_when_more_than_six_target_readings() {
 }
 
 #[test]
-fn mostly_rare_kanji_with_few_non_rare_yields_quiz_with_one_correct() {
-    // Synthetic-style: build a KanjiInfo in the global dictionary via the
-    // public surface and assert post-filter behaviour. We can't easily inject
-    // a fake KanjiInfo (OnceLock global), so this test relies on a kanji whose
-    // readings distribution guarantees the targeted branch. Verified manually:
-    // 厳 has 4 readings, 2 rare (おごそか f=1, いかめしい f=4) + 2 non-rare
-    // (ゲン f=71, きびしい f=7). Post-filter target = 2 (≤6), so quiz yields.
+fn mostly_rare_kanji_with_few_non_rare_yields_quiz_with_two_non_rare_correct() {
+    // Verified manually: 厳 has 4 readings — ゲン (f=71, not rare), きびしい
+    // (f=7, not rare), いかめしい (f=4, rare), おごそか (f=1, rare). Post-filter
+    // target = 2 non-rare readings (≤6, so the >6 cap is not exercised
+    // here — see `fallback_when_more_than_six_target_readings` for that
+    // branch). The quiz yields with the 2 non-rare readings as correct.
+    //
+    // The H4 behavioral change (cap moved from `total` to `target`) only
+    // manifests when `total > 6 && target ≤ 6` — this case is NOT covered
+    // here because injecting a synthetic KanjiInfo into the OnceLock
+    // global dictionary is not feasible without a dedicated test seam.
+    // Low risk: the post-filter cap is a one-line `if count > 6` check.
     init_real_dictionaries();
 
     let quiz = extract_quiz(generate_reading_quiz_for("厳", &["月", "水", "火"]).unwrap());
