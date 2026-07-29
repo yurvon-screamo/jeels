@@ -108,12 +108,12 @@ fn inject_csp_via_tauri_config(cdn: &str, landing: &str, trailbase: &str) {
     // `app_store` rustc cfg flag, which `lib.rs` uses to gate out
     // `tauri-plugin-updater` registration (Mac App Store 2.4.5(vii)).
     //
-    // `bundle.createUpdaterArtifacts: true` in tauri.conf.json produces
-    // .sig signature files alongside every bundle, intended for the
-    // Tauri updater (desktop distribution via GitHub Releases latest.json).
-    // For App Store builds the updater plugin is gated out, so .sig files
-    // are dead weight and Apple reviewers may flag stray signature
-    // artifacts that reference an active self-update mechanism.
+    // Two patches applied to TAURI_CONFIG:
+    // 1. `bundle.createUpdaterArtifacts: false` — stop emitting .sig files
+    // 2. `plugins.updater: null` (RFC 7396 deletion) — tauri-bundler refuses
+    //    to build macOS bundle if `plugins.updater.pubkey` is present but
+    //    `TAURI_SIGNING_PRIVATE_KEY` env var is missing. Removing the
+    //    section entirely disables updater integration in the bundler.
     //
     // RFC 7396 merge semantics: last write wins.
     if env::var("ORIGA_APP_STORE").is_ok() {
@@ -123,6 +123,9 @@ fn inject_csp_via_tauri_config(cdn: &str, landing: &str, trailbase: &str) {
         let updater_patch = json!({
             "bundle": {
                 "createUpdaterArtifacts": false
+            },
+            "plugins": {
+                "updater": null
             }
         });
         let mut cfg: serde_json::Value = serde_json::from_str(&final_config_str)

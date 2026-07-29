@@ -125,10 +125,28 @@ jobs:
                   # Solution: write the .p8 to ./private_keys/ so both consumers
                   # can find it, and set APPLE_API_KEY_PATH to the same file
                   # for cargo-mobile2.
+                  #
+                  # Whitespace tolerance: GitHub secret may contain folded
+                  # newlines / CRLF if pasted via web UI. Strip ALL whitespace
+                  # before decoding — base64 alphabet is strict ASCII, and
+                  # any embedded whitespace makes xcodebuild reject the .p8
+                  # with `CryptoKitASN1Error.invalidPEMDocument`.
                   KEY_PATH="private_keys/AuthKey_${APPLE_API_KEY}.p8"
                   mkdir -p private_keys
-                  echo "$APPLE_API_KEY_CONTENT" | base64 --decode > "$KEY_PATH"
+                  printf '%s' "$APPLE_API_KEY_CONTENT" | tr -d '[:space:]' | base64 --decode > "$KEY_PATH"
                   echo "APPLE_API_KEY_PATH=$(pwd)/$KEY_PATH" >> "$GITHUB_ENV"
+                  # Sanity check: file must contain PEM markers and be ~200-250 bytes.
+                  if [ ! -s "$KEY_PATH" ]; then
+                    echo "::error::Decoded .p8 is empty — base64 secret malformed"
+                    exit 1
+                  fi
+                  file_size=$(wc -c < "$KEY_PATH")
+                  echo "Decoded .p8 size: $file_size bytes"
+                  if [ "$file_size" -lt 200 ]; then
+                    echo "::error::Decoded .p8 is suspiciously small ($file_size bytes) — secret may be truncated"
+                    exit 1
+                  fi
+                  head -1 "$KEY_PATH"
                   echo "API key decoded to $KEY_PATH"
 
             - name: Update version in config files
