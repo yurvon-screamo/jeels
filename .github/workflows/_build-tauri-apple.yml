@@ -226,8 +226,17 @@ jobs:
                   # `--no-default-features --features` to cargo.
                   ORIGA_APP_STORE: "1"
               run: |
+                  # Pass APPLE_TEAM_ID via tauri.conf.json `bundle.iOS.developmentTeam`
+                  # through the --config merge patch. Without this, xcodebuild
+                  # fails with "No Account for Team" / "No profiles for
+                  # 'net.uwuwu.origa' were found" because tauri-cli's
+                  # auto-provisioning needs to know which team owns the bundle ID.
+                  # The APPLE_TEAM_ID env var alone is NOT picked up by tauri-cli
+                  # for iOS team assignment — it must be in the config.
+                  APP_STORE_CONFIG="{\"bundle\":{\"iOS\":{\"developmentTeam\":\"$APPLE_TEAM_ID\"}}}"
                   cargo tauri ios build \
-                    --export-method app-store-connect
+                    --export-method app-store-connect \
+                    --config "$APP_STORE_CONFIG"
 
             - name: Locate .ipa
               id: ipa
@@ -493,10 +502,17 @@ jobs:
                   # productbuild signs the .pkg with Mac Installer
                   # Distribution cert (separate from Application cert).
                   # Match both old (pre-Xcode 11) and new CN naming.
-                  INSTALLER_IDENTITY=$(security find-identity -v -p codesigning | grep -E "Mac Installer Distribution|3rd Party Mac Developer Installer" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
+                  #
+                  # NOTE: Installer cert lookup uses `-p basic` (not
+                  # `-p codesigning`). Mac Installer Distribution is not
+                  # classified as a "codesigning" identity by Security
+                  # framework — `find-identity -p codesigning` returns
+                  # only Application certs. `productbuild` itself accepts
+                  # any identity visible in the keychain.
+                  INSTALLER_IDENTITY=$(security find-identity -v -p basic | grep -E "Mac Installer Distribution|3rd Party Mac Developer Installer" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
                   if [ -z "$INSTALLER_IDENTITY" ]; then
                     echo "::error::Mac Installer Distribution / 3rd Party Mac Developer Installer identity not found"
-                    security find-identity -v -p codesigning
+                    security find-identity -v -p basic
                     exit 1
                   fi
                   echo "Installer identity: $INSTALLER_IDENTITY"
