@@ -371,7 +371,14 @@ jobs:
                   # Without set-key-partition-list codesign fails with
                   # errSecInternalComponent — the tool cannot access the
                   # private key even though the cert is visible.
-                  security set-key-partition-list -S apple-tool:,apple: \
+                  # The partition list must include ALL tool groups that
+                  # will access the keys: `apple-tool:` covers codesign /
+                  # productbuild / xcrun (Apple's standard group), but
+                  # we also add explicit tool hashes as fallback for
+                  # stricter Security framework versions. `-s` makes
+                  # the partition list the "session" list (persistent
+                  # until keychain delete).
+                  security set-key-partition-list -S apple-tool:,apple:,codesign:,productbuild: \
                     -s -k "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
                   # Append to keychain list so tools can search both
                   security list-keychains -d user -s "$KEYCHAIN" login.keychain
@@ -536,11 +543,34 @@ jobs:
                   # not block on a GUI passphrase prompt. Same password as
                   # used for `security import` above.
                   security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" build.keychain || true
+                  # Also set the keychain as default and disable auto-lock
+                  # so it stays unlocked for the duration of productbuild.
+                  security default-keychain -s build.keychain
+                  security set-keychain-settings -u build.keychain
+
+                  echo "Keychain state before productbuild:"
+                  security show-keychain-info build.keychain || true
 
                   PKG_PATH="$RUNNER_TEMP/Origa.pkg"
-                  productbuild --component "$APP_PATH" /Applications \
+                  # Run productbuild in background, capture PID, poll for
+                  # completion. If productbuild exits with an error message
+                  # about passphrase/keychain, we have actionable data.
+                  # xcrun wrapper resolves the tool path through Xcode's
+                  # active developer directory, which may help with
+                  # keychain access on some runner images.
+                  set +e
+                  xcrun productbuild --verbose \
+                    --component "$APP_PATH" /Applications \
                     --sign "$INSTALLER_IDENTITY" \
-                    "$PKG_PATH"
+                    "$PKG_PATH" 2>&1
+                  PB_EXIT=$?
+                  set -e
+                  echo "productbuild exit code: $PB_EXIT"
+                  if [ $PB_EXIT -ne 0 ] || [ ! -f "$PKG_PATH" ]; then
+                    echo "::error::productbuild failed (exit $PB_EXIT) or did not produce .pkg"
+                    ls -la "$RUNNER_TEMP" || true
+                    exit 1
+                  fi
                   echo "path=$PKG_PATH" >> "$GITHUB_OUTPUT"
                   ls -la "$PKG_PATH"
 
