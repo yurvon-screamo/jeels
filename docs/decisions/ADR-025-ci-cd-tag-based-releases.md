@@ -173,7 +173,7 @@ prerelease, the skipped `generate-latest-json` is tolerated.
 | Windows NSIS | `Origa_<version>_x64-setup.exe` | `Origa_x64-setup.exe` |
 | Linux AppImage | `Origa_<version>_amd64.AppImage` | `Origa_amd64.AppImage` |
 | Linux DEB | `Origa_<version>_amd64.deb` | `Origa_amd64.deb` |
-| macOS zip | `Origa_<version>_macos-arm64.zip` | `Origa_macos-arm64.zip` |
+| ~~macOS zip~~ | ~~`Origa_<version>_macos-arm64.zip`~~ | ~~`Origa_macos-arm64.zip`~~ — **removed in PR #308 (2026-07-29)**: macOS distribution moved to Mac App Store only, see ADR-033. |
 | Android APK | `origa_<version>.apk` | `origa.apk` |
 
 Desktop uses `Origa_` (capital) to match Tauri's `productName: "Origa"` default
@@ -422,7 +422,7 @@ default output is renamed (not duplicated) via `mv` in `_build-tauri.yml`.
 | Windows NSIS | `Origa_x64-setup.exe` |
 | Linux AppImage | `Origa_amd64.AppImage` |
 | Linux DEB | `Origa_amd64.deb` |
-| macOS zip | `Origa_macos-arm64.zip` |
+| ~~macOS zip~~ | ~~`Origa_macos-arm64.zip`~~ — removed in PR #308, see ADR-033 |
 | Android APK | `origa.apk` (already single-naming) |
 
 ### Rationale
