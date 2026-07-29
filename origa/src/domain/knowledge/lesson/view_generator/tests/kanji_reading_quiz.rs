@@ -91,6 +91,18 @@ fn non_rare_target_readings_are_correct_options() {
 fn rare_readings_filtered_from_correct_options() {
     init_real_dictionaries();
 
+    // Back-compat: skip if the kanji.json on disk/CDN has no reading_frequencies
+    // (before the enriched version is deployed). Without freq data, no reading
+    // is rare and the filter is a no-op — there's nothing to assert here.
+    let info = crate::dictionary::kanji::get_kanji_info("厳").unwrap();
+    if info.reading_frequencies().is_empty() {
+        eprintln!(
+            "Skipping: kanji.json without reading_frequencies. \
+             Deploy via scripts/enrich_kanji_reading_frequencies.py to enable."
+        );
+        return;
+    }
+
     // 厳 has 4 readings: ゲン (f=71, not rare), きびしい (f=7, not rare),
     // いかめしい (f=4, rare), おごそか (f=1, rare). The two rare readings
     // must NOT appear as correct options.
@@ -251,7 +263,18 @@ fn mostly_rare_kanji_with_few_non_rare_yields_quiz_with_two_non_rare_correct() {
     // here because injecting a synthetic KanjiInfo into the OnceLock
     // global dictionary is not feasible without a dedicated test seam.
     // Low risk: the post-filter cap is a one-line `if count > 6` check.
+    //
+    // Back-compat: skip when kanji.json lacks reading_frequencies (before
+    // the enriched version is deployed). The filter becomes a no-op.
     init_real_dictionaries();
+    let info = crate::dictionary::kanji::get_kanji_info("厳").unwrap();
+    if info.reading_frequencies().is_empty() {
+        eprintln!(
+            "Skipping: kanji.json without reading_frequencies. \
+             Deploy via scripts/enrich_kanji_reading_frequencies.py to enable."
+        );
+        return;
+    }
 
     let quiz = extract_quiz(generate_reading_quiz_for("厳", &["月", "水", "火"]).unwrap());
 
