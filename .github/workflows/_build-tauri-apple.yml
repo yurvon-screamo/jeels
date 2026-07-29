@@ -538,6 +538,7 @@ jobs:
             - name: Upload to App Store Connect
               id: upload
               continue-on-error: true
+              timeout-minutes: 15
               env:
                   APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
