@@ -1,7 +1,7 @@
 use crate::i18n::*;
 use crate::ui_components::{
     FuriganaText, KanjiViewMode, KanjiWritingSection, MarkdownText, MarkdownVariant, ReadingGroup,
-    ReadingWithFreq, Text, TextSize, TypographyVariant,
+    ReadingItem, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 use origa::domain::NativeLanguage;
@@ -20,8 +20,8 @@ pub fn KanjiCardDetails(
     name: String,
     radicals: Option<Vec<RadicalDisplay>>,
     example_words: Option<Vec<(String, String)>>,
-    on_readings: Option<Vec<ReadingWithFreq>>,
-    kun_readings: Option<Vec<ReadingWithFreq>>,
+    on_readings: Option<Vec<ReadingItem>>,
+    kun_readings: Option<Vec<ReadingItem>>,
     #[prop(into)] known_kanji: Signal<HashSet<char>>,
     native_language: NativeLanguage,
 ) -> impl IntoView {

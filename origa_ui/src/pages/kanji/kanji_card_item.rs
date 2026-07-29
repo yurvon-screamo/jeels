@@ -55,17 +55,15 @@ pub fn KanjiCardItem(
             let mut kun = kanji_card.kun_readings_with_freq();
             let mut all = std::mem::take(&mut on);
             all.append(&mut kun);
-            all.sort_by_key(|(_, f)| std::cmp::Reverse(*f));
-            let non_rare: Vec<(String, u32)> = all
-                .iter()
-                .filter(|(_, f)| *f > origa::domain::RARE_READING_MAX_FREQ)
-                .cloned()
-                .collect();
+            // (reading, freq, is_rare) — sort by freq desc.
+            all.sort_by_key(|(_, f, _)| std::cmp::Reverse(*f));
+            let non_rare: Vec<(String, u32, bool)> =
+                all.iter().filter(|(_, _, r)| !r).cloned().collect();
             let source = if non_rare.is_empty() { &all } else { &non_rare };
             source
                 .iter()
                 .take(3)
-                .map(|(r, _)| r.clone())
+                .map(|(r, _, _)| r.clone())
                 .collect::<Vec<_>>()
                 .join(" · ")
         },

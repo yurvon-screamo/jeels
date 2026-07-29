@@ -1,8 +1,7 @@
 use std::collections::HashSet;
 
 use crate::ui_components::{
-    FuriganaText, MarkdownText, ReadingGroup, ReadingWithFreq, Tag, Text, TextSize,
-    TypographyVariant,
+    FuriganaText, MarkdownText, ReadingGroup, ReadingItem, Tag, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 
@@ -10,8 +9,8 @@ use leptos::prelude::*;
 pub(in crate::pages::kanji) fn KanjiDetailHeroCard(
     kanji_stored: StoredValue<String>,
     answer_text: Memo<String>,
-    on_readings: Vec<ReadingWithFreq>,
-    kun_readings: Vec<ReadingWithFreq>,
+    on_readings: Vec<ReadingItem>,
+    kun_readings: Vec<ReadingItem>,
     has_radicals: bool,
     radicals_stored: StoredValue<String>,
     #[prop(into)] tag_variant: Signal<crate::ui_components::TagVariant>,

@@ -107,7 +107,7 @@ pub use ocr_loading_stage::{
 pub use offline_bundle_card::OfflineBundleCard;
 pub use page_header::PageHeader;
 pub use progress::ProgressBar;
-pub use reading_group::{ReadingGroup, ReadingWithFreq};
+pub use reading_group::{ReadingGroup, ReadingItem};
 pub use search::Search;
 pub use selected_count::SelectedCount;
 pub use sidebar::Sidebar;

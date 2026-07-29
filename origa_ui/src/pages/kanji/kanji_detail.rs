@@ -215,8 +215,24 @@ pub fn KanjiDetail() -> impl IntoView {
                     DomainCard::Kanji(kanji_card) => (
                         kanji_card.kanji().text().to_string(),
                         kanji_card.radicals_chars().into_iter().collect::<String>(),
-                        kanji_card.on_readings_with_freq(),
-                        kanji_card.kun_readings_with_freq(),
+                        kanji_card
+                            .on_readings_with_freq()
+                            .into_iter()
+                            .map(|(r, f, rare)| crate::ui_components::ReadingItem {
+                                reading: r,
+                                freq: f,
+                                is_rare: rare,
+                            })
+                            .collect::<Vec<_>>(),
+                        kanji_card
+                            .kun_readings_with_freq()
+                            .into_iter()
+                            .map(|(r, f, rare)| crate::ui_components::ReadingItem {
+                                reading: r,
+                                freq: f,
+                                is_rare: rare,
+                            })
+                            .collect::<Vec<_>>(),
                     ),
                     _ => (
                         "?".to_string(),
@@ -283,13 +299,13 @@ pub fn KanjiDetail() -> impl IntoView {
 
                 let active_tab_cell = active_tab;
 
-                let on_readings_stored: Vec<crate::ui_components::ReadingWithFreq> =
+                let on_readings_stored: Vec<crate::ui_components::ReadingItem> =
                     on_readings.clone();
-                let kun_readings_stored: Vec<crate::ui_components::ReadingWithFreq> =
+                let kun_readings_stored: Vec<crate::ui_components::ReadingItem> =
                     kun_readings.clone();
-                let on_readings_mobile: Vec<crate::ui_components::ReadingWithFreq> =
+                let on_readings_mobile: Vec<crate::ui_components::ReadingItem> =
                     on_readings.clone();
-                let kun_readings_mobile: Vec<crate::ui_components::ReadingWithFreq> =
+                let kun_readings_mobile: Vec<crate::ui_components::ReadingItem> =
                     kun_readings.clone();
                 let kanji_char_stored = kanji_char.clone();
                 let breadcrumbs_label = breadcrumbs_kanji_label;
