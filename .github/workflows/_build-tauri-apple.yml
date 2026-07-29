@@ -541,14 +541,15 @@ jobs:
                   # macOS versions even when partition list is correct).
                   # Output of `find-identity -v -p basic` is:
                   #   1) HASH "CN string" (TEAM)
-                  # We extract $1 = the SHA-1 hash.
+                  #   2) HASH "CN string" (TEAM)
+                  # $1 = "N)" prefix, $2 = SHA-1 hash.
                   INSTALLER_LINE=$(security find-identity -v -p basic | grep -E "Mac Installer Distribution|3rd Party Mac Developer Installer" | head -1 || true)
                   if [ -z "$INSTALLER_LINE" ]; then
                     echo "::error::Mac Installer Distribution / 3rd Party Mac Developer Installer identity not found"
                     security find-identity -v -p basic
                     exit 1
                   fi
-                  INSTALLER_IDENTITY=$(echo "$INSTALLER_LINE" | awk '{print $1}')
+                  INSTALLER_IDENTITY=$(echo "$INSTALLER_LINE" | awk '{print $2}')
                   echo "Installer identity (SHA-1): $INSTALLER_IDENTITY"
                   echo "  from line: $INSTALLER_LINE"
 
