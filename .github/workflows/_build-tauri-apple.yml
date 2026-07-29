@@ -146,8 +146,6 @@ jobs:
                   if [[ "$NORMALIZED" == -----BEGINPRIVATEKEY* ]]; then
                       # Raw PEM pasted directly. Re-wrap at 64 chars per line
                       # with proper PEM headers (PKCS#8 format Apple uses).
-                      # The normalized string is `-----BEGINPRIVATEKEY-----<base64>-----ENDPRIVATEKEY-----`
-                      # — split by markers, then fold the inner base64.
                       INNER=$(printf '%s' "$NORMALIZED" \
                               | sed 's/^-----BEGINPRIVATEKEY-----//' \
                               | sed 's/-----ENDPRIVATEKEY-----$//')
@@ -177,6 +175,23 @@ jobs:
                   fi
                   # Show the PEM header line (safe — not sensitive).
                   echo "PEM header: $(head -1 "$KEY_PATH")"
+
+                  # Validate the key parses as a real EC private key. Catches
+                  # truncation/corruption that produces a valid-looking PEM
+                  # envelope but an invalid ASN.1 key body inside. Without
+                  # this check, xcodebuild fails ~10 min later with
+                  # `CryptoKitASN1Error.invalidPEMDocument` after cargo build.
+                  if ! openssl pkey -in "$KEY_PATH" -noout 2>/dev/null; then
+                    echo "::error::Decoded .p8 is not a valid private key (openssl pkey parse failed)."
+                    echo "The APPLE_API_KEY_CONTENT secret is likely corrupted or truncated."
+                    echo "Re-download the original .p8 from App Store Connect → Users and Access → Keys"
+                    echo "(the file can only be downloaded ONCE at key creation time)."
+                    echo "If you no longer have the .p8: revoke the key, create a new one, store"
+                    echo "its base64 via:  base64 -i AuthKey_<key>.p8 | tr -d '\\n'"
+                    echo "...then update the APPLE_API_KEY, APPLE_API_KEY_CONTENT, and APPLE_API_ISSUER secrets."
+                    exit 1
+                  fi
+                  echo "✅ PEM key validated (openssl parsed it successfully)"
                   echo "API key decoded to $KEY_PATH"
 
             - name: Update version in config files
@@ -479,13 +494,20 @@ jobs:
               # Apple deprecated it ("does not sign nested code correctly"),
               # and Tauri already signed nested helpers/frameworks with
               # correct per-component entitlements during `cargo tauri build`.
+              #
+              # The requirement string is passed via env var to avoid
+              # YAML/bash quoting pitfalls: inline single-quote form
+              # (`--requirements 'designated => anchor apple generic and
+              # identifier "X"'`) is parsed by codesign as a file path when
+              # the inner double quotes are stripped at the bash layer.
               env:
                   APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
+                  CODESIGN_REQUIREMENT: 'designated => anchor apple generic and identifier "net.uwuwu.origa"'
               run: |
                   codesign --force --options runtime \
                     --entitlements tauri/Entitlements.plist \
                     --sign "$APPLE_SIGNING_IDENTITY" \
-                    --requirements 'designated => anchor apple generic and identifier "net.uwuwu.origa"' \
+                    --requirements "$CODESIGN_REQUIREMENT" \
                     "$APP_PATH"
                   codesign --verify --verbose=4 "$APP_PATH"
 
