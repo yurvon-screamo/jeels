@@ -333,73 +333,37 @@ jobs:
                   name: ${{ inputs.wasm_artifact_name }}
                   path: origa_ui/dist/
 
-            - name: Import Mac signing certificates
+            - name: Import Mac App signing certificate
+              uses: apple-actions/import-codesign-certs@v3
+              with:
+                  p12-file-base64: ${{ secrets.apple-mac-app-cert-p12 }}
+                  p12-password: ${{ secrets.apple-mac-cert-password }}
+                  keychain: build
+
+            - name: Import Mac Installer signing certificate
+              uses: apple-actions/import-codesign-certs@v3
+              with:
+                  p12-file-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
+                  p12-password: ${{ secrets.apple-mac-cert-password }}
+                  keychain: build
+
+            - name: Discover signing identities
               env:
-                  APPLE_MAC_APP_CERT_P12: ${{ secrets.apple-mac-app-cert-p12 }}
-                  APPLE_MAC_INSTALLER_CERT_P12: ${{ secrets.apple-mac-installer-cert-p12 }}
                   APPLE_MAC_CERT_PASSWORD: ${{ secrets.apple-mac-cert-password }}
               run: |
-                  # macOS desktop signing via tauri-bundler calls `codesign`
-                  # directly (NOT xcodebuild auto-provisioning like iOS).
-                  # The signing identity (cert + private key) must be in
-                  # login.keychain before the build starts. We import the
-                  # .p12 into a dedicated build.keychain to isolate from
-                  # the runner's default keychain and avoid races with
-                  # concurrent jobs.
-                  #
-                  # Requires 2 Mac Distribution certs from Apple Developer
-                  # Portal: "Mac App Distribution" (signs .app) and
-                  # "Mac Installer Distribution" (signs .pkg).
-                  if [ -z "$APPLE_MAC_APP_CERT_P12" ] || [ -z "$APPLE_MAC_INSTALLER_CERT_P12" ]; then
-                    echo "::error::Mac certificates not configured. Set APPLE_MAC_APP_CERT_P12 and APPLE_MAC_INSTALLER_CERT_P12 secrets."
-                    exit 1
-                  fi
+                  # apple-actions/import-codesign-certs creates 'build.keychain',
+                  # imports both certs, sets no-auto-lock, configures partition
+                  # list, and makes it default. This is the battle-tested path
+                  # recommended by tauri-apps/tauri-action#941 — manual
+                  # `security import` + `set-key-partition-list` scripts
+                  # consistently fail on headless runners because productbuild
+                  # blocks waiting for a GUI passphrase prompt that never
+                  # appears.
 
-                  echo "$APPLE_MAC_APP_CERT_P12" | base64 --decode > /tmp/mac_app.p12
-                  echo "$APPLE_MAC_INSTALLER_CERT_P12" | base64 --decode > /tmp/mac_installer.p12
-
-                  KEYCHAIN=build.keychain
-                  security create-keychain -p "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
-                  security default-keychain -s "$KEYCHAIN"
-                  security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
-                  # Disable keychain auto-lock ENTIRELY for the duration of
-                  # this job. The previous `-t 3600 -u` form sets a 1h timeout
-                  # AFTER WHICH the keychain auto-locks, but the macOS build
-                  # (cargo tauri build) takes ~25 min and productbuild then
-                  # runs ~30+ min after import — by then the 1h window has
-                  # expired and productbuild blocks indefinitely waiting for
-                  # a GUI unlock prompt that never arrives on a headless
-                  # runner. Reference: tauri-apps/tauri-action#941.
-                  # Runner is ephemeral, so persistent-unlock is acceptable.
-                  security set-keychain-settings "$KEYCHAIN"
-                  security import /tmp/mac_app.p12 -k "$KEYCHAIN" \
-                    -P "$APPLE_MAC_CERT_PASSWORD" -T /usr/bin/codesign
-                  security import /tmp/mac_installer.p12 -k "$KEYCHAIN" \
-                    -P "$APPLE_MAC_CERT_PASSWORD" -T /usr/bin/productbuild
-                  # Without set-key-partition-list codesign fails with
-                  # errSecInternalComponent — the tool cannot access the
-                  # private key even though the cert is visible.
-                  # Include explicit tool group entries for codesign and
-                  # productbuild in addition to Apple's standard apple-tool:
-                  # to cover stricter Security framework versions.
-                  security set-key-partition-list -S apple-tool:,apple:,codesign:,productbuild: \
-                    -s -k "$APPLE_MAC_CERT_PASSWORD" "$KEYCHAIN"
-                  # Append to keychain list so tools can search both
-                  security list-keychains -d user -s "$KEYCHAIN" login.keychain
-
-                  rm -f /tmp/mac_app.p12 /tmp/mac_installer.p12
-                  echo "Mac certificates imported into $KEYCHAIN"
-
-                  # Discover the signing identity CN for tauri-bundler.
-                  # tauri-bundler expects APPLE_SIGNING_IDENTITY env var
-                  # to be the exact CN as shown by `security find-identity`.
-                  # Apple renamed cert CNs after Xcode 11 (2019):
-                  #   old: "3rd Party Mac Developer Application: ..."
-                  #   new: "Mac App Distribution: ..."
-                  # Match both to support certs created in any era.
+                  # App identity for tauri-bundler (codesign)
                   APP_IDENTITY=$(security find-identity -v -p codesigning | grep -E "Mac App Distribution|3rd Party Mac Developer Application" | head -1 | sed 's/.*"\(.*\)".*/\1/' || true)
                   if [ -z "$APP_IDENTITY" ]; then
-                    echo "::error::Mac App Distribution / 3rd Party Mac Developer Application identity not found after import"
+                    echo "::error::Mac App Distribution / 3rd Party Mac Developer Application identity not found"
                     security find-identity -v -p codesigning
                     exit 1
                   fi
