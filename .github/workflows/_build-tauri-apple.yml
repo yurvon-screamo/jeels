@@ -339,6 +339,10 @@ jobs:
                   p12-file-base64: ${{ secrets.apple-mac-app-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
                   keychain: build
+                  # Use the same password for both keychain and .p12 to
+                  # simplify the second action call below (which must
+                  # unlock the existing keychain).
+                  keychain-password: ${{ secrets.apple-mac-cert-password }}
 
             - name: Import Mac Installer cert (reuse keychain)
               uses: apple-actions/import-codesign-certs@v3
@@ -346,6 +350,7 @@ jobs:
                   p12-file-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
                   keychain: build
+                  keychain-password: ${{ secrets.apple-mac-cert-password }}
                   # Don't recreate the keychain — the first call above
                   # already created it. Without this, the second call
                   # fails with errSecDuplicateItem (exit code 48).
