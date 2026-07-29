@@ -1,14 +1,17 @@
 use std::collections::HashSet;
 
-use crate::ui_components::{FuriganaText, MarkdownText, Tag, Text, TextSize, TypographyVariant};
+use crate::ui_components::{
+    FuriganaText, MarkdownText, ReadingGroup, ReadingWithFreq, Tag, Text, TextSize,
+    TypographyVariant,
+};
 use leptos::prelude::*;
 
 #[component]
 pub(in crate::pages::kanji) fn KanjiDetailHeroCard(
     kanji_stored: StoredValue<String>,
     answer_text: Memo<String>,
-    on_readings: StoredValue<String>,
-    kun_readings: StoredValue<String>,
+    on_readings: Vec<ReadingWithFreq>,
+    kun_readings: Vec<ReadingWithFreq>,
     has_radicals: bool,
     radicals_stored: StoredValue<String>,
     #[prop(into)] tag_variant: Signal<crate::ui_components::TagVariant>,
@@ -16,7 +19,11 @@ pub(in crate::pages::kanji) fn KanjiDetailHeroCard(
     #[prop(into)] radicals_title: Signal<String>,
     #[prop(into)] on_label: Signal<String>,
     #[prop(into)] kun_label: Signal<String>,
+    #[prop(into)] rare_hint: Signal<String>,
 ) -> impl IntoView {
+    let on_readings_stored = StoredValue::new(Some(on_readings));
+    let kun_readings_stored = StoredValue::new(Some(kun_readings));
+
     view! {
         <div class="kanji-detail-hero-card">
             <div class="kanji-detail-hero-header">
@@ -24,18 +31,18 @@ pub(in crate::pages::kanji) fn KanjiDetailHeroCard(
                 <div class="kanji-detail-hero-info">
                     <div class="kanji-detail-hero-meaning">{answer_text}</div>
                     <div class="kanji-detail-hero-readings">
-                        <Show when=move || !on_readings.get_value().is_empty()>
-                            <div class="kanji-detail-hero-reading">
-                                <span class="kanji-detail-hero-reading-label">{on_label}</span>
-                                {on_readings.get_value()}
-                            </div>
-                        </Show>
-                        <Show when=move || !kun_readings.get_value().is_empty()>
-                            <div class="kanji-detail-hero-reading">
-                                <span class="kanji-detail-hero-reading-label">{kun_label}</span>
-                                {kun_readings.get_value()}
-                            </div>
-                        </Show>
+                        <ReadingGroup
+                            label=on_label
+                            readings=on_readings_stored
+                            rare_hint=rare_hint
+                            test_id=Signal::derive(|| "kanji-detail-on-readings".to_string())
+                        />
+                        <ReadingGroup
+                            label=kun_label
+                            readings=kun_readings_stored
+                            rare_hint=rare_hint
+                            test_id=Signal::derive(|| "kanji-detail-kun-readings".to_string())
+                        />
                     </div>
                 </div>
                 <div class="kanji-detail-hero-badge">

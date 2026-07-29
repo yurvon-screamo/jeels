@@ -97,6 +97,43 @@ impl KanjiCard {
             .map(|info| info.kun_readings().to_vec())
             .unwrap_or_default()
     }
+
+    /// On readings paired with their corpus frequency. Pairs preserve the
+    /// order of [`on_readings`]. Frequency is `0` when no data is available
+    /// (legacy kanji.json); callers should prefer [`is_rare_reading`] for
+    /// rarity decisions.
+    pub fn on_readings_with_freq(&self) -> Vec<(String, u32)> {
+        get_kanji_info(self.kanji.text())
+            .map(|info| {
+                info.on_readings()
+                    .iter()
+                    .map(|r| (r.clone(), info.reading_frequency(r).unwrap_or(0)))
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Kun readings paired with their corpus frequency. See
+    /// [`on_readings_with_freq`].
+    pub fn kun_readings_with_freq(&self) -> Vec<(String, u32)> {
+        get_kanji_info(self.kanji.text())
+            .map(|info| {
+                info.kun_readings()
+                    .iter()
+                    .map(|r| (r.clone(), info.reading_frequency(r).unwrap_or(0)))
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Whether the given reading should be treated as rare for this kanji.
+    /// Delegates to [`KanjiInfo::is_rare_reading`]; returns `false` if the
+    /// kanji is not in the dictionary.
+    pub fn is_rare_reading(&self, reading: &str) -> bool {
+        get_kanji_info(self.kanji.text())
+            .map(|info| info.is_rare_reading(reading))
+            .unwrap_or(false)
+    }
 }
 
 impl ExampleKanjiWord {

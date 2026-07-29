@@ -13,8 +13,8 @@ use tracing::warn;
 struct KanjiData {
     symbol: String,
     description: String,
-    on_readings: Option<Vec<String>>,
-    kun_readings: Option<Vec<String>>,
+    on_readings: Option<Vec<crate::ui_components::ReadingWithFreq>>,
+    kun_readings: Option<Vec<crate::ui_components::ReadingWithFreq>>,
     radicals: Option<Vec<crate::pages::lesson::kanji_card_details::RadicalDisplay>>,
     examples: Option<Vec<(String, String)>>,
 }
@@ -37,8 +37,8 @@ fn extract_kanji_data(kanji_card: &DomainCard, native_language: NativeLanguage) 
         },
     };
 
-    let on_readings: Option<Vec<String>> = {
-        let readings = kanji.on_readings();
+    let on_readings: Option<Vec<crate::ui_components::ReadingWithFreq>> = {
+        let readings = kanji.on_readings_with_freq();
         if readings.is_empty() {
             None
         } else {
@@ -46,8 +46,8 @@ fn extract_kanji_data(kanji_card: &DomainCard, native_language: NativeLanguage) 
         }
     };
 
-    let kun_readings: Option<Vec<String>> = {
-        let readings = kanji.kun_readings();
+    let kun_readings: Option<Vec<crate::ui_components::ReadingWithFreq>> = {
+        let readings = kanji.kun_readings_with_freq();
         if readings.is_empty() {
             None
         } else {

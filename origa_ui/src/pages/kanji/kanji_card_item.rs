@@ -45,6 +45,34 @@ pub fn KanjiCardItem(
         format_answer_text(study_card_for_answer.card(), &lang)
     });
 
+    // Compact readings preview: top-N non-rare readings sorted by frequency
+    // desc. Falls back to top-N of any readings if all are rare. Kept on a
+    // single line with ellipsis — the goal is a glanceable preview, not a
+    // reference list (rarity details live on the detail page).
+    let compact_readings = match study_card.card() {
+        DomainCard::Kanji(kanji_card) => {
+            let mut on = kanji_card.on_readings_with_freq();
+            let mut kun = kanji_card.kun_readings_with_freq();
+            let mut all = std::mem::take(&mut on);
+            all.append(&mut kun);
+            all.sort_by_key(|(_, f)| std::cmp::Reverse(*f));
+            let non_rare: Vec<(String, u32)> = all
+                .iter()
+                .filter(|(_, f)| *f > origa::domain::RARE_READING_MAX_FREQ)
+                .cloned()
+                .collect();
+            let source = if non_rare.is_empty() { &all } else { &non_rare };
+            source
+                .iter()
+                .take(3)
+                .map(|(r, _)| r.clone())
+                .collect::<Vec<_>>()
+                .join(" · ")
+        },
+        _ => String::new(),
+    };
+    let compact_readings_stored = StoredValue::new(compact_readings);
+
     let status = CardStatus::from_study_card(&study_card);
     let show_mark_as_known = status != CardStatus::Learned;
 
@@ -75,6 +103,14 @@ pub fn KanjiCardItem(
                 <div class="kanji-card-content">
                     <Show when=move || !answer_text.get().is_empty()>
                         <span class="kanji-card-answer">{move || answer_text.get()}</span>
+                    </Show>
+                    <Show when=move || !compact_readings_stored.get_value().is_empty()>
+                        <span
+                            class="kanji-card-compact-readings"
+                            data-testid="kanji-card-compact-readings"
+                        >
+                            {compact_readings_stored.get_value()}
+                        </span>
                     </Show>
                     <Show when=move || show_radicals>
                         <span class="kanji-card-radicals">{radicals_text}</span>

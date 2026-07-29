@@ -116,9 +116,9 @@ pub fn LessonCard(
     };
     let examples_stored = StoredValue::new(example_words);
 
-    let on_readings: Option<Vec<String>> = match &card {
+    let on_readings: Option<Vec<crate::ui_components::ReadingWithFreq>> = match &card {
         DomainCard::Kanji(kanji) => {
-            let readings = kanji.on_readings().to_vec();
+            let readings = kanji.on_readings_with_freq();
             if readings.is_empty() {
                 None
             } else {
@@ -129,9 +129,9 @@ pub fn LessonCard(
     };
     let on_readings_stored = StoredValue::new(on_readings);
 
-    let kun_readings: Option<Vec<String>> = match &card {
+    let kun_readings: Option<Vec<crate::ui_components::ReadingWithFreq>> = match &card {
         DomainCard::Kanji(kanji) => {
-            let readings = kanji.kun_readings().to_vec();
+            let readings = kanji.kun_readings_with_freq();
             if readings.is_empty() {
                 None
             } else {

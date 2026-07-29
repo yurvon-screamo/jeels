@@ -481,6 +481,7 @@
         "radicals": "Radicals",
         "on_reading": "ON",
         "kun_reading": "KUN",
+        "reading_rare_hint": "rare",
         "tab_overview": "Overview",
         "tab_writing": "Writing",
         "tab_stats": "Stats"

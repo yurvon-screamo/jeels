@@ -218,25 +218,45 @@ pub(crate) fn generate_kanji_reading_quiz(
         Err(_) => return Ok(LessonCardView::Normal(original_card)),
     };
 
-    let on_readings = info.on_readings();
-    let kun_readings = info.kun_readings();
-    let total_readings = on_readings.len() + kun_readings.len();
-
-    if total_readings == 0 || total_readings > 6 {
+    // Filter out rare readings — they pay back little learning effort and
+    // clutter the quiz. If filtering leaves nothing, fall back to all
+    // readings (the kanji has no signal of rarity, so every reading matters).
+    let all_on: Vec<String> = info.on_readings().to_vec();
+    let all_kun: Vec<String> = info.kun_readings().to_vec();
+    let total_readings = all_on.len() + all_kun.len();
+    if total_readings == 0 {
         return Ok(LessonCardView::Normal(original_card));
     }
 
-    let target_readings: Vec<String> = on_readings
+    let non_rare_on: Vec<String> = all_on
         .iter()
-        .chain(kun_readings.iter())
+        .filter(|r| !info.is_rare_reading(r))
+        .cloned()
+        .collect();
+    let non_rare_kun: Vec<String> = all_kun
+        .iter()
+        .filter(|r| !info.is_rare_reading(r))
         .cloned()
         .collect();
 
-    let mut options: Vec<QuizOption> = on_readings
+    let (target_on, target_kun) = if non_rare_on.is_empty() && non_rare_kun.is_empty() {
+        (all_on, all_kun)
+    } else {
+        (non_rare_on, non_rare_kun)
+    };
+
+    let target_readings_count = target_on.len() + target_kun.len();
+    if target_readings_count > 6 {
+        return Ok(LessonCardView::Normal(original_card));
+    }
+
+    let target_readings: Vec<String> = target_on.iter().chain(target_kun.iter()).cloned().collect();
+
+    let mut options: Vec<QuizOption> = target_on
         .iter()
         .map(|r| QuizOption::new(r.clone(), true, Some("ON".to_string())))
         .chain(
-            kun_readings
+            target_kun
                 .iter()
                 .map(|r| QuizOption::new(r.clone(), true, Some("KUN".to_string()))),
         )
@@ -276,8 +296,22 @@ fn collect_distractors(
         .filter_map(|c| match c {
             Card::Kanji(kc) => {
                 let other_info = cached_kanji_info(kc.kanji().text(), kanji_cache).ok()?;
-                let mut readings = other_info.on_readings().to_vec();
-                readings.extend(other_info.kun_readings().iter().cloned());
+                // Drop rare readings of OTHER kanji too — offering a rare
+                // reading as a wrong-answer distractor rewards students for
+                // memorising low-value material.
+                let mut readings = other_info
+                    .on_readings()
+                    .iter()
+                    .filter(|r| !other_info.is_rare_reading(r))
+                    .cloned()
+                    .collect::<Vec<_>>();
+                readings.extend(
+                    other_info
+                        .kun_readings()
+                        .iter()
+                        .filter(|r| !other_info.is_rare_reading(r))
+                        .cloned(),
+                );
                 Some(readings)
             },
             Card::Vocabulary(_) | Card::Grammar(_) | Card::Phrase(_) => None,

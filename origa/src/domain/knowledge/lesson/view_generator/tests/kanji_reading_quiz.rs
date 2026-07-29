@@ -65,11 +65,15 @@ fn extract_quiz(view: LessonCardView) -> crate::domain::knowledge::lesson::types
 }
 
 #[test]
-fn all_target_readings_are_correct_options() {
+fn non_rare_target_readings_are_correct_options() {
     init_real_dictionaries();
 
     let quiz = extract_quiz(generate_reading_quiz_for("日", &["月", "水", "火"]).unwrap());
 
+    // 日 has 5 readings, all with corpus freq > RARE_READING_MAX_FREQ, so
+    // every reading is a non-rare target. Stable against corpus changes as
+    // long as 日 keeps no rare readings — re-verify via the pipeline if the
+    // JmdictFurigana corpus is updated.
     let target_readings = get_target_readings("日");
 
     for reading in &target_readings {
@@ -77,8 +81,65 @@ fn all_target_readings_are_correct_options() {
             quiz.options()
                 .iter()
                 .any(|o| o.text() == reading && o.is_correct()),
-            "reading '{}' must be a correct option",
+            "non-rare reading '{}' must be a correct option",
             reading
+        );
+    }
+}
+
+#[test]
+fn rare_readings_filtered_from_correct_options() {
+    init_real_dictionaries();
+
+    // 厳 has 4 readings: ゲン (f=71, not rare), きびしい (f=7, not rare),
+    // いかめしい (f=4, rare), おごそか (f=1, rare). The two rare readings
+    // must NOT appear as correct options.
+    let quiz = extract_quiz(generate_reading_quiz_for("厳", &["月", "水", "火"]).unwrap());
+
+    for opt in quiz.options().iter().filter(|o| o.is_correct()) {
+        assert!(
+            opt.text() != "いかめしい" && opt.text() != "おごそか",
+            "rare reading '{}' must not be a correct option",
+            opt.text()
+        );
+    }
+
+    // Sanity: at least one non-rare reading survived as correct.
+    assert!(
+        quiz.options()
+            .iter()
+            .any(|o| o.is_correct() && (o.text() == "ゲン" || o.text() == "きびしい")),
+        "at least one non-rare reading must remain a correct option"
+    );
+}
+
+#[test]
+fn all_readings_kept_when_all_are_rare() {
+    init_real_dictionaries();
+
+    // 弐 has 3 readings (ニ f=3, ジ f=3, ふたつ f=3), all rare at T=5. Per the
+    // spec, when filtering leaves nothing, fall back to all readings — the
+    // kanji carries no rarity signal, so every reading matters.
+    let quiz = extract_quiz(generate_reading_quiz_for("弐", &["月", "水", "火"]).unwrap());
+
+    let correct_texts: Vec<_> = quiz
+        .options()
+        .iter()
+        .filter(|o| o.is_correct())
+        .map(|o| o.text().to_string())
+        .collect();
+
+    assert_eq!(
+        correct_texts.len(),
+        3,
+        "all-rare kanji must keep all readings as correct: {:?}",
+        correct_texts
+    );
+    for expected in &["ニ", "ジ", "ふたつ"] {
+        assert!(
+            correct_texts.iter().any(|c| c == expected),
+            "fallback must keep reading '{}' as correct",
+            expected
         );
     }
 }
@@ -150,7 +211,7 @@ fn no_target_readings_in_distractors() {
 }
 
 #[test]
-fn fallback_when_more_than_six_readings() {
+fn fallback_when_more_than_six_target_readings() {
     init_real_dictionaries();
 
     let cards = create_kanji_cards(&["日"]);
@@ -160,6 +221,9 @@ fn fallback_when_more_than_six_readings() {
     let info = crate::dictionary::kanji::get_kanji_info("日").unwrap();
     let total = info.on_readings().len() + info.kun_readings().len();
 
+    // The >6 cap now applies to non-rare TARGET readings (post-filter). 日
+    // has 5 readings, none rare, so target == total. If 日 ever exceeds 6
+    // non-rare readings, the quiz must fall back to Normal.
     if total > 6 {
         let result = generation::generate_kanji_reading_quiz(
             cards[0].clone(),
@@ -169,7 +233,40 @@ fn fallback_when_more_than_six_readings() {
         .unwrap();
         assert!(
             matches!(result, LessonCardView::Normal(_)),
-            "kanji with >6 readings must fall back to Normal"
+            "kanji with >6 non-rare target readings must fall back to Normal"
+        );
+    }
+}
+
+#[test]
+fn mostly_rare_kanji_with_few_non_rare_yields_quiz_with_one_correct() {
+    // Synthetic-style: build a KanjiInfo in the global dictionary via the
+    // public surface and assert post-filter behaviour. We can't easily inject
+    // a fake KanjiInfo (OnceLock global), so this test relies on a kanji whose
+    // readings distribution guarantees the targeted branch. Verified manually:
+    // 厳 has 4 readings, 2 rare (おごそか f=1, いかめしい f=4) + 2 non-rare
+    // (ゲン f=71, きびしい f=7). Post-filter target = 2 (≤6), so quiz yields.
+    init_real_dictionaries();
+
+    let quiz = extract_quiz(generate_reading_quiz_for("厳", &["月", "水", "火"]).unwrap());
+
+    let correct: Vec<_> = quiz
+        .options()
+        .iter()
+        .filter(|o| o.is_correct())
+        .map(|o| o.text().to_string())
+        .collect();
+    assert_eq!(
+        correct.len(),
+        2,
+        "厳 must keep exactly its 2 non-rare readings: {:?}",
+        correct
+    );
+    for expected in &["ゲン", "きびしい"] {
+        assert!(
+            correct.iter().any(|c| c == expected),
+            "non-rare reading '{}' must remain a correct option",
+            expected
         );
     }
 }

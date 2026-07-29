@@ -97,6 +97,60 @@ Then('отображается содержимое деталей кандзи'
     await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 10_000 });
 });
 
+Then('чтения кандзи отображаются отдельными тегами', async ({ page }) => {
+    // Hero card renders readings via <ReadingGroup>, one .reading-tag span per
+    // reading. At least one of the ON/KUN groups must surface a tag.
+    const onGroup = page.getByTestId("kanji-detail-on-readings");
+    const kunGroup = page.getByTestId("kanji-detail-kun-readings");
+    const onTags = onGroup.locator(".reading-tag");
+    const kunTags = kunGroup.locator(".reading-tag");
+    const onCount = await onTags.count();
+    const kunCount = await kunTags.count();
+    expect(onCount + kunCount).toBeGreaterThan(0);
+});
+
+Then('в карточке кандзи отображаются compact-чтения', async ({ page }) => {
+    await expect(page.getByTestId("kanji-card-compact-readings").first()).toBeVisible({
+        timeout: 10_000,
+    });
+});
+
+Given('у пользователя есть кандзи "厳"', async ({ page }) => {
+    const kanjiPage = new KanjiPage(page);
+    await kanjiPage.goto();
+    await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
+    await kanjiPage.addBtn.click();
+    await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
+    // 厳 is an N1 kanji — switch level, search, select, add.
+    await kanjiPage.selectLevel("N1");
+    await kanjiPage.searchKanji("厳");
+    await kanjiPage.selectKanji("厳");
+    await kanjiPage.addSelectedKanji();
+    await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
+});
+
+When('пользователь открывает детали этого кандзи', async ({ page }) => {
+    await page.getByTestId("kanji-card-item").first().click();
+    await page.waitForURL(/\/kanji\//, { timeout: 10_000 });
+    await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 15_000 });
+});
+
+Then('редкие чтения кандзи отображаются приглушёнными', async ({ page }) => {
+    // ReadingGroup renders rare readings with data-rare="true". Scoped to the
+    // kanji-detail hero to avoid matching lesson cards.
+    const detail = page.getByTestId("kanji-detail");
+    const rareTags = detail.locator('[data-rare="true"]');
+    await expect(rareTags.first()).toBeVisible({ timeout: 10_000 });
+    const rareCount = await rareTags.count();
+    expect(rareCount).toBeGreaterThanOrEqual(1);
+});
+
+Then('частые чтения кандзи отображаются обычным стилем', async ({ page }) => {
+    const detail = page.getByTestId("kanji-detail");
+    const normalTags = detail.locator('.reading-tag:not([data-rare="true"])');
+    await expect(normalTags.first()).toBeVisible({ timeout: 10_000 });
+});
+
 When('нажимает кнопку выбора всех кандзи', async ({ page }) => {
     const kanjiPage = new KanjiPage(page);
     await kanjiPage.drawerSelectAllBtn.click();
