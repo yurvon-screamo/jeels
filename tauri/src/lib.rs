@@ -1,13 +1,21 @@
 mod auth_store;
-#[cfg(all(desktop, not(feature = "app-store")))]
+// `app_store` cfg is set by `tauri/build.rs` when the `ORIGA_APP_STORE`
+// env var is present. `feature = "app-store"` covers local `cargo check
+// --features app-store` invocations. The OR allows either mechanism:
+// tauri-cli does NOT pass `--features` through to cargo, so the env-var
+// path is the only way to gate during `cargo tauri ios build`.
+#[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
 mod updater_commands;
 
 use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
-#[cfg(any(feature = "release-devtools", all(desktop, not(feature = "app-store"))))]
+#[cfg(any(
+    feature = "release-devtools",
+    all(desktop, not(any(feature = "app-store", app_store)))
+))]
 use tauri::Manager;
 use tauri::{Emitter, Listener};
 use tauri_plugin_deep_link::DeepLinkExt;
-#[cfg(all(desktop, not(feature = "app-store")))]
+#[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
 use updater_commands::{PendingUpdate, check_for_update, install_update};
 
 /// Returns the deep-link URL that launched (or last targeted) the current
@@ -32,7 +40,7 @@ pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
-    #[cfg(all(desktop, not(feature = "app-store")))]
+    #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             tracing::info!("[deep-link] single-instance activated (app was already running)");
@@ -61,9 +69,9 @@ pub fn run() {
             auth_store_get,
             auth_store_set,
             auth_store_delete,
-            #[cfg(all(desktop, not(feature = "app-store")))]
+            #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
             check_for_update,
-            #[cfg(all(desktop, not(feature = "app-store")))]
+            #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
             install_update
         ])
         .setup(|app| {
