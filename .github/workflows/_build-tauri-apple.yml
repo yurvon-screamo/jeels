@@ -333,14 +333,23 @@ jobs:
                   name: ${{ inputs.wasm_artifact_name }}
                   path: origa_ui/dist/
 
-            - name: Import Mac signing certificates
+            - name: Import Mac App cert + create keychain
               uses: apple-actions/import-codesign-certs@v3
               with:
                   p12-file-base64: ${{ secrets.apple-mac-app-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
-                  additional-p12-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
-                  additional-p12-password: ${{ secrets.apple-mac-cert-password }}
                   keychain: build
+
+            - name: Import Mac Installer cert (reuse keychain)
+              uses: apple-actions/import-codesign-certs@v3
+              with:
+                  p12-file-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
+                  p12-password: ${{ secrets.apple-mac-cert-password }}
+                  keychain: build
+                  # Don't recreate the keychain — the first call above
+                  # already created it. Without this, the second call
+                  # fails with errSecDuplicateItem (exit code 48).
+                  create-keychain: false
 
             - name: Discover signing identities
               env:
