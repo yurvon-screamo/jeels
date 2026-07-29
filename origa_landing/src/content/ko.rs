@@ -182,7 +182,7 @@ pub static CONTENT: Content = Content {
     download_linux: "Linux",
     download_linux_formats: ".deb, .AppImage, .rpm",
     download_macos: "macOS",
-    download_macos_formats: ".dmg, .app",
+    download_macos_formats: "Mac",
     download_android: "Android",
     download_android_formats: ".apk",
     download_web: "웹",

@@ -4,16 +4,14 @@ use crate::components::seo::{PageMeta, SchemaOrg, breadcrumb_schema};
 use crate::content::Locale;
 
 // Fixed-name aliases published alongside the versioned assets on every
-// stable release (see ADR-025 and .github/workflows/_build-tauri.yml). GitHub's
-// /releases/latest/download/<name> URL requires a filename that does not change
-// between releases, so each platform links to its alias rather than the
-// versioned asset. Clicking starts the file download directly (GitHub serves
-// these with Content-Disposition: attachment), skipping the release UI.
+// stable release (see ADR-025). GitHub's /releases/latest/download/<name>
+// URL requires a filename that does not change between releases, so each
+// direct-download platform links to its alias rather than the versioned
+// asset.
 //
-// macOS distribution moved to the Mac App Store (ADR-033). The legacy
-// `Origa_macos-arm64.zip` direct-download asset is no longer produced by
-// CI — the macOS DownloadCard uses the same "coming soon" treatment as
-// iOS until the App Store listing goes live.
+// macOS distribution is Mac App Store only (ADR-033). The macOS
+// DownloadCard uses the "coming soon" badge until the App Store listing
+// is live; no direct-download link is published.
 const DOWNLOAD_WINDOWS: &str =
     "https://github.com/yurvon-screamo/origa/releases/latest/download/Origa_x64-setup.exe";
 const DOWNLOAD_LINUX_APPIMAGE: &str =
