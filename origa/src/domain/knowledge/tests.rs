@@ -1131,10 +1131,23 @@ fn limited_types_still_respect_daily_limit() {
         NativeLanguage::Russian,
     );
 
+    // daily_new_limit bounds the count of distinct NEW cards introduced per
+    // day. Multi-show expansion (`expand_repeated_views`) may add extra slots
+    // showing the same card_id twice — those are not new cards, so the limit
+    // must be checked against distinct card_ids, not against `result.len()`.
+    // Before the proportional-slot fix distribute returned only Vocabulary
+    // (so kanji never reached the multi-show pipeline) and the looser check
+    // happened to hold; with the fix kanji enters the lesson and exercises
+    // the multi-show path, exposing the original assertion's intent bug.
+    let distinct_new_count: usize = result
+        .values()
+        .map(|lc| lc.card_id())
+        .collect::<HashSet<_>>()
+        .len();
+
     assert!(
-        result.len() <= 5,
-        "Vocab + Kanji should respect daily limit of 5, got {}",
-        result.len()
+        distinct_new_count <= 5,
+        "Distinct new cards should respect daily limit of 5, got {distinct_new_count}"
     );
 }
 
