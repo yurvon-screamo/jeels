@@ -84,6 +84,7 @@ pub(crate) fn build_lesson_core(
     let favorite_ids: HashSet<Ulid> = favorite_cards.iter().map(|(id, _)| **id).collect();
 
     let mut selected_cards = collect_core_high_difficulty(&all_cards, &favorite_ids);
+    let mut rng = rand::rng();
     collect_core_new_cards(
         &all_cards,
         &mut selected_cards,
@@ -91,6 +92,7 @@ pub(crate) fn build_lesson_core(
         knowledge_set.new_cards_studied_today(),
         daily_new_limit,
         jlpt_content,
+        &mut rng,
     );
     fill_core_due_known(&all_cards, &mut selected_cards, &favorite_ids);
 
@@ -198,25 +200,18 @@ fn collect_core_high_difficulty<'a>(
         .collect()
 }
 
-fn collect_core_new_cards<'a>(
+fn collect_core_new_cards<'a, R: rand::Rng>(
     all_cards: &[(&'a Ulid, &'a StudyCard)],
     selected_cards: &mut Vec<(&'a Ulid, &'a StudyCard)>,
     favorite_ids: &HashSet<Ulid>,
     new_cards_studied_today: usize,
     daily_new_limit: usize,
     jlpt_content: &JlptContent,
+    rng: &mut R,
 ) {
-    let new_core_cards: Vec<_> = all_cards
-        .iter()
-        .filter(|(id, card)| is_core_candidate(id, card, favorite_ids) && card.memory().is_new())
-        .copied()
-        .collect();
-
-    if new_core_cards.is_empty() {
-        return;
-    }
-
-    let distributed = distribute_new_cards(new_core_cards, jlpt_content);
+    // Compute `allowed` BEFORE distribute so the per-type slot allocator
+    // knows the actual quota (otherwise it would build an unbounded list
+    // and we'd slice the tail off, defeating the proportional split).
     let available = MAX_LESSON_SIZE.saturating_sub(selected_cards.len() + favorite_ids.len());
     let daily_remaining = daily_new_limit
         .saturating_sub(new_cards_studied_today)
@@ -228,12 +223,22 @@ fn collect_core_new_cards<'a>(
         );
     let allowed = daily_remaining.min(available);
 
-    for card in distributed {
-        if selected_cards.len() >= allowed {
-            break;
-        }
-        selected_cards.push(card);
+    if allowed == 0 {
+        return;
     }
+
+    let new_core_cards: Vec<_> = all_cards
+        .iter()
+        .filter(|(id, card)| is_core_candidate(id, card, favorite_ids) && card.memory().is_new())
+        .copied()
+        .collect();
+
+    if new_core_cards.is_empty() {
+        return;
+    }
+
+    let distributed = distribute_new_cards(new_core_cards, jlpt_content, allowed, rng);
+    selected_cards.extend(distributed);
 }
 
 fn fill_core_due_known<'a>(
@@ -1135,71 +1140,218 @@ fn resolve_jlpt_level(card: &Card, jlpt_content: &JlptContent) -> Option<Japanes
     jlpt_content.find_level(&card.content_key(), CardType::from(card))
 }
 
-fn weighted_interleave_by_type<'a>(
-    cards: Vec<(&'a Ulid, &'a StudyCard)>,
-) -> Vec<(&'a Ulid, &'a StudyCard)> {
-    use std::collections::VecDeque;
-
-    let mut queues: HashMap<CardType, VecDeque<(&Ulid, &StudyCard)>> = HashMap::new();
-    for card in cards {
-        let card_type = CardType::from(card.1.card());
-        queues.entry(card_type).or_default().push_back(card);
+/// Distributes `allowed` slots across card types proportionally to
+/// `CARD_TYPE_WEIGHTS`, treating the weights as **percentages** (not as a
+/// round-robin pattern). Uses the largest-remainder method with a
+/// minor-priority rule for leftover slots:
+///
+/// 1. `raw_t = allowed * w_t / sum_w` (where `sum_w` is **renormalized** over
+///    types actually present in `available_by_type`).
+/// 2. `floor_t = min(floor(raw_t), available_t)`.
+/// 3. `leftover = allowed - sum(floor_t)`.
+/// 4. Phase 1 (minor types, non-Vocabulary): candidates with `floor_t <
+///    available_t` AND `floor_t < ceil(raw_t)`; sorted by `fract(raw_t)` desc
+///    with a random tie-break.
+/// 5. Phase 2 (fallback): Vocabulary first, then any remaining type, until
+///    leftover is exhausted or availability runs out.
+///
+/// This fixes the systematic grammar starvation at `daily_load ≤ 9` where the
+/// old round-robin pattern (`8V + 1K + 0G`) gave grammar 0 slots every day.
+fn compute_type_slots<R: rand::Rng>(
+    allowed: usize,
+    available_by_type: &HashMap<CardType, usize>,
+    rng: &mut R,
+) -> HashMap<CardType, usize> {
+    if allowed == 0 {
+        return HashMap::new();
     }
 
-    let pattern: Vec<CardType> = CARD_TYPE_WEIGHTS
+    // Active types: CARD_TYPE_WEIGHTS entries with available > 0.
+    // If a type is missing from the pool, sum_w is renormalized without it.
+    let active: Vec<(CardType, usize)> = CARD_TYPE_WEIGHTS
         .iter()
-        .flat_map(|(ct, w)| std::iter::repeat(*ct).take(*w))
+        .copied()
+        .filter(|(t, _)| available_by_type.get(t).copied().unwrap_or(0) > 0)
+        .collect();
+    if active.is_empty() {
+        return HashMap::new();
+    }
+
+    let sum_w: usize = active.iter().map(|(_, w)| w).sum();
+
+    // raw and floor (with availability cap).
+    let mut slots: HashMap<CardType, usize> = HashMap::new();
+    let mut raw_map: HashMap<CardType, f64> = HashMap::new();
+    let mut sum_floor = 0usize;
+    for (t, w) in &active {
+        let raw = (allowed as f64) * (*w as f64) / (sum_w as f64);
+        raw_map.insert(*t, raw);
+        let avail = available_by_type.get(t).copied().unwrap_or(0);
+        let floor = (raw.floor() as usize).min(avail);
+        slots.insert(*t, floor);
+        sum_floor += floor;
+    }
+
+    let mut leftover = allowed.saturating_sub(sum_floor);
+    if leftover == 0 {
+        debug_assert!(slots.values().sum::<usize>() <= allowed);
+        return slots;
+    }
+
+    // Phase 1: minor (non-Vocabulary) types first.
+    // Candidate must still have headroom: floor < available AND floor < ceil(raw).
+    let mut minor_candidates: Vec<CardType> = active
+        .iter()
+        .filter(|(t, _)| *t != CardType::Vocabulary)
+        .map(|(t, _)| *t)
+        .filter(|t| {
+            let cur = slots.get(t).copied().unwrap_or(0);
+            let avail = available_by_type.get(t).copied().unwrap_or(0);
+            let raw = raw_map.get(t).copied().unwrap_or(0.0);
+            cur < avail && cur < raw.ceil() as usize
+        })
         .collect();
 
-    let total_cards: usize = queues.values().map(|q| q.len()).sum();
-    let mut result = Vec::with_capacity(total_cards);
-    let mut pattern_idx = 0;
-    let mut empty_rounds = 0;
+    // Shuffle then stable-sort by remainder desc: ties keep the random order
+    // from the shuffle, giving the random tie-break required by the contract.
+    minor_candidates.shuffle(rng);
+    minor_candidates.sort_by(|a, b| {
+        let rem_a = raw_map.get(a).copied().unwrap_or(0.0).fract();
+        let rem_b = raw_map.get(b).copied().unwrap_or(0.0).fract();
+        rem_b
+            .partial_cmp(&rem_a)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
-    while result.len() < total_cards {
-        let card_type = pattern[pattern_idx % pattern.len()];
-        pattern_idx += 1;
-
-        if let Some(queue) = queues.get_mut(&card_type) {
-            if let Some(card) = queue.pop_front() {
-                result.push(card);
-                empty_rounds = 0;
-                continue;
-            }
-        }
-
-        empty_rounds += 1;
-        // Если за полный цикл паттерна не извлекли ни одной карточки —
-        // значит остались типы, не представленные в CARD_TYPE_WEIGHTS
-        if empty_rounds >= pattern.len() {
-            queues
-                .values_mut()
-                .flat_map(|q| q.drain(..))
-                .for_each(|card| result.push(card));
+    for t in minor_candidates.iter() {
+        if leftover == 0 {
             break;
+        }
+        let cur = slots.get(t).copied().unwrap_or(0);
+        let avail = available_by_type.get(t).copied().unwrap_or(0);
+        if cur < avail {
+            slots.insert(*t, cur + 1);
+            leftover -= 1;
         }
     }
 
-    result
+    // Phase 2: Vocabulary first, then any remaining type with headroom.
+    if leftover > 0 {
+        let phase2_order: Vec<CardType> = {
+            let mut v_first: Vec<CardType> = active
+                .iter()
+                .filter(|(t, _)| *t == CardType::Vocabulary)
+                .map(|(t, _)| *t)
+                .collect();
+            let mut rest: Vec<CardType> = active
+                .iter()
+                .filter(|(t, _)| *t != CardType::Vocabulary)
+                .map(|(t, _)| *t)
+                .collect();
+            v_first.append(&mut rest);
+            v_first
+        };
+        for t in phase2_order {
+            if leftover == 0 {
+                break;
+            }
+            let avail = available_by_type.get(&t).copied().unwrap_or(0);
+            while leftover > 0 {
+                let cur = slots.get(&t).copied().unwrap_or(0);
+                if cur >= avail {
+                    break;
+                }
+                slots.insert(t, cur + 1);
+                leftover -= 1;
+            }
+        }
+    }
+
+    debug_assert!(slots.values().sum::<usize>() <= allowed);
+    slots
 }
 
-fn distribute_new_cards<'a>(
+/// New cards grouped first by JLPT priority (N5 highest) then by CardType.
+/// Used by [`distribute_new_cards`] to walk groups in priority order while
+/// keeping per-type queues for the proportional slot allocator.
+type GroupedNewCards<'a> =
+    BTreeMap<Reverse<u8>, HashMap<CardType, VecDeque<(&'a Ulid, &'a StudyCard)>>>;
+
+/// Picks the new cards for the lesson respecting both the JLPT-level priority
+/// (N5 first, then N4, …) and the per-type proportional quota derived from
+/// `CARD_TYPE_WEIGHTS`. `allowed` bounds the total returned; each JLPT group
+/// consumes up to `min(remaining, group_size)` slots, allocated across types
+/// via `compute_type_slots`. Output order: Vocabulary as spine, then Kanji,
+/// then Grammar (matches the historical lesson layout — `interleave_core_by_type`
+/// reshuffles it later anyway).
+fn distribute_new_cards<'a, R: rand::Rng>(
     new_cards: Vec<(&'a Ulid, &'a StudyCard)>,
     jlpt_content: &JlptContent,
+    allowed: usize,
+    rng: &mut R,
 ) -> Vec<(&'a Ulid, &'a StudyCard)> {
-    // Reverse: N5(5) → наивысший приоритет → первый ключ в BTreeMap
-    let mut groups: BTreeMap<Reverse<u8>, Vec<(&Ulid, &StudyCard)>> = BTreeMap::new();
+    debug_assert!(
+        new_cards
+            .iter()
+            .all(|(_, sc)| !matches!(sc.card(), Card::Phrase(_))),
+        "phrases must be filtered out before distribute_new_cards (is_core_candidate)"
+    );
+
+    if allowed == 0 || new_cards.is_empty() {
+        return Vec::new();
+    }
+
+    // Reverse: N5(5) → highest priority → first key in BTreeMap.
+    let mut groups: GroupedNewCards = BTreeMap::new();
     for card in new_cards {
         let priority = resolve_jlpt_level(card.1.card(), jlpt_content)
             .map(|l| l.as_number())
             .unwrap_or(UNKNOWN_JLPT_PRIORITY);
-        groups.entry(Reverse(priority)).or_default().push(card);
+        groups
+            .entry(Reverse(priority))
+            .or_default()
+            .entry(CardType::from(card.1.card()))
+            .or_default()
+            .push_back(card);
     }
 
-    groups
-        .into_values()
-        .flat_map(|cards| weighted_interleave_by_type(cards))
-        .collect()
+    let mut result: Vec<(&Ulid, &StudyCard)> = Vec::with_capacity(allowed);
+    let mut remaining = allowed;
+    for (_, by_type) in groups {
+        if remaining == 0 {
+            break;
+        }
+        let group_total: usize = by_type.values().map(|q| q.len()).sum();
+        let take = remaining.min(group_total);
+        if take == 0 {
+            continue;
+        }
+
+        let available: HashMap<CardType, usize> =
+            by_type.iter().map(|(t, q)| (*t, q.len())).collect();
+        let slots = compute_type_slots(take, &available, rng);
+        // `take` is clamped to `group_total` above, so `compute_type_slots`
+        // must allocate exactly `take` slots. Guards against a future
+        // allocator change that would silently shorten `result`.
+        debug_assert_eq!(
+            slots.values().sum::<usize>(),
+            take,
+            "compute_type_slots must allocate exactly `take` slots"
+        );
+
+        for card_type in [CardType::Vocabulary, CardType::Kanji, CardType::Grammar] {
+            if let Some(queue) = by_type.get(&card_type) {
+                let n = slots.get(&card_type).copied().unwrap_or(0);
+                for card in queue.iter().take(n) {
+                    result.push(*card);
+                }
+            }
+        }
+
+        remaining -= take;
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -1209,6 +1361,8 @@ mod tests {
     use crate::domain::knowledge::{GrammarRuleCard, KanjiCard, PhraseCard, VocabularyCard};
     use crate::domain::value_objects::Question;
     use crate::domain::{RateMode, Rating};
+    use rand::SeedableRng;
+    use rand::rngs::StdRng;
     use rstest::rstest;
 
     fn vocab_card(word: &str) -> Card {
@@ -3285,6 +3439,334 @@ mod tests {
             phrases.contains(&phrase_id_independent()),
             "NEW no-anchor phrase must appear even when anchored phrases exhaust the budget: \
              got {phrases:?}"
+        );
+    }
+
+    // --- Proportional type-slot allocation (grammar-starvation fix) ---
+    //
+    // CARD_TYPE_WEIGHTS was originally meant as a PERCENTAGE split (V:K:G ≈
+    // 80:10:10) but the legacy `weighted_interleave_by_type` treated it as a
+    // round-robin pattern and sliced the first N positions off the result.
+    // At `daily_new_limit ≤ 9` this gave Grammar 0 slots every day. The new
+    // `compute_type_slots` uses largest-remainder + minor-priority tie-break
+    // so each type gets its proportional share even at small limits.
+
+    fn infinite_pool() -> HashMap<CardType, usize> {
+        let large = 1_000;
+        [
+            (CardType::Vocabulary, large),
+            (CardType::Kanji, large),
+            (CardType::Grammar, large),
+        ]
+        .into_iter()
+        .collect()
+    }
+
+    fn slots_count(slots: &HashMap<CardType, usize>, t: CardType) -> u32 {
+        slots.get(&t).copied().unwrap_or(0) as u32
+    }
+
+    /// Expected per-type slot split for a single `allowed` value. Deterministic
+    /// cases must hold for every RNG seed; random cases must reach BOTH
+    /// branches across enough seeds.
+    enum SlotExpectation {
+        Deterministic(u32, u32, u32),
+        Random {
+            a: (u32, u32, u32),
+            b: (u32, u32, u32),
+        },
+    }
+
+    #[rstest]
+    #[case::minimal(3, SlotExpectation::Random { a: (2, 1, 0), b: (2, 0, 1) })]
+    #[case::light(6, SlotExpectation::Deterministic(4, 1, 1))]
+    #[case::medium(9, SlotExpectation::Deterministic(7, 1, 1))]
+    #[case::hard(15, SlotExpectation::Random { a: (12, 2, 1), b: (12, 1, 2) })]
+    #[case::heavy(21, SlotExpectation::Random { a: (16, 3, 2), b: (16, 2, 3) })]
+    #[case::maximum_unit(30, SlotExpectation::Deterministic(24, 3, 3))]
+    fn compute_type_slots_reproduces_load_matrix(
+        #[case] allowed: usize,
+        #[case] expected: SlotExpectation,
+    ) {
+        let available = infinite_pool();
+        match expected {
+            SlotExpectation::Deterministic(v, k, g) => {
+                for seed in [0u64, 1, 42, 99, 1234] {
+                    let mut rng = StdRng::seed_from_u64(seed);
+                    let slots = compute_type_slots(allowed, &available, &mut rng);
+                    assert_eq!(
+                        slots_count(&slots, CardType::Vocabulary),
+                        v,
+                        "V wrong, allowed={allowed}, seed={seed}"
+                    );
+                    assert_eq!(
+                        slots_count(&slots, CardType::Kanji),
+                        k,
+                        "K wrong, allowed={allowed}, seed={seed}"
+                    );
+                    assert_eq!(
+                        slots_count(&slots, CardType::Grammar),
+                        g,
+                        "G wrong, allowed={allowed}, seed={seed}"
+                    );
+                }
+            },
+            SlotExpectation::Random { a, b } => {
+                let (mut found_a, mut found_b) = (false, false);
+                for seed in 0..200u64 {
+                    let mut rng = StdRng::seed_from_u64(seed);
+                    let slots = compute_type_slots(allowed, &available, &mut rng);
+                    let triple = (
+                        slots_count(&slots, CardType::Vocabulary),
+                        slots_count(&slots, CardType::Kanji),
+                        slots_count(&slots, CardType::Grammar),
+                    );
+                    assert!(
+                        triple == a || triple == b,
+                        "allowed={allowed}, seed={seed}: unexpected triple {triple:?}"
+                    );
+                    if triple == a {
+                        found_a = true;
+                    }
+                    if triple == b {
+                        found_b = true;
+                    }
+                }
+                assert!(found_a, "case A never observed for allowed={allowed}");
+                assert!(found_b, "case B never observed for allowed={allowed}");
+            },
+        }
+    }
+
+    #[test]
+    fn compute_type_slots_returns_empty_when_allowed_zero() {
+        let available = infinite_pool();
+        let mut rng = StdRng::seed_from_u64(0);
+        let slots = compute_type_slots(0, &available, &mut rng);
+        assert!(slots.is_empty());
+    }
+
+    #[test]
+    fn compute_type_slots_returns_empty_when_pool_empty() {
+        let available: HashMap<CardType, usize> = HashMap::new();
+        let mut rng = StdRng::seed_from_u64(0);
+        let slots = compute_type_slots(9, &available, &mut rng);
+        assert!(slots.is_empty());
+    }
+
+    #[test]
+    fn compute_type_slots_normalizes_when_main_type_absent() {
+        // V absent from pool → renormalize over K:G = 1:1, sum_w=2.
+        let mut available = HashMap::new();
+        available.insert(CardType::Kanji, 100);
+        available.insert(CardType::Grammar, 100);
+        for seed in [0u64, 1, 42] {
+            let mut rng = StdRng::seed_from_u64(seed);
+            let slots = compute_type_slots(10, &available, &mut rng);
+            assert_eq!(slots_count(&slots, CardType::Vocabulary), 0, "seed={seed}");
+            assert_eq!(slots_count(&slots, CardType::Kanji), 5, "seed={seed}");
+            assert_eq!(slots_count(&slots, CardType::Grammar), 5, "seed={seed}");
+        }
+    }
+
+    #[test]
+    fn compute_type_slots_phase2_fallback_to_vocabulary_when_grammar_capped() {
+        // V=∞, K=∞, G=1, allowed=30 → raw G=3 capped to 1, leftover=2 falls to
+        // V via Phase 2 (the cap-binding fallback path).
+        let mut available = HashMap::new();
+        available.insert(CardType::Vocabulary, 100);
+        available.insert(CardType::Kanji, 100);
+        available.insert(CardType::Grammar, 1);
+        for seed in [0u64, 1, 42, 99] {
+            let mut rng = StdRng::seed_from_u64(seed);
+            let slots = compute_type_slots(30, &available, &mut rng);
+            assert_eq!(
+                slots_count(&slots, CardType::Vocabulary),
+                26,
+                "V should absorb the cap-induced leftover (seed={seed})"
+            );
+            assert_eq!(slots_count(&slots, CardType::Kanji), 3, "seed={seed}");
+            assert_eq!(
+                slots_count(&slots, CardType::Grammar),
+                1,
+                "G must be capped at available=1 (seed={seed})"
+            );
+        }
+    }
+
+    /// Direct unit test for `distribute_new_cards` multi-group overflow:
+    /// when allowed exceeds the first JLPT group's size, the leftover must
+    /// roll over to the next group. N5(3V only) is tiny, so the proportional
+    /// split for N4(∞) yields the expected 7V+1K+1G there.
+    #[test]
+    fn distribute_new_cards_overflows_leftover_to_next_jlpt_group() {
+        let mut jlpt_content = JlptContent::new();
+        jlpt_content.words_by_level.insert(
+            JapaneseLevel::N5,
+            ["n5w1", "n5w2", "n5w3"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect(),
+        );
+        jlpt_content.words_by_level.insert(
+            JapaneseLevel::N4,
+            (0..30).map(|i| format!("n4w{i}")).collect::<HashSet<_>>(),
+        );
+        jlpt_content.kanji_by_level.insert(
+            JapaneseLevel::N4,
+            (0..10).map(|i| format!("n4k{i}")).collect::<HashSet<_>>(),
+        );
+        let gids: Vec<Ulid> = (0..5).map(|_| Ulid::new()).collect();
+        jlpt_content.grammar_by_level.insert(
+            JapaneseLevel::N4,
+            gids.iter().map(|u| u.to_string()).collect::<HashSet<_>>(),
+        );
+
+        let mut ks = KnowledgeSet::new();
+        // N5 group: 3 vocab only.
+        for w in ["n5w1", "n5w2", "n5w3"] {
+            ks.create_card(vocab_card(w)).unwrap();
+        }
+        // N4 group: 30V + 10K + 5G.
+        for i in 0..30 {
+            ks.create_card(vocab_card(&format!("n4w{i}"))).unwrap();
+        }
+        for i in 0..10 {
+            ks.create_card(Card::Kanji(KanjiCard::new_test(format!("n4k{i}"))))
+                .unwrap();
+        }
+        for gid in &gids {
+            ks.create_card(Card::Grammar(GrammarRuleCard::new_test_with_id(*gid)))
+                .unwrap();
+        }
+
+        let all_cards: Vec<(&Ulid, &StudyCard)> = ks.study_cards().iter().collect::<Vec<_>>();
+        let mut rng = StdRng::seed_from_u64(0);
+        let distributed = distribute_new_cards(all_cards, &jlpt_content, 9, &mut rng);
+        assert_eq!(distributed.len(), 9, "must return exactly `allowed` cards");
+
+        // Tally per type using the underlying StudyCard.
+        let mut vocab = 0;
+        let mut kanji = 0;
+        let mut grammar = 0;
+        for (_, sc) in &distributed {
+            match sc.card() {
+                Card::Vocabulary(_) => vocab += 1,
+                Card::Kanji(_) => kanji += 1,
+                Card::Grammar(_) => grammar += 1,
+                _ => {},
+            }
+        }
+        // N5 contributes 3V (its entire group), N4 contributes 4V+1K+1G
+        // (matrix row "light" for take=6).
+        assert_eq!(vocab, 7, "N5 3V + N4 4V = 7");
+        assert_eq!(kanji, 1);
+        assert_eq!(grammar, 1);
+    }
+
+    /// Direct unit test for `distribute_new_cards` JLPT priority: when the
+    /// first group alone can fill `allowed`, the second group is untouched.
+    #[test]
+    fn distribute_new_cards_consumes_first_jlpt_group_when_sufficient() {
+        let mut jlpt_content = JlptContent::new();
+        jlpt_content.words_by_level.insert(
+            JapaneseLevel::N5,
+            (0..30).map(|i| format!("n5w{i}")).collect::<HashSet<_>>(),
+        );
+        jlpt_content.kanji_by_level.insert(
+            JapaneseLevel::N5,
+            (0..10).map(|i| format!("n5k{i}")).collect::<HashSet<_>>(),
+        );
+        let gids: Vec<Ulid> = (0..5).map(|_| Ulid::new()).collect();
+        jlpt_content.grammar_by_level.insert(
+            JapaneseLevel::N5,
+            gids.iter().map(|u| u.to_string()).collect::<HashSet<_>>(),
+        );
+        jlpt_content.words_by_level.insert(
+            JapaneseLevel::N4,
+            ["n4w1"].into_iter().map(|s| s.to_string()).collect(),
+        );
+
+        let mut ks = KnowledgeSet::new();
+        for i in 0..30 {
+            ks.create_card(vocab_card(&format!("n5w{i}"))).unwrap();
+        }
+        for i in 0..10 {
+            ks.create_card(Card::Kanji(KanjiCard::new_test(format!("n5k{i}"))))
+                .unwrap();
+        }
+        for gid in &gids {
+            ks.create_card(Card::Grammar(GrammarRuleCard::new_test_with_id(*gid)))
+                .unwrap();
+        }
+        let n4_sc = ks.create_card(vocab_card("n4w1")).unwrap();
+
+        let all_cards: Vec<(&Ulid, &StudyCard)> = ks.study_cards().iter().collect::<Vec<_>>();
+        let mut rng = StdRng::seed_from_u64(0);
+        let distributed = distribute_new_cards(all_cards, &jlpt_content, 9, &mut rng);
+        assert_eq!(distributed.len(), 9);
+
+        // N4 card must NOT appear — N5 alone satisfied `allowed`.
+        assert!(
+            !distributed.iter().any(|(id, _)| **id == *n4_sc.card_id()),
+            "N4 card leaked while N5 group had enough cards"
+        );
+    }
+
+    #[test]
+    fn grammar_appears_in_lesson_at_medium_load() {
+        // End-to-end: 30V + 10K + 5G all N5, daily_new_limit=9 (Medium).
+        // Before the fix this returned 8V + 1K + 0G (grammar starved).
+        // After: 7V + 1K + 1G exactly (deterministic per matrix row "medium").
+        let mut ks = KnowledgeSet::new();
+        let mut jlpt_content = JlptContent::new();
+        jlpt_content.words_by_level.insert(
+            JapaneseLevel::N5,
+            (0..30).map(|i| format!("vocab{i}")).collect::<HashSet<_>>(),
+        );
+        jlpt_content.kanji_by_level.insert(
+            JapaneseLevel::N5,
+            (0..10).map(|i| format!("kanji{i}")).collect::<HashSet<_>>(),
+        );
+        let grammar_ids: Vec<Ulid> = (0..5).map(|_| Ulid::new()).collect();
+        jlpt_content.grammar_by_level.insert(
+            JapaneseLevel::N5,
+            grammar_ids
+                .iter()
+                .map(|u| u.to_string())
+                .collect::<HashSet<_>>(),
+        );
+
+        for i in 0..30 {
+            ks.create_card(vocab_card(&format!("vocab{i}"))).unwrap();
+        }
+        for i in 0..10 {
+            ks.create_card(Card::Kanji(KanjiCard::new_test(format!("kanji{i}"))))
+                .unwrap();
+        }
+        for gid in &grammar_ids {
+            ks.create_card(Card::Grammar(GrammarRuleCard::new_test_with_id(*gid)))
+                .unwrap();
+        }
+
+        let lesson =
+            ks.cards_to_lesson(9, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+
+        // Multi-show expansion may add an extra slot for the same grammar
+        // card_id, so we count DISTINCT grammar card_ids, not raw slots.
+        let grammar_card_ids: HashSet<Ulid> = lesson
+            .values()
+            .filter_map(|lc| {
+                let card = ks.get_card(lc.card_id())?.card();
+                matches!(card, Card::Grammar(_)).then_some(lc.card_id())
+            })
+            .collect();
+
+        assert_eq!(
+            grammar_card_ids.len(),
+            1,
+            "Medium=9 must include exactly 1 distinct grammar card, got {}",
+            grammar_card_ids.len()
         );
     }
 }
