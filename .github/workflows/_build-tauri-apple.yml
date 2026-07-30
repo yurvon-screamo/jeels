@@ -8,15 +8,14 @@ on:
                 required: true
             # version_base and version_type are retained for caller
             # compatibility (ci.yml and tauri.yml pass them) but are not
-            # consumed inside this workflow. Kept as required to avoid a
-            # contract-breaking change to the workflow_call signature,
-            # mirroring the same pattern in _build-tauri.yml.
+            # consumed inside this workflow. Kept as required: false to
+            # avoid implying they affect behavior.
             version_base:
                 type: string
-                required: true
+                required: false
             version_type:
                 type: string
-                required: true
+                required: false
             commit_sha:
                 type: string
                 required: true
@@ -48,9 +47,6 @@ on:
             ios-upload-status:
                 description: "iOS App Store Connect upload result: success|failure|skipped"
                 value: ${{ jobs.build-ios.outputs.upload-status }}
-            macos-build-status:
-                description: "macOS .app build result: success|failure|skipped"
-                value: ${{ jobs.build-macos.outputs.build-status }}
             macos-upload-status:
                 description: "macOS App Store Connect upload result: success|failure|skipped"
                 value: ${{ jobs.build-macos.outputs.upload-status }}
@@ -110,89 +106,14 @@ jobs:
                   path: origa_ui/dist/
 
             - name: Decode Apple API Key
-              env:
-                  APPLE_API_KEY_CONTENT: ${{ secrets.apple-api-key-content }}
-                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
-              run: |
-                  # Two consumers need the .p8 file:
-                  # 1. Tauri iOS build (cargo-mobile2 → xcodebuild auto-provisioning)
-                  #    reads it via APPLE_API_KEY_PATH env var (any path).
-                  # 2. `xcrun altool --upload-app` (App Store Connect upload)
-                  #    searches for `AuthKey_<key>.p8` ONLY in these dirs:
-                  #    ./private_keys/, ~/private_keys/, ~/.private_keys/,
-                  #    ~/.appstoreconnect/private_keys/, or $API_PRIVATE_KEYS_DIR.
-                  #    altool does NOT honor APPLE_API_KEY_PATH.
-                  # Solution: write the .p8 to ./private_keys/ so both consumers
-                  #    can find it, and set APPLE_API_KEY_PATH to the same file
-                  #    for cargo-mobile2.
-                  #
-                  # The APPLE_API_KEY_CONTENT secret may hold either:
-                  # (a) base64-encoded .p8 contents (from `base64 -i AuthKey.p8`
-                  #     or `[Convert]::ToBase64String(...)` in PowerShell)
-                  # (b) raw PEM contents pasted directly into the secret field.
-                  # Detect at runtime by checking whether the value starts with
-                  # the PEM header. Both paths strip ALL whitespace to avoid
-                  # xcodebuild `CryptoKitASN1Error.invalidPEMDocument` errors
-                  # caused by CRLF/CR/LF pollution from web UI paste.
-                  KEY_PATH="private_keys/AuthKey_${APPLE_API_KEY}.p8"
-                  mkdir -p private_keys
+              id: decode-key
+              uses: ./.github/actions/decode-apple-key
+              with:
+                  apple-api-key-content: ${{ secrets.apple-api-key-content }}
+                  apple-api-key: ${{ secrets.apple-api-key }}
 
-                  # Normalize: strip ALL whitespace; this collapses both the
-                  # base64 case (newlines folded in web UI) and the raw-PEM
-                  # case (CRLF line endings) into a single contiguous string
-                  # for the format test below.
-                  NORMALIZED=$(printf '%s' "$APPLE_API_KEY_CONTENT" | tr -d '[:space:]')
-
-                  if [[ "$NORMALIZED" == -----BEGINPRIVATEKEY* ]]; then
-                      # Raw PEM pasted directly. Re-wrap at 64 chars per line
-                      # with proper PEM headers (PKCS#8 format Apple uses).
-                      INNER=$(printf '%s' "$NORMALIZED" \
-                              | sed 's/^-----BEGINPRIVATEKEY-----//' \
-                              | sed 's/-----ENDPRIVATEKEY-----$//')
-                      {
-                          echo "-----BEGIN PRIVATE KEY-----"
-                          printf '%s' "$INNER" | fold -w 64
-                          echo ""
-                          echo "-----END PRIVATE KEY-----"
-                      } > "$KEY_PATH"
-                  else
-                      # base64-encoded .p8 file. Decode to original PEM.
-                      printf '%s' "$NORMALIZED" | base64 --decode > "$KEY_PATH"
-                  fi
-
-                  echo "APPLE_API_KEY_PATH=$(pwd)/$KEY_PATH" >> "$GITHUB_ENV"
-
-                  # Sanity check: file must contain PEM markers and be ~200-250 bytes.
-                  if [ ! -s "$KEY_PATH" ]; then
-                    echo "::error::Decoded .p8 is empty — secret malformed"
-                    exit 1
-                  fi
-                  file_size=$(wc -c < "$KEY_PATH")
-                  echo "Decoded .p8 size: $file_size bytes"
-                  if [ "$file_size" -lt 200 ]; then
-                    echo "::error::Decoded .p8 is suspiciously small ($file_size bytes) — secret may be truncated"
-                    exit 1
-                  fi
-                  # Show the PEM header line (safe — not sensitive).
-                  echo "PEM header: $(head -1 "$KEY_PATH")"
-
-                  # Validate the key parses as a real EC private key. Catches
-                  # truncation/corruption that produces a valid-looking PEM
-                  # envelope but an invalid ASN.1 key body inside. Without
-                  # this check, xcodebuild fails ~10 min later with
-                  # `CryptoKitASN1Error.invalidPEMDocument` after cargo build.
-                  if ! openssl pkey -in "$KEY_PATH" -noout 2>/dev/null; then
-                    echo "::error::Decoded .p8 is not a valid private key (openssl pkey parse failed)."
-                    echo "The APPLE_API_KEY_CONTENT secret is likely corrupted or truncated."
-                    echo "Re-download the original .p8 from App Store Connect → Users and Access → Keys"
-                    echo "(the file can only be downloaded ONCE at key creation time)."
-                    echo "If you no longer have the .p8: revoke the key, create a new one, store"
-                    echo "its base64 via:  base64 -i AuthKey_<key>.p8 | tr -d '\\n'"
-                    echo "...then update the APPLE_API_KEY, APPLE_API_KEY_CONTENT, and APPLE_API_ISSUER secrets."
-                    exit 1
-                  fi
-                  echo "✅ PEM key validated (openssl parsed it successfully)"
-                  echo "API key decoded to $KEY_PATH"
+            - name: Set API key env
+              run: echo "APPLE_API_KEY_PATH=${{ steps.decode-key.outputs.key-path }}" >> "$GITHUB_ENV"
 
             - name: Update version in config files
               uses: ./.github/actions/update-version
@@ -305,7 +226,6 @@ jobs:
         permissions:
             contents: read
         outputs:
-            build-status: ${{ steps.build-report.outputs.status }}
             upload-status: ${{ steps.upload-report.outputs.status }}
         env:
             ORIGA_VERSION: ${{ inputs.version }}
@@ -316,7 +236,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
-            - name: Select latest Xcode
+            - name: Select latest Xcode with macOS SDK
               shell: bash
               run: |
                   LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
@@ -326,6 +246,12 @@ jobs:
                   fi
                   echo "Selected Xcode: $LATEST_XCODE"
                   sudo xcode-select -s "$LATEST_XCODE"
+                  if ! xcodebuild -showsdks | grep -q "macosx"; then
+                    echo "::error::macOS SDK not found in $LATEST_XCODE"
+                    xcodebuild -showsdks
+                    exit 1
+                  fi
+                  echo "macOS SDK verified"
 
             - name: Download WASM artifact
               uses: actions/download-artifact@v8
@@ -380,21 +306,14 @@ jobs:
                   echo "Signing identity: $APP_IDENTITY"
 
             - name: Decode Apple API Key
-              env:
-                  APPLE_API_KEY_CONTENT: ${{ secrets.apple-api-key-content }}
-                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
-              run: |
-                  # Same pattern as build-ios: write to ./private_keys/ so
-                  # xcrun altool finds the key (it searches ./private_keys/,
-                  # ~/private_keys/, ~/.private_keys/, ~/.appstoreconnect/
-                  # private_keys/, or $API_PRIVATE_KEYS_DIR — NOT /tmp/).
-                  # APPLE_API_KEY_PATH is unused by macOS build (codesign uses
-                  # keychain identity, not API key), but set for consistency.
-                  KEY_PATH="private_keys/AuthKey_${APPLE_API_KEY}.p8"
-                  mkdir -p private_keys
-                  echo "$APPLE_API_KEY_CONTENT" | base64 --decode > "$KEY_PATH"
-                  echo "APPLE_API_KEY_PATH=$(pwd)/$KEY_PATH" >> "$GITHUB_ENV"
-                  echo "API key decoded to $KEY_PATH"
+              id: decode-key
+              uses: ./.github/actions/decode-apple-key
+              with:
+                  apple-api-key-content: ${{ secrets.apple-api-key-content }}
+                  apple-api-key: ${{ secrets.apple-api-key }}
+
+            - name: Set API key env
+              run: echo "APPLE_API_KEY_PATH=${{ steps.decode-key.outputs.key-path }}" >> "$GITHUB_ENV"
 
             - name: Update version in config files
               uses: ./.github/actions/update-version
