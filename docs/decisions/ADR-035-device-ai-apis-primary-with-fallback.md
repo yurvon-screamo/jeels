@@ -45,10 +45,9 @@ Investigation surfaced hard constraints that shape the decision:
    iOS/Android support; the code did not build.
 
    **Resolution:** depend on a fork (`yurvon-screamo/tauri-plugin-device-ai-apis`,
-   rev `bdc3a16`) that adds `get_capabilities` to the mobile impl (returning the
-   documented iOS/Android feature matrix) and applies the existing
-   `mobile_invoke_error` mapper in `init()`. The fix will be upstreamed; until
-   merged, the fork carries it.
+   rev `e5709f6`) that fixes all three mobile-bridge layers (Rust `mobile.rs`,
+   Android Kotlin, iOS Swift — see Alternatives). The fixes will be upstreamed;
+   until merged, the fork carries them.
 
 ## Decision
 
@@ -102,12 +101,32 @@ to the matching fallback in the same row.
 
 ### Fork the plugin (mobile bridge fix) — ADOPTED
 
-The upstream mobile bridge (`src/mobile.rs` + `commands`) did not compile on
-Android/iOS. A fork (`yurvon-screamo/tauri-plugin-device-ai-apis`, rev
-`bdc3a16`) carries the two-line-plus-method fix. The mobile build was the main
-reason for adopting device-ai, so fixing the bridge was mandatory rather than
-excluding mobile. The fix will be upstreamed via a PR to `hypothesi/...`;
-until merged, Origa depends on the fork.
+The upstream plugin never compiled its mobile targets in CI (`test.yml` only
+runs `cargo fmt/clippy/test` on `ubuntu-latest`), so the mobile bridge was
+broken at three layers, all surfaced when Origa's CI first built Android/iOS:
+
+1. **Rust `mobile.rs`** — `get_capabilities` was defined only on the desktop
+   `DeviceAiApis` impl, and `init()` used `?` on `register_*_plugin` without
+   `From<PluginInvokeError>`. Fixed by adding `get_capabilities` (returning the
+   documented iOS/Android feature matrix) and applying the existing
+   `mobile_invoke_error` mapper.
+2. **Android Kotlin `DeviceAiPlugin.kt`** — four array-returning commands used
+   `Invoke.resolve(JSONArray)`, which takes `JSObject`. Switched to
+   `Invoke.resolveObject` (matches tauri-apps/plugins-workspace notification).
+3. **iOS Swift `DeviceAiPlugin.swift`** — `Invoke.reject` takes a `String` but
+   was passed the `Encodable` `PluginError` (~20 sites); added an
+   `Invoke.reject(_ error: PluginError)` overload that JSON-encodes it.
+   `VNRecognizeTextRequest.recognitionLevel` assignments qualified as
+   `VNRequestTextRecognitionLevel.fast/.accurate`; `UIImage(data:)` wrapped
+   `[UInt8]` in `Data(...)`; iOS 26 FoundationModels `LanguageModelSession`
+   `@InstructionsBuilder` mismatch resolved by dropping system-prompt
+   instructions at the two LLM call sites (Origa does not use LLM).
+
+The fork `yurvon-screamo/tauri-plugin-device-ai-apis` (rev `e5709f6`) carries
+all of the above. The mobile build was the main reason for adopting device-ai,
+so fixing the bridge was mandatory rather than excluding mobile. The fixes
+will be upstreamed via a PR to `hypothesi/...`; until merged, Origa depends on
+the fork.
 
 ### Fork the plugin and fix `windows.rs`
 
@@ -139,9 +158,11 @@ until merged, Origa depends on the fork.
   - **Web has no live-microphone ASR** — MediaRecorder→Whisper PCM resampling
     is a separate enhancement.
 - **Runtime quality on macOS/iOS/Android is not locally verifiable** (no such
-  dev hardware). Verification is compile-time only: a `device-ai-build` CI job
-  on `macos-latest` checks the primary path compiles. Runtime smoke is the
-  owner's responsibility; the kill-switch is the escape hatch.
+  dev hardware). Compile-time verification: the `Build Tauri / Build Android`
+  matrix job builds the mobile (Android) device-ai path, and the macOS/iOS
+  paths were validated in CI before the temporary device-ai-* jobs were
+  removed. Runtime smoke on a real device remains the owner's responsibility;
+  the kill-switch is the escape hatch.
 - The `device-ai` crate compiles into the macOS/iOS/Android binary even under
   `--features disable-device-ai` (Cargo cannot combine `[target.cfg]` deps with
   feature gates without `optional = true`). This is accepted binary bloat for

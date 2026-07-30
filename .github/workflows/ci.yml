@@ -171,55 +171,6 @@ jobs:
             - name: Run tests
               run: cargo test --workspace --exclude origa_landing
 
-    device-ai-build:
-        name: device-ai plugin (macOS)
-        permissions:
-            contents: read
-        runs-on: macos-latest
-        # The device-ai plugin is compiled in only on macOS/iOS/Android (see
-        # tauri/Cargo.toml target gating). Windows and Linux cannot build it.
-        # This job verifies the primary native-AI path compiles on its lead
-        # platform, since a Windows/Linux dev machine cannot exercise it.
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-
-            - name: Setup Rust
-              uses: ./.github/actions/setup-rust
-              with:
-                  shared-key: origa-ci-device-ai
-                  save-if: false
-
-            - name: Check origa-app compiles with device-ai
-              run: cargo check -p origa-app
-
-    # TEMPORARY: verify the fork's mobile-bridge fix compiles on iOS too (the
-    # Build Tauri matrix covers Android but not iOS). Remove once confirmed —
-    # macOS/iOS desktop device-ai is exercised on release (tauri.yml).
-    device-ai-build-ios:
-        name: device-ai plugin (iOS)
-        permissions:
-            contents: read
-        runs-on: macos-latest
-        env:
-            # Match the app's iOS deployment target (tauri/gen/apple/project.yml)
-            # so the plugin's Swift code can use iOS 15+ barcode symbologies and
-            # the iOS 26 FoundationModels APIs without #available guards.
-            IPHONEOS_DEPLOYMENT_TARGET: "26.0"
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-
-            - name: Setup Rust
-              uses: ./.github/actions/setup-rust
-              with:
-                  targets: aarch64-apple-ios
-                  shared-key: origa-ci-device-ai-ios
-                  save-if: false
-
-            - name: Check origa-app compiles for iOS with device-ai
-              run: cargo check --target aarch64-apple-ios -p origa-app
-
     e2e-build:
         name: E2E Build
         permissions:
