@@ -97,6 +97,55 @@ impl KanjiCard {
             .map(|info| info.kun_readings().to_vec())
             .unwrap_or_default()
     }
+
+    /// On readings paired with their corpus frequency and rarity flag. Pairs
+    /// preserve the order of [`on_readings`]. Frequency is `0` and rarity is
+    /// `false` when no data is available (legacy kanji.json); callers receive
+    /// a fully-resolved view so the UI never has to interpret the threshold.
+    pub fn on_readings_with_freq(&self) -> Vec<(String, u32, bool)> {
+        get_kanji_info(self.kanji.text())
+            .map(|info| {
+                info.on_readings()
+                    .iter()
+                    .map(|r| {
+                        (
+                            r.clone(),
+                            info.reading_frequency(r).unwrap_or(0),
+                            info.is_rare_reading(r),
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Kun readings paired with their corpus frequency and rarity flag. See
+    /// [`on_readings_with_freq`].
+    pub fn kun_readings_with_freq(&self) -> Vec<(String, u32, bool)> {
+        get_kanji_info(self.kanji.text())
+            .map(|info| {
+                info.kun_readings()
+                    .iter()
+                    .map(|r| {
+                        (
+                            r.clone(),
+                            info.reading_frequency(r).unwrap_or(0),
+                            info.is_rare_reading(r),
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Whether the given reading should be treated as rare for this kanji.
+    /// Delegates to [`KanjiInfo::is_rare_reading`]; returns `false` if the
+    /// kanji is not in the dictionary.
+    pub fn is_rare_reading(&self, reading: &str) -> bool {
+        get_kanji_info(self.kanji.text())
+            .map(|info| info.is_rare_reading(reading))
+            .unwrap_or(false)
+    }
 }
 
 impl ExampleKanjiWord {

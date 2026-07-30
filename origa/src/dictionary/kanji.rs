@@ -94,6 +94,12 @@ pub fn kanji_difficulty_cmp(a: &KanjiInfo, b: &KanjiInfo) -> std::cmp::Ordering 
         .then_with(|| b.used_in().cmp(&a.used_in()))
 }
 
+/// A kanji reading is considered "rare" when it is demonstrated by at most this
+/// many words in the JmdictFurigana corpus. Readings at or below this threshold
+/// are filtered out of kanji reading quizzes and visually de-emphasised in the
+/// UI. See `scripts/analyze_reading_frequencies.py` for the empirical basis.
+pub const RARE_READING_MAX_FREQ: u32 = 5;
+
 /// Sorts a slice of `KanjiInfo` references in place by learning difficulty.
 ///
 /// See [`kanji_difficulty_cmp`] for the ordering rules.
@@ -139,6 +145,15 @@ pub struct KanjiInfo {
     popular_words: Vec<String>,
     on_readings: Vec<String>,
     kun_readings: Vec<String>,
+    /// Per-reading corpus frequency (key = reading exactly as it appears in
+    /// `on_readings`/`kun_readings`, value = number of JmdictFurigana words
+    /// that demonstrate this reading for this kanji).
+    ///
+    /// Populated by `scripts/enrich_kanji_reading_frequencies.py`. Absent in
+    /// legacy kanji.json (treated as "no frequency data" → no reading is
+    /// considered rare, see [`is_rare_reading`]).
+    #[serde(default)]
+    reading_frequencies: HashMap<String, u32>,
 }
 
 impl KanjiInfo {
@@ -196,6 +211,50 @@ impl KanjiInfo {
         &self.kun_readings
     }
 
+    /// Per-reading corpus frequency map. Empty for legacy kanji.json without
+    /// the `reading_frequencies` field.
+    pub fn reading_frequencies(&self) -> &HashMap<String, u32> {
+        &self.reading_frequencies
+    }
+
+    /// Corpus frequency for a specific reading, if frequency data is present.
+    /// Returns `None` when the frequency map is empty (legacy data) so callers
+    /// can distinguish "no data" from "frequency is zero".
+    pub fn reading_frequency(&self, reading: &str) -> Option<u32> {
+        if self.reading_frequencies.is_empty() {
+            return None;
+        }
+        Some(self.reading_frequencies.get(reading).copied().unwrap_or(0))
+    }
+
+    /// Whether a reading should be treated as rare (filtered from quizzes and
+    /// de-emphasised in the UI).
+    ///
+    /// Returns `false` when frequency data is missing entirely (legacy data)
+    /// or when the reading is absent from a non-empty map (logged as a likely
+    /// pipeline inconsistency). Only returns `true` when the map is non-empty,
+    /// the reading is present, and its frequency is at or below
+    /// [`RARE_READING_MAX_FREQ`].
+    pub fn is_rare_reading(&self, reading: &str) -> bool {
+        match self.reading_frequencies.get(reading) {
+            Some(freq) => *freq <= RARE_READING_MAX_FREQ,
+            None => {
+                if !self.reading_frequencies.is_empty() {
+                    // A non-empty map without an entry for a reading is a
+                    // pipeline inconsistency (enrich_kanji_reading_frequencies
+                    // guarantees full coverage). Surface it at `warn` so it
+                    // stays visible in production builds.
+                    tracing::warn!(
+                        kanji = %self.kanji,
+                        reading = %reading,
+                        "reading missing from frequency map (pipeline inconsistency?)"
+                    );
+                }
+                false
+            },
+        }
+    }
+
     pub fn popular_words_with_translations(
         &self,
         native_language: &NativeLanguage,
@@ -251,6 +310,7 @@ impl KanjiDatabase {
                         popular_words: k.popular_words,
                         on_readings: k.on_readings,
                         kun_readings: k.kun_readings,
+                        reading_frequencies: k.reading_frequencies,
                     },
                 )
             })
@@ -296,6 +356,8 @@ struct KanjiStoredType {
     on_readings: Vec<String>,
     #[serde(default)]
     kun_readings: Vec<String>,
+    #[serde(default)]
+    reading_frequencies: HashMap<String, u32>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -772,6 +834,7 @@ mod tests {
             popular_words: vec![],
             on_readings: vec![],
             kun_readings: vec![],
+            reading_frequencies: HashMap::new(),
         }
     }
 
@@ -844,5 +907,125 @@ mod tests {
             list.iter().map(|k| k.kanji()).collect::<Vec<_>>(),
             vec!['一', '本', '森']
         );
+    }
+
+    /// Test helper: a `KanjiInfo` with explicit reading_frequencies for
+    /// rarity tests. Two readings, one frequent, one rare at the threshold.
+    fn make_kanji_with_freq() -> KanjiInfo {
+        let mut freqs = HashMap::new();
+        freqs.insert("セイ".to_string(), 1414);
+        freqs.insert("なる".to_string(), RARE_READING_MAX_FREQ);
+        KanjiInfo {
+            kanji: '生',
+            jlpt: JapaneseLevel::N5,
+            used_in: 1526,
+            description_ru: vec!["жизнь".to_string()],
+            description_en: vec!["life".to_string()],
+            radicals: vec!['生'],
+            popular_words: vec![],
+            on_readings: vec!["セイ".to_string()],
+            kun_readings: vec!["なる".to_string()],
+            reading_frequencies: freqs,
+        }
+    }
+
+    #[test]
+    fn reading_frequency_returns_corpus_count_for_known_reading() {
+        let info = make_kanji_with_freq();
+        assert_eq!(info.reading_frequency("セイ"), Some(1414));
+    }
+
+    #[test]
+    fn reading_frequency_returns_zero_for_missing_key_in_nonempty_map() {
+        // A non-empty map without an entry for a reading indicates a pipeline
+        // inconsistency. The accessor surfaces it as Some(0) so callers can
+        // distinguish from the "no data at all" case (None).
+        let info = make_kanji_with_freq();
+        assert_eq!(info.reading_frequency("not-in-map"), Some(0));
+    }
+
+    #[test]
+    fn reading_frequency_returns_none_for_empty_map() {
+        let info = make_kanji('日', vec!['日'], 100);
+        assert_eq!(info.reading_frequency("ニチ"), None);
+    }
+
+    #[test]
+    fn is_rare_reading_true_at_threshold() {
+        // freq == RARE_READING_MAX_FREQ is rare (inclusive).
+        let info = make_kanji_with_freq();
+        assert!(info.is_rare_reading("なる"));
+    }
+
+    #[test]
+    fn is_rare_reading_false_above_threshold() {
+        let info = make_kanji_with_freq();
+        assert!(!info.is_rare_reading("セイ"));
+    }
+
+    #[test]
+    fn is_rare_reading_returns_false_for_empty_map() {
+        // Legacy kanji.json (no reading_frequencies field) → nothing is rare.
+        let info = make_kanji('日', vec!['日'], 100);
+        assert!(!info.is_rare_reading("ニチ"));
+    }
+
+    #[test]
+    fn is_rare_reading_returns_false_for_missing_key_in_nonempty_map() {
+        // A non-empty map missing a reading is a pipeline bug; we must NOT
+        // silently treat the reading as rare (would hide it from the user).
+        let info = make_kanji_with_freq();
+        assert!(!info.is_rare_reading("unknown-reading"));
+    }
+
+    #[test]
+    fn reading_frequencies_defaults_to_empty_for_legacy_json() {
+        // Back-compat: a kanji.json entry without the reading_frequencies
+        // field must still parse, with an empty map.
+        let json = r#"{
+            "kanji": [{
+                "kanji": "日",
+                "jlpt": "N5",
+                "used_in": 100,
+                "description_ru": ["день"],
+                "description_en": ["day"],
+                "radicals": ["日"],
+                "popular_words": [],
+                "on_readings": ["ニチ"],
+                "kun_readings": ["ひ"]
+            }]
+        }"#;
+        let db = KanjiDatabase::from_json(json).unwrap();
+        let info = db.get_kanji_info("日").unwrap();
+        assert!(info.reading_frequencies().is_empty());
+        assert!(!info.is_rare_reading("ニチ"));
+    }
+
+    #[test]
+    fn reading_frequencies_loaded_from_real_kanji_json() {
+        // Smoke: the real kanji.json (enriched by the pipeline) exposes
+        // non-empty frequencies for 生, with the spotlight anchors we rely on
+        // in the pipeline --validate step.
+        //
+        // Back-compat: this test early-returns when the kanji.json on disk
+        // (or CDN) lacks `reading_frequencies` (e.g. before the enriched
+        // version is deployed). The feature degrades gracefully — without
+        // frequencies, no reading is rare, so quizzes and UI behave as
+        // before. Once the enriched kanji.json is deployed, this test
+        // automatically exercises the spotlight anchors.
+        let json = load_real_kanji_json();
+        let db = KanjiDatabase::from_json(&json).unwrap();
+        let info = db.get_kanji_info("生").unwrap();
+        if info.reading_frequencies().is_empty() {
+            eprintln!(
+                "Skipping: kanji.json without reading_frequencies. \
+                 Run `python scripts/enrich_kanji_reading_frequencies.py --apply` \
+                 (or wait for the CDN deploy) to enable this test."
+            );
+            return;
+        }
+        assert_eq!(info.reading_frequency("セイ"), Some(1414));
+        assert!(!info.is_rare_reading("セイ"));
+        assert!(!info.is_rare_reading("なる")); // f=17, above threshold
     }
 }

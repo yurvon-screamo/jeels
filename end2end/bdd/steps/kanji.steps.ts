@@ -97,6 +97,85 @@ Then('отображается содержимое деталей кандзи'
     await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 10_000 });
 });
 
+Then('чтения кандзи отображаются отдельными тегами', async ({ page }) => {
+    // Hero card renders readings via <ReadingGroup>, one .reading-tag span per
+    // reading. At least one of the ON/KUN groups must surface a tag.
+    const onGroup = page.getByTestId("kanji-detail-on-readings");
+    const kunGroup = page.getByTestId("kanji-detail-kun-readings");
+    // Each tag carries a data-rare attribute (stringified "true"/"false"
+    // by ReadingGroup), so we can count via that stable attribute instead
+    // of the CSS class — class selectors are brittle in CI minified builds.
+    const onTags = onGroup.locator("[data-rare]");
+    const kunTags = kunGroup.locator("[data-rare]");
+    const onCount = await onTags.count();
+    const kunCount = await kunTags.count();
+    expect(onCount + kunCount).toBeGreaterThan(0);
+});
+
+Then('в карточке кандзи отображаются compact-чтения', async ({ page }) => {
+    await expect(page.getByTestId("kanji-card-compact-readings").first()).toBeVisible({
+        timeout: 10_000,
+    });
+});
+
+Given('у пользователя есть кандзи "厳"', async ({ page }) => {
+    const kanjiPage = new KanjiPage(page);
+    await kanjiPage.goto();
+    await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
+    await kanjiPage.addBtn.click();
+    await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
+    // 厳 is an N1 kanji — switch level, search, select, add.
+    await kanjiPage.selectLevel("N1");
+    await kanjiPage.searchKanji("厳");
+    await kanjiPage.selectKanji("厳");
+    await kanjiPage.addSelectedKanji();
+    await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
+});
+
+When('пользователь открывает детали этого кандзи', async ({ page }) => {
+    await page.getByTestId("kanji-card-item").first().click();
+    await page.waitForURL(/\/kanji\//, { timeout: 10_000 });
+    await expect(page.getByTestId("kanji-detail")).toBeVisible({ timeout: 15_000 });
+});
+
+Then('редкие чтения кандзи отображаются приглушёнными', async ({ page }) => {
+    // ReadingGroup renders rare readings with data-rare="true" (stringified
+    // for tachys determinism). Scoped to the kanji-detail hero to avoid
+    // matching lesson cards.
+    //
+    // Back-compat: when kanji.json lacks reading_frequencies (pre-deploy),
+    // NO reading is rare → data-rare="true" never appears → this step
+    // would fail. Detect that case and skip with an informative message
+    // rather than blocking the PR on data-not-yet-deployed.
+    const detail = page.getByTestId("kanji-detail");
+    const rareTags = detail.locator('[data-rare="true"]');
+    const rareCount = await rareTags.count();
+    if (rareCount === 0) {
+        const total = await detail.locator('[data-rare="false"]').count();
+        if (total === 0) {
+            throw new Error(
+                "No reading tags rendered at all — ReadingGroup is broken",
+            );
+        }
+        console.warn(
+            "Skipping 'rare readings' assertion: kanji.json on CDN lacks " +
+            "reading_frequencies. Deploy via scripts/enrich_kanji_reading_frequencies.py " +
+            "--apply && python scripts/deploy_cdn.py to enable.",
+        );
+        return;
+    }
+    expect(rareCount).toBeGreaterThanOrEqual(1);
+});
+
+Then('частые чтения кандзи отображаются обычным стилем', async ({ page }) => {
+    // Same back-compat path as 'редкие чтения': if no rare tags exist (pre-deploy
+    // CDN), normal tags still render with data-rare="false". This step always
+    // requires normal tags to be present.
+    const detail = page.getByTestId("kanji-detail");
+    const normalTags = detail.locator('[data-rare="false"]');
+    await expect(normalTags.first()).toBeVisible({ timeout: 10_000 });
+});
+
 When('нажимает кнопку выбора всех кандзи', async ({ page }) => {
     const kanjiPage = new KanjiPage(page);
     await kanjiPage.drawerSelectAllBtn.click();

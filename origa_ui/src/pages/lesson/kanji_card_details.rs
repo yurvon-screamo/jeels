@@ -1,7 +1,7 @@
 use crate::i18n::*;
 use crate::ui_components::{
     FuriganaText, KanjiViewMode, KanjiWritingSection, MarkdownText, MarkdownVariant, ReadingGroup,
-    Text, TextSize, TypographyVariant,
+    ReadingItem, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 use origa::domain::NativeLanguage;
@@ -20,8 +20,8 @@ pub fn KanjiCardDetails(
     name: String,
     radicals: Option<Vec<RadicalDisplay>>,
     example_words: Option<Vec<(String, String)>>,
-    on_readings: Option<Vec<String>>,
-    kun_readings: Option<Vec<String>>,
+    on_readings: Option<Vec<ReadingItem>>,
+    kun_readings: Option<Vec<ReadingItem>>,
     #[prop(into)] known_kanji: Signal<HashSet<char>>,
     native_language: NativeLanguage,
 ) -> impl IntoView {
@@ -41,6 +41,12 @@ pub fn KanjiCardDetails(
 
     view! {
         <div class="my-6 space-y-4 max-w-max mx-auto">
+            // Lesson cards inherit the muted-tag rare styling from ReadingGroup,
+            // but the "rare" hint label is intentionally omitted: the lesson is
+            // an active-recall context where a textual rare-marker would pull
+            // attention toward the very readings we are de-emphasising. The
+            // muted style alone is enough; the explanatory label lives on the
+            // kanji-detail page where the student is browsing, not recalling.
             <ReadingGroup
                 label=Signal::derive(move || i18n.get_keys().lesson().on_yomi().inner().to_string())
                 readings=on_readings_stored

@@ -38,6 +38,13 @@ pub use knowledge::{
     VocabularyCard, YesNoCard, estimate_completion_date,
 };
 
+/// Re-exported so the UI can stay layering-clean: presentation code reaches
+/// the rare-reading threshold through the domain, not by reaching into the
+/// dictionary module directly. The constant itself lives next to
+/// [`KanjiInfo`](crate::dictionary::kanji::KanjiInfo) because it describes
+/// dictionary data semantics.
+pub use crate::dictionary::kanji::RARE_READING_MAX_FREQ;
+
 pub(crate) use knowledge::collect_known_vocabulary_words;
 pub use memory::{CardState, Difficulty, MemoryHistory, MemoryState, Rating, ReviewLog, Stability};
 pub use score_content::ScoreContentResult;

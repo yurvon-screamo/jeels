@@ -8,7 +8,7 @@ use crate::repository::HybridUserRepository;
 use crate::ui_components::{
     CardActionBar, CardHistoryModal, DeleteConfirmModal, FsrsMetrics, FuriganaText,
     KanjiDrawingPractice, KanjiViewMode, KanjiWritingSection, LoadingOverlay, MarkdownText,
-    TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
+    ReadingGroup, TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -215,14 +215,30 @@ pub fn KanjiDetail() -> impl IntoView {
                     DomainCard::Kanji(kanji_card) => (
                         kanji_card.kanji().text().to_string(),
                         kanji_card.radicals_chars().into_iter().collect::<String>(),
-                        kanji_card.on_readings().join("、"),
-                        kanji_card.kun_readings().join("、"),
+                        kanji_card
+                            .on_readings_with_freq()
+                            .into_iter()
+                            .map(|(r, f, rare)| crate::ui_components::ReadingItem {
+                                reading: r,
+                                freq: f,
+                                is_rare: rare,
+                            })
+                            .collect::<Vec<_>>(),
+                        kanji_card
+                            .kun_readings_with_freq()
+                            .into_iter()
+                            .map(|(r, f, rare)| crate::ui_components::ReadingItem {
+                                reading: r,
+                                freq: f,
+                                is_rare: rare,
+                            })
+                            .collect::<Vec<_>>(),
                     ),
                     _ => (
                         "?".to_string(),
                         String::new(),
-                        String::new(),
-                        String::new(),
+                        Vec::new(),
+                        Vec::new(),
                     ),
                 };
 
@@ -283,14 +299,14 @@ pub fn KanjiDetail() -> impl IntoView {
 
                 let active_tab_cell = active_tab;
 
-                let on_readings_stored: StoredValue<String> =
-                    StoredValue::new(on_readings.clone());
-                let kun_readings_stored: StoredValue<String> =
-                    StoredValue::new(kun_readings.clone());
-                let on_readings_mobile: StoredValue<String> =
-                    StoredValue::new(on_readings.clone());
-                let kun_readings_mobile: StoredValue<String> =
-                    StoredValue::new(kun_readings.clone());
+                let on_readings_stored: Vec<crate::ui_components::ReadingItem> =
+                    on_readings.clone();
+                let kun_readings_stored: Vec<crate::ui_components::ReadingItem> =
+                    kun_readings.clone();
+                let on_readings_mobile: Vec<crate::ui_components::ReadingItem> =
+                    on_readings.clone();
+                let kun_readings_mobile: Vec<crate::ui_components::ReadingItem> =
+                    kun_readings.clone();
                 let kanji_char_stored = kanji_char.clone();
                 let breadcrumbs_label = breadcrumbs_kanji_label;
 
@@ -311,6 +327,9 @@ pub fn KanjiDetail() -> impl IntoView {
                 });
                 let kun_label = Signal::derive(move || {
                     i18n.get_keys().kanji_page().kun_reading().inner().to_string()
+                });
+                let rare_hint = Signal::derive(move || {
+                    i18n.get_keys().kanji_page().reading_rare_hint().inner().to_string()
                 });
 
                 Some(view! {
@@ -361,6 +380,7 @@ pub fn KanjiDetail() -> impl IntoView {
                                     tag_label=Signal::derive(move || status.label(&i18n))
                                     on_label=on_label
                                     kun_label=kun_label
+                                    rare_hint=rare_hint
                                 />
                             </div>
                             <div class="kanji-detail-vocab-cell">
@@ -430,22 +450,18 @@ pub fn KanjiDetail() -> impl IntoView {
                                         {answer_text}
                                     </div>
                                     <div class="kanji-detail-hero-readings">
-                                        <Show when=move || !on_readings_mobile.get_value().is_empty()>
-                                            <div class="kanji-detail-hero-reading">
-                                                <span class="kanji-detail-hero-reading-label">
-                                                    {on_label}
-                                                </span>
-                                                {on_readings_mobile.get_value()}
-                                            </div>
-                                        </Show>
-                                        <Show when=move || !kun_readings_mobile.get_value().is_empty()>
-                                            <div class="kanji-detail-hero-reading">
-                                                <span class="kanji-detail-hero-reading-label">
-                                                    {kun_label}
-                                                </span>
-                                                {kun_readings_mobile.get_value()}
-                                            </div>
-                                        </Show>
+                                        <ReadingGroup
+                                            label=on_label
+                                            readings=StoredValue::new(Some(on_readings_mobile.clone()))
+                                            rare_hint=rare_hint
+                                            test_id=Signal::derive(|| "kanji-detail-on-readings-mobile".to_string())
+                                        />
+                                        <ReadingGroup
+                                            label=kun_label
+                                            readings=StoredValue::new(Some(kun_readings_mobile.clone()))
+                                            rare_hint=rare_hint
+                                            test_id=Signal::derive(|| "kanji-detail-kun-readings-mobile".to_string())
+                                        />
                                     </div>
                                 </div>
                                 <div class="kanji-detail-hero-badge">
