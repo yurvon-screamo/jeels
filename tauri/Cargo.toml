@@ -21,6 +21,12 @@ release-devtools = ["tauri/devtools"]
 # Mac App Store compliance (Guideline 2.4.5(vii) — no self-update mechanisms,
 # 2.5.1 — no debug code). Use with `--no-default-features --features app-store`.
 app-store = []
+# Compile-time kill-switch for the device-ai plugin (native ASR/OCR/TTS).
+# Build with `--features disable-device-ai` to drop the plugin entirely and
+# force the fallback stack (Whisper/NDLOCR WASM + tauri-plugin-tts) on every
+# platform — useful if native quality proves unacceptable for Japanese and a
+# release is needed before code can be reverted.
+disable-device-ai = []
 
 [build-dependencies]
 tauri-build.workspace = true
@@ -39,6 +45,22 @@ rustls = { version = "0.23", default-features = false, features = ["ring"] }
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
+
+# device-ai plugin + crate: native ASR/OCR/TTS, primary on macOS/iOS/Android.
+# Scoped to platforms where the plugin is functionally available:
+#  - Excluded on Windows: upstream windows.rs does not compile against windows
+#    0.58 (WinRT API drift) and Windows TTS "synthesizes but does not play".
+#  - Excluded on Linux: the device-ai crate has no Linux backend (returns
+#    FeatureNotAvailable), so the plugin would be dead code in the binary.
+# Windows + Linux keep the current stack (tauri-plugin-tts + Whisper/NDLOCR
+# WASM) — strictly non-regressing.
+[target.'cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))'.dependencies]
+tauri-plugin-device-ai-apis.workspace = true
+device-ai.workspace = true
+
+# base64 decode for the device-ai file-recognition command (audio payload).
+[target.'cfg(target_os = "macos")'.dependencies]
+base64.workspace = true
 
 # Mobile-only plugins — desktop compilation excludes them via target cfg.
 # Per Tauri plugin docs: haptics supports only Android/iOS (no desktop stubs

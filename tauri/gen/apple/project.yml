@@ -60,6 +60,7 @@ targets:
         NSCameraUsageDescription: "Origa uses the camera to capture Japanese text for OCR."
         NSPhotoLibraryUsageDescription: "Origa reads photos to extract Japanese text via OCR."
         NSMicrophoneUsageDescription: "Origa records audio to transcribe Japanese speech."
+        NSSpeechRecognitionUsageDescription: "Origa recognizes Japanese speech to transcribe audio input."
     entitlements:
       path: origa-app_iOS/origa-app_iOS.entitlements
     scheme:

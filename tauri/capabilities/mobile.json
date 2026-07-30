@@ -1,7 +1,7 @@
 {
 	"$schema": "../gen/schemas/mobile-schema.json",
 	"identifier": "mobile",
-	"description": "Capability for the mobile platforms (Android/iOS) — deep-link + opener for OAuth",
+	"description": "Capability for the mobile platforms (Android/iOS) — deep-link + opener for OAuth, TTS, and device-ai native ASR/OCR/TTS",
 	"platforms": ["iOS", "android"],
 	"permissions": [
 		"core:default",
@@ -9,6 +9,11 @@
 		"tts:default",
 		"deep-link:default",
 		"haptics:default",
+		"device-ai-apis:allow-get-capabilities",
+		"device-ai-apis:allow-vision-recognize-text",
+		"device-ai-apis:allow-speech-recognize",
+		"device-ai-apis:allow-speech-synthesize",
+		"device-ai-apis:allow-speech-get-voices",
 		{
 			"identifier": "opener:default",
 			"allow": [

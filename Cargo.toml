@@ -115,6 +115,17 @@ tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
 tauri-plugin-haptics = "2"
 tauri-build = { version = "2", features = [] }
+# device-ai: native AI APIs (ASR/OCR/TTS). Pinned to a specific rev for
+# reproducible builds. Scoped to macOS/iOS/Android (see tauri/Cargo.toml
+# target gating) — Windows and Linux are excluded:
+#  - Windows: upstream windows.rs does not compile against windows 0.58
+#    (WinRT API drift) and Windows TTS "synthesizes but does not play".
+#  - Linux: device-ai has no Linux backend (returns FeatureNotAvailable).
+# Windows + Linux keep their current stack (tauri-plugin-tts + Whisper/NDLOCR
+# WASM) — strictly non-regressing.
+# Future: fork + fix windows.rs to enable device-ai on Windows.
+tauri-plugin-device-ai-apis = { git = "https://github.com/hypothesi/tauri-plugin-device-ai-apis", rev = "a8f945abe3d5c5977798b29924f916900b1f1fe2" }
+device-ai = { git = "https://github.com/hypothesi/tauri-plugin-device-ai-apis", rev = "a8f945abe3d5c5977798b29924f916900b1f1fe2" }
 
 # Dev Dependencies
 wasm-bindgen = "0.2"
