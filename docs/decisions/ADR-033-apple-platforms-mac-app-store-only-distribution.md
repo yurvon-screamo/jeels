@@ -190,7 +190,7 @@ The correct flow per Tauri docs is:
 tauri build --bundles app --target universal-apple-darwin
 xcrun productbuild --sign "<installer identity>" \
   --component <app-path> /Applications <output.pkg>
-xcrun altool --upload-app --type macos --file <output.pkg> \
+xcrun altool --upload-app --type mac --file <output.pkg> \
   --apiKey $APPLE_API_KEY_ID --apiIssuer $APPLE_API_ISSUER
 ```
 
@@ -245,12 +245,13 @@ xcrun altool --upload-app --type macos --file <output.pkg> \
   newlines or truncation, `xcodebuild` fails ~10 min later with
   `CryptoKitASN1Error.invalidPEMDocument`. CI now fail-fasts via
   `openssl pkey -in KEY_PATH -noout` validation right after decode.
+- **`xcrun altool` deprecated** by Apple (mid-2026). Works for now, but
+  may be removed in a future Xcode version. Migration path: App Store
+  Connect API direct upload, or `Transporter` CLI. Not blocking — altool
+  expected to be supported through at least 2027.
 
 ## Out of scope for this ADR
 
-- **Frontend haptics integration**: `tauri-plugin-haptics` is registered
-  (mobile-only, target-scoped dep) but no Leptos/WASM consumer calls it
-  yet. Tracked in follow-up `mobile-haptics-ui-integration` task.
 - **`bundle.createUpdaterArtifacts: true` unconditional in
   `tauri.conf.json`**: kept for desktop distribution (Windows/Linux
   updater). App Store builds override to `false` via `--config` flag

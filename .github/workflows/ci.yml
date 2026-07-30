@@ -86,6 +86,14 @@ jobs:
             - name: Run clippy
               run: cargo clippy --workspace --all-targets -- -D warnings
 
+            - name: Verify App Store cfg compiles
+              # The ORIGA_APP_STORE env var triggers build.rs to emit
+              # cargo:rustc-cfg=app_store, gating out updater /
+              # single-instance / devtools. Without this check, regressions
+              # in the gated code path surface only at tag-push on
+              # macos-15 (~30 min, blocks release).
+              run: ORIGA_APP_STORE=1 cargo check -p origa-app
+
     cdn-download:
         name: Download CDN
         permissions:

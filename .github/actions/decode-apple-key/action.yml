@@ -1,0 +1,76 @@
+name: "Decode Apple API Key"
+description: "Decode APPLE_API_KEY_CONTENT (base64 or raw PEM) into ./private_keys/ with validation"
+
+inputs:
+    apple-api-key-content:
+        description: "Base64-encoded .p8 contents OR raw PEM (from GitHub secret)"
+        required: true
+    apple-api-key:
+        description: "Apple API Key ID (10-char, used in filename)"
+        required: true
+
+outputs:
+    key-path:
+        description: "Absolute path to the decoded .p8 file"
+        value: ${{ steps.decode.outputs.key-path }}
+
+runs:
+    using: "composite"
+    steps:
+        - name: Decode and validate Apple API Key
+          id: decode
+          shell: bash
+          env:
+              APPLE_API_KEY_CONTENT: ${{ inputs.apple-api-key-content }}
+              APPLE_API_KEY: ${{ inputs.apple-api-key }}
+          run: |
+              # Write .p8 to ./private_keys/ (search path for xcrun altool)
+              # and set APPLE_API_KEY_PATH for cargo-mobile2 (iOS auto-provisioning).
+              #
+              # The APPLE_API_KEY_CONTENT secret may hold either:
+              # (a) base64-encoded .p8 contents
+              # (b) raw PEM pasted directly into the secret field
+              # Detect by checking whether the value starts with PEM header.
+              # Both paths strip ALL whitespace to avoid xcodebuild
+              # CryptoKitASN1Error.invalidPEMDocument from CRLF pollution.
+              KEY_PATH="private_keys/AuthKey_${APPLE_API_KEY}.p8"
+              mkdir -p private_keys
+
+              NORMALIZED=$(printf '%s' "$APPLE_API_KEY_CONTENT" | tr -d '[:space:]')
+
+              if [[ "$NORMALIZED" == -----BEGINPRIVATEKEY* ]]; then
+                  INNER=$(printf '%s' "$NORMALIZED" \
+                          | sed 's/^-----BEGINPRIVATEKEY-----//' \
+                          | sed 's/-----ENDPRIVATEKEY-----$//')
+                  {
+                      echo "-----BEGIN PRIVATE KEY-----"
+                      printf '%s' "$INNER" | fold -w 64
+                      echo ""
+                      echo "-----END PRIVATE KEY-----"
+                  } > "$KEY_PATH"
+              else
+                  printf '%s' "$NORMALIZED" | base64 --decode > "$KEY_PATH"
+              fi
+
+              ABS_KEY_PATH="$(pwd)/$KEY_PATH"
+              echo "key-path=$ABS_KEY_PATH" >> "$GITHUB_OUTPUT"
+
+              if [ ! -s "$KEY_PATH" ]; then
+                echo "::error::Decoded .p8 is empty — secret malformed"
+                exit 1
+              fi
+              file_size=$(wc -c < "$KEY_PATH")
+              echo "Decoded .p8 size: $file_size bytes"
+              if [ "$file_size" -lt 200 ]; then
+                echo "::error::Decoded .p8 is suspiciously small ($file_size bytes) — secret may be truncated"
+                exit 1
+              fi
+              echo "PEM header: $(head -1 "$KEY_PATH")"
+
+              if ! openssl pkey -in "$KEY_PATH" -noout 2>/dev/null; then
+                echo "::error::Decoded .p8 is not a valid private key (openssl pkey parse failed)."
+                echo "The APPLE_API_KEY_CONTENT secret is likely corrupted or truncated."
+                echo "Re-download the .p8 from App Store Connect → Users and Access → Keys"
+                exit 1
+              fi
+              echo "PEM key validated (openssl parsed successfully)"
