@@ -47,13 +47,10 @@ serde_json.workspace = true
 tracing.workspace = true
 
 # device-ai plugin + crate: native ASR/OCR/TTS, primary on macOS/iOS/Android.
-# Scoped to platforms where the plugin is functionally available:
-#  - Excluded on Windows: upstream windows.rs does not compile against windows
-#    0.58 (WinRT API drift) and Windows TTS "synthesizes but does not play".
-#  - Excluded on Linux: the device-ai crate has no Linux backend (returns
-#    FeatureNotAvailable), so the plugin would be dead code in the binary.
-# Windows + Linux keep the current stack (tauri-plugin-tts + Whisper/NDLOCR
-# WASM) — strictly non-regressing.
+# Excluded on Windows (upstream windows.rs does not compile against windows
+# 0.58 and Windows TTS does not play audio — see root Cargo.toml note) and
+# Linux (no device-ai backend). Windows + Linux keep their current stack.
+# device-ai Rust crate gives macOS desktop direct access (file-based ASR).
 [target.'cfg(any(target_os = "macos", target_os = "ios", target_os = "android"))'.dependencies]
 tauri-plugin-device-ai-apis.workspace = true
 device-ai.workspace = true

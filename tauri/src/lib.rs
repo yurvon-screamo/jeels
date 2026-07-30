@@ -74,10 +74,9 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_tts::init());
 
-    // device-ai (native ASR/OCR/TTS) is primary on macOS/iOS/Android only.
+    // device-ai (native ASR/OCR/TTS) is primary on macOS/iOS/Android.
     // Excluded on Windows (upstream windows.rs does not compile against
-    // windows 0.58) and Linux (no device-ai backend → dead code). See
-    // tauri/Cargo.toml note. Windows + Linux keep their current stack.
+    // windows 0.58) and Linux (no device-ai backend). See tauri/Cargo.toml.
     // The `disable-device-ai` feature is a compile-time kill-switch: it drops
     // the plugin entirely, forcing the fallback stack on every platform.
     #[cfg(all(

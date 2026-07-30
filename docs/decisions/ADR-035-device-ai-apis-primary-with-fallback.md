@@ -22,7 +22,7 @@ The user requested `tauri-plugin-device-ai-apis` (hypothesi/tauri-plugin-device-
 ai-apis) be adopted as the **primary** source for ASR, OCR, and TTS on every
 platform, keeping the current stack as a fallback (web, unsupported devices).
 
-Investigation surfaced three hard constraints that shape the decision:
+Investigation surfaced hard constraints that shape the decision:
 
 1. **The plugin does not compile on Windows.** Its `crates/device-ai/src/
    windows.rs` is written against a `windows-rs` API that no longer exists in
@@ -35,6 +35,20 @@ Investigation surfaced three hard constraints that shape the decision:
 3. **The plugin's JS `speech_recognize` accepts only live-microphone input.**
    File-based recognition requires calling the `device-ai` Rust crate directly,
    and that crate's speech backend only implements macOS and Windows.
+4. **Upstream mobile bridge did not compile** (discovered when Origa's CI first
+   built Android). The plugin's own `test.yml` only runs `cargo fmt/clippy/test`
+   on `ubuntu-latest` — it never builds the Android/iOS targets — so two errors
+   went unnoticed from the initial commit: `commands::get_capabilities` calls a
+   method absent on the mobile `DeviceAiApis` impl (defined only on desktop),
+   and `init()` used `?` on `register_android_plugin`/`register_ios_plugin`
+   without a `From<PluginInvokeError>` impl. The README still advertises
+   iOS/Android support; the code did not build.
+
+   **Resolution:** depend on a fork (`yurvon-screamo/tauri-plugin-device-ai-apis`,
+   rev `bdc3a16`) that adds `get_capabilities` to the mobile impl (returning the
+   documented iOS/Android feature matrix) and applies the existing
+   `mobile_invoke_error` mapper in `init()`. The fix will be upstreamed; until
+   merged, the fork carries it.
 
 ## Decision
 
@@ -85,6 +99,15 @@ to the matching fallback in the same row.
   description is required.
 
 ## Alternatives Considered
+
+### Fork the plugin (mobile bridge fix) — ADOPTED
+
+The upstream mobile bridge (`src/mobile.rs` + `commands`) did not compile on
+Android/iOS. A fork (`yurvon-screamo/tauri-plugin-device-ai-apis`, rev
+`bdc3a16`) carries the two-line-plus-method fix. The mobile build was the main
+reason for adopting device-ai, so fixing the bridge was mandatory rather than
+excluding mobile. The fix will be upstreamed via a PR to `hypothesi/...`;
+until merged, Origa depends on the fork.
 
 ### Fork the plugin and fix `windows.rs`
 
