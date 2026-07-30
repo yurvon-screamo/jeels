@@ -39,7 +39,7 @@ tracing-subscriber = "0.3"
 ulid = { version = "1.2", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", features = ["std", "clock", "serde", "wasmbind"] }
-rand = "0.9"
+rand = "0.10"
 rusqlite = { version = "0.39", default-features = false }
 thiserror = "2.0"
 sha2 = "0.10"
