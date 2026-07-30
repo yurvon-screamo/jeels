@@ -193,6 +193,28 @@ jobs:
             - name: Check origa-app compiles with device-ai
               run: cargo check -p origa-app
 
+    # TEMPORARY: verify the fork's mobile-bridge fix compiles on iOS too (the
+    # Build Tauri matrix covers Android but not iOS). Remove once confirmed —
+    # macOS/iOS desktop device-ai is exercised on release (tauri.yml).
+    device-ai-build-ios:
+        name: device-ai plugin (iOS)
+        permissions:
+            contents: read
+        runs-on: macos-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Rust
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: aarch64-apple-ios
+                  shared-key: origa-ci-device-ai-ios
+                  save-if: false
+
+            - name: Check origa-app compiles for iOS with device-ai
+              run: cargo check --target aarch64-apple-ios -p origa-app
+
     e2e-build:
         name: E2E Build
         permissions:
