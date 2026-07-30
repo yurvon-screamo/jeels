@@ -1,0 +1,14 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "device-ai",
+	"description": "Native device-ai capabilities (ASR/OCR/TTS) for the macOS desktop window. Windows and Linux are excluded — the device-ai plugin is not compiled there (see tauri/Cargo.toml), so referencing its permissions here would fail the build on those platforms via the platform scope below.",
+	"platforms": ["macOS"],
+	"windows": ["main"],
+	"permissions": [
+		"device-ai-apis:allow-get-capabilities",
+		"device-ai-apis:allow-vision-recognize-text",
+		"device-ai-apis:allow-speech-recognize",
+		"device-ai-apis:allow-speech-synthesize",
+		"device-ai-apis:allow-speech-get-voices"
+	]
+}

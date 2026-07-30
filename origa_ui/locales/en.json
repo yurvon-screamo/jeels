@@ -421,7 +421,11 @@
             "wav_only": "Only WAV format is supported for speech recognition.",
             "file_too_large": "Audio file is too large. Maximum size is {} MB.",
             "no_speech": "No speech detected in the audio.",
-            "loading_model": "Loading model for {}..."
+            "loading_model": "Loading model for {}...",
+            "unsupported_format": "Unsupported audio format. Please use WAV, MP3, WebM, M4A, or OGG.",
+            "record": "Record from microphone",
+            "recording": "Listening — speak now",
+            "live_unavailable": "Live microphone recognition is not available on this device."
         }
     },
     "grammar_page": {

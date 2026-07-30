@@ -115,6 +115,18 @@ tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
 tauri-plugin-haptics = "2"
 tauri-build = { version = "2", features = [] }
+# device-ai: native AI APIs (ASR/OCR/TTS). Pinned to a fork rev that fixes the
+# upstream mobile bridge (hypothesi's CI never built mobile, so two compile
+# errors went unnoticed: missing get_capabilities on the mobile impl, and
+# `?` on register_*_plugin without From<PluginInvokeError>).
+# Scoped to macOS/iOS/Android:
+#  - Windows: upstream windows.rs does not compile against windows 0.58
+#    (WinRT API drift) and Windows TTS "synthesizes but does not play".
+#  - Linux: device-ai has no Linux backend (returns FeatureNotAvailable).
+# Windows + Linux keep their current stack — strictly non-regressing.
+# Future: upstream the mobile fix and switch back to hypothesi/...
+tauri-plugin-device-ai-apis = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "e5709f64b0abdd364bac048a02d36cfc22ed8b8c" }
+device-ai = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "e5709f64b0abdd364bac048a02d36cfc22ed8b8c" }
 
 # Dev Dependencies
 wasm-bindgen = "0.2"

@@ -16,8 +16,12 @@ use crate::i18n::use_i18n;
 #[cfg(target_arch = "wasm32")]
 use crate::loaders::whisper_model_loader::WhisperModelLoader;
 use crate::ui_components::{Alert, AlertType, Button, ButtonVariant};
+
+use super::audio_live_recorder::AudioLiveRecorder;
 #[cfg(target_arch = "wasm32")]
 use crate::utils::file::read_file_as_bytes;
+#[cfg(target_arch = "wasm32")]
+use base64::{Engine, engine::general_purpose::STANDARD};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub(super) enum AudioState {
@@ -103,6 +107,22 @@ async fn transcribe_via_wasm(
     audio_state: RwSignal<AudioState>,
     error_message: RwSignal<Option<String>>,
 ) -> Result<String, String> {
+    let bytes = read_file_as_bytes(file).await.map_err(|e| {
+        audio_state.set(AudioState::Error);
+        error_message.set(Some(e.clone()));
+        e
+    })?;
+
+    // device-ai native file ASR is primary (no model download); Whisper WASM
+    // is the fallback. Routing is runtime-resolved via capabilities, so on
+    // Windows/Linux and the web the native path is unavailable and Whisper is
+    // used transparently.
+    if let Some(text) =
+        super::asr_provider::recognize_file_via_device_ai(&STANDARD.encode(&bytes)).await
+    {
+        return Ok(text);
+    }
+
     let model = get_or_load_whisper_model(i18n, status_text)
         .await
         .map_err(|e| {
@@ -124,12 +144,6 @@ async fn transcribe_via_wasm(
     });
     status_text.set(Some(loading_label.replacen("{}", name, 1)));
     audio_state.set(AudioState::Processing);
-
-    let bytes = read_file_as_bytes(file).await.map_err(|e| {
-        audio_state.set(AudioState::Error);
-        error_message.set(Some(e.clone()));
-        e
-    })?;
 
     let use_case = origa::use_cases::TranscribeAudioUseCase::new();
     let infer_start = web_sys::js_sys::Date::now();
@@ -213,7 +227,12 @@ pub(super) fn AudioInputStage(
 
         if !valid_ext {
             error_message.set(Some(
-                "Unsupported audio format. Please use WAV, MP3, WebM, M4A, or OGG.".to_string(),
+                i18n.get_keys()
+                    .words()
+                    .audio()
+                    .unsupported_format()
+                    .inner()
+                    .to_string(),
             ));
             return;
         }
@@ -363,6 +382,10 @@ pub(super) fn AudioInputStage(
                                     </div>
                                 </label>
                             </div>
+                            <AudioLiveRecorder
+                                on_text_extracted
+                                on_error
+                            />
                             {move || {
                                 error_message.get().map(move |msg| view! {
                                     <div>

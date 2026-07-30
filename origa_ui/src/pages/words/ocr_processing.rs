@@ -180,6 +180,14 @@ async fn process_image_with_ocr(
         .map(|(_, data)| data)
         .ok_or("Invalid data URL format")?;
 
+    // Native device-ai OCR is primary (no model download); WASM NDLOCR is the
+    // fallback. Falls through on any native failure or unavailability.
+    if let Some(text) =
+        super::ocr_device_ai::recognize_via_device_ai(base64_data, loading_state).await
+    {
+        return Ok(text);
+    }
+
     let bytes = base64_decode(base64_data)?;
 
     let model = CACHED_MODEL.with(|cached| cached.borrow().clone());

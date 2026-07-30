@@ -1,4 +1,13 @@
 mod auth_store;
+// device-ai native file-based speech recognition. macOS-only — the device-ai
+// Rust backend is compiled in only on macOS/iOS/Android (see tauri/Cargo.toml)
+// and the speech-recognize backend is implemented for macOS. The
+// `disable-device-ai` feature is a compile-time kill-switch that drops the
+// command too, so flipping the switch cannot leave a dangling registered
+// handler. On other targets the command is absent and the frontend falls
+// back to Whisper WASM.
+#[cfg(all(target_os = "macos", not(feature = "disable-device-ai")))]
+mod device_ai_commands;
 // `app_store` cfg is set by `tauri/build.rs` when the `ORIGA_APP_STORE`
 // env var is present. `feature = "app-store"` covers local `cargo check
 // --features app-store` invocations. The OR allows either mechanism:
@@ -59,11 +68,26 @@ pub fn run() {
         builder = builder.plugin(tauri_plugin_haptics::init());
     }
 
-    builder
+    builder = builder
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_tts::init())
+        .plugin(tauri_plugin_tts::init());
+
+    // device-ai (native ASR/OCR/TTS) is primary on macOS/iOS/Android.
+    // Excluded on Windows (upstream windows.rs does not compile against
+    // windows 0.58) and Linux (no device-ai backend). See tauri/Cargo.toml.
+    // The `disable-device-ai` feature is a compile-time kill-switch: it drops
+    // the plugin entirely, forcing the fallback stack on every platform.
+    #[cfg(all(
+        any(target_os = "macos", target_os = "ios", target_os = "android"),
+        not(feature = "disable-device-ai")
+    ))]
+    {
+        builder = builder.plugin(tauri_plugin_device_ai_apis::init());
+    }
+
+    builder
         .invoke_handler(tauri::generate_handler![
             get_current_deep_link,
             auth_store_get,
@@ -72,7 +96,9 @@ pub fn run() {
             #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
             check_for_update,
             #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
-            install_update
+            install_update,
+            #[cfg(all(target_os = "macos", not(feature = "disable-device-ai")))]
+            device_ai_commands::device_ai_recognize_file
         ])
         .setup(|app| {
             tracing::info!("[deep-link] setup started");
