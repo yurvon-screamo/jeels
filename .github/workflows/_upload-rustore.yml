@@ -2,6 +2,9 @@ name: Upload to RuStore
 
 # Reusable workflow for uploading signed AAB to RuStore via Public API.
 # Called from tauri.yml after build-tauri succeeds on tag pushes.
+# STABLE-ONLY contract: prerelease (RC) and alpha are gated out by the caller
+# (tauri.yml upload-rustore if-clause); this workflow also self-gates on
+# inputs.version_type == 'stable'.
 #
 # Flow:
 #   1. POST /public/auth/ — exchange signed keyId+timestamp for JWE token (15 min TTL)
@@ -44,7 +47,7 @@ permissions:
 
 jobs:
     upload:
-        if: inputs.version_type == 'stable' || inputs.version_type == 'prerelease'
+        if: inputs.version_type == 'stable'
         runs-on: ubuntu-latest
         env:
             PACKAGE_NAME: net.uwuwu.origa
