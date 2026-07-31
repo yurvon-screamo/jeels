@@ -37,6 +37,13 @@ export default defineConfig({
         {
             name: "bdd",
             testDir: bddTestDir,
+            // BDD scenarios span multiple pages and frequently reload WASM
+            // (onboarding, lesson lifecycle) or do a full login twice (the
+            // sync roundtrip: fixture login → logout → re-login). Each UI
+            // login is a cold WASM load + TrailBase auth round-trip, so the
+            // default 60s test timeout is too tight and aborts mid-flow.
+            // 180s matches the `page` fixture timeout in bdd/fixtures.ts.
+            timeout: 180000,
             use: {
                 ...devices["Desktop Chrome"],
             },
