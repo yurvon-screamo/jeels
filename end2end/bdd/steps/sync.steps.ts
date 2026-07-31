@@ -81,7 +81,10 @@ Then('запись на сервере содержит обновлённый k
         },
     });
     expect(resp.ok, `admin records read must succeed, got ${resp.status}`).toBe(true);
-    const rows = (await resp.json()) as Array<{ knowledge_set?: string }>;
+    // TrailBase records list wraps rows in { records: [...] } — see
+    // trailbase_records.rs ListResponseInner.
+    const data = (await resp.json()) as { records: Array<{ knowledge_set?: string }> };
+    const rows = data.records;
     expect(rows.length, "remote user row must exist for the test account").toBeGreaterThan(0);
     const ks = rows[0]?.knowledge_set;
     expect(ks, "remote knowledge_set column must be present").toBeTruthy();
