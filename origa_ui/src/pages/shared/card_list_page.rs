@@ -2,9 +2,10 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use super::{
-    CardCounts, CardStatus, DeleteRequest, Filter, FilterBtn, GroupedGrid, LevelIndex,
-    ListGrouping, LoadMoreButton, create_delete_callback, create_mark_as_known_callback,
-    create_toggle_favorite_callback, order_cards_by_group,
+    CardCounts, CardStatus, DeleteRequest, Filter, FilterBtn, GroupedGrid, JlptCounts, JlptFilter,
+    JlptFilterBtn, LevelIndex, ListGrouping, LoadMoreButton, create_delete_callback,
+    create_mark_as_known_callback, create_toggle_favorite_callback, jlpt_level_idx,
+    order_cards_by_group,
 };
 use crate::i18n::use_i18n;
 use crate::loaders::get_jlpt_content;
@@ -15,7 +16,7 @@ use crate::ui_components::{
 use leptos::either::Either;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use origa::domain::{Card, CardAnswer, NativeLanguage, StudyCard, User};
+use origa::domain::{Card, CardAnswer, JapaneseLevel, NativeLanguage, StudyCard, User};
 use origa::traits::UserRepository;
 use std::collections::HashMap;
 
@@ -147,6 +148,10 @@ where
 
     let search = RwSignal::new(String::new());
     let filter = RwSignal::new(Filter::All);
+    // JLPT axis — only meaningful for `ListGrouping::ByJlptLevel`. For Flat
+    // pages (`/words`, `/phrases`) the row is not rendered and the filter
+    // stays at `All`, so it never affects `filtered_cards`.
+    let jlpt_filter = RwSignal::new(JlptFilter::All);
     let visible_count: RwSignal<usize> = RwSignal::new(50);
 
     // Build the card_id -> JLPT level lookup once when grouping is enabled.
@@ -172,6 +177,8 @@ where
     let filtered_cards = Memo::new(move |_| {
         let query = search.get().to_lowercase();
         let current_filter = filter.get();
+        let current_jlpt = jlpt_filter.get();
+        let index = level_index.get();
         let lang = native_lang.get();
 
         let mut cards: Vec<_> = all_cards
@@ -206,14 +213,19 @@ where
                 };
                 let matches_filter =
                     current_filter.matches(CardStatus::from_study_card(card), card.is_favorite());
-                matches_search && matches_filter
+                // JLPT axis — AND with status + search. For Flat pages
+                // `level_index` is empty, so `index.get(...)` is None and
+                // `JlptFilter::All` (default) still matches via the All arm.
+                let card_level = index.get(card.card_id()).and_then(|l| *l);
+                let matches_jlpt = current_jlpt.matches(card_level);
+                matches_search && matches_filter && matches_jlpt
             })
             .collect();
 
         match grouping {
             ListGrouping::ByJlptLevel { .. } => {
-                // Clone the memo once here, not inside `sort_by`'s comparator.
-                let index = level_index.get();
+                // `index` was captured once above; reuse it for sort instead
+                // of calling `level_index.get()` again inside this branch.
                 cards = order_cards_by_group(&cards, &index);
             },
             ListGrouping::Flat => {
@@ -225,9 +237,23 @@ where
         cards
     });
 
+    let jlpt_counts = Memo::new(move |_| {
+        let index = level_index.get();
+        let mut counts = JlptCounts::default();
+        for card in all_cards.get().iter() {
+            match index.get(card.card_id()).and_then(|l| *l) {
+                Some(level) => counts.by_level[jlpt_level_idx(level)] += 1,
+                None => counts.other += 1,
+            }
+            counts.total += 1;
+        }
+        counts
+    });
+
     Effect::new(move |_| {
         let _ = search.get();
         let _ = filter.get();
+        let _ = jlpt_filter.get();
         visible_count.set(50);
     });
 
@@ -286,6 +312,43 @@ where
                     <FilterBtn filter=Filter::Learned count=move || counts.get().learned active=filter test_id=format!("{test_id_prefix}-filter-learned") />
                     <FilterBtn filter=Filter::Favorite count=move || counts.get().favorite active=filter test_id=format!("{test_id_prefix}-filter-favorite") />
                 </div>
+
+                {matches!(grouping, ListGrouping::ByJlptLevel { .. }).then(|| {
+                    view! {
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <JlptFilterBtn
+                                filter=JlptFilter::All
+                                count=move || jlpt_counts.get().total
+                                active=jlpt_filter
+                                test_id=format!("{test_id_prefix}-filter-jlpt-all")
+                            />
+                            <For
+                                each=|| JapaneseLevel::ALL.to_vec()
+                                key=|level: &JapaneseLevel| *level
+                                children=move |level| {
+                                    let counts_for_btn = jlpt_counts;
+                                    view! {
+                                        <JlptFilterBtn
+                                            filter=JlptFilter::Level(level)
+                                            count=move || counts_for_btn.get().level_count(level)
+                                            active=jlpt_filter
+                                            test_id=format!(
+                                                "{test_id_prefix}-filter-jlpt-{}",
+                                                level.code().to_lowercase()
+                                            )
+                                        />
+                                    }
+                                }
+                            />
+                            <JlptFilterBtn
+                                filter=JlptFilter::Other
+                                count=move || jlpt_counts.get().other
+                                active=jlpt_filter
+                                test_id=format!("{test_id_prefix}-filter-jlpt-other")
+                            />
+                        </div>
+                    }
+                })}
 
                 {match grouping {
                     ListGrouping::Flat => view! {
