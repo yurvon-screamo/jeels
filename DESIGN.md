@@ -244,25 +244,32 @@ Origa — минималистичный интерфейс для прилож�
 CSS-переменные задают fallback-цепочку по принципу «Latin-шрифт → CJK-шрифт»:
 
 ```css
---font-serif: "Cormorant Garamond", "Noto Serif JP", serif;
+--font-serif: "Cormorant Garamond", "Noto Sans JP", sans-serif;
 --font-mono: "IBM Plex Mono", "Noto Sans JP", monospace;
 ```
 
 Браузер выбирает шрифт посимвольно: Latin/Cyrillic рендерится
 Cormorant/IBM Plex Mono (включают Latin + Cyrillic глифы), а кандзи/кана
-«проваливаются» к Noto JP через `unicode-range` в `@font-face`. Это критично:
+«проваливается» к **Noto Sans JP** через `unicode-range` в `@font-face`. Это критично:
 Xiaomi MIUI/HyperOS и Android по умолчанию отдают **китайский** CJK-serif
 (например MiSans CJK SC) для общих хань-кандзи — формы штрихов 食/海/語/難
-визуально неправильны для японского. Noto Sans JP / Noto Serif JP дают
-корректные японские формы. Noto JP также использует `font-display: block`,
+визуально неправильны для японского. Noto Sans JP даёт корректные японские
+формы. Noto Sans JP также использует `font-display: block`,
 чтобы до загрузки шрифта браузер не «мигал» китайским системным CJK.
+
+> **Unified CJK (Gothic):** оба стека (`--font-serif` и `--font-mono`)
+> используют единую CJK-семью — **Noto Sans JP**. Ранее `--font-serif`
+> падал на Noto Serif JP (Mincho), а `--font-mono` — на Noto Sans JP (Gothic);
+> это порождало смешение Mincho-кандзи и Gothic-кана в одном слове
+> (display/heading serif + body mono сходились на карточках), что особенно
+> ломало верстку на Xiaomi. Latin-сплит сохранён: Cormorant для serif-элементов,
+> IBM Plex Mono для mono-элементов. Supersedes ADR-028 §font-set.
 
 | Семейство | Назначение | Вара | Покрытие |
 | --------- | ---------- | ---- | -------- |
 | Cormorant Garamond | Display/Heading | 300–700 (variable) + italic | Latin, Latin-Extended, **Cyrillic**, пунктуация |
 | IBM Plex Mono | Body/Label/Mono | 300, 400, 500 + italic 400 | Latin, Latin-Extended (Vietnamese), **Cyrillic**, пунктуация |
-| Noto Serif JP | CJK-fallback для `--font-serif` | 400 (Regular) | кандзи + кана + пунктуация (subset по корпусу приложения) |
-| Noto Sans JP | CJK-fallback для `--font-mono` | 400 (Regular) | кандзи + кана + пунктуация (subset по корпусу приложения) |
+| Noto Sans JP | CJK-fallback для обоих стеков (`--font-serif`, `--font-mono`) | 400 (Regular) | кандзи + кана + пунктуация (subset по корпусу приложения) |
 
 > **Cyrillic support** (ADR-030): Cormorant Garamond и IBM Plex Mono
 > теперь subsetted с Cyrillic диапазоном. Ранее Cyrillic UI-текст рендерился
@@ -273,7 +280,7 @@ Xiaomi MIUI/HyperOS и Android по умолчанию отдают **китай
 - **Display**: Cormorant Garamond, 300,
   clamp(1.75rem, 6vw, 3rem) — H1, hero titles
 - **Heading**: Cormorant Garamond, 400-500,
-  1.25–1.5rem — H2–H6, Japanese text display
+  1.25–1.5rem — H2–H6 (Japanese glyphs → Noto Sans JP, Gothic)
 - **Body**: IBM Plex Mono, 400, 14px —
    Основной текст, описания
 - **Label**: IBM Plex Mono, 400, 11–13px —
@@ -281,9 +288,11 @@ Xiaomi MIUI/HyperOS и Android по умолчанию отдают **китай
 - **Mono**: IBM Plex Mono, 400-500, 13px —
    Код, технические данные
 
-> Noto JP грузится только Regular (400). Если визуальный smoke выявит
-> слишком светлые CJK-заголовки рядом с Cormorant-500, добавляется
-> Medium (500) — задокументировано как follow-up в ADR-028.
+> Noto Sans JP грузится только Regular (400). С унификацией CJK на Gothic
+> (ранее Mincho для serif-стека) риск слишком светлых CJK-глифов рядом с
+> Cormorant-500 ВЫШЕ — Gothic 400 оптически легче Mincho 400. Если визуальный
+> smoke выявит слишком светлые CJK-заголовки, добавляется Medium (500) —
+> задокументировано как follow-up в ADR-028 (теперь приоритетнее).
 
 ### Правила типографики
 
@@ -576,20 +585,27 @@ Badge — это "штамп на полях". Без рамки, приглуш
 
 ```css
 .furigana-ruby {
-  font-family: "Cormorant Garamond", serif;
+  /* font-family inherits the container (serif or mono stack) */
   ruby-align: center;
 }
 
 .furigana-rt {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.5em;
+  /* font-family inherits the container */
+  font-size: 0.6em;
   color: var(--fg-muted);
+}
+
+.furigana-plain {
+  display: inline;
 }
 ```
 
-Основной японский текст — Cormorant Garamond
-(serif создаёт классический вид иероглифов).
-Furigana (ромуадзи/кана) — IBM Plex Mono в 50% размера.
+Фуригана наследует font-family контейнера: в markdown-теле (`--font-mono`)
+кандзи/кана/аннотация — все Noto Sans JP; в заголовках (`--font-serif`) — тоже
+единая семья. Per-glyph резолв через `unicode-range` сохранён. Ранее
+`.furigana-ruby` жёстко задавал serif, а `.furigana-rt` — mono, что порождало
+смешение Mincho-кандзи и Gothic-кана/аннотации в одном слове. Furigana (кана) —
+0.6em от размера базового текста.
 
 ## Animation System
 

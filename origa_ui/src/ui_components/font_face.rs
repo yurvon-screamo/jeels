@@ -111,14 +111,6 @@ const FACES: &[FaceSpec] = &[
         display: "block",
         unicode_range: CJK_RANGE,
     },
-    FaceSpec {
-        logical: "noto-serif-jp-400",
-        family: "Noto Serif JP",
-        weight: "400",
-        style: "normal",
-        display: "block",
-        unicode_range: CJK_RANGE,
-    },
 ];
 
 /// Inject the `@font-face` stylesheet into `document.head`.

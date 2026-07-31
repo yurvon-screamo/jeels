@@ -82,14 +82,6 @@ SOURCES: tuple[Source, ...] = (
         extract_glob="NotoSansJP-Regular.otf",
     ),
     Source(
-        logical="noto-serif-jp-400",
-        url="https://github.com/notofonts/noto-cjk/releases/download/Serif2.003/12_NotoSerifJP.zip",
-        sha256="53bdd2a6e4eb63bf24f7890e018dddb94366e3555d0814c72b74fbb128f328f0",
-        kind="cjk",
-        archive="NotoSerifJP.zip",
-        extract_glob="**/NotoSerifJP-Regular.otf",
-    ),
-    Source(
         logical="cormorant-garamond",
         url="https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf",
         sha256="b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0",
@@ -296,7 +288,7 @@ def main() -> None:
     for src in SOURCES:
         try:
             source_path = ensure_source(src)
-        except (subprocess.CalledProcessError, OSError) as e:
+        except (subprocess.CalledProcessError, OSError):
             # Transient network failure (e.g. release-assets.githubusercontent.com
             # blocked). Preserve any existing woff2 for this logical name so the
             # CDN/font registry stays consistent; the source can be re-fetched
@@ -336,7 +328,7 @@ CYRILLIC_MUST_HAVE = "АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмН
 def verify_glyph_coverage() -> None:
     from fontTools.ttLib import TTFont
 
-    noto = next(FONTS_OUT.glob("noto-serif-jp-400-*.woff2"))
+    noto = next(FONTS_OUT.glob("noto-sans-jp-400-*.woff2"))
     cmap = TTFont(noto).getBestCmap()
     missing = [c for c in MUST_HAVE if ord(c) not in cmap]
     if missing:

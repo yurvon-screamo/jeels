@@ -169,8 +169,8 @@ runs:
         # fallback glyphs (woff2 404). Hashed names are globbed, so a missing
         # deploy or a stale cdn-data cache is caught here.
         FONT_COUNT=$(find cdn/fonts -name '*.woff2' 2>/dev/null | wc -l)
-        if [ "$FONT_COUNT" -lt 8 ]; then
-          echo "ERROR: expected >=8 woff2 in cdn/fonts/, found $FONT_COUNT"
+        if [ "$FONT_COUNT" -lt 7 ]; then
+          echo "ERROR: expected >=7 woff2 in cdn/fonts/, found $FONT_COUNT"
           ERRORS=$((ERRORS + 1))
         fi
         for f in cdn/fonts/noto-*-jp-400-*.woff2; do

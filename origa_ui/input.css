@@ -67,7 +67,7 @@
     --space-xxl: 48px;
     --space-xxxl: 64px;
 
-    --font-serif: "Cormorant Garamond", "Noto Serif JP", serif;
+    --font-serif: "Cormorant Garamond", "Noto Sans JP", sans-serif;
     --font-mono: "IBM Plex Mono", "Noto Sans JP", monospace;
 
     /* Rounded */
@@ -1698,12 +1698,10 @@ input[type="submit"],
 }
 
 .furigana-ruby {
-    font-family: var(--font-serif);
     ruby-align: center;
 }
 
 .furigana-rt {
-    font-family: var(--font-mono);
     font-size: 0.6em;
     color: var(--fg-muted);
 }
@@ -1716,7 +1714,7 @@ rt {
 }
 
 .furigana-plain {
-    font-family: var(--font-serif);
+    display: inline;
 }
 
 .furigana-hidden .furigana-rt {

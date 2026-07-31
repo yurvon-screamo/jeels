@@ -4,6 +4,11 @@
 
 Accepted
 
+> **Updated (2026-07-31): CJK regression-guard moved to Noto Sans JP.**
+> `subset_fonts.py::verify_glyph_coverage` now runs the CJK `MUST_HAVE` check
+> against `noto-sans-jp-400-*` (was `noto-serif-jp-400-*`), because Noto Serif JP
+> was removed when CJK was unified on Noto Sans JP — see ADR-028 §Status (2026-07-31).
+
 ## Date
 
 2026-07-07
