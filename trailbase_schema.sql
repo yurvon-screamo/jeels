@@ -1,5 +1,6 @@
--- TrailBase user table schema for Origa
--- Execute this SQL in TrailBase SQL Editor (/_/admin/editor) 
+-- TrailBase `user` table schema for Origa.
+-- Reference for the table as it exists in production.
+-- Apply via TrailBase SQL Editor (/_/admin/editor).
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,20 +12,25 @@ CREATE TABLE user (
     current_japanese_level INTEGER,
     duolingo_jwt_token TEXT,
     telegram_user_id INTEGER,
-    knowledge_set TEXT CHECK(json_valid(knowledge_set)) NOT NULL DEFAULT '{"study_cards":{},"lesson_history":[]}',
+    reminders_enabled INTEGER NOT NULL DEFAULT 0,
+    -- knowledge_set holds a compressed (deflate + base64) wire blob produced by
+    -- origa_ui/src/repository/knowledge_set_codec.rs. Its value is intentionally
+    -- NOT valid JSON, so this column MUST NOT carry a CHECK(json_valid(...))
+    -- constraint: doing so rejects every save_sync with a CHECK-constraint
+    -- violation (HTTP 500). Data integrity is enforced client-side by the
+    -- codec's read-recover policy (corrupt remote -> empty -> self-heal via
+    -- local overwrite). See ADR-034.
+    knowledge_set TEXT NOT NULL DEFAULT '{"study_cards":{},"lesson_history":[]}',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     imported_sets TEXT CHECK(json_valid(imported_sets)) NOT NULL DEFAULT '[]',
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    daily_load INTEGER DEFAULT 1
 ) STRICT;
 
--- Create index for faster lookups by trailbase_id
+-- Index for faster lookups by trailbase_id
 CREATE INDEX idx_user_trailbase_id ON user(trailbase_id);
 
--- Create index for faster lookups by email
+-- Index for faster lookups by email
 CREATE INDEX idx_user_email ON user(email);
-
--- Migration: Add imported_sets column to existing tables
--- Run this if you already have a user table without imported_sets
--- ALTER TABLE user ADD COLUMN imported_sets TEXT CHECK(json_valid(imported_sets)) NOT NULL DEFAULT '[]';
 
 -- _ROW_.trailbase_id = _USER_.id
 -- _REQ_.trailbase_id = _USER_.id

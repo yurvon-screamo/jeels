@@ -30,6 +30,26 @@ TrailBase's default request body limit is **10 MB** (`crates/core/src/server/mod
 already on the edge of that limit, so the uncompressed format is not just
 slow — it is one card away from rejected writes.
 
+### Schema constraint: `CHECK(json_valid(knowledge_set))`
+
+The production `user` table (`trailbase_schema.sql`) declared:
+
+```sql
+knowledge_set TEXT CHECK(json_valid(knowledge_set)) NOT NULL DEFAULT '{"study_cards":{},"lesson_history":[]}'
+```
+
+SQLite evaluates `json_valid()` against the **column value** (the raw stored
+string), not the JSON-body field. A plain-JSON `knowledge_set` satisfied it;
+the new `DEFLATE;<base64>` wire string does not — `json_valid()` returns 0 and
+the write is rejected with a CHECK-constraint violation, surfacing as an
+**HTTP 500 from TrailBase on every `save_sync`** after upgrade.
+
+This constraint was **missed in the original Context analysis** — the ADR
+treated the column as opaque `TEXT` without reading the schema file. The
+lesson is recorded in §"Methodological note" below. The resolution (this ADR's
+wire format is kept; the constraint is dropped) is in §Decision and
+§Consequences.
+
 ### Scope of this ADR
 
 This is a **band-aid** that shrinks the wire payload of the existing
@@ -57,6 +77,25 @@ knowledge_set_codec.rs`); `domain/` is untouched.
 base64 is unavoidable: the TrailBase column is `TEXT` (`Option<String>`), so
 raw deflate bytes cannot be stored. Its ~33% overhead is more than offset by
 deflate's compression ratio.
+
+### Schema migration: drop `CHECK(json_valid)` on `knowledge_set`
+
+Because the new wire value is intentionally not JSON (see §Context — Schema
+constraint), the column's `CHECK(json_valid(knowledge_set))` MUST be dropped,
+otherwise every `save_sync` is rejected. SQLite has no `ALTER TABLE … DROP
+CONSTRAINT`, so the change is a recreate-table migration (create `user_new`
+without the CHECK → `INSERT … SELECT` all columns → drop old → rename), run
+manually via the TrailBase SQL editor. The migration was applied to production
+before release; `trailbase_schema.sql` (the reference file) was updated to
+match, with an inline comment warning future engineers not to re-add the
+CHECK.
+
+Data integrity is unchanged in spirit: previously the CHECK guarded "the
+column holds valid JSON", which the codec violated by design; the codec's
+read-recover policy is the real integrity guarantee (corrupt remote → empty →
+self-heal via local overwrite). The other JSON columns (`jlpt_progress`,
+`imported_sets`) keep their `CHECK(json_valid(...))` — their wire format is
+still plain JSON.
 
 ### Compression level: 6 (data-driven)
 
@@ -144,6 +183,19 @@ return `Err` on remote failure and must propagate). Delta sync requires
 server-side merge, versioning, and conflict resolution — that is the future
 "variant C" restructure, not a band-aid.
 
+### A5: JSON-wrapper (avoid the schema migration)
+
+Wrap the compressed payload as a JSON object so `json_valid()` passes without
+touching the schema: e.g. `{"_w":1,"d":"<base64>"}` instead of the
+`DEFLATE;<base64>` prefix string. Considered and rejected in favour of dropping
+the CHECK: the wrapper adds ~20 bytes per write, forces the decode path to
+discriminate three formats (legacy JSON / `DEFLATE;` / wrapper) instead of two,
+and preserves a constraint (`json_valid`) whose guarantee is now meaningless
+for this column — the value is an opaque blob either way. Dropping the CHECK
+keeps the codec two-format and makes the schema honest about what the column
+holds. The trade-off is a one-time recreate-table migration, which is
+acceptable given pre-release timing.
+
 ## Consequences
 
 ### Positive
@@ -202,6 +254,28 @@ Three distinct scenarios, with the mitigation that covers each:
   other than this client), a decoded-size cap must be added to `inflate` to
   prevent a maliciously crafted stream from exhausting WASM client memory.
 
+### Methodological note — the missed CHECK constraint
+
+The original ADR treated the `knowledge_set` column as opaque `TEXT` without
+reading `trailbase_schema.sql`. The `CHECK(json_valid(knowledge_set))`
+constraint was discovered only when login of existing accounts started failing
+with HTTP 500 in master (caught pre-release — production was not affected). The
+codec's 58 passing unit tests did not catch it either: they exercised
+encode/decode against an in-memory `serde_json::Value`, never against a SQLite
+instance carrying the production CHECK. Two corrections follow:
+
+- The schema migration (drop CHECK) is now part of this ADR's decision, and
+  `trailbase_schema.sql` carries an inline warning against re-adding it.
+- A BDD scenario (`end2end/bdd/features/sync.feature`) exercises the full
+  login → mutate (`toggle_favorite`, a `save_sync` checkpoint) → re-login →
+  verify roundtrip, so a future wire-format change that trips a server-side
+  invariant surfaces in E2E rather than in production.
+
+General lesson: when a codec changes the wire shape of a persisted field,
+grep the DDL (`*.sql`, migrations) for constraints on that column before
+declaring the change safe. Unit tests over a mock transport do not cover the
+database layer's invariants.
+
 ## Verification
 
 | Check | Command | Result |
@@ -209,6 +283,9 @@ Three distinct scenarios, with the mitigation that covers each:
 | Format choice gate | `cargo test -p origa_ui --test knowledge_set_format_poc --release -- --nocapture --ignored` | deflate(JSON) L6 chosen; bincode disqualified by roundtrip |
 | Codec unit tests | `cargo test -p origa_ui repository::knowledge_set_codec` | 5 functions / 7 cases passed (roundtrip, legacy-decode, carries-prefix, smaller-than-json, recovering-`#[rstest]`×3: corrupt-legacy / corrupt-prefixed / unknown-prefix) |
 | Wire roundtrip + self-heal | `cargo test -p origa_ui repository::trailbase_repository` | 2 passed (UserRow roundtrip, corrupt self-heal) |
+| Schema migration applied | `SELECT sql FROM sqlite_master WHERE name='user';` | Done — production recreated without CHECK; column reads `knowledge_set TEXT NOT NULL DEFAULT '...'` |
+| Reference schema matches prod | `git diff trailbase_schema.sql` | Done — CREATE TABLE matches the production dump byte-for-byte (incl. `reminders_enabled`, `daily_load`); inline comment explains why no CHECK |
+| E2E roundtrip scenario defined | `end2end/bdd/features/sync.feature` | Scenario written + binds (`bdd:gen`, `typecheck`, `eslint` clean). **Pending first runtime `npm run test:bdd`** — not yet executed against the live stack |
 | Lint | `cargo clippy -p origa_ui --all-targets -- -D warnings` | 0 warnings |
 | Format | `cargo fmt -p origa_ui -- --check` | clean |
 
@@ -217,4 +294,6 @@ Three distinct scenarios, with the mitigation that covers each:
 - `origa_ui/src/repository/knowledge_set_codec.rs` — the codec
 - `origa_ui/src/repository/trailbase_repository.rs` — `user_to_json` (write-strict), `to_user` (read-recover)
 - `origa_ui/tests/knowledge_set_format_poc.rs` — the data-driven PoC gate
+- `trailbase_schema.sql` — production `user` table DDL (reference); `knowledge_set` carries an inline comment on why the CHECK was dropped
+- `end2end/bdd/features/sync.feature` — E2E guard: data survives logout + re-login
 - ADR scope note: "variant C" (aggregate normalization / delta sync) deferred — see plan v3 review record.
