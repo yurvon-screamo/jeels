@@ -18,6 +18,20 @@
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
 	<string>0.1.0</string>
+	<key>CFBundleDisplayName</key>
+	<string>Origa</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.education</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Origa uses the camera to capture Japanese text for OCR.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Origa reads photos to extract Japanese text via OCR.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Origa records audio to transcribe Japanese speech.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Origa recognizes Japanese speech to transcribe audio input.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
