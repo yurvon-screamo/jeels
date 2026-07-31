@@ -29,6 +29,14 @@ Accepted
 > justified by correct CJK on the very first launch and offline operation. Web
 > builds are unchanged.
 
+> **Updated (2026-07-31): CJK unified on Noto Sans JP; Noto Serif JP removed.**
+> Both `--font-serif` and `--font-mono` now fall through to a single CJK family
+> — Noto Sans JP (Gothic) — so kanji and kana never mix Mincho/Gothic within a
+> word (the split previously broke Japanese typography on Xiaomi). Noto Serif JP
+> is dropped from `font_face.rs`, `subset_fonts.py`, and `end2end/cdn-manifest.txt`.
+> The Noto Serif JP rows in the font-set table below are historical — see
+> DESIGN.md §Система шрифтов for the current font set.
+
 ## Date
 
 2026-07-03
