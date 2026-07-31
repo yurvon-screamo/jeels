@@ -64,15 +64,21 @@ When('пользователь снова входит в тот же аккау
 });
 
 // Composite of "toggle favorite" + explicit wait for the save_sync write to
-// /api/records/v1/user/<id> to resolve. The plain toggle step (common.steps)
+// /api/records/v1/user to resolve. The plain toggle step (common.steps)
 // returns as soon as the optimistic UI flips the heart SVG; the actual
 // save_sync runs in a fire-and-forget spawn_local and can still be in-flight
 // when a later logout wipes client state — turning the post-relogin
 // assertion into a race (false-fail if the save is aborted, false-pass if it
-// happens to land). Waiting on the PUT/POST response here makes the roundtrip
+// happens to land). Waiting on the write response here makes the roundtrip
 // deterministic: the remote is guaranteed to hold the favorite before any
 // state wipe. Also asserts the response is 2xx, so a CHECK-constraint (or any
 // other server-side invariant) regression surfaces here, not as a silent 500.
+//
+// Method set: TrailBase records API uses POST to create a row and PATCH to
+// update one (see trailbase_records.rs: `create` → POST, `update` → PATCH).
+// PUT is included defensively in case the wire contract evolves; GET/OPTIONS
+// are excluded so the CORS preflight + the read-back after save don't satisfy
+// the wait prematurely.
 //
 // Matcher scope note: the predicate matches the user-records endpoint by URL +
 // method, not the request body or a specific record id. That is safe ONLY when
@@ -82,6 +88,8 @@ When('пользователь снова входит в тот же аккау
 // by reading the record id from the response of an earlier create, or by
 // inspecting the request body) so a debounced save from another mutation
 // can't satisfy the wait first.
+const RECORD_WRITE_METHODS = new Set(["POST", "PUT", "PATCH"]);
+
 When('отмечает первую карточку избранной и дожидается сохранения', async ({ page }) => {
     const favBtn = page.locator('[data-testid*="card-item"]').first()
         .locator('[data-testid*="favorite"]').first();
@@ -92,8 +100,7 @@ When('отмечает первую карточку избранной и до�
     const saveResponse = page.waitForResponse(
         (resp) =>
             /\/api\/records\/v1\/user(\/|$)/.test(resp.url()) &&
-            (resp.request().method() === "PUT" ||
-                resp.request().method() === "POST"),
+            RECORD_WRITE_METHODS.has(resp.request().method()),
         { timeout: 15_000 },
     );
 
