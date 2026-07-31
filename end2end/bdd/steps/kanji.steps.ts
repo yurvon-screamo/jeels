@@ -216,3 +216,35 @@ Then('CJK шрифты загружены', async ({ page }) => {
     });
     expect(fontUsed).toBe(true);
 });
+
+Given('у пользователя есть кандзи нескольких уровней', async ({ page }) => {
+    const kanjiPage = new KanjiPage(page);
+    await kanjiPage.goto();
+    await expect(kanjiPage.kanjiPage).toBeVisible({ timeout: 15_000 });
+    await kanjiPage.addBtn.click();
+    await expect(kanjiPage.drawer).toBeVisible({ timeout: 10_000 });
+    // Pick a couple of N5 kanji, switch to N4, pick a couple there. This
+    // guarantees both grid-N5 and grid-N4 sections will render.
+    await kanjiPage.selectLevel("N5");
+    const n5First = kanjiPage.drawer.getByTestId("kanji-drawer-item").first();
+    await n5First.click();
+    await kanjiPage.selectLevel("N4");
+    const n4First = kanjiPage.drawer.getByTestId("kanji-drawer-item").first();
+    await n4First.click();
+    await kanjiPage.addSelectedKanji();
+    await expect(kanjiPage.kanjiGrid).toBeVisible({ timeout: 30_000 });
+});
+
+When('выбирает фильтр уровня кандзи {string}', async ({ page }, level: string) => {
+    const testid = `kanji-filter-jlpt-${level.toLowerCase()}`;
+    await page.getByTestId(testid).click();
+});
+
+Then('отображается только группа кандзи уровня {string}', async ({ page }, level: string) => {
+    await expect(page.getByTestId(`kanji-grid-${level}`)).toBeVisible({ timeout: 10_000 });
+    for (const other of ["N5", "N4", "N3", "N2", "N1", "other"]) {
+        if (other !== level) {
+            await expect(page.getByTestId(`kanji-grid-${other}`)).not.toBeVisible();
+        }
+    }
+});

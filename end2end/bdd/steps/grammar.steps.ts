@@ -251,3 +251,36 @@ When('отвечает на все вопросы практики', async ({ pa
 Then('отображается завершение практики', async ({ page }) => {
     await expect(page.getByTestId("grammar-practice-complete")).toBeVisible({ timeout: 15_000 });
 });
+
+Given('у пользователя есть грамматика нескольких уровней', async ({ page }) => {
+    const grammarPage = new GrammarPage(page);
+    await grammarPage.goto();
+    await expect(grammarPage.grammarPage).toBeVisible({ timeout: 15_000 });
+    await grammarPage.openAddModal();
+    // Pick all N5 rules, then at least one N4 rule — guarantees both
+    // grid-N5 and grid-N4 sections render. N4 click is fail-fast: if N4
+    // data is missing on CDN, the test fails here with a clear cause
+    // rather than later at the `grammar-grid-N4` visibility assertion.
+    await grammarPage.selectLevel("N5");
+    await grammarPage.selectAllRules();
+    await grammarPage.selectLevel("N4");
+    const n4First = grammarPage.drawer.getByTestId("grammar-drawer-item").first();
+    await expect(n4First).toBeVisible({ timeout: 10_000 });
+    await n4First.click();
+    await grammarPage.addSelectedRules();
+    await expect(grammarPage.grammarGrid).toBeVisible({ timeout: 30_000 });
+});
+
+When('выбирает фильтр уровня грамматики {string}', async ({ page }, level: string) => {
+    const testid = `grammar-filter-jlpt-${level.toLowerCase()}`;
+    await page.getByTestId(testid).click();
+});
+
+Then('отображается только группа грамматики уровня {string}', async ({ page }, level: string) => {
+    await expect(page.getByTestId(`grammar-grid-${level}`)).toBeVisible({ timeout: 10_000 });
+    for (const other of ["N5", "N4", "N3", "N2", "N1", "other"]) {
+        if (other !== level) {
+            await expect(page.getByTestId(`grammar-grid-${other}`)).not.toBeVisible();
+        }
+    }
+});
