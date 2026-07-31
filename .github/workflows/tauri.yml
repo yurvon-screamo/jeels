@@ -123,8 +123,8 @@ jobs:
     build-apple:
         name: Build Apple (iOS + macOS)
         # Apple builds use expensive macOS runners (~30 min/target).
-        # Gate on tag push (stable/prerelease) like upload-rustore, so
-        # workflow_dispatch runs do NOT consume macOS minutes.
+        # Gate on tag push (stable/prerelease), so workflow_dispatch runs do
+        # NOT consume macOS minutes.
         # Set `force_apple: true` in workflow_dispatch inputs to override
         # for manual testing / debugging.
         if: >
@@ -299,16 +299,20 @@ jobs:
 
     upload-rustore:
         name: Upload to RuStore
-        # Independent of release: failure does NOT block GitHub Release.
-        # Continue-on-error semantics during burn-in — RuStore API has multiple
-        # hard requirements (signing cert in Console, no stale drafts, version
-        # bump) that may not be met on first run. Soft-fail until stable.
+        # Stable-only: only v*.*.* stable tags publish to RuStore; prerelease
+        # (RC) and alpha are intentionally excluded — RC still ships to GitHub
+        # Release via the `release` job.
+        #
+        # Intentionally NOT a dependency of `release`: this job is absent from
+        # release.needs ([version, build-tauri, build-apple, generate-latest-json]).
+        # Transient RuStore failures (network, stale drafts, moderation quirks)
+        # even on a stable release MUST NOT block the GitHub Release.
+        # Do NOT add upload-rustore to release.needs — that regresses isolation.
         if: >
             always() &&
             needs.build-tauri.result == 'success' &&
             startsWith(github.ref, 'refs/tags/v') &&
-            (needs.version.outputs.version_type == 'stable' ||
-             needs.version.outputs.version_type == 'prerelease')
+            needs.version.outputs.version_type == 'stable'
         needs: [version, build-tauri]
         uses: ./.github/workflows/_upload-rustore.yml
         with:
