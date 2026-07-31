@@ -285,7 +285,7 @@ database layer's invariants.
 | Wire roundtrip + self-heal | `cargo test -p origa_ui repository::trailbase_repository` | 2 passed (UserRow roundtrip, corrupt self-heal) |
 | Schema migration applied | `SELECT sql FROM sqlite_master WHERE name='user';` | Done — production recreated without CHECK; column reads `knowledge_set TEXT NOT NULL DEFAULT '...'` |
 | Reference schema matches prod | `git diff trailbase_schema.sql` | Done — CREATE TABLE matches the production dump byte-for-byte (incl. `reminders_enabled`, `daily_load`); inline comment explains why no CHECK |
-| E2E roundtrip scenario defined | `end2end/bdd/features/sync.feature` | Scenario written + binds (`bdd:gen`, `typecheck`, `eslint` clean). **Pending first runtime `npm run test:bdd`** — not yet executed against the live stack |
+| E2E guard passes roundtrip | `npm run test:bdd` (sync.feature, profile-sync shard) | Done — login → add word → toggle favorite (assert save_sync PATCH 2xx) → admin records read confirms `knowledge_set` on disk is no longer the empty default. Verified locally and on CI |
 | Lint | `cargo clippy -p origa_ui --all-targets -- -D warnings` | 0 warnings |
 | Format | `cargo fmt -p origa_ui -- --check` | clean |
 
