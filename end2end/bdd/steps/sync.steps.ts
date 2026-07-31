@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import { Then, When } from "../fixtures";
 import { uiLogin } from "../../helpers/auth";
+import { WordsPage } from "../../pages";
 
 const NIL_USER_ID = "0".repeat(26);
 
@@ -54,13 +55,44 @@ When('второй браузер входит в тот же аккаунт', a
     await context.close();
 });
 
-// Re-login into the same test account after a logout (auth.steps clears all
-// client-side state). The credentials come from the `testUser` fixture, so
-// this exercises the SAME identity the scenario started with — a real
-// roundtrip through the remote, not a fresh account. Catches wire-format /
-// schema-invariant regressions on save_sync (see ADR-034).
-When('пользователь снова входит в тот же аккаунт', async ({ page, testUser }) => {
-    await uiLogin(page, testUser.email, testUser.password);
+// Cross-device verification: open a SECOND, pristine browser context (no
+// cookies / localStorage / IndexedDB carried over from the first session) and
+// log into the SAME test account, then assert the favorite toggled in the
+// first session is present. This is the real "data survives across devices"
+// roundtrip — it reads the favorite back from the remote, not from the local
+// store of the session that wrote it.
+//
+// A fresh context is used deliberately instead of logout+reload on the same
+// page: the app's logout path wipes IndexedDB mid-session and the subsequent
+// UI re-login races the WASM re-init (intermittent "login form never
+// appears"), which is an app-side flakiness orthogonal to what this scenario
+// guards. A new context is the deterministic equivalent and matches the
+// real-world "open the app on a second device" flow.
+//
+// Action + assertion live in one Then step because the BDD `page` fixture is
+// fixed for the test scope — a second page cannot be exposed to later steps.
+Then('второй браузер видит эту карточку избранной', async ({ browser, testUser }) => {
+    const context = await browser.newContext();
+    const pageB = await context.newPage();
+    await pageB.setViewportSize({ width: 1280, height: 720 });
+    try {
+        await uiLogin(pageB, testUser.email, testUser.password);
+
+        const wordsPage = new WordsPage(pageB);
+        await wordsPage.goto();
+        await wordsPage.expectWordsVisible();
+
+        // Mirror the "первая карточка отмечена избранной" assertion shape from
+        // common.steps.ts — the filled-heart SVG marks the favorited state.
+        const favBtn = pageB.locator('[data-testid*="card-item"]').first()
+            .locator('[data-testid*="favorite"]').first();
+        await expect(
+            favBtn.locator('svg path[fill="currentColor"]'),
+            "favorite set in session A must be visible from a fresh session B (cross-device sync)",
+        ).toBeVisible({ timeout: 15_000 });
+    } finally {
+        await context.close();
+    }
 });
 
 // Composite of "toggle favorite" + explicit wait for the save_sync write to

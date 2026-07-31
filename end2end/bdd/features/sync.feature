@@ -14,16 +14,14 @@
 
   # Regression guard for the PR #303 incident: a wire-format change that trips
   # a server-side invariant (then: CHECK(json_valid(knowledge_set))) broke
-  # every save_sync for existing accounts. This roundtrip verifies that data
+  # every save_sync for existing accounts. This scenario verifies that data
   # mutated on a checkpoint path (toggle_favorite) reaches the remote and is
-  # read back after a fresh login on a clean client. See ADR-034.
-  Сценарий: Данные аккаунта сохраняются после повторного входа
+  # read back from a SECOND, pristine browser context — the real cross-device
+  # sync roundtrip. See ADR-034.
+  Сценарий: Данные аккаунта сохраняются и видны с другого устройства
     Допустим новый пользователь
     И пользователь пропустил онбординг
     Допустим у пользователя есть добавленное слово
     Когда отмечает первую карточку избранной и дожидается сохранения
     Тогда первая карточка отмечена избранной
-    Допустим пользователь вышел из аккаунта
-    Когда пользователь снова входит в тот же аккаунт
-    Когда пользователь открывает страницу слов
-    Тогда первая карточка отмечена избранной
+    И второй браузер видит эту карточку избранной
