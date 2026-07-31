@@ -17,6 +17,7 @@ use super::email_password_form::EmailPasswordForm;
 #[component]
 pub fn PasswordSection(
     #[prop(optional, into)] test_id: Signal<String>,
+    #[prop(optional, into)] loading: Signal<bool>,
     expanded: RwSignal<bool>,
     server_error: RwSignal<Option<String>>,
     on_submit: Callback<(String, String)>,
@@ -59,14 +60,26 @@ pub fn PasswordSection(
         >
             <div class="space-y-4">
                 <EmailPasswordForm
+                    loading=loading
                     on_submit=on_submit
                     server_error=server_error
                     test_id=form_test_id
                 />
                 <button
                     type="button"
-                    class="w-full text-center cursor-pointer"
+                    class=move || {
+                        // Mirror the cursor to the actual disabled state so the
+                        // control doesn't read "clickable" while a request is
+                        // in flight.
+                        let cursor = if loading.get() {
+                            "cursor-not-allowed"
+                        } else {
+                            "cursor-pointer"
+                        };
+                        format!("w-full text-center {}", cursor)
+                    }
                     data-testid=BACK_TEST_ID
+                    disabled=move || loading.get()
                     on:click=move |_: leptos::ev::MouseEvent| {
                         expanded.set(false);
                     }

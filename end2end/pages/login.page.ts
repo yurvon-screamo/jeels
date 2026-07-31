@@ -15,6 +15,12 @@ export class LoginPage extends BasePage {
     readonly submitButton: Locator;
     readonly errorAlert: Locator;
 
+    // Layout
+    readonly headerDivider: Locator;
+
+    // Submit-state internals
+    readonly spinner: Locator;
+
     // OAuth
     readonly googleButton: Locator;
     readonly yandexButton: Locator;
@@ -34,6 +40,14 @@ export class LoginPage extends BasePage {
         this.passwordFormToggle = page.getByTestId("login-password-toggle");
         this.submitButton = page.getByTestId("login-submit");
         this.errorAlert = page.getByTestId("login-form-error");
+
+        // Layout
+        this.headerDivider = page.getByTestId("login-header-divider");
+
+        // The submit button renders an inline spinner (data-testid="btn-spinner"
+        // in ui_components/button.rs) while a request is in flight. Scoped to
+        // the submit button so it can't match a spinner on another control.
+        this.spinner = this.submitButton.getByTestId("btn-spinner");
 
         // OAuth
         this.googleButton = page.getByTestId("oauth-google");
@@ -92,6 +106,17 @@ export class LoginPage extends BasePage {
     async submit(): Promise<void> {
         await this.submitButton.waitFor({ state: "visible", timeout: 5000 });
         await this.submitButton.click({ force: true });
+    }
+
+    /**
+     * Asserts the in-flight submit state: the submit button is disabled and a
+     * spinner is rendered. Regression guard for the loader (it disappeared in
+     * the collapsible-login refactor when the loading signal stopped being
+     * threaded down to the form).
+     */
+    async expectSubmittingState(): Promise<void> {
+        await expect(this.submitButton).toBeDisabled({ timeout: 5_000 });
+        await expect(this.spinner).toBeVisible({ timeout: 5_000 });
     }
 
     async login(

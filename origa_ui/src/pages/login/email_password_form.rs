@@ -10,13 +10,13 @@ use super::validation;
 #[component]
 pub fn EmailPasswordForm(
     #[prop(optional, into)] test_id: Signal<String>,
+    #[prop(optional, into)] loading: Signal<bool>,
     #[prop(optional)] server_error: Option<RwSignal<Option<String>>>,
     on_submit: Callback<(String, String)>,
 ) -> impl IntoView {
     let i18n = use_i18n();
     let email = RwSignal::new(String::new());
     let password = RwSignal::new(String::new());
-    let loading = RwSignal::new(false);
     let validation_error = RwSignal::new(None::<String>);
 
     let display_error = move || {
@@ -46,6 +46,13 @@ pub fn EmailPasswordForm(
 
     let on_submit_form = move |ev: leptos::ev::SubmitEvent| {
         ev.prevent_default();
+        // Guards against double-submit: the submit button is disabled while
+        // loading, but browsers still fire a form submit on Enter even when
+        // the submit button is disabled. The signal is idempotent, so this
+        // early-return is belt-and-suspenders, not data-safety.
+        if loading.get() {
+            return;
+        }
         handle_submit();
     };
 
