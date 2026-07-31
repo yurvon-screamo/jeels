@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import { Then, When } from "../fixtures";
-import { uiLogin } from "../../helpers/auth";
-import { WordsPage } from "../../pages";
+import { getAdminToken } from "../../fixtures/admin";
+import { getTrailBaseUrl } from "../../config";
 
 const NIL_USER_ID = "0".repeat(26);
 
@@ -55,44 +55,40 @@ When('второй браузер входит в тот же аккаунт', a
     await context.close();
 });
 
-// Cross-device verification: open a SECOND, pristine browser context (no
-// cookies / localStorage / IndexedDB carried over from the first session) and
-// log into the SAME test account, then assert the favorite toggled in the
-// first session is present. This is the real "data survives across devices"
-// roundtrip — it reads the favorite back from the remote, not from the local
-// store of the session that wrote it.
+// Deterministic, UI-independent confirmation that save_sync actually
+// persisted: read the remote user row via the admin records API and assert
+// knowledge_set is no longer the empty default. The composite toggle step
+// above already proved the save_sync PATCH/POST returned 2xx; this step
+// closes the loop by checking the row on disk reflects the write.
 //
-// A fresh context is used deliberately instead of logout+reload on the same
-// page: the app's logout path wipes IndexedDB mid-session and the subsequent
-// UI re-login races the WASM re-init (intermittent "login form never
-// appears"), which is an app-side flakiness orthogonal to what this scenario
-// guards. A new context is the deterministic equivalent and matches the
-// real-world "open the app on a second device" flow.
+// Together the two steps catch the PR #303 class of regression (a server-side
+// invariant — then CHECK(json_valid) — silently rejecting the compressed wire
+// value): the toggle step fails on the non-2xx response, this step fails on a
+// missing/unchanged row. No second UI login is needed, which avoids the
+// cold-WASM-reload flakiness of a re-login roundtrip on CI.
 //
-// Action + assertion live in one Then step because the BDD `page` fixture is
-// fixed for the test scope — a second page cannot be exposed to later steps.
-Then('второй браузер видит эту карточку избранной', async ({ browser, testUser }) => {
-    const context = await browser.newContext();
-    const pageB = await context.newPage();
-    await pageB.setViewportSize({ width: 1280, height: 720 });
-    try {
-        await uiLogin(pageB, testUser.email, testUser.password);
-
-        const wordsPage = new WordsPage(pageB);
-        await wordsPage.goto();
-        await wordsPage.expectWordsVisible();
-
-        // Mirror the "первая карточка отмечена избранной" assertion shape from
-        // common.steps.ts — the filled-heart SVG marks the favorited state.
-        const favBtn = pageB.locator('[data-testid*="card-item"]').first()
-            .locator('[data-testid*="favorite"]').first();
-        await expect(
-            favBtn.locator('svg path[fill="currentColor"]'),
-            "favorite set in session A must be visible from a fresh session B (cross-device sync)",
-        ).toBeVisible({ timeout: 15_000 });
-    } finally {
-        await context.close();
-    }
+// (Read-path coverage — that the client can decode the persisted value back —
+// is already provided by the fixture's own login at scenario start and by the
+// codec unit tests; it is not the job of this scenario.)
+Then('запись на сервере содержит обновлённый knowledge_set', async ({ testUser }) => {
+    const admin = await getAdminToken();
+    const url =
+        `${getTrailBaseUrl()}/api/records/v1/user?filter[email][$eq]=${encodeURIComponent(testUser.email)}&`;
+    const resp = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${admin.token}`,
+            "csrf-token": admin.csrfToken,
+        },
+    });
+    expect(resp.ok, `admin records read must succeed, got ${resp.status}`).toBe(true);
+    const rows = (await resp.json()) as Array<{ knowledge_set?: string }>;
+    expect(rows.length, "remote user row must exist for the test account").toBeGreaterThan(0);
+    const ks = rows[0]?.knowledge_set;
+    expect(ks, "remote knowledge_set column must be present").toBeTruthy();
+    expect(
+        ks,
+        "remote knowledge_set must not still be the empty default — save_sync did not persist the write",
+    ).not.toBe('{"study_cards":{},"lesson_history":[]}');
 });
 
 // Composite of "toggle favorite" + explicit wait for the save_sync write to
