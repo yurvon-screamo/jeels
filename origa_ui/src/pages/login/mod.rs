@@ -76,38 +76,54 @@ pub fn Login() -> impl IntoView {
         }
     });
 
+    // Wraps the login body (divider + form/oauth stack) in a single AnyView so
+    // the CardLayout children tuple (and therefore the bin crate's
+    // monomorphised type-depth) does not grow — see ADR-027 for the
+    // recursion_limit rationale. Mirrors `login_footer` below.
+    let login_body = move || {
+        view! {
+            <Divider
+                variant=Signal::derive(|| DividerVariant::Single)
+                class=Signal::derive(|| "my-6".to_string())
+                test_id=Signal::derive(|| "login-header-divider".to_string())
+            />
+            <div class="space-y-6">
+                <PasswordSection
+                    loading=loading
+                    expanded=password_expanded
+                    on_submit=on_email_submit
+                    server_error=server_error
+                    test_id=Signal::derive(|| "login-form".to_string())
+                />
+
+                <Show when=move || auth_store_for_view.oauth_error.get().is_some()>
+                    <Alert
+                        test_id=Signal::derive(|| "oauth-error".to_string())
+                        alert_type=Signal::derive(|| AlertType::Error)
+                        message=Signal::derive(move || auth_store_for_view.oauth_error.get().unwrap_or_default())
+                    />
+                </Show>
+
+                <div class="flex items-center gap-4">
+                    <Divider variant=Signal::derive(|| DividerVariant::Single) class=Signal::derive(|| "flex-1".to_string()) test_id=Signal::derive(|| "login-divider-left".to_string()) />
+                    <Text size=TextSize::Small variant=TypographyVariant::Muted class="whitespace-nowrap" test_id=Signal::derive(|| "login-divider-text".to_string())>
+                        {t!(i18n, login.or_login_with)}
+                    </Text>
+                    <Divider variant=Signal::derive(|| DividerVariant::Single) class=Signal::derive(|| "flex-1".to_string()) test_id=Signal::derive(|| "login-divider-right".to_string()) />
+                </div>
+
+                <oauth_buttons::OAuthButtons debug_sink=oauth_debug />
+            </div>
+        }
+        .into_any()
+    };
+
     view! {
         <PageLayout variant=PageLayoutVariant::Full test_id=Signal::derive(|| "login-page".to_string())>
             <CardLayout size=CardLayoutSize::Small class="px-4 pt-4 pb-8" test_id=Signal::derive(|| "login-card".to_string())>
                 <LoginLanguageToggle test_id=Signal::derive(|| "login-lang-toggle".to_string()) />
                 <LoginHeader />
-                <div class="space-y-6">
-                    <PasswordSection
-                        expanded=password_expanded
-                        on_submit=on_email_submit
-                        server_error=server_error
-                        test_id=Signal::derive(|| "login-form".to_string())
-                    />
-
-                    <Show when=move || auth_store_for_view.oauth_error.get().is_some()>
-                        <Alert
-                            test_id=Signal::derive(|| "oauth-error".to_string())
-                            alert_type=Signal::derive(|| AlertType::Error)
-                            message=Signal::derive(move || auth_store_for_view.oauth_error.get().unwrap_or_default())
-                        />
-                    </Show>
-
-                    <div class="flex items-center gap-4">
-                        <Divider variant=Signal::derive(|| DividerVariant::Single) class=Signal::derive(|| "flex-1".to_string()) test_id=Signal::derive(|| "login-divider-left".to_string()) />
-                        <Text size=TextSize::Small variant=TypographyVariant::Muted class="whitespace-nowrap" test_id=Signal::derive(|| "login-divider-text".to_string())>
-                            {t!(i18n, login.or_login_with)}
-                        </Text>
-                        <Divider variant=Signal::derive(|| DividerVariant::Single) class=Signal::derive(|| "flex-1".to_string()) test_id=Signal::derive(|| "login-divider-right".to_string()) />
-                    </div>
-
-                    <oauth_buttons::OAuthButtons debug_sink=oauth_debug />
-                </div>
-
+                {login_body()}
                 {login_footer(oauth_debug)}
             </CardLayout>
         </PageLayout>

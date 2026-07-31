@@ -69,7 +69,7 @@ pub fn Button(
             }
         >
             <Show when=move || loading.get()>
-                <span class="btn-spinner"></span>
+                <span class="btn-spinner" data-testid="btn-spinner"></span>
             </Show>
             <span class=move || if loading.get() { "btn-text btn-text-hidden" } else { "btn-text" }>
                 {children()}

@@ -20,7 +20,7 @@ pub fn LoginHeader(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
     });
 
     view! {
-        <div class="text-center mb-10" data-testid=test_id_val>
+        <div class="text-center" data-testid=test_id_val>
             <Logo size=LogoSize::Lg class=Signal::derive(|| "mx-auto mb-6".to_string()) />
             <Text size=TextSize::Small variant=TypographyVariant::Muted uppercase=true tracking_widest=true test_id=subtitle_test_id>
                 {t!(i18n, login.subtitle)}
