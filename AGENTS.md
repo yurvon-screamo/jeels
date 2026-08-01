@@ -40,7 +40,16 @@ cd tauri && cargo tauri dev
 ### Переменные окружения (compile-time, `build.rs`)
 
 Обязательные: `ORIGA_CDN_BASE_URL`.
-Опциональные: `ORIGA_CDN_REGION`, `ORIGA_VERSION`, `ORIGA_COMMIT`, `ORIGA_BUILD_DATE`, `TRAILBASE_URL`, `ORIGA_LANDING_BASE_URL`.
+Опциональные: `ORIGA_CDN_REGION`, `ORIGA_VERSION`, `ORIGA_COMMIT`, `ORIGA_BUILD_DATE`, `TRAILBASE_URL`, `ORIGA_LANDING_BASE_URL`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`.
+
+**Sentry** (ADR-036): единый `SENTRY_DSN` пробрасывается во все build-скрипты; пустой/не задан = Sentry отключен. `SENTRY_ENVIRONMENT` маппится в CI из `version_type` (`stable`→`production`, `prerelease`→`staging`, иначе `development`). `SENTRY_RELEASE` выводится из `ORIGA_VERSION` (отдельная CI-переменная не нужна). Локально для теста Sentry:
+
+```powershell
+$env:SENTRY_DSN = "https://<public_key>@o<orgid>.ingest.sentry.io/<projectid>"
+$env:SENTRY_ENVIRONMENT = "development"
+$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"
+cd tauri && cargo tauri dev
+```
 
 **DNS naming scheme** (CI/CD production):
 

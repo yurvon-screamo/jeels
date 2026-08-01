@@ -102,6 +102,11 @@ fn build_csp_substitutes_staging_hosts() {
     assert!(csp.contains("https://accounts.google.com"));
     assert!(csp.contains("https://oauth.yandex.ru"));
 
+    // Sentry hosts are static (independent of env), so they must appear in
+    // every build — including staging. See ADR-036.
+    assert!(csp.contains("https://js.sentry-cdn.com"));
+    assert!(csp.contains("https://*.ingest.sentry.io"));
+
     // Production hosts must NOT leak into the staging build.
     assert!(!csp.contains(DEFAULT_CDN));
     assert!(!csp.contains(DEFAULT_TRAILBASE));

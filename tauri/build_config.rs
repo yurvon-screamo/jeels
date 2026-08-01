@@ -35,12 +35,18 @@ pub(crate) const DEFAULT_LANDING: &str = "https://origa.uwuwu.net";
 /// telemetry, OAuth providers) remain hardcoded — they are not
 /// environment-dependent.
 ///
+/// Sentry hosts (`js.sentry-cdn.com` for the loader script, `*.ingest.sentry.io`
+/// for envelope submission) are static: they depend only on the Sentry SaaS,
+/// not on env configuration. The wildcard `*.ingest.sentry.io` covers the
+/// `o<orgid>.ingest.sentry.io` shape of every Sentry project's DSN host, so a
+/// single project change does not require a CSP edit (ADR-036 §7).
+///
 /// The literal is kept on a single line because `rustfmt` does not reflow
 /// string-literal contents, and byte-equality with `tauri.conf.json` must hold
 /// (verified by `build_csp_with_production_defaults_matches_committed_tauri_conf`).
 pub(crate) fn build_csp(cdn: &str, landing: &str, trailbase: &str) -> String {
     format!(
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io; connect-src 'self' ipc: http://ipc.localhost {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io; img-src 'self' data: blob: {cdn}; media-src 'self' blob: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://*.ingest.sentry.io; img-src 'self' data: blob: {cdn}; media-src 'self' blob: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
     )
 }
 

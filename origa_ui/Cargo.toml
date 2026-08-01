@@ -86,6 +86,7 @@ end2end-dir = "end2end"
 
 [dev-dependencies]
 rstest.workspace = true
+wasm-bindgen-test.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
