@@ -998,6 +998,43 @@ input[type="submit"],
     position: relative;
 }
 
+/* Onboarding scoring progress bar — single horizontal track with one marker
+   per section boundary (Grammar | Kanji | Vocabulary | …). Sits on top of the
+   generic `.progress-track` / `.progress-fill` geometry: same height, same
+   border, but the fill is driven by an inline `width: %` style instead of the
+   `--progress-width` CSS var so the parent component can compute it from the
+   section-aware queue length. */
+.scoring-progress-bar {
+    width: 100%;
+}
+
+.scoring-progress-track {
+    position: relative;
+    height: 8px;
+    border: 1px solid var(--border-dark);
+    background: var(--bg-aged);
+    overflow: visible;
+}
+
+.scoring-progress-fill {
+    height: 100%;
+    background: var(--fg-black);
+    transition: width 0.3s ease;
+}
+
+.scoring-progress-marker {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: var(--border-dark);
+    transform: translateX(-1px);
+}
+
+.scoring-progress-legend {
+    color: var(--fg-muted);
+}
+
 .progress-track-lesson {
     height: 3px;
     border: 1px solid var(--border-light);

@@ -16,6 +16,14 @@ pub struct WordKnowledge {
     pub meaning: Option<String>,
 }
 
+/// Marker stored inside `imported_sets` to signal that the user has finished
+/// onboarding scoring. The companion `ONBOARDING_SKIPPED_KEY` marker (written
+/// by the skip path) is treated equivalently by [`User::is_onboarding_completed`].
+/// Reusing `imported_sets` avoids a schema migration: the field is already
+/// `#[serde(default)]` and synced via `save_sync`.
+pub const ONBOARDING_COMPLETED_KEY: &str = "__onboarding_completed__";
+pub const ONBOARDING_SKIPPED_KEY: &str = "__onboarding_skipped__";
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
     id: Ulid,
@@ -42,6 +50,14 @@ pub struct User {
 
     #[serde(default)]
     known_vocab_hash: u32,
+
+    /// Cards the user marked "don't know" during onboarding scoring. Persisted
+    /// per-click via `save_sync` so the scoring step can resume after an app
+    /// restart and skip already-evaluated cards. Cleared by
+    /// [`crate::use_cases::CompleteOnboardingScoringUseCase`] when onboarding
+    /// finishes.
+    #[serde(default)]
+    onboarding_scoring_skipped: HashSet<Ulid>,
 }
 
 impl User {
@@ -62,6 +78,7 @@ impl User {
             imported_sets: HashSet::new(),
             daily_load: DailyLoad::default(),
             known_vocab_hash: 0,
+            onboarding_scoring_skipped: HashSet::new(),
         }
     }
 
@@ -91,6 +108,7 @@ impl User {
             imported_sets,
             daily_load,
             known_vocab_hash,
+            onboarding_scoring_skipped: HashSet::new(),
         }
     }
 
@@ -119,6 +137,10 @@ impl User {
 
         for set_id in &another_user.imported_sets {
             self.imported_sets.insert(set_id.clone());
+        }
+
+        for card_id in &another_user.onboarding_scoring_skipped {
+            self.onboarding_scoring_skipped.insert(*card_id);
         }
 
         self.touch();
@@ -217,6 +239,49 @@ impl User {
     pub fn set_known_vocab_hash(&mut self, hash: u32) {
         self.known_vocab_hash = hash;
         self.touch();
+    }
+
+    /// Marks the onboarding scoring as finished. The user is no longer
+    /// redirected to `/onboarding` on the next app start. Stored as a sentinel
+    /// inside `imported_sets` so no schema migration is required.
+    pub fn mark_onboarding_completed(&mut self) {
+        self.imported_sets
+            .insert(ONBOARDING_COMPLETED_KEY.to_string());
+        self.touch();
+    }
+
+    /// Returns `true` when onboarding has reached a terminal state (either the
+    /// user finished scoring or skipped it). Used as the single routing guard
+    /// across `/home` and `/onboarding`.
+    pub fn is_onboarding_completed(&self) -> bool {
+        self.imported_sets.contains(ONBOARDING_COMPLETED_KEY)
+            || self.imported_sets.contains(ONBOARDING_SKIPPED_KEY)
+    }
+
+    /// Records a card the user marked "don't know" during onboarding scoring.
+    /// Persisted through the regular `save` path so the scoring step can resume
+    /// after an app restart and skip cards already evaluated.
+    pub fn mark_card_skipped_in_onboarding(&mut self, card_id: Ulid) {
+        self.onboarding_scoring_skipped.insert(card_id);
+        self.touch();
+    }
+
+    pub fn is_card_skipped_in_onboarding(&self, card_id: &Ulid) -> bool {
+        self.onboarding_scoring_skipped.contains(card_id)
+    }
+
+    pub fn onboarding_scoring_skipped(&self) -> &HashSet<Ulid> {
+        &self.onboarding_scoring_skipped
+    }
+
+    /// Clears every "don't know" record collected during onboarding scoring.
+    /// Called by [`crate::use_cases::CompleteOnboardingScoringUseCase`] when
+    /// onboarding reaches its terminal state.
+    pub fn clear_onboarding_scoring_skipped(&mut self) {
+        if !self.onboarding_scoring_skipped.is_empty() {
+            self.onboarding_scoring_skipped.clear();
+            self.touch();
+        }
     }
 
     pub fn is_word_known(&self, word: &str) -> WordKnowledge {
@@ -897,5 +962,126 @@ mod tests {
         assert_eq!(n5.words.learned, 1);
         assert_eq!(n5.words.total, 1);
         assert!(n5.words.percentage() > 0.0);
+    }
+
+    #[test]
+    fn new_user_has_empty_onboarding_scoring_skipped() {
+        let user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+
+        assert!(user.onboarding_scoring_skipped().is_empty());
+        assert!(!user.is_onboarding_completed());
+    }
+
+    #[test]
+    fn mark_card_skipped_in_onboarding_adds_to_set() {
+        let mut user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+        let card_id = Ulid::new();
+
+        user.mark_card_skipped_in_onboarding(card_id);
+
+        assert!(user.is_card_skipped_in_onboarding(&card_id));
+        assert_eq!(user.onboarding_scoring_skipped().len(), 1);
+    }
+
+    #[test]
+    fn mark_card_skipped_in_onboarding_is_idempotent() {
+        let mut user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+        let card_id = Ulid::new();
+
+        user.mark_card_skipped_in_onboarding(card_id);
+        user.mark_card_skipped_in_onboarding(card_id);
+
+        assert_eq!(user.onboarding_scoring_skipped().len(), 1);
+    }
+
+    #[test]
+    fn is_card_skipped_in_onboarding_returns_false_for_unknown_id() {
+        let user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+
+        assert!(!user.is_card_skipped_in_onboarding(&Ulid::new()));
+    }
+
+    #[test]
+    fn clear_onboarding_scoring_skipped_empties_set() {
+        let mut user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+        user.mark_card_skipped_in_onboarding(Ulid::new());
+        user.mark_card_skipped_in_onboarding(Ulid::new());
+
+        user.clear_onboarding_scoring_skipped();
+
+        assert!(user.onboarding_scoring_skipped().is_empty());
+    }
+
+    #[test]
+    fn mark_onboarding_completed_makes_is_completed_true() {
+        let mut user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+
+        user.mark_onboarding_completed();
+
+        assert!(user.is_onboarding_completed());
+    }
+
+    #[test]
+    fn is_onboarding_completed_returns_true_for_legacy_skipped_marker() {
+        let mut user = User::new(
+            "test@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+        user.mark_set_as_imported(ONBOARDING_SKIPPED_KEY.to_string());
+
+        assert!(user.is_onboarding_completed());
+    }
+
+    #[test]
+    fn user_deserializes_old_json_without_skipped_field() {
+        // Arrange — simulate a legacy User payload that predates the
+        // onboarding_scoring_skipped field by serializing a current user and
+        // then stripping the field from the JSON.
+        let user = User::new(
+            "legacy@example.com".to_string(),
+            NativeLanguage::Russian,
+            None,
+        );
+        let mut json = serde_json::to_value(&user).expect("serialize user");
+        let obj = json
+            .as_object_mut()
+            .expect("User must serialize to a JSON object");
+        assert!(
+            obj.remove("onboarding_scoring_skipped").is_some(),
+            "precondition: field exists in current serialization"
+        );
+
+        // Act
+        let deserialized: User = serde_json::from_value(json)
+            .expect("legacy JSON without skipped field must deserialize");
+
+        // Assert
+        assert_eq!(deserialized.email(), "legacy@example.com");
+        assert!(deserialized.onboarding_scoring_skipped().is_empty());
     }
 }
