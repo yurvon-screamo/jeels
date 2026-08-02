@@ -44,7 +44,16 @@ fn main() {
         build_config::DEFAULT_LANDING,
     );
 
-    inject_csp_via_tauri_config(&cdn, &landing, &trailbase);
+    // Parse the Sentry ingest host from the DSN at build time so the CSP can
+    // pin to the exact project host (no `*.sentry.io` wildcard — see
+    // ADR-036 §7). Falls back to the production default when SENTRY_DSN is
+    // unset (local dev without Sentry) OR when the DSN is malformed.
+    let sentry_dsn = env::var("SENTRY_DSN").unwrap_or_default();
+    let sentry_ingest_host = build_config::extract_sentry_ingest_host(&sentry_dsn)
+        .map(str::to_owned)
+        .unwrap_or_else(|| build_config::DEFAULT_SENTRY_INGEST_HOST.to_owned());
+
+    inject_csp_via_tauri_config(&cdn, &landing, &trailbase, &sentry_ingest_host);
     emit_sentry_env();
 
     tauri_build::build();
@@ -96,8 +105,13 @@ fn emit_sentry_env() {
 /// serde_json 1.0.150) instead of replacing it. This preserves flavor/beta/
 /// staging overrides (productName, identifier, bundle, plugins, devUrl, etc.).
 /// The CSP wins because it is applied last.
-fn inject_csp_via_tauri_config(cdn: &str, landing: &str, trailbase: &str) {
-    let csp = build_config::build_csp(cdn, landing, trailbase);
+fn inject_csp_via_tauri_config(
+    cdn: &str,
+    landing: &str,
+    trailbase: &str,
+    sentry_ingest_host: &str,
+) {
+    let csp = build_config::build_csp(cdn, landing, trailbase, sentry_ingest_host);
 
     // Only `app.security.csp` is overridden — all other fields in
     // `tauri.conf.json` (productName, windows, plugins, bundle, etc.) remain

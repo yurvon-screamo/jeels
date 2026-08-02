@@ -162,18 +162,28 @@ mitigation with a regression test.
 `tauri/build_config.rs::build_csp` and `tauri/tauri.conf.json` add:
 
 - `script-src`: `https://js.sentry-cdn.com` (loader script host)
-- `connect-src`: `https://*.ingest.sentry.io` (envelope submission)
+- `connect-src`: `https://<ingest_host>` (envelope submission, pinned)
 
-`*.ingest.sentry.io` is a wildcard because the ingest subdomain is
-`o<orgid>.ingest.sentry.io`, and `orgid` is part of the DSN. A future Sentry
-project migration would change the org id and require a CSP edit if the host
-were pinned. The wildcard is the lower-maintenance choice; the surface area
-is Sentry's own SaaS infrastructure.
+The ingest host is **extracted from the DSN at build time** by
+`build_config::extract_sentry_ingest_host` and parameterised into
+`build_csp`. The default (used when `SENTRY_DSN` is unset, e.g. local dev)
+is `DEFAULT_SENTRY_INGEST_HOST`, pinned to the production project's exact
+host.
+
+**Why pin and not `*.sentry.io` wildcard?** `sentry.io` is a multi-tenant
+SaaS domain: anyone can create a free Sentry account and receive an
+`<orgid>.ingest.sentry.io` subdomain. A wildcard `connect-src` would allow
+the WebView to POST to **any** Sentry project, including attacker-controlled
+ones — a data exfiltration vector post-XSS. CSP3 §8.6 explicitly warns about
+this class. The cost of pinning (a CSP edit on the rare Sentry project /
+region migration) is negligible vs a permanent exfil surface.
 
 `build_csp_with_production_defaults_matches_committed_tauri_conf` and
 `build_csp_substitutes_staging_hosts` in `tauri/tests/build_config.rs`
 enforce byte-equality between the template and the committed `tauri.conf.json`
-and pin the Sentry hosts in staging builds (drift guards).
+and assert the staging build carries the staging ingest host (not a
+wildcard, not the production host). `extract_sentry_ingest_host` is covered
+by five unit tests (US DSN, EU DSN, malformed variants, empty input).
 
 ### 8. CI/CD wiring
 
