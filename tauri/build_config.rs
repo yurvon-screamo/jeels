@@ -28,6 +28,13 @@ pub(crate) use defaults::{DEFAULT_CDN, DEFAULT_TRAILBASE};
 /// Production landing URL. Used when `ORIGA_LANDING_BASE_URL` env var is unset.
 pub(crate) const DEFAULT_LANDING: &str = "https://origa.uwuwu.net";
 
+/// Production Sentry ingest host. Used when `SENTRY_DSN` is unset OR when the
+/// DSN cannot be parsed. Pinned to the exact host (not a `*.sentry.io`
+/// wildcard) to avoid exfiltration to attacker-controlled Sentry projects on
+/// the multi-tenant `sentry.io` SaaS — see ADR-036 §7. CI overrides this with
+/// the host parsed from `SENTRY_DSN` when that env var is set.
+pub(crate) const DEFAULT_SENTRY_INGEST_HOST: &str = "o4511840951992320.ingest.us.sentry.io";
+
 /// Build the Content-Security-Policy directive by substituting env-controlled
 /// hosts into the static template. The CDN host is referenced from `font-src`
 /// because all fonts are self-hosted there (ADR-028). Other third-party hosts
@@ -35,12 +42,23 @@ pub(crate) const DEFAULT_LANDING: &str = "https://origa.uwuwu.net";
 /// telemetry, OAuth providers) remain hardcoded — they are not
 /// environment-dependent.
 ///
+/// Sentry's loader host (`js.sentry-cdn.com`) is static. Its ingest host is
+/// pinned to the project's exact host (extracted from the DSN at build time
+/// by `build.rs` and passed here as `sentry_ingest_host`). Pinning to a
+/// single host rather than `*.sentry.io` avoids the exfiltration vector of a
+/// wildcard on the multi-tenant `sentry.io` SaaS — see ADR-036 §7.
+///
 /// The literal is kept on a single line because `rustfmt` does not reflow
 /// string-literal contents, and byte-equality with `tauri.conf.json` must hold
 /// (verified by `build_csp_with_production_defaults_matches_committed_tauri_conf`).
-pub(crate) fn build_csp(cdn: &str, landing: &str, trailbase: &str) -> String {
+pub(crate) fn build_csp(
+    cdn: &str,
+    landing: &str,
+    trailbase: &str,
+    sentry_ingest_host: &str,
+) -> String {
     format!(
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io; connect-src 'self' ipc: http://ipc.localhost {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io; img-src 'self' data: blob: {cdn}; media-src 'self' blob: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://{sentry_ingest_host}; img-src 'self' data: blob: {cdn}; media-src 'self' blob: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
     )
 }
 
@@ -116,4 +134,20 @@ pub(crate) fn resolve_env(env_value: Option<&str>, default: &str) -> String {
         Some(v) if !v.is_empty() => v.to_string(),
         _ => default.to_string(),
     }
+}
+
+/// Extract the ingest host from a Sentry DSN for use as a CSP `connect-src`
+/// entry. DSN format: `https://<key>@<host>/<project_id>` (the `<project_id>`
+/// segment may itself contain `/`). Returns `None` for malformed inputs so
+/// `build.rs` can fall back to `DEFAULT_SENTRY_INGEST_HOST`.
+///
+/// Used to pin the CSP to the project's exact ingest host rather than a
+/// `*.sentry.io` wildcard — see ADR-036 §7.
+pub(crate) fn extract_sentry_ingest_host(dsn: &str) -> Option<&str> {
+    let after_at = dsn.split_once('@')?.1;
+    let host = after_at.split_once('/')?.0;
+    if host.is_empty() {
+        return None;
+    }
+    Some(host)
 }

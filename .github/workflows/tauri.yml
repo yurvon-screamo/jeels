@@ -53,6 +53,14 @@ jobs:
             ORIGA_VERSION: ${{ needs.version.outputs.version }}
             ORIGA_COMMIT: ${{ needs.version.outputs.commit_sha }}
             ORIGA_BUILD_DATE: ${{ needs.version.outputs.build_date }}
+            # Sentry: single DSN shared by both layers (native + WASM); the
+            # `layer` scope tag distinguishes them inside the one Sentry
+            # project. Empty/unset = Sentry disabled (dev, Dependabot).
+            # `SENTRY_ENVIRONMENT` is derived from `version_type` so that
+            # stable releases land in `production`, prereleases in `staging`,
+            # and master/branch builds in `development`. See ADR-036.
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ needs.version.outputs.version_type == 'stable' && 'production' || needs.version.outputs.version_type == 'prerelease' && 'staging' || 'development' }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4

@@ -73,6 +73,11 @@ jobs:
             ORIGA_VERSION: ${{ inputs.version }}
             ORIGA_COMMIT: ${{ inputs.commit_sha }}
             ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+            # Sentry (ADR-036): single DSN shared by both layers; the `layer`
+            # scope tag distinguishes tauri-native from ui-wasm events.
+            # Empty/unset = Sentry disabled (dev, Dependabot).
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ inputs.version_type == 'stable' && 'production' || inputs.version_type == 'prerelease' && 'staging' || 'development' }}
 
         steps:
             - name: Checkout repository
@@ -231,6 +236,11 @@ jobs:
             ORIGA_VERSION: ${{ inputs.version }}
             ORIGA_COMMIT: ${{ inputs.commit_sha }}
             ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+            # Sentry (ADR-036): single DSN shared by both layers; the `layer`
+            # scope tag distinguishes tauri-native from ui-wasm events.
+            # Empty/unset = Sentry disabled (dev, Dependabot).
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ inputs.version_type == 'stable' && 'production' || inputs.version_type == 'prerelease' && 'staging' || 'development' }}
 
         steps:
             - name: Checkout repository

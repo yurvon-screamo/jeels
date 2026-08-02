@@ -38,6 +38,23 @@ fn main() {
     println!("cargo:rustc-env=ORIGA_CDN_REGION={}", cdn_region);
     println!("cargo:rustc-env=TRAILBASE_URL={}", trailbase);
 
+    // Sentry env vars for the WASM frontend. Single `SENTRY_DSN` from CI is
+    // emitted under the crate-scoped name `SENTRY_DSN_UI` (distinguishes from
+    // the tauri-native layer in the same Sentry project via the `layer` tag).
+    // Empty/unset = Sentry disabled at runtime. `SENTRY_RELEASE_UI` is derived
+    // from `ORIGA_VERSION` to guarantee release-name sync with the native
+    // layer (ADR-036 §3). See ADR-024 for the env-var read pattern
+    // (`env::var()` + `cargo:rustc-env` + `rerun-if-env-changed` instead of
+    // `option_env!`, which captures at build-script compile time).
+    let sentry_dsn = env::var("SENTRY_DSN").unwrap_or_default();
+    let sentry_environment =
+        env::var("SENTRY_ENVIRONMENT").unwrap_or_else(|_| "development".into());
+    let sentry_release = env::var("ORIGA_VERSION").unwrap_or_else(|_| "dev".into());
+
+    println!("cargo:rustc-env=SENTRY_DSN_UI={sentry_dsn}");
+    println!("cargo:rustc-env=SENTRY_ENVIRONMENT_UI={sentry_environment}");
+    println!("cargo:rustc-env=SENTRY_RELEASE_UI={sentry_release}");
+
     println!("cargo:rerun-if-env-changed=ORIGA_VERSION");
     println!("cargo:rerun-if-env-changed=ORIGA_COMMIT");
     println!("cargo:rerun-if-env-changed=ORIGA_BUILD_DATE");
@@ -45,6 +62,8 @@ fn main() {
     println!("cargo:rerun-if-env-changed=ORIGA_CDN_BASE_URL");
     println!("cargo:rerun-if-env-changed=ORIGA_CDN_REGION");
     println!("cargo:rerun-if-env-changed=TRAILBASE_URL");
+    println!("cargo:rerun-if-env-changed=SENTRY_DSN");
+    println!("cargo:rerun-if-env-changed=SENTRY_ENVIRONMENT");
     println!("cargo:rerun-if-changed=build_config.rs");
     println!("cargo:rerun-if-changed=../build_defaults.rs");
 }

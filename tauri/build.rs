@@ -44,9 +44,48 @@ fn main() {
         build_config::DEFAULT_LANDING,
     );
 
-    inject_csp_via_tauri_config(&cdn, &landing, &trailbase);
+    // Parse the Sentry ingest host from the DSN at build time so the CSP can
+    // pin to the exact project host (no `*.sentry.io` wildcard — see
+    // ADR-036 §7). Falls back to the production default when SENTRY_DSN is
+    // unset (local dev without Sentry) OR when the DSN is malformed.
+    let sentry_dsn = env::var("SENTRY_DSN").unwrap_or_default();
+    let sentry_ingest_host = build_config::extract_sentry_ingest_host(&sentry_dsn)
+        .map(str::to_owned)
+        .unwrap_or_else(|| build_config::DEFAULT_SENTRY_INGEST_HOST.to_owned());
+
+    inject_csp_via_tauri_config(&cdn, &landing, &trailbase, &sentry_ingest_host);
+    emit_sentry_env();
 
     tauri_build::build();
+}
+
+/// Emit Sentry env vars consumed by `init_sentry()` in `lib.rs`.
+///
+/// Reads a single `SENTRY_DSN` from the environment (CI exposes one DSN — the
+/// project uses a single Sentry project with a `layer` tag distinguishing
+/// tauri-native from ui-wasm events) and emits it under the crate-scoped name
+/// `SENTRY_DSN_TAURI`. An empty/unset value disables Sentry at runtime
+/// (`init_sentry` returns `None`).
+///
+/// `SENTRY_RELEASE` is derived from `ORIGA_VERSION` (already exported by the
+/// root build) to guarantee release-name sync between native and WASM layers
+/// — both read the same `ORIGA_VERSION`, so they cannot drift (ADR-036 §3).
+///
+/// Uses `env::var()` + `cargo:rustc-env` + `cargo:rerun-if-env-changed`
+/// (NOT `option_env!`, which captures at build-script compile time and is not
+/// invalidated by `rerun-if-env-changed` — see ADR-024 for the pattern).
+fn emit_sentry_env() {
+    let dsn = env::var("SENTRY_DSN").unwrap_or_default();
+    let environment = env::var("SENTRY_ENVIRONMENT").unwrap_or_else(|_| "development".into());
+    let release = env::var("ORIGA_VERSION").unwrap_or_else(|_| "dev".into());
+
+    println!("cargo:rustc-env=SENTRY_DSN_TAURI={dsn}");
+    println!("cargo:rustc-env=SENTRY_ENVIRONMENT={environment}");
+    println!("cargo:rustc-env=SENTRY_RELEASE={release}");
+
+    println!("cargo:rerun-if-env-changed=SENTRY_DSN");
+    println!("cargo:rerun-if-env-changed=SENTRY_ENVIRONMENT");
+    println!("cargo:rerun-if-env-changed=ORIGA_VERSION");
 }
 
 /// Build a `TAURI_CONFIG` JSON Merge Patch (RFC 7396) overriding only the
@@ -66,8 +105,13 @@ fn main() {
 /// serde_json 1.0.150) instead of replacing it. This preserves flavor/beta/
 /// staging overrides (productName, identifier, bundle, plugins, devUrl, etc.).
 /// The CSP wins because it is applied last.
-fn inject_csp_via_tauri_config(cdn: &str, landing: &str, trailbase: &str) {
-    let csp = build_config::build_csp(cdn, landing, trailbase);
+fn inject_csp_via_tauri_config(
+    cdn: &str,
+    landing: &str,
+    trailbase: &str,
+    sentry_ingest_host: &str,
+) {
+    let csp = build_config::build_csp(cdn, landing, trailbase, sentry_ingest_host);
 
     // Only `app.security.csp` is overridden — all other fields in
     // `tauri.conf.json` (productName, windows, plugins, bundle, etc.) remain

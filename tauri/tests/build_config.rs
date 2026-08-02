@@ -16,7 +16,8 @@
 mod build_config;
 
 use build_config::{
-    DEFAULT_CDN, DEFAULT_LANDING, DEFAULT_TRAILBASE, apply_merge_patch, build_csp, resolve_env,
+    DEFAULT_CDN, DEFAULT_LANDING, DEFAULT_SENTRY_INGEST_HOST, DEFAULT_TRAILBASE, apply_merge_patch,
+    build_csp, extract_sentry_ingest_host, resolve_env,
 };
 
 /// Reference template for `tauri/capabilities/default.json`. Byte-identical to
@@ -63,7 +64,12 @@ fn build_capabilities_content(landing: &str, trailbase: &str) -> String {
 /// the committed CSP was updated without updating the template.
 #[test]
 fn build_csp_with_production_defaults_matches_committed_tauri_conf() {
-    let csp = build_csp(DEFAULT_CDN, DEFAULT_LANDING, DEFAULT_TRAILBASE);
+    let csp = build_csp(
+        DEFAULT_CDN,
+        DEFAULT_LANDING,
+        DEFAULT_TRAILBASE,
+        DEFAULT_SENTRY_INGEST_HOST,
+    );
 
     let config: serde_json::Value = serde_json::from_str(include_str!("../tauri.conf.json"))
         .expect("tauri.conf.json must be valid JSON");
@@ -83,6 +89,7 @@ fn build_csp_substitutes_staging_hosts() {
         "https://cdn.staging.example.com",
         "https://landing.staging.example.com",
         "https://api.staging.example.com",
+        "o-staging.ingest.sentry.io",
     );
 
     assert!(csp.contains("https://cdn.staging.example.com"));
@@ -102,9 +109,20 @@ fn build_csp_substitutes_staging_hosts() {
     assert!(csp.contains("https://accounts.google.com"));
     assert!(csp.contains("https://oauth.yandex.ru"));
 
+    // Sentry: loader host is static, ingest host is parameterised. The ingest
+    // host must be pinned to the exact staging value — NOT a wildcard — to
+    // avoid the multi-tenant SaaS exfil vector. See ADR-036 §7.
+    assert!(csp.contains("https://js.sentry-cdn.com"));
+    assert!(csp.contains("https://o-staging.ingest.sentry.io"));
+    assert!(
+        !csp.contains("*.sentry.io"),
+        "CSP must NOT contain a sentry.io wildcard — see ADR-036 §7"
+    );
+
     // Production hosts must NOT leak into the staging build.
     assert!(!csp.contains(DEFAULT_CDN));
     assert!(!csp.contains(DEFAULT_TRAILBASE));
+    assert!(!csp.contains(DEFAULT_SENTRY_INGEST_HOST));
 }
 
 /// Verifies that the reference template for `capabilities/default.json`,
@@ -305,4 +323,54 @@ fn default_trailbase_drift_guard() {
         resolve_env(None, DEFAULT_TRAILBASE),
         "https://app.origa.uwuwu.net"
     );
+}
+
+/// Drift guard for `DEFAULT_SENTRY_INGEST_HOST`: pins the production ingest
+/// host. A change of Sentry project / region requires updating this constant
+/// AND the committed `tauri.conf.json` (the byte-equality drift guard above
+/// catches a mismatch). See ADR-036 §7.
+#[test]
+fn default_sentry_ingest_host_drift_guard() {
+    assert_eq!(
+        DEFAULT_SENTRY_INGEST_HOST,
+        "o4511840951992320.ingest.us.sentry.io"
+    );
+}
+
+/// `extract_sentry_ingest_host` parses a standard Sentry SaaS DSN.
+#[test]
+fn extract_sentry_ingest_host_parses_us_region_dsn() {
+    let dsn = "https://aef7d1190ac77f89ae112b6a97e93d01@o4511840951992320.ingest.us.sentry.io/4511840959201280";
+    assert_eq!(
+        extract_sentry_ingest_host(dsn),
+        Some("o4511840951992320.ingest.us.sentry.io")
+    );
+}
+
+/// `extract_sentry_ingest_host` parses an EU region DSN (no region segment).
+#[test]
+fn extract_sentry_ingest_host_parses_eu_region_dsn() {
+    let dsn = "https://abc123@o42.ingest.sentry.io/99";
+    assert_eq!(
+        extract_sentry_ingest_host(dsn),
+        Some("o42.ingest.sentry.io")
+    );
+}
+
+/// `extract_sentry_ingest_host` rejects malformed DSNs (missing `@`).
+#[test]
+fn extract_sentry_ingest_host_rejects_missing_at() {
+    assert_eq!(extract_sentry_ingest_host("https://sentry.io/1"), None);
+}
+
+/// `extract_sentry_ingest_host` rejects malformed DSNs (missing `/`).
+#[test]
+fn extract_sentry_ingest_host_rejects_missing_slash() {
+    assert_eq!(extract_sentry_ingest_host("https://key@host"), None);
+}
+
+/// `extract_sentry_ingest_host` rejects an empty DSN.
+#[test]
+fn extract_sentry_ingest_host_rejects_empty() {
+    assert_eq!(extract_sentry_ingest_host(""), None);
 }

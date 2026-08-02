@@ -45,6 +45,7 @@ rustls = { version = "0.23", default-features = false, features = ["ring"] }
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
+sentry.workspace = true
 
 # device-ai plugin + crate: native ASR/OCR/TTS, primary on macOS/iOS/Android.
 # Excluded on Windows (upstream windows.rs does not compile against windows

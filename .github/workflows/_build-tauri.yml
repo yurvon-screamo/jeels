@@ -74,6 +74,11 @@ jobs:
             ORIGA_VERSION: ${{ inputs.version }}
             ORIGA_COMMIT: ${{ inputs.commit_sha }}
             ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+            # Sentry (ADR-036): single DSN shared by both layers; the `layer`
+            # scope tag distinguishes tauri-native from ui-wasm events.
+            # Empty/unset = Sentry disabled (dev, Dependabot).
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ inputs.version_type == 'stable' && 'production' || inputs.version_type == 'prerelease' && 'staging' || 'development' }}
             # Skip updater signing for Dependabot PRs. GitHub hides repository
             # `secrets.*` from Dependabot runs, but caller workflows pass a
             # dummy private key via `vars.TAURI_CI_DUMMY_PRIVATE_KEY` (vars are
@@ -186,6 +191,9 @@ jobs:
             ORIGA_VERSION: ${{ inputs.version }}
             ORIGA_COMMIT: ${{ inputs.commit_sha }}
             ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+            # Sentry (ADR-036): see build-windows for rationale.
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ inputs.version_type == 'stable' && 'production' || inputs.version_type == 'prerelease' && 'staging' || 'development' }}
             # Skip updater signing for Dependabot PRs — see build-windows for
             # the full rationale.
             TAURI_SIGNING_PRIVATE_KEY: ${{ github.actor != 'dependabot[bot]' && secrets.tauri-signing-private-key || '' }}
@@ -286,6 +294,9 @@ jobs:
             ORIGA_VERSION: ${{ inputs.version }}
             ORIGA_COMMIT: ${{ inputs.commit_sha }}
             ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+            # Sentry (ADR-036): see build-windows for rationale.
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ inputs.version_type == 'stable' && 'production' || inputs.version_type == 'prerelease' && 'staging' || 'development' }}
             # NDK r26b exact version. Single source of truth — referenced by both
             # the sdkmanager `packages` input and the NDK env-var derivation below.
             NDK_VERSION: '26.1.10909125'

@@ -46,6 +46,12 @@ fn get_current_deep_link(app: tauri::AppHandle) -> Option<String> {
 pub fn run() {
     let _ = rustls::crypto::ring::default_provider().install_default();
 
+    // Initialize Sentry AFTER the rustls crypto provider is installed: the
+    // sentry transport uses `rustls-no-provider` and reuses this ring provider.
+    // The guard must outlive `tauri::Builder::run` — kept on the stack, dropped
+    // only when `run()` returns (i.e. process exit). See ADR-036.
+    let _sentry_guard = init_sentry();
+
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
@@ -165,4 +171,57 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+/// Initialize the Sentry client for native (Rust) crash reporting.
+///
+/// Returns `None` (no-op) when `SENTRY_DSN_TAURI` is empty/unset — this is the
+/// dev/Dependabot path where no DSN is configured. The returned guard must be
+/// held for the entire application lifetime; dropping it flushes pending
+/// events and shuts down the transport background thread.
+///
+/// The `layer = "tauri"` scope tag distinguishes native events from WASM
+/// events in the shared Sentry project (ADR-036).
+///
+/// `default_integrations` stays `true` (default) so the standard integrations
+/// (backtrace, contexts, debug-images, panic, release-health) are registered.
+/// The panic integration calls `client.flush(None)` synchronously inside the
+/// panic hook — bounded by the OS TCP timeout rather than infinite. Accepting
+/// this trade-off keeps the integration simple and is preferred over a custom
+/// panic hook with manual integration registration (ADR-036 §6).
+fn init_sentry() -> Option<sentry::ClientInitGuard> {
+    let dsn: &str = env!("SENTRY_DSN_TAURI");
+    if dsn.is_empty() {
+        tracing::info!("[sentry] disabled (no SENTRY_DSN)");
+        return None;
+    }
+
+    // Validate the DSN up-front: `ClientOptions::dsn` panics on an invalid
+    // DSN string (sentry::init docs). Parse once to reject garbage here, then
+    // pass the original string to the builder (which re-parses internally).
+    if let Err(e) = dsn.parse::<sentry::types::Dsn>() {
+        tracing::error!("[sentry] invalid DSN, disabling: {e}");
+        return None;
+    }
+
+    let guard = sentry::init(
+        sentry::ClientOptions::new()
+            .dsn(dsn)
+            .release(env!("SENTRY_RELEASE"))
+            .environment(env!("SENTRY_ENVIRONMENT"))
+            .send_default_pii(false)
+            .in_app_include(["origa", "origa_ui", "origa_app"]),
+    );
+
+    sentry::configure_scope(|scope| {
+        scope.set_tag("layer", "tauri");
+    });
+
+    tracing::info!(
+        "[sentry] enabled (release={}, environment={})",
+        env!("SENTRY_RELEASE"),
+        env!("SENTRY_ENVIRONMENT")
+    );
+
+    Some(guard)
 }

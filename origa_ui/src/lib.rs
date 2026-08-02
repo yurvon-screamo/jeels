@@ -12,6 +12,7 @@ mod loaders;
 mod pages;
 mod repository;
 mod routes;
+mod sentry;
 mod store;
 mod ui_components;
 pub mod utils;
@@ -22,6 +23,18 @@ pub fn init_tracing() {
     }
 
     console_error_panic_hook::set_once();
+
+    // Wrap the console panic hook so Rust panics are first forwarded to
+    // Sentry, then logged to the browser console. `set_once` uses an internal
+    // `Once`, so calling `take_hook` after it returns the console hook; we
+    // re-wrap it with a Sentry-capturing closure. See ADR-036 §5.
+    let console_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        sentry::capture_exception(&info.to_string());
+        console_hook(info);
+    }));
+
+    sentry::init();
 
     let mut builder = WASMLayerConfigBuilder::new();
 

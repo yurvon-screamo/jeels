@@ -22,7 +22,7 @@
             }
         ],
         "security": {
-            "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io; connect-src 'self' ipc: http://ipc.localhost https://s3.origa.uwuwu.net https://origa.uwuwu.net https://app.origa.uwuwu.net https://huggingface.co https://signal.pyke.io https://cdn.pyke.io; img-src 'self' data: blob: https://s3.origa.uwuwu.net; media-src 'self' blob: https://s3.origa.uwuwu.net; style-src 'self' 'unsafe-inline'; font-src 'self' https://s3.origa.uwuwu.net; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
+            "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost https://s3.origa.uwuwu.net https://origa.uwuwu.net https://app.origa.uwuwu.net https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://o4511840951992320.ingest.us.sentry.io; img-src 'self' data: blob: https://s3.origa.uwuwu.net; media-src 'self' blob: https://s3.origa.uwuwu.net; style-src 'self' 'unsafe-inline'; font-src 'self' https://s3.origa.uwuwu.net; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
         }
     },
     "bundle": {
