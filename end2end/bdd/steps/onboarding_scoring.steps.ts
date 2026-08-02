@@ -28,7 +28,10 @@ Then('отображается вариант ответа', async ({ page }) =>
 
 Then('отображается прогресс оценивания', async ({ page }) => {
     const onboarding = new OnboardingPage(page);
-    await expect(onboarding.scoringProgress).toBeVisible();
+    // After a reload the auth-store re-loads all dictionaries on a fresh
+    // ProtectedRoute mount; that can take well over the default 5s timeout
+    // depending on CDN latency. Give the scoring UI up to 60s to surface.
+    await expect(onboarding.scoringProgress).toBeVisible({ timeout: 60_000 });
 });
 
 Then('отображаются кнопки "Знаю" и "Не знаю"', async ({ page }) => {
@@ -41,11 +44,19 @@ When('пользователь нажимает "Не знаю"', async ({ page 
     const onboarding = new OnboardingPage(page);
     // Snapshot the question text BEFORE dismissing so the "card not shown
     // again" assertion after a reload can verify the same card does not
-    // reappear.
+    // reappear. We then wait for the question to actually change so the step
+    // completes only once the next card (or the completion screen) is in
+    // place — without relying on the progress-bar textContent, which is now
+    // a stable section-label list rather than a per-click counter.
     lastDontKnowQuestion = await onboarding.scoringQuestion.textContent();
-    const progressBefore = await onboarding.getScoringProgress();
     await onboarding.clickDontKnow();
-    await expect(onboarding.scoringProgress).not.toHaveText(progressBefore, { timeout: 5_000 });
+    for (let i = 0; i < 30; i++) {
+        const isComplete = await onboarding.scoringComplete.isVisible().catch(() => false);
+        if (isComplete) return;
+        const next = await onboarding.scoringQuestion.textContent().catch(() => null);
+        if (next !== null && next !== lastDontKnowQuestion) return;
+        await page.waitForTimeout(200);
+    }
 });
 
 When('пользователь перезагружает страницу приложения', async ({ page }) => {

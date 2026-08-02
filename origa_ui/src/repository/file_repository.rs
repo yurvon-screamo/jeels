@@ -116,15 +116,6 @@ impl UserRepository for FileSystemUserRepository {
         }
 
         let users = self.list_users().await?;
-        // Backfill the onboarding-completed marker for users persisted before
-        // the marker existed. Idempotent — no-op once the marker is present.
-        // The marker lives in memory after this read and is written back to
-        // storage lazily on the next `save` (rate card, etc.); routing only
-        // needs the in-memory view.
-        let mut users: Vec<User> = users;
-        for user in &mut users {
-            user.migrate_onboarding_state();
-        }
         Ok(users.into_iter().next())
     }
 

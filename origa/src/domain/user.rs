@@ -284,22 +284,6 @@ impl User {
         }
     }
 
-    /// Backfills the `__onboarding_completed__` marker for users persisted
-    /// before this field existed. Legacy users with imported sets but no
-    /// completion marker are assumed to have finished onboarding (the previous
-    /// routing logic treated any non-empty `imported_sets` as "done"). New
-    /// users and skipped users are left untouched.
-    pub fn migrate_onboarding_state(&mut self) {
-        if self.is_onboarding_completed() {
-            return;
-        }
-        if !self.imported_sets.is_empty() {
-            self.imported_sets
-                .insert(ONBOARDING_COMPLETED_KEY.to_string());
-            self.touch();
-        }
-    }
-
     pub fn is_word_known(&self, word: &str) -> WordKnowledge {
         let meaning = get_translation(word, self.native_language());
 
@@ -1071,48 +1055,6 @@ mod tests {
         user.mark_set_as_imported(ONBOARDING_SKIPPED_KEY.to_string());
 
         assert!(user.is_onboarding_completed());
-    }
-
-    #[test]
-    fn migrate_onboarding_state_marks_legacy_users_with_imported_sets() {
-        let mut user = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-        user.mark_set_as_imported("jlpt_n5".to_string());
-
-        user.migrate_onboarding_state();
-
-        assert!(user.is_onboarding_completed());
-    }
-
-    #[test]
-    fn migrate_onboarding_state_leaves_new_users_untouched() {
-        let mut user = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-
-        user.migrate_onboarding_state();
-
-        assert!(!user.is_onboarding_completed());
-    }
-
-    #[test]
-    fn migrate_onboarding_state_skips_already_completed_users() {
-        let mut user = User::new(
-            "test@example.com".to_string(),
-            NativeLanguage::Russian,
-            None,
-        );
-        user.mark_onboarding_completed();
-        let sets_before = user.imported_sets().clone();
-
-        user.migrate_onboarding_state();
-
-        assert_eq!(user.imported_sets(), &sets_before);
     }
 
     #[test]

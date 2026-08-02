@@ -192,18 +192,9 @@ fn user_to_json(user: &User, trailbase_id: &str) -> Result<serde_json::Value, Or
 
 impl UserRepository for TrailBaseUserRepository {
     async fn get_current_user(&self) -> Result<Option<User>, OrigaError> {
-        let mut opt = self
-            .find_current()
+        self.find_current()
             .await
-            .map(|opt| opt.map(|(user, _)| user))?;
-        // Backfill the onboarding-completed marker for users persisted before
-        // the marker existed (covers cross-device logins where the remote
-        // record was last written by an older app version). In-memory only;
-        // written back lazily on the next `save`.
-        if let Some(user) = &mut opt {
-            user.migrate_onboarding_state();
-        }
-        Ok(opt)
+            .map(|opt| opt.map(|(user, _)| user))
     }
 
     async fn save(&self, user: &User) -> Result<(), OrigaError> {
