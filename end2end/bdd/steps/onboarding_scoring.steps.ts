@@ -4,6 +4,12 @@ import { OnboardingPage } from "../../pages";
 import { completeOnboardingToScoring } from "../../helpers/onboarding";
 import { skipOnboarding } from "../../helpers/navigation";
 
+// Module-scoped snapshot of the question text captured by the "Не знаю" step
+// so the "card not shown again" assertion can verify it differs from the
+// current question after a reload. Scenario-scoped because playwright-bdd
+// runs scenarios sequentially within a file.
+let lastDontKnowQuestion: string | null = null;
+
 Given('новый пользователь дошёл до шага оценивания карточек', async ({ page }) => {
     const reached = await completeOnboardingToScoring(page);
     expect(reached).toBeTruthy();
@@ -33,9 +39,47 @@ Then('отображаются кнопки "Знаю" и "Не знаю"', asyn
 
 When('пользователь нажимает "Не знаю"', async ({ page }) => {
     const onboarding = new OnboardingPage(page);
+    // Snapshot the question text BEFORE dismissing so the "card not shown
+    // again" assertion after a reload can verify the same card does not
+    // reappear.
+    lastDontKnowQuestion = await onboarding.scoringQuestion.textContent();
     const progressBefore = await onboarding.getScoringProgress();
     await onboarding.clickDontKnow();
     await expect(onboarding.scoringProgress).not.toHaveText(progressBefore, { timeout: 5_000 });
+});
+
+When('пользователь перезагружает страницу приложения', async ({ page }) => {
+    await page.reload();
+});
+
+Then('карточка "Не знаю" не показывается снова', async ({ page }) => {
+    // AC #1 verification: skipped-card persistence. After a reload the
+    // scoring step must resume from where the user left off, so the card
+    // dismissed via "Don't know" (snapshotted in `lastDontKnowQuestion`)
+    // must NOT reappear.
+    expect(
+        lastDontKnowQuestion,
+        "snapshot from the previous 'Не знаю' step is required for this assertion",
+    ).not.toBeNull();
+
+    const onboarding = new OnboardingPage(page);
+    await expect(onboarding.scoringHint).toBeVisible({ timeout: 30_000 });
+    await expect(onboarding.scoringQuestion).toBeVisible({ timeout: 30_000 });
+    const current = await onboarding.scoringQuestion.textContent();
+    expect(current, "scoring question must be loaded after reload").not.toBeNull();
+    expect(current, "skipped card must not reappear after reload").not.toBe(
+        lastDontKnowQuestion,
+    );
+});
+
+Then('отображаются метки секций прогресс-бара', async ({ page }) => {
+    // Section markers are rendered as separate divs with stable test-ids
+    // derived from CardType::sort_order() (Grammar=0, Kanji=1, Vocab=2).
+    // The exact set visible depends on which cards the imported sets
+    // produced; we assert at least one marker is rendered for the typical
+    // onboarding (which always imports Vocabulary cards from jlpt_n5).
+    const markers = page.locator('[data-testid^="scoring-progress-marker-"]');
+    await expect(markers.first()).toBeVisible({ timeout: 10_000 });
 });
 
 When('пользователь нажимает "Знаю"', async ({ page }) => {

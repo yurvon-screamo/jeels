@@ -187,7 +187,15 @@
             "no_new_cards": "No new cards to assess",
             "all_new": "All cards are new — time to study!",
             "you_know_count": "You know {known} of {total} cards",
-            "press_finish": "Press \"Finish\" to start learning"
+            "press_finish": "Press \"Finish\" to start learning",
+            "section": {
+                "grammar": "Grammar",
+                "kanji": "Kanji",
+                "vocabulary": "Vocabulary",
+                "phrase": "Phrases"
+            },
+            "reading_on": "On",
+            "reading_kun": "Kun"
         },
         "summary": {
             "title": "Ready to import",

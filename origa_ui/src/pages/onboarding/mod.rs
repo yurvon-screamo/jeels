@@ -6,7 +6,10 @@ mod intro_step;
 mod jlpt_step;
 mod load_step;
 mod progress;
+mod scoring_card_view;
 mod scoring_helpers;
+mod scoring_mark_all;
+mod scoring_progress;
 mod scoring_step;
 mod summary_step;
 
@@ -26,7 +29,9 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use leptos_router::hooks::use_navigate;
 use load_step::LoadStep;
-use onboarding_actions::{create_on_skip_callback, create_on_start_import_callback};
+use onboarding_actions::{
+    create_on_finish_callback, create_on_skip_callback, create_on_start_import_callback,
+};
 use onboarding_state::{OnboardingState, OnboardingStep};
 use origa::domain::NativeLanguage;
 use origa::domain::User;
@@ -170,9 +175,18 @@ pub fn Onboarding() -> impl IntoView {
                         return;
                     }
                     current_user.set(Some(user.clone()));
-                    if !user.imported_sets().is_empty() {
+                    if user.is_onboarding_completed() {
                         nav("/home", Default::default());
                         return;
+                    }
+                    // Resume mid-flight onboarding (after app restart): if
+                    // sets have already been imported, jump straight to the
+                    // scoring step instead of forcing the user to walk through
+                    // the intro/jlpt/apps flow again.
+                    if !user.imported_sets().is_empty() {
+                        state.update(|s| {
+                            s.current_step = OnboardingStep::Scoring;
+                        });
                     }
                 },
                 Ok(None) => {
@@ -219,12 +233,10 @@ pub fn Onboarding() -> impl IntoView {
 
     let on_skip = create_on_skip_callback(repository.clone(), state, disposed, navigate_for_skip);
 
+    let on_finish = create_on_finish_callback(repository.clone(), disposed, navigate_for_finish);
+
     let on_start_import =
         create_on_start_import_callback(repository, state, current_user, is_importing, disposed);
-
-    let on_finish = Callback::new(move |_: ()| {
-        navigate_for_finish("/home", Default::default());
-    });
 
     let can_proceed = Memo::new(move |_| state.get().can_proceed());
 

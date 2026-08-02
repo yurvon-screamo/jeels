@@ -49,6 +49,19 @@ impl CardType {
             CardType::Phrase => TagVariant::Sage,
         }
     }
+
+    /// Stable ordering used by the onboarding scoring step to group cards by
+    /// type so the user evaluates grammar first, then kanji, then vocabulary,
+    /// then phrases — rather than the hash-randomized order of `HashMap`.
+    /// Lower numbers come first.
+    pub fn sort_order(&self) -> u8 {
+        match self {
+            CardType::Grammar => 0,
+            CardType::Kanji => 1,
+            CardType::Vocabulary => 2,
+            CardType::Phrase => 3,
+        }
+    }
 }
 
 impl From<&DomainCard> for CardType {

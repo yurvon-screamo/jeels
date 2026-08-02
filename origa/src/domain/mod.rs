@@ -55,7 +55,7 @@ pub use tokenizer::{
     init_dictionary_from_rkyv, is_dictionary_loaded, lookup_tokens_translations,
     serialize_dictionary_to_rkyv, tokenize_text,
 };
-pub use user::{User, WordKnowledge};
+pub use user::{ONBOARDING_COMPLETED_KEY, ONBOARDING_SKIPPED_KEY, User, WordKnowledge};
 pub use value_objects::{CardAnswer, DailyLoad, JapaneseLevel, NativeLanguage, Question};
 pub use well_known_set::{
     SetType, TypeMeta, TypesMeta, WellKnownSet, WellKnownSetMeta, get_types_meta, id_to_set_type,

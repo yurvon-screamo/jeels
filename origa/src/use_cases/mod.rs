@@ -1,4 +1,5 @@
 mod analyze_text_for_cards;
+mod complete_onboarding_scoring;
 mod create_cards_from_analysis;
 mod create_grammar_card;
 mod create_kanji_card;
@@ -25,6 +26,7 @@ mod tests;
 pub use tests::fixtures::{init_phrase_index_from_cdn, init_real_dictionaries};
 
 pub use analyze_text_for_cards::{AnalyzeTextForCardsUseCase, AnalyzeTextResult, AnalyzedWord};
+pub use complete_onboarding_scoring::CompleteOnboardingScoringUseCase;
 pub use create_cards_from_analysis::{
     CreateCardsFromAnalysisResult, CreateCardsFromAnalysisUseCase, WordToCreate,
 };

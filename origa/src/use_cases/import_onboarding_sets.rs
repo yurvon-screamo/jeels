@@ -3,11 +3,11 @@ use std::collections::HashSet;
 use tracing::{debug, info, warn};
 
 use crate::dictionary::grammar::get_rules_by_level;
+use crate::domain::resolve_set_path;
 use crate::domain::{
     Card, GrammarRuleCard, JapaneseLevel, KanjiCard, OrigaError, StudyCard, User, VocabularyCard,
     WellKnownSet,
 };
-use crate::domain::{id_to_set_type, resolve_set_path};
 use crate::traits::{CdnProvider, UserRepository};
 
 pub struct ImportOnboardingResult {
@@ -34,10 +34,10 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
         &self,
         mut user: User,
         set_ids: Vec<String>,
+        target_level: JapaneseLevel,
     ) -> Result<ImportOnboardingResult, OrigaError> {
-        debug!(user_id = %user.id(), set_count = set_ids.len(), "Starting onboarding sets import");
+        debug!(user_id = %user.id(), set_count = set_ids.len(), ?target_level, "Starting onboarding sets import");
 
-        let current_level = user.current_japanese_level();
         let native_language = *user.native_language();
 
         let sets = self.load_sets_via_cdn(&set_ids).await?;
@@ -52,15 +52,17 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
         };
 
         let mut created_kanji_chars: HashSet<String> = HashSet::new();
-        let mut jlpt_imported_levels: HashSet<JapaneseLevel> = HashSet::new();
+        let mut grammar_levels: HashSet<JapaneseLevel> = HashSet::new();
 
         for (set_id, set) in sets {
             debug!(set_id = %set_id, words_count = set.words().len(), "Processing set");
 
             let set_level = *set.level();
-            if id_to_set_type(&set_id) == "Jlpt" {
-                jlpt_imported_levels.insert(set_level);
-            }
+            // Grammar is keyed by JLPT level, so any set contributes its own
+            // level — previously gated to "Jlpt"-prefixed ids only, which left
+            // Minna / Irodori / Duolingo without grammar.
+            grammar_levels.insert(set_level);
+
             let words_result = VocabularyCard::from_text(&set.words().join(" "), &native_language);
 
             result.skipped_no_translation += words_result.skipped_no_translation.len();
@@ -76,7 +78,7 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
                     self.process_kanji_from_vocab(
                         &study_card,
                         set_level,
-                        &current_level,
+                        &target_level,
                         &mut user,
                         &mut created_kanji_chars,
                         &mut result,
@@ -87,9 +89,18 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
             result.imported_set_ids.push(set_id);
         }
 
-        debug!(levels = ?jlpt_imported_levels, "Importing grammar rules for onboarding levels");
+        // Pull in every level at or below the target so a user picking N3 also
+        // gets N5/N4/N2/... grammar rules they should already know, regardless
+        // of which sets they imported.
+        for level in JapaneseLevel::ALL {
+            if level <= target_level {
+                grammar_levels.insert(level);
+            }
+        }
 
-        for level in &jlpt_imported_levels {
+        debug!(levels = ?grammar_levels, "Importing grammar rules for onboarding levels");
+
+        for level in &grammar_levels {
             let grammar_rules = get_rules_by_level(level);
             for rule in grammar_rules {
                 if let Ok(grammar_card) = GrammarRuleCard::new(*rule.rule_id()) {
@@ -173,11 +184,11 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
     fn extract_kanji_chars(
         &self,
         study_card: &StudyCard,
-        current_level: &JapaneseLevel,
+        target_level: &JapaneseLevel,
     ) -> Vec<String> {
         if let Card::Vocabulary(vocab) = study_card.card() {
             vocab
-                .get_kanji_cards(current_level)
+                .get_kanji_cards(target_level)
                 .into_iter()
                 .map(|info| info.kanji().to_string())
                 .collect()
@@ -190,19 +201,19 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
         &self,
         study_card: &StudyCard,
         set_level: JapaneseLevel,
-        current_level: &JapaneseLevel,
+        target_level: &JapaneseLevel,
         user: &mut crate::domain::User,
         created_kanji_chars: &mut HashSet<String>,
         result: &mut ImportOnboardingResult,
     ) {
-        let kanji_chars = self.extract_kanji_chars(study_card, current_level);
+        let kanji_chars = self.extract_kanji_chars(study_card, target_level);
 
         for kanji_char in kanji_chars {
             if created_kanji_chars.contains(&kanji_char) {
                 continue;
             }
 
-            if !self.should_create_kanji_card(&kanji_char, set_level, current_level) {
+            if !self.should_create_kanji_card(&kanji_char, set_level, target_level) {
                 continue;
             }
 
@@ -217,11 +228,11 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
         &self,
         kanji_char: &str,
         set_level: JapaneseLevel,
-        current_level: &JapaneseLevel,
+        target_level: &JapaneseLevel,
     ) -> bool {
-        set_level <= *current_level
+        set_level <= *target_level
             || crate::dictionary::kanji::get_kanji_info(kanji_char)
-                .map(|info| info.jlpt() <= current_level)
+                .map(|info| info.jlpt() <= target_level)
                 .unwrap_or(false)
     }
 
