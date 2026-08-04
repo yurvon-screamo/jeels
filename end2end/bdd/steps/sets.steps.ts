@@ -141,8 +141,15 @@ Then('отображается больше наборов', async ({ page }) =>
 });
 
 When('пользователь эмулирует отсутствие сети', async ({ page }) => {
-    // Block only CDN requests, not the SPA itself — full offline mode
-    // prevents the WASM app from loading at all.
+    // Clear Cache API so CDN requests are not served from cache by
+    // CacheFirstCdnProvider — previous scenarios populate it.
+    await page.evaluate(() => {
+        return caches.keys().then((keys) =>
+            Promise.all(keys.map((k) => caches.delete(k)))
+        );
+    });
+
+    // Block CDN requests to simulate network failure for sets data.
     await page.route('**/well_known_set/**', (route) =>
         route.abort('failed')
     );
