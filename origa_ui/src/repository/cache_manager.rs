@@ -9,7 +9,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
 #[cfg(target_arch = "wasm32")]
-use super::cdn_provider::CDN_CACHE_NAME;
+use super::cdn_provider::{CDN_CACHE_NAME, cdn_cache_url};
 #[cfg(target_arch = "wasm32")]
 use super::dictionary_cache::RKYV_CACHE_NAME;
 #[cfg(target_arch = "wasm32")]
@@ -175,7 +175,7 @@ async fn open_cdn_cache() -> Result<web_sys::Cache, OrigaError> {
 
 #[cfg(target_arch = "wasm32")]
 async fn get_local_manifest(cache: &web_sys::Cache) -> Option<CacheManifest> {
-    let result = JsFuture::from(cache.match_with_str(MANIFEST_CACHE_KEY))
+    let result = JsFuture::from(cache.match_with_str(&cdn_cache_url(MANIFEST_CACHE_KEY)))
         .await
         .ok()?;
 
@@ -215,7 +215,7 @@ fn find_stale_entries(local: &CacheManifest, remote: &CacheManifest) -> Vec<Stri
 #[cfg(target_arch = "wasm32")]
 async fn invalidate_stale_entries(cache: &web_sys::Cache, stale_paths: &[String]) {
     for path in stale_paths {
-        match JsFuture::from(cache.delete_with_str(path)).await {
+        match JsFuture::from(cache.delete_with_str(&cdn_cache_url(path))).await {
             Ok(result) => {
                 let deleted = result.is_truthy();
                 tracing::debug!(path = %path, deleted = deleted, "Cache entry invalidation");
@@ -249,7 +249,7 @@ async fn invalidate_rkyv_dictionary() -> Result<(), OrigaError> {
 
     let dict_key = crate::core::config::urls().dictionary;
 
-    JsFuture::from(cache.delete_with_str(dict_key))
+    JsFuture::from(cache.delete_with_str(&cdn_cache_url(dict_key)))
         .await
         .map_err(|e| OrigaError::RepositoryError {
             reason: format!("Failed to delete rkyv dictionary cache: {:?}", e),
@@ -288,11 +288,12 @@ async fn save_local_manifest(
             reason: format!("Failed to create manifest response: {:?}", e),
         })?;
 
-    let request = web_sys::Request::new_with_str(MANIFEST_CACHE_KEY).map_err(|e| {
-        OrigaError::RepositoryError {
-            reason: format!("Failed to create manifest request: {:?}", e),
-        }
-    })?;
+    let request =
+        web_sys::Request::new_with_str(&cdn_cache_url(MANIFEST_CACHE_KEY)).map_err(|e| {
+            OrigaError::RepositoryError {
+                reason: format!("Failed to create manifest request: {:?}", e),
+            }
+        })?;
 
     JsFuture::from(cache.put_with_request(&request, &response))
         .await

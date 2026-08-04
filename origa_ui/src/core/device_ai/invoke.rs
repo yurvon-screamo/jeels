@@ -107,15 +107,12 @@ pub async fn recognize_live(language: &str) -> Result<RecognitionResult, String>
 /// Invokes a plugin command and races the result promise against a timeout so
 /// a hung native call cannot block the UI permanently.
 async fn invoke(command: &str, args: &JsValue, timeout: Duration) -> Result<JsValue, String> {
-    let result = tauri::invoke_with_args(command, args).await?;
-    race_with_timeout(result, timeout).await
+    tracing::debug!("device-ai: invoking {command} (timeout {timeout:?})");
+    let promise = tauri::invoke_promise(command, args)?;
+    race_with_timeout(promise, timeout).await
 }
 
-async fn race_with_timeout(promise_value: JsValue, timeout: Duration) -> Result<JsValue, String> {
-    let promise = promise_value
-        .dyn_into::<js_sys::Promise>()
-        .map_err(|_| "plugin command did not return a Promise".to_string())?;
-
+async fn race_with_timeout(promise: js_sys::Promise, timeout: Duration) -> Result<JsValue, String> {
     let timeout_promise = make_timeout_promise(timeout);
 
     let raced = js_sys::Promise::race(&js_sys::Array::of2(&promise, &timeout_promise));

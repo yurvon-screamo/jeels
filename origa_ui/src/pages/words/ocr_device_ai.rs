@@ -8,7 +8,7 @@
 use crate::core::device_ai::{self, Feature};
 use crate::ui_components::{OcrLoadingStage, OcrLoadingState};
 use leptos::prelude::*;
-use tracing::warn;
+use tracing::{info, warn};
 
 /// Attempts native OCR on a base64-encoded image. Returns `Some(text)` on
 /// success, or `None` when native OCR is unavailable or fails — signalling
@@ -18,8 +18,10 @@ pub(super) async fn recognize_via_device_ai(
     loading_state: &OcrLoadingState,
 ) -> Option<String> {
     if !device_ai::available(Feature::TextRecognition).await {
+        info!("OCR: native device-ai unavailable, using WASM NDLOCR fallback");
         return None;
     }
+    info!("OCR: using native device-ai text recognition");
 
     // No model download or initialization stage for native OCR — jump straight
     // to recognition so the UI reflects the actual work.

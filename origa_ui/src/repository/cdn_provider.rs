@@ -103,9 +103,11 @@ pub async fn store_cache_marker(key: &str, value: &str) -> Result<(), OrigaError
             reason: format!("Failed to create marker response: {:?}", e),
         }
     })?;
-    let request = web_sys::Request::new_with_str(key).map_err(|e| OrigaError::RepositoryError {
-        reason: format!("Failed to create marker request: {:?}", e),
-    })?;
+    let url = cdn_cache_url(key);
+    let request =
+        web_sys::Request::new_with_str(&url).map_err(|e| OrigaError::RepositoryError {
+            reason: format!("Failed to create marker request: {:?}", e),
+        })?;
     JsFuture::from(cache.put_with_request(&request, &response))
         .await
         .map_err(|e| OrigaError::RepositoryError {
@@ -122,8 +124,24 @@ fn ensure_leading_slash(path: &str) -> String {
     }
 }
 
+/// Absolute URL used as the Cache API key for `path`.
+///
+/// The Cache API rejects request URLs that are not HTTP(S): a relative path
+/// resolves against the WebView origin (`tauri://localhost` on iOS and desktop
+/// production builds) and WebKit throws `Request url is not HTTP/HTTPS`. Keys
+/// are therefore always built on the full CDN base.
+///
+/// Unlike [`crate::core::config::cdn_url`], preserves any `?v=` query string —
+/// phrase chunks and versioned content use it as a content hash, so it must be
+/// part of the cache key or a content change would keep serving the stale entry.
+pub(crate) fn cdn_cache_url(path: &str) -> String {
+    let base = env!("ORIGA_CDN_BASE_URL").trim_end_matches('/');
+    format!("{}{}", base, ensure_leading_slash(path))
+}
+
 async fn get_text_from_cache(cache: &web_sys::Cache, path: &str) -> Option<String> {
-    let result = JsFuture::from(cache.match_with_str(path)).await.ok()?;
+    let url = cdn_cache_url(path);
+    let result = JsFuture::from(cache.match_with_str(&url)).await.ok()?;
     if result.is_null() || result.is_undefined() {
         return None;
     }
@@ -136,7 +154,8 @@ async fn get_text_from_cache(cache: &web_sys::Cache, path: &str) -> Option<Strin
 }
 
 async fn get_bytes_from_cache(cache: &web_sys::Cache, path: &str) -> Option<Vec<u8>> {
-    let result = JsFuture::from(cache.match_with_str(path)).await.ok()?;
+    let url = cdn_cache_url(path);
+    let result = JsFuture::from(cache.match_with_str(&url)).await.ok()?;
     if result.is_null() || result.is_undefined() {
         return None;
     }
@@ -154,8 +173,9 @@ async fn save_response_to_cache(
     path: &str,
     response: &web_sys::Response,
 ) -> Result<(), OrigaError> {
+    let url = cdn_cache_url(path);
     let request =
-        web_sys::Request::new_with_str(path).map_err(|e| OrigaError::RepositoryError {
+        web_sys::Request::new_with_str(&url).map_err(|e| OrigaError::RepositoryError {
             reason: format!("Failed to create cache request: {:?}", e),
         })?;
 
@@ -408,7 +428,7 @@ pub async fn prefetch_to_cache(path: &str) -> Result<(), OrigaError> {
     let cache = open_cache().await?;
     let key = ensure_leading_slash(path);
 
-    let existing = JsFuture::from(cache.match_with_str(&key))
+    let existing = JsFuture::from(cache.match_with_str(&cdn_cache_url(&key)))
         .await
         .map_err(|e| OrigaError::RepositoryError {
             reason: format!("Cache match failed: {:?}", e),
@@ -445,10 +465,11 @@ pub async fn prefetch_to_cache(path: &str) -> Result<(), OrigaError> {
         });
     }
 
-    let request =
-        web_sys::Request::new_with_str(&key).map_err(|e| OrigaError::RepositoryError {
+    let request = web_sys::Request::new_with_str(&cdn_cache_url(&key)).map_err(|e| {
+        OrigaError::RepositoryError {
             reason: format!("Failed to create request: {:?}", e),
-        })?;
+        }
+    })?;
 
     JsFuture::from(cache.put_with_request(&request, &response))
         .await
@@ -464,7 +485,7 @@ pub async fn is_cached(path: &str) -> bool {
         return false;
     };
     let key = ensure_leading_slash(path);
-    let Ok(result) = JsFuture::from(cache.match_with_str(&key)).await else {
+    let Ok(result) = JsFuture::from(cache.match_with_str(&cdn_cache_url(&key))).await else {
         return false;
     };
     !result.is_null() && !result.is_undefined()

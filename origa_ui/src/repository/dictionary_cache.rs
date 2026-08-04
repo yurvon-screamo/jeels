@@ -3,6 +3,7 @@ use wasm_bindgen_futures::JsFuture;
 
 use origa::domain::{DictionaryData, OrigaError};
 
+use super::cdn_provider::cdn_cache_url;
 use crate::core::config::urls;
 
 pub const RKYV_CACHE_NAME: &str = "origa-dictionary-rkyv-v2";
@@ -44,7 +45,7 @@ pub async fn get_cached_dictionary_rkyv() -> Result<Option<Vec<u8>>, OrigaError>
     let url = urls().dictionary;
 
     let match_start = now_ms();
-    let match_promise = cache.match_with_str(url);
+    let match_promise = cache.match_with_str(&cdn_cache_url(url));
     let response_option =
         JsFuture::from(match_promise)
             .await
@@ -146,7 +147,7 @@ pub async fn save_dictionary_to_cache_rkyv(data: &DictionaryData) -> Result<(), 
 
     let url = urls().dictionary;
     let put_start = now_ms();
-    let put_promise = cache.put_with_str(url, &response);
+    let put_promise = cache.put_with_str(&cdn_cache_url(url), &response);
     JsFuture::from(put_promise)
         .await
         .map_err(|e| OrigaError::RepositoryError {

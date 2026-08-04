@@ -8,7 +8,7 @@ use leptos::wasm_bindgen::JsCast;
 use leptos::wasm_bindgen::JsValue;
 use leptos::wasm_bindgen::closure::Closure;
 use origa::domain::furiganize_segments;
-use tracing::warn;
+use tracing::{info, warn};
 use web_sys::js_sys::Function;
 use web_sys::{SpeechSynthesisUtterance, SpeechSynthesisVoice, window};
 
@@ -255,8 +255,10 @@ pub fn speak_tts_text(text: &str, rate: f32) -> Result<(), String> {
             // plugin:tts is the fallback (Windows/Linux, or where device-ai is
             // unavailable). Routing is runtime-resolved via capabilities.
             let result = if device_ai::available(Feature::SpeechSynthesis).await {
+                info!("TTS: using native device-ai synthesis");
                 device_ai_speak(&text_owned, rate).await
             } else {
+                info!("TTS: native device-ai unavailable, using legacy plugin:tts");
                 invoke_tauri_speak(&text_owned, rate).await
             };
             if let Err(e) = result {
@@ -303,11 +305,13 @@ where
             // plugin:tts path instead emits `tts://speech:finish`, consumed by
             // the registered listener; device-ai never emits that event.
             if device_ai::available(Feature::SpeechSynthesis).await {
+                info!("TTS: using native device-ai synthesis");
                 if let Err(e) = device_ai_speak(&text_owned, rate).await {
                     warn!("TTS speak error: {}", e);
                 }
                 on_end();
             } else {
+                info!("TTS: native device-ai unavailable, using legacy plugin:tts");
                 TTS_CALLBACK.with(|cell| {
                     *cell.borrow_mut() = Some(Box::new(on_end));
                 });

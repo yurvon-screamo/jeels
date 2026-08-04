@@ -189,14 +189,24 @@ fn try_native_webview_reload() -> bool {
 ///
 /// Returns the resolved promise value, or an error string describing the failure.
 pub async fn invoke_with_args(command: &str, args: &JsValue) -> Result<JsValue, String> {
+    let promise = invoke_promise(command, args)?;
+    JsFuture::from(promise)
+        .await
+        .map_err(|e| format!("invoke('{command}') rejected: {e:?}"))
+}
+
+/// Returns the raw JS Promise for a Tauri command invocation, without awaiting.
+///
+/// Callers that need to race the call against a timeout (see
+/// `device_ai::invoke`) use this to keep the promise pending while the race
+/// runs; awaiting first (as `invoke_with_args` does) would hand back the
+/// resolved value, which is no longer a Promise.
+pub fn invoke_promise(command: &str, args: &JsValue) -> Result<js_sys::Promise, String> {
     let invoke = invoke_fn().ok_or_else(|| "Tauri invoke not available".to_string())?;
     let result = invoke
         .call2(&JsValue::UNDEFINED, &JsValue::from_str(command), args)
         .map_err(|e| format!("invoke('{command}') call failed: {e:?}"))?;
-    let promise = result
+    result
         .dyn_into::<js_sys::Promise>()
-        .map_err(|_| format!("invoke('{command}') did not return a Promise"))?;
-    JsFuture::from(promise)
-        .await
-        .map_err(|e| format!("invoke('{command}') rejected: {e:?}"))
+        .map_err(|_| format!("invoke('{command}') did not return a Promise"))
 }
