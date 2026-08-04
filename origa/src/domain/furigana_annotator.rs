@@ -198,10 +198,8 @@ mod tests {
 大人|おとな|0-1:おとな
 大人|だいじん|0-1:だいじん
 指|ゆび|0:ゆび
-明日|あした|0-1:あした
-明日|あす|0-1:あす
 ";
-            furigana_dict::init_furigana_dict(content).unwrap();
+            let _ = furigana_dict::init_furigana_dict(content);
         }
     }
 
@@ -269,6 +267,20 @@ mod tests {
         assert!(tabe.unwrap().reading.is_some());
     }
 
+    /// Read the real JmdictFurigana.txt from the CDN dictionaries directory.
+    /// This ensures test data matches production (e.g. 明日 frequency ordering).
+    fn read_real_furigana_dict() -> String {
+        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let path = std::path::PathBuf::from(manifest_dir)
+            .parent()
+            .unwrap()
+            .join("cdn")
+            .join("dictionaries")
+            .join("JmdictFurigana.txt");
+        std::fs::read_to_string(&path)
+            .expect("JmdictFurigana.txt should exist in cdn/dictionaries/")
+    }
+
     // 明日 has multiple readings: あした (most common), あす (literary),
     // みょうにち (formal). JmdictFurigana.txt lists them in frequency order.
     // The annotator must pick the FIRST entry (most common = あした), not
@@ -276,14 +288,29 @@ mod tests {
     // the literary reading あす.
     #[test]
     fn annotate_text_picks_most_frequent_reading_for_multi_reading_word() {
-        setup_dictionaries();
-        let result = annotate_text("明日").unwrap();
+        // Build a local dictionary to avoid depending on test execution
+        // order — the global OnceLock may already be populated by other
+        // test modules with inline data that doesn't include 明日.
+        let content = "\
+明日|あした|0-1:あした
+明日|あす|0-1:あす
+";
+        let dict = furigana_dict::FuriganaDictionary::from_text(content).unwrap();
 
-        let ashita = result.iter().find(|s| s.text.contains('明'));
-        assert!(ashita.is_some(), "明日 span should exist");
-        let span = ashita.unwrap();
+        // Resolve the annotation for the 明日 token as a Single-type
+        // InternalToken — this is the path that previously called
+        // sort_by_reading_hint and could pick the wrong reading.
+        let token = InternalToken::Single {
+            surface: "明日".to_string(),
+            lookup_text: "明日".to_string(),
+            reading_hint: Some("アス".to_string()),
+        };
+        let span = resolve_annotation(token, &dict);
+
         let reading = span.reading.as_ref().expect("明日 should have a reading");
-        // hiragana_to_katakana is applied, so あした becomes アシタ
+        // hiragana_to_katakana is applied, so あした becomes アシタ.
+        // The reading_hint was アス (literary) — the annotator must NOT
+        // use it and must pick the first dictionary entry instead.
         assert_eq!(
             reading, "アシタ",
             "明日 should use the most frequent reading あした, got {}",
