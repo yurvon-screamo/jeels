@@ -17,6 +17,36 @@ pub enum InputMode {
     Audio,
 }
 
+/// Pure view-stage decision extracted from the component for unit testing.
+/// Determines which content the add-words modal renders, without needing
+/// reactive signals or DOM.
+///
+/// Precedence: analyzing > preview (has words) > no-results (analyzed, empty)
+/// > input (initial/reset).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AnalysisStage {
+    /// No analysis performed yet, or reset — show input tabs.
+    Input,
+    /// Analysis in progress — spinner / disabled state.
+    Analyzing,
+    /// Analysis completed but found 0 words — show feedback message.
+    NoResults,
+    /// Analysis completed with results — show preview list.
+    Preview,
+}
+
+pub fn analysis_stage(words_count: usize, has_analyzed: bool, is_analyzing: bool) -> AnalysisStage {
+    if is_analyzing {
+        AnalysisStage::Analyzing
+    } else if words_count > 0 {
+        AnalysisStage::Preview
+    } else if has_analyzed {
+        AnalysisStage::NoResults
+    } else {
+        AnalysisStage::Input
+    }
+}
+
 #[derive(Clone)]
 pub struct PreviewModalState {
     pub input_mode: RwSignal<InputMode>,
@@ -26,6 +56,10 @@ pub struct PreviewModalState {
     pub selected_words: RwSignal<HashSet<String>>,
     pub is_analyzing: RwSignal<bool>,
     pub is_creating: RwSignal<bool>,
+    /// True once an analysis has finished (success with 0+ words, or the user
+    /// has run at least one `analyze_text`). Reset to false on `reset()`.
+    /// Drives the NoResults feedback branch in the modal.
+    pub has_analyzed: RwSignal<bool>,
     pub error_message: RwSignal<Option<String>>,
     pub repository: HybridUserRepository,
     pub refresh_trigger: RwSignal<u32>,
@@ -57,6 +91,7 @@ impl PreviewModalState {
             selected_words,
             is_analyzing: RwSignal::new(false),
             is_creating: RwSignal::new(false),
+            has_analyzed: RwSignal::new(false),
             error_message: RwSignal::new(None),
             repository,
             refresh_trigger,
@@ -70,6 +105,7 @@ impl PreviewModalState {
         let analyzed_words = self.analyzed_words;
         let selected_words = self.selected_words;
         let is_analyzing = self.is_analyzing;
+        let has_analyzed = self.has_analyzed;
         let error = self.error_message;
         let disposed = self.disposed;
 
@@ -91,6 +127,7 @@ impl PreviewModalState {
                     analyzed_words.set(result.words);
                     selected_words.set(words_to_select);
                     is_analyzing.set(false);
+                    has_analyzed.set(true);
                 },
                 Err(e) => {
                     error!(error = %e, "Text analysis failed");
@@ -115,6 +152,7 @@ impl PreviewModalState {
         self.input_text.set(String::new());
         self.analyzed_words.set(Vec::new());
         self.selected_words.set(HashSet::new());
+        self.has_analyzed.set(false);
         self.error_message.set(None);
     }
 
@@ -157,5 +195,31 @@ impl PreviewModalState {
                 },
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use rstest::rstest;
+
+    #[rstest]
+    #[case::initial_input(0, false, false, AnalysisStage::Input)]
+    #[case::analyzing(0, false, true, AnalysisStage::Analyzing)]
+    #[case::analyzing_with_prior_words(2, true, true, AnalysisStage::Analyzing)]
+    #[case::no_results_after_analysis(0, true, false, AnalysisStage::NoResults)]
+    #[case::preview_with_words(3, true, false, AnalysisStage::Preview)]
+    #[case::preview_ignores_has_analyzed(1, false, false, AnalysisStage::Preview)]
+    fn analysis_stage_decision(
+        #[case] words_count: usize,
+        #[case] has_analyzed: bool,
+        #[case] is_analyzing: bool,
+        #[case] expected: AnalysisStage,
+    ) {
+        assert_eq!(
+            analysis_stage(words_count, has_analyzed, is_analyzing),
+            expected
+        );
     }
 }

@@ -28,6 +28,20 @@ When('вводит текст {string} для анализа', async ({ page }, 
     await wordsPage.analyzeText();
 });
 
+When('вводит нераспознаваемый текст для анализа', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.openAddModal();
+    // Latin punctuation only — lindera tokenizes Japanese; this yields 0
+    // AnalyzedWords and triggers the NoResults feedback branch.
+    await wordsPage.enterText(",,, ... !!!");
+    await wordsPage.analyzeTextNoResults();
+});
+
+Then('отображается сообщение об отсутствии найденных слов', async ({ page }) => {
+    const wordsPage = new WordsPage(page);
+    await expect(wordsPage.noResultsFeedback).toBeVisible();
+});
+
 When('выбирает первое слово из результатов', async ({ page }) => {
     const wordsPage = new WordsPage(page);
     await wordsPage.selectFirstWord();

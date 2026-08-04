@@ -80,9 +80,13 @@ fn BottomTabItem(
     view! {
         <A href=href attr:class=class attr:data-testid=test_id_val attr:aria-current=move || if is_active.get() { "page" } else { "false" }>
             {if use_logo {
-                view! { <Logo size=LogoSize::Sm /> }.into_any()
+                view! {
+                    <span class="bottom-tab-item-logo">
+                        <Logo size=LogoSize::Sm />
+                    </span>
+                }.into_any()
             } else {
-                view! { <Icon icon=icon width="24" height="24" /> }.into_any()
+                view! { <Icon icon=icon width="26" height="26" /> }.into_any()
             }}
             <span class="bottom-tab-item-label">{label}</span>
         </A>
