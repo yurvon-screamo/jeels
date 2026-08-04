@@ -975,6 +975,7 @@ input[type="submit"],
     position: absolute;
     top: 0;
     left: 0;
+    height: 100%;
 }
 
 /* Indeterminate fallback: CDN serves model GETs chunked without Content-Length,
@@ -1542,6 +1543,7 @@ input[type="submit"],
     display: flex;
     z-index: 50;
     width: 100%;
+    overflow-x: hidden;
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
 }
@@ -1610,6 +1612,17 @@ input[type="submit"],
     font-size: var(--text-label-sm);
     letter-spacing: 0.05em;
     line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+@media (max-width: 400px) {
+    .bottom-tab-item-label {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
 }
 
 /* === SIDEBAR === */
@@ -1913,6 +1926,12 @@ rt {
 .kanji-animation-svg {
     width: 109px;
     height: 109px;
+    max-width: 100%;
+}
+
+.kanji-animation-svg svg {
+    max-width: 100%;
+    height: auto;
 }
 
 .kanji-animation-svg path:not(.bg) {
@@ -2321,6 +2340,10 @@ rt {
     background: var(--bg-paper);
     border-color: var(--border-light);
     opacity: 0.5;
+}
+
+.quiz-option-hidden {
+    display: none;
 }
 
 .btn.quiz-option-correct {
@@ -5757,6 +5780,8 @@ rt {
     flex-direction: column;
     gap: 24px;
     padding-bottom: 32px;
+    overflow-x: hidden;
+    min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -5817,6 +5842,7 @@ rt {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
 }
 
 .profile-section {

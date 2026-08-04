@@ -202,6 +202,9 @@ impl OptionDisplay {
             OptionDisplay::Dimmed => {
                 format!("{} opacity-50 pointer-events-none", base)
             },
+            OptionDisplay::Hidden => {
+                format!("{} hidden", base)
+            },
             OptionDisplay::Neutral => base.to_string(),
         }
     }

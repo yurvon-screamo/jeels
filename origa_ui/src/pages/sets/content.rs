@@ -24,6 +24,7 @@ pub fn SetsContent() -> impl IntoView {
 
     let sets: RwSignal<Vec<SetInfo>> = RwSignal::new(Vec::new());
     let is_loading: RwSignal<bool> = RwSignal::new(true);
+    let load_error: RwSignal<bool> = RwSignal::new(false);
     let preview_modal_open = RwSignal::new(false);
     let preview_set_ids = RwSignal::new(Vec::<String>::new());
     let preview_set_titles = RwSignal::new(HashMap::<String, String>::new());
@@ -80,6 +81,7 @@ pub fn SetsContent() -> impl IntoView {
                     if disposed.is_disposed() {
                         return;
                     }
+                    load_error.set(false);
                     let set_list: Vec<SetInfo> = meta_list
                         .into_iter()
                         .map(|meta| {
@@ -103,6 +105,9 @@ pub fn SetsContent() -> impl IntoView {
                 },
                 Err(e) => {
                     tracing::error!("SetsContent: load_meta_list error: {:?}", e);
+                    if !disposed.is_disposed() {
+                        load_error.set(true);
+                    }
                 },
             }
             is_loading.set(false);
@@ -189,7 +194,20 @@ pub fn SetsContent() -> impl IntoView {
                     </Text>
                 </div>
             </Show>
-            <Show when=move || !is_loading.get()>
+            <Show when=move || !is_loading.get() && load_error.get()>
+                <div
+                    class="flex flex-col items-center py-12 px-4 text-center gap-3"
+                    data-testid="sets-offline-error"
+                >
+                    <Text size=TextSize::Large>
+                        {t!(i18n, sets.offline_title)}
+                    </Text>
+                    <Text size=TextSize::Small variant=TypographyVariant::Muted>
+                        {t!(i18n, sets.offline_desc)}
+                    </Text>
+                </div>
+            </Show>
+            <Show when=move || !is_loading.get() && !load_error.get()>
                 <div class="space-y-4 mb-6">
                     <Input
                         value=search

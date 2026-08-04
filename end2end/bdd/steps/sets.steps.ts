@@ -139,3 +139,13 @@ Then('отображается больше наборов', async ({ page }) =>
     const setsPage = new SetsPage(page);
     expect(await setsPage.getSetCardCount()).toBeGreaterThan(0);
 });
+
+When('пользователь эмулирует отсутствие сети', async ({ page }) => {
+    await page.context().setOffline(true);
+});
+
+Then('отображается сообщение об отсутствии соединения', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.offlineError).toBeVisible({ timeout: 15_000 });
+    await page.context().setOffline(false);
+});
