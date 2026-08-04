@@ -1536,8 +1536,12 @@ input[type="submit"],
     bottom: 0;
     left: 0;
     right: 0;
-    height: 72px;
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    /* Full height INCLUDING the safe-area inset so the bar fills the space
+       above the home indicator on notched iPhones (viewport-fit=cover).
+       Previously height was a flat 72px and padding-bottom ate into it,
+       leaving icons crushed and a gap below the bar. */
+    height: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--bg-cream);
     border-top: 1px solid var(--border-dark);
     display: flex;
@@ -1600,11 +1604,29 @@ input[type="submit"],
 }
 
 .bottom-tab-item-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Logo in the bottom bar: prevent flexbox from shrinking it on narrow
+   phones. The wrapper carries flex-shrink:0 so the 32×32 logo keeps its
+   aspect ratio. */
+.bottom-tab-item-logo {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bottom-tab-item-logo img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
 }
 
 .bottom-tab-item-label {
@@ -2201,6 +2223,13 @@ rt {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--fg-muted);
+    /* Allow the progress string to wrap onto its own line on narrow phones
+       instead of splitting mid-phrase (e.g. "0 ИЗ" / "9"). balance distributes
+       text evenly across wrapped lines; center keeps it tidy. */
+    text-align: center;
+    max-width: 90vw;
+    line-height: 1.6;
+    text-wrap: balance;
 }
 
 .btn-loading {
@@ -5052,6 +5081,21 @@ rt {
 
     .kanji-detail-top-bar .fsrs-metrics {
         display: none;
+    }
+
+    /* Compact reading groups on phones: shrink the ON/KUN label column so
+       reading tags have room to sit side-by-side in a row instead of
+       stacking one-per-line. */
+    .kanji-detail-hero-readings .reading-group {
+        gap: 8px;
+    }
+
+    .kanji-detail-hero-readings .reading-kanji {
+        width: 36px;
+    }
+
+    .kanji-detail-hero-readings .reading-furigana {
+        gap: 4px;
     }
 }
 
