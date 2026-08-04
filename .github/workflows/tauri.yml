@@ -271,7 +271,7 @@ jobs:
                   ls -la release_assets/
 
             - name: Publish release
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               with:
                   tag_name: ${{ github.ref_name }}
                   name: ${{ needs.version.outputs.version_type == 'prerelease' && format('Pre-release {0}', needs.version.outputs.version) || format('Release {0}', needs.version.outputs.version) }}
