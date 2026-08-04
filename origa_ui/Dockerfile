@@ -110,7 +110,7 @@ RUN --mount=type=cache,target=/root/.cargo/registry,sharing=locked \
     trunk build --release --dist dist
 
 # Runtime: TrailBase + SPA static files
-FROM trailbase/trailbase:0.28.5
+FROM trailbase/trailbase:0.31.1
 
 USER root
 WORKDIR /app
