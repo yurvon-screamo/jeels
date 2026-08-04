@@ -749,13 +749,11 @@ fn place_phrases_constraint_aware(
 }
 
 /// Per-card target number of showings, derived from the FSRS memory state.
-/// Hard cards are repeated most, in-progress/new cards get a lighter drill,
-/// known cards keep their original single showing.
+/// Hard and in-progress/new cards both get a light drill of 2 showings; known
+/// cards keep their original single showing.
 fn target_showings(study_card: &StudyCard) -> usize {
     let memory = study_card.memory();
-    if memory.is_high_difficulty() {
-        3
-    } else if memory.is_new() || memory.is_in_progress() {
+    if memory.is_high_difficulty() || memory.is_new() || memory.is_in_progress() {
         2
     } else {
         1
@@ -3007,9 +3005,9 @@ mod tests {
             .collect()
     }
 
-    /// Best-effort fallback: a single-card core whose HD target forces 3
+    /// Best-effort fallback: a single-card core whose HD target forces 2
     /// showings cannot honour MIN_REPEAT_SPACING by construction (need
-    /// 1 + 3 + 1 + 3 + 1 = 9 slots, have 3). The contract degrades
+    /// 1 + MIN_REPEAT_SPACING + 1 slots, have 1). The contract degrades
     /// gracefully: copies are still emitted so the learner drills the
     /// card, every copy follows the anchor, and the anchor keeps the
     /// first slot.
