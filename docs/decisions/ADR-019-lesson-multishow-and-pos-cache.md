@@ -41,14 +41,14 @@ Backward-compat: кастомный `Deserialize` для `LessonData` через
 
 Функция `target_showings`:
 
-- `is_high_difficulty` || `is_new` || `is_in_progress` → 2;
-- иначе (known) → 1.
+- `is_high_difficulty` → 2;
+- иначе (new/in-progress/known) → 1.
 
 Применяется к Vocabulary/Kanji/Grammar; Phrase не умножается (`candidate_views_for_repeat` для Phrase возвращает пустой вектор). «Разные вью» = строго разные дискриминанты `LessonCardView` (дедуп через `std::mem::discriminant` в `build_distinct_views`). `compute_expansion_views` обрезает кандидатов до цели и возвращает пустой вектор, если доступных различных вью меньше 2 (в этом случае показ остаётся единичным). Если доступных различных типов (с учётом guards) меньше цели → clamp к числу доступных (НЕ fallback к 1). Каждый показ рейтится отдельно по `card_id` → N оценок FSRS.
 
-Матрица фактически достигаемых показов: Vocabulary hard/in-progress/new → 2, Kanji hard/in-progress/new → 2, Grammar hard → 2, Grammar new → 1 (только `Normal`).
+Матрица фактически достигаемых показов: Vocabulary hard → 2, Kanji hard → 2, Grammar hard → 2; Vocabulary/Kanji/Grammar new/in-progress/known → 1 (Grammar new также 1 — только `Normal`).
 
-> **Изм. от 2026-08-04:** ранее high-difficulty имел target=3 (Kanji hard достигал 3 показов); снижено до 2 — уроки получались слишком длинными.
+> **Изм. от 2026-08-04:** ранее high-difficulty имел target=3 (Kanji hard достигал 3 показов); снижено до 2 — уроки получались слишком длинными. В той же правке new/in-progress временно остались на target=2; позже снижены до 1 — повторный показ нужен только трудным картам, новые и в стадии закрепления достаточно одного показа за урок.
 
 ### 4. POS кэш + миграция
 

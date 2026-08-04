@@ -749,15 +749,11 @@ fn place_phrases_constraint_aware(
 }
 
 /// Per-card target number of showings, derived from the FSRS memory state.
-/// Hard and in-progress/new cards both get a light drill of 2 showings; known
-/// cards keep their original single showing.
+/// Only high-difficulty cards get repeated showings (2); new, in-progress, and
+/// known cards keep their original single showing.
 fn target_showings(study_card: &StudyCard) -> usize {
     let memory = study_card.memory();
-    if memory.is_high_difficulty() || memory.is_new() || memory.is_in_progress() {
-        2
-    } else {
-        1
-    }
+    if memory.is_high_difficulty() { 2 } else { 1 }
 }
 
 /// Decides whether a primary card slot should be expanded into multiple
@@ -2647,7 +2643,7 @@ mod tests {
     }
 
     #[test]
-    fn expand_in_progress_primary_vocab_yields_multiple_showings() {
+    fn expand_in_progress_primary_vocab_preserves_single_showing() {
         init_test_dict();
         let mut ks = KnowledgeSet::new();
         seed_distractor_vocab(&mut ks, &["犬", "鳥", "魚", "馬", "牛"]);
@@ -2658,10 +2654,10 @@ mod tests {
 
         let result = build_lesson_with_one_primary_vocab(&ks, card_id);
         let showings = result.find_by_card_id(card_id);
-        assert!(
-            showings.len() >= 2,
-            "in-progress primary vocab should produce at least 2 showings, got {}",
-            showings.len()
+        assert_eq!(
+            showings.len(),
+            1,
+            "in-progress primary vocab should keep a single showing (only HD repeats)"
         );
     }
 
@@ -2783,13 +2779,13 @@ mod tests {
         for word in words {
             let sc = ks.create_card(vocab_card(word)).expect("seed primary card");
             let card_id = *sc.card_id();
-            rate_into_state(&mut ks, card_id, 10.0, 4.0, 1, Rating::Good);
+            rate_into_state(&mut ks, card_id, 3.0, 8.0, 1, Rating::Hard);
             assert!(
                 ks.get_card(card_id)
                     .expect("card exists")
                     .memory()
-                    .is_in_progress(),
-                "fixture card must be expandable review vocab"
+                    .is_high_difficulty(),
+                "fixture card must be expandable HD vocab"
             );
             cards.push((
                 card_id,
