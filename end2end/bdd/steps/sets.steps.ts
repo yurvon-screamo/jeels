@@ -141,11 +141,17 @@ Then('отображается больше наборов', async ({ page }) =>
 });
 
 When('пользователь эмулирует отсутствие сети', async ({ page }) => {
-    await page.context().setOffline(true);
+    // Block only CDN requests, not the SPA itself — full offline mode
+    // prevents the WASM app from loading at all.
+    await page.route('**/well_known_set/**', (route) =>
+        route.abort('failed')
+    );
+    await page.route('**/well_known_types_meta.json', (route) =>
+        route.abort('failed')
+    );
 });
 
 Then('отображается сообщение об отсутствии соединения', async ({ page }) => {
     const setsPage = new SetsPage(page);
     await expect(setsPage.offlineError).toBeVisible({ timeout: 15_000 });
-    await page.context().setOffline(false);
 });
