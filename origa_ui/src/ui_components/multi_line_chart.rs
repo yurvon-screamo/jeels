@@ -115,7 +115,16 @@ pub fn MultiLineChart(
         }
 
         let step_x = chart_width as f64 / (count - 1) as f64;
-        let max_labels = if count <= 10 { count } else { 6 };
+        // Limit the number of X-axis labels to prevent overlap on narrow
+        // viewports. On mobile (chart_width ~296px) even 6 short labels can
+        // collide, so scale down the cap for smaller chart widths.
+        let max_labels = if chart_width < 320 {
+            4
+        } else if count <= 10 {
+            count
+        } else {
+            6
+        };
         let label_step = (count as f64 / max_labels as f64).ceil() as usize;
 
         first_line

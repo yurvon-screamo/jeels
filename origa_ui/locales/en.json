@@ -524,7 +524,9 @@
         "import_partial": "Created {} cards, skipped {} (already exist)",
         "import_with_errors": "Created {} cards, skipped {}, errors: {}",
         "import_complete_title": "Import complete",
-        "reimport": "Re-import"
+        "reimport": "Re-import",
+        "offline_title": "No connection",
+        "offline_desc": "Word sets are unavailable offline. Connect to the internet and refresh."
     },
     "shared": {
         "filter_all": "All",

@@ -10,6 +10,7 @@ use super::{
 use crate::i18n::use_i18n;
 use crate::loaders::recalculate_user_jlpt_progress;
 use crate::repository::{HybridUserRepository, set_last_sync_time};
+use crate::store::ConnectivityStore;
 use crate::ui_components::{ToastContainer, ToastData};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -104,9 +105,17 @@ pub fn HomeContent(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
 
     let repo_sync = repository.clone();
     let i18n_sync = i18n;
+    let connectivity = use_context::<ConnectivityStore>();
     Effect::new(move |_| {
         let repo = repo_sync.clone();
         let i18n = i18n_sync;
+        let is_online = connectivity
+            .as_ref()
+            .map(|c| c.is_online.get())
+            .unwrap_or(true);
+        if !is_online {
+            return;
+        }
         spawn_local(async move {
             show_sync_toast(toasts, i18n);
 
