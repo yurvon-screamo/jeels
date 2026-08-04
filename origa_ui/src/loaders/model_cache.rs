@@ -53,10 +53,10 @@ impl ModelCache {
     pub async fn ensure_files_cached(
         &self,
         cache: &Cache,
-        filenames: &[&str],
+        files: &[(&str, String)],
     ) -> Result<bool, OrigaError> {
-        for filename in filenames {
-            if !self.is_file_cached(cache, filename).await? {
+        for (filename, url) in files {
+            if !self.is_file_cached(cache, filename, url).await? {
                 return Ok(false);
             }
         }
@@ -66,11 +66,11 @@ impl ModelCache {
     pub async fn load_files_from_cache(
         &self,
         cache: &Cache,
-        filenames: &[&str],
+        files: &[(&str, String)],
     ) -> Result<Vec<Vec<u8>>, OrigaError> {
-        let mut result = Vec::with_capacity(filenames.len());
-        for filename in filenames {
-            let data = self.load_file_from_cache(cache, filename).await?;
+        let mut result = Vec::with_capacity(files.len());
+        for (filename, url) in files {
+            let data = self.load_file_from_cache(cache, filename, url).await?;
             result.push(data);
         }
         Ok(result)
@@ -84,14 +84,18 @@ impl ModelCache {
         for (filename, url) in files {
             self.download_and_cache_file(cache, filename, url).await?;
         }
-        let filenames: Vec<&str> = files.iter().map(|(f, _)| *f).collect();
-        self.load_files_from_cache(cache, &filenames).await
+        self.load_files_from_cache(cache, files).await
     }
 
-    pub async fn is_file_cached(&self, cache: &Cache, filename: &str) -> Result<bool, OrigaError> {
+    pub async fn is_file_cached(
+        &self,
+        cache: &Cache,
+        filename: &str,
+        url: &str,
+    ) -> Result<bool, OrigaError> {
         debug!("Checking if {} is cached", filename);
-        let request = Request::new_with_str(filename)
-            .map_err(|e| self.js_err("Failed to create request", &e))?;
+        let request =
+            Request::new_with_str(url).map_err(|e| self.js_err("Failed to create request", &e))?;
 
         let has_response = JsFuture::from(cache.match_with_request(&request))
             .await
@@ -104,9 +108,10 @@ impl ModelCache {
         &self,
         cache: &Cache,
         filename: &str,
+        url: &str,
     ) -> Result<Vec<u8>, OrigaError> {
-        let request = Request::new_with_str(filename)
-            .map_err(|e| self.js_err("Failed to create request", &e))?;
+        let request =
+            Request::new_with_str(url).map_err(|e| self.js_err("Failed to create request", &e))?;
 
         let response_js = JsFuture::from(cache.match_with_request(&request))
             .await
@@ -179,7 +184,7 @@ impl ModelCache {
         debug!("Downloaded {} bytes for {}", data.len(), filename);
 
         let mut data_for_cache = data.clone();
-        let cache_request = Request::new_with_str(filename)
+        let cache_request = Request::new_with_str(url)
             .map_err(|e| self.js_err("Failed to create cache request", &e))?;
 
         let cache_response_init = web_sys::ResponseInit::new();
