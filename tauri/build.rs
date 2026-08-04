@@ -182,6 +182,33 @@ fn inject_csp_via_tauri_config(
             env::set_var("TAURI_CONFIG", &patched);
         }
         println!("cargo:rustc-env=TAURI_CONFIG={patched}");
+    } else if env::var("TAURI_SIGNING_PRIVATE_KEY")
+        .unwrap_or_default()
+        .is_empty()
+    {
+        // No signing key available (Dependabot PRs — GitHub hides repository
+        // secrets from bot runs; or local dev without a key). The workflow
+        // workaround in _build-tauri.yml sets TAURI_SIGNING_PRIVATE_KEY to
+        // an empty string, but tauri.conf.json has createUpdaterArtifacts:
+        // true, which makes the bundler try to sign regardless. An empty key
+        // fails with "failed to decode secret key: … Missing comment in
+        // secret key". Patching createUpdaterArtifacts: false here skips the
+        // signing step entirely, producing a compile-only build without
+        // updater signatures — the desired behaviour for verification.
+        let no_sign_patch = json!({
+            "bundle": {
+                "createUpdaterArtifacts": false
+            }
+        });
+        let mut cfg: serde_json::Value = serde_json::from_str(&final_config_str)
+            .expect("TAURI_CONFIG must be valid JSON for no-signing-key patch");
+        build_config::apply_merge_patch(&mut cfg, no_sign_patch);
+        let patched = cfg.to_string();
+        // SAFETY: same single-threaded build-script contract as above.
+        unsafe {
+            env::set_var("TAURI_CONFIG", &patched);
+        }
+        println!("cargo:rustc-env=TAURI_CONFIG={patched}");
     } else {
         // Desktop distribution path: emit final_config_str unchanged
         // (CSP-merged, createUpdaterArtifacts still true per tauri.conf.json
@@ -200,6 +227,7 @@ fn inject_csp_via_tauri_config(
     }
 
     println!("cargo:rerun-if-env-changed=ORIGA_APP_STORE");
+    println!("cargo:rerun-if-env-changed=TAURI_SIGNING_PRIVATE_KEY");
     println!("cargo:rerun-if-env-changed=ORIGA_CDN_BASE_URL");
     println!("cargo:rerun-if-env-changed=TRAILBASE_URL");
     println!("cargo:rerun-if-env-changed=ORIGA_LANDING_BASE_URL");

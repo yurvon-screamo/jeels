@@ -277,6 +277,49 @@ fn apply_merge_patch_csp_into_tauri_cli_config_preserves_overrides() {
     assert_eq!(target["app"]["security"]["csp"], "default-src 'self'");
 }
 
+/// Regression guard for the no-signing-key patch applied when
+/// `TAURI_SIGNING_PRIVATE_KEY` is empty (Dependabot PRs, local dev without a
+/// key). The committed `tauri.conf.json` has `createUpdaterArtifacts: true`;
+/// the build script patches it to `false` so the bundler skips signing.
+/// Without this patch, Tauri fails with "failed to decode secret key:
+/// … Missing comment in secret key" because the empty key is invalid.
+///
+/// This test simulates the exact merge: load the committed config, apply the
+/// CSP patch, then apply the no-sign patch, and assert the final result.
+#[test]
+fn apply_merge_patch_no_signing_key_disables_updater_artifacts() {
+    // Start from the committed tauri.conf.json (includes
+    // createUpdaterArtifacts: true).
+    let mut target: serde_json::Value = serde_json::from_str(include_str!("../tauri.conf.json"))
+        .expect("tauri.conf.json must be valid JSON");
+
+    // The CSP patch our build.rs applies first.
+    let csp_patch = serde_json::json!({
+        "app": { "security": { "csp": "default-src 'self'" } }
+    });
+    apply_merge_patch(&mut target, csp_patch);
+
+    // The no-signing-key patch our build.rs applies when
+    // TAURI_SIGNING_PRIVATE_KEY is empty.
+    let no_sign_patch = serde_json::json!({
+        "bundle": { "createUpdaterArtifacts": false }
+    });
+    apply_merge_patch(&mut target, no_sign_patch);
+
+    // The patch must flip createUpdaterArtifacts to false.
+    assert_eq!(
+        target["bundle"]["createUpdaterArtifacts"], false,
+        "no-signing-key patch must disable createUpdaterArtifacts"
+    );
+    // CSP must survive (applied first, not overwritten).
+    assert_eq!(target["app"]["security"]["csp"], "default-src 'self'");
+    // Other bundle keys (icon, targets) must survive the merge.
+    assert_eq!(
+        target["bundle"]["targets"], "all",
+        "bundle.targets must survive the no-signing-key patch"
+    );
+}
+
 /// `resolve_env` falls back to the default when the env var is unset (`None`).
 /// Asserting against the literal CDN host (not the `DEFAULT_CDN` constant)
 /// makes this a real drift guard: changing the constant breaks the assertion.
