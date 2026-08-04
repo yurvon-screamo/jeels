@@ -147,7 +147,7 @@ jobs:
                   save-if: false
 
             - name: Cache UniDic dictionary
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: origa_ui/public/dictionaries/unidic
                   key: unidic-dict-v1-${{ hashFiles('origa_ui/build.rs') }}
@@ -266,7 +266,7 @@ jobs:
 
             - name: Cache TrailBase CLI
               id: cache-trailbase
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ~/.local/bin/trail
                   key: trailbase-v0.28.3-verified
@@ -311,7 +311,7 @@ jobs:
 
             - name: Cache Playwright browsers
               id: playwright-cache
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ~/.cache/ms-playwright
                   key: playwright-chromium-v1-${{ hashFiles('end2end/package-lock.json') }}
@@ -372,7 +372,7 @@ jobs:
 
             - name: Cache Playwright browsers
               id: playwright-cache
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ~/.cache/ms-playwright
                   key: playwright-chromium-v1-${{ hashFiles('end2end/package-lock.json') }}
