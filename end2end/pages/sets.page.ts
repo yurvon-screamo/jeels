@@ -40,9 +40,6 @@ export class SetsPage extends BasePage {
     // Pagination
     readonly loadMoreButton: Locator;
 
-    // Offline error
-    readonly offlineError: Locator;
-
     constructor(page: Page) {
         super(page);
 
@@ -83,9 +80,6 @@ export class SetsPage extends BasePage {
 
         // Pagination
         this.loadMoreButton = page.getByTestId("sets-load-more-btn");
-
-        // Offline error
-        this.offlineError = page.getByTestId("sets-offline-error");
     }
 
     async goto(): Promise<void> {

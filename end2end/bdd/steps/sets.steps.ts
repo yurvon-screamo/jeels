@@ -139,26 +139,3 @@ Then('отображается больше наборов', async ({ page }) =>
     const setsPage = new SetsPage(page);
     expect(await setsPage.getSetCardCount()).toBeGreaterThan(0);
 });
-
-When('пользователь эмулирует отсутствие сети', async ({ page }) => {
-    // Clear Cache API so CDN requests are not served from cache by
-    // CacheFirstCdnProvider — previous scenarios populate it.
-    await page.evaluate(() => {
-        return caches.keys().then((keys) =>
-            Promise.all(keys.map((k) => caches.delete(k)))
-        );
-    });
-
-    // Block CDN requests to simulate network failure for sets data.
-    await page.route('**/well_known_set/**', (route) =>
-        route.abort('failed')
-    );
-    await page.route('**/well_known_types_meta.json', (route) =>
-        route.abort('failed')
-    );
-});
-
-Then('отображается сообщение об отсутствии соединения', async ({ page }) => {
-    const setsPage = new SetsPage(page);
-    await expect(setsPage.offlineError).toBeVisible({ timeout: 15_000 });
-});
