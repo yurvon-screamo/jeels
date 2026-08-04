@@ -267,20 +267,6 @@ mod tests {
         assert!(tabe.unwrap().reading.is_some());
     }
 
-    /// Read the real JmdictFurigana.txt from the CDN dictionaries directory.
-    /// This ensures test data matches production (e.g. 明日 frequency ordering).
-    fn read_real_furigana_dict() -> String {
-        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        let path = std::path::PathBuf::from(manifest_dir)
-            .parent()
-            .unwrap()
-            .join("cdn")
-            .join("dictionaries")
-            .join("JmdictFurigana.txt");
-        std::fs::read_to_string(&path)
-            .expect("JmdictFurigana.txt should exist in cdn/dictionaries/")
-    }
-
     // 明日 has multiple readings: あした (most common), あす (literary),
     // みょうにち (formal). JmdictFurigana.txt lists them in frequency order.
     // The annotator must pick the FIRST entry (most common = あした), not
