@@ -137,6 +137,19 @@ jobs:
               with:
                   tools: tauri-cli
 
+            - name: Regenerate Xcode project from project.yml
+              # XcodeGen regenerates project.pbxproj from project.yml (the
+              # source of truth) so the committed pbxproj can never drift.
+              # Prevents issues like MinimumOSVersion 14.0 vs 26.0 (PR #296
+              # updated project.yml but forgot to regenerate pbxproj).
+              working-directory: tauri/gen/apple
+              shell: bash
+              run: |
+                  brew install xcodegen
+                  xcodegen generate
+                  echo "--- Verify deployment target ---"
+                  grep "IPHONEOS_DEPLOYMENT_TARGET" origa-app.xcodeproj/project.pbxproj
+
             - name: Build iOS .ipa (App Store export)
               working-directory: tauri
               env:
