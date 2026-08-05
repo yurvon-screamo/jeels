@@ -47,6 +47,8 @@ sentry = { version = "0.49", default-features = false, features = [
     "release-health",
     "reqwest",
     "debug-images",
+    "tracing",
+    "logs",
 ] }
 
 # Domain

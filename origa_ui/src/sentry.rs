@@ -77,7 +77,16 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
                     dsn: "{dsn}",
                     release: "{release}",
                     environment: "{environment}",
-                    sendDefaultPii: false
+                    sendDefaultPii: false,
+                    tracesSampleRate: 1.0,
+                    integrations: [
+                        // CaptureConsole routes tracing-wasm's console.error
+                        // output (which is where all WASM tracing::error! calls
+                        // land via the WASMLayer) into Sentry as error events.
+                        // console.warn/info become breadcrumbs via the default
+                        // Breadcrumbs integration (not CaptureConsole).
+                        new Sentry.Integrations.CaptureConsole({{ levels: ['error'] }})
+                    ]
                 }});
                 Sentry.setTag("layer", "ui");
             }};

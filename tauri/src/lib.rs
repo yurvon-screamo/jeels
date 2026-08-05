@@ -50,7 +50,18 @@ pub fn run() {
     // sentry transport uses `rustls-no-provider` and reuses this ring provider.
     // The guard must outlive `tauri::Builder::run` — kept on the stack, dropped
     // only when `run()` returns (i.e. process exit). See ADR-036.
+    // 1. Initialize Sentry FIRST — it creates the global Hub that
+    //    `sentry::integrations::tracing::layer()` relies on to dispatch
+    //    events/logs/breadcrumbs. The tracing subscriber (step 2) must be
+    //    registered AFTER the Hub exists, otherwise tracing events fire
+    //    into a void.
     let _sentry_guard = init_sentry();
+
+    // 2. Register the tracing subscriber with the Sentry layer. The
+    //    sentry-tracing layer routes `tracing::error!` → Sentry events,
+    //    `tracing::warn!/info!` → breadcrumbs, and (with `enable_logs`)
+    //    structured logs — instead of silently dropping them.
+    init_tracing();
 
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
@@ -173,6 +184,31 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
+/// Register the tracing subscriber with a Sentry layer.
+///
+/// **Must be called AFTER `init_sentry()`** — the `sentry::integrations::tracing::layer()`
+/// dispatches events through the global Hub created by `sentry::init`. Registering
+/// the subscriber before the Hub exists causes tracing events to fire into a void.
+///
+/// The Sentry layer routes tracing events as follows (with `logs` feature):
+/// - `ERROR` → Sentry event (issue) + structured log
+/// - `WARN`/`INFO` → breadcrumb + structured log
+/// - `DEBUG`/`TRACE` → ignored
+///
+/// The `fmt` layer (stdout/stderr) is desktop-only: on iOS/Android there is no
+/// terminal, and writing to stdout/stderr may pollute the system log or be silently
+/// dropped depending on the WebView configuration.
+fn init_tracing() {
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+    let registry = tracing_subscriber::registry().with(sentry::integrations::tracing::layer());
+
+    #[cfg(desktop)]
+    let registry = registry.with(tracing_subscriber::fmt::layer());
+
+    registry.init();
+}
+
 /// Initialize the Sentry client for native (Rust) crash reporting.
 ///
 /// Returns `None` (no-op) when `SENTRY_DSN_TAURI` is empty/unset — this is the
@@ -210,6 +246,8 @@ fn init_sentry() -> Option<sentry::ClientInitGuard> {
             .release(env!("SENTRY_RELEASE"))
             .environment(env!("SENTRY_ENVIRONMENT"))
             .send_default_pii(false)
+            .enable_logs(true)
+            .traces_sample_rate(1.0)
             .in_app_include(["origa", "origa_ui", "origa_app"]),
     );
 
