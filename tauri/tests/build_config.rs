@@ -112,11 +112,32 @@ fn build_csp_substitutes_staging_hosts() {
     // Sentry: loader host is static, ingest host is parameterised. The ingest
     // host must be pinned to the exact staging value — NOT a wildcard — to
     // avoid the multi-tenant SaaS exfil vector. See ADR-036 §7.
+    //
+    // The loader (js.sentry-cdn.com) is a thin bootstrap that fetches the
+    // actual SDK bundle from browser.sentry-cdn.com, so BOTH hosts must be in
+    // script-src — listing only the loader leaves the bundle blocked by CSP.
+    //
+    // Session Replay additionally needs connect-src data: (compression
+    // payload encoding), worker-src 'self' blob: (compression Web Worker),
+    // and child-src 'self' blob: (worker-src fallback for older browsers).
     assert!(csp.contains("https://js.sentry-cdn.com"));
+    assert!(csp.contains("https://browser.sentry-cdn.com"));
     assert!(csp.contains("https://o-staging.ingest.sentry.io"));
     assert!(
         !csp.contains("*.sentry.io"),
         "CSP must NOT contain a sentry.io wildcard — see ADR-036 §7"
+    );
+    assert!(
+        csp.contains("connect-src 'self' ipc: http://ipc.localhost data:"),
+        "connect-src must allow data: for Sentry Replay compression payloads"
+    );
+    assert!(
+        csp.contains("worker-src 'self' blob:"),
+        "worker-src must allow blob: for the Sentry Replay Web Worker"
+    );
+    assert!(
+        csp.contains("child-src 'self' blob:"),
+        "child-src must allow blob: as a worker-src fallback for older browsers"
     );
 
     // Production hosts must NOT leak into the staging build.

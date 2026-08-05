@@ -42,11 +42,21 @@ pub(crate) const DEFAULT_SENTRY_INGEST_HOST: &str = "o4511840951992320.ingest.us
 /// telemetry, OAuth providers) remain hardcoded — they are not
 /// environment-dependent.
 ///
-/// Sentry's loader host (`js.sentry-cdn.com`) is static. Its ingest host is
-/// pinned to the project's exact host (extracted from the DSN at build time
-/// by `build.rs` and passed here as `sentry_ingest_host`). Pinning to a
-/// single host rather than `*.sentry.io` avoids the exfiltration vector of a
-/// wildcard on the multi-tenant `sentry.io` SaaS — see ADR-036 §7.
+/// Sentry's loader host (`js.sentry-cdn.com`) is static, as is the SDK
+/// bundle host (`browser.sentry-cdn.com`). The ingest host is pinned to
+/// the project's exact host (extracted from the DSN at build time by
+/// `build.rs` and passed here as `sentry_ingest_host`). Pinning to a
+/// single host rather than `*.sentry.io` avoids the exfiltration vector
+/// of a wildcard on the multi-tenant `sentry.io` SaaS — see ADR-036 §7.
+///
+/// Session Replay requires three extra directives beyond the loader /
+/// bundle / ingest hosts:
+/// - `connect-src data:` — the SDK encodes compression payloads as
+///   `data:` URLs (getsentry/sentry-javascript#4468).
+/// - `worker-src 'self' blob:` — Replay runs its compression in a
+///   blob-URL Web Worker.
+/// - `child-src 'self' blob:` — fallback for browsers that do not
+///   implement `worker-src` yet.
 ///
 /// The literal is kept on a single line because `rustfmt` does not reflow
 /// string-literal contents, and byte-equality with `tauri.conf.json` must hold
@@ -58,7 +68,7 @@ pub(crate) fn build_csp(
     sentry_ingest_host: &str,
 ) -> String {
     format!(
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://{sentry_ingest_host}; img-src 'self' data: blob: {cdn}; media-src 'self' blob: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com https://browser.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost data: {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://{sentry_ingest_host}; img-src 'self' data: blob: {cdn}; media-src 'self' blob: data: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'; worker-src 'self' blob:; child-src 'self' blob:"
     )
 }
 
