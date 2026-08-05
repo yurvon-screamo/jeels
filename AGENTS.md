@@ -37,6 +37,20 @@ $env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"  # ОБЯЗАТЕЛЬНО
 cd tauri && cargo tauri dev
 ```
 
+### Android dev (эмулятор)
+
+Debug WASM-бандл раздувается до ~300 МБ и крашит Android WebView кучу
+(`OutOfMemoryError` в `RustWebViewClient.shouldInterceptRequest`,
+tauri-apps/tauri#13554). Для `cargo tauri android dev` обязательно
+использовать профиль `wasm-dev` (определён в корневом `Cargo.toml`):
+стрип debug-символов + opt-level=1, компилируется быстро, WASM ~8–19 МБ.
+
+```powershell
+$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"
+$env:TRUNK_BUILD_CARGO_PROFILE = "wasm-dev"
+cd tauri && cargo tauri android dev
+```
+
 ### Переменные окружения (compile-time, `build.rs`)
 
 Обязательные: `ORIGA_CDN_BASE_URL`.

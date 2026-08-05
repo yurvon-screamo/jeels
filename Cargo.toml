@@ -213,3 +213,16 @@ opt-level = 'z'
 lto = "fat"
 codegen-units = 1
 panic = "abort"
+
+# Android dev: debug WASM balloons to ~300 MB and crashes the WebView heap
+# (OutOfMemoryError in RustWebViewClient.shouldInterceptRequest — see
+# tauri-apps/tauri#13554). This profile strips debug symbols and applies a
+# light opt-level so the resulting .wasm fits the ~192 MB Android heap while
+# still compiling fast enough for hot reload. Use via
+# `TRUNK_BUILD_CARGO_PROFILE=wasm-dev cargo tauri android dev`.
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+debug = 0
+strip = true
+codegen-units = 16
