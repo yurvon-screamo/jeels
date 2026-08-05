@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Migrate user_v2.knowledge_set from reviews-array format to denormalized counters.
+Migrate domain_user.knowledge_set from reviews-array format to denormalized counters.
 
-Reads each row in user_v2, decodes the knowledge_set blob (deflate+base64 per
+Reads each row in domain_user, decodes the knowledge_set blob (deflate+base64 per
 ADR-034), walks every StudyCard's MemoryHistory.reviews array, computes scalar
 counters (reps, lapses, easy_count, good_count, last_review_date, last_rating),
 removes the reviews array, and writes the row back.
@@ -13,7 +13,7 @@ Usage:
     python scripts/migrate_reviews_to_counters.py [--dry-run]
 
 The script reads/writes via the TrailBase admin records API. It does NOT touch
-the `user` table — only `user_v2`.
+the `user` table — only `domain_user`.
 
 Prerequisites:
     pip install requests
@@ -148,13 +148,13 @@ def migrate_knowledge_set(ks: dict) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Migrate user_v2 knowledge_set from reviews array to scalar counters"
+        description="Migrate domain_user knowledge_set from reviews array to scalar counters"
     )
     parser.add_argument(
         "--dry-run", action="store_true", help="Decode and show what would change, but don't write"
     )
     parser.add_argument(
-        "--table", default="user_v2", help="TrailBase table name (default: user_v2)"
+        "--table", default="domain_user", help="TrailBase table name (default: domain_user)"
     )
     args = parser.parse_args()
 

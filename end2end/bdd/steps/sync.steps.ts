@@ -130,7 +130,7 @@ When('отмечает первую карточку избранной и до�
     // past the waitForResponse window.
     const saveResponse = page.waitForResponse(
         (resp) =>
-            /\/api\/records\/v1\/user(_v2)?(\/|$)/.test(resp.url()) &&
+            /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
             RECORD_WRITE_METHODS.has(resp.request().method()),
         { timeout: 15_000 },
     );
@@ -151,7 +151,7 @@ When('отмечает первую карточку избранной и до�
 When('дожидается сохранения данных урока', async ({ page }) => {
     const saveResponse = await page.waitForResponse(
         (resp) =>
-            /\/api\/records\/v1\/user(_v2)?(\/|$)/.test(resp.url()) &&
+            /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
             RECORD_WRITE_METHODS.has(resp.request().method()),
         { timeout: 30_000 },
     );
