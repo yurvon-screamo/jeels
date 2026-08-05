@@ -27,7 +27,7 @@ const HIGH_DIFFICULTY_STABILITY_CAP: f64 = 7.0;
 /// undercount by ±N during offline→offline divergence). `current_state`
 /// merges via LWW by `last_review_date` (unchanged from the array-based
 /// `select_later_state` logic).
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryHistory {
     current_state: Option<MemoryState>,
     #[serde(default)]

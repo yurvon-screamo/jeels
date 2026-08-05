@@ -10,7 +10,7 @@ mod yesno_view_filtering {
     use super::*;
 
     fn create_high_difficulty_card(word: &str) -> StudyCard {
-        let study_card = create_study_card_with_memory(word, 3.0, 7.0, 5, Rating::Hard);
+        let study_card = create_study_card_with_memory(word, 3.0, 7.0, Rating::Hard);
         assert!(study_card.memory().is_high_difficulty());
         assert!(!study_card.memory().is_known_card());
         assert!(!study_card.memory().is_in_progress());
@@ -18,7 +18,7 @@ mod yesno_view_filtering {
     }
 
     fn create_in_progress_card(word: &str) -> StudyCard {
-        let study_card = create_study_card_with_memory(word, 5.0, 3.0, 5, Rating::Good);
+        let study_card = create_study_card_with_memory(word, 5.0, 3.0, Rating::Good);
         assert!(study_card.memory().is_in_progress());
         assert!(!study_card.memory().is_high_difficulty());
         assert!(!study_card.memory().is_known_card());
@@ -81,7 +81,7 @@ mod reversed_view_filtering {
     use super::*;
 
     fn create_high_difficulty_card(word: &str) -> StudyCard {
-        let study_card = create_study_card_with_memory(word, 3.0, 7.0, 5, Rating::Hard);
+        let study_card = create_study_card_with_memory(word, 3.0, 7.0, Rating::Hard);
         assert!(study_card.memory().is_high_difficulty());
         assert!(!study_card.memory().is_known_card());
         assert!(!study_card.memory().is_in_progress());
@@ -89,7 +89,7 @@ mod reversed_view_filtering {
     }
 
     fn create_known_card(word: &str) -> StudyCard {
-        let study_card = create_study_card_with_memory(word, 22.0, 2.0, 20, Rating::Easy);
+        let study_card = create_study_card_with_memory(word, 22.0, 2.0, Rating::Easy);
         assert!(study_card.memory().is_known_card());
         assert!(!study_card.memory().is_high_difficulty());
         assert!(!study_card.memory().is_in_progress());
@@ -97,7 +97,7 @@ mod reversed_view_filtering {
     }
 
     fn create_in_progress_card(word: &str) -> StudyCard {
-        let study_card = create_study_card_with_memory(word, 5.0, 3.0, 5, Rating::Good);
+        let study_card = create_study_card_with_memory(word, 5.0, 3.0, Rating::Good);
         assert!(study_card.memory().is_in_progress());
         assert!(!study_card.memory().is_high_difficulty());
         assert!(!study_card.memory().is_known_card());

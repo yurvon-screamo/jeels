@@ -30,7 +30,6 @@ pub(crate) fn create_study_card_with_memory(
     word: &str,
     stability: f64,
     difficulty: f64,
-    _interval_days: i64,
     rating: Rating,
 ) -> StudyCard {
     let card = Card::Vocabulary(VocabularyCard::new(

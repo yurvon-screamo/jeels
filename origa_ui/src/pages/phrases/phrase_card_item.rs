@@ -3,8 +3,8 @@ use std::collections::HashSet;
 use super::super::shared::{CardStatus, DeleteRequest};
 use crate::i18n::use_i18n;
 use crate::ui_components::{
-    AudioPlayer, CardActionBar, CollapsibleDescription, DeleteConfirmModal,
-    FsrsMetrics, MarkdownText, Skeleton, Tag, TagVariant, TranslatorText,
+    AudioPlayer, CardActionBar, CollapsibleDescription, DeleteConfirmModal, FsrsMetrics,
+    MarkdownText, Skeleton, Tag, TagVariant, TranslatorText,
 };
 use leptos::prelude::*;
 use origa::domain::{Card as DomainCard, NativeLanguage, StudyCard};

@@ -9,8 +9,8 @@ use super::grammar_practice_session::GrammarPracticeSession;
 use crate::i18n::use_i18n;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText, LoadingOverlay,
-    MarkdownText, TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
+    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText, LoadingOverlay, MarkdownText,
+    TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;

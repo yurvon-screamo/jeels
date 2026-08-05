@@ -6,9 +6,9 @@ use super::kanji_detail_parts::{KanjiDetailHeroCard, MobileOverview};
 use crate::i18n::use_i18n;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText,
-    KanjiDrawingPractice, KanjiViewMode, KanjiWritingSection, LoadingOverlay, MarkdownText,
-    ReadingGroup, TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
+    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText, KanjiDrawingPractice,
+    KanjiViewMode, KanjiWritingSection, LoadingOverlay, MarkdownText, ReadingGroup, TabItem, Tabs,
+    Tag, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
