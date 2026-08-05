@@ -197,7 +197,7 @@ mod reversed_view_easy_reviews {
                 Difficulty::new(7.0).unwrap(),
                 Utc::now(),
             );
-            study_card.add_review(memory, ReviewLog::new(Rating::Easy, Duration::days(5)));
+            study_card.apply_review(memory, Rating::Easy);
         }
 
         assert!(study_card.memory().is_high_difficulty());
@@ -218,7 +218,7 @@ mod reversed_view_easy_reviews {
                 Difficulty::new(7.0).unwrap(),
                 Utc::now(),
             );
-            study_card.add_review(memory, ReviewLog::new(Rating::Good, Duration::days(5)));
+            study_card.apply_review(memory, Rating::Good);
         }
 
         assert!(study_card.memory().is_high_difficulty());

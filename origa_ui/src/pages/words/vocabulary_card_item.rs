@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use super::super::shared::{CardStatus, DeleteRequest, format_answer_parts};
 use crate::i18n::use_i18n;
 use crate::ui_components::{
-    CardActionBar, CardHistoryModal, DeleteConfirmModal, FsrsMetrics, FuriganaText, Tag,
+    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText, Tag,
     TagVariant, WordTranslations,
 };
 use leptos::prelude::*;
@@ -24,9 +24,7 @@ pub fn VocabularyCardItem(
     let card_id = *study_card.card_id();
     let is_favorite = study_card.is_favorite();
     let memory = study_card.memory();
-    let memory_clone = memory.clone();
 
-    let is_history_open = RwSignal::new(false);
     let is_delete_modal_open = RwSignal::new(false);
 
     let confirm_delete = Callback::new(move |_| {
@@ -100,7 +98,6 @@ pub fn VocabularyCardItem(
                         on_toggle_favorite=Callback::new(move |_| on_toggle_favorite.run(card_id))
                         show_mark_as_known=Signal::derive(move || show_mark_as_known)
                         on_mark_as_known=Callback::new(move |_| on_mark_as_known.run(()))
-                        on_history=Callback::new(move |_| is_history_open.set(true))
                         on_delete=Callback::new(move |_| is_delete_modal_open.set(true))
                         test_id=Signal::derive(|| "words-card-item".to_string())
                         show_tag=Signal::derive(|| false)
@@ -108,11 +105,6 @@ pub fn VocabularyCardItem(
                 </div>
             </div>
         </div>
-        <CardHistoryModal
-            is_open=Signal::derive(move || is_history_open.get())
-            memory=memory_clone.clone()
-            on_close=Callback::new(move |_| is_history_open.set(false))
-        />
         <DeleteConfirmModal
             test_id="words-delete-modal"
             is_open=is_delete_modal_open

@@ -1351,10 +1351,10 @@ fn distribute_new_cards<'a, R: rand::Rng>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::RateMode;
     use crate::domain::knowledge::LessonCardView;
     use crate::domain::knowledge::{GrammarRuleCard, KanjiCard, PhraseCard, VocabularyCard};
     use crate::domain::value_objects::Question;
-    use crate::domain::{RateMode, Rating};
     use rand::SeedableRng;
     use rand::rngs::StdRng;
     use rstest::rstest;
@@ -2580,7 +2580,7 @@ mod tests {
     // times (in distinct views) when its FSRS state demands it, while
     // companions, phrases and known cards keep a single showing.
 
-    use crate::domain::memory::{Difficulty, MemoryState, ReviewLog, Stability};
+    use crate::domain::memory::{Difficulty, MemoryState, Rating, Stability};
     use chrono::{Duration, Utc};
 
     fn init_test_dict() {
@@ -2601,7 +2601,7 @@ mod tests {
             Utc::now() - Duration::days(interval_days),
         );
         let study_card = ks.study_cards_mut_for_test().get_mut(&card_id).unwrap();
-        study_card.add_review(memory, ReviewLog::new(rating, Duration::days(1)));
+        study_card.apply_review(memory, rating);
     }
 
     fn seed_distractor_vocab(ks: &mut KnowledgeSet, words: &[&str]) {

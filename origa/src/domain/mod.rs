@@ -46,7 +46,7 @@ pub use knowledge::{
 pub use crate::dictionary::kanji::RARE_READING_MAX_FREQ;
 
 pub(crate) use knowledge::collect_known_vocabulary_words;
-pub use memory::{CardState, Difficulty, MemoryHistory, MemoryState, Rating, ReviewLog, Stability};
+pub use memory::{CardState, Difficulty, MemoryHistory, MemoryState, Rating, Stability};
 pub use score_content::ScoreContentResult;
 pub use srs::RateMode;
 pub use stats::{RatingRatio, TodayOverview, compute_rating_ratio, compute_today_overview};

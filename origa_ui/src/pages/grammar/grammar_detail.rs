@@ -9,7 +9,7 @@ use super::grammar_practice_session::GrammarPracticeSession;
 use crate::i18n::use_i18n;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    CardActionBar, CardHistoryModal, DeleteConfirmModal, FsrsMetrics, FuriganaText, LoadingOverlay,
+    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText, LoadingOverlay,
     MarkdownText, TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
@@ -158,7 +158,6 @@ pub fn GrammarDetail() -> impl IntoView {
     });
 
     let is_delete_modal_open = RwSignal::new(false);
-    let is_history_open = RwSignal::new(false);
     let navigate = StoredValue::new(use_navigate());
     let active_tab: RwSignal<String> = RwSignal::new("overview".to_string());
 
@@ -316,8 +315,6 @@ pub fn GrammarDetail() -> impl IntoView {
                             r.content(&native_lang.get()).related_patterns().map(|s| s.to_string())
                         })
                     });
-                    let memory_history: StoredValue<origa::domain::MemoryHistory> =
-                        StoredValue::new(memory.clone());
                     let title_stored: StoredValue<String> = StoredValue::new(title_text.clone());
                     let known_kanji_stored: StoredValue<HashSet<char>> =
                         StoredValue::new(known_kanji.get());
@@ -362,7 +359,6 @@ pub fn GrammarDetail() -> impl IntoView {
                                     show_mark_as_known=Signal::derive(move || status != CardStatus::Learned)
                                     on_mark_as_known=Callback::new(move |_| on_mark_as_known.run(card_id_for_known))
                                     mark_known_pending=mark_known_pending
-                                    on_history=Callback::new(move |_| is_history_open.set(true))
                                     on_delete=Callback::new(move |_| is_delete_modal_open.set(true))
                                     test_id=Signal::derive(|| "grammar-detail-actions".to_string())
                                     show_tag=Signal::derive(|| false)
@@ -500,7 +496,6 @@ pub fn GrammarDetail() -> impl IntoView {
                                             show_mark_as_known=Signal::derive(move || status != CardStatus::Learned)
                                             on_mark_as_known=Callback::new(move |_| on_mark_as_known.run(card_id_for_known))
                                             mark_known_pending=mark_known_pending
-                                            on_history=Callback::new(move |_| is_history_open.set(true))
                                             on_delete=Callback::new(move |_| is_delete_modal_open.set(true))
                                             test_id=Signal::derive(|| "grammar-detail-actions-mobile".to_string())
                                             show_tag=Signal::derive(|| false)
@@ -558,11 +553,6 @@ pub fn GrammarDetail() -> impl IntoView {
                             </Show>
                         </div>
 
-                        <CardHistoryModal
-                            is_open=Signal::derive(move || is_history_open.get())
-                            memory=memory_history.get_value()
-                            on_close=Callback::new(move |_| is_history_open.set(false))
-                        />
                         <DeleteConfirmModal
                             test_id="grammar-detail-delete-modal"
                             is_open=is_delete_modal_open

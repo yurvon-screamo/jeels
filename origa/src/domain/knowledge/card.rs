@@ -1,5 +1,5 @@
 use crate::domain::{
-    OrigaError, PartOfSpeech, Rating, ReviewLog,
+    OrigaError, PartOfSpeech, Rating,
     knowledge::{GrammarRuleCard, KanjiCard, PhraseCard, VocabularyCard},
     memory::{MemoryHistory, MemoryState},
     value_objects::{CardAnswer, NativeLanguage, Question},
@@ -70,8 +70,8 @@ impl StudyCard {
         self.favorite_changed_at = ts;
     }
 
-    pub(crate) fn add_review(&mut self, memory_state: MemoryState, review: ReviewLog) {
-        self.memory_history.add_review(memory_state, review);
+    pub(crate) fn apply_review(&mut self, memory_state: MemoryState, rating: Rating) {
+        self.memory_history.apply_review(memory_state, rating);
     }
 
     pub fn toggle_favorite(&mut self) {
@@ -369,13 +369,7 @@ mod tests {
                     crate::domain::memory::Difficulty::new(2.0).unwrap(),
                     Utc::now(),
                 );
-                study_card2.add_review(
-                    memory_state,
-                    crate::domain::memory::ReviewLog::new(
-                        crate::domain::memory::Rating::Good,
-                        Duration::days(1),
-                    ),
-                );
+                study_card2.apply_review(memory_state, crate::domain::memory::Rating::Good);
 
                 study_card1.merge(&study_card2);
 
@@ -427,25 +421,13 @@ mod tests {
                     crate::domain::memory::Difficulty::new(2.0).unwrap(),
                     Utc::now(),
                 );
-                study_card1.add_review(
-                    memory_state.clone(),
-                    crate::domain::memory::ReviewLog::new(
-                        crate::domain::memory::Rating::Good,
-                        Duration::days(1),
-                    ),
-                );
+                study_card1.apply_review(memory_state.clone(), crate::domain::memory::Rating::Good);
                 study_card1.toggle_favorite();
                 study_card1.handle_favorite_rating(crate::domain::memory::Rating::Easy);
                 study_card1.handle_favorite_rating(crate::domain::memory::Rating::Easy);
                 assert_eq!(study_card1.favorite_easy_streak(), 2);
 
-                study_card2.add_review(
-                    memory_state,
-                    crate::domain::memory::ReviewLog::new(
-                        crate::domain::memory::Rating::Good,
-                        Duration::days(1),
-                    ),
-                );
+                study_card2.apply_review(memory_state, crate::domain::memory::Rating::Good);
                 study_card2.toggle_favorite();
                 study_card2.handle_favorite_rating(crate::domain::memory::Rating::Easy);
                 study_card2.handle_favorite_rating(crate::domain::memory::Rating::Easy);
@@ -566,13 +548,7 @@ mod tests {
                     crate::domain::memory::Difficulty::new(2.0).unwrap(),
                     Utc::now(),
                 );
-                study_card.add_review(
-                    memory_state,
-                    crate::domain::memory::ReviewLog::new(
-                        crate::domain::memory::Rating::Good,
-                        Duration::days(1),
-                    ),
-                );
+                study_card.apply_review(memory_state, crate::domain::memory::Rating::Good);
                 study_card.toggle_favorite();
                 assert!(study_card.is_favorite());
 
@@ -637,13 +613,7 @@ mod tests {
                     crate::domain::memory::Difficulty::new(2.0).unwrap(),
                     Utc::now(),
                 );
-                study_card.add_review(
-                    memory_state,
-                    crate::domain::memory::ReviewLog::new(
-                        crate::domain::memory::Rating::Good,
-                        Duration::days(1),
-                    ),
-                );
+                study_card.apply_review(memory_state, crate::domain::memory::Rating::Good);
                 study_card.toggle_favorite();
                 study_card.handle_favorite_rating(crate::domain::memory::Rating::Easy);
 

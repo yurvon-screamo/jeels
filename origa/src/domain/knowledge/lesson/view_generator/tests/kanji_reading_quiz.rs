@@ -2,9 +2,9 @@ use super::*;
 use crate::dictionary::kanji::KanjiInfo;
 use crate::domain::knowledge::KanjiCard;
 use crate::domain::knowledge::lesson::types::{LessonCardView, QuizMode};
-use crate::domain::memory::{Difficulty, MemoryState, Rating, ReviewLog, Stability};
+use crate::domain::memory::{Difficulty, MemoryState, Rating, Stability};
 use crate::use_cases::init_real_dictionaries;
-use chrono::{Duration, Utc};
+use chrono::Utc;
 use rand::{SeedableRng, rngs::StdRng};
 use std::collections::HashMap;
 
@@ -34,7 +34,7 @@ fn make_reviewed_kanji(kanji: &str, stability: f64, difficulty: f64, rating: Rat
         Difficulty::new(difficulty).unwrap(),
         Utc::now(),
     );
-    sc.add_review(mem, ReviewLog::new(rating, Duration::days(5)));
+    sc.apply_review(mem, rating);
     sc
 }
 

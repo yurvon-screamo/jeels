@@ -37,7 +37,7 @@ impl TrailBaseUserRepository {
     pub fn new() -> Self {
         Self {
             client: TrailBaseClient::new(),
-            table_name: "user".to_string(),
+            table_name: "user_v2".to_string(),
             user_cache: Arc::new(RwLock::new(HashMap::new())),
         }
     }

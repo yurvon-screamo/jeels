@@ -1,7 +1,7 @@
 use crate::domain::OrigaError;
 use crate::domain::Rating;
 use crate::domain::{CardState, Difficulty, MemoryHistory, MemoryState, Stability};
-use chrono::{Duration, Utc};
+use chrono::Utc;
 use rs_fsrs::{Card as FsrsCard, FSRS, Parameters, Rating as FsrsRating, State as FsrsState};
 use serde::Deserialize;
 use serde::Serialize;
@@ -9,12 +9,6 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 static FSRS_SERVICE: OnceLock<FsrsSrsService> = OnceLock::new();
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct NextReview {
-    pub interval: Duration,
-    pub memory_state: MemoryState,
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RateMode {
@@ -125,7 +119,7 @@ pub fn rate_memory(
     mode: RateMode,
     rating: Rating,
     memory_history: &MemoryHistory,
-) -> Result<NextReview, OrigaError> {
+) -> Result<MemoryState, OrigaError> {
     let srs_service = FSRS_SERVICE.get_or_init(FsrsSrsService::new);
     let engine = srs_service
         .engines
@@ -138,14 +132,10 @@ fn schedule_next_review(
     engine: &FSRS,
     rating: Rating,
     memory_history: &MemoryHistory,
-) -> Result<NextReview, OrigaError> {
+) -> Result<MemoryState, OrigaError> {
     let now = Utc::now();
     let card = if let Some(memory_state) = memory_history.memory_state() {
-        let last_review_date = memory_history
-            .reviews()
-            .back()
-            .map(|review| review.timestamp())
-            .unwrap_or(now);
+        let last_review_date = memory_history.last_review_date().unwrap_or(now);
 
         let elapsed_days = now
             .signed_duration_since(last_review_date)
@@ -158,12 +148,8 @@ fn schedule_next_review(
             .num_days()
             .max(0);
 
-        let reps = memory_history.reviews().len() as i32;
-        let lapses = memory_history
-            .reviews()
-            .iter()
-            .filter(|review| matches!(review.rating(), Rating::Again))
-            .count() as i32;
+        let reps = memory_history.reps() as i32;
+        let lapses = memory_history.lapses() as i32;
 
         FsrsCard {
             due: *memory_state.next_review_date(),
@@ -190,29 +176,22 @@ fn schedule_next_review(
     let scheduling_info = engine.next(card, now, fsrs_rating);
 
     let next_review_date = scheduling_info.card.due;
-    let interval = next_review_date.signed_duration_since(now);
-    let interval = if interval < Duration::zero() {
-        Duration::zero()
-    } else {
-        interval
-    };
-
     let stability = Stability::new(scheduling_info.card.stability)?;
     let difficulty = Difficulty::new(scheduling_info.card.difficulty)?;
     let card_state = to_card_state(scheduling_info.card.state);
-    let memory_state =
-        MemoryState::with_card_state(stability, difficulty, next_review_date, card_state);
 
-    Ok(NextReview {
-        interval,
-        memory_state,
-    })
+    Ok(MemoryState::with_card_state(
+        stability,
+        difficulty,
+        next_review_date,
+        card_state,
+    ))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Utc;
+    use chrono::Duration;
     use rstest::rstest;
 
     fn engine_for(mode: RateMode, enable_fuzz: bool) -> FSRS {
@@ -230,14 +209,9 @@ mod tests {
 
         let after = Utc::now();
 
-        assert!(
-            result.interval >= Duration::zero() && result.interval <= Duration::minutes(1),
-            "New card with Again should have interval <= 1 minute, got {:?}",
-            result.interval
-        );
-        let next_review = result.memory_state.next_review_date();
+        let next_review = result.next_review_date();
         assert!(*next_review >= before && *next_review <= after + Duration::minutes(1));
-        assert_eq!(result.memory_state.card_state(), CardState::Learning);
+        assert_eq!(result.card_state(), CardState::Learning);
     }
 
     #[rstest]
@@ -245,30 +219,30 @@ mod tests {
     #[case(RateMode::PhraseReview)]
     #[case(RateMode::GrammarReview)]
     #[case(RateMode::KanjiReview)]
-    fn good_on_new_card_returns_positive_interval(#[case] mode: RateMode) {
+    fn good_on_new_card_returns_future_review(#[case] mode: RateMode) {
         let memory_history = MemoryHistory::new();
+        let now = Utc::now();
 
         let result = rate_memory(mode, Rating::Good, &memory_history).unwrap();
 
         assert!(
-            result.interval > Duration::zero(),
-            "Good rating in {mode:?} mode should produce a positive interval, got {:?}",
-            result.interval
+            *result.next_review_date() > now,
+            "Good rating in {mode:?} mode should produce a future review date"
         );
     }
 
     #[test]
     fn phrase_review_again_returns_short_interval() {
         let memory_history = MemoryHistory::new();
+        let before = Utc::now();
 
         let result = rate_memory(RateMode::PhraseReview, Rating::Again, &memory_history).unwrap();
 
-        assert!(
-            result.interval >= Duration::zero() && result.interval <= Duration::minutes(1),
-            "New card with Again should have interval <= 1 minute, got {:?}",
-            result.interval
-        );
-        assert_eq!(result.memory_state.card_state(), CardState::Learning);
+        let after = Utc::now();
+
+        let next_review = result.next_review_date();
+        assert!(*next_review >= before && *next_review <= after + Duration::minutes(1));
+        assert_eq!(result.card_state(), CardState::Learning);
     }
 
     #[test]
@@ -279,7 +253,7 @@ mod tests {
             rate_memory(RateMode::StandardLesson, Rating::Easy, &memory_history).unwrap();
         let phrase = rate_memory(RateMode::PhraseReview, Rating::Easy, &memory_history).unwrap();
 
-        assert!(phrase.interval > standard.interval);
+        assert!(*phrase.next_review_date() > *standard.next_review_date());
     }
 
     #[rstest]
@@ -301,27 +275,27 @@ mod tests {
     #[test]
     fn grammar_review_again_returns_short_interval() {
         let memory_history = MemoryHistory::new();
+        let before = Utc::now();
 
         let result = rate_memory(RateMode::GrammarReview, Rating::Again, &memory_history).unwrap();
 
-        assert!(
-            result.interval >= Duration::zero() && result.interval <= Duration::minutes(1),
-            "New card with Again should have interval <= 1 minute, got {:?}",
-            result.interval
-        );
+        let after = Utc::now();
+
+        let next_review = result.next_review_date();
+        assert!(*next_review >= before && *next_review <= after + Duration::minutes(1));
     }
 
     #[test]
     fn kanji_review_again_returns_short_interval() {
         let memory_history = MemoryHistory::new();
+        let before = Utc::now();
 
         let result = rate_memory(RateMode::KanjiReview, Rating::Again, &memory_history).unwrap();
 
-        assert!(
-            result.interval >= Duration::zero() && result.interval <= Duration::minutes(1),
-            "New card with Again should have interval <= 1 minute, got {:?}",
-            result.interval
-        );
+        let after = Utc::now();
+
+        let next_review = result.next_review_date();
+        assert!(*next_review >= before && *next_review <= after + Duration::minutes(1));
     }
 
     #[test]
@@ -332,7 +306,7 @@ mod tests {
             rate_memory(RateMode::StandardLesson, Rating::Easy, &memory_history).unwrap();
         let grammar = rate_memory(RateMode::GrammarReview, Rating::Easy, &memory_history).unwrap();
 
-        assert!(grammar.interval <= standard.interval);
+        assert!(*grammar.next_review_date() <= *standard.next_review_date());
     }
 
     #[test]
@@ -352,7 +326,21 @@ mod tests {
         )
         .unwrap();
 
-        assert!(kanji.interval <= standard.interval);
+        // Compare intervals (next_review - now) rather than raw timestamps to
+        // avoid false negatives from sub-millisecond differences in `now`.
+        let now = Utc::now();
+        let standard_days = standard
+            .next_review_date()
+            .signed_duration_since(now)
+            .num_seconds();
+        let kanji_days = kanji
+            .next_review_date()
+            .signed_duration_since(now)
+            .num_seconds();
+        assert!(
+            kanji_days <= standard_days,
+            "kanji interval ({kanji_days}s) should be <= standard ({standard_days}s)"
+        );
     }
 
     #[test]
@@ -360,11 +348,7 @@ mod tests {
         let memory_history = MemoryHistory::new();
         let result = rate_memory(RateMode::StandardLesson, Rating::Good, &memory_history).unwrap();
 
-        assert_eq!(result.memory_state.card_state(), CardState::Learning);
-        assert!(
-            result.interval >= Duration::zero(),
-            "Learning card should have non-negative interval"
-        );
+        assert_eq!(result.card_state(), CardState::Learning);
     }
 
     #[test]
@@ -372,8 +356,7 @@ mod tests {
         let memory_history = MemoryHistory::new();
         let result = rate_memory(RateMode::StandardLesson, Rating::Easy, &memory_history).unwrap();
 
-        assert_eq!(result.memory_state.card_state(), CardState::Review);
-        assert!(result.interval > Duration::days(0));
+        assert_eq!(result.card_state(), CardState::Review);
     }
 
     #[test]
@@ -385,14 +368,11 @@ mod tests {
             Utc::now() - chrono::Duration::days(5),
             CardState::Review,
         );
-        history.add_review(
-            state,
-            crate::domain::ReviewLog::new(Rating::Good, chrono::Duration::days(5)),
-        );
+        history.apply_review(state, Rating::Good);
 
         let result = rate_memory(RateMode::StandardLesson, Rating::Again, &history).unwrap();
 
-        assert_eq!(result.memory_state.card_state(), CardState::Relearning);
+        assert_eq!(result.card_state(), CardState::Relearning);
     }
 
     #[test]
@@ -404,14 +384,11 @@ mod tests {
             Utc::now(),
             CardState::Learning,
         );
-        history.add_review(
-            state,
-            crate::domain::ReviewLog::new(Rating::Good, chrono::Duration::zero()),
-        );
+        history.apply_review(state, Rating::Good);
 
         let result = rate_memory(RateMode::StandardLesson, Rating::Good, &history).unwrap();
 
-        assert_eq!(result.memory_state.card_state(), CardState::Review);
+        assert_eq!(result.card_state(), CardState::Review);
     }
 
     #[test]
@@ -423,13 +400,10 @@ mod tests {
             Utc::now(),
             CardState::Relearning,
         );
-        history.add_review(
-            state,
-            crate::domain::ReviewLog::new(Rating::Again, chrono::Duration::zero()),
-        );
+        history.apply_review(state, Rating::Again);
 
         let result = rate_memory(RateMode::StandardLesson, Rating::Good, &history).unwrap();
 
-        assert_eq!(result.memory_state.card_state(), CardState::Review);
+        assert_eq!(result.card_state(), CardState::Review);
     }
 }
