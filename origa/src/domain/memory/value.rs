@@ -1,9 +1,8 @@
 use core::fmt;
 
 use crate::domain::OrigaError;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use ulid::Ulid;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Default)]
 pub enum CardState {
@@ -75,41 +74,6 @@ impl fmt::Display for MemoryState {
             "Stability: {}, Difficulty: {}, Next review date: {}",
             self.stability, self.difficulty, self.next_review_date
         )
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
-pub struct ReviewLog {
-    id: Ulid,
-    rating: Rating,
-    timestamp: DateTime<Utc>,
-    interval: Duration,
-}
-
-impl ReviewLog {
-    pub fn new(rating: Rating, interval: Duration) -> Self {
-        Self {
-            id: Ulid::new(),
-            rating,
-            timestamp: Utc::now(),
-            interval,
-        }
-    }
-
-    pub fn id(&self) -> Ulid {
-        self.id
-    }
-
-    pub fn rating(&self) -> Rating {
-        self.rating
-    }
-
-    pub fn timestamp(&self) -> DateTime<Utc> {
-        self.timestamp
-    }
-
-    pub fn interval(&self) -> Duration {
-        self.interval
     }
 }
 
@@ -205,32 +169,7 @@ mod tests {
         assert!(display.contains("Next review date"));
     }
 
-    // ReviewLog tests
-    #[test]
-    fn review_log_new_assigns_id_rating_and_interval() {
-        let log = ReviewLog::new(Rating::Good, Duration::days(1));
-
-        assert!(log.id() > Ulid::nil());
-        assert_eq!(log.rating(), Rating::Good);
-        assert_eq!(log.interval(), Duration::days(1));
-    }
-
-    #[test]
-    fn review_log_preserves_all_rating_variants() {
-        let logs = [
-            ReviewLog::new(Rating::Easy, Duration::days(1)),
-            ReviewLog::new(Rating::Good, Duration::days(1)),
-            ReviewLog::new(Rating::Hard, Duration::days(1)),
-            ReviewLog::new(Rating::Again, Duration::days(1)),
-        ];
-
-        assert_eq!(logs[0].rating(), Rating::Easy);
-        assert_eq!(logs[1].rating(), Rating::Good);
-        assert_eq!(logs[2].rating(), Rating::Hard);
-        assert_eq!(logs[3].rating(), Rating::Again);
-    }
-
-    // Stability tests - validation
+    // Rating enum tests
     #[test]
     fn stability_new_valid() {
         let stability = Stability::new(0.5).unwrap();

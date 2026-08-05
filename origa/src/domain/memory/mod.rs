@@ -1,21 +1,47 @@
 mod value;
 
-pub use value::{CardState, Difficulty, MemoryState, Rating, ReviewLog, Stability};
-
-use std::collections::{HashSet, VecDeque};
+pub use value::{CardState, Difficulty, MemoryState, Rating, Stability};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use ulid::Ulid;
 
 pub(crate) const KNOWN_CARD_STABILITY_THRESHOLD: f64 = 21.0;
 const HIGH_DIFFICULTY_THRESHOLD: f64 = 7.0;
 const HIGH_DIFFICULTY_STABILITY_CAP: f64 = 7.0;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+/// Denormalized memory state for a study card.
+///
+/// Previously held a `VecDeque<ReviewLog>` with every individual review
+/// (rating + timestamp + interval + ULID). That array was ~95% of the
+/// serialized `knowledge_set` wire payload (ADR-034): 6000 cards × ~8
+/// reviews × ~130 bytes ≈ 8 MB per save_sync.
+///
+/// Analysis of `rs-fsrs-1.2.1` proved the array feeds only two scalars
+/// into the FSRS scheduler: `reps` (fuzz seed only) and `lapses` (never
+/// read by scheduling math). Core FSRS state — stability, difficulty,
+/// next_review_date, last_review, card_state — lives entirely in
+/// `current_state`. The `easy_count`/`good_count` scalars feed only the
+/// lesson view generator's reversed-card heuristic.
+///
+/// Cross-device merge uses `max()` for counters (known limitation: may
+/// undercount by ±N during offline→offline divergence). `current_state`
+/// merges via LWW by `last_review_date` (unchanged from the array-based
+/// `select_later_state` logic).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryHistory {
     current_state: Option<MemoryState>,
-    reviews: VecDeque<ReviewLog>,
+    #[serde(default)]
+    reps: u32,
+    #[serde(default)]
+    lapses: u32,
+    #[serde(default)]
+    easy_count: u32,
+    #[serde(default)]
+    good_count: u32,
+    #[serde(default)]
+    last_review_date: Option<DateTime<Utc>>,
+    #[serde(default)]
+    last_rating: Option<Rating>,
 }
 
 impl Default for MemoryHistory {
@@ -28,7 +54,12 @@ impl MemoryHistory {
     pub fn new() -> Self {
         Self {
             current_state: None,
-            reviews: VecDeque::new(),
+            reps: 0,
+            lapses: 0,
+            easy_count: 0,
+            good_count: 0,
+            last_review_date: None,
+            last_rating: None,
         }
     }
 
@@ -50,31 +81,41 @@ impl MemoryHistory {
             .map(|state| state.next_review_date())
     }
 
-    pub fn reviews(&self) -> &VecDeque<ReviewLog> {
-        &self.reviews
+    pub fn reps(&self) -> u32 {
+        self.reps
+    }
+
+    pub fn lapses(&self) -> u32 {
+        self.lapses
     }
 
     pub fn easy_review_count(&self) -> usize {
-        self.reviews
-            .iter()
-            .filter(|review| review.rating() == Rating::Easy)
-            .count()
+        self.easy_count as usize
     }
 
     pub fn good_review_count(&self) -> usize {
-        self.reviews
-            .iter()
-            .filter(|review| review.rating() == Rating::Good)
-            .count()
+        self.good_count as usize
     }
 
-    pub(crate) fn add_review(&mut self, memory_state: MemoryState, review: ReviewLog) {
+    pub(crate) fn apply_review(&mut self, memory_state: MemoryState, rating: Rating) {
         self.current_state = Some(memory_state);
-        self.reviews.push_back(review);
+        self.last_review_date = Some(Utc::now());
+        self.last_rating = Some(rating);
+        self.reps += 1;
+        match rating {
+            Rating::Again => self.lapses += 1,
+            Rating::Easy => self.easy_count += 1,
+            Rating::Good => self.good_count += 1,
+            Rating::Hard => {},
+        }
     }
 
     pub fn last_review_date(&self) -> Option<DateTime<Utc>> {
-        self.reviews.back().map(|review| review.timestamp())
+        self.last_review_date
+    }
+
+    pub fn last_rating(&self) -> Option<Rating> {
+        self.last_rating
     }
 
     /// Карточка которая требует повторения
@@ -115,21 +156,33 @@ impl MemoryHistory {
         self.current_state = select_later_state(
             &self.current_state,
             &other.current_state,
-            self.last_review_date(),
-            other.last_review_date(),
+            self.last_review_date,
+            other.last_review_date,
         );
 
-        let existing_ids: HashSet<Ulid> = self.reviews.iter().map(|r| r.id()).collect();
+        // Counters merge via max(). Known limitation: during offline→offline
+        // divergence this may undercount by ±N relative to a G-Set union.
+        // FSRS impact: reps feeds only the fuzz seed (±5% interval jitter),
+        // lapses/easy_count/good_count feed display heuristics only.
+        self.reps = self.reps.max(other.reps);
+        self.lapses = self.lapses.max(other.lapses);
+        self.easy_count = self.easy_count.max(other.easy_count);
+        self.good_count = self.good_count.max(other.good_count);
 
-        for review in &other.reviews {
-            if !existing_ids.contains(&review.id()) {
-                self.reviews.push_back(*review);
-            }
+        // last_review_date + last_rating: take from whichever side is newer.
+        match (self.last_review_date, other.last_review_date) {
+            (Some(self_ts), Some(other_ts)) => {
+                if other_ts >= self_ts {
+                    self.last_review_date = other.last_review_date;
+                    self.last_rating = other.last_rating;
+                }
+            },
+            (None, Some(_)) => {
+                self.last_review_date = other.last_review_date;
+                self.last_rating = other.last_rating;
+            },
+            _ => {},
         }
-
-        self.reviews
-            .make_contiguous()
-            .sort_by_key(|r| r.timestamp());
     }
 }
 
@@ -163,10 +216,6 @@ mod tests {
     use super::*;
     use chrono::Duration;
 
-    fn make_review(rating: Rating) -> ReviewLog {
-        ReviewLog::new(rating, Duration::days(1))
-    }
-
     fn make_state() -> MemoryState {
         MemoryState::new(
             Stability::new(5.0).unwrap(),
@@ -174,6 +223,16 @@ mod tests {
             Utc::now(),
         )
     }
+
+    fn make_state_at(stability: f64, difficulty: f64, date: DateTime<Utc>) -> MemoryState {
+        MemoryState::new(
+            Stability::new(stability).unwrap(),
+            Difficulty::new(difficulty).unwrap(),
+            date,
+        )
+    }
+
+    // --- counter increments ---
 
     #[test]
     fn easy_review_count_empty_history() {
@@ -185,9 +244,9 @@ mod tests {
     fn easy_review_count_no_easy_reviews() {
         let mut history = MemoryHistory::new();
         let state = make_state();
-        history.add_review(state.clone(), make_review(Rating::Good));
-        history.add_review(state.clone(), make_review(Rating::Hard));
-        history.add_review(state.clone(), make_review(Rating::Again));
+        history.apply_review(state.clone(), Rating::Good);
+        history.apply_review(state.clone(), Rating::Hard);
+        history.apply_review(state.clone(), Rating::Again);
         assert_eq!(history.easy_review_count(), 0);
     }
 
@@ -195,11 +254,11 @@ mod tests {
     fn easy_review_count_mixed_reviews() {
         let mut history = MemoryHistory::new();
         let state = make_state();
-        history.add_review(state.clone(), make_review(Rating::Easy));
-        history.add_review(state.clone(), make_review(Rating::Good));
-        history.add_review(state.clone(), make_review(Rating::Easy));
-        history.add_review(state.clone(), make_review(Rating::Easy));
-        history.add_review(state.clone(), make_review(Rating::Hard));
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Good);
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Hard);
         assert_eq!(history.easy_review_count(), 3);
     }
 
@@ -208,7 +267,7 @@ mod tests {
         let mut history = MemoryHistory::new();
         let state = make_state();
         for _ in 0..5 {
-            history.add_review(state.clone(), make_review(Rating::Easy));
+            history.apply_review(state.clone(), Rating::Easy);
         }
         assert_eq!(history.easy_review_count(), 5);
     }
@@ -223,8 +282,8 @@ mod tests {
     fn good_review_count_no_good_reviews() {
         let mut history = MemoryHistory::new();
         let state = make_state();
-        history.add_review(state.clone(), make_review(Rating::Easy));
-        history.add_review(state.clone(), make_review(Rating::Hard));
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Hard);
         assert_eq!(history.good_review_count(), 0);
     }
 
@@ -232,19 +291,50 @@ mod tests {
     fn good_review_count_mixed_reviews() {
         let mut history = MemoryHistory::new();
         let state = make_state();
-        history.add_review(state.clone(), make_review(Rating::Good));
-        history.add_review(state.clone(), make_review(Rating::Easy));
-        history.add_review(state.clone(), make_review(Rating::Good));
-        history.add_review(state.clone(), make_review(Rating::Hard));
-        history.add_review(state.clone(), make_review(Rating::Good));
+        history.apply_review(state.clone(), Rating::Good);
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Good);
+        history.apply_review(state.clone(), Rating::Hard);
+        history.apply_review(state.clone(), Rating::Good);
         assert_eq!(history.good_review_count(), 3);
+    }
+
+    #[test]
+    fn reps_increments_on_every_rating() {
+        let mut history = MemoryHistory::new();
+        let state = make_state();
+        history.apply_review(state.clone(), Rating::Good);
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Hard);
+        history.apply_review(state.clone(), Rating::Again);
+        assert_eq!(history.reps(), 4);
+    }
+
+    #[test]
+    fn lapses_increments_only_on_again() {
+        let mut history = MemoryHistory::new();
+        let state = make_state();
+        history.apply_review(state.clone(), Rating::Good);
+        history.apply_review(state.clone(), Rating::Again);
+        history.apply_review(state.clone(), Rating::Easy);
+        history.apply_review(state.clone(), Rating::Again);
+        assert_eq!(history.lapses(), 2);
+    }
+
+    #[test]
+    fn last_rating_tracks_most_recent() {
+        let mut history = MemoryHistory::new();
+        let state = make_state();
+        history.apply_review(state.clone(), Rating::Good);
+        assert_eq!(history.last_rating(), Some(Rating::Good));
+        history.apply_review(make_state(), Rating::Hard);
+        assert_eq!(history.last_rating(), Some(Rating::Hard));
     }
 
     // --- is_due ---
 
     #[test]
     fn is_due_true_when_next_review_in_past() {
-        // Arrange
         let past = Utc::now() - Duration::days(1);
         let state = MemoryState::new(
             Stability::new(5.0).unwrap(),
@@ -252,15 +342,13 @@ mod tests {
             past,
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Good));
+        history.apply_review(state.clone(), Rating::Good);
 
-        // Act & Assert
         assert!(history.is_due());
     }
 
     #[test]
     fn is_due_false_when_next_review_in_future() {
-        // Arrange
         let future = Utc::now() + Duration::days(1);
         let state = MemoryState::new(
             Stability::new(5.0).unwrap(),
@@ -268,18 +356,15 @@ mod tests {
             future,
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Good));
+        history.apply_review(state.clone(), Rating::Good);
 
-        // Act & Assert
         assert!(!history.is_due());
     }
 
     #[test]
     fn is_due_false_when_no_memory_state() {
-        // Arrange
         let history = MemoryHistory::new();
 
-        // Act & Assert
         assert!(!history.is_due());
     }
 
@@ -287,40 +372,34 @@ mod tests {
 
     #[test]
     fn is_high_difficulty_true_above_threshold() {
-        // Arrange
         let state = MemoryState::new(
             Stability::new(5.0).unwrap(),
             Difficulty::new(HIGH_DIFFICULTY_THRESHOLD + 0.1).unwrap(),
             Utc::now(),
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Hard));
+        history.apply_review(state.clone(), Rating::Hard);
 
-        // Act & Assert
         assert!(history.is_high_difficulty());
     }
 
     #[test]
     fn is_high_difficulty_false_below_threshold() {
-        // Arrange
         let state = MemoryState::new(
             Stability::new(5.0).unwrap(),
             Difficulty::new(HIGH_DIFFICULTY_THRESHOLD - 0.1).unwrap(),
             Utc::now(),
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Good));
+        history.apply_review(state.clone(), Rating::Good);
 
-        // Act & Assert
         assert!(!history.is_high_difficulty());
     }
 
     #[test]
     fn is_high_difficulty_false_when_no_memory_state() {
-        // Arrange
         let history = MemoryHistory::new();
 
-        // Act & Assert
         assert!(!history.is_high_difficulty());
     }
 
@@ -332,7 +411,7 @@ mod tests {
             Utc::now(),
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Hard));
+        history.apply_review(state.clone(), Rating::Hard);
 
         assert!(!history.is_high_difficulty());
     }
@@ -345,7 +424,7 @@ mod tests {
             Utc::now(),
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Hard));
+        history.apply_review(state.clone(), Rating::Hard);
 
         assert!(history.is_high_difficulty());
     }
@@ -354,40 +433,34 @@ mod tests {
 
     #[test]
     fn is_in_progress_true_when_stability_below_threshold() {
-        // Arrange
         let state = MemoryState::new(
             Stability::new(KNOWN_CARD_STABILITY_THRESHOLD - 0.1).unwrap(),
             Difficulty::new(3.0).unwrap(),
             Utc::now() + Duration::days(1),
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Good));
+        history.apply_review(state.clone(), Rating::Good);
 
-        // Act & Assert
         assert!(history.is_in_progress());
     }
 
     #[test]
     fn is_in_progress_false_when_stability_above_threshold() {
-        // Arrange
         let state = MemoryState::new(
             Stability::new(KNOWN_CARD_STABILITY_THRESHOLD + 0.1).unwrap(),
             Difficulty::new(3.0).unwrap(),
             Utc::now() + Duration::days(1),
         );
         let mut history = MemoryHistory::new();
-        history.add_review(state, make_review(Rating::Good));
+        history.apply_review(state.clone(), Rating::Good);
 
-        // Act & Assert
         assert!(!history.is_in_progress());
     }
 
     #[test]
     fn is_in_progress_false_when_no_memory_state() {
-        // Arrange
         let history = MemoryHistory::new();
 
-        // Act & Assert
         assert!(!history.is_in_progress());
     }
 
@@ -395,63 +468,69 @@ mod tests {
 
     #[test]
     fn merge_empty_with_non_empty_result_is_non_empty() {
-        // Arrange
         let mut empty = MemoryHistory::new();
         let state = make_state();
         let mut non_empty = MemoryHistory::new();
-        non_empty.add_review(state, make_review(Rating::Good));
+        non_empty.apply_review(state.clone(), Rating::Good);
 
-        // Act
         empty.merge(&non_empty);
 
-        // Assert
         assert!(empty.memory_state().is_some());
-        assert_eq!(empty.reviews().len(), 1);
+        assert_eq!(empty.reps(), 1);
     }
 
     #[test]
     fn merge_non_empty_with_empty_result_is_non_empty() {
-        // Arrange
         let state = make_state();
         let mut non_empty = MemoryHistory::new();
-        non_empty.add_review(state, make_review(Rating::Good));
+        non_empty.apply_review(state.clone(), Rating::Good);
         let original_state = non_empty.memory_state().cloned();
         let empty = MemoryHistory::new();
 
-        // Act
         non_empty.merge(&empty);
 
-        // Assert
         assert_eq!(non_empty.memory_state(), original_state.as_ref());
-        assert_eq!(non_empty.reviews().len(), 1);
+        assert_eq!(non_empty.reps(), 1);
     }
 
     #[test]
-    fn merge_both_with_reviews_combines_and_deduplicates() {
-        // Arrange
-        let state1 = MemoryState::new(
-            Stability::new(3.0).unwrap(),
-            Difficulty::new(2.0).unwrap(),
-            Utc::now() - Duration::days(2),
-        );
-        let state2 = MemoryState::new(
-            Stability::new(5.0).unwrap(),
-            Difficulty::new(4.0).unwrap(),
-            Utc::now(),
-        );
+    fn merge_combines_counters_via_max() {
+        let state1 = make_state_at(3.0, 2.0, Utc::now() - Duration::days(2));
+        let state2 = make_state_at(5.0, 4.0, Utc::now());
 
         let mut history_a = MemoryHistory::new();
-        history_a.add_review(state1, make_review(Rating::Good));
+        history_a.apply_review(state1, Rating::Good);
+        history_a.apply_review(make_state(), Rating::Easy);
+        history_a.apply_review(make_state(), Rating::Again);
 
         let mut history_b = MemoryHistory::new();
-        history_b.add_review(state2, make_review(Rating::Easy));
+        history_b.apply_review(state2, Rating::Easy);
 
-        // Act
         history_a.merge(&history_b);
 
-        // Assert — два уникальных review
-        assert_eq!(history_a.reviews().len(), 2);
-        // select_later_state выбирает state с более поздним last_review_date
+        // reps: max(3, 1) = 3
+        assert_eq!(history_a.reps(), 3);
+        // easy_count: max(1, 1) = 1
+        assert_eq!(history_a.easy_review_count(), 1);
+        // lapses: max(1, 0) = 1
+        assert_eq!(history_a.lapses(), 1);
+        // select_later_state picks state2 (newer last_review_date)
         assert_eq!(history_a.memory_state().unwrap().difficulty().value(), 4.0);
+    }
+
+    #[test]
+    fn merge_takes_last_rating_from_newer_side() {
+        let older = make_state_at(3.0, 2.0, Utc::now() - Duration::days(1));
+        let newer = make_state_at(5.0, 4.0, Utc::now());
+
+        let mut history_a = MemoryHistory::new();
+        history_a.apply_review(older, Rating::Good);
+
+        let mut history_b = MemoryHistory::new();
+        history_b.apply_review(newer, Rating::Easy);
+
+        history_a.merge(&history_b);
+
+        assert_eq!(history_a.last_rating(), Some(Rating::Easy));
     }
 }

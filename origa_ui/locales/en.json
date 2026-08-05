@@ -576,7 +576,6 @@
         "hint": "Phrase cards are auto-created when you learn all words in a phrase"
     },
     "ui": {
-        "card_history": "Card history",
         "card_not_studied": "Card hasn't been studied yet",
         "delete_card": "Delete card?",
         "delete_card_message": "The card will be deleted permanently.",

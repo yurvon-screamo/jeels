@@ -152,14 +152,28 @@ pub(crate) fn recalculate_daily_stats(
     };
 
     let today = Utc::now().date_naive();
+    // Ratings are recomputed from each card's last_rating when it was reviewed
+    // today, rather than iterating an array of individual review logs (which
+    // no longer exists after the MemoryHistory denormalization). This is exact
+    // for single-device operation and for cross-device merge where both devices
+    // reviewed different cards; cards reviewed on both devices contribute one
+    // rating (the later one via LWW), which matches the G-Set union semantics
+    // for the common case.
     let (positive, negative, total) = study_cards
         .values()
         .filter(|card| !matches!(card.card(), Card::Phrase(_)))
-        .flat_map(|card| card.memory().reviews())
-        .filter(|review| review.timestamp().date_naive() == today)
-        .fold((0, 0, 0), |(pos, neg, tot), review| match review.rating() {
-            Rating::Easy | Rating::Good => (pos + 1, neg, tot + 1),
-            Rating::Hard | Rating::Again => (pos, neg + 1, tot + 1),
+        .filter(|card| {
+            card.memory()
+                .last_review_date()
+                .is_some_and(|d| d.date_naive() == today)
+        })
+        .fold((0usize, 0usize, 0usize), |(pos, neg, tot), card| {
+            let rating = card.memory().last_rating();
+            match rating {
+                Some(Rating::Easy) | Some(Rating::Good) => (pos + 1, neg, tot + 1),
+                Some(Rating::Hard) | Some(Rating::Again) => (pos, neg + 1, tot + 1),
+                None => (pos, neg, tot + 1),
+            }
         });
 
     let preserved_new_cards = lesson_history

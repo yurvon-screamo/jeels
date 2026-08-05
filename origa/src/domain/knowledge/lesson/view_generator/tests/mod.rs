@@ -1,9 +1,9 @@
 use crate::domain::knowledge::KnowledgeSet;
 use crate::domain::knowledge::VocabularyCard;
-use crate::domain::memory::{Difficulty, MemoryState, Rating, ReviewLog, Stability};
+use crate::domain::memory::{Difficulty, MemoryState, Rating, Stability};
 use crate::domain::value_objects::{NativeLanguage, Question};
 use crate::domain::{Card, GrammarRuleCard, StudyCard};
-use chrono::{Duration, Utc};
+use chrono::Utc;
 use ulid::Ulid;
 
 mod card_views;
@@ -30,7 +30,6 @@ pub(crate) fn create_study_card_with_memory(
     word: &str,
     stability: f64,
     difficulty: f64,
-    interval_days: i64,
     rating: Rating,
 ) -> StudyCard {
     let card = Card::Vocabulary(VocabularyCard::new(
@@ -42,10 +41,7 @@ pub(crate) fn create_study_card_with_memory(
         Difficulty::new(difficulty).unwrap(),
         Utc::now(),
     );
-    study_card.add_review(
-        memory,
-        ReviewLog::new(rating, Duration::days(interval_days)),
-    );
+    study_card.apply_review(memory, rating);
     study_card
 }
 

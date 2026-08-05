@@ -14,5 +14,11 @@ record_apis: [
     table_name: "user"
     acl_world: [READ, CREATE, UPDATE, DELETE]
     acl_authenticated: [READ, CREATE, UPDATE, DELETE]
+  },
+  {
+    name: "domain_user"
+    table_name: "domain_user"
+    acl_world: [READ, CREATE, UPDATE, DELETE]
+    acl_authenticated: [READ, CREATE, UPDATE, DELETE]
   }
 ]

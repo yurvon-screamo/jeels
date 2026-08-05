@@ -30,8 +30,7 @@ use ulid::Ulid;
 
 use crate::dictionary::kanji::get_kanji_info;
 use crate::domain::{
-    JapaneseLevel, JlptContent, NativeLanguage, OrigaError, RateMode, Rating, ReviewLog,
-    srs::{NextReview, rate_memory},
+    JapaneseLevel, JlptContent, NativeLanguage, OrigaError, RateMode, Rating, srs::rate_memory,
 };
 
 pub(crate) const MAX_COMPANION_WORDS: usize = 3;
@@ -332,13 +331,8 @@ impl KnowledgeSet {
                 },
             };
 
-            let NextReview {
-                interval,
-                memory_state,
-            } = rate_memory(effective_mode, rating, card.memory())?;
-
-            let review = ReviewLog::new(rating, interval);
-            card.add_review(memory_state, review);
+            let memory_state = rate_memory(effective_mode, rating, card.memory())?;
+            card.apply_review(memory_state, rating);
             card.handle_favorite_rating(rating);
             self.update_history(rating, was_new, is_phrase, mode);
             Ok(())
@@ -409,7 +403,7 @@ impl KnowledgeSet {
 
     pub fn mark_card_as_known(&mut self, card_id: Ulid) -> Result<(), OrigaError> {
         use crate::domain::memory::{
-            Difficulty, KNOWN_CARD_STABILITY_THRESHOLD, MemoryState, Rating, ReviewLog, Stability,
+            Difficulty, KNOWN_CARD_STABILITY_THRESHOLD, MemoryState, Rating, Stability,
         };
         use chrono::{Duration, Utc};
 
@@ -420,10 +414,7 @@ impl KnowledgeSet {
                 Difficulty::new(3.0).unwrap(),
                 Utc::now() - Duration::days(1),
             );
-            card.add_review(
-                memory,
-                ReviewLog::new(Rating::Easy, Duration::days(stability as i64)),
-            );
+            card.apply_review(memory, Rating::Easy);
             card.handle_favorite_rating(Rating::Easy);
             Ok(())
         } else {
