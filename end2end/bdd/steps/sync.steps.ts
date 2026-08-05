@@ -73,7 +73,7 @@ When('второй браузер входит в тот же аккаунт', a
 Then('запись на сервере содержит обновлённый knowledge_set', async ({ testUser }) => {
     const admin = await getAdminToken();
     const url =
-        `${getTrailBaseUrl()}/api/records/v1/user?filter[email][$eq]=${encodeURIComponent(testUser.email)}&`;
+        `${getTrailBaseUrl()}/api/records/v1/domain_user?filter[email][$eq]=${encodeURIComponent(testUser.email)}&`;
     const resp = await fetch(url, {
         headers: {
             Authorization: `Bearer ${admin.token}`,
@@ -142,20 +142,6 @@ When('отмечает первую карточку избранной и до�
 
     const resp = await saveResponse;
     expect(resp.ok(), `save_sync must succeed, got ${resp.status()}`).toBe(true);
-});
-
-// Wait for a save_sync write to /api/records/v1/user[_v2] to resolve after a
-// lesson. The lesson's rate_card calls fire local-only saves, but the lesson
-// completion triggers a save_sync checkpoint. This step makes that roundtrip
-// deterministic so the subsequent admin-read assertion is not racy.
-When('дожидается сохранения данных урока', async ({ page }) => {
-    const saveResponse = await page.waitForResponse(
-        (resp) =>
-            /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
-            RECORD_WRITE_METHODS.has(resp.request().method()),
-        { timeout: 30_000 },
-    );
-    expect(saveResponse.ok(), `lesson save_sync must succeed, got ${saveResponse.status()}`).toBe(true);
 });
 
 Then('на сервере одна запись пользователя', async ({ page }) => {

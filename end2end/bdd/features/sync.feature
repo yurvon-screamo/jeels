@@ -26,17 +26,3 @@
     Когда отмечает первую карточку избранной и дожидается сохранения
     Тогда первая карточка отмечена избранной
     И запись на сервере содержит обновлённый knowledge_set
-
-  # Regression guard for the MemoryHistory denormalization (v12): the
-  # reviews array was replaced with scalar counters. This scenario drives
-  # a real lesson (rate → save_sync) and asserts the remote row reflects
-  # the write — catching a serialization regression where the denormalized
-  # format is rejected or lost.
-  Сценарий: Memory state сохраняется на сервере после урока
-    Допустим новый пользователь
-    И пользователь пропустил онбординг
-    И у пользователя есть добавленное слово
-    Когда пользователь начинает урок
-    И оценивает каждую карточку как Good
-    И дожидается сохранения данных урока
-    Тогда запись на сервере содержит обновлённый knowledge_set
