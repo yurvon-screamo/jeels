@@ -68,7 +68,7 @@ pub(crate) fn build_csp(
     sentry_ingest_host: &str,
 ) -> String {
     format!(
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com https://browser.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost data: {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://{sentry_ingest_host}; img-src 'self' data: blob: {cdn}; media-src 'self' blob: data: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'; worker-src 'self' blob:; child-src 'self' blob:"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.pyke.io https://js.sentry-cdn.com https://browser.sentry-cdn.com; connect-src 'self' ipc: http://ipc.localhost data: {cdn} {landing} {trailbase} https://huggingface.co https://signal.pyke.io https://cdn.pyke.io https://browser.sentry-cdn.com https://{sentry_ingest_host}; img-src 'self' data: blob: {cdn}; media-src 'self' blob: data: {cdn}; style-src 'self' 'unsafe-inline'; font-src 'self' {cdn}; form-action 'self' https://accounts.google.com https://oauth.yandex.ru; frame-ancestors 'none'; worker-src 'self' blob:; child-src 'self' blob:"
     )
 }
 
