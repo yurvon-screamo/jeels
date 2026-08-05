@@ -1803,7 +1803,7 @@ rt {
     cursor: pointer;
     display: inline-block;
     position: relative;
-    vertical-align: middle;
+    vertical-align: baseline;
     line-height: 1;
 }
 
