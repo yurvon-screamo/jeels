@@ -141,5 +141,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD ["curl", "--fail", "http://localhost:8080/api/healthcheck"]
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["tini", "--", "/app/entrypoint.sh"]
 CMD ["/app/trail", "run", "--address", "0.0.0.0:8080", "--public-dir", "/app/public", "--spa"]
