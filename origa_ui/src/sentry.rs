@@ -77,7 +77,16 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
                     dsn: "{dsn}",
                     release: "{release}",
                     environment: "{environment}",
-                    sendDefaultPii: false
+                    sendDefaultPii: false,
+                    tracesSampleRate: 1.0,
+                    integrations: [
+                        // CaptureConsole routes tracing-wasm's console.error
+                        // output (which is where all WASM tracing::error! calls
+                        // land via the WASMLayer) into Sentry as error events.
+                        // console.warn/info become breadcrumbs via the default
+                        // Breadcrumbs integration (not CaptureConsole).
+                        new Sentry.Integrations.CaptureConsole({{ levels: ['error'] }})
+                    ]
                 }});
                 Sentry.setTag("layer", "ui");
             }};
@@ -154,7 +163,15 @@ fn extract_public_key(dsn: &str) -> Option<&str> {
     Some(key)
 }
 
-/// Create and append a `<script src=url crossorigin>` element to `<head>`.
+/// Create and append a `<script src=url crossorigin data-lazy=no>` element to
+/// `<head>`.
+///
+/// `data-lazy="no"` forces the loader to fetch the full SDK immediately (on the
+/// next event-loop tick) instead of waiting for the first error. This is
+/// required for performance monitoring: BrowserTracing must be active *before*
+/// the app's `fetch` calls to capture them as transactions. Without it, the
+/// loader only downloads the SDK when an error occurs — by which point the
+/// dictionary-loading `fetch` requests have already happened uninstrumented.
 fn inject_script(
     document: &Document,
     head: &web_sys::HtmlHeadElement,
@@ -163,6 +180,7 @@ fn inject_script(
     let script: Element = document.create_element("script")?;
     script.set_attribute("src", url)?;
     script.set_attribute("crossorigin", "anonymous")?;
+    script.set_attribute("data-lazy", "no")?;
     head.append_child(&script)?;
     Ok(())
 }
@@ -256,6 +274,15 @@ mod wasm_tests {
             last_src.contains("js.sentry-cdn.com/abc123def456.min.js"),
             "injected script src must point at the Sentry loader CDN with the DSN public key, got: {last_src}"
         );
+
+        // data-lazy="no" must be set so the loader fetches the full SDK
+        // immediately (required for BrowserTracing to capture fetch calls
+        // during dictionary loading).
+        let last_data_lazy = last_head_script_data_lazy().unwrap_or_default();
+        assert_eq!(
+            last_data_lazy, "no",
+            "injected script must have data-lazy=no for eager SDK loading"
+        );
     }
 
     fn count_head_scripts() -> usize {
@@ -275,5 +302,15 @@ mod wasm_tests {
         let last = nodes.item(nodes.length() - 1)?;
         let el = last.dyn_ref::<web_sys::Element>()?;
         el.get_attribute("src")
+    }
+
+    fn last_head_script_data_lazy() -> Option<String> {
+        let window = web_sys::window()?;
+        let document = window.document()?;
+        let head = document.head()?;
+        let nodes = head.query_selector_all("script").ok()?;
+        let last = nodes.item(nodes.length() - 1)?;
+        let el = last.dyn_ref::<web_sys::Element>()?;
+        el.get_attribute("data-lazy")
     }
 }
