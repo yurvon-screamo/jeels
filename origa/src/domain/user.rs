@@ -680,6 +680,47 @@ mod tests {
         assert_eq!(user1.imported_sets().len(), 3);
     }
 
+    /// Regression guard for the cross-device onboarding-repeat bug: a user
+    /// who completed/skipped onboarding on device 1 has the sentinel inside
+    /// `imported_sets`. When device 2 merges the remote record into its
+    /// (empty) local record, the sentinel MUST survive so
+    /// `is_onboarding_completed()` stays true — otherwise onboarding is
+    /// shown again on the new device.
+    #[test]
+    fn user_merge_preserves_onboarding_completed_sentinel() {
+        // Device 1 — finished onboarding (skip path writes SKIPPED, finish
+        // path writes COMPLETED; both must survive merge).
+        let mut device1 = User::new("d1@example.com".to_string(), NativeLanguage::Russian, None);
+        device1.mark_set_as_imported("jlpt_n5".to_string());
+        device1.mark_set_as_imported(ONBOARDING_SKIPPED_KEY.to_string());
+
+        // Device 2 — fresh local user (no imported sets yet).
+        let mut device2 = User::new("d1@example.com".to_string(), NativeLanguage::Russian, None);
+
+        // merge_current_user flow: local.merge(&remote).
+        device2.merge(&device1);
+
+        assert!(
+            device2.is_onboarding_completed(),
+            "after merging a remote user with ONBOARDING_SKIPPED_KEY, \
+             is_onboarding_completed() must be true — a false here is the \
+             cross-device onboarding-repeat regression"
+        );
+        assert!(device2.is_set_imported(ONBOARDING_SKIPPED_KEY));
+        assert!(device2.is_set_imported("jlpt_n5"));
+
+        // Also cover the COMPLETED sentinel (finish path).
+        let mut device1b = User::new("d1b@example.com".to_string(), NativeLanguage::Russian, None);
+        device1b.mark_onboarding_completed();
+        let mut device2b = User::new("d1b@example.com".to_string(), NativeLanguage::Russian, None);
+        device2b.merge(&device1b);
+        assert!(
+            device2b.is_onboarding_completed(),
+            "after merging a remote user with ONBOARDING_COMPLETED_KEY, \
+             is_onboarding_completed() must be true"
+        );
+    }
+
     #[test]
     fn user_merge_takes_identity_from_remote() {
         // Remote is the source of truth for identity. A local user created with

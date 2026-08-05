@@ -68,3 +68,62 @@ fn userrow_to_user_self_heals_on_corrupt_knowledge_set() {
         "corrupt knowledge_set must self-heal to empty, never panic"
     );
 }
+
+/// Regression guard for the cross-device onboarding-repeat bug: the
+/// `__onboarding_skipped__` / `__onboarding_completed__` sentinel keys
+/// live inside `imported_sets`, so they MUST survive the
+/// `user_to_json` → wire → `UserRow::to_user` round-trip. If they are
+/// dropped, a user who skips onboarding on device A is shown onboarding
+/// again on device B because `is_onboarding_completed()` returns false.
+#[test]
+fn user_to_json_then_userrow_roundtrip_preserves_onboarding_sentinels() {
+    use origa::domain::{ONBOARDING_COMPLETED_KEY, ONBOARDING_SKIPPED_KEY};
+
+    // Arrange — a user who skipped onboarding (skip path writes
+    // ONBOARDING_SKIPPED_KEY via mark_set_as_imported).
+    let mut user = User::new(
+        "sentinel-test@example.com".to_string(),
+        NativeLanguage::Russian,
+        None,
+    );
+    user.mark_set_as_imported(ONBOARDING_SKIPPED_KEY.to_string());
+    assert!(
+        user.is_onboarding_completed(),
+        "fixture precondition: user must be onboarding-completed before round-trip"
+    );
+
+    // Act — encode to the wire body, deserialize back as a UserRow, rebuild.
+    let body = user_to_json(&user, "00000000-0000-0000-0000-000000000003").expect("user_to_json");
+    let row: UserRow = serde_json::from_value(body).expect("UserRow deserialize from wire body");
+    let restored = row.to_user();
+
+    // Assert — both sentinel keys survive, and the routing guard still
+    // reports onboarding as completed after the round-trip.
+    assert!(
+        restored.is_set_imported(ONBOARDING_SKIPPED_KEY),
+        "ONBOARDING_SKIPPED_KEY must survive the wire round-trip"
+    );
+    assert!(
+        restored.is_onboarding_completed(),
+        "is_onboarding_completed() must be true after the round-trip — \
+         a false here is the cross-device onboarding-repeat regression"
+    );
+
+    // Also cover the completed-marker path (written by the finish path via
+    // mark_onboarding_completed, which inserts ONBOARDING_COMPLETED_KEY).
+    let mut finished = User::new(
+        "completed-test@example.com".to_string(),
+        NativeLanguage::Russian,
+        None,
+    );
+    finished.mark_onboarding_completed();
+    let body =
+        user_to_json(&finished, "00000000-0000-0000-0000-000000000004").expect("user_to_json");
+    let row: UserRow = serde_json::from_value(body).expect("UserRow deserialize from wire body");
+    let restored = row.to_user();
+    assert!(
+        restored.is_set_imported(ONBOARDING_COMPLETED_KEY),
+        "ONBOARDING_COMPLETED_KEY must survive the wire round-trip"
+    );
+    assert!(restored.is_onboarding_completed());
+}
