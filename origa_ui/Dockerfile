@@ -124,9 +124,9 @@ RUN apk add --no-cache curl sqlite aws-cli
 COPY --from=builder /app/origa_ui/dist /app/public
 
 # Backup machinery: GFS-rotation script, custom entrypoint (crond + trail), crontab
-COPY backup.sh     /app/backup.sh
-COPY entrypoint.sh /app/entrypoint.sh
-COPY crontab       /app/crontab
+COPY origa_ui/backup.sh     /app/backup.sh
+COPY origa_ui/entrypoint.sh /app/entrypoint.sh
+COPY origa_ui/crontab       /app/crontab
 RUN chmod +x /app/backup.sh /app/entrypoint.sh \
  && chmod 600 /app/crontab
 
