@@ -119,17 +119,27 @@ ARG ORIGA_CDN_BASE_URL
 ENV ORIGA_CDN_BASE_URL=${ORIGA_CDN_BASE_URL}
 
 # hadolint ignore=DL3018
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl sqlite aws-cli
 
 COPY --from=builder /app/origa_ui/dist /app/public
+
+# Backup machinery: GFS-rotation script, custom entrypoint (crond + trail), crontab
+COPY origa_ui/backup.sh     /app/backup.sh
+COPY origa_ui/entrypoint.sh /app/entrypoint.sh
+COPY origa_ui/crontab       /app/crontab
+RUN chmod +x /app/backup.sh /app/entrypoint.sh \
+ && chmod 600 /app/crontab
 
 RUN chown -R trailbase:trailbase /app
 
 USER trailbase
+
+ENV BACKUP_BUCKET_PATH=trailbase
 
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD ["curl", "--fail", "http://localhost:8080/api/healthcheck"]
 
+ENTRYPOINT ["tini", "--", "/app/entrypoint.sh"]
 CMD ["/app/trail", "run", "--address", "0.0.0.0:8080", "--public-dir", "/app/public", "--spa"]

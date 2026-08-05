@@ -1,0 +1,4 @@
+# TrailBase backup schedule (UTC)
+# Twice daily: 03:00 and 15:00
+# Weekly/monthly rotation is determined inside backup.sh by date.
+0 3,15 * * * /app/backup.sh

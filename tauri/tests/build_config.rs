@@ -132,6 +132,10 @@ fn build_csp_substitutes_staging_hosts() {
         "connect-src must allow data: for Sentry Replay compression payloads"
     );
     assert!(
+        csp.contains("https://browser.sentry-cdn.com https://o-staging.ingest.sentry.io"),
+        "connect-src must allow browser.sentry-cdn.com for source map (.map) fetches"
+    );
+    assert!(
         csp.contains("worker-src 'self' blob:"),
         "worker-src must allow blob: for the Sentry Replay Web Worker"
     );
