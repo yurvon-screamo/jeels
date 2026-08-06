@@ -95,6 +95,7 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
                     environment: "{environment}",
                     sendDefaultPii: false,
                     tracesSampleRate: 1.0,
+                    enableLogs: true,
                     integrations: integrations
                 }});
                 Sentry.setTag("layer", "ui");

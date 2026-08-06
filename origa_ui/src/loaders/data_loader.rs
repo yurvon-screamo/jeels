@@ -9,8 +9,6 @@ use crate::repository::cdn_provider;
 use crate::utils::{now_ms, yield_to_browser};
 
 pub async fn load_vocabulary() -> Result<(), OrigaError> {
-    use futures::future::join_all;
-
     if is_vocabulary_loaded() {
         tracing::debug!("📖 Vocabulary already loaded");
         return Ok(());
@@ -21,28 +19,40 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
 
     let cdn = cdn_provider();
 
-    let chunk_futures: Vec<_> = (1..=11)
-        .map(|i| {
-            let path = format!("dictionary/chunk_{:02}.json", i);
-            async move { cdn.fetch_text(&path).await }
-        })
-        .collect();
+    // Batched fetch: 11 JSON chunks (~35 MB total). Fetching all 11 at once
+    // via join_all caused WASM OOM on iOS. Batches of 3 keep peak memory
+    // bounded while still parallelizing for speed (~4 rounds instead of 11
+    // sequential requests).
+    const BATCH_SIZE: usize = 3;
+    let mut all_chunks: Vec<String> = Vec::with_capacity(11);
 
-    let chunks = join_all(chunk_futures).await;
-    let chunks: Vec<String> = chunks.into_iter().collect::<Result<Vec<_>, _>>()?;
+    for batch_start in (1..=11).step_by(BATCH_SIZE) {
+        let batch_end = (batch_start + BATCH_SIZE - 1).min(11);
+        let batch_futures: Vec<_> = (batch_start..=batch_end)
+            .map(|i| {
+                let path = format!("dictionary/chunk_{:02}.json", i);
+                async move { cdn.fetch_text(&path).await }
+            })
+            .collect();
+        let batch_results = futures::future::join_all(batch_futures).await;
+        for result in batch_results {
+            all_chunks.push(result?);
+        }
+        yield_to_browser().await;
+    }
 
     let data = VocabularyChunkData {
-        chunk_01: chunks[0].clone(),
-        chunk_02: chunks[1].clone(),
-        chunk_03: chunks[2].clone(),
-        chunk_04: chunks[3].clone(),
-        chunk_05: chunks[4].clone(),
-        chunk_06: chunks[5].clone(),
-        chunk_07: chunks[6].clone(),
-        chunk_08: chunks[7].clone(),
-        chunk_09: chunks[8].clone(),
-        chunk_10: chunks[9].clone(),
-        chunk_11: chunks[10].clone(),
+        chunk_01: all_chunks[0].clone(),
+        chunk_02: all_chunks[1].clone(),
+        chunk_03: all_chunks[2].clone(),
+        chunk_04: all_chunks[3].clone(),
+        chunk_05: all_chunks[4].clone(),
+        chunk_06: all_chunks[5].clone(),
+        chunk_07: all_chunks[6].clone(),
+        chunk_08: all_chunks[7].clone(),
+        chunk_09: all_chunks[8].clone(),
+        chunk_10: all_chunks[9].clone(),
+        chunk_11: all_chunks[10].clone(),
     };
 
     yield_to_browser().await;
