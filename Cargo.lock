@@ -6056,7 +6056,10 @@ version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
  "device-ai",
+ "jni",
+ "ndk-context",
  "rustls",
+ "rustls-platform-verifier",
  "sentry",
  "serde",
  "serde_json",

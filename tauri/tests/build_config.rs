@@ -105,6 +105,7 @@ fn build_csp_substitutes_staging_hosts() {
     // Other third-party hosts must survive any host substitution.
     assert!(csp.contains("https://huggingface.co"));
     assert!(csp.contains("https://cdn.pyke.io"));
+    assert!(csp.contains("https://cdn.jsdelivr.net"));
     assert!(csp.contains("https://signal.pyke.io"));
     assert!(csp.contains("https://accounts.google.com"));
     assert!(csp.contains("https://oauth.yandex.ru"));

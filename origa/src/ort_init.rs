@@ -61,12 +61,35 @@ pub async fn ensure() -> Result<InitOutcome, OrigaError> {
     result
 }
 
+/// ort-web runtime files are served from jsDelivr's npm mirror instead of
+/// the default `cdn.pyke.io`. The pyke CDN has been intermittently unreachable
+/// (`ERR_CONNECTION_RESET`), which causes ort-web initialization to fail —
+/// Whisper and OCR silently break. jsDelivr is Cloudflare-backed, has
+/// immutable caching, and mirrors the exact same `onnxruntime-web` npm
+/// package. The version is pinned to match the ort-web crate's bundled
+/// build (0.2.1+1.24 → onnxruntime-web 1.24.3).
+const ORT_WEB_CDN: &str = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.24.3/dist/";
+
+/// Builds a `Dist` for the CPU-only (no execution provider features) build.
+fn dist_none() -> ort_web::Dist {
+    ort_web::Dist::new(ORT_WEB_CDN)
+        .with_script_name("ort.wasm.min.js")
+        .with_binary_name("ort-wasm-simd-threaded.wasm")
+}
+
+/// Builds a `Dist` for the WebGPU-enabled (JSEP) build.
+fn dist_webgpu() -> ort_web::Dist {
+    ort_web::Dist::new(ORT_WEB_CDN)
+        .with_script_name("ort.webgpu.min.js")
+        .with_binary_name("ort-wasm-simd-threaded.jsep.wasm")
+}
+
 async fn init_inner() -> Result<InitOutcome, OrigaError> {
     let webgpu_active = webgpu_adapter_available().await;
 
     if webgpu_active {
         tracing::info!("WebGPU adapter detected, initializing ort-web with FEATURE_WEBGPU");
-        match ort_web::api(ort_web::FEATURE_WEBGPU).await {
+        match ort_web::api(dist_webgpu()).await {
             Ok(api) => {
                 ort::set_api(api);
                 tracing::info!(webgpu_active = true, "ort-web initialized");
@@ -87,7 +110,7 @@ async fn init_inner() -> Result<InitOutcome, OrigaError> {
         );
     }
 
-    let api = ort_web::api(ort_web::FEATURE_NONE)
+    let api = ort_web::api(dist_none())
         .await
         .map_err(|e| OrigaError::OcrError {
             reason: format!("ort_web::api(FEATURE_NONE) failed: {e:?}"),
