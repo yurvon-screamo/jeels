@@ -70,23 +70,32 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
 
     // 1. Install `window.sentryOnLoad` BEFORE injecting the script so the
     //    loader invokes it even when it loads synchronously from cache.
+    //
+    //    Sentry v8 removed the `Integrations.XXX` class hash — integrations
+    //    are now functions (e.g. `Sentry.captureConsoleIntegration()`).
+    //    Accessing `Sentry.Integrations.CaptureConsole` throws
+    //    `TypeError: Cannot read properties of undefined (reading
+    //    'CaptureConsole')`, which prevents `Sentry.init` from running at
+    //    all. The loader script serves the latest SDK, so we must use the
+    //    v8 functional API. See Sentry v7-to-v8 migration guide.
     let init_js = format!(
         r#"(function() {{
             window.sentryOnLoad = function() {{
+                // captureConsoleIntegration routes tracing-wasm's console.error
+                // output (which is where all WASM tracing::error! calls land via
+                // the WASMLayer) into Sentry as error events. console.warn/info
+                // become breadcrumbs via the default Breadcrumbs integration.
+                var integrations = [];
+                if (typeof Sentry.captureConsoleIntegration === 'function') {{
+                    integrations.push(Sentry.captureConsoleIntegration({{ levels: ['error'] }}));
+                }}
                 Sentry.init({{
                     dsn: "{dsn}",
                     release: "{release}",
                     environment: "{environment}",
                     sendDefaultPii: false,
                     tracesSampleRate: 1.0,
-                    integrations: [
-                        // CaptureConsole routes tracing-wasm's console.error
-                        // output (which is where all WASM tracing::error! calls
-                        // land via the WASMLayer) into Sentry as error events.
-                        // console.warn/info become breadcrumbs via the default
-                        // Breadcrumbs integration (not CaptureConsole).
-                        new Sentry.Integrations.CaptureConsole({{ levels: ['error'] }})
-                    ]
+                    integrations: integrations
                 }});
                 Sentry.setTag("layer", "ui");
             }};

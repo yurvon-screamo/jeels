@@ -66,3 +66,14 @@ base64.workspace = true
 # in the public API). Target-scoping keeps the desktop binary clean.
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 tauri-plugin-haptics.workspace = true
+
+# Android-only: rustls-platform-verifier JNI initialization.
+# reqwest (Sentry transport, lindera build) pulls in rustls-platform-verifier
+# on non-WASM targets. On Android it must be initialized with a JNI context
+# before any TLS handshake, or the process aborts. jni crate is needed to
+# obtain JNIEnv from the JavaVM. ndk-context provides the JavaVM/Activity
+# pointers (initialized by tao before main()).
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+rustls-platform-verifier = "0.6"
+ndk-context = "0.1"
