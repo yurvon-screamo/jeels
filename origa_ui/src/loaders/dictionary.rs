@@ -79,7 +79,6 @@ async fn fetch_file(field: &str, path: &str) -> Result<(String, Vec<u8>), OrigaE
 }
 
 async fn load_dictionary_from_network() -> Result<DictionaryData, OrigaError> {
-    use futures::future::join_all;
     tracing::info!("📖 Fetching dictionary files...");
 
     let files = [
@@ -94,18 +93,22 @@ async fn load_dictionary_from_network() -> Result<DictionaryData, OrigaError> {
     ];
 
     let fetch_start = now_ms();
-    let fetch_futures: Vec<_> = files
-        .iter()
-        .map(|(field, path)| fetch_file(field, path))
-        .collect();
 
-    let results = join_all(fetch_futures).await;
+    // Sequential fetch: UniDic files are large (matrix.mtx alone is 25 MB
+    // compressed → ~100 MB decompressed). Fetching all 8 simultaneously via
+    // join_all caused WASM OOM on iOS. Sequential download keeps peak memory
+    // to one file at a time; each fetch_bytes → decompress → store cycle
+    // drops the compressed bytes before the next download starts.
+    let mut results = Vec::with_capacity(files.len());
+    for (field, path) in &files {
+        results.push(fetch_file(field, path).await?);
+    }
+
     tracing::info!(
         "📖 Dictionary files fetched ({:.2}s)",
         (now_ms() - fetch_start) / 1000.0
     );
 
-    let results: Vec<_> = results.into_iter().collect::<Result<Vec<_>, _>>()?;
     let mut data = DictionaryData {
         char_def: Vec::new(),
         matrix: Vec::new(),
