@@ -128,24 +128,49 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
 /// WASM panic, including the path where Sentry is disabled (no loader
 /// injected, `window.Sentry` is `undefined`). Defensive on every JS call —
 /// any failure is silently dropped so the downstream console hook still runs.
+///
+/// Two things are critical here:
+///
+/// 1. **Wrap in `new Error(msg)`** — Sentry groups events by stack trace.
+///    Passing a bare string collapses every panic into a single issue group
+///    in the dashboard, making them indistinguishable. `js_sys::Error::new`
+///    captures a synthetic JS stack at this call site, which Sentry uses for
+///    deduplication and grouping.
+///
+/// 2. **Call `Sentry.flush(2000)`** — `captureException` only queues the
+///    event; the actual HTTP POST to the ingest endpoint happens on the next
+///    event-loop tick. After `panic = "abort"` fires the WASM `unreachable`
+///    trap, the JS runtime stays alive but the running async task is dead.
+///    Without an explicit flush the queued event may sit in the SDK buffer
+///    indefinitely. `flush` returns a Promise — we fire it without awaiting
+///    (the panic hook is synchronous), but calling it starts the send
+///    immediately.
 pub fn capture_exception(msg: &str) {
-    // The SDK accepts a string here and synthesises a stacktrace-less event.
-    // Wrapping in `new Error(msg)` would preserve a synthetic stack, but the
-    // WASM panic message already includes location info from
-    // `console_error_panic_hook`, so the marginal value is low.
     let Ok(sentry_obj) = sentry_global() else {
         return;
     };
     if sentry_obj.is_undefined() || sentry_obj.is_null() {
         return;
     }
+
+    // Wrap in a real Error so Sentry has a stacktrace for grouping.
+    let error = js_sys::Error::new(msg);
+
     let Ok(capture) = Reflect::get(&sentry_obj, &"captureException".into()) else {
         return;
     };
-    let Some(f) = capture.dyn_ref::<js_sys::Function>() else {
+    let Some(capture_fn) = capture.dyn_ref::<js_sys::Function>() else {
         return;
     };
-    let _ = f.call1(&sentry_obj, &JsValue::from(msg));
+    let _ = capture_fn.call1(&sentry_obj, &error);
+
+    // Force the SDK to send the queued event immediately. Without this the
+    // event may never leave the buffer if the WASM trap cascades.
+    if let Ok(flush) = Reflect::get(&sentry_obj, &"flush".into()) {
+        if let Some(flush_fn) = flush.dyn_ref::<js_sys::Function>() {
+            let _ = flush_fn.call1(&sentry_obj, &JsValue::from_f64(2000.0));
+        }
+    }
 }
 
 /// Read `window.Sentry`. Returns `Err` only if `window` itself is missing;
