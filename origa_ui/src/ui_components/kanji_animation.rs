@@ -1,14 +1,8 @@
 use crate::i18n::{t, use_i18n};
 use crate::repository::cdn_provider;
-use futures::future::{AbortHandle, abortable};
 use leptos::prelude::*;
-use leptos::task::spawn_local;
+use leptos::task::spawn_local_scoped_with_cancellation;
 use origa::traits::CdnProvider;
-use std::sync::{Arc, Mutex};
-
-fn safe_lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-    mutex.lock().unwrap_or_else(|e| e.into_inner())
-}
 
 #[derive(Clone, Copy, PartialEq, Default)]
 pub enum KanjiViewMode {
@@ -63,8 +57,6 @@ pub fn KanjiAnimation(
 ) -> impl IntoView {
     let i18n = use_i18n();
     let (iteration, set_iteration) = signal(0);
-    let abort_handle = Arc::new(Mutex::new(None::<AbortHandle>));
-    let disposed = StoredValue::new(());
 
     let encoded = urlencoding::encode(&kanji);
     let svg_path = match mode {
@@ -89,29 +81,18 @@ pub fn KanjiAnimation(
     });
 
     let stroke_time = 0.4f32;
-    let abort_handle_clone = abort_handle.clone();
 
     Effect::new(move |_| {
-        // Cancel previous timer if exists
-        if let Some(handle) = safe_lock(&abort_handle_clone).take() {
-            handle.abort();
-        }
-
         let iter = iteration.get();
-        let abort_handle_clone2 = abort_handle_clone.clone();
 
         if iter % 2 != 0 {
-            spawn_local(async move {
-                let future = async {
-                    gloo_timers::future::TimeoutFuture::new(1500).await;
-                    if disposed.is_disposed() {
-                        return;
-                    }
-                    set_iteration.try_update(|n| *n += 1);
-                };
-                let (abortable, handle) = abortable(future);
-                *safe_lock(&abort_handle_clone2) = Some(handle);
-                let _ = abortable.await;
+            // spawn_local_scoped_with_cancellation binds the timer to the
+            // reactive Owner and auto-cancels it on dispose, preventing the
+            // "Tried to access a reactive value that has already been
+            // disposed" panic when KanjiAnimation is unmounted mid-cycle.
+            spawn_local_scoped_with_cancellation(async move {
+                gloo_timers::future::TimeoutFuture::new(1500).await;
+                set_iteration.try_update(|n| *n += 1);
             });
         } else if let Some(Some(svg_html)) = svg_content.get()
             && matches!(mode, KanjiViewMode::Animation)
@@ -121,25 +102,10 @@ pub fn KanjiAnimation(
             let strokes = path_count.saturating_sub(bg_count).max(1);
             let total_duration_ms = ((strokes as f32 * stroke_time + 0.5) * 1000.0) as u32;
 
-            spawn_local(async move {
-                let future = async {
-                    gloo_timers::future::TimeoutFuture::new(total_duration_ms).await;
-                    if disposed.is_disposed() {
-                        return;
-                    }
-                    set_iteration.try_update(|n| *n += 1);
-                };
-                let (abortable, handle) = abortable(future);
-                *safe_lock(&abort_handle_clone2) = Some(handle);
-                let _ = abortable.await;
+            spawn_local_scoped_with_cancellation(async move {
+                gloo_timers::future::TimeoutFuture::new(total_duration_ms).await;
+                set_iteration.try_update(|n| *n += 1);
             });
-        }
-    });
-
-    let abort_handle_cleanup = abort_handle.clone();
-    on_cleanup(move || {
-        if let Some(handle) = safe_lock(&abort_handle_cleanup).take() {
-            handle.abort();
         }
     });
 
