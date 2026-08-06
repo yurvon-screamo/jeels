@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use leptos::task::spawn_local;
+use leptos::task::spawn_local_scoped_with_cancellation;
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Default, Debug)]
@@ -46,14 +46,10 @@ pub fn Toast(
     let toast_id = toast.id;
     let actual_duration = toast.duration_ms.unwrap_or(duration_ms);
     let has_duration = actual_duration > 0;
-    let disposed = StoredValue::new(());
 
     if has_duration {
-        spawn_local(async move {
+        spawn_local_scoped_with_cancellation(async move {
             gloo_timers::future::TimeoutFuture::new(actual_duration as u32).await;
-            if disposed.is_disposed() {
-                return;
-            }
             on_close.run(toast_id);
         });
     }
@@ -128,18 +124,14 @@ pub fn ToastContainer(
         if val.is_empty() { None } else { Some(val) }
     };
     let closing_toasts = RwSignal::new(HashMap::<usize, bool>::new());
-    let disposed = StoredValue::new(());
 
     let on_close = Callback::new(move |id: usize| {
         let toasts_clone = toasts;
         closing_toasts.update(|c| {
             c.insert(id, true);
         });
-        leptos::task::spawn_local(async move {
+        spawn_local_scoped_with_cancellation(async move {
             gloo_timers::future::TimeoutFuture::new(200).await;
-            if disposed.is_disposed() {
-                return;
-            }
             toasts_clone.update(|t| t.retain(|toast| toast.id != id));
             closing_toasts.update(|c| {
                 c.remove(&id);
