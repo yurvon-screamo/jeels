@@ -114,8 +114,8 @@ pub use tabs::{TabItem, Tabs};
 pub use tag::{Tag, TagVariant};
 pub use test_id::derive_test_id;
 pub use text_to_speech::{
-    get_reading_from_text, is_speech_supported, speak_tts_text, speak_tts_text_with_callback,
-    stop_speech,
+    extract_japanese_text, get_reading_from_text, is_speech_supported, speak_tts_text,
+    speak_tts_text_with_callback, stop_speech,
 };
 pub use toast::{ToastContainer, ToastData, ToastType};
 pub use tooltip::Tooltip;

@@ -6037,3 +6037,9 @@ rt {
 .legal-links__item:hover {
     color: var(--fg-black);
 }
+
+/* Onboarding scoring card: stabilise question area height so the
+   Know/Don't-Know buttons don't jump when card content varies. */
+.scoring-card-question-area {
+    min-height: 80px;
+}

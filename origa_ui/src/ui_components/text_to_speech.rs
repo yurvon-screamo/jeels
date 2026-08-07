@@ -402,12 +402,45 @@ fn get_japanese_voice(synthesis: &web_sys::SpeechSynthesis) -> Option<SpeechSynt
         .or(japanese_voices.into_iter().next())
 }
 
+/// Extract only Japanese characters from a mixed-language text.
+///
+/// Grammar card titles (and similar UI strings) embed Japanese alongside
+/// native-language explanations, e.g. `"〜ば (условие)"`. Sending the full
+/// string to TTS causes the engine to attempt reading the non-Japanese
+/// portion with a Japanese voice, producing garbled output. This function
+/// keeps hiragana, katakana, kanji (CJK Unified Ideographs), CJK punctuation,
+/// the long vowel mark (ー), and whitespace between Japanese segments, so TTS
+/// only receives the pronounceable portion.
+pub fn extract_japanese_text(text: &str) -> String {
+    text.chars()
+        .filter(|&c| {
+            // Hiragana: 3040-309F
+            ('\u{3040}'..='\u{309F}').contains(&c)
+            // Katakana + long vowel mark + half-width katakana: 30A0-30FF
+            || ('\u{30A0}'..='\u{30FF}').contains(&c)
+            // CJK Unified Ideographs (common kanji): 4E00-9FFF
+            || ('\u{4E00}'..='\u{9FFF}').contains(&c)
+            // CJK Unified Ideographs Extension A (rare kanji): 3400-4DBF
+            || ('\u{3400}'..='\u{4DBF}').contains(&c)
+            // CJK punctuation (ideographic comma/period/fullwidth): 3000-303F
+            || ('\u{3000}'..='\u{303F}').contains(&c)
+            // Half-width katakana: FF65-FF9F
+            || ('\u{FF65}'..='\u{FF9F}').contains(&c)
+            // Whitespace (to keep Japanese segments separated naturally)
+            || c.is_whitespace()
+        })
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
 pub fn stop_speech() -> Result<(), String> {
     if tauri::is_tauri() {
         spawn_local(async {
-            // device-ai native synthesize is blocking and not interruptible;
-            // only the legacy plugin:tts exposes a stop. Issuing plugin:tts|stop
-            // is best-effort and a no-op when the device-ai path is active.
+            // device-ai TTS (both Android QUEUE_FLUSH and iOS
+            // stopSpeaking) flushes the current utterance natively on the
+            // next speak() call. The legacy plugin:tts stop is still called
+            // for the Windows/Linux fallback path.
             if let Err(e) = invoke_tauri_stop().await {
                 warn!("TTS stop error: {}", e);
             }
@@ -421,4 +454,57 @@ pub fn stop_speech() -> Result<(), String> {
         .map_err(|e| format!("Speech synthesis not supported: {:?}", e))?;
     synthesis.cancel();
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extract_japanese_from_mixed_text() {
+        assert_eq!(extract_japanese_text("〜ば (условие)"), "〜ば");
+    }
+
+    #[test]
+    fn extract_japanese_keeps_katakana_and_kanji() {
+        assert_eq!(extract_japanese_text("食べる taberu"), "食べる");
+    }
+
+    #[test]
+    fn extract_japanese_keeps_long_vowel_mark() {
+        assert_eq!(extract_japanese_text("コーヒー coffee"), "コーヒー");
+    }
+
+    #[test]
+    fn extract_japanese_pure_japanese_unchanged() {
+        assert_eq!(extract_japanese_text("日本語"), "日本語");
+    }
+
+    #[test]
+    fn extract_japanese_no_japanese_returns_empty() {
+        assert_eq!(extract_japanese_text("hello world"), "");
+    }
+
+    #[test]
+    fn extract_japanese_empty_string() {
+        assert_eq!(extract_japanese_text(""), "");
+    }
+
+    #[test]
+    fn extract_japanese_keeps_cjk_punctuation() {
+        assert_eq!(extract_japanese_text("大きい。big"), "大きい。");
+    }
+
+    #[test]
+    fn extract_japanese_multiple_segments() {
+        assert_eq!(
+            extract_japanese_text("〜ば条件、if condition"),
+            "〜ば条件、"
+        );
+    }
+
+    #[test]
+    fn extract_japanese_hiragana_only() {
+        assert_eq!(extract_japanese_text("ありがとう thank you"), "ありがとう");
+    }
 }

@@ -242,7 +242,7 @@ pub fn Onboarding() -> impl IntoView {
 
     view! {
         <PageLayout variant=PageLayoutVariant::Full test_id="onboarding-page">
-            <CardLayout size=CardLayoutSize::Adaptive class="px-4 py-8" test_id="onboarding-card">
+            <CardLayout size=CardLayoutSize::Adaptive class="py-6" test_id="onboarding-card">
                 <Show when=move || is_loading.get()>
                     <div class="flex flex-col items-center py-8 gap-4">
                         <Spinner test_id="onboarding-spinner" />
@@ -313,18 +313,6 @@ pub fn Onboarding() -> impl IntoView {
                                         {t!(i18n, onboarding.back)}
                                     </Button>
                                 </Show>
-
-                                <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring) && !scoring_completed.get()>
-                                    <Button
-                                        variant=ButtonVariant::Ghost
-                                        on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                            on_skip.run(());
-                                        })
-                                        test_id="onboarding-skip-scoring"
-                                    >
-                                        {t!(i18n, onboarding.skip)}
-                                    </Button>
-                                </Show>
                             </div>
 
                             <div>
@@ -356,32 +344,54 @@ pub fn Onboarding() -> impl IntoView {
                                         {move || if is_importing.get() { t!(i18n, onboarding.importing).into_any() } else { t!(i18n, onboarding.start_import).into_any() }}
                                     </Button>
                                 </Show>
-
-                                <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring) && !scoring_completed.get()>
-                                    <Button
-                                        variant=ButtonVariant::Olive
-                                        on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                            mark_all_trigger.update(|n| *n += 1);
-                                        })
-                                        test_id="onboarding-mark-all-known"
-                                    >
-                                        {t!(i18n, onboarding.know_all)}
-                                    </Button>
-                                </Show>
-
-                                <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring) && scoring_completed.get()>
-                                    <Button
-                                        variant=ButtonVariant::Olive
-                                        on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                            on_finish.run(());
-                                        })
-                                        test_id="onboarding-finish"
-                                    >
-                                        {t!(i18n, onboarding.finish)}
-                                    </Button>
-                                </Show>
                             </div>
                         </div>
+
+                        // Scoring step actions are on a separate row below
+                        // the card so they don't sit adjacent to the Know /
+                        // Don't-Know buttons — reducing accidental taps on
+                        // Skip / Know-All.
+                        <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring)>
+                            <div class="onboarding-scoring-actions mt-4 flex justify-between items-center">
+                                <Show when=move || !scoring_completed.get()>
+                                    <Button
+                                        variant=ButtonVariant::Ghost
+                                        on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
+                                            on_skip.run(());
+                                        })
+                                        test_id="onboarding-skip-scoring"
+                                    >
+                                        {t!(i18n, onboarding.skip)}
+                                    </Button>
+                                </Show>
+
+                                <div>
+                                    <Show when=move || !scoring_completed.get()>
+                                        <Button
+                                            variant=ButtonVariant::Olive
+                                            on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
+                                                mark_all_trigger.update(|n| *n += 1);
+                                            })
+                                            test_id="onboarding-mark-all-known"
+                                        >
+                                            {t!(i18n, onboarding.know_all)}
+                                        </Button>
+                                    </Show>
+
+                                    <Show when=move || scoring_completed.get()>
+                                        <Button
+                                            variant=ButtonVariant::Olive
+                                            on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
+                                                on_finish.run(());
+                                            })
+                                            test_id="onboarding-finish"
+                                        >
+                                            {t!(i18n, onboarding.finish)}
+                                        </Button>
+                                    </Show>
+                                </div>
+                            </div>
+                        </Show>
                     </div>
                 </Show>
             </CardLayout>

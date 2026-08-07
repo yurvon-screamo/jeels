@@ -16,15 +16,15 @@ pub fn IntroStep(
 
     view! {
         <div data-testid=test_id_val class="intro-step max-w-xl mx-auto text-center">
+            // Language toggle sits on its own row above the title so long
+            // translated titles never overlap the toggle on narrow screens.
+            <div class="flex justify-end mb-4" data-testid="intro-step-language-bar">
+                <NativeLanguageToggle selected_language=selected_language test_id=Signal::derive(|| "intro-lang-toggle".to_string()) />
+            </div>
             <div class="intro-welcome flex flex-col items-center gap-4 mb-8">
-                <div class="flex items-center w-full relative" data-testid="intro-step-language-bar">
-                    <Text size=TextSize::Large variant=TypographyVariant::Primary test_id="intro-step-title" class="w-full text-center">
-                        {t!(i18n, onboarding.intro.title)}
-                    </Text>
-                    <div class="absolute right-0">
-                        <NativeLanguageToggle selected_language=selected_language test_id=Signal::derive(|| "intro-lang-toggle".to_string()) />
-                    </div>
-                </div>
+                <Text size=TextSize::Large variant=TypographyVariant::Primary test_id="intro-step-title" class="w-full text-center">
+                    {t!(i18n, onboarding.intro.title)}
+                </Text>
                 <Text size=TextSize::Default variant=TypographyVariant::Muted test_id="intro-step-subtitle">
                     {t!(i18n, onboarding.intro.subtitle)}
                 </Text>
