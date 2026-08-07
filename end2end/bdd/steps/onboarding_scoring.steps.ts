@@ -159,3 +159,29 @@ When('нажимает кнопку "Назад" в онбординге', async
 Then('отображается шаг выбора уровня JLPT', async ({ page }) => {
     await expect(page.getByTestId("onboarding-jlpt-step")).toBeVisible({ timeout: 10_000 });
 });
+
+Then('отображается более одной секции в прогресс-баре', async ({ page }) => {
+    // Each CardType section (Grammar, Kanji, Vocab, Phrase) renders a marker
+    // div. If only grammar was imported (the bug from issue #3), only one
+    // marker would appear. This assertion verifies multiple card types exist.
+    const markers = page.locator('[data-testid^="scoring-progress-marker-"]');
+    await expect(markers.first()).toBeVisible({ timeout: 30_000 });
+    const count = await markers.count();
+    expect(count, "scoring must contain more than one card type section").toBeGreaterThan(1);
+});
+
+When('пользователь поочерёдно отмечает все карточки как известные', async ({ page }) => {
+    const onboarding = new OnboardingPage(page);
+    // Click "Know" repeatedly until the scoring completes or we hit a safety
+    // limit. This tests the full sequential scoring flow (not the "mark all"
+    // batch path) to verify every card type is traversable.
+    for (let i = 0; i < 500; i++) {
+        const isComplete = await onboarding.scoringComplete.isVisible().catch(() => false);
+        if (isComplete) return;
+        const hasCard = await onboarding.scoringKnowBtn.isVisible().catch(() => false);
+        if (!hasCard) return;
+        await onboarding.clickKnow();
+        // Wait for the card to advance or completion screen
+        await page.waitForTimeout(300);
+    }
+});

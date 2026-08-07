@@ -8,7 +8,10 @@ use origa::dictionary::pitch_audio::get_audio_for_reading;
 use tracing::warn;
 use wasm_bindgen_futures::JsFuture;
 
-use super::{get_reading_from_text, speak_tts_text, speak_tts_text_with_callback, stop_speech};
+use super::{
+    extract_japanese_text, get_reading_from_text, speak_tts_text, speak_tts_text_with_callback,
+    stop_speech,
+};
 use crate::repository::cdn_provider::prefetch_blob_url;
 
 struct ActiveAudio {
@@ -79,7 +82,7 @@ where
 {
     let Some(path) = lookup_audio_path(word) else {
         stop_current_audio();
-        let reading = get_reading_from_text(word);
+        let reading = extract_japanese_text(&get_reading_from_text(word));
         match on_end {
             Some(cb) => {
                 let _ = speak_tts_text_with_callback(&reading, rate, cb);
@@ -157,7 +160,7 @@ fn fallback_to_tts<F>(word: &str, rate: f32, on_end: &Rc<RefCell<Option<F>>>)
 where
     F: FnMut() + 'static,
 {
-    let reading = get_reading_from_text(word);
+    let reading = extract_japanese_text(&get_reading_from_text(word));
     if let Some(cb) = on_end.borrow_mut().take() {
         let _ = speak_tts_text_with_callback(&reading, rate, cb);
     } else {

@@ -215,7 +215,7 @@ pub fn SummaryStep(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
                         });
                         let type_label = get_type_label(&set_type);
                         let type_label_for_img = type_label.clone();
-                        let is_expanded = RwSignal::new(true);
+                        let is_expanded = RwSignal::new(false);
 
                         view! {
                             <div class=move || {
