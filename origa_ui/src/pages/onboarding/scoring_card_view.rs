@@ -35,9 +35,9 @@ pub fn ScoringCardView(
     // Kanji cards are not auto-spoken: hearing the reading would leak the
     // answer the assessment is asking the user to recall. Stop any
     // currently-playing audio BEFORE starting the new one so rapid card
-    // transitions don't accumulate a queue of overlapping utterances
-    // (especially on device-ai where synthesize is blocking and not
-    // interruptible by stop_speech alone).
+    // transitions don't overlap. The device-ai plugin also flushes natively
+    // (Android QUEUE_FLUSH, iOS stopSpeaking), but this synchronous stop
+    // covers the CDN-audio and Web Speech API paths too.
     Effect::new(move |_| {
         if let Some(c) = card.get() {
             if c.card_type != CardType::Kanji && is_speech_supported() {

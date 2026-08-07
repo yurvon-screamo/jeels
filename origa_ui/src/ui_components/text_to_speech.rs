@@ -437,9 +437,10 @@ pub fn extract_japanese_text(text: &str) -> String {
 pub fn stop_speech() -> Result<(), String> {
     if tauri::is_tauri() {
         spawn_local(async {
-            // device-ai native synthesize is blocking and not interruptible;
-            // only the legacy plugin:tts exposes a stop. Issuing plugin:tts|stop
-            // is best-effort and a no-op when the device-ai path is active.
+            // device-ai TTS (both Android QUEUE_FLUSH and iOS
+            // stopSpeaking) flushes the current utterance natively on the
+            // next speak() call. The legacy plugin:tts stop is still called
+            // for the Windows/Linux fallback path.
             if let Err(e) = invoke_tauri_stop().await {
                 warn!("TTS stop error: {}", e);
             }
