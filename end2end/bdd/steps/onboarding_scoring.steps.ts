@@ -172,20 +172,32 @@ Then('отображается более одной секции в прогр�
 
 When('пользователь поочерёдно отмечает все карточки как известные', async ({ page }) => {
     const onboarding = new OnboardingPage(page);
-    // Click "Know" repeatedly until the scoring completes. The upper bound
-    // (300 iterations) is a safety limit well above the maximum realistic
+    // Click "Know" repeatedly until the scoring completes. Each iteration
+    // waits for the question to actually change (or the completion screen)
+    // before clicking again — the save is async (TrailBase round-trip), so
+    // a blind waitForTimeout would re-click the same card.
+    //
+    // The upper bound (300 iterations) is well above the maximum realistic
     // card count (~150 for a standard N5 onboarding import); if the loop
-    // exits without completion, the step throws to surface the failure
-    // rather than silently passing and misleading the next assertion.
+    // exits without completion, the step throws to surface the failure.
     const MAX_CLICKS = 300;
     for (let i = 0; i < MAX_CLICKS; i++) {
         const isComplete = await onboarding.scoringComplete.isVisible().catch(() => false);
         if (isComplete) return;
-        const hasCard = await onboarding.scoringKnowBtn.isVisible().catch(() => false);
-        if (!hasCard) return;
+
+        const prevQuestion = await onboarding.scoringQuestion
+            .textContent()
+            .catch(() => null);
         await onboarding.clickKnow();
-        // Wait for the card to advance or completion screen
-        await page.waitForTimeout(300);
+
+        // Wait for question to change or completion screen
+        for (let j = 0; j < 30; j++) {
+            const done = await onboarding.scoringComplete.isVisible().catch(() => false);
+            if (done) return;
+            const next = await onboarding.scoringQuestion.textContent().catch(() => null);
+            if (next !== null && next !== prevQuestion) break;
+            await page.waitForTimeout(200);
+        }
     }
     throw new Error(
         `Scoring did not complete after ${MAX_CLICKS} "Know" clicks — ` +
