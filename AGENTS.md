@@ -34,8 +34,22 @@ models/      — ML модели
 ## Среда разработки
 
 ```powershell
-$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"  # ОБЯЗАТЕЛЬНО
+$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"  # ОБЯЗАТЕЛЬНО
 cd tauri && cargo tauri dev
+```
+
+### Android dev (эмулятор)
+
+Debug WASM-бандл раздувается до ~300 МБ и крашит Android WebView кучу
+(`OutOfMemoryError` в `RustWebViewClient.shouldInterceptRequest`,
+tauri-apps/tauri#13554). Для `cargo tauri android dev` обязательно
+использовать профиль `wasm-dev` (определён в корневом `Cargo.toml`):
+стрип debug-символов + opt-level=1, компилируется быстро, WASM ~8–19 МБ.
+
+```powershell
+$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"
+$env:TRUNK_BUILD_CARGO_PROFILE = "wasm-dev"
+cd tauri && cargo tauri android dev
 ```
 
 ### Переменные окружения (compile-time, `build.rs`)
@@ -48,18 +62,18 @@ cd tauri && cargo tauri dev
 ```powershell
 $env:SENTRY_DSN = "https://<public_key>@o<orgid>.ingest.sentry.io/<projectid>"
 $env:SENTRY_ENVIRONMENT = "development"
-$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"
+$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"
 cd tauri && cargo tauri dev
 ```
 
 **DNS naming scheme** (CI/CD production):
 
 - `ORIGA_BASE_URI` — base domain (e.g. `origa.uwuwu.net`)
-- `ORIGA_CDN_URI_PREFIX` — CDN subdomain prefix (e.g. `s3` → `s3.origa.uwuwu.net`)
+- `ORIGA_CDN_URI_PREFIX` — CDN subdomain prefix (e.g. `cdn` → `cdn.origa.uwuwu.net`)
 - `ORIGA_APP_URI_PREFIX` — app subdomain prefix (e.g. `app` → `app.origa.uwuwu.net`)
 - Landing = base domain (no prefix)
 
-**Local dev:** `$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"` (production CDN endpoint — read-only, safe to use directly; cache policy is tiered, see CDN / S3 below)
+**Local dev:** `$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"` (production CDN endpoint — read-only, safe to use directly; cache policy is tiered, see CDN / S3 below)
 **Landing dev:** `$env:ORIGA_LANDING_BASE_URL = "https://origa.uwuwu.net"`
 
 ## Команды
