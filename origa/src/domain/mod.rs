@@ -46,7 +46,7 @@ pub use knowledge::{
 pub use crate::dictionary::kanji::RARE_READING_MAX_FREQ;
 
 pub(crate) use knowledge::collect_known_vocabulary_words;
-pub use memory::{CardState, Difficulty, MemoryHistory, MemoryState, Rating, ReviewLog, Stability};
+pub use memory::{CardState, Difficulty, MemoryHistory, MemoryState, Rating, Stability};
 pub use score_content::ScoreContentResult;
 pub use srs::RateMode;
 pub use stats::{RatingRatio, TodayOverview, compute_rating_ratio, compute_today_overview};
@@ -55,7 +55,7 @@ pub use tokenizer::{
     init_dictionary_from_rkyv, is_dictionary_loaded, lookup_tokens_translations,
     serialize_dictionary_to_rkyv, tokenize_text,
 };
-pub use user::{User, WordKnowledge};
+pub use user::{ONBOARDING_COMPLETED_KEY, ONBOARDING_SKIPPED_KEY, User, WordKnowledge};
 pub use value_objects::{CardAnswer, DailyLoad, JapaneseLevel, NativeLanguage, Question};
 pub use well_known_set::{
     SetType, TypeMeta, TypesMeta, WellKnownSet, WellKnownSetMeta, get_types_meta, id_to_set_type,

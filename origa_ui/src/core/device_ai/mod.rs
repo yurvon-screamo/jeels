@@ -68,13 +68,21 @@ pub fn plugin_compiled_in() -> bool {
 /// "unavailable" so callers transparently use the fallback stack.
 pub async fn available(feature: Feature) -> bool {
     if !plugin_compiled_in() {
+        tracing::debug!("device-ai: {feature:?} unavailable — not running in a Tauri WebView");
         return false;
     }
     let caps = match cached_or_query().await {
         Ok(c) => c,
-        Err(_) => return false,
+        Err(e) => {
+            tracing::warn!(
+                "device-ai: {feature:?} — capabilities query failed ({e}), using fallback"
+            );
+            return false;
+        },
     };
-    feature.status(&caps)
+    let status = feature.status(&caps);
+    tracing::debug!("device-ai: {feature:?} available = {status}");
+    status
 }
 
 /// Resolves capabilities from the cache, querying the plugin on first access.
@@ -103,10 +111,16 @@ async fn cached_or_query() -> Result<Capabilities, String> {
     match result {
         Ok(caps) => {
             CACHED_CAPABILITIES.with(|c| *c.borrow_mut() = Some(caps.clone()));
+            tracing::info!(
+                "device-ai: native capabilities — speech_recognition={}, speech_synthesis={}, text_recognition={}",
+                caps.speech_recognition.available,
+                caps.speech_synthesis.available,
+                caps.text_recognition.available,
+            );
             Ok(caps)
         },
         Err(e) => {
-            tracing::debug!("device-ai capabilities query failed, will retry: {e}");
+            tracing::warn!("device-ai: capabilities query failed ({e}), routing to fallbacks");
             Ok(Capabilities::all_unavailable())
         },
     }

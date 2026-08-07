@@ -1,7 +1,6 @@
 use crate::dictionary::furigana_dict::{self, FuriganaEntry, ReadingSpan, get_furigana_dict};
 use crate::domain::OrigaError;
 use crate::domain::hiragana_to_katakana;
-use crate::domain::katakana_to_hiragana;
 use crate::domain::tokenizer::{TokenInfo, tokenize_text};
 
 #[derive(Debug, Clone)]
@@ -131,8 +130,7 @@ fn resolve_annotation(
             lookup_text,
             reading_hint,
         } => {
-            let mut entries = dict.lookup_word(&lookup_text);
-            sort_by_reading_hint(&mut entries, reading_hint.as_deref());
+            let entries = dict.lookup_word(&lookup_text);
 
             if let Some(best) = entries.first() {
                 AnnotatedSpan {
@@ -183,45 +181,9 @@ fn resolve_annotation(
     }
 }
 
-fn sort_by_reading_hint(entries: &mut Vec<&FuriganaEntry>, hint: Option<&str>) {
-    let Some(hint) = hint else { return };
-    let hint_hiragana = katakana_to_hiragana(hint);
-    entries.sort_by(|a, b| {
-        let a_matches = a.reading == hint_hiragana;
-        let b_matches = b.reading == hint_hiragana;
-        b_matches.cmp(&a_matches)
-    });
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn sort_by_reading_hint_prioritizes_matching_reading() {
-        let content = "大人|おとな|0-1:おとな\n大人|だいじん|0-1:だいじん";
-        let dict = furigana_dict::FuriganaDictionary::from_text(content).unwrap();
-
-        let mut entries = dict.lookup_word("大人");
-        assert_eq!(entries.len(), 2);
-
-        sort_by_reading_hint(&mut entries, Some("オトナ"));
-        assert_eq!(entries[0].reading, "おとな");
-
-        sort_by_reading_hint(&mut entries, Some("ダイジン"));
-        assert_eq!(entries[0].reading, "だいじん");
-    }
-
-    #[test]
-    fn sort_by_reading_hint_no_hint_does_nothing() {
-        let content = "指|ゆび|0:ゆび";
-        let dict = furigana_dict::FuriganaDictionary::from_text(content).unwrap();
-
-        let mut entries = dict.lookup_word("指");
-        let original_reading = entries[0].reading.clone();
-        sort_by_reading_hint(&mut entries, None);
-        assert_eq!(entries[0].reading, original_reading);
-    }
 
     fn setup_dictionaries() {
         if !crate::domain::is_dictionary_loaded() {
@@ -234,9 +196,10 @@ mod tests {
 食べる|たべる|0:た
 食べ物|たべもの|0:たべ;2:もの
 大人|おとな|0-1:おとな
+大人|だいじん|0-1:だいじん
 指|ゆび|0:ゆび
 ";
-            furigana_dict::init_furigana_dict(content).unwrap();
+            let _ = furigana_dict::init_furigana_dict(content);
         }
     }
 
@@ -302,5 +265,42 @@ mod tests {
         let tabe = result.iter().find(|s| s.text == "食べ");
         assert!(tabe.is_some());
         assert!(tabe.unwrap().reading.is_some());
+    }
+
+    // 明日 has multiple readings: あした (most common), あす (literary),
+    // みょうにち (formal). JmdictFurigana.txt lists them in frequency order.
+    // The annotator must pick the FIRST entry (most common = あした), not
+    // reorder based on Lindera's phonological_surface_form which can return
+    // the literary reading あす.
+    #[test]
+    fn annotate_text_picks_most_frequent_reading_for_multi_reading_word() {
+        // Build a local dictionary to avoid depending on test execution
+        // order — the global OnceLock may already be populated by other
+        // test modules with inline data that doesn't include 明日.
+        let content = "\
+明日|あした|0-1:あした
+明日|あす|0-1:あす
+";
+        let dict = furigana_dict::FuriganaDictionary::from_text(content).unwrap();
+
+        // Resolve the annotation for the 明日 token as a Single-type
+        // InternalToken — this is the path that previously called
+        // sort_by_reading_hint and could pick the wrong reading.
+        let token = InternalToken::Single {
+            surface: "明日".to_string(),
+            lookup_text: "明日".to_string(),
+            reading_hint: Some("アス".to_string()),
+        };
+        let span = resolve_annotation(token, &dict);
+
+        let reading = span.reading.as_ref().expect("明日 should have a reading");
+        // hiragana_to_katakana is applied, so あした becomes アシタ.
+        // The reading_hint was アス (literary) — the annotator must NOT
+        // use it and must pick the first dictionary entry instead.
+        assert_eq!(
+            reading, "アシタ",
+            "明日 should use the most frequent reading あした, got {}",
+            reading
+        );
     }
 }

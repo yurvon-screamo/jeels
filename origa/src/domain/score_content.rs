@@ -87,8 +87,8 @@ mod tests {
 
     use super::*;
     use crate::domain::{
-        Card, Difficulty, KanjiCard, MemoryState, Rating, ReviewLog, Stability, StudyCard,
-        VocabularyCard, value_objects::Question,
+        Card, Difficulty, KanjiCard, MemoryState, Rating, Stability, StudyCard, VocabularyCard,
+        value_objects::Question,
     };
     use crate::use_cases::init_real_dictionaries;
 
@@ -123,8 +123,7 @@ mod tests {
         let difficulty = Difficulty::new(3.0).unwrap();
         let next_review = Utc::now() + Duration::days(30);
         let memory_state = MemoryState::new(stability, difficulty, next_review);
-        let review = ReviewLog::new(Rating::Good, Duration::days(22));
-        study_card.add_review(memory_state, review);
+        study_card.apply_review(memory_state, Rating::Good);
     }
 
     fn cards_to_hashmap(cards: Vec<StudyCard>) -> HashMap<Ulid, StudyCard> {

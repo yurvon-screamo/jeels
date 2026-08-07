@@ -198,6 +198,25 @@ impl OnboardingState {
             }
         }
     }
+
+    /// The JLPT level used to scope grammar and kanji imports. Prefers the
+    /// level explicitly picked in `JlptStep`; otherwise falls back to the
+    /// highest level among the selected sets so that, for example, choosing
+    /// only Minna N4 still imports N4 grammar/kanji without a JLPT selection.
+    ///
+    /// NOTE: until `selected_level` is persisted into `user.jlpt_progress`
+    /// (separate bug, out of scope), the fallback branch is always reached on
+    /// a fresh app start. The branch is still exercised when the user has not
+    /// picked a JLPT level in the current onboarding session.
+    pub fn target_level(&self) -> JapaneseLevel {
+        self.selected_level.unwrap_or_else(|| {
+            self.sets_to_import
+                .iter()
+                .map(|s| s.level)
+                .max()
+                .unwrap_or(JapaneseLevel::N5)
+        })
+    }
 }
 
 fn level_to_lowercase(level: JapaneseLevel) -> &'static str {

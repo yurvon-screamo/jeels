@@ -975,6 +975,7 @@ input[type="submit"],
     position: absolute;
     top: 0;
     left: 0;
+    height: 100%;
 }
 
 /* Indeterminate fallback: CDN serves model GETs chunked without Content-Length,
@@ -996,6 +997,43 @@ input[type="submit"],
 
 .progress-container {
     position: relative;
+}
+
+/* Onboarding scoring progress bar — single horizontal track with one marker
+   per section boundary (Grammar | Kanji | Vocabulary | …). Sits on top of the
+   generic `.progress-track` / `.progress-fill` geometry: same height, same
+   border, but the fill is driven by an inline `width: %` style instead of the
+   `--progress-width` CSS var so the parent component can compute it from the
+   section-aware queue length. */
+.scoring-progress-bar {
+    width: 100%;
+}
+
+.scoring-progress-track {
+    position: relative;
+    height: 8px;
+    border: 1px solid var(--border-dark);
+    background: var(--bg-aged);
+    overflow: visible;
+}
+
+.scoring-progress-fill {
+    height: 100%;
+    background: var(--fg-black);
+    transition: width 0.3s ease;
+}
+
+.scoring-progress-marker {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: var(--border-dark);
+    transform: translateX(-1px);
+}
+
+.scoring-progress-legend {
+    color: var(--fg-muted);
 }
 
 .progress-track-lesson {
@@ -1498,13 +1536,18 @@ input[type="submit"],
     bottom: 0;
     left: 0;
     right: 0;
-    height: 72px;
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    /* Full height INCLUDING the safe-area inset so the bar fills the space
+       above the home indicator on notched iPhones (viewport-fit=cover).
+       Previously height was a flat 72px and padding-bottom ate into it,
+       leaving icons crushed and a gap below the bar. */
+    height: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--bg-cream);
     border-top: 1px solid var(--border-dark);
     display: flex;
     z-index: 50;
     width: 100%;
+    overflow-x: hidden;
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
 }
@@ -1561,11 +1604,29 @@ input[type="submit"],
 }
 
 .bottom-tab-item-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Logo in the bottom bar: prevent flexbox from shrinking it on narrow
+   phones. The wrapper carries flex-shrink:0 so the 32×32 logo keeps its
+   aspect ratio. */
+.bottom-tab-item-logo {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bottom-tab-item-logo img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
 }
 
 .bottom-tab-item-label {
@@ -1573,6 +1634,17 @@ input[type="submit"],
     font-size: var(--text-label-sm);
     letter-spacing: 0.05em;
     line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+@media (max-width: 400px) {
+    .bottom-tab-item-label {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
 }
 
 /* === SIDEBAR === */
@@ -1731,7 +1803,7 @@ rt {
     cursor: pointer;
     display: inline-block;
     position: relative;
-    vertical-align: middle;
+    vertical-align: baseline;
     line-height: 1;
 }
 
@@ -1876,6 +1948,12 @@ rt {
 .kanji-animation-svg {
     width: 109px;
     height: 109px;
+    max-width: 100%;
+}
+
+.kanji-animation-svg svg {
+    max-width: 100%;
+    height: auto;
 }
 
 .kanji-animation-svg path:not(.bg) {
@@ -2145,6 +2223,13 @@ rt {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--fg-muted);
+    /* Allow the progress string to wrap onto its own line on narrow phones
+       instead of splitting mid-phrase (e.g. "0 ИЗ" / "9"). balance distributes
+       text evenly across wrapped lines; center keeps it tidy. */
+    text-align: center;
+    max-width: 90vw;
+    line-height: 1.6;
+    text-wrap: balance;
 }
 
 .btn-loading {
@@ -2284,6 +2369,10 @@ rt {
     background: var(--bg-paper);
     border-color: var(--border-light);
     opacity: 0.5;
+}
+
+.quiz-option-hidden {
+    display: none;
 }
 
 .btn.quiz-option-correct {
@@ -4993,6 +5082,21 @@ rt {
     .kanji-detail-top-bar .fsrs-metrics {
         display: none;
     }
+
+    /* Compact reading groups on phones: shrink the ON/KUN label column so
+       reading tags have room to sit side-by-side in a row instead of
+       stacking one-per-line. */
+    .kanji-detail-hero-readings .reading-group {
+        gap: 8px;
+    }
+
+    .kanji-detail-hero-readings .reading-kanji {
+        width: 36px;
+    }
+
+    .kanji-detail-hero-readings .reading-furigana {
+        gap: 4px;
+    }
 }
 
 /* Legacy section separator (used in mobile tabs) */
@@ -5720,6 +5824,8 @@ rt {
     flex-direction: column;
     gap: 24px;
     padding-bottom: 32px;
+    overflow-x: hidden;
+    min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -5780,6 +5886,7 @@ rt {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
 }
 
 .profile-section {

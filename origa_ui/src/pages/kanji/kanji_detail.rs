@@ -6,9 +6,9 @@ use super::kanji_detail_parts::{KanjiDetailHeroCard, MobileOverview};
 use crate::i18n::use_i18n;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    CardActionBar, CardHistoryModal, DeleteConfirmModal, FsrsMetrics, FuriganaText,
-    KanjiDrawingPractice, KanjiViewMode, KanjiWritingSection, LoadingOverlay, MarkdownText,
-    ReadingGroup, TabItem, Tabs, Tag, Text, TextSize, TypographyVariant,
+    CardActionBar, DeleteConfirmModal, FsrsMetrics, FuriganaText, KanjiDrawingPractice,
+    KanjiViewMode, KanjiWritingSection, LoadingOverlay, MarkdownText, ReadingGroup, TabItem, Tabs,
+    Tag, Text, TextSize, TypographyVariant,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -147,7 +147,6 @@ pub fn KanjiDetail() -> impl IntoView {
     });
 
     let is_delete_modal_open = RwSignal::new(false);
-    let is_history_open = RwSignal::new(false);
     let navigate = StoredValue::new(use_navigate());
 
     let not_found_text =
@@ -279,9 +278,6 @@ pub fn KanjiDetail() -> impl IntoView {
                 let radicals_stored: StoredValue<String> = StoredValue::new(radicals.clone());
                 let has_examples = Memo::new(move |_| !example_words.get().is_empty());
 
-                let memory_history: StoredValue<origa::domain::MemoryHistory> =
-                    StoredValue::new(memory.clone());
-
                 let card_id_for_delete = card_id;
                 let confirm_delete = Callback::new(move |_| {
                     on_delete.run(DeleteRequest {
@@ -356,7 +352,6 @@ pub fn KanjiDetail() -> impl IntoView {
                             show_mark_as_known=Signal::derive(move || status != CardStatus::Learned)
                             on_mark_as_known=Callback::new(move |_| on_mark_as_known.run(card_id_for_known))
                             mark_known_pending=mark_known_pending
-                            on_history=Callback::new(move |_| is_history_open.set(true))
                             on_delete=Callback::new(move |_| is_delete_modal_open.set(true))
                             test_id=Signal::derive(|| "kanji-detail-actions".to_string())
                             show_tag=Signal::derive(|| false)
@@ -491,9 +486,6 @@ pub fn KanjiDetail() -> impl IntoView {
                                         on_mark_as_known.run(card_id_for_known)
                                     })
                                     mark_known_pending=mark_known_pending
-                                    on_history=Callback::new(move |_| {
-                                        is_history_open.set(true)
-                                    })
                                     on_delete=Callback::new(move |_| {
                                         is_delete_modal_open.set(true)
                                     })
@@ -540,11 +532,6 @@ pub fn KanjiDetail() -> impl IntoView {
                         </Show>
                     </div>
 
-                    <CardHistoryModal
-                        is_open=Signal::derive(move || is_history_open.get())
-                        memory=memory_history.get_value()
-                        on_close=Callback::new(move |_| is_history_open.set(false))
-                    />
                     <DeleteConfirmModal
                         test_id="kanji-detail-delete-modal"
                         is_open=is_delete_modal_open

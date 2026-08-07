@@ -187,7 +187,15 @@
             "no_new_cards": "No new cards to assess",
             "all_new": "All cards are new — time to study!",
             "you_know_count": "You know {known} of {total} cards",
-            "press_finish": "Press \"Finish\" to start learning"
+            "press_finish": "Press \"Finish\" to start learning",
+            "section": {
+                "grammar": "Grammar",
+                "kanji": "Kanji",
+                "vocabulary": "Vocabulary",
+                "phrase": "Phrases"
+            },
+            "reading_on": "On",
+            "reading_kun": "Kun"
         },
         "summary": {
             "title": "Ready to import",
@@ -516,7 +524,9 @@
         "import_partial": "Created {} cards, skipped {} (already exist)",
         "import_with_errors": "Created {} cards, skipped {}, errors: {}",
         "import_complete_title": "Import complete",
-        "reimport": "Re-import"
+        "reimport": "Re-import",
+        "offline_title": "No connection",
+        "offline_desc": "Word sets are unavailable offline. Connect to the internet and refresh."
     },
     "shared": {
         "filter_all": "All",
@@ -566,7 +576,6 @@
         "hint": "Phrase cards are auto-created when you learn all words in a phrase"
     },
     "ui": {
-        "card_history": "Card history",
         "card_not_studied": "Card hasn't been studied yet",
         "delete_card": "Delete card?",
         "delete_card_message": "The card will be deleted permanently.",

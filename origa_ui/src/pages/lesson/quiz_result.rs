@@ -20,6 +20,10 @@ pub enum OptionDisplay {
     Wrong,
     Missed,
     Dimmed,
+    /// Completely hidden — used to remove incorrect/unselected options
+    /// after the user answers, collapsing the answer grid to only the
+    /// selected answer and the correct one.
+    Hidden,
 }
 
 impl QuizResult {
@@ -27,11 +31,11 @@ impl QuizResult {
         match self {
             QuizResult::None => OptionDisplay::Neutral,
             QuizResult::Correct | QuizResult::Incorrect if is_correct => OptionDisplay::Correct,
-            QuizResult::Correct => OptionDisplay::Dimmed,
+            QuizResult::Correct => OptionDisplay::Hidden,
             QuizResult::Incorrect if is_selected => OptionDisplay::Wrong,
-            QuizResult::Incorrect => OptionDisplay::Dimmed,
+            QuizResult::Incorrect => OptionDisplay::Hidden,
             QuizResult::DontKnow if is_correct => OptionDisplay::Correct,
-            QuizResult::DontKnow => OptionDisplay::Dimmed,
+            QuizResult::DontKnow => OptionDisplay::Hidden,
             QuizResult::MultiCorrect | QuizResult::MultiPartial => OptionDisplay::Neutral,
         }
     }
@@ -66,6 +70,7 @@ impl QuizResult {
             OptionDisplay::Wrong => "quiz-option-wrong",
             OptionDisplay::Dimmed => "quiz-option-dimmed",
             OptionDisplay::Missed => "quiz-option-missed",
+            OptionDisplay::Hidden => "quiz-option-hidden",
         }
     }
 
@@ -94,5 +99,56 @@ impl From<YesNoResult> for QuizResult {
             YesNoResult::Incorrect => QuizResult::Incorrect,
             YesNoResult::DontKnow => QuizResult::DontKnow,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn single_quiz_hides_incorrect_unselected_options_after_answer() {
+        // User answered incorrectly. Options that are neither correct nor
+        // selected by the user should be Hidden — not Dimmed — so the grid
+        // collapses to just the user's answer + the correct one.
+        let result = QuizResult::Incorrect;
+        assert_eq!(
+            result.option_display(false, false),
+            OptionDisplay::Hidden,
+            "incorrect unselected options should be Hidden after answering"
+        );
+    }
+
+    #[test]
+    fn single_quiz_keeps_selected_wrong_visible() {
+        let result = QuizResult::Incorrect;
+        assert_eq!(
+            result.option_display(false, true),
+            OptionDisplay::Wrong,
+            "the user's selected wrong answer must stay visible"
+        );
+    }
+
+    #[test]
+    fn single_quiz_correct_answer_keeps_selected_visible() {
+        let result = QuizResult::Correct;
+        assert_eq!(result.option_display(true, true), OptionDisplay::Correct);
+    }
+
+    #[test]
+    fn single_quiz_correct_answer_hides_unselected() {
+        let result = QuizResult::Correct;
+        assert_eq!(
+            result.option_display(false, false),
+            OptionDisplay::Hidden,
+            "when answered correctly, unselected options should collapse"
+        );
+    }
+
+    #[test]
+    fn dont_know_hides_all_wrong_keeps_correct() {
+        let result = QuizResult::DontKnow;
+        assert_eq!(result.option_display(true, false), OptionDisplay::Correct);
+        assert_eq!(result.option_display(false, false), OptionDisplay::Hidden);
     }
 }

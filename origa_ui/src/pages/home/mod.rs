@@ -56,7 +56,7 @@ pub fn Home() -> impl IntoView {
                         if disposed.is_disposed() {
                             return;
                         }
-                        if user.imported_sets().is_empty() {
+                        if !user.is_onboarding_completed() {
                             navigate("/onboarding", Default::default());
                             return;
                         }

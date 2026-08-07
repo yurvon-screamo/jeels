@@ -116,7 +116,7 @@ impl UserRepository for FileSystemUserRepository {
         }
 
         let users = self.list_users().await?;
-        Ok(users.first().cloned())
+        Ok(users.into_iter().next())
     }
 
     async fn save(&self, user: &User) -> Result<(), OrigaError> {

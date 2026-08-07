@@ -2,6 +2,7 @@ mod file_well_known_set_loader;
 mod in_memory_repository;
 mod real_dictionaries;
 
+pub use file_well_known_set_loader::MockCdnProvider;
 pub use in_memory_repository::InMemoryUserRepository;
 pub use real_dictionaries::{init_phrase_index_from_cdn, init_real_dictionaries};
 

@@ -28,6 +28,7 @@ export class WordsPage extends BasePage {
     readonly drawerAddBtn: Locator;
     readonly drawerCancelBtn: Locator;
     readonly analyzedWordItems: Locator;
+    readonly noResultsFeedback: Locator;
 
     // Anki import
     readonly ankiTab: Locator;
@@ -87,6 +88,7 @@ export class WordsPage extends BasePage {
         this.drawerAddBtn = page.getByTestId("words-drawer-add-btn");
         this.drawerCancelBtn = page.getByTestId("words-drawer-cancel-btn");
         this.analyzedWordItems = this.drawer.getByTestId("words-drawer-item");
+        this.noResultsFeedback = this.drawer.getByTestId("words-no-results");
 
         // Anki import
         this.ankiTab = this.drawer.getByText("Anki");
@@ -154,6 +156,13 @@ export class WordsPage extends BasePage {
         await this.drawerAnalyzeBtn.click();
         // Wait for analysis results - the "Найдено" text indicates completion
         await this.drawer.getByText(/Найдено/).waitFor({ state: "visible", timeout: 10_000 });
+    }
+
+    async analyzeTextNoResults(): Promise<void> {
+        await this.drawerAnalyzeBtn.click();
+        // When analysis returns 0 words, the "Слов не найдено" feedback
+        // appears instead of the "Найдено" count line.
+        await expect(this.noResultsFeedback).toBeVisible({ timeout: 10_000 });
     }
 
     async selectFirstWord(): Promise<void> {

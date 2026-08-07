@@ -1,6 +1,6 @@
 use crate::i18n::use_i18n;
 use crate::pages::shared::MarkAsKnownButton;
-use crate::ui_components::{DeleteButton, FavoriteButton, HistoryButton, Tag, TagVariant, Tooltip};
+use crate::ui_components::{DeleteButton, FavoriteButton, Tag, TagVariant, Tooltip};
 use leptos::prelude::*;
 
 #[component]
@@ -13,14 +13,12 @@ pub fn CardActionBar(
     #[prop(optional, into)] on_mark_as_known: Option<Callback<()>>,
     #[prop(optional)] show_mark_as_known: Signal<bool>,
     #[prop(optional, into)] mark_known_pending: Signal<bool>,
-    #[prop(optional, into)] on_history: Option<Callback<()>>,
     #[prop(optional, into)] on_delete: Option<Callback<()>>,
     #[prop(optional, into)] test_id: Signal<String>,
     #[prop(optional, into)] show_tag: Signal<bool>,
 ) -> impl IntoView {
     let favorite_test_id = Signal::derive(move || format!("{}-favorite-btn", test_id.get()));
     let mark_known_test_id = Signal::derive(move || format!("{}-mark-known-btn", test_id.get()));
-    let history_test_id = Signal::derive(move || format!("{}-history-btn", test_id.get()));
     let delete_test_id = Signal::derive(move || format!("{}-delete-btn", test_id.get()));
 
     let mark_known_visible = move || show_mark_as_known.get();
@@ -62,17 +60,6 @@ pub fn CardActionBar(
                             </Tooltip>
                         </span>
                     }
-                            .into_any(),
-                        None => ().into_any(),
-                    }
-                }}
-                {move || {
-                    match on_history {
-                        Some(cb) => view! {
-                            <Tooltip text=Signal::derive(move || crate::i18n::td_string!(i18n.get_locale(), ui.card_history))>
-                                <HistoryButton on_click=cb test_id=history_test_id />
-                            </Tooltip>
-                        }
                             .into_any(),
                         None => ().into_any(),
                     }

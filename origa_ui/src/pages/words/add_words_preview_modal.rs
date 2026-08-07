@@ -1,6 +1,8 @@
 use crate::i18n::{t, use_i18n};
 use crate::pages::words::add_words_preview_modal_handlers::create_preview_modal_handlers;
-use crate::pages::words::add_words_preview_modal_state::{InputMode, PreviewModalState};
+use crate::pages::words::add_words_preview_modal_state::{
+    AnalysisStage, InputMode, PreviewModalState, analysis_stage,
+};
 use crate::pages::words::analyzed_word_item::AnalyzedWordItem;
 use crate::pages::words::anki_import_stage::AnkiImportStage;
 use crate::pages::words::audio_input_stage::AudioInputStage;
@@ -69,6 +71,8 @@ pub fn AddWordsPreviewModal(
         }
     });
 
+    let has_analyzed = state.has_analyzed;
+
     let tabs = Signal::derive(move || {
         let mut items = vec![
             TabItem {
@@ -136,8 +140,47 @@ pub fn AddWordsPreviewModal(
             <div class="space-y-4">
                 {move || {
                     let words = analyzed_words.get();
-                    if words.is_empty() {
-                        view! {
+                    let stage = analysis_stage(
+                        words.len(),
+                        has_analyzed.get(),
+                        is_analyzing.get(),
+                    );
+                    match stage {
+                        AnalysisStage::Analyzing => view! {
+                            <div class="space-y-4">
+                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
+                                <div class="flex items-center justify-center py-8">
+                                    <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                        {t!(i18n, words.analyzing)}
+                                    </Text>
+                                </div>
+                            </div>
+                        }.into_any(),
+                        AnalysisStage::Preview => view! {
+                            <PreviewStage
+                                analyzed_words=words
+                                selected_words=selected_words
+                                known_kanji=known_kanji.get()
+                                is_creating=is_creating
+                                on_word_toggle=handlers.on_word_toggle
+                                on_cancel=handlers.on_cancel
+                                on_create=handlers.on_create
+                            />
+                        }.into_any(),
+                        AnalysisStage::NoResults => view! {
+                            <div class="space-y-4">
+                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
+                                <div
+                                    class="flex flex-col items-center justify-center py-8 gap-2"
+                                    data-testid="words-no-results"
+                                >
+                                    <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                        {move || i18n.get_keys().words().words_not_found().inner().to_string()}
+                                    </Text>
+                                </div>
+                            </div>
+                        }.into_any(),
+                        AnalysisStage::Input => view! {
                             <div class="space-y-4">
                                 <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
                                 {move || {
@@ -179,19 +222,7 @@ pub fn AddWordsPreviewModal(
                                     }
                                 }}
                             </div>
-                        }.into_any()
-                    } else {
-                        view! {
-                            <PreviewStage
-                                analyzed_words=words
-                                selected_words=selected_words
-                                known_kanji=known_kanji.get()
-                                is_creating=is_creating
-                                on_word_toggle=handlers.on_word_toggle
-                                on_cancel=handlers.on_cancel
-                                on_create=handlers.on_create
-                            />
-                        }.into_any()
+                        }.into_any(),
                     }
                 }}
             </div>

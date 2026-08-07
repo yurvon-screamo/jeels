@@ -105,6 +105,7 @@ fn build_csp_substitutes_staging_hosts() {
     // Other third-party hosts must survive any host substitution.
     assert!(csp.contains("https://huggingface.co"));
     assert!(csp.contains("https://cdn.pyke.io"));
+    assert!(csp.contains("https://cdn.jsdelivr.net"));
     assert!(csp.contains("https://signal.pyke.io"));
     assert!(csp.contains("https://accounts.google.com"));
     assert!(csp.contains("https://oauth.yandex.ru"));
@@ -112,11 +113,36 @@ fn build_csp_substitutes_staging_hosts() {
     // Sentry: loader host is static, ingest host is parameterised. The ingest
     // host must be pinned to the exact staging value — NOT a wildcard — to
     // avoid the multi-tenant SaaS exfil vector. See ADR-036 §7.
+    //
+    // The loader (js.sentry-cdn.com) is a thin bootstrap that fetches the
+    // actual SDK bundle from browser.sentry-cdn.com, so BOTH hosts must be in
+    // script-src — listing only the loader leaves the bundle blocked by CSP.
+    //
+    // Session Replay additionally needs connect-src data: (compression
+    // payload encoding), worker-src 'self' blob: (compression Web Worker),
+    // and child-src 'self' blob: (worker-src fallback for older browsers).
     assert!(csp.contains("https://js.sentry-cdn.com"));
+    assert!(csp.contains("https://browser.sentry-cdn.com"));
     assert!(csp.contains("https://o-staging.ingest.sentry.io"));
     assert!(
         !csp.contains("*.sentry.io"),
         "CSP must NOT contain a sentry.io wildcard — see ADR-036 §7"
+    );
+    assert!(
+        csp.contains("connect-src 'self' ipc: http://ipc.localhost data:"),
+        "connect-src must allow data: for Sentry Replay compression payloads"
+    );
+    assert!(
+        csp.contains("https://browser.sentry-cdn.com https://o-staging.ingest.sentry.io"),
+        "connect-src must allow browser.sentry-cdn.com for source map (.map) fetches"
+    );
+    assert!(
+        csp.contains("worker-src 'self' blob:"),
+        "worker-src must allow blob: for the Sentry Replay Web Worker"
+    );
+    assert!(
+        csp.contains("child-src 'self' blob:"),
+        "child-src must allow blob: as a worker-src fallback for older browsers"
     );
 
     // Production hosts must NOT leak into the staging build.
@@ -275,6 +301,49 @@ fn apply_merge_patch_csp_into_tauri_cli_config_preserves_overrides() {
     assert_eq!(target["build"]["devUrl"], "http://localhost:1420");
     // CSP must be present (the whole point of the patch).
     assert_eq!(target["app"]["security"]["csp"], "default-src 'self'");
+}
+
+/// Regression guard for the no-signing-key patch applied when
+/// `TAURI_SIGNING_PRIVATE_KEY` is empty (Dependabot PRs, local dev without a
+/// key). The committed `tauri.conf.json` has `createUpdaterArtifacts: true`;
+/// the build script patches it to `false` so the bundler skips signing.
+/// Without this patch, Tauri fails with "failed to decode secret key:
+/// … Missing comment in secret key" because the empty key is invalid.
+///
+/// This test simulates the exact merge: load the committed config, apply the
+/// CSP patch, then apply the no-sign patch, and assert the final result.
+#[test]
+fn apply_merge_patch_no_signing_key_disables_updater_artifacts() {
+    // Start from the committed tauri.conf.json (includes
+    // createUpdaterArtifacts: true).
+    let mut target: serde_json::Value = serde_json::from_str(include_str!("../tauri.conf.json"))
+        .expect("tauri.conf.json must be valid JSON");
+
+    // The CSP patch our build.rs applies first.
+    let csp_patch = serde_json::json!({
+        "app": { "security": { "csp": "default-src 'self'" } }
+    });
+    apply_merge_patch(&mut target, csp_patch);
+
+    // The no-signing-key patch our build.rs applies when
+    // TAURI_SIGNING_PRIVATE_KEY is empty.
+    let no_sign_patch = serde_json::json!({
+        "bundle": { "createUpdaterArtifacts": false }
+    });
+    apply_merge_patch(&mut target, no_sign_patch);
+
+    // The patch must flip createUpdaterArtifacts to false.
+    assert_eq!(
+        target["bundle"]["createUpdaterArtifacts"], false,
+        "no-signing-key patch must disable createUpdaterArtifacts"
+    );
+    // CSP must survive (applied first, not overwritten).
+    assert_eq!(target["app"]["security"]["csp"], "default-src 'self'");
+    // Other bundle keys (icon, targets) must survive the merge.
+    assert_eq!(
+        target["bundle"]["targets"], "all",
+        "bundle.targets must survive the no-signing-key patch"
+    );
 }
 
 /// `resolve_env` falls back to the default when the env var is unset (`None`).

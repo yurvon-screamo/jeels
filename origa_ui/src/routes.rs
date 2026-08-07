@@ -61,25 +61,37 @@ pub fn start_dictionary_loading(
             tracing::warn!("Cache manifest check failed: {e}");
         }
 
-        // Phase B: parallel loading of all independent data
-        let vocab_fut = load_vocabulary();
-        let kanji_fut = load_with_retry(load_kanji, 1);
-        let radicals_fut = load_with_retry(load_radicals, 1);
-        let grammar_fut = load_grammar();
-        let phrases_fut = load_phrases();
-        let pitch_fut = load_pitch_audio();
-        let dict_fut = load_dictionary();
-        let furigana_fut = load_furigana_dict();
+        // Phase B: staged loading to minimize peak WASM linear memory.
+        //
+        // The iOS WKWebView process has a ~1.5 GB jetsam limit. Loading all
+        // resources simultaneously via futures::join! caused ~27 concurrent
+        // HTTP requests and ~144 MB of response bodies in the JS heap at once,
+        // plus UniDic deflate-decompression (~61 MB → ~200 MB) and JSON parsing
+        // — pushing peak memory past the limit and killing the process with an
+        // OOM jetsam kill (not a Rust panic the hook can catch).
+        //
+        // Stages are ordered heaviest-first so the most memory-intensive work
+        // happens while the JS heap is relatively empty. After each loader
+        // returns, its raw bytes are consumed into static OnceLock structures
+        // and the intermediate Vec/String buffers are dropped.
+        //
+        // Sizes (CDN, compressed):
+        //   Stage 1 — dictionary:  ~61 MB (→ ~200 MB decompressed)
+        //   Stage 2 — vocab+phrases+furigana+pitch: ~91 MB text
+        //   Stage 3 — kanji+grammar+radicals: ~4 MB text
 
-        let (vocab_r, kanji_r, radicals_r, grammar_r, phrases_r, pitch_r, dict_r, furigana_r) = futures::join!(
-            vocab_fut,
-            kanji_fut,
-            radicals_fut,
-            grammar_fut,
-            phrases_fut,
-            pitch_fut,
-            dict_fut,
-            furigana_fut,
+        // Stage 1: UniDic dictionary — solo, dominates memory usage.
+        if let Err(e) = load_dictionary().await {
+            tracing::error!("Failed to load dictionary: {e}");
+        }
+        auth_store.is_dictionary_loaded.set(true);
+
+        // Stage 2: medium resources in parallel.
+        let (vocab_r, phrases_r, furigana_r, pitch_r) = futures::join!(
+            load_vocabulary(),
+            load_phrases(),
+            load_furigana_dict(),
+            load_pitch_audio(),
         );
 
         if let Err(e) = vocab_r {
@@ -87,40 +99,42 @@ pub fn start_dictionary_loading(
         }
         auth_store.is_vocabulary_loaded.set(true);
 
-        if let Err(e) = kanji_r {
-            tracing::error!("Failed to load kanji: {e}");
-        }
-        auth_store.is_kanji_loaded.set(true);
-
-        if let Err(e) = radicals_r {
-            tracing::error!("Failed to load radicals: {e}");
-        }
-        auth_store.is_radicals_loaded.set(true);
-
-        if let Err(e) = grammar_r {
-            tracing::error!("Failed to load grammar: {e}");
-        }
-        auth_store.is_grammar_loaded.set(true);
-
         if let Err(e) = phrases_r {
             tracing::error!("Failed to load phrases: {e}");
         }
         auth_store.is_phrases_loaded.set(true);
+
+        if let Err(e) = furigana_r {
+            tracing::warn!("Failed to load furigana: {e}");
+        }
+        auth_store.is_furigana_loaded.set(true);
 
         if let Err(e) = pitch_r {
             tracing::warn!("Failed to load pitch audio: {e}");
         }
         auth_store.is_pitch_audio_loaded.set(true);
 
-        if let Err(e) = dict_r {
-            tracing::error!("Failed to load dictionary: {e}");
-        }
-        auth_store.is_dictionary_loaded.set(true);
+        // Stage 3: light resources in parallel.
+        let (kanji_r, grammar_r, radicals_r) = futures::join!(
+            load_with_retry(load_kanji, 1),
+            load_grammar(),
+            load_with_retry(load_radicals, 1),
+        );
 
-        if let Err(e) = furigana_r {
-            tracing::warn!("Failed to load furigana: {e}");
+        if let Err(e) = kanji_r {
+            tracing::error!("Failed to load kanji: {e}");
         }
-        auth_store.is_furigana_loaded.set(true);
+        auth_store.is_kanji_loaded.set(true);
+
+        if let Err(e) = grammar_r {
+            tracing::error!("Failed to load grammar: {e}");
+        }
+        auth_store.is_grammar_loaded.set(true);
+
+        if let Err(e) = radicals_r {
+            tracing::error!("Failed to load radicals: {e}");
+        }
+        auth_store.is_radicals_loaded.set(true);
 
         // Phase C: jlpt_content (depends on kanji + grammar)
         if let Err(e) = load_with_retry(load_jlpt_content, 1).await {

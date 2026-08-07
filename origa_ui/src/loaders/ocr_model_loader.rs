@@ -43,18 +43,17 @@ impl ModelLoader {
         };
 
         let cache = model_cache.get_cache().await?;
-        let filenames = ModelConfig::ndlocr_file_names();
+        let files: Vec<(&str, String)> = ModelConfig::ndlocr_file_names()
+            .iter()
+            .map(|&f| (f, self.config.model_url(f)))
+            .collect();
 
-        if model_cache.ensure_files_cached(&cache, filenames).await? {
+        if model_cache.ensure_files_cached(&cache, &files).await? {
             info!("NDLOCR-Lite models found in cache, loading...");
-            let loaded = model_cache.load_files_from_cache(&cache, filenames).await?;
+            let loaded = model_cache.load_files_from_cache(&cache, &files).await?;
             self.build_model_files(loaded)
         } else {
             info!("NDLOCR-Lite models not found in cache, downloading...");
-            let files: Vec<(&str, String)> = filenames
-                .iter()
-                .map(|&f| (f, self.config.model_url(f)))
-                .collect();
             let loaded = model_cache.download_and_cache_model(&cache, &files).await?;
             self.build_model_files(loaded)
         }

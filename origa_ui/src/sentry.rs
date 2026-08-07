@@ -70,14 +70,33 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
 
     // 1. Install `window.sentryOnLoad` BEFORE injecting the script so the
     //    loader invokes it even when it loads synchronously from cache.
+    //
+    //    Sentry v8 removed the `Integrations.XXX` class hash — integrations
+    //    are now functions (e.g. `Sentry.captureConsoleIntegration()`).
+    //    Accessing `Sentry.Integrations.CaptureConsole` throws
+    //    `TypeError: Cannot read properties of undefined (reading
+    //    'CaptureConsole')`, which prevents `Sentry.init` from running at
+    //    all. The loader script serves the latest SDK, so we must use the
+    //    v8 functional API. See Sentry v7-to-v8 migration guide.
     let init_js = format!(
         r#"(function() {{
             window.sentryOnLoad = function() {{
+                // captureConsoleIntegration routes tracing-wasm's console.error
+                // output (which is where all WASM tracing::error! calls land via
+                // the WASMLayer) into Sentry as error events. console.warn/info
+                // become breadcrumbs via the default Breadcrumbs integration.
+                var integrations = [];
+                if (typeof Sentry.captureConsoleIntegration === 'function') {{
+                    integrations.push(Sentry.captureConsoleIntegration({{ levels: ['error'] }}));
+                }}
                 Sentry.init({{
                     dsn: "{dsn}",
                     release: "{release}",
                     environment: "{environment}",
-                    sendDefaultPii: false
+                    sendDefaultPii: false,
+                    tracesSampleRate: 1.0,
+                    enableLogs: true,
+                    integrations: integrations
                 }});
                 Sentry.setTag("layer", "ui");
             }};
@@ -110,24 +129,49 @@ pub(crate) fn init_with(dsn: &str, release: &str, environment: &str) {
 /// WASM panic, including the path where Sentry is disabled (no loader
 /// injected, `window.Sentry` is `undefined`). Defensive on every JS call —
 /// any failure is silently dropped so the downstream console hook still runs.
+///
+/// Two things are critical here:
+///
+/// 1. **Wrap in `new Error(msg)`** — Sentry groups events by stack trace.
+///    Passing a bare string collapses every panic into a single issue group
+///    in the dashboard, making them indistinguishable. `js_sys::Error::new`
+///    captures a synthetic JS stack at this call site, which Sentry uses for
+///    deduplication and grouping.
+///
+/// 2. **Call `Sentry.flush(2000)`** — `captureException` only queues the
+///    event; the actual HTTP POST to the ingest endpoint happens on the next
+///    event-loop tick. After `panic = "abort"` fires the WASM `unreachable`
+///    trap, the JS runtime stays alive but the running async task is dead.
+///    Without an explicit flush the queued event may sit in the SDK buffer
+///    indefinitely. `flush` returns a Promise — we fire it without awaiting
+///    (the panic hook is synchronous), but calling it starts the send
+///    immediately.
 pub fn capture_exception(msg: &str) {
-    // The SDK accepts a string here and synthesises a stacktrace-less event.
-    // Wrapping in `new Error(msg)` would preserve a synthetic stack, but the
-    // WASM panic message already includes location info from
-    // `console_error_panic_hook`, so the marginal value is low.
     let Ok(sentry_obj) = sentry_global() else {
         return;
     };
     if sentry_obj.is_undefined() || sentry_obj.is_null() {
         return;
     }
+
+    // Wrap in a real Error so Sentry has a stacktrace for grouping.
+    let error = js_sys::Error::new(msg);
+
     let Ok(capture) = Reflect::get(&sentry_obj, &"captureException".into()) else {
         return;
     };
-    let Some(f) = capture.dyn_ref::<js_sys::Function>() else {
+    let Some(capture_fn) = capture.dyn_ref::<js_sys::Function>() else {
         return;
     };
-    let _ = f.call1(&sentry_obj, &JsValue::from(msg));
+    let _ = capture_fn.call1(&sentry_obj, &error);
+
+    // Force the SDK to send the queued event immediately. Without this the
+    // event may never leave the buffer if the WASM trap cascades.
+    if let Ok(flush) = Reflect::get(&sentry_obj, &"flush".into()) {
+        if let Some(flush_fn) = flush.dyn_ref::<js_sys::Function>() {
+            let _ = flush_fn.call1(&sentry_obj, &JsValue::from_f64(2000.0));
+        }
+    }
 }
 
 /// Read `window.Sentry`. Returns `Err` only if `window` itself is missing;
@@ -154,7 +198,15 @@ fn extract_public_key(dsn: &str) -> Option<&str> {
     Some(key)
 }
 
-/// Create and append a `<script src=url crossorigin>` element to `<head>`.
+/// Create and append a `<script src=url crossorigin data-lazy=no>` element to
+/// `<head>`.
+///
+/// `data-lazy="no"` forces the loader to fetch the full SDK immediately (on the
+/// next event-loop tick) instead of waiting for the first error. This is
+/// required for performance monitoring: BrowserTracing must be active *before*
+/// the app's `fetch` calls to capture them as transactions. Without it, the
+/// loader only downloads the SDK when an error occurs — by which point the
+/// dictionary-loading `fetch` requests have already happened uninstrumented.
 fn inject_script(
     document: &Document,
     head: &web_sys::HtmlHeadElement,
@@ -163,6 +215,7 @@ fn inject_script(
     let script: Element = document.create_element("script")?;
     script.set_attribute("src", url)?;
     script.set_attribute("crossorigin", "anonymous")?;
+    script.set_attribute("data-lazy", "no")?;
     head.append_child(&script)?;
     Ok(())
 }
@@ -256,6 +309,15 @@ mod wasm_tests {
             last_src.contains("js.sentry-cdn.com/abc123def456.min.js"),
             "injected script src must point at the Sentry loader CDN with the DSN public key, got: {last_src}"
         );
+
+        // data-lazy="no" must be set so the loader fetches the full SDK
+        // immediately (required for BrowserTracing to capture fetch calls
+        // during dictionary loading).
+        let last_data_lazy = last_head_script_data_lazy().unwrap_or_default();
+        assert_eq!(
+            last_data_lazy, "no",
+            "injected script must have data-lazy=no for eager SDK loading"
+        );
     }
 
     fn count_head_scripts() -> usize {
@@ -275,5 +337,15 @@ mod wasm_tests {
         let last = nodes.item(nodes.length() - 1)?;
         let el = last.dyn_ref::<web_sys::Element>()?;
         el.get_attribute("src")
+    }
+
+    fn last_head_script_data_lazy() -> Option<String> {
+        let window = web_sys::window()?;
+        let document = window.document()?;
+        let head = document.head()?;
+        let nodes = head.query_selector_all("script").ok()?;
+        let last = nodes.item(nodes.length() - 1)?;
+        let el = last.dyn_ref::<web_sys::Element>()?;
+        el.get_attribute("data-lazy")
     }
 }

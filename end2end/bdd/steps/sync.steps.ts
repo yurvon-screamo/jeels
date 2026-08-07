@@ -73,7 +73,7 @@ When('второй браузер входит в тот же аккаунт', a
 Then('запись на сервере содержит обновлённый knowledge_set', async ({ testUser }) => {
     const admin = await getAdminToken();
     const url =
-        `${getTrailBaseUrl()}/api/records/v1/user?filter[email][$eq]=${encodeURIComponent(testUser.email)}&`;
+        `${getTrailBaseUrl()}/api/records/v1/domain_user?filter[email][$eq]=${encodeURIComponent(testUser.email)}&`;
     const resp = await fetch(url, {
         headers: {
             Authorization: `Bearer ${admin.token}`,
@@ -130,7 +130,7 @@ When('отмечает первую карточку избранной и до�
     // past the waitForResponse window.
     const saveResponse = page.waitForResponse(
         (resp) =>
-            /\/api\/records\/v1\/user(\/|$)/.test(resp.url()) &&
+            /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
             RECORD_WRITE_METHODS.has(resp.request().method()),
         { timeout: 15_000 },
     );

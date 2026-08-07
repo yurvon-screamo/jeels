@@ -5,7 +5,6 @@ use crate::domain::JlptContent;
 use crate::domain::NativeLanguage;
 use crate::domain::memory::{KNOWN_CARD_STABILITY_THRESHOLD, MemoryState};
 use crate::domain::value_objects::Question;
-use chrono::Duration;
 
 fn create_vocab_card(word: &str) -> Card {
     Card::Vocabulary(VocabularyCard::new(
@@ -138,10 +137,7 @@ fn handle_favorite_rating_easy_increases_streak() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
     study_card.toggle_favorite();
 
     assert_eq!(study_card.favorite_easy_streak(), 0);
@@ -156,10 +152,7 @@ fn handle_favorite_rating_good_does_not_change_streak() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
     study_card.toggle_favorite();
 
     study_card.handle_favorite_rating(Rating::Easy);
@@ -176,10 +169,7 @@ fn handle_favorite_rating_hard_resets_streak() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
     study_card.toggle_favorite();
 
     study_card.handle_favorite_rating(Rating::Easy);
@@ -196,10 +186,7 @@ fn handle_favorite_rating_again_resets_streak() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
     study_card.toggle_favorite();
 
     study_card.handle_favorite_rating(Rating::Easy);
@@ -216,10 +203,7 @@ fn handle_favorite_rating_five_easy_removes_favorite() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
     study_card.toggle_favorite();
 
     assert!(study_card.is_favorite());
@@ -241,10 +225,7 @@ fn handle_favorite_rating_good_does_not_interrupt_accumulation() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
     study_card.toggle_favorite();
 
     study_card.handle_favorite_rating(Rating::Easy);
@@ -282,10 +263,7 @@ fn handle_favorite_rating_non_favorited_does_nothing() {
     let mut study_card = knowledge_set.create_card(card).unwrap();
 
     let memory = create_known_memory_state();
-    study_card.add_review(
-        memory.clone(),
-        ReviewLog::new(Rating::Good, Duration::days(1)),
-    );
+    study_card.apply_review(memory, Rating::Good);
 
     assert!(!study_card.is_favorite());
 
@@ -336,7 +314,7 @@ fn handle_favorite_rating_high_difficulty_auto_unfavorite_after_five_easy() {
         crate::domain::memory::Difficulty::new(7.0).unwrap(),
         chrono::Utc::now(),
     );
-    study_card.add_review(memory, ReviewLog::new(Rating::Good, Duration::days(1)));
+    study_card.apply_review(memory, Rating::Good);
 
     study_card.toggle_favorite();
     assert!(study_card.is_favorite());

@@ -36,3 +36,24 @@ CREATE INDEX idx_user_email ON user(email);
 -- _REQ_.trailbase_id = _USER_.id
 -- _ROW_.trailbase_id = _USER_.id AND _REQ_.trailbase_id = _USER_.id
 -- _ROW_.trailbase_id = _USER_.id
+
+-- ─────────────────────────────────────────────────────────────────────
+-- domain_user: rolling-deployment copy of `user` for the MemoryHistory
+-- denormalization (ADR-034 successor). Created via:
+--   CREATE TABLE domain_user AS SELECT * FROM user;
+-- then a Record API + RLS rules are configured identically to `user`.
+--
+-- The new client (v12+) writes to `domain_user`; the old client continues
+-- to write to `user`. Once all clients have updated (app-store rollout
+-- complete), `user` can be dropped and `domain_user` optionally renamed.
+--
+-- The knowledge_set column in domain_user is processed by a one-time
+-- migration script (scripts/migrate_reviews_to_counters.py) that
+-- decodes the deflate+base64 blob, replaces the reviews array with
+-- scalar counters (reps, lapses, easy_count, good_count,
+-- last_review_date, last_rating), and re-encodes. After migration,
+-- the wire payload shrinks from ~2 MB to ~150 KB per save_sync.
+--
+-- RLS rules for domain_user (same as user):
+-- _ROW_.trailbase_id = _USER_.id
+-- _REQ_.trailbase_id = _USER_.id

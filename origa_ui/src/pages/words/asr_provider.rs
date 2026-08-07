@@ -6,7 +6,7 @@
 //! Both return `None` when unavailable so callers fall back to Whisper WASM.
 
 use crate::core::device_ai::{self, Feature};
-use tracing::warn;
+use tracing::{info, warn};
 
 const JA_JP: &str = "ja-JP";
 
@@ -23,8 +23,10 @@ pub(super) async fn recognize_file_via_device_ai(base64_audio: &str) -> Option<S
     const CMD_RECOGNIZE_FILE: &str = "device_ai_recognize_file";
 
     if !device_ai::available(Feature::SpeechRecognition).await {
+        info!("ASR (file): native device-ai unavailable, using Whisper WASM fallback");
         return None;
     }
+    info!("ASR (file): using native device-ai recognition");
 
     let inner = js_sys::Object::new();
     let _ = js_sys::Reflect::set(
@@ -56,8 +58,10 @@ pub(super) async fn recognize_file_via_device_ai(base64_audio: &str) -> Option<S
 /// Returns `Some(text)` on success, or `None` when unavailable/failed.
 pub(super) async fn recognize_live_via_device_ai() -> Option<String> {
     if !device_ai::available(Feature::SpeechRecognition).await {
+        info!("ASR (live): native device-ai unavailable, using Whisper WASM fallback");
         return None;
     }
+    info!("ASR (live): using native device-ai recognition");
 
     match device_ai::recognize_live(JA_JP).await {
         Ok(result) => Some(result.text),

@@ -5,7 +5,7 @@ use leptos::task::spawn_local;
 use leptos_router::NavigateOptions;
 use origa::domain::User;
 use origa::traits::UserRepository;
-use origa::use_cases::ImportOnboardingSetsUseCase;
+use origa::use_cases::{CompleteOnboardingScoringUseCase, ImportOnboardingSetsUseCase};
 
 use super::onboarding_state::OnboardingState;
 
@@ -29,7 +29,7 @@ where
             };
 
             user.set_daily_load(state.get_untracked().daily_load);
-            user.mark_set_as_imported("__onboarding_skipped__".to_string());
+            user.mark_set_as_imported(origa::domain::ONBOARDING_SKIPPED_KEY.to_string());
             recalculate_user_jlpt_progress(&mut user);
 
             // Hard block on remote failure: completing onboarding is a sync
@@ -86,7 +86,8 @@ pub(super) fn create_on_start_import_callback(
             recalculate_user_jlpt_progress(&mut user);
 
             let use_case = ImportOnboardingSetsUseCase::new(&repo, cdn);
-            let result = use_case.execute(user, set_ids).await;
+            let target_level = state.get_untracked().target_level();
+            let result = use_case.execute(user, set_ids, target_level).await;
 
             if disposed.is_disposed() {
                 return;
@@ -111,6 +112,45 @@ pub(super) fn create_on_start_import_callback(
                     is_importing.set(false);
                 },
             }
+        });
+    })
+}
+
+/// Atomically finishes onboarding scoring: clears the per-click "don't know"
+/// records, marks the user as onboarding-completed (so `/home` no longer
+/// bounces back to `/onboarding`), persists both via a single `save_sync`,
+/// then seeds ready-to-learn phrase cards for the now-known vocabulary.
+///
+/// Phrases are a derivative payload: a failure inside
+/// [`CompleteOnboardingScoringUseCase`] before the save_sync bubbles up as
+/// `Err`, but a seed-step failure is logged and swallowed so the user can
+/// still proceed to `/home`. The next dictionary load will re-run seeding
+/// with the up-to-date known-vocabulary hash.
+pub(super) fn create_on_finish_callback<N>(
+    repository: crate::repository::HybridUserRepository,
+    disposed: StoredValue<()>,
+    navigate: N,
+) -> Callback<()>
+where
+    N: Fn(&str, NavigateOptions) + Clone + Send + Sync + 'static,
+{
+    Callback::new(move |_: ()| {
+        let repo = repository.clone();
+        let nav = navigate.clone();
+        spawn_local(async move {
+            let use_case = CompleteOnboardingScoringUseCase::new(&repo);
+            match use_case.execute().await {
+                Ok(seeded) => {
+                    tracing::info!(seeded_phrases = seeded, "Onboarding scoring completed");
+                },
+                Err(e) => {
+                    tracing::warn!(error = ?e, "CompleteOnboardingScoring failed");
+                },
+            }
+            if disposed.is_disposed() {
+                return;
+            }
+            nav("/home", Default::default());
         });
     })
 }

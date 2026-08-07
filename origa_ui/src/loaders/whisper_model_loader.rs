@@ -35,24 +35,21 @@ impl WhisperModelLoader {
         let model_cache = ModelCache::new(&self.cache_name, to_stt_error);
 
         let cache = model_cache.get_cache().await?;
-        let filenames = [
+        let files: Vec<(&str, String)> = [
             "onnx/encoder_model.onnx",
             "onnx/decoder_model.onnx",
             "tokenizer.json",
-        ];
+        ]
+        .iter()
+        .map(|&f| (f, format!("{}/{}", self.base_url.trim_end_matches('/'), f)))
+        .collect();
 
-        if model_cache.ensure_files_cached(&cache, &filenames).await? {
+        if model_cache.ensure_files_cached(&cache, &files).await? {
             info!("Whisper models found in cache, loading...");
-            let loaded = model_cache
-                .load_files_from_cache(&cache, &filenames)
-                .await?;
+            let loaded = model_cache.load_files_from_cache(&cache, &files).await?;
             self.build_model_files(loaded)
         } else {
             info!("Whisper models not in cache, downloading...");
-            let files: Vec<(&str, String)> = filenames
-                .iter()
-                .map(|&f| (f, format!("{}/{}", self.base_url.trim_end_matches('/'), f)))
-                .collect();
             let loaded = model_cache.download_and_cache_model(&cache, &files).await?;
             self.build_model_files(loaded)
         }

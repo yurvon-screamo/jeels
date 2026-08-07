@@ -23,8 +23,8 @@ pub fn LessonCardHeader(
             .map(|p| part_of_speech_label(p, &i18n)),
     );
     view! {
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between mb-4 gap-2">
+            <div class="flex items-center gap-2 flex-wrap min-w-0">
                 <Tag variant=Signal::derive(move || card_type.tag_variant())>
                     {card_type.label(&i18n)}
                 </Tag>
@@ -59,7 +59,7 @@ pub fn LessonCardHeader(
                 </Show>
             </div>
             <Show when=move || card_type != CardType::Kanji>
-                <AudioButtons text=question_text.clone() audio_path=audio_path.clone() class=Signal::derive(|| "".to_string())/>
+                <AudioButtons text=question_text.clone() audio_path=audio_path.clone() class=Signal::derive(|| "shrink-0".to_string())/>
             </Show>
         </div>
     }

@@ -749,17 +749,11 @@ fn place_phrases_constraint_aware(
 }
 
 /// Per-card target number of showings, derived from the FSRS memory state.
-/// Hard cards are repeated most, in-progress/new cards get a lighter drill,
+/// Only high-difficulty cards get repeated showings (2); new, in-progress, and
 /// known cards keep their original single showing.
 fn target_showings(study_card: &StudyCard) -> usize {
     let memory = study_card.memory();
-    if memory.is_high_difficulty() {
-        3
-    } else if memory.is_new() || memory.is_in_progress() {
-        2
-    } else {
-        1
-    }
+    if memory.is_high_difficulty() { 2 } else { 1 }
 }
 
 /// Decides whether a primary card slot should be expanded into multiple
@@ -1357,10 +1351,10 @@ fn distribute_new_cards<'a, R: rand::Rng>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::RateMode;
     use crate::domain::knowledge::LessonCardView;
     use crate::domain::knowledge::{GrammarRuleCard, KanjiCard, PhraseCard, VocabularyCard};
     use crate::domain::value_objects::Question;
-    use crate::domain::{RateMode, Rating};
     use rand::SeedableRng;
     use rand::rngs::StdRng;
     use rstest::rstest;
@@ -2586,7 +2580,7 @@ mod tests {
     // times (in distinct views) when its FSRS state demands it, while
     // companions, phrases and known cards keep a single showing.
 
-    use crate::domain::memory::{Difficulty, MemoryState, ReviewLog, Stability};
+    use crate::domain::memory::{Difficulty, MemoryState, Rating, Stability};
     use chrono::{Duration, Utc};
 
     fn init_test_dict() {
@@ -2607,7 +2601,7 @@ mod tests {
             Utc::now() - Duration::days(interval_days),
         );
         let study_card = ks.study_cards_mut_for_test().get_mut(&card_id).unwrap();
-        study_card.add_review(memory, ReviewLog::new(rating, Duration::days(1)));
+        study_card.apply_review(memory, rating);
     }
 
     fn seed_distractor_vocab(ks: &mut KnowledgeSet, words: &[&str]) {
@@ -2649,7 +2643,7 @@ mod tests {
     }
 
     #[test]
-    fn expand_in_progress_primary_vocab_yields_multiple_showings() {
+    fn expand_in_progress_primary_vocab_preserves_single_showing() {
         init_test_dict();
         let mut ks = KnowledgeSet::new();
         seed_distractor_vocab(&mut ks, &["犬", "鳥", "魚", "馬", "牛"]);
@@ -2660,10 +2654,10 @@ mod tests {
 
         let result = build_lesson_with_one_primary_vocab(&ks, card_id);
         let showings = result.find_by_card_id(card_id);
-        assert!(
-            showings.len() >= 2,
-            "in-progress primary vocab should produce at least 2 showings, got {}",
-            showings.len()
+        assert_eq!(
+            showings.len(),
+            1,
+            "in-progress primary vocab should keep a single showing (only HD repeats)"
         );
     }
 
@@ -2785,13 +2779,13 @@ mod tests {
         for word in words {
             let sc = ks.create_card(vocab_card(word)).expect("seed primary card");
             let card_id = *sc.card_id();
-            rate_into_state(&mut ks, card_id, 10.0, 4.0, 1, Rating::Good);
+            rate_into_state(&mut ks, card_id, 3.0, 8.0, 1, Rating::Hard);
             assert!(
                 ks.get_card(card_id)
                     .expect("card exists")
                     .memory()
-                    .is_in_progress(),
-                "fixture card must be expandable review vocab"
+                    .is_high_difficulty(),
+                "fixture card must be expandable HD vocab"
             );
             cards.push((
                 card_id,
@@ -3007,9 +3001,9 @@ mod tests {
             .collect()
     }
 
-    /// Best-effort fallback: a single-card core whose HD target forces 3
+    /// Best-effort fallback: a single-card core whose HD target forces 2
     /// showings cannot honour MIN_REPEAT_SPACING by construction (need
-    /// 1 + 3 + 1 + 3 + 1 = 9 slots, have 3). The contract degrades
+    /// 1 + MIN_REPEAT_SPACING + 1 slots, have 1). The contract degrades
     /// gracefully: copies are still emitted so the learner drills the
     /// card, every copy follows the anchor, and the anchor keeps the
     /// first slot.

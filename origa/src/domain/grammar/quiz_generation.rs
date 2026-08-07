@@ -399,10 +399,9 @@ mod tests {
         use super::*;
         use crate::dictionary::grammar::{FormatAction, GrammarRule, GrammarRuleContent};
         use crate::domain::knowledge::VocabularyCard;
-        use crate::domain::memory::{MemoryState, ReviewLog};
+        use crate::domain::memory::MemoryState;
         use crate::domain::value_objects::{NativeLanguage, Question};
         use crate::domain::{JapaneseLevel, Rating};
-        use chrono::Duration;
         use std::collections::HashMap;
         use ulid::Ulid;
 
@@ -444,7 +443,7 @@ mod tests {
                 crate::domain::memory::Difficulty::new(2.0).unwrap(),
                 chrono::Utc::now(),
             );
-            study_card.add_review(memory, ReviewLog::new(Rating::Good, Duration::days(1)));
+            study_card.apply_review(memory, Rating::Good);
         }
 
         #[test]
