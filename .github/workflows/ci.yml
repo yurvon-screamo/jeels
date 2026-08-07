@@ -48,7 +48,7 @@ jobs:
             contents: read
         runs-on: ubuntu-24.04
         env:
-            ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+            ORIGA_CDN_BASE_URL: "${{ vars.ORIGA_CDN_BASE_URL }}"
             ORIGA_LANDING_BASE_URL: "https://${{ vars.ORIGA_BASE_URI }}"
             ORIGA_APP_BASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
             TRAILBASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
@@ -107,7 +107,7 @@ jobs:
               uses: ./.github/actions/download-cdn
               with:
                   cache-key: cdn-data-v12-${{ hashFiles('end2end/cdn-manifest.txt') }}
-                  cdn-base-url: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+                  cdn-base-url: "${{ vars.ORIGA_CDN_BASE_URL }}"
 
             - name: Upload CDN artifact
               uses: actions/upload-artifact@v4
@@ -123,7 +123,7 @@ jobs:
         needs: cdn-download
         runs-on: ubuntu-24.04
         env:
-            ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+            ORIGA_CDN_BASE_URL: "${{ vars.ORIGA_CDN_BASE_URL }}"
             ORIGA_LANDING_BASE_URL: "https://${{ vars.ORIGA_BASE_URI }}"
             ORIGA_APP_BASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
             TRAILBASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
@@ -477,7 +477,7 @@ jobs:
                   push: false
                   cache-from: type=registry,ref=ghcr.io/yurvon-screamo/origa:ui-buildcache
                   build-args: |
-                      ORIGA_CDN_BASE_URL=https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}
+                      ORIGA_CDN_BASE_URL=${{ vars.ORIGA_CDN_BASE_URL }}
                       ORIGA_CDN_REGION=${{ vars.ORIGA_CDN_REGION }}
                       TRAILBASE_URL=https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}
 

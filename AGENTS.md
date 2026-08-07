@@ -34,7 +34,7 @@ models/      — ML модели
 ## Среда разработки
 
 ```powershell
-$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"  # ОБЯЗАТЕЛЬНО
+$env:ORIGA_CDN_BASE_URL = "https://origa-cdn.yurvon.workers.dev"  # ОБЯЗАТЕЛЬНО
 cd tauri && cargo tauri dev
 ```
 
@@ -47,7 +47,7 @@ tauri-apps/tauri#13554). Для `cargo tauri android dev` обязательно
 стрип debug-символов + opt-level=1, компилируется быстро, WASM ~8–19 МБ.
 
 ```powershell
-$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"
+$env:ORIGA_CDN_BASE_URL = "https://origa-cdn.yurvon.workers.dev"
 $env:TRUNK_BUILD_CARGO_PROFILE = "wasm-dev"
 cd tauri && cargo tauri android dev
 ```
@@ -62,18 +62,18 @@ cd tauri && cargo tauri android dev
 ```powershell
 $env:SENTRY_DSN = "https://<public_key>@o<orgid>.ingest.sentry.io/<projectid>"
 $env:SENTRY_ENVIRONMENT = "development"
-$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"
+$env:ORIGA_CDN_BASE_URL = "https://origa-cdn.yurvon.workers.dev"
 cd tauri && cargo tauri dev
 ```
 
-**DNS naming scheme** (CI/CD production):
+**CI/CD variables** (GitHub Actions):
 
 - `ORIGA_BASE_URI` — base domain (e.g. `origa.uwuwu.net`)
-- `ORIGA_CDN_URI_PREFIX` — CDN subdomain prefix (e.g. `cdn` → `cdn.origa.uwuwu.net`)
+- `ORIGA_CDN_BASE_URL` — full CDN URL with scheme (e.g. `https://origa-cdn.yurvon.workers.dev`); consumed directly as `ORIGA_CDN_BASE_URL` env var by `build.rs`
 - `ORIGA_APP_URI_PREFIX` — app subdomain prefix (e.g. `app` → `app.origa.uwuwu.net`)
 - Landing = base domain (no prefix)
 
-**Local dev:** `$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"` (production CDN endpoint — read-only, safe to use directly; cache policy is tiered, see CDN / S3 below)
+**Local dev:** `$env:ORIGA_CDN_BASE_URL = "https://origa-cdn.yurvon.workers.dev"` (production CDN endpoint — read-only, safe to use directly; cache policy is tiered, see CDN / S3 below)
 **Landing dev:** `$env:ORIGA_LANDING_BASE_URL = "https://origa.uwuwu.net"`
 
 ## Команды
@@ -97,7 +97,7 @@ cargo fmt --check && cargo fmt
 
 ## CDN / S3
 
-Tigris object storage (S3-compatible), bucket `s3://origa-cdn` под user-owned account `yurvon-screamo`. CDN URL `https://s3.origa.uwuwu.net` вшивается через `build.rs`. Трейт: `origa/src/traits/cdn_provider.rs`, реализация: `origa_ui/src/repository/cdn_provider.rs`. Bucket management — через `t3` CLI. См. [ADR-037](docs/decisions/ADR-037-migrate-cdn-to-user-tigris-deprecate-s3-proxy.md) и [runbook](docs/runbooks/migrate-cdn-to-user-tigris.md).
+Tigris object storage (S3-compatible), bucket `s3://origa-cdn` под user-owned account `yurvon-screamo`. CDN URL `https://origa-cdn.yurvon.workers.dev` вшивается через `build.rs`. Трейт: `origa/src/traits/cdn_provider.rs`, реализация: `origa_ui/src/repository/cdn_provider.rs`. Bucket management — через `t3` CLI. Cloudflare Worker проксирует Tigris через Cloudflare edge (РФ-friendly, DPI-safe). См. [ADR-037](docs/decisions/ADR-037-migrate-cdn-to-user-tigris-deprecate-s3-proxy.md) и [runbook](docs/runbooks/migrate-cdn-to-user-tigris.md).
 
 Профиль `~/.aws/credentials [origa-cdn]` — для `deploy_cdn.py` / `refresh_cache_control.py` (Editor role на `origa-cdn`).
 

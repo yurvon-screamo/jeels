@@ -289,7 +289,7 @@ pub const PR_BODY_EN: &str = r#"
   <h2>Where data is stored</h2>
   <ul>
     <li>Account and progress data: the TrailBase server at <code>app.origa.uwuwu.net</code>, hosted in Singapore.</li>
-    <li>Static assets (dictionaries, machine-learning models, phrase audio): the CDN at <code>cdn.origa.uwuwu.net</code>. These are public catalog content, not user data.</li>
+    <li>Static assets (dictionaries, machine-learning models, phrase audio): served via Cloudflare CDN. These are public catalog content, not user data.</li>
     <li>OAuth sign-in is handled by Google and Yandex according to their respective privacy policies.</li>
   </ul>
 </section>
@@ -316,7 +316,7 @@ pub const PR_BODY_EN: &str = r#"
   <ul>
     <li>Google OAuth (accounts.google.com) — optional sign-in provider.</li>
     <li>Yandex OAuth (oauth.yandex.ru) — optional sign-in provider.</li>
-    <li>Static CDN (cdn.origa.uwuwu.net) — public catalog content.</li>
+    <li>Static CDN (Cloudflare edge) — public catalog content.</li>
   </ul>
   <p>Origa does not include advertising SDKs, analytics SDKs, or cross-device tracking SDKs.</p>
 </section>

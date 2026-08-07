@@ -4,7 +4,7 @@
 //!
 //! ```powershell
 //! $env:SENTRY_DSN = "https://<key>@<host>/<project>"
-//! $env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"  # required by build.rs
+//! $env:ORIGA_CDN_BASE_URL = "https://origa-cdn.yurvon.workers.dev"  # required by build.rs
 //! cargo run --example sentry_smoke --release
 //! ```
 //!

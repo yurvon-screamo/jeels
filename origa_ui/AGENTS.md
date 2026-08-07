@@ -138,7 +138,7 @@ ADR-029 for concrete cases.
 ## Development
 
 ```powershell
-$env:ORIGA_CDN_BASE_URL = "https://cdn.origa.uwuwu.net"  # REQUIRED
+$env:ORIGA_CDN_BASE_URL = "https://origa-cdn.yurvon.workers.dev"  # REQUIRED
 cd tauri && cargo tauri dev          # full app (recommended)
 cd origa_ui && trunk serve           # frontend only
 ```
