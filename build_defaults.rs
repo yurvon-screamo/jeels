@@ -25,4 +25,4 @@ pub(crate) const DEFAULT_TRAILBASE: &str = "https://app.origa.uwuwu.net";
 /// resolved against its own origin (`tauri.localhost`) instead of the CDN,
 /// causing resources to be served from the local bundle and wrapped in blob
 /// URLs by `CacheFirstCdnProvider`. See ADR-023.
-pub(crate) const DEFAULT_CDN: &str = "https://s3.origa.uwuwu.net";
+pub(crate) const DEFAULT_CDN: &str = "https://cdn.origa.uwuwu.net";

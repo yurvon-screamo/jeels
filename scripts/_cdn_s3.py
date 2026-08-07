@@ -31,8 +31,8 @@ if TYPE_CHECKING:
     from boto3.s3.transfer import TransferConfig
     from botocore.client import BaseClient
 
-S3_BUCKET = "adaptable-foodbox-ucep7wx"
-S3_PROFILE = "origa"
+S3_BUCKET = "origa-cdn"
+S3_PROFILE = "origa-cdn"
 S3_ENDPOINT = "https://t3.storageapi.dev"
 
 # copy-object caps at 5 GiB; surfaced so callers can skip oversize objects with
