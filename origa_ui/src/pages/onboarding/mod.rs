@@ -366,7 +366,7 @@ pub fn Onboarding() -> impl IntoView {
                                 </Show>
 
                                 <div>
-                                    <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring) && !scoring_completed.get()>
+                                    <Show when=move || !scoring_completed.get()>
                                         <Button
                                             variant=ButtonVariant::Olive
                                             on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
@@ -378,7 +378,7 @@ pub fn Onboarding() -> impl IntoView {
                                         </Button>
                                     </Show>
 
-                                    <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring) && scoring_completed.get()>
+                                    <Show when=move || scoring_completed.get()>
                                         <Button
                                             variant=ButtonVariant::Olive
                                             on_click=Callback::new(move |_: leptos::ev::MouseEvent| {

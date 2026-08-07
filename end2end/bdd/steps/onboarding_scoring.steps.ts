@@ -172,10 +172,13 @@ Then('отображается более одной секции в прогр�
 
 When('пользователь поочерёдно отмечает все карточки как известные', async ({ page }) => {
     const onboarding = new OnboardingPage(page);
-    // Click "Know" repeatedly until the scoring completes or we hit a safety
-    // limit. This tests the full sequential scoring flow (not the "mark all"
-    // batch path) to verify every card type is traversable.
-    for (let i = 0; i < 500; i++) {
+    // Click "Know" repeatedly until the scoring completes. The upper bound
+    // (300 iterations) is a safety limit well above the maximum realistic
+    // card count (~150 for a standard N5 onboarding import); if the loop
+    // exits without completion, the step throws to surface the failure
+    // rather than silently passing and misleading the next assertion.
+    const MAX_CLICKS = 300;
+    for (let i = 0; i < MAX_CLICKS; i++) {
         const isComplete = await onboarding.scoringComplete.isVisible().catch(() => false);
         if (isComplete) return;
         const hasCard = await onboarding.scoringKnowBtn.isVisible().catch(() => false);
@@ -184,4 +187,8 @@ When('пользователь поочерёдно отмечает все ка
         // Wait for the card to advance or completion screen
         await page.waitForTimeout(300);
     }
+    throw new Error(
+        `Scoring did not complete after ${MAX_CLICKS} "Know" clicks — ` +
+        "cards may be stuck or not advancing",
+    );
 });
