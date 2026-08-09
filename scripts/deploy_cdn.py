@@ -53,6 +53,11 @@ VERSIONED_FILES: list[str] = [
     "well_known_set/jlpt_n1.json",
     "well_known_set/well_known_types_meta.json",
     "well_known_set/well_known_sets_meta.json",
+    # Phrase data bundles (4 files, ~12 MB each, replace 198 individual chunks)
+    "phrases/data_bundle_0.json",
+    "phrases/data_bundle_1.json",
+    "phrases/data_bundle_2.json",
+    "phrases/data_bundle_3.json",
 ]
 
 SYNC_DIRS = [
@@ -73,6 +78,21 @@ SYNC_DIRS = [
     "well_known_set/minna_n3",
     "well_known_set/minna_n2",
     "well_known_set/spy_family",
+]
+
+# Kanji JLPT bundles — deployed as individual files (not in SYNC_DIRS because
+# they're generated top-level files in cdn/, not in a subdirectory)
+KANJI_BUNDLE_FILES = [
+    "kanji_animations_n5.json",
+    "kanji_animations_n4.json",
+    "kanji_animations_n3.json",
+    "kanji_animations_n2.json",
+    "kanji_animations_n1.json",
+    "kanji_frames_n5.json",
+    "kanji_frames_n4.json",
+    "kanji_frames_n3.json",
+    "kanji_frames_n2.json",
+    "kanji_frames_n1.json",
 ]
 
 MANIFEST_VERSION = 1
@@ -189,6 +209,97 @@ def upload_manifest(cdn_dir: Path, dry_run: bool) -> None:
     _cdn_s3.upload_file(manifest_path, "manifest.json", cache_control, dry_run)
 
 
+def _force_all_deploy(dry_run: bool) -> None:
+    """Upload everything from cdn/ to R2 via boto3 only (no aws CLI).
+
+    Skips all remote reads (manifest download, remote object listing).
+    Uploads versioned files + syncs all directories. Shows progress per dir.
+    """
+    import time as _time
+
+    project_root = Path(__file__).resolve().parent.parent
+    cdn_dir = project_root / "cdn"
+    if not cdn_dir.is_dir():
+        print(f"ERROR: {cdn_dir} not found", file=sys.stderr)
+        sys.exit(1)
+
+    print("=== FORCE-ALL DEPLOY (boto3 only, no remote reads) ===\n", flush=True)
+
+    # Step 1: Generate + upload manifest
+    print("Step 1: Manifest...", flush=True)
+    manifest = generate_manifest(cdn_dir)
+    manifest_path = cdn_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    cc = _cdn_cache.cache_control_for("manifest.json")
+    _cdn_s3.upload_file(manifest_path, "manifest.json", cc, dry_run)
+    print(f"  manifest.json uploaded ({len(manifest['files'])} files)", flush=True)
+
+    # Step 2: Upload versioned files
+    print(f"\nStep 2: Versioned files ({len(VERSIONED_FILES)})...", flush=True)
+    for relative_path in VERSIONED_FILES:
+        local_path = cdn_dir / relative_path
+        if not local_path.is_file():
+            print(f"  SKIP {relative_path} (not found)", flush=True)
+            continue
+        cache_control = _cdn_cache.cache_control_for(relative_path)
+        _cdn_s3.upload_file(local_path, relative_path, cache_control, dry_run)
+    print(f"  {len(VERSIONED_FILES)} versioned files done", flush=True)
+
+    # Step 2b: Upload kanji JLPT bundles
+    print(f"\nStep 2b: Kanji JLPT bundles ({len(KANJI_BUNDLE_FILES)})...", flush=True)
+    for relative_path in KANJI_BUNDLE_FILES:
+        local_path = cdn_dir / relative_path
+        if not local_path.is_file():
+            print(f"  SKIP {relative_path} (not found)", flush=True)
+            continue
+        cache_control = _cdn_cache.cache_control_for(relative_path)
+        _cdn_s3.upload_file(local_path, relative_path, cache_control, dry_run)
+    print(f"  {len(KANJI_BUNDLE_FILES)} kanji bundles done", flush=True)
+
+    # Step 3: Sync directories (no remote listing — upload everything)
+    print(f"\nStep 3: Sync directories...", flush=True)
+    for dir_name in SYNC_DIRS:
+        local_dir = cdn_dir / dir_name
+        if not local_dir.is_dir():
+            print(f"  {dir_name}/ — not found locally, skipping", flush=True)
+            continue
+
+        cache_control = _cdn_cache.cache_control_for(dir_name + "/")
+        all_files = [
+            p for p in sorted(local_dir.rglob("*"))
+            if p.is_file() and p.name != "README.md"
+        ]
+        total = len(all_files)
+        if total == 0:
+            print(f"  {dir_name}/ — empty", flush=True)
+            continue
+
+        uploaded = 0
+        start = _time.time()
+        base_prefix = dir_name.rstrip("/") + "/"
+        print(f"  {dir_name}/ [{total} files, {cache_control}]", flush=True)
+
+        for i, local_path in enumerate(all_files, 1):
+            key = base_prefix + local_path.relative_to(local_dir).as_posix()
+            _cdn_s3.upload_file(local_path, key, cache_control, dry_run)
+            uploaded += 1
+
+            if i % 200 == 0 or i == total:
+                elapsed = _time.time() - start
+                rate = i / elapsed if elapsed > 0 else 0
+                pct = i * 100 // total
+                print(
+                    f"    [{i}/{total}] {pct}%  up={uploaded}  "
+                    f"{rate:.0f} files/s  {elapsed:.0f}s",
+                    flush=True,
+                )
+
+    print("\n✅ Force-all deploy complete!", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deploy CDN to S3")
     parser.add_argument(
@@ -203,6 +314,13 @@ def main() -> None:
         "Use when CDN actual files are stale but the manifest is current.",
     )
     parser.add_argument(
+        "--force-all",
+        action="store_true",
+        help="Upload EVERYTHING from cdn/ to R2 via boto3 only. Skips all "
+        "remote reads (aws CLI). Use for initial deploy or when aws CLI is "
+        "broken. Shows progress bar per directory.",
+    )
+    parser.add_argument(
         "--verify-remote",
         action="store_true",
         help="Download remote files and verify actual hash matches manifest. "
@@ -215,6 +333,11 @@ def main() -> None:
     )
     args = parser.parse_args()
     dry_run = args.dry_run
+
+    # --force-all: bypass all remote reads, upload everything from cdn/ via boto3
+    if args.force_all:
+        _force_all_deploy(dry_run)
+        return
 
     if args.verify_remote:
         conflicting = [
@@ -253,6 +376,24 @@ def main() -> None:
     if not cdn_dir.is_dir():
         print(f"ERROR: {cdn_dir} not found", file=sys.stderr)
         sys.exit(1)
+
+    # Step 0: Generate bundles (BEFORE manifest so hashes are included)
+    print("Step 0: Generating bundles...")
+    import subprocess
+    for script in ["bundle_phrases_data.py", "bundle_kanji_svgs.py"]:
+        script_path = Path(__file__).resolve().parent / script
+        if script_path.is_file():
+            result = subprocess.run(
+                [sys.executable, str(script_path)],
+                capture_output=True, text=True, cwd=str(script_path.parent),
+            )
+            if result.returncode != 0:
+                print(f"  {script} FAILED: {result.stderr}", file=sys.stderr)
+                sys.exit(1)
+            for line in result.stdout.strip().splitlines():
+                print(f"  {line}")
+        else:
+            print(f"  {script} not found, skipping")
 
     # Step 1: Generate local manifest
     print("Step 1: Generating local manifest...")
