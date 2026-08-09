@@ -3,6 +3,7 @@ pub mod data_loader;
 pub mod dictionary;
 pub mod furigana_dict_loader;
 pub mod jlpt_content_loader;
+pub mod kanji_bundle_store;
 pub mod loading_message;
 pub mod model_cache;
 pub mod ocr_model_loader;
