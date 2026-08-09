@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use origa::domain::OrigaError;
+use origa::traits::CdnProvider;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum KanjiBundleType {

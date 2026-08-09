@@ -3,6 +3,7 @@ use std::sync::Arc;
 use futures::stream::{self, StreamExt};
 use origa::dictionary::phrase::index_version;
 use origa::domain::OrigaError;
+use origa::traits::CdnProvider;
 
 use crate::repository::cdn_provider;
 
@@ -198,7 +199,13 @@ pub async fn extract_phrase_bundles_to_cache() -> Result<usize, OrigaError> {
 
         for (chunk_key, chunk_value) in &bundle {
             let cache_path = format!("phrases/data/{}.json?v={}", chunk_key, hash);
-            let chunk_text = serde_json::to_string(chunk_value).unwrap_or_default();
+            let chunk_text = match serde_json::to_string(chunk_value) {
+                Ok(t) => t,
+                Err(e) => {
+                    tracing::warn!(chunk = %chunk_key, error = %e, "Failed to serialize phrase chunk, skipping");
+                    continue;
+                }
+            };
             if let Err(e) = cdn_provider::store_text_in_cache(&cache_path, &chunk_text).await {
                 tracing::warn!(
                     chunk = %chunk_key,

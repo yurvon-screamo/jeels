@@ -73,7 +73,7 @@ fn get_card_cdn_resources(card: &StudyCard) -> Vec<String> {
     match card.card() {
         Card::Vocabulary(v) => vocabulary_resources(v.word().text()),
         Card::Phrase(p) => phrase_resources(p.phrase_id()),
-        Card::Kanji(k) => kanji_svg_resources(k.kanji().text(), Some(&k.kanji().jlpt().to_string())),
+        Card::Kanji(k) => kanji_svg_resources(k.kanji().text(), Some(&k.jlpt().to_string())),
         Card::Grammar(_) => vec![],
     }
 }
@@ -134,7 +134,7 @@ pub async fn precache_all_cards(
     let jlpt_levels: std::collections::HashSet<String> = cards
         .iter()
         .filter_map(|c| match c.card() {
-            Card::Kanji(k) => Some(k.kanji().jlpt().to_string()),
+            Card::Kanji(k) => Some(k.jlpt().to_string()),
             _ => None,
         })
         .collect();
@@ -143,8 +143,12 @@ pub async fn precache_all_cards(
         if !is_level_loaded(level) {
             tracing::info!(level = %level, "Loading kanji JLPT bundle for precache");
             // Load both animations and frames
-            let _ = load_bundle(KanjiBundleType::Animations, level).await;
-            let _ = load_bundle(KanjiBundleType::Frames, level).await;
+            if let Err(e) = load_bundle(KanjiBundleType::Animations, level).await {
+                tracing::warn!(level = %level, error = ?e, "Failed to load kanji animations bundle");
+            }
+            if let Err(e) = load_bundle(KanjiBundleType::Frames, level).await {
+                tracing::warn!(level = %level, error = ?e, "Failed to load kanji frames bundle");
+            }
         }
     }
 

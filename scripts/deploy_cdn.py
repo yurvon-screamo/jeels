@@ -53,11 +53,25 @@ VERSIONED_FILES: list[str] = [
     "well_known_set/jlpt_n1.json",
     "well_known_set/well_known_types_meta.json",
     "well_known_set/well_known_sets_meta.json",
+    # Well-known sets
+    "well_known_set/well_known_sets_meta.json",
+    "well_known_set/well_known_types_meta.json",
     # Phrase data bundles (4 files, ~12 MB each, replace 198 individual chunks)
     "phrases/data_bundle_0.json",
     "phrases/data_bundle_1.json",
     "phrases/data_bundle_2.json",
     "phrases/data_bundle_3.json",
+    # Kanji JLPT bundles (10 files: 5 animation + 5 frames)
+    "kanji_animations_n5.json",
+    "kanji_animations_n4.json",
+    "kanji_animations_n3.json",
+    "kanji_animations_n2.json",
+    "kanji_animations_n1.json",
+    "kanji_frames_n5.json",
+    "kanji_frames_n4.json",
+    "kanji_frames_n3.json",
+    "kanji_frames_n2.json",
+    "kanji_frames_n1.json",
 ]
 
 SYNC_DIRS = [
@@ -297,7 +311,7 @@ def _force_all_deploy(dry_run: bool) -> None:
                     flush=True,
                 )
 
-    print("\n✅ Force-all deploy complete!", flush=True)
+    print("\nForce-all deploy complete!", flush=True)
 
 
 def main() -> None:
