@@ -60,6 +60,7 @@ _RELEASE_UPDATED_RULES: Final[frozenset[str]] = frozenset(
         "dictionary/",
         "grammar/",
         "phrases/data/",
+        "phrases/data_bundle",  # phrases/data_bundle_0.json etc
         "phrases/phrase_index.json",
         "pitch/",
         "well_known_set/",

@@ -91,6 +91,21 @@ SYNC_DIRS = [
     "well_known_set/spy_family",
 ]
 
+# Kanji JLPT bundles — deployed as individual files (not in SYNC_DIRS because
+# they're generated top-level files in cdn/, not in a subdirectory)
+KANJI_BUNDLE_FILES = [
+    "kanji_animations_n5.json",
+    "kanji_animations_n4.json",
+    "kanji_animations_n3.json",
+    "kanji_animations_n2.json",
+    "kanji_animations_n1.json",
+    "kanji_frames_n5.json",
+    "kanji_frames_n4.json",
+    "kanji_frames_n3.json",
+    "kanji_frames_n2.json",
+    "kanji_frames_n1.json",
+]
+
 MANIFEST_VERSION = 1
 CHUNK_SIZE = 8192
 
