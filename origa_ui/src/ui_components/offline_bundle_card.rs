@@ -72,7 +72,7 @@ pub fn OfflineBundleCard(#[prop(optional, into)] test_id: Signal<String>) -> imp
             let result = precache_loader::precache_base_bundle(move |p| progress.set(p)).await;
             // After base bundle download, extract phrase data bundles into
             // individual cache entries so phrase_data_loader gets cache hits.
-            if let Ok(_) = &result {
+            if result.is_ok() {
                 if let Err(e) = precache_loader::extract_phrase_bundles_to_cache().await {
                     tracing::warn!(error = ?e, "Phrase data bundle extraction failed");
                 }

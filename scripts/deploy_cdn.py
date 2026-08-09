@@ -53,9 +53,6 @@ VERSIONED_FILES: list[str] = [
     "well_known_set/jlpt_n1.json",
     "well_known_set/well_known_types_meta.json",
     "well_known_set/well_known_sets_meta.json",
-    # Well-known sets
-    "well_known_set/well_known_sets_meta.json",
-    "well_known_set/well_known_types_meta.json",
     # Phrase data bundles (4 files, ~12 MB each, replace 198 individual chunks)
     "phrases/data_bundle_0.json",
     "phrases/data_bundle_1.json",
@@ -92,21 +89,6 @@ SYNC_DIRS = [
     "well_known_set/minna_n3",
     "well_known_set/minna_n2",
     "well_known_set/spy_family",
-]
-
-# Kanji JLPT bundles — deployed as individual files (not in SYNC_DIRS because
-# they're generated top-level files in cdn/, not in a subdirectory)
-KANJI_BUNDLE_FILES = [
-    "kanji_animations_n5.json",
-    "kanji_animations_n4.json",
-    "kanji_animations_n3.json",
-    "kanji_animations_n2.json",
-    "kanji_animations_n1.json",
-    "kanji_frames_n5.json",
-    "kanji_frames_n4.json",
-    "kanji_frames_n3.json",
-    "kanji_frames_n2.json",
-    "kanji_frames_n1.json",
 ]
 
 MANIFEST_VERSION = 1
@@ -261,17 +243,6 @@ def _force_all_deploy(dry_run: bool) -> None:
         cache_control = _cdn_cache.cache_control_for(relative_path)
         _cdn_s3.upload_file(local_path, relative_path, cache_control, dry_run)
     print(f"  {len(VERSIONED_FILES)} versioned files done", flush=True)
-
-    # Step 2b: Upload kanji JLPT bundles
-    print(f"\nStep 2b: Kanji JLPT bundles ({len(KANJI_BUNDLE_FILES)})...", flush=True)
-    for relative_path in KANJI_BUNDLE_FILES:
-        local_path = cdn_dir / relative_path
-        if not local_path.is_file():
-            print(f"  SKIP {relative_path} (not found)", flush=True)
-            continue
-        cache_control = _cdn_cache.cache_control_for(relative_path)
-        _cdn_s3.upload_file(local_path, relative_path, cache_control, dry_run)
-    print(f"  {len(KANJI_BUNDLE_FILES)} kanji bundles done", flush=True)
 
     # Step 3: Sync directories (no remote listing — upload everything)
     print(f"\nStep 3: Sync directories...", flush=True)

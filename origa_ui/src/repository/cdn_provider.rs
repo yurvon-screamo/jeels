@@ -503,12 +503,11 @@ pub async fn store_text_in_cache(path: &str, text: &str) -> Result<(), OrigaErro
             reason: format!("Failed to create response for cache store: {:?}", e),
         }
     })?;
-    let request =
-        web_sys::Request::new_with_str(&cdn_cache_url(&key)).map_err(|e| {
-            OrigaError::RepositoryError {
-                reason: format!("Failed to create request: {:?}", e),
-            }
-        })?;
+    let request = web_sys::Request::new_with_str(&cdn_cache_url(&key)).map_err(|e| {
+        OrigaError::RepositoryError {
+            reason: format!("Failed to create request: {:?}", e),
+        }
+    })?;
     JsFuture::from(cache.put_with_request(&request, &response))
         .await
         .map_err(|e| OrigaError::RepositoryError {

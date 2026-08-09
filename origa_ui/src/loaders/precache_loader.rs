@@ -180,7 +180,7 @@ pub async fn extract_phrase_bundles_to_cache() -> Result<usize, OrigaError> {
                     "Failed to fetch phrase data bundle for extraction, skipping"
                 );
                 continue;
-            }
+            },
         };
 
         // Parse as generic JSON to avoid coupling to phrase types
@@ -194,7 +194,7 @@ pub async fn extract_phrase_bundles_to_cache() -> Result<usize, OrigaError> {
                         "Failed to parse phrase data bundle, skipping"
                     );
                     continue;
-                }
+                },
             };
 
         for (chunk_key, chunk_value) in &bundle {
@@ -204,7 +204,7 @@ pub async fn extract_phrase_bundles_to_cache() -> Result<usize, OrigaError> {
                 Err(e) => {
                     tracing::warn!(chunk = %chunk_key, error = %e, "Failed to serialize phrase chunk, skipping");
                     continue;
-                }
+                },
             };
             if let Err(e) = cdn_provider::store_text_in_cache(&cache_path, &chunk_text).await {
                 tracing::warn!(
@@ -224,7 +224,10 @@ pub async fn extract_phrase_bundles_to_cache() -> Result<usize, OrigaError> {
         );
     }
 
-    tracing::info!(total_extracted = extracted, "Phrase data extraction complete");
+    tracing::info!(
+        total_extracted = extracted,
+        "Phrase data extraction complete"
+    );
     Ok(extracted)
 }
 

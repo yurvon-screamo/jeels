@@ -53,10 +53,7 @@ pub fn get_svg(bundle_type: KanjiBundleType, jlpt: &str, kanji: &str) -> Option<
 }
 
 /// Load a JLPT bundle from CDN into memory. No-op if already loaded.
-pub async fn load_bundle(
-    bundle_type: KanjiBundleType,
-    jlpt: &str,
-) -> Result<(), OrigaError> {
+pub async fn load_bundle(bundle_type: KanjiBundleType, jlpt: &str) -> Result<(), OrigaError> {
     let level = normalize_jlpt(jlpt).to_string();
 
     // Check if already loaded
@@ -75,11 +72,10 @@ pub async fn load_bundle(
     let json = cdn.fetch_text(&path).await?;
 
     // Parse
-    let bundle: HashMap<String, String> = serde_json::from_str(&json).map_err(|e| {
-        OrigaError::RepositoryError {
+    let bundle: HashMap<String, String> =
+        serde_json::from_str(&json).map_err(|e| OrigaError::RepositoryError {
             reason: format!("Failed to parse kanji bundle {}: {}", path, e),
-        }
-    })?;
+        })?;
 
     let chunk_count = bundle.len();
 
