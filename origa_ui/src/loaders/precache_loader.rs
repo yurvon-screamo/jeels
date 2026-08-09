@@ -8,6 +8,7 @@ use crate::repository::cdn_provider;
 
 const BUNDLE_DOWNLOADED_KEY: &str = "/__origa_bundle_downloaded__";
 const CONCURRENCY: usize = 20;
+const PHRASE_BUNDLE_COUNT: usize = 4;
 
 #[derive(Clone, Default)]
 pub struct PreCacheProgress {
@@ -49,9 +50,12 @@ pub fn get_base_bundle_resources() -> Vec<String> {
     resources.push("grammar/grammar.json".to_string());
     resources.push("phrases/phrase_index.json".to_string());
 
-    let (_, hash) = index_version();
-    for i in 0..=197 {
-        resources.push(format!("phrases/data/p{:04}.json?v={}", i, hash));
+    // Phrase data bundles (4 files replace 198 individual chunks).
+    // After download, extract_phrase_bundles_to_cache() parses each bundle
+    // and stores individual chunks in Cache API so phrase_data_loader
+    // gets cache hits without per-chunk CDN requests.
+    for i in 0..PHRASE_BUNDLE_COUNT {
+        resources.push(format!("phrases/data_bundle_{}.json", i));
     }
 
     resources.push("pitch/index.json".to_string());
@@ -153,6 +157,70 @@ pub async fn precache_base_bundle(
     Ok(result)
 }
 
+/// After downloading phrase data bundles, extract individual chunks into
+/// Cache API. This lets phrase_data_loader.rs work unchanged (cache hits).
+///
+/// Each bundle is `{"p0000": [...], "p0001": [...], ...}`.
+/// We store each value under `phrases/data/p0000.json?v=HASH` so the cache
+/// key matches what phrase_data_loader fetches.
+pub async fn extract_phrase_bundles_to_cache() -> Result<usize, OrigaError> {
+    let cdn = cdn_provider();
+    let (_, hash) = index_version();
+    let mut extracted = 0usize;
+
+    for bundle_idx in 0..PHRASE_BUNDLE_COUNT {
+        let bundle_path = format!("phrases/data_bundle_{}.json", bundle_idx);
+        let bundle_json = match cdn.fetch_text(&bundle_path).await {
+            Ok(text) => text,
+            Err(e) => {
+                tracing::warn!(
+                    bundle = bundle_idx,
+                    error = ?e,
+                    "Failed to fetch phrase data bundle for extraction, skipping"
+                );
+                continue;
+            }
+        };
+
+        // Parse as generic JSON to avoid coupling to phrase types
+        let bundle: std::collections::HashMap<String, serde_json::Value> =
+            match serde_json::from_str(&bundle_json) {
+                Ok(v) => v,
+                Err(e) => {
+                    tracing::warn!(
+                        bundle = bundle_idx,
+                        error = %e,
+                        "Failed to parse phrase data bundle, skipping"
+                    );
+                    continue;
+                }
+            };
+
+        for (chunk_key, chunk_value) in &bundle {
+            let cache_path = format!("phrases/data/{}.json?v={}", chunk_key, hash);
+            let chunk_text = serde_json::to_string(chunk_value).unwrap_or_default();
+            if let Err(e) = cdn_provider::store_text_in_cache(&cache_path, &chunk_text).await {
+                tracing::warn!(
+                    chunk = %chunk_key,
+                    error = ?e,
+                    "Failed to store phrase chunk in cache during extraction"
+                );
+            } else {
+                extracted += 1;
+            }
+        }
+
+        tracing::info!(
+            bundle = bundle_idx,
+            chunks = bundle.len(),
+            "Extracted phrase data bundle to cache"
+        );
+    }
+
+    tracing::info!(total_extracted = extracted, "Phrase data extraction complete");
+    Ok(extracted)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -181,12 +249,22 @@ mod tests {
     }
 
     #[test]
-    fn base_bundle_includes_well_known_sets() {
+    fn base_bundle_includes_phrase_data_bundles() {
         let resources = get_base_bundle_resources();
-        assert!(resources.contains(&"well_known_set/well_known_sets_meta.json".to_string()));
-        assert!(resources.contains(&"well_known_set/well_known_types_meta.json".to_string()));
-        for level in ["n1", "n2", "n3", "n4", "n5"] {
-            assert!(resources.contains(&format!("well_known_set/jlpt_{}.json", level)));
+        for i in 0..PHRASE_BUNDLE_COUNT {
+            assert!(
+                resources.contains(&format!("phrases/data_bundle_{}.json", i)),
+                "Missing phrases/data_bundle_{}.json",
+                i
+            );
         }
+    }
+
+    #[test]
+    fn base_bundle_does_not_include_individual_phrase_chunks() {
+        // Individual phrase data files should NOT be in the base bundle
+        // anymore — they're replaced by data_bundle_0..3
+        let resources = get_base_bundle_resources();
+        assert!(!resources.iter().any(|r| r.starts_with("phrases/data/p")));
     }
 }

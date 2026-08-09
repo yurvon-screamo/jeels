@@ -3,6 +3,7 @@ use origa::domain::{Card, JapaneseChar, OrigaError, StudyCard};
 
 use leptos::prelude::{GetUntracked, Set};
 
+use crate::loaders::kanji_bundle_store::{KanjiBundleType, is_level_loaded, load_bundle};
 use crate::loaders::precache_loader::{DownloadResult, PreCacheProgress, batch_download};
 use crate::ui_components::get_reading_from_text;
 
@@ -18,7 +19,22 @@ fn kata_to_hira(text: &str) -> String {
         .collect()
 }
 
-fn kanji_svg_resources(kanji_text: &str) -> Vec<String> {
+/// Build CDN resource paths for a card's kanji SVGs.
+///
+/// If the kanji's JLPT bundle is already loaded in memory (via
+/// kanji_bundle_store), the SVG is available without a CDN request —
+/// return empty vec. Otherwise return the individual CDN paths as before
+/// (backward compat with clients that don't have bundles on CDN yet).
+fn kanji_svg_resources(kanji_text: &str, jlpt: Option<&str>) -> Vec<String> {
+    // If a JLPT bundle is loaded for this level, skip CDN prefetch —
+    // kanji_animation.rs will find the SVG in the in-memory store.
+    if let Some(level) = jlpt {
+        if is_level_loaded(level) {
+            return vec![];
+        }
+    }
+
+    // Fallback: individual CDN paths
     kanji_text
         .chars()
         .filter(|c| c.is_kanji())
@@ -42,7 +58,9 @@ fn vocabulary_resources(word: &str) -> Vec<String> {
         resources.push(entry.cdn_path());
     }
 
-    resources.extend(kanji_svg_resources(word));
+    // Vocabulary kanji SVGs: no JLPT level known, always CDN fallback.
+    // kanji_animation.rs will still check the in-memory store at render time.
+    resources.extend(kanji_svg_resources(word, None));
 
     resources
 }
@@ -55,7 +73,7 @@ fn get_card_cdn_resources(card: &StudyCard) -> Vec<String> {
     match card.card() {
         Card::Vocabulary(v) => vocabulary_resources(v.word().text()),
         Card::Phrase(p) => phrase_resources(p.phrase_id()),
-        Card::Kanji(k) => kanji_svg_resources(k.kanji().text()),
+        Card::Kanji(k) => kanji_svg_resources(k.kanji().text(), Some(&k.kanji().jlpt().to_string())),
         Card::Grammar(_) => vec![],
     }
 }
@@ -110,6 +128,26 @@ pub async fn precache_all_cards(
     cards: &[StudyCard],
     on_progress: impl Fn(PreCacheProgress) + Clone + 'static,
 ) -> Result<DownloadResult, OrigaError> {
+    // Lazy-load kanji JLPT bundles for levels present in kanji cards.
+    // This populates the in-memory kanji_bundle_store so that
+    // kanji_svg_resources returns empty (no CDN per-file fetch needed).
+    let jlpt_levels: std::collections::HashSet<String> = cards
+        .iter()
+        .filter_map(|c| match c.card() {
+            Card::Kanji(k) => Some(k.kanji().jlpt().to_string()),
+            _ => None,
+        })
+        .collect();
+
+    for level in &jlpt_levels {
+        if !is_level_loaded(level) {
+            tracing::info!(level = %level, "Loading kanji JLPT bundle for precache");
+            // Load both animations and frames
+            let _ = load_bundle(KanjiBundleType::Animations, level).await;
+            let _ = load_bundle(KanjiBundleType::Frames, level).await;
+        }
+    }
+
     let all_paths: Vec<String> = cards.iter().flat_map(get_card_cdn_resources).collect();
 
     let mut unique_paths = all_paths;
@@ -170,7 +208,7 @@ mod tests {
 
     #[test]
     fn kanji_svg_resources_extracts_kanji_chars() {
-        let resources = kanji_svg_resources("日本語");
+        let resources = kanji_svg_resources("日本語", None);
         assert!(resources.contains(&"kanji_animations/%E6%97%A5.svg".to_string()));
         assert!(resources.contains(&"kanji_frames/%E6%97%A5.svg".to_string()));
         assert!(resources.contains(&"kanji_animations/%E6%9C%AC.svg".to_string()));
@@ -181,13 +219,13 @@ mod tests {
 
     #[test]
     fn kanji_svg_resources_skips_hiragana() {
-        let resources = kanji_svg_resources("ねこ");
+        let resources = kanji_svg_resources("ねこ", None);
         assert!(resources.is_empty());
     }
 
     #[test]
     fn kanji_svg_resources_skips_katakana() {
-        let resources = kanji_svg_resources("ネコ");
+        let resources = kanji_svg_resources("ネコ", None);
         assert!(resources.is_empty());
     }
 }
