@@ -31,9 +31,9 @@ if TYPE_CHECKING:
     from boto3.s3.transfer import TransferConfig
     from botocore.client import BaseClient
 
-S3_BUCKET = "origa-cdn"
-S3_PROFILE = "origa-cdn-r2"
-S3_ENDPOINT = "https://9a6e457ad4c9d185f6d35bbfd3e2c3e2.r2.cloudflarestorage.com"
+S3_BUCKET = "adaptable-foodbox-ucep7wx"
+S3_PROFILE = "origa"
+S3_ENDPOINT = "https://t3.storageapi.dev"
 
 # copy-object caps at 5 GiB; surfaced so callers can skip oversize objects with
 # a clear message instead of an opaque T3 error mid-walk.
@@ -248,9 +248,9 @@ def copy_object_cache_control(key: str, target_cc: str, dry_run: bool) -> bool:
     return True
 
 
-# R2 (Cloudflare) supports standard S3 multipart thresholds (no Tigris 24KB
-# limit). 8 MB threshold = whisper decoder 118 MB → ~15 parts instead of ~7200.
-MULTIPART_THRESHOLD_BYTES = 8 * 1024 * 1024
+# Tigris (T3 Storage) single-PUT body limit ~24KB. Files above this must
+# use multipart upload. 16KB threshold/chunk size verified to pass.
+MULTIPART_THRESHOLD_BYTES = 16 * 1024
 
 # Explicit pins for extensions whose canonical type matters and that mimetypes
 # either cannot guess (woff/woff2) or resolves inconsistently across minimal
@@ -292,7 +292,7 @@ def _s3_upload_client() -> BaseClient:
             endpoint_url=S3_ENDPOINT,
             config=BotoConfig(
                 signature_version="s3v4",
-                s3={"addressing_style": "path"},  # R2 uses path-style
+                s3={"addressing_style": "virtual"},
                 retries={"max_attempts": 5, "mode": "standard"},
             ),
         )
@@ -307,7 +307,7 @@ def _transfer_config() -> TransferConfig:
         _transfer_config_obj = TransferConfig(
             multipart_threshold=MULTIPART_THRESHOLD_BYTES,
             multipart_chunksize=MULTIPART_THRESHOLD_BYTES,
-            max_concurrency=4,  # R2 has no Tigris rate-limit; 4 threads per file
+            max_concurrency=1,
         )
     return _transfer_config_obj
 

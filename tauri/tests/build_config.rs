@@ -353,7 +353,7 @@ fn apply_merge_patch_no_signing_key_disables_updater_artifacts() {
 fn resolve_env_uses_default_when_unset() {
     assert_eq!(
         resolve_env(None, DEFAULT_CDN),
-        "https://cdn.origa.uwuwu.net"
+        "https://s3.origa.uwuwu.net"
     );
 }
 
@@ -365,7 +365,7 @@ fn resolve_env_uses_default_when_unset() {
 fn resolve_env_uses_default_when_empty() {
     assert_eq!(
         resolve_env(Some(""), DEFAULT_CDN),
-        "https://cdn.origa.uwuwu.net"
+        "https://s3.origa.uwuwu.net"
     );
 }
 

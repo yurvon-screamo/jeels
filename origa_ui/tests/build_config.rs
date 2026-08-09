@@ -31,12 +31,12 @@ fn trailbase_uses_explicit_value_when_set() {
 
 #[test]
 fn cdn_uses_production_default_when_unset() {
-    assert_eq!(resolve_cdn(None), "https://cdn.origa.uwuwu.net");
+    assert_eq!(resolve_cdn(None), "https://s3.origa.uwuwu.net");
 }
 
 #[test]
 fn cdn_uses_production_default_when_empty() {
-    assert_eq!(resolve_cdn(Some("")), "https://cdn.origa.uwuwu.net");
+    assert_eq!(resolve_cdn(Some("")), "https://s3.origa.uwuwu.net");
 }
 
 #[test]
