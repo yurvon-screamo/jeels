@@ -491,6 +491,31 @@ pub async fn is_cached(path: &str) -> bool {
     !result.is_null() && !result.is_undefined()
 }
 
+/// Store arbitrary text in the CDN Cache API under the given path.
+/// Used by bundle extraction: download a bundle, parse it, then store
+/// individual chunks in cache so that lazy readers (phrase_data_loader)
+/// get cache hits without individual CDN requests.
+pub async fn store_text_in_cache(path: &str, text: &str) -> Result<(), OrigaError> {
+    let cache = open_cache().await?;
+    let key = ensure_leading_slash(path);
+    let response = web_sys::Response::new_with_opt_str(Some(text)).map_err(|e| {
+        OrigaError::RepositoryError {
+            reason: format!("Failed to create response for cache store: {:?}", e),
+        }
+    })?;
+    let request = web_sys::Request::new_with_str(&cdn_cache_url(&key)).map_err(|e| {
+        OrigaError::RepositoryError {
+            reason: format!("Failed to create request: {:?}", e),
+        }
+    })?;
+    JsFuture::from(cache.put_with_request(&request, &response))
+        .await
+        .map_err(|e| OrigaError::RepositoryError {
+            reason: format!("Failed to store in cache: {:?}", e),
+        })?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,4 +1,5 @@
 use crate::i18n::{t, use_i18n};
+use crate::loaders::kanji_bundle_store::{self, KanjiBundleType};
 use crate::repository::cdn_provider;
 use leptos::prelude::*;
 use leptos::task::spawn_local_scoped_with_cancellation;
@@ -73,8 +74,25 @@ pub fn KanjiAnimation(
 
     let svg_content = LocalResource::new(move || {
         let path = svg_path.clone();
+        let kanji_str = kanji.clone();
+        let mode_val = mode;
 
         async move {
+            // 1. Try in-memory JLPT bundle store first (no CDN request)
+            let bundle_type = match mode_val {
+                KanjiViewMode::Animation => KanjiBundleType::Animations,
+                KanjiViewMode::Frames => KanjiBundleType::Frames,
+            };
+
+            // We don't know the JLPT level here, so try each level.
+            // The store is populated by card_precache_loader before cards render.
+            for level in &["n5", "n4", "n3", "n2", "n1"] {
+                if let Some(svg) = kanji_bundle_store::get_svg(bundle_type, level, &kanji_str) {
+                    return Some(svg);
+                }
+            }
+
+            // 2. Fallback: CDN fetch (backward compat, cache-first)
             let cdn = cdn_provider();
             cdn.fetch_text(&path).await.ok()
         }
