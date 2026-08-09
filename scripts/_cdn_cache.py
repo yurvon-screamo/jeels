@@ -38,10 +38,20 @@ _IMMUTABLE_RULES: Final[frozenset[str]] = frozenset(
         "fonts/",
         "kanji_animations/",
         "kanji_frames/",
+        # JLPT bundles (exact paths, no trailing /)
+        "kanji_animations_n5.json",
+        "kanji_animations_n4.json",
+        "kanji_animations_n3.json",
+        "kanji_animations_n2.json",
+        "kanji_animations_n1.json",
+        "kanji_frames_n5.json",
+        "kanji_frames_n4.json",
+        "kanji_frames_n3.json",
+        "kanji_frames_n2.json",
+        "kanji_frames_n1.json",
         "ndlocr/",
         "phrases/audio/",
         "whisper/",
-        "fonts/",
     }
 )
 

@@ -32,8 +32,8 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient
 
 S3_BUCKET = "origa-cdn"
-S3_PROFILE = "origa-cdn"
-S3_ENDPOINT = "https://t3.storageapi.dev"
+S3_PROFILE = "origa-cdn-r2"
+S3_ENDPOINT = "https://9a6e457ad4c9d185f6d35bbfd3e2c3e2.r2.cloudflarestorage.com"
 
 # copy-object caps at 5 GiB; surfaced so callers can skip oversize objects with
 # a clear message instead of an opaque T3 error mid-walk.
@@ -248,24 +248,9 @@ def copy_object_cache_control(key: str, target_cc: str, dry_run: bool) -> bool:
     return True
 
 
-# T3 Storage drops single-PUT request bodies larger than ~24KB. The aws CLI
-# only switches to multipart above its 8MB default threshold, so files in the
-# 24KB-8MB band (fonts, audio, JSON) were sent as one PUT and failed. Both the
-# multipart threshold and the part size are capped by T3's ~24KB per-PUT body
-# limit, so they share one 16KB value -- the largest size verified to pass
-# (all 8 web fonts deployed through it).
-#
-# Trade-off of the tiny part size: large objects become many parts. The biggest
-# objects here are the whisper decoder (118 MB -> ~7200 parts) and the ndlocr
-# and whisper-encoder models (33-41 MB). S3 caps one object at 10 000 parts,
-# so at 16 KB the per-object ceiling is ~156 MB; the current largest object
-# sits under it, but a future model beyond that needs a larger part size, which
-# in turn requires pinning T3's exact PUT limit (only "~24 KB" is known today).
-# A model swap is also slow (thousands of serial parts); steady-state deploys
-# are unaffected because sync_directory skips unchanged objects by size+mtime.
-# Set a bucket lifecycle rule to abort incomplete multipart uploads so a failed
-# large upload does not accumulate storage cost.
-MULTIPART_THRESHOLD_BYTES = 16 * 1024
+# R2 (Cloudflare) supports standard S3 multipart thresholds (no Tigris 24KB
+# limit). 8 MB threshold = whisper decoder 118 MB → ~15 parts instead of ~7200.
+MULTIPART_THRESHOLD_BYTES = 8 * 1024 * 1024
 
 # Explicit pins for extensions whose canonical type matters and that mimetypes
 # either cannot guess (woff/woff2) or resolves inconsistently across minimal
@@ -300,8 +285,17 @@ def _s3_upload_client() -> BaseClient:
                 file=sys.stderr,
             )
             sys.exit(1)
+        from botocore.client import Config as BotoConfig
         session = boto3.Session(profile_name=S3_PROFILE)
-        _s3_client = session.client("s3", endpoint_url=S3_ENDPOINT)
+        _s3_client = session.client(
+            "s3",
+            endpoint_url=S3_ENDPOINT,
+            config=BotoConfig(
+                signature_version="s3v4",
+                s3={"addressing_style": "path"},  # R2 uses path-style
+                retries={"max_attempts": 5, "mode": "standard"},
+            ),
+        )
     return _s3_client
 
 
@@ -313,7 +307,7 @@ def _transfer_config() -> TransferConfig:
         _transfer_config_obj = TransferConfig(
             multipart_threshold=MULTIPART_THRESHOLD_BYTES,
             multipart_chunksize=MULTIPART_THRESHOLD_BYTES,
-            max_concurrency=1,
+            max_concurrency=4,  # R2 has no Tigris rate-limit; 4 threads per file
         )
     return _transfer_config_obj
 
@@ -400,23 +394,27 @@ def sync_directory(
 
     Mirrors ``aws s3 sync``: walk local files recursively, skip README.md, and
     upload only objects that are absent remotely, differ in byte size, or whose
-    local mtime is newer than the remote LastModified (the CLI's size+mtime
-    heuristic, so a same-size content edit is still re-uploaded rather than
-    silently served stale). The deploy orchestrator prints a per-directory
-    header before calling this, so in dry-run the function does nothing -- it
-    neither walks the 100k+ local tree nor lists remote, keeping the preview
-    instant and offline. Each upload routes through ``upload_file``, so the
-    16KB multipart threshold applies.
+    local mtime is newer than the remote LastModified. Shows a progress bar
+    (count/total + percentage) for each directory.
     """
     if dry_run:
         return
+    import time as _time
+
     base_prefix = prefix.rstrip("/") + "/"
     remote = list_remote_objects(prefix)
-    for local_path in sorted(local_dir.rglob("*")):
-        if not local_path.is_file():
-            continue
-        if local_path.name == "README.md":
-            continue
+
+    # Count total files first for progress bar
+    all_files = [
+        p for p in sorted(local_dir.rglob("*"))
+        if p.is_file() and p.name != "README.md"
+    ]
+    total = len(all_files)
+    uploaded = 0
+    skipped = 0
+    start = _time.time()
+
+    for i, local_path in enumerate(all_files, 1):
         key = base_prefix + local_path.relative_to(local_dir).as_posix()
         stat_result = local_path.stat()
         info = remote.get(key)
@@ -425,5 +423,17 @@ def sync_directory(
             and info.size == stat_result.st_size
             and stat_result.st_mtime <= info.last_modified_epoch
         ):
-            continue
-        upload_file(local_path, key, cache_control, dry_run)
+            skipped += 1
+        else:
+            upload_file(local_path, key, cache_control, dry_run)
+            uploaded += 1
+
+        if i % 200 == 0 or i == total:
+            elapsed = _time.time() - start
+            rate = i / elapsed if elapsed > 0 else 0
+            pct = i * 100 // total
+            print(
+                f"    [{i}/{total}] {pct}%  up={uploaded} skip={skipped}  "
+                f"{rate:.0f} files/s  {elapsed:.0f}s",
+                flush=True,
+            )
