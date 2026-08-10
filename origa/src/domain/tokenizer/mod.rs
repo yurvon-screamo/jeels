@@ -56,9 +56,6 @@ impl TokenInfo {
     }
 }
 
-#[derive(
-    Clone, serde::Serialize, serde::Deserialize, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize,
-)]
 pub struct DictionaryData {
     pub char_def: Vec<u8>,
     pub matrix: Vec<u8>,
@@ -70,89 +67,174 @@ pub struct DictionaryData {
     pub metadata: Vec<u8>,
 }
 
-/// Convert DictionaryData to rkyv bytes for storage
-pub fn serialize_dictionary_to_rkyv(data: &DictionaryData) -> Result<Vec<u8>, OrigaError> {
-    let bytes =
-        rkyv::to_bytes::<rkyv::rancor::Error>(data).map_err(|e| OrigaError::TokenizerError {
-            reason: format!("Failed to serialize dictionary: {}", e),
-        })?;
-    Ok(bytes.to_vec())
+static TOKENIZER: OnceLock<lindera::tokenizer::Tokenizer> = OnceLock::new();
+
+/// Pre-built lindera dictionary components for rkyv serialization.
+///
+/// Instead of caching raw `DictionaryData` bytes (~204 MB of decompressed
+/// lindera-format files) and re-running `load()` on every cache hit, we cache
+/// the already-parsed lindera structures. This eliminates:
+/// - `ConnectionCostMatrix::load` CPU work (byte→i16 conversion + transpose)
+/// - `CharacterDefinition::load` rkyv deserialization
+/// - `UnknownDictionary::load` rkyv deserialization
+///
+/// `PrefixDictionary.da` still needs `DoubleArrayAhoCorasick::deserialize`
+/// at access time (the rkyv `DoubleArrayArchiver` stores raw bytes and
+/// reconstructs the automaton on deserialize), but this is unavoidable.
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+pub struct CachedLinderaDictionary {
+    pub connection_cost_matrix:
+        lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix,
+    pub character_definition:
+        lindera_dictionary::dictionary::character_definition::CharacterDefinition,
+    pub unknown_dictionary: lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary,
+    pub prefix_dictionary: lindera_dictionary::dictionary::prefix_dictionary::PrefixDictionary,
+    pub metadata: lindera_dictionary::dictionary::metadata::Metadata,
 }
 
-/// Initialize dictionary from rkyv bytes directly (zero-copy access)
-pub fn init_dictionary_from_rkyv(bytes: &[u8]) -> Result<(), OrigaError> {
-    let archived =
-        rkyv::access::<ArchivedDictionaryData, rkyv::rancor::Error>(bytes).map_err(|e| {
+/// Serialize a CachedLinderaDictionary to rkyv bytes for Cache API storage.
+pub fn serialize_cached_lindera_to_rkyv(
+    cached: &CachedLinderaDictionary,
+) -> Result<Vec<u8>, OrigaError> {
+    rkyv::to_bytes::<rkyv::rancor::Error>(cached)
+        .map_err(|e| OrigaError::TokenizerError {
+            reason: format!("Failed to serialize cached lindera dictionary: {}", e),
+        })
+        .map(|bytes| bytes.to_vec())
+}
+
+/// Build `CachedLinderaDictionary` from raw `DictionaryData` (consumed).
+///
+/// Runs lindera `load()` on each component to produce the final structures.
+/// DictionaryData fields are moved into lindera (via `impl Into<Data>`) or
+/// borrowed temporarily (for `&[u8]` loads) — no ~204 MB clone.
+pub fn build_cached_lindera(data: DictionaryData) -> Result<CachedLinderaDictionary, OrigaError> {
+    let DictionaryData {
+        char_def,
+        matrix,
+        dict_da,
+        dict_vals,
+        unk,
+        words_idx,
+        words,
+        metadata,
+    } = data;
+
+    let metadata =
+        lindera_dictionary::dictionary::metadata::Metadata::load(&metadata).map_err(|e| {
             OrigaError::TokenizerError {
-                reason: format!("Failed to validate dictionary data: {:?}", e),
+                reason: format!("Failed to load metadata: {}", e),
             }
         })?;
 
-    let data = DictionaryData {
-        char_def: archived.char_def.to_vec(),
-        matrix: archived.matrix.to_vec(),
-        dict_da: archived.dict_da.to_vec(),
-        dict_vals: archived.dict_vals.to_vec(),
-        unk: archived.unk.to_vec(),
-        words_idx: archived.words_idx.to_vec(),
-        words: archived.words.to_vec(),
-        metadata: archived.metadata.to_vec(),
-    };
+    let prefix_dictionary =
+        lindera_dictionary::dictionary::prefix_dictionary::PrefixDictionary::load(
+            dict_da, dict_vals, words_idx, words, true,
+        );
 
-    init_dictionary(data)
+    let connection_cost_matrix =
+        lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix::load(matrix);
+
+    let character_definition =
+        lindera_dictionary::dictionary::character_definition::CharacterDefinition::load(&char_def)
+            .map_err(|e| OrigaError::TokenizerError {
+                reason: format!("Failed to load character definition: {}", e),
+            })?;
+
+    let unknown_dictionary =
+        lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary::load(&unk).map_err(
+            |e| OrigaError::TokenizerError {
+                reason: format!("Failed to load unknown dictionary: {}", e),
+            },
+        )?;
+
+    Ok(CachedLinderaDictionary {
+        connection_cost_matrix,
+        character_definition,
+        unknown_dictionary,
+        prefix_dictionary,
+        metadata,
+    })
 }
 
-static DICTIONARY_DATA: OnceLock<DictionaryData> = OnceLock::new();
-static TOKENIZER: OnceLock<lindera::tokenizer::Tokenizer> = OnceLock::new();
+/// Build a lindera `Tokenizer` from cached rkyv bytes (fast path).
+///
+/// Skips all `load()` calls — the structures are already deserialized.
+/// Only `DoubleArrayAhoCorasick::deserialize` runs for PrefixDictionary.da.
+pub fn init_tokenizer_from_rkyv_cached(bytes: &[u8]) -> Result<(), OrigaError> {
+    let cached: CachedLinderaDictionary =
+        rkyv::from_bytes::<CachedLinderaDictionary, rkyv::rancor::Error>(bytes).map_err(|e| {
+            OrigaError::TokenizerError {
+                reason: format!("Failed to deserialize cached lindera dictionary: {}", e),
+            }
+        })?;
+
+    init_tokenizer_from_cached(cached)
+}
+
+/// Build a `Tokenizer` from already-constructed `CachedLinderaDictionary`
+/// components (cache hit or freshly built from DictionaryData).
+pub fn init_tokenizer_from_cached(cached: CachedLinderaDictionary) -> Result<(), OrigaError> {
+    let dictionary = lindera_dictionary::dictionary::Dictionary {
+        prefix_dictionary: cached.prefix_dictionary,
+        connection_cost_matrix: cached.connection_cost_matrix,
+        character_definition: cached.character_definition,
+        unknown_dictionary: cached.unknown_dictionary,
+        metadata: cached.metadata,
+    };
+
+    init_tokenizer_from_dictionary(dictionary)
+}
 
 pub fn is_dictionary_loaded() -> bool {
     TOKENIZER.get().is_some()
 }
 
 pub fn init_dictionary(data: DictionaryData) -> Result<(), OrigaError> {
-    let _ = DICTIONARY_DATA.get_or_init(|| data);
-    init_tokenizer()
+    init_tokenizer(data)
 }
 
 const USER_DICT_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/user_dictionary.bin"));
 
-fn init_tokenizer() -> Result<(), OrigaError> {
-    let data = DICTIONARY_DATA.get().ok_or(OrigaError::TokenizerError {
-        reason: "Dictionary data not loaded".to_string(),
-    })?;
+fn init_tokenizer(data: DictionaryData) -> Result<(), OrigaError> {
+    let DictionaryData {
+        char_def,
+        matrix,
+        dict_da,
+        dict_vals,
+        unk,
+        words_idx,
+        words,
+        metadata,
+    } = data;
 
-    let metadata = lindera_dictionary::dictionary::metadata::Metadata::load(&data.metadata)
-        .map_err(|e| OrigaError::TokenizerError {
-            reason: format!("Failed to load metadata: {}", e),
+    let metadata =
+        lindera_dictionary::dictionary::metadata::Metadata::load(&metadata).map_err(|e| {
+            OrigaError::TokenizerError {
+                reason: format!("Failed to load metadata: {}", e),
+            }
         })?;
 
     let prefix_dictionary =
         lindera_dictionary::dictionary::prefix_dictionary::PrefixDictionary::load(
-            data.dict_da.clone(),
-            data.dict_vals.clone(),
-            data.words_idx.clone(),
-            data.words.clone(),
-            true,
+            dict_da, dict_vals, words_idx, words, true,
         );
 
     let connection_cost_matrix =
-        lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix::load(
-            data.matrix.clone(),
-        );
+        lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix::load(matrix);
 
     let character_definition =
-        lindera_dictionary::dictionary::character_definition::CharacterDefinition::load(
-            &data.char_def,
-        )
-        .map_err(|e| OrigaError::TokenizerError {
-            reason: format!("Failed to load character definition: {}", e),
-        })?;
+        lindera_dictionary::dictionary::character_definition::CharacterDefinition::load(&char_def)
+            .map_err(|e| OrigaError::TokenizerError {
+                reason: format!("Failed to load character definition: {}", e),
+            })?;
 
     let unknown_dictionary =
-        lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary::load(&data.unk)
-            .map_err(|e| OrigaError::TokenizerError {
+        lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary::load(&unk).map_err(
+            |e| OrigaError::TokenizerError {
                 reason: format!("Failed to load unknown dictionary: {}", e),
-            })?;
+            },
+        )?;
 
     let dictionary = lindera_dictionary::dictionary::Dictionary {
         prefix_dictionary,
@@ -162,6 +244,12 @@ fn init_tokenizer() -> Result<(), OrigaError> {
         metadata,
     };
 
+    init_tokenizer_from_dictionary(dictionary)
+}
+
+fn init_tokenizer_from_dictionary(
+    dictionary: lindera_dictionary::dictionary::Dictionary,
+) -> Result<(), OrigaError> {
     let user_dictionary = if USER_DICT_BYTES.is_empty() {
         None
     } else {
@@ -493,6 +581,48 @@ mod tests {
             let data = create_test_dictionary_data();
             let _ = init_dictionary(data);
         }
+    }
+
+    #[test]
+    fn rkyv_cached_lindera_round_trip() {
+        // Build CachedLinderaDictionary from real dictionary data.
+        let data = create_test_dictionary_data();
+        let cached = build_cached_lindera(data).expect("build_cached_lindera should succeed");
+
+        // Serialize to rkyv.
+        let bytes = serialize_cached_lindera_to_rkyv(&cached)
+            .expect("serialize_cached_lindera_to_rkyv should succeed");
+        assert!(!bytes.is_empty());
+
+        // Deserialize back.
+        let restored: CachedLinderaDictionary =
+            rkyv::from_bytes::<CachedLinderaDictionary, rkyv::rancor::Error>(&bytes)
+                .expect("rkyv from_bytes should succeed");
+
+        // Verify ConnectionCostMatrix survived round-trip.
+        assert_eq!(
+            restored.connection_cost_matrix.forward_size,
+            cached.connection_cost_matrix.forward_size,
+        );
+        assert_eq!(
+            restored.connection_cost_matrix.backward_size,
+            cached.connection_cost_matrix.backward_size,
+        );
+        assert_eq!(
+            restored.connection_cost_matrix.costs_data.len(),
+            cached.connection_cost_matrix.costs_data.len(),
+        );
+
+        // Verify Metadata survived.
+        assert_eq!(restored.metadata.name, cached.metadata.name);
+    }
+
+    #[test]
+    fn rkyv_cached_lindera_invalid_bytes_returns_error() {
+        let garbage = b"definitely not rkyv data";
+        let result: Result<CachedLinderaDictionary, rkyv::rancor::Error> =
+            rkyv::from_bytes(garbage);
+        assert!(result.is_err());
     }
 
     fn create_test_dictionary_data() -> DictionaryData {

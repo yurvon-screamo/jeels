@@ -1,8 +1,9 @@
-use crate::repository::{cdn_provider, get_cached_dictionary_rkyv, save_dictionary_to_cache_rkyv};
+use crate::repository::{cdn_provider, get_cached_lindera_rkyv, save_lindera_to_cache_rkyv};
 use crate::utils::{now_ms, yield_to_browser};
 use flate2::read::DeflateDecoder;
 use origa::domain::{
-    DictionaryData, OrigaError, init_dictionary, init_dictionary_from_rkyv, is_dictionary_loaded,
+    DictionaryData, OrigaError, init_tokenizer_from_rkyv_cached, is_dictionary_loaded,
+    serialize_cached_lindera_to_rkyv,
 };
 use origa::traits::CdnProvider;
 use std::io::Read;
@@ -26,39 +27,70 @@ pub async fn load_dictionary() -> Result<(), OrigaError> {
     let start = now_ms();
     tracing::info!("📖 Loading Unidic dictionary...");
 
-    match get_cached_dictionary_rkyv().await {
+    // Fast path: try loading from cached lindera structures (pre-built
+    // lindera Dictionary components serialized via rkyv). This skips
+    // all lindera load() calls on cache hit.
+    match get_cached_lindera_rkyv().await {
         Ok(Some(bytes)) => {
-            tracing::info!("📖 Dictionary found in cache (rkyv), {} bytes", bytes.len());
+            tracing::info!("📖 Cached lindera structures found, {} bytes", bytes.len());
             yield_to_browser().await;
-            init_dictionary_from_rkyv(&bytes)?;
-            tracing::info!(
-                "📖 Dictionary loaded from rkyv cache ({:.2}s)",
-                (now_ms() - start) / 1000.0
-            );
-            return Ok(());
+            match init_tokenizer_from_rkyv_cached(&bytes) {
+                Ok(()) => {
+                    tracing::info!(
+                        "📖 Dictionary loaded from cached lindera structures ({:.2}s)",
+                        (now_ms() - start) / 1000.0
+                    );
+                    return Ok(());
+                },
+                Err(e) => {
+                    tracing::warn!(
+                        error = ?e,
+                        "Failed to load from cached lindera structures, falling back to network"
+                    );
+                },
+            }
         },
         Ok(None) => {
-            tracing::debug!("📖 No rkyv cache found, loading from network");
+            tracing::debug!("📖 No cached lindera structures found, loading from network");
         },
         Err(e) => {
             tracing::warn!("Cache read failed, loading from network: {:?}", e);
         },
     }
 
+    // Slow path (cache miss): fetch from CDN, decompress, build lindera
+    // structures, then serialize them for future cache hits.
     let data = load_dictionary_from_network().await?;
-    let data_clone = data.clone();
     yield_to_browser().await;
-    init_dictionary(data)?;
 
+    // Build lindera structures — DictionaryData is consumed (moved into
+    // lindera load() calls), no ~204 MB clone.
+    let cached = origa::domain::build_cached_lindera(data)?;
+    yield_to_browser().await;
+
+    // Serialize for future cache hits BEFORE moving into the tokenizer.
     let cache_start = now_ms();
-    if let Err(e) = save_dictionary_to_cache_rkyv(&data_clone).await {
-        tracing::warn!("Failed to cache dictionary: {:?}", e);
-    } else {
-        tracing::info!(
-            "📖 Dictionary cached (rkyv) ({:.2}s)",
-            (now_ms() - cache_start) / 1000.0
-        );
+    match serialize_cached_lindera_to_rkyv(&cached) {
+        Ok(bytes) => {
+            tracing::info!(
+                "📖 Cached lindera structures serialized ({} bytes, {:.2}s)",
+                bytes.len(),
+                (now_ms() - cache_start) / 1000.0
+            );
+            if let Err(e) = save_lindera_to_cache_rkyv(&bytes).await {
+                tracing::warn!("Failed to cache lindera structures: {:?}", e);
+            }
+        },
+        Err(e) => {
+            tracing::warn!(
+                "Failed to serialize lindera structures for caching: {:?}",
+                e
+            );
+        },
     }
+
+    // Now move the structures into the static Tokenizer.
+    origa::domain::init_tokenizer_from_cached(cached)?;
 
     tracing::info!(
         "📖 Dictionary loaded from network ({:.2}s)",
