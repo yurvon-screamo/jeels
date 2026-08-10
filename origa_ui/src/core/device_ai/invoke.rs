@@ -15,16 +15,14 @@ use wasm_bindgen_futures::JsFuture;
 
 use crate::core::tauri;
 
-use super::contracts::{Capabilities, RecognitionResult, TextRecognitionResult, Voice};
+use super::contracts::{Capabilities, RecognitionResult, TextRecognitionResult};
 
 const CMD_GET_CAPABILITIES: &str = "plugin:device-ai-apis|get_capabilities";
 const CMD_VISION_RECOGNIZE_TEXT: &str = "plugin:device-ai-apis|vision_recognize_text";
-const CMD_SPEECH_SYNTHESIZE: &str = "plugin:device-ai-apis|speech_synthesize";
-const CMD_SPEECH_GET_VOICES: &str = "plugin:device-ai-apis|speech_get_voices";
 const CMD_SPEECH_RECOGNIZE: &str = "plugin:device-ai-apis|speech_recognize";
 
-/// Default guard for quick operations (capabilities, OCR, synthesis). Live
-/// recognition may run for the full utterance, so it passes a longer timeout.
+/// Default guard for quick operations (capabilities, OCR). Live recognition
+/// may run for the full utterance, so it passes a longer timeout.
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(20);
 const LIVE_RECOGNITION_TIMEOUT: Duration = Duration::from_secs(45);
 
@@ -58,36 +56,6 @@ pub async fn recognize_text(base64: &str) -> Result<TextRecognitionResult, Strin
     let raw = invoke(CMD_VISION_RECOGNIZE_TEXT, &payload, DEFAULT_TIMEOUT).await?;
     serde_wasm_bindgen::from_value::<TextRecognitionResult>(raw)
         .map_err(|e| format!("vision_recognize_text decode failed: {e:?}"))
-}
-
-/// Synthesize and play `text`. `voice_id` selects a voice returned by
-/// [`get_voices`]; pass `None` for the system default.
-pub async fn synthesize(text: &str, voice_id: Option<&str>, rate: f32) -> Result<(), String> {
-    let options = js_sys::Object::new();
-    set_f64(&options, "rate", rate as f64);
-    // Pitch slightly raised — the macOS/AVFoundation Japanese voices (Kyoko)
-    // read as too flat at the default 1.0; 1.2 matches the legacy plugin:tts
-    // path's chosen pitch for consistent voice character across backends.
-    set_f64(&options, "pitch", 1.2);
-    set_f64(&options, "volume", 1.0);
-    if let Some(id) = voice_id {
-        set_str(&options, "voice", id);
-    }
-
-    let payload = js_sys::Object::new();
-    set_str(&payload, "text", text);
-    set_ref(&payload, "options", &options);
-
-    invoke(CMD_SPEECH_SYNTHESIZE, &payload, DEFAULT_TIMEOUT)
-        .await
-        .map(|_| ())
-}
-
-/// List the voices available for synthesis on the current platform.
-pub async fn get_voices() -> Result<Vec<Voice>, String> {
-    let raw = invoke(CMD_SPEECH_GET_VOICES, &JsValue::UNDEFINED, DEFAULT_TIMEOUT).await?;
-    serde_wasm_bindgen::from_value::<Vec<Voice>>(raw)
-        .map_err(|e| format!("speech_get_voices decode failed: {e:?}"))
 }
 
 /// Perform one-shot live-microphone speech recognition. Returns when the
@@ -144,12 +112,6 @@ fn make_timeout_promise(timeout: Duration) -> js_sys::Promise {
 fn set_str(obj: &js_sys::Object, key: &str, value: &str) {
     if js_sys::Reflect::set(obj, &JsValue::from_str(key), &JsValue::from_str(value)).is_err() {
         tracing::warn!("device-ai invoke: failed to set `{key}` (string) on payload");
-    }
-}
-
-fn set_f64(obj: &js_sys::Object, key: &str, value: f64) {
-    if js_sys::Reflect::set(obj, &JsValue::from_str(key), &JsValue::from_f64(value)).is_err() {
-        tracing::warn!("device-ai invoke: failed to set `{key}` (f64) on payload");
     }
 }
 

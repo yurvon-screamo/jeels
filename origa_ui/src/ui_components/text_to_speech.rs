@@ -1,7 +1,6 @@
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 
-use crate::core::device_ai::{self, contracts::pick_japanese_voice};
 use crate::core::tauri;
 use leptos::task::spawn_local;
 use leptos::wasm_bindgen::JsCast;
@@ -210,32 +209,6 @@ async fn invoke_tauri_stop() -> Result<(), String> {
         .map_err(|e| format!("plugin:tts|stop error: {:?}", e))
 }
 
-/// Resolves a Japanese voice id from the native device-ai voice list.
-/// Cached after the first successful or failed resolution.
-async fn resolve_device_ai_voice_id() -> Option<String> {
-    if let Some(id) = DEVICE_AI_VOICE_ID.with(|c| c.borrow().clone()) {
-        return Some(id);
-    }
-    if DEVICE_AI_VOICE_RESOLVED.with(|f| f.get()) {
-        return None;
-    }
-
-    let voices = device_ai::get_voices().await.ok()?;
-    let picked = pick_japanese_voice(&voices).map(|v| v.id.clone());
-
-    if let Some(ref id) = picked {
-        DEVICE_AI_VOICE_ID.with(|c| *c.borrow_mut() = Some(id.clone()));
-    }
-    DEVICE_AI_VOICE_RESOLVED.with(|f| f.set(true));
-    picked
-}
-
-/// Synthesize and play via native device-ai TTS.
-async fn device_ai_speak(text: &str, rate: f32) -> Result<(), String> {
-    let voice_id = resolve_device_ai_voice_id().await;
-    device_ai::synthesize(text, voice_id.as_deref(), rate).await
-}
-
 pub fn is_speech_supported() -> bool {
     if tauri::is_tauri() {
         return true;
@@ -251,21 +224,7 @@ pub fn speak_tts_text(text: &str, rate: f32) -> Result<(), String> {
     if tauri::is_tauri() {
         let text_owned = text.to_string();
         spawn_local(async move {
-            // plugin:tts is the primary TTS backend on every platform: it
-            // explicitly sets language = "ja-JP" on the native engine, which
-            // prevents the system-default-locale voice (e.g. Russian) from
-            // being used when no Japanese voice is installed. device-ai TTS is
-            // the fallback — it never calls setLanguage and therefore falls
-            // back to the system voice when no Japanese voice is resolved.
-            let result = invoke_tauri_speak(&text_owned, rate).await;
-            let result = match result {
-                Ok(()) => Ok(()),
-                Err(e) => {
-                    warn!("plugin:tts speak failed, trying device-ai fallback: {}", e);
-                    device_ai_speak(&text_owned, rate).await
-                },
-            };
-            if let Err(e) = result {
+            if let Err(e) = invoke_tauri_speak(&text_owned, rate).await {
                 warn!("TTS speak error: {}", e);
             }
         });
@@ -293,7 +252,7 @@ pub fn speak_tts_text(text: &str, rate: f32) -> Result<(), String> {
     Ok(())
 }
 
-pub fn speak_tts_text_with_callback<F>(text: &str, rate: f32, mut on_end: F) -> Result<(), String>
+pub fn speak_tts_text_with_callback<F>(text: &str, rate: f32, on_end: F) -> Result<(), String>
 where
     F: FnMut() + 'static,
 {
@@ -304,25 +263,13 @@ where
     if tauri::is_tauri() {
         let text_owned = text.to_string();
         spawn_local(async move {
-            // plugin:tts is primary (sets language = "ja-JP" natively);
-            // device-ai is the fallback. The callback path differs: plugin:tts
-            // emits a `tts://speech:finish` event consumed by the registered
-            // listener, while device-ai synthesize resolves on completion.
-            let primary_result = invoke_tauri_speak(&text_owned, rate).await;
-            if primary_result.is_ok() {
-                TTS_CALLBACK.with(|cell| {
-                    *cell.borrow_mut() = Some(Box::new(on_end));
-                });
-                ensure_tauri_listener_registered();
-            } else {
-                warn!(
-                    "plugin:tts speak failed, trying device-ai fallback: {:?}",
-                    primary_result
-                );
-                if let Err(e) = device_ai_speak(&text_owned, rate).await {
-                    warn!("TTS speak error: {}", e);
-                }
-                on_end();
+            TTS_CALLBACK.with(|cell| {
+                *cell.borrow_mut() = Some(Box::new(on_end));
+            });
+            ensure_tauri_listener_registered();
+
+            if let Err(e) = invoke_tauri_speak(&text_owned, rate).await {
+                warn!("TTS speak error: {}", e);
             }
         });
         return Ok(());
