@@ -1,23 +1,6 @@
 use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
 
-pub struct Urls {
-    pub base: &'static str,
-    pub dictionary: &'static str,
-}
-
-static URLS: OnceLock<Urls> = OnceLock::new();
-
-pub fn urls() -> &'static Urls {
-    URLS.get_or_init(|| {
-        let base = env!("ORIGA_PUBLIC_BASE_URL");
-        Urls {
-            base,
-            dictionary: "dictionaries/unidic/cache/dictionary-data",
-        }
-    })
-}
-
 pub fn public_url(path: &str) -> String {
     if !path.starts_with('/') {
         tracing::warn!(
@@ -26,7 +9,7 @@ pub fn public_url(path: &str) -> String {
         );
     }
 
-    let base = urls().base;
+    let base = option_env!("ORIGA_PUBLIC_BASE_URL").unwrap_or("");
     if base.is_empty() {
         path.to_string()
     } else {
