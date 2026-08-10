@@ -252,16 +252,7 @@ pub fn SummaryStep(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
                                     </div>
                                 </div>
                                 <div
-                                    class="accordion-content"
-                                    style:max-height=move || {
-                                        let count = sets_for_type.get().len();
-                                        let estimated_height = (count * 44 + 40).max(200);
-                                        if is_expanded.get() {
-                                            format!("{}px", estimated_height)
-                                        } else {
-                                            "0px".to_string()
-                                        }
-                                    }
+                                    class=move || format!("accordion-content {}", if is_expanded.get() { "expanded" } else { "" })
                                 >
                                     <div class="accordion-body">
                                         <For

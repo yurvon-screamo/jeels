@@ -109,7 +109,9 @@
       "footer": "You'll be able to study all of this in the app.",
       "vocabulary_desc": "Built-in dictionaries with examples",
       "kanji_desc": "Furigana, radicals and stroke order",
-      "grammar_desc": "Grammar reference with context"
+      "grammar_desc": "Grammar reference with context",
+      "skip_confirm_title": "Skip learning setup?",
+      "skip_confirm_body": "You can configure card sets later in your profile. Continue?"
     },
     "load": {
       "title": "Choose a comfortable learning pace",

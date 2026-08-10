@@ -1036,6 +1036,23 @@ input[type="submit"],
     color: var(--fg-muted);
 }
 
+/* Section colours in the scoring progress bar — Grammar=Terracotta,
+   Kanji=Olive, Vocabulary/Phrase=default (black). Applied to both the
+   vertical section marker and the legend text so the visual association
+   is clear at a glance. */
+.scoring-section-grammar {
+    color: var(--accent-terracotta);
+}
+.scoring-progress-marker.scoring-section-grammar {
+    background: var(--accent-terracotta);
+}
+.scoring-section-kanji {
+    color: var(--accent-olive);
+}
+.scoring-progress-marker.scoring-section-kanji {
+    background: var(--accent-olive);
+}
+
 .progress-track-lesson {
     height: 3px;
     border: 1px solid var(--border-light);
@@ -1341,8 +1358,12 @@ input[type="submit"],
     background: var(--bg-aged);
 }
 
-.accordion-item.active .accordion-content {
-    max-height: 200px;
+/* Expanded accordion: capped at 300px with internal scroll so large
+   set lists (e.g. Minna with 25+ sections) don't create an infinitely
+   scrollable page. The scroll keeps the accordion self-contained. */
+.accordion-content.expanded {
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .accordion-body {
@@ -6038,8 +6059,12 @@ rt {
     color: var(--fg-black);
 }
 
-/* Onboarding scoring card: stabilise question area height so the
-   Know/Don't-Know buttons don't jump when card content varies. */
+/* Onboarding scoring card: stabilise question area and answer area height
+   so the Know/Don't-Know buttons don't jump when card content varies between
+   card types (grammar has no readings, vocabulary has readings + answer). */
 .scoring-card-question-area {
     min-height: 80px;
+}
+.scoring-card-answer-area {
+    min-height: 60px;
 }

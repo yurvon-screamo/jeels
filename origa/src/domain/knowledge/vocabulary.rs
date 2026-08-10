@@ -1,9 +1,7 @@
 use crate::dictionary::grammar::GrammarRule;
-use crate::dictionary::kanji::{KanjiInfo, get_kanji_info};
 use crate::dictionary::vocabulary::{get_description, get_translation, get_translations};
-use crate::domain::japanese::JapaneseChar;
 use crate::domain::tokenizer::{PartOfSpeech, tokenize_text};
-use crate::domain::{CardAnswer, JapaneseLevel, NativeLanguage, OrigaError, Question};
+use crate::domain::{CardAnswer, NativeLanguage, OrigaError, Question};
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 
@@ -126,16 +124,6 @@ impl VocabularyCard {
         CardAnswer::vocabulary(translations, description).map_err(|e| OrigaError::InvalidAnswer {
             reason: e.to_string(),
         })
-    }
-
-    pub fn get_kanji_cards(&self, current_level: &JapaneseLevel) -> Vec<&KanjiInfo> {
-        self.word
-            .text()
-            .chars()
-            .filter(|c| c.is_kanji())
-            .filter_map(|c| get_kanji_info(&c.to_string()).ok())
-            .filter(|k: &&KanjiInfo| k.jlpt() <= current_level)
-            .collect::<Vec<_>>()
     }
 
     pub fn part_of_speech(&self) -> Result<PartOfSpeech, OrigaError> {
@@ -339,61 +327,6 @@ mod tests {
         let result = VocabularyCard::validate_translation("", &NativeLanguage::Russian);
 
         assert!(result.is_err());
-    }
-
-    #[test]
-    fn get_kanji_cards_returns_empty_for_hiragana() {
-        init_real_dictionaries();
-        let card = create_vocab_card("ねこ");
-        let level = JapaneseLevel::N5;
-
-        let kanji_cards = card.get_kanji_cards(&level);
-
-        assert!(kanji_cards.is_empty());
-    }
-
-    #[test]
-    fn get_kanji_cards_returns_empty_for_katakana() {
-        init_real_dictionaries();
-        let card = create_vocab_card("ネコ");
-        let level = JapaneseLevel::N5;
-
-        let kanji_cards = card.get_kanji_cards(&level);
-
-        assert!(kanji_cards.is_empty());
-    }
-
-    #[test]
-    fn get_kanji_cards_returns_kanji_for_kanji_word() {
-        init_real_dictionaries();
-        let card = create_vocab_card("日本語");
-        let level = JapaneseLevel::N1;
-
-        let kanji_cards = card.get_kanji_cards(&level);
-
-        assert!(!kanji_cards.is_empty());
-    }
-
-    #[test]
-    fn get_kanji_cards_filters_by_level() {
-        init_real_dictionaries();
-        let card = create_vocab_card("日本語");
-        let level_n5 = JapaneseLevel::N5;
-
-        let kanji_cards = card.get_kanji_cards(&level_n5);
-
-        assert!(kanji_cards.iter().all(|k| k.jlpt() <= &level_n5));
-    }
-
-    #[test]
-    fn get_kanji_cards_returns_multiple_kanji() {
-        init_real_dictionaries();
-        let card = create_vocab_card("日本語");
-        let level = JapaneseLevel::N1;
-
-        let kanji_cards = card.get_kanji_cards(&level);
-
-        assert!(kanji_cards.len() >= 2);
     }
 
     #[test]

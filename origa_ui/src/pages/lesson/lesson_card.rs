@@ -40,8 +40,12 @@ pub fn LessonCard(
     let card_type = CardType::from(&card);
     let is_phrase = card_type == CardType::Phrase;
     let lang = native_language;
-    let is_na_adj =
-        grammar_info.is_none() && super::na_adjective_helper::is_na_adjective_card(&card);
+    // な-suffix is appended only to Japanese text, never to translations.
+    // On a normal card, question_text IS the Japanese word → safe to append.
+    // On a reversed card, question_text is the translation → must NOT append.
+    let is_na_adj = !is_reversed
+        && grammar_info.is_none()
+        && super::na_adjective_helper::is_na_adjective_card(&card);
 
     let question_text = match card.question(&lang) {
         Ok(q) => q.text().to_string(),
@@ -68,7 +72,20 @@ pub fn LessonCard(
         .as_ref()
         .map(|t| t.join(", "))
         .unwrap_or_else(|| answer_data.text.clone());
+
+    // Question screen: normal → Japanese word (+な for na-adj);
+    // reversed → translation (the user's prompt to recall the Japanese word).
     let card_question_text = StoredValue::new(if is_reversed {
+        question_text.clone()
+    } else if is_na_adj {
+        super::na_adjective_helper::append_na_suffix(&question_text)
+    } else {
+        question_text.clone()
+    });
+    // Answer heading: normal → Japanese word (+な for na-adj);
+    // reversed → Japanese word from the answer side (tts_text = the
+    // original Japanese stored in reverse_side, surfaced as CardAnswer::Text).
+    let answer_heading = StoredValue::new(if is_reversed {
         tts_text.clone()
     } else if is_na_adj {
         super::na_adjective_helper::append_na_suffix(&question_text)
@@ -283,7 +300,7 @@ pub fn LessonCard(
 
                 <Show when=move || show_answer.get()>
                     <LessonCardAnswer
-                        question_text=if is_reversed { answer.get_value() } else { question.get_value() }
+                        question_text=answer_heading.get_value()
                         answer_text=answer.get_value()
                         answer_translations=answer_translations_stored.get_value()
                         answer_description=answer_description_stored.get_value()

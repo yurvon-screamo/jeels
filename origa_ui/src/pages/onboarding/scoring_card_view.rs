@@ -116,7 +116,7 @@ pub fn ScoringCardView(
                                 }}
                             </div>
 
-                            <div class="mt-4 text-center">
+                            <div class="mt-4 text-center scoring-card-answer-area">
                                 {move || {
                                     if let Some(value) = readings.clone() {
                                         view! {

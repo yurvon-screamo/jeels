@@ -167,25 +167,25 @@ When('пользователь нажимает "Знаю все"', async ({ pag
 });
 
 Then('отображается модальное окно подтверждения', async ({ page }) => {
-    await expect(page.getByTestId("onboarding-scoring-confirm")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("onboarding-confirm")).toBeVisible({ timeout: 10_000 });
 });
 
 Then('отображается кнопка подтверждения', async ({ page }) => {
-    await expect(page.getByTestId("onboarding-scoring-confirm-ok")).toBeVisible();
+    await expect(page.getByTestId("onboarding-confirm-ok")).toBeVisible();
 });
 
 Then('отображается кнопка отмены', async ({ page }) => {
-    await expect(page.getByTestId("onboarding-scoring-confirm-cancel")).toBeVisible();
+    await expect(page.getByTestId("onboarding-confirm-cancel")).toBeVisible();
 });
 
 When('нажимает кнопку отмены в модальном окне', async ({ page }) => {
-    await page.getByTestId("onboarding-scoring-confirm-cancel").click();
+    await page.getByTestId("onboarding-confirm-cancel").click();
 });
 
 Then('модальное окно подтверждения не отображается', async ({ page }) => {
-    await expect(page.getByTestId("onboarding-scoring-confirm")).not.toBeVisible();
+    await expect(page.getByTestId("onboarding-confirm")).not.toBeVisible();
 });
 
 When('пользователь подтверждает действие в модальном окне', async ({ page }) => {
-    await page.getByTestId("onboarding-scoring-confirm-ok").click();
+    await page.getByTestId("onboarding-confirm-ok").click();
 });
