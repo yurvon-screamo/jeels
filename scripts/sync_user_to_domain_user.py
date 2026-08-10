@@ -13,6 +13,15 @@ The merge is idempotent (LWW + max() + union semantics) — it can be run
 repeatedly as the app-store rollout progresses, and the final run after
 100% rollout guarantees no data is left behind.
 
+⚠️  CONCURRENCY: This script does a read-merge-write cycle without
+    optimistic locking. If a new-client user does save_sync to
+    domain_user while this script runs, their write may be lost.
+    Mitigations:
+      - Run during low-traffic window (e.g. night)
+      - The idempotent merge means re-runs are safe — data lost to a
+        race will be recovered on the next sync run if the source data
+        still exists in `user`.
+
 Usage:
     TRAILBASE_URL=https://app.origa.uwuwu.net \\
     TRAILBASE_ADMIN_TOKEN=... \\
