@@ -69,11 +69,10 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
             result.skipped_no_translation += words_result.skipped_no_translation.len();
 
             for vocab_card in words_result.cards {
-                if let Ok(_study_card) = self.create_vocabulary_card(
-                    &mut user,
-                    vocab_card,
-                    &mut result.skipped_duplicates,
-                ) {
+                if self
+                    .create_vocabulary_card(&mut user, vocab_card, &mut result.skipped_duplicates)
+                    .is_ok()
+                {
                     result.created_vocabulary += 1;
                 }
             }
