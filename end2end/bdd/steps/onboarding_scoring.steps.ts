@@ -159,3 +159,33 @@ When('нажимает кнопку "Назад" в онбординге', async
 Then('отображается шаг выбора уровня JLPT', async ({ page }) => {
     await expect(page.getByTestId("onboarding-jlpt-step")).toBeVisible({ timeout: 10_000 });
 });
+
+When('пользователь нажимает "Знаю все"', async ({ page }) => {
+    const onboarding = new OnboardingPage(page);
+    await expect(onboarding.scoringHint).toBeVisible({ timeout: 30_000 });
+    await page.getByTestId("onboarding-mark-all-known").click();
+});
+
+Then('отображается модальное окно подтверждения', async ({ page }) => {
+    await expect(page.getByTestId("onboarding-scoring-confirm")).toBeVisible({ timeout: 10_000 });
+});
+
+Then('отображается кнопка подтверждения', async ({ page }) => {
+    await expect(page.getByTestId("onboarding-scoring-confirm-ok")).toBeVisible();
+});
+
+Then('отображается кнопка отмены', async ({ page }) => {
+    await expect(page.getByTestId("onboarding-scoring-confirm-cancel")).toBeVisible();
+});
+
+When('нажимает кнопку отмены в модальном окне', async ({ page }) => {
+    await page.getByTestId("onboarding-scoring-confirm-cancel").click();
+});
+
+Then('модальное окно подтверждения не отображается', async ({ page }) => {
+    await expect(page.getByTestId("onboarding-scoring-confirm")).not.toBeVisible();
+});
+
+When('пользователь подтверждает действие в модальном окне', async ({ page }) => {
+    await page.getByTestId("onboarding-scoring-confirm-ok").click();
+});

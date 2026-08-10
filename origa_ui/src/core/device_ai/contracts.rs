@@ -39,15 +39,6 @@ impl Capabilities {
     }
 }
 
-/// A synthesizable voice installed on the system.
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct Voice {
-    pub id: String,
-    pub name: String,
-    pub language: String,
-}
-
 /// Result of one-shot speech recognition (live microphone or audio file).
 #[derive(Debug, Clone, Deserialize, Default, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -65,71 +56,9 @@ pub struct TextRecognitionResult {
     pub text: String,
 }
 
-/// Selects the best Japanese voice for synthesis.
-///
-/// Preference order: an enhanced Kyoko voice (matches the macOS system voice
-/// historically selected), any Kyoko voice, any enhanced Japanese voice, any
-/// Japanese voice. Pure function — unit-testable without the plugin.
-pub fn pick_japanese_voice(voices: &[Voice]) -> Option<&Voice> {
-    let ja: Vec<&Voice> = voices
-        .iter()
-        .filter(|v| v.language.starts_with("ja"))
-        .collect();
-    let name_lower = |v: &&Voice| v.name.to_lowercase();
-
-    ja.iter()
-        .find(|v| name_lower(v).contains("kyoko") && name_lower(v).contains("enhanced"))
-        .copied()
-        .or_else(|| ja.iter().find(|v| name_lower(v).contains("kyoko")).copied())
-        .or_else(|| {
-            ja.iter()
-                .find(|v| name_lower(v).contains("enhanced"))
-                .copied()
-        })
-        .or_else(|| ja.first().copied())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn voice(id: &str, name: &str, lang: &str) -> Voice {
-        Voice {
-            id: id.to_string(),
-            name: name.to_string(),
-            language: lang.to_string(),
-        }
-    }
-
-    #[test]
-    fn pick_japanese_voice_prefers_enhanced_kyoko() {
-        let voices = vec![
-            voice("v1", "Otoya", "ja-JP"),
-            voice("v2", "Kyoko", "ja-JP"),
-            voice("v3", "Kyoko Enhanced", "ja-JP"),
-        ];
-
-        let picked = pick_japanese_voice(&voices);
-        assert_eq!(picked.map(|v| v.id.as_str()), Some("v3"));
-    }
-
-    #[test]
-    fn pick_japanese_voice_falls_back_to_any_japanese() {
-        let voices = vec![
-            voice("v1", "Samantha", "en-US"),
-            voice("v2", "Otoya", "ja-JP"),
-        ];
-
-        let picked = pick_japanese_voice(&voices);
-        assert_eq!(picked.map(|v| v.id.as_str()), Some("v2"));
-    }
-
-    #[test]
-    fn pick_japanese_voice_returns_none_without_japanese() {
-        let voices = vec![voice("v1", "Samantha", "en-US")];
-
-        assert!(pick_japanese_voice(&voices).is_none());
-    }
 
     #[test]
     fn capabilities_deserialize_from_plugin_camel_case_payload() {
@@ -143,7 +72,6 @@ mod tests {
         let caps: Capabilities = serde_json::from_str(json).unwrap();
 
         assert!(caps.speech_recognition.available);
-        assert!(caps.speech_synthesis.available);
         assert!(caps.text_recognition.available);
     }
 

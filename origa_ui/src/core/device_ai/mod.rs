@@ -1,9 +1,9 @@
 //! High-level device-ai provider: capabilities-first routing decisions plus
-//! cached access to the plugin's native ASR/OCR/TTS.
+//! cached access to the plugin's native ASR/OCR.
 //!
 //! Routing contract:
 //! - Web (no Tauri) → the plugin is unreachable; [`available`] returns `false`
-//!   for every feature and callers use the WASM/`speechSynthesis` fallback.
+//!   for every feature and callers use the WASM fallback.
 //! - Tauri on Windows/Linux → the plugin is not compiled in; invoking it
 //!   fails, capabilities stay unavailable, fallback is used.
 //! - Tauri on macOS/iOS/Android → capabilities are queried once, cached, and
@@ -18,7 +18,7 @@ mod invoke;
 
 use std::cell::RefCell;
 
-use contracts::{Capabilities, RecognitionResult, TextRecognitionResult, Voice};
+use contracts::{Capabilities, RecognitionResult, TextRecognitionResult};
 
 use crate::core::tauri;
 
@@ -26,7 +26,6 @@ use crate::core::tauri;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Feature {
     SpeechRecognition,
-    SpeechSynthesis,
     TextRecognition,
 }
 
@@ -34,7 +33,6 @@ impl Feature {
     fn status(self, caps: &Capabilities) -> bool {
         match self {
             Self::SpeechRecognition => caps.speech_recognition.available,
-            Self::SpeechSynthesis => caps.speech_synthesis.available,
             Self::TextRecognition => caps.text_recognition.available,
         }
     }
@@ -43,7 +41,7 @@ impl Feature {
 thread_local! {
     /// Capabilities cache. `None` = not yet queried; `Some(caps)` = queried
     /// (possibly all-unavailable). Queried once per session to avoid repeated
-    /// plugin round-trips on every TTS/OCR/ASR call.
+    /// plugin round-trips on every OCR/ASR call.
     static CACHED_CAPABILITIES: RefCell<Option<Capabilities>> = const { RefCell::new(None) };
     static CAPABILITIES_LOADING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
 }
@@ -112,9 +110,8 @@ async fn cached_or_query() -> Result<Capabilities, String> {
         Ok(caps) => {
             CACHED_CAPABILITIES.with(|c| *c.borrow_mut() = Some(caps.clone()));
             tracing::info!(
-                "device-ai: native capabilities — speech_recognition={}, speech_synthesis={}, text_recognition={}",
+                "device-ai: native capabilities — speech_recognition={}, text_recognition={}",
                 caps.speech_recognition.available,
-                caps.speech_synthesis.available,
                 caps.text_recognition.available,
             );
             Ok(caps)
@@ -132,16 +129,6 @@ pub async fn recognize_text(base64: &str) -> Result<TextRecognitionResult, Strin
     invoke::recognize_text(base64).await
 }
 
-/// Synthesize and play `text` via native TTS. Resolves when playback finishes.
-pub async fn synthesize(text: &str, voice_id: Option<&str>, rate: f32) -> Result<(), String> {
-    invoke::synthesize(text, voice_id, rate).await
-}
-
-/// List native synthesis voices.
-pub async fn get_voices() -> Result<Vec<Voice>, String> {
-    invoke::get_voices().await
-}
-
 /// One-shot live-microphone recognition. Returns `Err` if unavailable —
 /// callers fall back to recording + Whisper WASM.
 pub async fn recognize_live(language: &str) -> Result<RecognitionResult, String> {
@@ -155,10 +142,9 @@ mod tests {
     #[test]
     fn feature_status_reads_available_flag() {
         let mut caps = Capabilities::all_unavailable();
-        caps.speech_synthesis.available = true;
+        caps.speech_recognition.available = true;
 
-        assert!(!Feature::SpeechRecognition.status(&caps));
-        assert!(Feature::SpeechSynthesis.status(&caps));
+        assert!(Feature::SpeechRecognition.status(&caps));
         assert!(!Feature::TextRecognition.status(&caps));
     }
 
@@ -167,7 +153,6 @@ mod tests {
         let caps = Capabilities::all_unavailable();
 
         assert!(!Feature::SpeechRecognition.status(&caps));
-        assert!(!Feature::SpeechSynthesis.status(&caps));
         assert!(!Feature::TextRecognition.status(&caps));
     }
 }

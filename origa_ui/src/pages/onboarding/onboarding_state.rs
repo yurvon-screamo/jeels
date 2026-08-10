@@ -187,13 +187,13 @@ impl OnboardingState {
 
         if let Some(selected) = level {
             for &lvl in &levels_order {
-                if lvl == selected {
-                    break;
-                }
-
                 let set_id = format!("jlpt_{}", level_to_lowercase(lvl));
                 if let Some(jlpt_set) = self.available_sets.iter().find(|s| s.id == set_id) {
                     self.sets_to_import.push(jlpt_set.clone());
+                }
+
+                if lvl == selected {
+                    break;
                 }
             }
         }
@@ -226,5 +226,73 @@ fn level_to_lowercase(level: JapaneseLevel) -> &'static str {
         JapaneseLevel::N3 => "n3",
         JapaneseLevel::N2 => "n2",
         JapaneseLevel::N1 => "n1",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use origa::domain::WellKnownSetMeta;
+
+    fn make_meta(id: &str, level: JapaneseLevel) -> WellKnownSetMeta {
+        WellKnownSetMeta {
+            id: id.to_string(),
+            set_type: "jlpt".to_string(),
+            level,
+            title_ru: format!("Тест {}", id),
+            title_en: format!("Test {}", id),
+            desc_ru: String::new(),
+            desc_en: String::new(),
+            word_count: 10,
+        }
+    }
+
+    fn available_sets() -> Vec<WellKnownSetMeta> {
+        vec![
+            make_meta("jlpt_n5", JapaneseLevel::N5),
+            make_meta("jlpt_n4", JapaneseLevel::N4),
+            make_meta("jlpt_n3", JapaneseLevel::N3),
+        ]
+    }
+
+    #[test]
+    fn set_jlpt_level_includes_selected_level_set() {
+        let mut state = OnboardingState::new();
+        state.set_available_sets(available_sets());
+        state.set_jlpt_level(Some(JapaneseLevel::N4));
+
+        let ids: Vec<&str> = state.sets_to_import.iter().map(|s| s.id.as_str()).collect();
+        assert!(
+            ids.contains(&"jlpt_n4"),
+            "selected level's set must be included; got {:?}",
+            ids
+        );
+        assert!(
+            ids.contains(&"jlpt_n5"),
+            "lower level sets must be included; got {:?}",
+            ids
+        );
+    }
+
+    #[test]
+    fn set_jlpt_level_n5_includes_only_n5() {
+        let mut state = OnboardingState::new();
+        state.set_available_sets(available_sets());
+        state.set_jlpt_level(Some(JapaneseLevel::N5));
+
+        let ids: Vec<&str> = state.sets_to_import.iter().map(|s| s.id.as_str()).collect();
+        assert_eq!(ids, vec!["jlpt_n5"]);
+    }
+
+    #[test]
+    fn set_jlpt_level_clears_previous_selection() {
+        let mut state = OnboardingState::new();
+        state.set_available_sets(available_sets());
+        state.set_jlpt_level(Some(JapaneseLevel::N4));
+        assert!(!state.sets_to_import.is_empty());
+
+        state.set_jlpt_level(Some(JapaneseLevel::N5));
+        let ids: Vec<&str> = state.sets_to_import.iter().map(|s| s.id.as_str()).collect();
+        assert_eq!(ids, vec!["jlpt_n5"]);
     }
 }

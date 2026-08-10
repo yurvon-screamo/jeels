@@ -283,7 +283,7 @@ pub fn LessonCard(
 
                 <Show when=move || show_answer.get()>
                     <LessonCardAnswer
-                        question_text=display_question.get_value()
+                        question_text=if is_reversed { answer.get_value() } else { question.get_value() }
                         answer_text=answer.get_value()
                         answer_translations=answer_translations_stored.get_value()
                         answer_description=answer_description_stored.get_value()
