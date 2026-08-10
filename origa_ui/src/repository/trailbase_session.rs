@@ -231,33 +231,6 @@ impl TrailBaseClient {
         Ok(())
     }
 
-    pub async fn delete_account(&self) -> Result<(), String> {
-        let session = get_session().ok_or("Not authenticated")?;
-
-        let api = self.records("user");
-
-        if let Some(record_id) = session.record_id {
-            api.delete(&record_id.to_string())
-                .await
-                .map_err(|e| e.to_string())?;
-        } else {
-            let records: Vec<serde_json::Value> = api
-                .list_filtered("email", &session.email)
-                .await
-                .map_err(|e| e.to_string())?;
-
-            if let Some(record) = records.first()
-                && let Some(id) = record.get("id").and_then(|v| v.as_i64())
-            {
-                api.delete(&id.to_string())
-                    .await
-                    .map_err(|e| e.to_string())?;
-            }
-        }
-
-        self.logout().await
-    }
-
     pub async fn change_password(
         &self,
         old_password: &str,

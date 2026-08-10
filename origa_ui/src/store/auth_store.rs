@@ -389,7 +389,13 @@ impl AuthStore {
 
         self.is_deleting_account.set(true);
 
-        if let Err(e) = self.client.delete_account().await {
+        // Capture user id before clearing auth state — we need it for the
+        // local data cleanup after the remote record is gone. If there is no
+        // loaded user, the account is in an anomalous state (authenticated
+        // session but no domain User) — abort before touching the server.
+        let user_id = self.user.with(|u| u.clone().map(|user| user.id()));
+
+        if let Err(e) = self.repository.delete_remote(user_id).await {
             tracing::error!("Server account delete failed: {:?}", e);
             self.clear_auth_state().await;
             self.is_deleting_account.set(false);
@@ -398,7 +404,10 @@ impl AuthStore {
             });
         }
 
-        let user_id = self.user.with(|u| u.clone().map(|user| user.id()));
+        // Invalidate the auth session on the server side. Best-effort — the
+        // record is already deleted, so a lingering session token is harmless.
+        let _ = self.client.logout().await;
+
         self.clear_auth_state().await;
 
         if let Some(id) = user_id
