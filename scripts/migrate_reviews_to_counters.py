@@ -22,131 +22,21 @@ Prerequisites:
 from __future__ import annotations
 
 import argparse
-import base64
-import json
 import os
 import sys
-from datetime import datetime, timezone
 
 import requests
 
-# ─── ADR-034 codec constants ──────────────────────────────────────────
-DEFLATE_PREFIX = "DEFLATE;"
-
-# Rating enum values as serialized by serde (string variants)
-RATING_EASY = "Easy"
-RATING_GOOD = "Good"
-RATING_HARD = "Hard"
-RATING_AGAIN = "Again"
-
-
-def decode_knowledge_set(raw: str) -> dict:
-    """Decode knowledge_set wire blob to a dict.
-
-    Handles both legacy plain-JSON and DEFLATE;<base64> formats (ADR-034).
-    Recovering: corrupt input → empty KnowledgeSet.
-    """
-    if raw.startswith(DEFLATE_PREFIX):
-        import zlib
-
-        b64_data = raw[len(DEFLATE_PREFIX) :]
-        try:
-            deflated = base64.b64decode(b64_data)
-            json_bytes = zlib.deinflate(deflated)
-            return json.loads(json_bytes)
-        except Exception as e:
-            print(f"  WARN: decode failed ({e}), returning empty KnowledgeSet", file=sys.stderr)
-            return {"study_cards": {}, "lesson_history": []}
-    else:
-        # Legacy plain JSON
-        try:
-            return json.loads(raw)
-        except Exception as e:
-            print(f"  WARN: JSON decode failed ({e}), returning empty", file=sys.stderr)
-            return {"study_cards": {}, "lesson_history": []}
+# Import shared codec + merge logic
+sys.path.insert(0, os.path.dirname(__file__))
+from _knowledge_set_codec import (  # noqa: E402
+    decode_knowledge_set,
+    encode_knowledge_set,
+    migrate_knowledge_set,
+)
 
 
-def encode_knowledge_set(ks: dict) -> str:
-    """Encode KnowledgeSet dict to DEFLATE;<base64> wire format."""
-    import zlib
-
-    json_str = json.dumps(ks, separators=(",", ":"), ensure_ascii=False)
-    deflated = zlib.compress(json_str.encode("utf-8"), level=6)
-    return DEFLATE_PREFIX + base64.b64encode(deflated).decode("ascii")
-
-
-def migrate_memory_history(memory: dict) -> dict:
-    """Replace reviews array with scalar counters in a single MemoryHistory.
-
-    Input shape (old):
-        {
-            "current_state": {...} | null,
-            "reviews": [
-                {"id": "...", "rating": "Good", "timestamp": "...", "interval": {...}},
-                ...
-            ]
-        }
-
-    Output shape (new):
-        {
-            "current_state": {...} | null,
-            "reps": 3,
-            "lapses": 1,
-            "easy_count": 1,
-            "good_count": 1,
-            "last_review_date": "2025-01-01T12:00:00Z" | null,
-            "last_rating": "Good" | null
-        }
-    """
-    reviews = memory.get("reviews", [])
-    current_state = memory.get("current_state")
-
-    reps = len(reviews)
-    lapses = sum(1 for r in reviews if r.get("rating") == RATING_AGAIN)
-    easy_count = sum(1 for r in reviews if r.get("rating") == RATING_EASY)
-    good_count = sum(1 for r in reviews if r.get("rating") == RATING_GOOD)
-
-    # last_review_date: timestamp of the last review (chronologically)
-    last_review_date = None
-    last_rating = None
-    if reviews:
-        # Reviews are appended chronologically; last element is most recent.
-        # But sort by timestamp defensively in case of disorder.
-        sorted_reviews = sorted(reviews, key=lambda r: r.get("timestamp", ""))
-        last = sorted_reviews[-1]
-        last_review_date = last.get("timestamp")
-        last_rating = last.get("rating")
-
-    return {
-        "current_state": current_state,
-        "reps": reps,
-        "lapses": lapses,
-        "easy_count": easy_count,
-        "good_count": good_count,
-        "last_review_date": last_review_date,
-        "last_rating": last_rating,
-    }
-
-
-def migrate_knowledge_set(ks: dict) -> dict:
-    """Migrate all StudyCards in a KnowledgeSet from reviews to counters."""
-    study_cards = ks.get("study_cards", {})
-    migrated_count = 0
-
-    for card_id, study_card in study_cards.items():
-        memory = study_card.get("memory_history")
-        if memory is None:
-            continue
-        if "reviews" not in memory:
-            # Already migrated or no reviews — skip
-            continue
-        study_card["memory_history"] = migrate_memory_history(memory)
-        migrated_count += 1
-
-    return ks, migrated_count
-
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Migrate domain_user knowledge_set from reviews array to scalar counters"
     )
@@ -226,7 +116,7 @@ def main():
         )
 
         if args.dry_run:
-            print(f"    DRY RUN — not writing")
+            print("    DRY RUN — not writing")
             continue
 
         # Write back
@@ -234,7 +124,7 @@ def main():
         resp = session.patch(update_url, json={"knowledge_set": new_ks_raw})
         resp.raise_for_status()
         total_rows_updated += 1
-        print(f"    Written ✓")
+        print("    Written ✓")
 
     print(f"\nDone. {total_cards_migrated} cards migrated, {total_rows_updated} rows updated.")
     if args.dry_run:
