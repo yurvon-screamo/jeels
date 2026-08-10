@@ -26,6 +26,10 @@ use crate::core::tauri;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Feature {
     SpeechRecognition,
+    /// TTS synthesis — device-ai is now the fallback for TTS (plugin:tts is
+    /// primary because it sets language = ja-JP natively). This variant is
+    /// still used by `status()` and tests.
+    #[allow(dead_code)]
     SpeechSynthesis,
     TextRecognition,
 }

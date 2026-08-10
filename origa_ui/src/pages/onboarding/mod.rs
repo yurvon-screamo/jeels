@@ -19,8 +19,8 @@ use crate::i18n::{
 use crate::loaders::WellKnownSetLoaderImpl;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    Button, ButtonVariant, CardLayout, CardLayoutSize, PageLayout, PageLayoutVariant, Spinner,
-    Stepper, StepperStep, Text, TextSize, TypographyVariant,
+    Button, ButtonVariant, CardLayout, CardLayoutSize, Modal, PageLayout, PageLayoutVariant,
+    Spinner, Stepper, StepperStep, Text, TextSize, TypographyVariant,
 };
 use apps_step::AppsStep;
 use intro_step::IntroStep;
@@ -40,6 +40,13 @@ use origa::use_cases::UpdateUserProfileUseCase;
 use progress::ProgressStep;
 use scoring_step::ScoringStep;
 use summary_step::SummaryStep;
+
+/// Which destructive scoring action is awaiting confirmation in the modal.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PendingScoringAction {
+    KnowAll,
+    Skip,
+}
 
 #[component]
 pub fn Onboarding() -> impl IntoView {
@@ -64,6 +71,11 @@ pub fn Onboarding() -> impl IntoView {
     let mark_all_trigger: RwSignal<u32> = RwSignal::new(0);
     let scoring_completed: RwSignal<bool> = RwSignal::new(false);
     let lang_initialized = RwSignal::new(false);
+
+    // Confirm-modal open state. When `true`, the modal shows the confirmation
+    // for whichever action was last requested.
+    let confirm_modal_open: RwSignal<bool> = RwSignal::new(false);
+    let pending_scoring_action: RwSignal<Option<PendingScoringAction>> = RwSignal::new(None);
 
     provide_context(state);
 
@@ -357,7 +369,8 @@ pub fn Onboarding() -> impl IntoView {
                                     <Button
                                         variant=ButtonVariant::Ghost
                                         on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                            on_skip.run(());
+                                            pending_scoring_action.set(Some(PendingScoringAction::Skip));
+                                            confirm_modal_open.set(true);
                                         })
                                         test_id="onboarding-skip-scoring"
                                     >
@@ -370,7 +383,8 @@ pub fn Onboarding() -> impl IntoView {
                                         <Button
                                             variant=ButtonVariant::Olive
                                             on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                                mark_all_trigger.update(|n| *n += 1);
+                                                pending_scoring_action.set(Some(PendingScoringAction::KnowAll));
+                                                confirm_modal_open.set(true);
                                             })
                                             test_id="onboarding-mark-all-known"
                                         >
@@ -391,6 +405,82 @@ pub fn Onboarding() -> impl IntoView {
                                     </Show>
                                 </div>
                             </div>
+
+                            // Confirmation modal for destructive scoring actions.
+                            // Both "Know all" and "Skip" are irreversible from the
+                            // user's perspective — the modal makes the consequence
+                            // explicit before committing.
+                            <Modal
+                                is_open=confirm_modal_open
+                                title=Signal::derive(move || {
+                                    let locale = i18n.get_locale();
+                                    match pending_scoring_action.get() {
+                                        Some(PendingScoringAction::KnowAll) => {
+                                            td_string!(locale, onboarding.scoring.know_all_confirm_title).to_string()
+                                        },
+                                        Some(PendingScoringAction::Skip) => {
+                                            td_string!(locale, onboarding.scoring.skip_confirm_title).to_string()
+                                        },
+                                        None => String::new(),
+                                    }
+                                })
+                                test_id=Signal::derive(|| "onboarding-scoring-confirm".to_string())
+                            >
+                                <div class="flex flex-col gap-4">
+                                    <Text size=TextSize::Small variant=TypographyVariant::Muted>
+                                        {move || {
+                                            let locale = i18n.get_locale();
+                                            match pending_scoring_action.get() {
+                                                Some(PendingScoringAction::KnowAll) => {
+                                                    td_string!(locale, onboarding.scoring.know_all_confirm_body).to_string()
+                                                },
+                                                Some(PendingScoringAction::Skip) => {
+                                                    td_string!(locale, onboarding.scoring.skip_confirm_body).to_string()
+                                                },
+                                                None => String::new(),
+                                            }
+                                        }}
+                                    </Text>
+                                    <div class="flex justify-end gap-3">
+                                        <Button
+                                            variant=ButtonVariant::Ghost
+                                            on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
+                                                pending_scoring_action.set(None);
+                                                confirm_modal_open.set(false);
+                                            })
+                                            test_id="onboarding-scoring-confirm-cancel"
+                                        >
+                                            {move || {
+                                                let locale = i18n.get_locale();
+                                                td_string!(locale, onboarding.scoring.cancel).to_string().into_any()
+                                            }}
+                                        </Button>
+                                        <Button
+                                            variant=ButtonVariant::Olive
+                                            on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
+                                                let action = pending_scoring_action.get();
+                                                pending_scoring_action.set(None);
+                                                confirm_modal_open.set(false);
+                                                match action {
+                                                    Some(PendingScoringAction::KnowAll) => {
+                                                        mark_all_trigger.update(|n| *n += 1);
+                                                    },
+                                                    Some(PendingScoringAction::Skip) => {
+                                                        on_skip.run(());
+                                                    },
+                                                    None => {},
+                                                }
+                                            })
+                                            test_id="onboarding-scoring-confirm-ok"
+                                        >
+                                            {move || {
+                                                let locale = i18n.get_locale();
+                                                td_string!(locale, onboarding.scoring.confirm).to_string().into_any()
+                                            }}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Modal>
                         </Show>
                     </div>
                 </Show>

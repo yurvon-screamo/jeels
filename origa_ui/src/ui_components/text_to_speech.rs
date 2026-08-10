@@ -1,14 +1,14 @@
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 
-use crate::core::device_ai::{self, Feature, contracts::pick_japanese_voice};
+use crate::core::device_ai::{self, contracts::pick_japanese_voice};
 use crate::core::tauri;
 use leptos::task::spawn_local;
 use leptos::wasm_bindgen::JsCast;
 use leptos::wasm_bindgen::JsValue;
 use leptos::wasm_bindgen::closure::Closure;
 use origa::domain::furiganize_segments;
-use tracing::{info, warn};
+use tracing::warn;
 use web_sys::js_sys::Function;
 use web_sys::{SpeechSynthesisUtterance, SpeechSynthesisVoice, window};
 
@@ -251,15 +251,19 @@ pub fn speak_tts_text(text: &str, rate: f32) -> Result<(), String> {
     if tauri::is_tauri() {
         let text_owned = text.to_string();
         spawn_local(async move {
-            // device-ai native TTS is primary (macOS/iOS/Android); the legacy
-            // plugin:tts is the fallback (Windows/Linux, or where device-ai is
-            // unavailable). Routing is runtime-resolved via capabilities.
-            let result = if device_ai::available(Feature::SpeechSynthesis).await {
-                info!("TTS: using native device-ai synthesis");
-                device_ai_speak(&text_owned, rate).await
-            } else {
-                info!("TTS: native device-ai unavailable, using legacy plugin:tts");
-                invoke_tauri_speak(&text_owned, rate).await
+            // plugin:tts is the primary TTS backend on every platform: it
+            // explicitly sets language = "ja-JP" on the native engine, which
+            // prevents the system-default-locale voice (e.g. Russian) from
+            // being used when no Japanese voice is installed. device-ai TTS is
+            // the fallback — it never calls setLanguage and therefore falls
+            // back to the system voice when no Japanese voice is resolved.
+            let result = invoke_tauri_speak(&text_owned, rate).await;
+            let result = match result {
+                Ok(()) => Ok(()),
+                Err(e) => {
+                    warn!("plugin:tts speak failed, trying device-ai fallback: {}", e);
+                    device_ai_speak(&text_owned, rate).await
+                },
             };
             if let Err(e) = result {
                 warn!("TTS speak error: {}", e);
@@ -300,26 +304,25 @@ where
     if tauri::is_tauri() {
         let text_owned = text.to_string();
         spawn_local(async move {
-            // device-ai synthesize is blocking — it resolves when playback
-            // finishes, so the callback fires right after. The legacy
-            // plugin:tts path instead emits `tts://speech:finish`, consumed by
-            // the registered listener; device-ai never emits that event.
-            if device_ai::available(Feature::SpeechSynthesis).await {
-                info!("TTS: using native device-ai synthesis");
-                if let Err(e) = device_ai_speak(&text_owned, rate).await {
-                    warn!("TTS speak error: {}", e);
-                }
-                on_end();
-            } else {
-                info!("TTS: native device-ai unavailable, using legacy plugin:tts");
+            // plugin:tts is primary (sets language = "ja-JP" natively);
+            // device-ai is the fallback. The callback path differs: plugin:tts
+            // emits a `tts://speech:finish` event consumed by the registered
+            // listener, while device-ai synthesize resolves on completion.
+            let primary_result = invoke_tauri_speak(&text_owned, rate).await;
+            if primary_result.is_ok() {
                 TTS_CALLBACK.with(|cell| {
                     *cell.borrow_mut() = Some(Box::new(on_end));
                 });
                 ensure_tauri_listener_registered();
-
-                if let Err(e) = invoke_tauri_speak(&text_owned, rate).await {
+            } else {
+                warn!(
+                    "plugin:tts speak failed, trying device-ai fallback: {:?}",
+                    primary_result
+                );
+                if let Err(e) = device_ai_speak(&text_owned, rate).await {
                     warn!("TTS speak error: {}", e);
                 }
+                on_end();
             }
         });
         return Ok(());
@@ -437,10 +440,10 @@ pub fn extract_japanese_text(text: &str) -> String {
 pub fn stop_speech() -> Result<(), String> {
     if tauri::is_tauri() {
         spawn_local(async {
-            // device-ai TTS (both Android QUEUE_FLUSH and iOS
-            // stopSpeaking) flushes the current utterance natively on the
-            // next speak() call. The legacy plugin:tts stop is still called
-            // for the Windows/Linux fallback path.
+            // Stop both TTS backends. plugin:tts stop cancels the current
+            // utterance on platforms where it is active. device-ai TTS does not
+            // expose a stop command, but the next speak() call with QUEUE_FLUSH
+            // (Android) / stopSpeaking (iOS) cancels any in-flight utterance.
             if let Err(e) = invoke_tauri_stop().await {
                 warn!("TTS stop error: {}", e);
             }

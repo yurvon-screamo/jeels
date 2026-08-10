@@ -187,13 +187,13 @@ impl OnboardingState {
 
         if let Some(selected) = level {
             for &lvl in &levels_order {
-                if lvl == selected {
-                    break;
-                }
-
                 let set_id = format!("jlpt_{}", level_to_lowercase(lvl));
                 if let Some(jlpt_set) = self.available_sets.iter().find(|s| s.id == set_id) {
                     self.sets_to_import.push(jlpt_set.clone());
+                }
+
+                if lvl == selected {
+                    break;
                 }
             }
         }

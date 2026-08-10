@@ -37,10 +37,16 @@ fn extract_grammar_rule_id(card: &LessonCard) -> Option<Ulid> {
 
 async fn check_and_create_ready_phrases<R: UserRepository>(
     card_id: Ulid,
+    card_type: CardType,
     repo: &R,
     rating: Rating,
 ) {
-    if rating == Rating::Again {
+    // Early exit before the repo round-trip: phrase creation only applies to
+    // vocabulary cards rated Good/Easy. Skipping the get_current_user() call
+    // for Kanji/Grammar/Phrase cards eliminates a redundant IndexedDB read on
+    // every rating, which was the primary source of the "slow kanji advance"
+    // symptom — the async chain waited on this fetch before advancing.
+    if rating == Rating::Again || card_type != CardType::Vocabulary {
         return;
     }
 
@@ -125,6 +131,9 @@ pub fn create_on_rate_callback(
             .map(determine_rate_mode)
             .unwrap_or(RateMode::StandardLesson);
         let grammar_rule_id = lesson_card.and_then(extract_grammar_rule_id);
+        let card_type = lesson_card
+            .map(|lc| CardType::from(lc.card()))
+            .unwrap_or(CardType::Vocabulary);
 
         let Some(real_card_id) = real_card_id else {
             return;
@@ -145,7 +154,7 @@ pub fn create_on_rate_callback(
                 warn!(error = ?e, "Failed to rate card");
             }
 
-            check_and_create_ready_phrases(real_card_id, &repo, rating).await;
+            check_and_create_ready_phrases(real_card_id, card_type, &repo, rating).await;
 
             if is_disposed.is_disposed() {
                 return;
