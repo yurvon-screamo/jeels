@@ -8,6 +8,8 @@ mod header;
 mod kanji_card_details;
 mod keyboard_handler;
 mod lesson_card;
+#[cfg(all(target_arch = "wasm32", test))]
+mod lesson_card_wasm_tests;
 mod lesson_card_answer;
 mod lesson_card_container;
 mod lesson_card_header;

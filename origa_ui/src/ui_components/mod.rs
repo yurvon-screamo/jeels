@@ -48,6 +48,8 @@ mod filter_tag;
 mod stepper;
 mod tabs;
 mod tag;
+#[cfg(all(target_arch = "wasm32", test))]
+mod component_wasm_tests;
 mod test_id;
 mod text_to_speech;
 mod toast;
