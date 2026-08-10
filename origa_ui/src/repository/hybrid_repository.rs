@@ -60,6 +60,23 @@ impl HybridUserRepository {
         self.remote.save(&updated_user).await?;
         Ok(())
     }
+
+    /// Delete the remote user record only. Unlike `delete`, this does NOT
+    /// swallow remote errors — account deletion must surface failures so the
+    /// caller (AuthStore) can abort the flow instead of leaving the user in a
+    /// half-deleted state. Local data cleanup is the caller's responsibility.
+    ///
+    /// `user_id` is accepted as `Option<Ulid>` — when `None`, the caller has no
+    /// loaded domain `User`, which means the account is in an anomalous state
+    /// (authenticated session but no User object). This is surfaced as an error
+    /// rather than silently passing a nil ULID.
+    pub async fn delete_remote(&self, user_id: Option<Ulid>) -> Result<(), OrigaError> {
+        tracing::info!("delete_remote: Deleting remote user {:?}", user_id);
+        let id = user_id.ok_or_else(|| OrigaError::RepositoryError {
+            reason: "Cannot delete account: no user is currently loaded".to_string(),
+        })?;
+        self.remote.delete(id).await
+    }
 }
 
 impl UserRepository for HybridUserRepository {
