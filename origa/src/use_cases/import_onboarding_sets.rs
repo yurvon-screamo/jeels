@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use tracing::{debug, info, warn};
 
 use crate::dictionary::grammar::get_rules_by_level;
+use crate::dictionary::kanji::get_kanji_list;
 use crate::domain::resolve_set_path;
 use crate::domain::{
     Card, GrammarRuleCard, JapaneseLevel, KanjiCard, OrigaError, StudyCard, User, VocabularyCard,
@@ -68,21 +69,12 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
             result.skipped_no_translation += words_result.skipped_no_translation.len();
 
             for vocab_card in words_result.cards {
-                if let Ok(study_card) = self.create_vocabulary_card(
+                if let Ok(_study_card) = self.create_vocabulary_card(
                     &mut user,
                     vocab_card,
                     &mut result.skipped_duplicates,
                 ) {
                     result.created_vocabulary += 1;
-
-                    self.process_kanji_from_vocab(
-                        &study_card,
-                        set_level,
-                        &target_level,
-                        &mut user,
-                        &mut created_kanji_chars,
-                        &mut result,
-                    );
                 }
             }
 
@@ -90,8 +82,8 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
         }
 
         // Pull in every level at or below the target so a user picking N3 also
-        // gets N5/N4/N2/... grammar rules they should already know, regardless
-        // of which sets they imported.
+        // gets N5/N4/N2/... grammar rules and kanji they should already know,
+        // regardless of which sets they imported.
         for level in JapaneseLevel::ALL {
             if level <= target_level {
                 grammar_levels.insert(level);
@@ -116,6 +108,32 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
                             warn!(error = ?e, "Failed to create grammar card");
                         },
                     }
+                }
+            }
+        }
+
+        // Import kanji directly from the kanji dictionary for every level ≤
+        // target — symmetric with grammar above. Previously kanji were
+        // extracted FROM vocabulary words, which produced wrong results: a
+        // word at N4 might contain an N3 kanji, so the user got kanji they
+        // never asked for. Kanji→vocab companion cards are still created for
+        // each kanji (create_companion_vocab_cards).
+        debug!(target_level = ?target_level, "Importing kanji from dictionary");
+        for level in JapaneseLevel::ALL {
+            if level > target_level {
+                continue;
+            }
+            for info in get_kanji_list(&level) {
+                let kanji_char = info.kanji().to_string();
+                if created_kanji_chars.contains(&kanji_char) {
+                    continue;
+                }
+                if self
+                    .create_kanji_card(&mut user, &kanji_char, &mut result)
+                    .is_ok()
+                {
+                    result.created_kanji += 1;
+                    created_kanji_chars.insert(kanji_char);
                 }
             }
         }
@@ -179,61 +197,6 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
             },
             Err(e) => Err(e),
         }
-    }
-
-    fn extract_kanji_chars(
-        &self,
-        study_card: &StudyCard,
-        target_level: &JapaneseLevel,
-    ) -> Vec<String> {
-        if let Card::Vocabulary(vocab) = study_card.card() {
-            vocab
-                .get_kanji_cards(target_level)
-                .into_iter()
-                .map(|info| info.kanji().to_string())
-                .collect()
-        } else {
-            Vec::new()
-        }
-    }
-
-    fn process_kanji_from_vocab(
-        &self,
-        study_card: &StudyCard,
-        set_level: JapaneseLevel,
-        target_level: &JapaneseLevel,
-        user: &mut crate::domain::User,
-        created_kanji_chars: &mut HashSet<String>,
-        result: &mut ImportOnboardingResult,
-    ) {
-        let kanji_chars = self.extract_kanji_chars(study_card, target_level);
-
-        for kanji_char in kanji_chars {
-            if created_kanji_chars.contains(&kanji_char) {
-                continue;
-            }
-
-            if !self.should_create_kanji_card(&kanji_char, set_level, target_level) {
-                continue;
-            }
-
-            if self.create_kanji_card(user, &kanji_char, result).is_ok() {
-                result.created_kanji += 1;
-                created_kanji_chars.insert(kanji_char);
-            }
-        }
-    }
-
-    fn should_create_kanji_card(
-        &self,
-        kanji_char: &str,
-        set_level: JapaneseLevel,
-        target_level: &JapaneseLevel,
-    ) -> bool {
-        set_level <= *target_level
-            || crate::dictionary::kanji::get_kanji_info(kanji_char)
-                .map(|info| info.jlpt() <= target_level)
-                .unwrap_or(false)
     }
 
     fn create_kanji_card(

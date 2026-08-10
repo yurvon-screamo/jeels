@@ -41,11 +41,12 @@ use progress::ProgressStep;
 use scoring_step::ScoringStep;
 use summary_step::SummaryStep;
 
-/// Which destructive scoring action is awaiting confirmation in the modal.
+/// Which destructive action is awaiting confirmation in the modal.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum PendingScoringAction {
+enum PendingAction {
     KnowAll,
     Skip,
+    IntroSkip,
 }
 
 #[component]
@@ -75,7 +76,7 @@ pub fn Onboarding() -> impl IntoView {
     // Confirm-modal open state. When `true`, the modal shows the confirmation
     // for whichever action was last requested.
     let confirm_modal_open: RwSignal<bool> = RwSignal::new(false);
-    let pending_scoring_action: RwSignal<Option<PendingScoringAction>> = RwSignal::new(None);
+    let pending_scoring_action: RwSignal<Option<PendingAction>> = RwSignal::new(None);
 
     provide_context(state);
 
@@ -163,8 +164,16 @@ pub fn Onboarding() -> impl IntoView {
     let active_step: RwSignal<usize> = RwSignal::new(0);
 
     Effect::new(move |_| {
-        let step = state.get().current_step.as_usize();
-        active_step.set(step);
+        let step = state.get().current_step;
+        active_step.set(step.as_usize());
+
+        // Scroll to top on every step change so the user always sees the
+        // beginning of the step content — especially important for the
+        // Summary step whose accordion can leave the page scrolled far
+        // down from the previous step.
+        if let Some(window) = web_sys::window() {
+            window.scroll_to_with_x_and_y(0.0, 0.0);
+        }
     });
 
     let repo_for_init = repository.clone();
@@ -304,7 +313,8 @@ pub fn Onboarding() -> impl IntoView {
                                     <Button
                                         variant=ButtonVariant::Ghost
                                         on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                            on_skip.run(());
+                                            pending_scoring_action.set(Some(PendingAction::IntroSkip));
+                                            confirm_modal_open.set(true);
                                         })
                                         test_id="onboarding-skip"
                                     >
@@ -364,12 +374,12 @@ pub fn Onboarding() -> impl IntoView {
                         // Don't-Know buttons — reducing accidental taps on
                         // Skip / Know-All.
                         <Show when=move || matches!(state.get().current_step, OnboardingStep::Scoring)>
-                            <div class="onboarding-scoring-actions mt-4 flex justify-between items-center">
+                            <div class=move || format!("mt-4 flex items-center {}", if scoring_completed.get() { "justify-end" } else { "justify-between" })>
                                 <Show when=move || !scoring_completed.get()>
                                     <Button
                                         variant=ButtonVariant::Ghost
                                         on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                            pending_scoring_action.set(Some(PendingScoringAction::Skip));
+                                            pending_scoring_action.set(Some(PendingAction::Skip));
                                             confirm_modal_open.set(true);
                                         })
                                         test_id="onboarding-skip-scoring"
@@ -383,7 +393,7 @@ pub fn Onboarding() -> impl IntoView {
                                         <Button
                                             variant=ButtonVariant::Olive
                                             on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                                pending_scoring_action.set(Some(PendingScoringAction::KnowAll));
+                                                pending_scoring_action.set(Some(PendingAction::KnowAll));
                                                 confirm_modal_open.set(true);
                                             })
                                             test_id="onboarding-mark-all-known"
@@ -406,36 +416,44 @@ pub fn Onboarding() -> impl IntoView {
                                 </div>
                             </div>
 
-                            // Confirmation modal for destructive scoring actions.
-                            // Both "Know all" and "Skip" are irreversible from the
-                            // user's perspective — the modal makes the consequence
-                            // explicit before committing.
-                            <Modal
+                        </Show>
+
+                        // Confirmation modal for destructive actions (skip
+                        // onboarding, skip scoring, mark-all-known). Available
+                        // on all steps so the Intro skip and scoring actions
+                        // share one modal component.
+                        <Modal
                                 is_open=confirm_modal_open
                                 title=Signal::derive(move || {
                                     let locale = i18n.get_locale();
                                     match pending_scoring_action.get() {
-                                        Some(PendingScoringAction::KnowAll) => {
+                                        Some(PendingAction::KnowAll) => {
                                             td_string!(locale, onboarding.scoring.know_all_confirm_title).to_string()
                                         },
-                                        Some(PendingScoringAction::Skip) => {
+                                        Some(PendingAction::Skip) => {
                                             td_string!(locale, onboarding.scoring.skip_confirm_title).to_string()
+                                        },
+                                        Some(PendingAction::IntroSkip) => {
+                                            td_string!(locale, onboarding.intro.skip_confirm_title).to_string()
                                         },
                                         None => String::new(),
                                     }
                                 })
-                                test_id=Signal::derive(|| "onboarding-scoring-confirm".to_string())
+                                test_id=Signal::derive(|| "onboarding-confirm".to_string())
                             >
                                 <div class="flex flex-col gap-4">
                                     <Text size=TextSize::Small variant=TypographyVariant::Muted>
                                         {move || {
                                             let locale = i18n.get_locale();
                                             match pending_scoring_action.get() {
-                                                Some(PendingScoringAction::KnowAll) => {
+                                                Some(PendingAction::KnowAll) => {
                                                     td_string!(locale, onboarding.scoring.know_all_confirm_body).to_string()
                                                 },
-                                                Some(PendingScoringAction::Skip) => {
+                                                Some(PendingAction::Skip) => {
                                                     td_string!(locale, onboarding.scoring.skip_confirm_body).to_string()
+                                                },
+                                                Some(PendingAction::IntroSkip) => {
+                                                    td_string!(locale, onboarding.intro.skip_confirm_body).to_string()
                                                 },
                                                 None => String::new(),
                                             }
@@ -448,7 +466,7 @@ pub fn Onboarding() -> impl IntoView {
                                                 pending_scoring_action.set(None);
                                                 confirm_modal_open.set(false);
                                             })
-                                            test_id="onboarding-scoring-confirm-cancel"
+                                            test_id="onboarding-confirm-cancel"
                                         >
                                             {move || {
                                                 let locale = i18n.get_locale();
@@ -462,16 +480,19 @@ pub fn Onboarding() -> impl IntoView {
                                                 pending_scoring_action.set(None);
                                                 confirm_modal_open.set(false);
                                                 match action {
-                                                    Some(PendingScoringAction::KnowAll) => {
+                                                    Some(PendingAction::KnowAll) => {
                                                         mark_all_trigger.update(|n| *n += 1);
                                                     },
-                                                    Some(PendingScoringAction::Skip) => {
+                                                    Some(PendingAction::Skip) => {
+                                                        on_skip.run(());
+                                                    },
+                                                    Some(PendingAction::IntroSkip) => {
                                                         on_skip.run(());
                                                     },
                                                     None => {},
                                                 }
                                             })
-                                            test_id="onboarding-scoring-confirm-ok"
+                                            test_id="onboarding-confirm-ok"
                                         >
                                             {move || {
                                                 let locale = i18n.get_locale();
@@ -481,7 +502,6 @@ pub fn Onboarding() -> impl IntoView {
                                     </div>
                                 </div>
                             </Modal>
-                        </Show>
                     </div>
                 </Show>
             </CardLayout>

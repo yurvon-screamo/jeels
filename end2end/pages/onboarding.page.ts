@@ -212,6 +212,7 @@ export class OnboardingPage extends BasePage {
 
     async skipOnboarding(): Promise<void> {
         await this.page.getByTestId("onboarding-skip").click();
+        await this.page.getByTestId("onboarding-confirm-ok").click();
     }
 
     async clickKnow(): Promise<void> {
@@ -224,12 +225,12 @@ export class OnboardingPage extends BasePage {
 
     async clickMarkAllKnown(): Promise<void> {
         await this.markAllKnownBtn.click();
-        await this.page.getByTestId("onboarding-scoring-confirm-ok").click();
+        await this.page.getByTestId("onboarding-confirm-ok").click();
     }
 
     async clickSkipScoring(): Promise<void> {
         await this.skipScoringBtn.click();
-        await this.page.getByTestId("onboarding-scoring-confirm-ok").click();
+        await this.page.getByTestId("onboarding-confirm-ok").click();
     }
 
     async clickFinish(): Promise<void> {

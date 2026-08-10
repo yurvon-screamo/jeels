@@ -56,6 +56,16 @@ fn section_label(i18n: &I18nContext<Locale>, card_type: CardType) -> String {
     }
 }
 
+/// CSS class for a section's colour in the progress bar legend and marker.
+/// Grammar → Terracotta, Kanji → Olive, Vocabulary/Phrase → default (black).
+fn section_color_class(card_type: CardType) -> &'static str {
+    match card_type {
+        CardType::Grammar => "scoring-section-grammar",
+        CardType::Kanji => "scoring-section-kanji",
+        CardType::Vocabulary | CardType::Phrase => "",
+    }
+}
+
 /// Horizontal progress bar with one tick per scoring section. The fill width
 /// tracks the user's position in the overall queue (not per-section), and a
 /// vertical "marker" line is drawn at every section boundary so the user can
@@ -103,9 +113,10 @@ pub fn ScoringProgressBar(
                         let total_val = total.get();
                         let pct = (s.end as f64 / total_val.max(1) as f64) * 100.0;
                         let marker_test_id = format!("scoring-progress-marker-{}", s.card_type.sort_order());
+                        let color_class = section_color_class(s.card_type);
                         view! {
                             <div
-                                class="scoring-progress-marker"
+                                class=format!("scoring-progress-marker {}", color_class)
                                 style=format!("left: {}%", pct)
                                 data-testid=marker_test_id
                             ></div>
@@ -122,8 +133,9 @@ pub fn ScoringProgressBar(
                         .map(move |s| {
                             let label = section_label(&i18n, s.card_type);
                             let size = s.end.saturating_sub(s.start);
+                            let color_class = section_color_class(s.card_type);
                             view! {
-                                <Text size=TextSize::Small variant=TypographyVariant::Muted>
+                                <Text size=TextSize::Small variant=TypographyVariant::Muted class=Signal::derive(move || color_class.to_string())>
                                     {format!("{}: {}", label, size)}
                                 </Text>
                             }.into_any()
