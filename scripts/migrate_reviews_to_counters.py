@@ -41,10 +41,14 @@ def main() -> None:
         description="Migrate domain_user knowledge_set from reviews array to scalar counters"
     )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Decode and show what would change, but don't write"
+        "--dry-run",
+        action="store_true",
+        help="Decode and show what would change, but don't write",
     )
     parser.add_argument(
-        "--table", default="domain_user", help="TrailBase table name (default: domain_user)"
+        "--table",
+        default="domain_user",
+        help="TrailBase table name (default: domain_user)",
     )
     args = parser.parse_args()
 
@@ -52,7 +56,10 @@ def main() -> None:
     admin_token = os.environ.get("TRAILBASE_ADMIN_TOKEN")
 
     if not base_url or not admin_token:
-        print("ERROR: TRAILBASE_URL and TRAILBASE_ADMIN_TOKEN must be set", file=sys.stderr)
+        print(
+            "ERROR: TRAILBASE_URL and TRAILBASE_ADMIN_TOKEN must be set",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     session = requests.Session()
@@ -126,7 +133,9 @@ def main() -> None:
         total_rows_updated += 1
         print("    Written ✓")
 
-    print(f"\nDone. {total_cards_migrated} cards migrated, {total_rows_updated} rows updated.")
+    print(
+        f"\nDone. {total_cards_migrated} cards migrated, {total_rows_updated} rows updated."
+    )
     if args.dry_run:
         print("(dry run — no changes written)")
 

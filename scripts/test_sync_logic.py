@@ -157,9 +157,7 @@ def test_migrate_preserves_current_state():
 
 def test_migrate_idempotent():
     """Double-migrating produces the same result."""
-    mem = make_memory_with_reviews(
-        [(YESTERDAY, "Good"), (NOW, "Again"), (NOW, "Easy")]
-    )
+    mem = make_memory_with_reviews([(YESTERDAY, "Good"), (NOW, "Again"), (NOW, "Easy")])
     once = migrate_memory_history(mem)
     # No "reviews" key → migrate_memory_history should handle gracefully
     twice = {
@@ -229,14 +227,24 @@ def test_merge_memory_history_keeps_older_if_local_newer():
 def test_merge_memory_history_idempotent():
     """Double-merge = single merge."""
     local = make_memory_with_counters(
-        reps=3, lapses=1, easy_count=1, good_count=2,
-        last_review_date=YESTERDAY, last_rating="Good",
-        stability=5.0, difficulty=3.0,
+        reps=3,
+        lapses=1,
+        easy_count=1,
+        good_count=2,
+        last_review_date=YESTERDAY,
+        last_rating="Good",
+        stability=5.0,
+        difficulty=3.0,
     )
     remote = make_memory_with_counters(
-        reps=1, lapses=0, easy_count=1, good_count=0,
-        last_review_date=NOW, last_rating="Easy",
-        stability=10.0, difficulty=7.0,
+        reps=1,
+        lapses=0,
+        easy_count=1,
+        good_count=0,
+        last_review_date=NOW,
+        last_rating="Easy",
+        stability=10.0,
+        difficulty=7.0,
     )
 
     once = merge_memory_history(local, remote)
@@ -250,12 +258,8 @@ def test_merge_memory_history_idempotent():
 
 def test_merge_study_card_favorite_lww():
     """Favorite: LWW by favorite_changed_at — unfavorite wins with newer ts."""
-    local = make_study_card(
-        is_favorite=True, favorite_changed_at=YESTERDAY, streak=2
-    )
-    remote = make_study_card(
-        is_favorite=False, favorite_changed_at=NOW, streak=0
-    )
+    local = make_study_card(is_favorite=True, favorite_changed_at=YESTERDAY, streak=2)
+    remote = make_study_card(is_favorite=False, favorite_changed_at=NOW, streak=0)
 
     result = merge_study_card(local, remote)
 
@@ -266,12 +270,8 @@ def test_merge_study_card_favorite_lww():
 
 def test_merge_study_card_favorite_keeps_newer_favorite():
     """Newer favorite=true wins over older favorite=false."""
-    local = make_study_card(
-        is_favorite=False, favorite_changed_at=YESTERDAY, streak=0
-    )
-    remote = make_study_card(
-        is_favorite=True, favorite_changed_at=NOW, streak=3
-    )
+    local = make_study_card(is_favorite=False, favorite_changed_at=YESTERDAY, streak=0)
+    remote = make_study_card(is_favorite=True, favorite_changed_at=NOW, streak=3)
 
     result = merge_study_card(local, remote)
 
@@ -412,8 +412,12 @@ def test_merge_knowledge_set_idempotent():
             "card_a": make_study_card(
                 "card_a",
                 memory=make_memory_with_counters(
-                    reps=5, lapses=1, last_review_date=YESTERDAY,
-                    last_rating="Good", stability=3.0, difficulty=2.0,
+                    reps=5,
+                    lapses=1,
+                    last_review_date=YESTERDAY,
+                    last_rating="Good",
+                    stability=3.0,
+                    difficulty=2.0,
                 ),
             ),
         },
@@ -426,8 +430,12 @@ def test_merge_knowledge_set_idempotent():
             "card_a": make_study_card(
                 "card_a",
                 memory=make_memory_with_counters(
-                    reps=3, lapses=0, last_review_date=NOW,
-                    last_rating="Easy", stability=10.0, difficulty=5.0,
+                    reps=3,
+                    lapses=0,
+                    last_review_date=NOW,
+                    last_rating="Easy",
+                    stability=10.0,
+                    difficulty=5.0,
                 ),
             ),
             "card_b": make_study_card("card_b", word="犬"),
@@ -557,9 +565,14 @@ def test_cross_format_merge():
             "card_a": make_study_card(
                 "card_a",
                 memory=make_memory_with_counters(
-                    reps=5, lapses=0, easy_count=2, good_count=3,
-                    last_review_date=NOW, last_rating="Good",
-                    stability=10.0, difficulty=4.0,
+                    reps=5,
+                    lapses=0,
+                    easy_count=2,
+                    good_count=3,
+                    last_review_date=NOW,
+                    last_rating="Good",
+                    stability=10.0,
+                    difficulty=4.0,
                 ),
             ),
         },

@@ -64,7 +64,9 @@ from _knowledge_set_codec import (  # noqa: E402
 # ─── HTTP helpers ─────────────────────────────────────────────────────
 
 
-def fetch_all_records(session: requests.Session, base_url: str, table: str) -> list[dict]:
+def fetch_all_records(
+    session: requests.Session, base_url: str, table: str
+) -> list[dict]:
     """Fetch all records from a TrailBase table with cursor pagination."""
     records: list[dict] = []
     cursor = None
@@ -110,10 +112,18 @@ def merge_scalar_fields(
 ) -> dict[str, Any]:
     """Merge non-knowledge_set fields from user (remote) into domain_user.
 
-    Mirrors User::merge: scalar fields (email, username, native_language,
-    telegram_user_id, daily_load, reminders_enabled) follow LWW by updated_at.
-    imported_sets is unioned. jlpt_progress and known_vocab_hash are taken
-    from the newer row — they're recomputed client-side from knowledge_set.
+    INTENTIONAL DIVERGENCE from Rust User::merge (user.rs:130-134): Rust
+    unconditionally takes remote values for scalar fields
+    (`self.username = another_user.username.clone()`). That works for
+    client-to-client sync where the remote is always the "latest" device
+    state. Here, we merge across TABLES, not devices — both tables have
+    independent update histories. LWW by `updated_at` is the correct
+    heuristic: the table that was written to last wins for scalar fields.
+
+    imported_sets is always unioned (matches Rust).
+
+    jlpt_progress and known_vocab_hash are taken from the newer row —
+    the new client recalculates both from knowledge_set on first sync.
     """
     user_updated = parse_timestamp(user_row.get("updated_at"))
     domain_updated = parse_timestamp(domain_row.get("updated_at"))
@@ -151,9 +161,7 @@ def merge_scalar_fields(
     return merged
 
 
-def _union_imported_sets(
-    domain_json: str | None, user_json: str | None
-) -> str:
+def _union_imported_sets(domain_json: str | None, user_json: str | None) -> str:
     """Union two imported_sets JSON arrays."""
     domain_sets = set()
     user_sets = set()
@@ -192,7 +200,8 @@ def sync_user_to_domain(
 
 
 def _create_domain_from_user(
-    user_row: dict[str, Any], apply: bool  # noqa: A002
+    user_row: dict[str, Any],
+    apply: bool,  # noqa: A002
 ) -> dict[str, Any]:
     """Create a new domain_user row from a user row (full copy + migration)."""
     email = user_row.get("email", "?")
@@ -204,16 +213,23 @@ def _create_domain_from_user(
 
     # Convert knowledge_set: reviews → counters
     ks_raw = new_row.get("knowledge_set")
-    if ks_raw and ks_raw != '{"study_cards":{},"lesson_history":[]}':
+    if ks_raw:
         ks = decode_knowledge_set(ks_raw)
-        ks, migrated = migrate_knowledge_set(ks)
-        new_ks_raw = encode_knowledge_set(ks)
-        old_size = len(ks_raw)
-        new_size = len(new_ks_raw)
+        if ks.get("study_cards"):
+            ks, migrated = migrate_knowledge_set(ks)
+            new_ks_raw = encode_knowledge_set(ks)
+            old_size = len(ks_raw)
+            new_size = len(new_ks_raw)
+        else:
+            # Empty knowledge_set — no migration needed
+            migrated = 0
+            old_size = len(ks_raw)
+            new_size = old_size
+            new_ks_raw = ks_raw
     else:
         migrated = 0
-        old_size = len(ks_raw) if ks_raw else 0
-        new_size = old_size
+        old_size = 0
+        new_size = 0
         new_ks_raw = ks_raw
 
     new_row["knowledge_set"] = new_ks_raw
@@ -232,7 +248,12 @@ def _create_domain_from_user(
     resp = _SESSION.post(create_url, json=new_row)
     resp.raise_for_status()
     print(f"    Created ✓ (id={resp.json().get('id', '?')})")
-    return {"action": "create", "email": email, "migrated": migrated, "id": resp.json().get("id")}
+    return {
+        "action": "create",
+        "email": email,
+        "migrated": migrated,
+        "id": resp.json().get("id"),
+    }
 
 
 def _merge_user_into_domain(
@@ -244,35 +265,44 @@ def _merge_user_into_domain(
     email = user_row.get("email", "?")
     record_id = domain_row.get("id")
 
-    # Decode both knowledge_sets
+    # Decode user knowledge_set
     user_ks_raw = user_row.get("knowledge_set") or ""
     domain_ks_raw = domain_row.get("knowledge_set") or ""
 
-    if not user_ks_raw or user_ks_raw == '{"study_cards":{},"lesson_history":[]}':
+    if not user_ks_raw:
         print(f"  [{email}] No data in user table, skipping")
         return {"action": "skip", "email": email, "reason": "empty user ks"}
 
     user_ks = decode_knowledge_set(user_ks_raw)
+    if not user_ks.get("study_cards"):
+        print(f"  [{email}] No study cards in user table, skipping")
+        return {"action": "skip", "email": email, "reason": "empty user ks"}
 
     # Convert user's reviews → counters first (old format → new format)
     user_ks, migrated = migrate_knowledge_set(user_ks)
 
-    if not domain_ks_raw or domain_ks_raw == '{"study_cards":{},"lesson_history":[]}':
+    if not domain_ks_raw:
         # domain_user is empty — just take user's migrated KS
         merged_ks = user_ks
         user_card_count = len(user_ks.get("study_cards", {}))
         print(f"  [{email}] domain_user empty, importing {user_card_count} cards")
     else:
         domain_ks = decode_knowledge_set(domain_ks_raw)
-        # Merge: domain_user is "local" (current), user is "remote" (incoming)
-        merged_ks = merge_knowledge_sets(domain_ks, user_ks)
-        domain_card_count = len(domain_ks.get("study_cards", {}))
-        user_card_count = len(user_ks.get("study_cards", {}))
-        merged_card_count = len(merged_ks.get("study_cards", {}))
-        print(
-            f"  [{email}] MERGE: domain={domain_card_count} cards, "
-            f"user={user_card_count} cards → {merged_card_count} cards"
-        )
+        if not domain_ks.get("study_cards"):
+            # domain_user is empty — just take user's migrated KS
+            merged_ks = user_ks
+            user_card_count = len(user_ks.get("study_cards", {}))
+            print(f"  [{email}] domain_user empty, importing {user_card_count} cards")
+        else:
+            # Merge: domain_user is "local" (current), user is "remote" (incoming)
+            merged_ks = merge_knowledge_sets(domain_ks, user_ks)
+            domain_card_count = len(domain_ks.get("study_cards", {}))
+            user_card_count = len(user_ks.get("study_cards", {}))
+            merged_card_count = len(merged_ks.get("study_cards", {}))
+            print(
+                f"  [{email}] MERGE: domain={domain_card_count} cards, "
+                f"user={user_card_count} cards → {merged_card_count} cards"
+            )
 
     new_ks_raw = encode_knowledge_set(merged_ks)
 
@@ -298,11 +328,10 @@ def _merge_user_into_domain(
 _BASE_URL: str = ""
 _SESSION: requests.Session = requests.Session()  # type: ignore[assignment]
 _TABLE_DOMAIN: str = "domain_user"
-_TABLE_SOURCE: str = "user"
 
 
 def main() -> None:
-    global _BASE_URL, _SESSION, _TABLE_DOMAIN, _TABLE_SOURCE
+    global _BASE_URL, _SESSION, _TABLE_DOMAIN
 
     parser = argparse.ArgumentParser(
         description="Sync users from `user` table into `domain_user` table"
@@ -335,7 +364,6 @@ def main() -> None:
         sys.exit(1)
 
     _BASE_URL = base_url
-    _TABLE_SOURCE = args.source_table
     _TABLE_DOMAIN = args.target_table
 
     _SESSION = requests.Session()
@@ -360,18 +388,20 @@ def main() -> None:
     print(f"  {len(domain_records)} records")
     print()
 
-    # Index domain_user by email
+    # Index domain_user by email (case-insensitive — RFC 5321 local-part
+    # is technically case-sensitive but email providers treat it as
+    # case-insensitive; normalizing prevents duplicate-user bugs)
     domain_by_email: dict[str, dict[str, Any]] = {}
     for row in domain_records:
         email = row.get("email")
         if email:
-            domain_by_email[email] = row
+            domain_by_email[email.lower()] = row
 
     # Process each user
     results: list[dict[str, Any]] = []
     for user_row in user_records:
         email = user_row.get("email", "?")
-        domain_row = domain_by_email.get(email)
+        domain_row = domain_by_email.get(email.lower())
         result = sync_user_to_domain(user_row, domain_row, args.apply)
         results.append(result)
 

@@ -159,7 +159,9 @@ def _select_later_state(
     return copy.deepcopy(left)
 
 
-def merge_memory_history(local: dict[str, Any], remote: dict[str, Any]) -> dict[str, Any]:
+def merge_memory_history(
+    local: dict[str, Any], remote: dict[str, Any]
+) -> dict[str, Any]:
     """Mirror MemoryHistory::merge — merge remote into local."""
     local_lrd = local.get("last_review_date")
     remote_lrd = remote.get("last_review_date")
@@ -305,7 +307,7 @@ def _card_content_key(card: dict[str, Any]) -> str | None:
     """
     if not isinstance(card, dict) or len(card) != 1:
         return None
-    (variant, inner), = card.items()
+    ((variant, inner),) = card.items()
     match variant:
         case "Vocabulary":
             return _nested_text(inner, "word")
@@ -343,7 +345,9 @@ def _validate_unique_card(
         return True
 
     for existing_card in study_cards.values():
-        existing = existing_card.get("card") if isinstance(existing_card, dict) else None
+        existing = (
+            existing_card.get("card") if isinstance(existing_card, dict) else None
+        )
         if existing is None:
             continue
         existing_key = _card_content_key(existing)
