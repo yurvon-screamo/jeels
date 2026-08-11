@@ -117,17 +117,6 @@ const DOCS: &[(Locale, &str, &str)] = &[
         "capture",
         include_str!("../../content/docs/ru/capture.md"),
     ),
-    // roadmap
-    (
-        Locale::En,
-        "roadmap",
-        include_str!("../../content/docs/en/roadmap.md"),
-    ),
-    (
-        Locale::Ru,
-        "roadmap",
-        include_str!("../../content/docs/ru/roadmap.md"),
-    ),
     // limitations
     (
         Locale::En,
@@ -152,7 +141,6 @@ pub const SIDEBAR_SLUGS: &[&str] = &[
     "grammar",
     "phrases",
     "capture",
-    "roadmap",
     "limitations",
 ];
 

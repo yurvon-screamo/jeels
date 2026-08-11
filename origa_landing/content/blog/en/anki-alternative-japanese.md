@@ -55,16 +55,16 @@ A checklist that's actually useful:
 - **Built-in Japanese dictionaries in your language.** If adding a card still requires an external dictionary lookup, you've moved the friction, not removed it.
 - **Automatic furigana with smart hiding.** Furigana should appear on kanji you haven't learned and disappear on kanji you have — without a custom template.
 - **Kanji and vocabulary that know about each other.** The tool should treat 食べる and 食事 as related, not as unrelated cards.
-- **OCR or text extraction.** Being able to add words from a photo of a manga page or a textbook screenshot is the difference between studying your content and studying someone else's word list. (See [how Origa handles OCR and text extraction](/features).)
+- **OCR or text extraction.** Being able to add words from a photo of a manga page or a textbook screenshot is the difference between studying your content and studying someone else's word list. (See [how Origa handles OCR and text extraction](/docs/capture).)
 - **A grammar path that uses your vocabulary.** Otherwise grammar is a second app again.
 
 If an "alternative" fails the first item (scheduler quality), it's not an alternative — it's a downgrade wearing a friendlier interface.
 
 ## How Origa handles this
 
-Origa is the app I work on, so I'll be specific and you can check the claims. It exists because the "five apps for one language" problem described above is exactly what its author ran into.
+I build Origa, so I'll be specific and you can check the claims. It exists because the "five apps for one language" problem described above is exactly what its author ran into.
 
-A few concrete differences from Anki, with the honest caveat that **both use FSRS** — Origa didn't invent the algorithm, and Anki didn't fall behind on it. The scheduling quality is comparable. Where they differ is everything around the scheduler.
+A few concrete differences from Anki, with the caveat that **both use FSRS** — Origa didn't invent the algorithm, and Anki didn't fall behind on it. The scheduling quality is comparable. Where they differ is everything around the scheduler.
 
 | Concern | Anki | Origa |
 | --- | --- | --- |
@@ -79,7 +79,7 @@ A few concrete differences from Anki, with the honest caveat that **both use FSR
 
 That last row matters if you're considering a switch: you don't have to throw away years of Anki progress. Origa imports existing Anki decks, so the migration cost is low.
 
-### Known limitations (the honest part)
+### Known limitations
 
 - **Origa is not as customizable as Anki.** If you live in custom HTML/CSS card templates, Origa won't replace that. It optimizes for low-friction defaults over maximal control.
 - **It's newer.** Anki has a decade-plus of edge-case hardening and a huge deck ecosystem. Origa's library of pre-built content is growing but smaller.
@@ -105,7 +105,7 @@ Use Anki if you value control, study multiple subjects, or have already invested
 
 Consider Origa if your friction is specifically Japanese card creation, you want furigana and kanji linkage handled for you, you study through a language other than English, or you're tired of stitching grammar onto a vocabulary tool. Import your Anki deck first — if the workflow clicks, keep it; if not, you're back where you started. ([Download Origa](/download).)
 
-The honest version of "best Anki alternative" is "the one that removes *your* friction." Figure out which step of your current routine eats the most time, and pick the tool that removes that step without dropping the scheduler quality.
+The useful version of "best Anki alternative" is "the one that removes *your* friction." Figure out which step of your current routine eats the most time, and pick the tool that removes that step without dropping the scheduler quality.
 
 ## FAQ
 

@@ -33,7 +33,7 @@ So the typical picture of someone studying Japanese is three to five apps at onc
 The base skill is memorizing words and not forgetting them. Spaced repetition systems (SRS) dominate here. The FSRS algorithm is the current standard: it adjusts review intervals based on how you, specifically, forget a specific card.
 
 - **Anki.** Free, open source, runs everywhere. Maximum flexibility: cards can be laid out however you want, decks are configurable. The flip side of that flexibility is that cards need to be created and formatted manually. For Japanese, that means: open a dictionary, copy the word, then the reading, then the translation, then find audio. The interface is English; there are community Russian decks, but the app itself is built for an English speaker. [FSRS](https://docs.ankiweb.net/deck-options.html#fsrs) appeared in Anki 23.10 (October 2023) and is on by default for new collections starting in 24.10.
-- **Origa.** The app I work on. Uses the same FSRS, but card creation is reduced to typing a word: the built-in bilingual dictionary pulls in the reading, translation, and audio on its own. You can import existing Anki decks (`.anki2`, `.anki21`) — progress transfers. Interface and dictionaries are in your language.
+- **Origa.** Uses the same FSRS, but card creation is reduced to typing a word: the built-in bilingual dictionary pulls in the reading, translation, and audio on its own. You can import existing Anki decks (`.anki2`, `.anki21`) — progress transfers. Interface and dictionaries are in your language.
 
 If your pain is creating cards manually, an alternative makes sense. If you've already assembled the perfect system in Anki and it works for you — there's nothing to change.
 
@@ -42,7 +42,7 @@ If your pain is creating cards manually, an alternative makes sense. If you've a
 Kanji is a separate problem. The same 食 appears in dozens of words, and it's important not just to memorize the character but to see it in different contexts.
 
 - **[WaniKani](https://www.wanikani.com/).** Structured path through radicals, English interface, paid subscription. Suitable if you're starting kanji from zero and want a fixed order. The downside — you learn what the program deems necessary, not what you encountered today in a manga or article. For the wider Origa-vs-WaniKani trade-offs (radical order vs. content-driven, paid vs. free, English-only vs. four UI languages), see the [full comparison](/compare).
-- **Origa.** Furigana is generated automatically and hidden on learned kanji — what you've already studied is no longer hinted at, forcing you to recall the reading. Kanji are linked to vocabulary: the system knows that 食べる and 食事 share one kanji, and tracks it across all the words where you've encountered it. (See [how Origa handles kanji, furigana, and vocabulary linkage](/features).)
+- **Origa.** Furigana is generated automatically and hidden on learned kanji — what you've already studied is no longer hinted at, forcing you to recall the reading. Kanji are linked to vocabulary: the system knows that 食べる and 食事 share one kanji, and tracks it across all the words where you've encountered it. (See [how Origa handles kanji, furigana, and vocabulary linkage](/docs/kanji).)
 
 The approaches differ: WaniKani leads you up its own ladder, Origa teaches what you actually encounter in your content.
 
@@ -90,7 +90,7 @@ The search for "Japanese learning app in [your language]" runs into almost no st
 3. **Look at the interface language.** If you don't study through English, apps with an English core will slow you down at every step.
 4. **Check migration.** If you already have an Anki deck, make sure the new app imports it. Throwing away years of progress is an unjustified cost.
 
-In most cases a working set is one memorization app plus one or two specialized tools (grammar, exam format). The goal is not to find "one best app" but to cover categories without duplication. Origa tries to be the one app that covers vocabulary, kanji, grammar, and listening together — but the limitations are honestly stated below.
+In most cases a working set is one memorization app plus one or two specialized tools (grammar, exam format). The goal is not to find "one best app" but to cover categories without duplication. Origa tries to be the one app that covers vocabulary, kanji, grammar, and listening together — but see the limitations below.
 
 ## Origa's limitations
 
@@ -102,7 +102,7 @@ In most cases a working set is one memorization app plus one or two specialized 
 ## FAQ
 
 **Is Origa's spaced repetition the same as Anki's?**
-Yes, both use FSRS. Origa didn't invent it and doesn't claim otherwise. The difference is what surrounds the scheduler: card creation, furigana, kanji tracking, grammar — not the algorithm itself.
+Yes, both use FSRS. The difference is what surrounds the scheduler: card creation, furigana, kanji tracking, grammar.
 
 **Can I keep my Anki decks?**
 Yes. Origa imports `.anki2`, `.anki21`, and `.anki21b` — decks and review history transfer.
