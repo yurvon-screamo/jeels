@@ -31,13 +31,13 @@ pub struct AuthResult {
 /// with `{ "url": "origa://auth/callback?code=..." }`.
 #[cfg(target_os = "ios")]
 #[tauri::command]
-pub async fn start_auth<R: Runtime>(
+pub async fn start_auth<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     url: String,
     callback_scheme: String,
 ) -> Result<AuthResult, String> {
     use crate::AsWebAuthState;
-    use tauri::Runtime;
+    use tauri::Manager;
 
     let state = app
         .try_state::<AsWebAuthState<R>>()
@@ -64,6 +64,3 @@ pub async fn start_auth<R: Runtime>(
 pub async fn start_auth(_url: String, _callback_scheme: String) -> Result<AuthResult, String> {
     Err("ASWebAuthenticationSession is only available on iOS".to_string())
 }
-
-#[cfg(target_os = "ios")]
-use tauri::Runtime;
