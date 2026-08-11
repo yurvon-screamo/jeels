@@ -1,29 +1,37 @@
 #!/usr/bin/env python3
-"""Download a Mac App Store provisioning profile via App Store Connect API.
+"""Download a Mac App Store provisioning profile and generate merged entitlements.
 
 Generates an ES256 JWT from the same .p8 API key used by xcrun altool,
 calls GET /v1/profiles?filter[profileType]=MAC_APP_STORE, decodes the
-base64 profileContent, and writes an embedded.provisionprofile file.
+base64 profileContent, and writes:
+  1. embedded.provisionprofile (for .app/Contents/)
+  2. Merged entitlements plist (app entitlements + profile entitlements)
 
 Zero external dependencies — uses only Python stdlib + openssl (for
-ECDSA signing, avoiding the need for PyJWT/cryptography).
+ECDSA signing and CMS decryption).
 
 Usage:
-    APPLE_API_KEY_PATH=path/to/AuthKey.p8 \
-    APPLE_API_KEY=KEYID123ABC \
-    APPLE_API_ISSUER=12345678-abcd-... \
-    python3 download_macos_profile.py <output_path> [bundle_id]
+    APPLE_API_KEY_PATH=path/to/AuthKey.p8 \\
+    APPLE_API_KEY=KEYID123ABC \\
+    APPLE_API_ISSUER=12345678-abcd-... \\
+    python3 download_macos_profile.py \\
+        --output-profile embedded.provisionprofile \\
+        --output-entitlements Entitlements.merged.plist \\
+        --app-entitlements tauri/Entitlements.plist \\
+        [bundle_id]
 
 Exit codes:
-    0 — profile downloaded successfully
+    0 — profile downloaded and entitlements merged
     1 — no matching profile found / API error
 """
 
 from __future__ import annotations
 
+import argparse
 import base64
 import json
 import os
+import plistlib
 import subprocess
 import sys
 import tempfile
@@ -119,10 +127,10 @@ def create_es256_jwt(key_path: str, key_id: str, issuer_id: str) -> str:
 # App Store Connect API
 # ---------------------------------------------------------------------------
 
-def fetch_mac_profiles(
+def fetch_mac_profile(
     jwt_token: str, bundle_id: str
-) -> tuple[str, str] | None:
-    """Fetch MAC_APP_STORE profiles, return (profileContent_b64, profile_name).
+) -> tuple[bytes, str] | None:
+    """Fetch MAC_APP_STORE profile, return (profile_bytes, profile_name).
 
     Returns None if no matching profile is found.
     """
@@ -168,7 +176,7 @@ def fetch_mac_profiles(
         name = attrs.get("name", "unknown")
         state = attrs.get("profileState", "unknown")
         if content and state == "ACTIVE":
-            return content, name
+            return base64.b64decode(content), name
         if content:
             print(
                 f"WARNING: profile '{name}' matches but state is {state}, skipping",
@@ -179,10 +187,67 @@ def fetch_mac_profiles(
 
 
 # ---------------------------------------------------------------------------
+# Entitlements extraction & merge
+# ---------------------------------------------------------------------------
+
+def extract_profile_entitlements(profile_path: str) -> dict:
+    """Extract the Entitlements dict from a .provisionprofile file.
+
+    Uses `security cms -D` (macOS) to strip the CMS wrapper and reveal
+    the inner plist, then parses it with plistlib.
+    """
+    result = subprocess.run(
+        ["security", "cms", "-D", "-i", profile_path],
+        capture_output=True,
+        check=True,
+    )
+    plist_data = plistlib.loads(result.stdout)
+    return plist_data.get("Entitlements", {})
+
+
+def merge_entitlements(
+    app_entitlements_path: str, profile_entitlements: dict
+) -> dict:
+    """Merge app entitlements with profile entitlements.
+
+    App entitlements take precedence for keys that exist in both.
+    Profile-only entitlements (com.apple.application-identifier,
+    com.apple.developer.team-identifier, keychain-access-groups, etc.)
+    are added.
+    """
+    with open(app_entitlements_path, "rb") as f:
+        app_entitlements = plistlib.load(f)
+
+    merged = dict(profile_entitlements)
+    merged.update(app_entitlements)
+    return merged
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Download Mac App Store provisioning profile"
+    )
+    parser.add_argument(
+        "bundle_id", nargs="?", default="net.uwuwu.origa", help="Bundle ID"
+    )
+    parser.add_argument(
+        "--output-profile", default="embedded.provisionprofile",
+        help="Output path for .provisionprofile"
+    )
+    parser.add_argument(
+        "--output-entitlements", default=None,
+        help="Output path for merged entitlements plist"
+    )
+    parser.add_argument(
+        "--app-entitlements", default=None,
+        help="App's Entitlements.plist to merge with profile entitlements"
+    )
+    args = parser.parse_args()
+
     key_path = os.environ.get("APPLE_API_KEY_PATH", "")
     key_id = os.environ.get("APPLE_API_KEY", "")
     issuer_id = os.environ.get("APPLE_API_ISSUER", "")
@@ -195,9 +260,6 @@ def main() -> int:
         )
         return 1
 
-    output_path = sys.argv[1] if len(sys.argv) > 1 else "embedded.provisionprofile"
-    bundle_id = sys.argv[2] if len(sys.argv) > 2 else "net.uwuwu.origa"
-
     if not os.path.isfile(key_path):
         print(f"ERROR: key file not found: {key_path}", file=sys.stderr)
         return 1
@@ -205,26 +267,39 @@ def main() -> int:
     print(f"Generating ES256 JWT (key_id={key_id}, issuer={issuer_id[:8]}…)")
     jwt_token = create_es256_jwt(key_path, key_id, issuer_id)
 
-    print(f"Fetching MAC_APP_STORE profiles for {bundle_id}…")
-    result = fetch_mac_profiles(jwt_token, bundle_id)
+    print(f"Fetching MAC_APP_STORE profiles for {args.bundle_id}…")
+    result = fetch_mac_profile(jwt_token, args.bundle_id)
     if result is None:
         print(
-            f"ERROR: No active MAC_APP_STORE profile found for {bundle_id}.\n"
+            f"ERROR: No active MAC_APP_STORE profile found for {args.bundle_id}.\n"
             "Create one at https://developer.apple.com/account/resources/profiles "
             "(Platform: macOS, Type: App Store).",
             file=sys.stderr,
         )
         return 1
 
-    content_b64, profile_name = result
-    profile_bytes = base64.b64decode(content_b64)
+    profile_bytes, profile_name = result
 
-    with open(output_path, "wb") as f:
+    with open(args.output_profile, "wb") as f:
         f.write(profile_bytes)
 
     print(
-        f"✅ Downloaded '{profile_name}' ({len(profile_bytes)} bytes) → {output_path}"
+        f"✅ Downloaded '{profile_name}' ({len(profile_bytes)} bytes) "
+        f"→ {args.output_profile}"
     )
+
+    # Extract entitlements from profile and merge with app entitlements
+    if args.output_entitlements and args.app_entitlements:
+        profile_entitlements = extract_profile_entitlements(args.output_profile)
+        merged = merge_entitlements(args.app_entitlements, profile_entitlements)
+
+        with open(args.output_entitlements, "wb") as f:
+            plistlib.dump(merged, f)
+
+        print(f"✅ Merged entitlements → {args.output_entitlements}")
+        print(f"   App keys:   {sorted(set(merged) - set(profile_entitlements))}")
+        print(f"   Profile keys: {sorted(profile_entitlements)}")
+
     return 0
 
 

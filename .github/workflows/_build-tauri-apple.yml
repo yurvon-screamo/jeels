@@ -447,6 +447,12 @@ jobs:
               # it into Contents/, and re-sign the top-level .app bundle to seal
               # the new file into the signature.
               #
+              # ITMS-90886: the provisioning profile carries entitlements
+              # (com.apple.application-identifier, team-identifier,
+              # keychain-access-groups, etc.) that MUST be present in the
+              # app's signature. We merge the profile's entitlements with
+              # the app's Entitlements.plist and sign with the combined set.
+              #
               # No --deep: nested code (frameworks, helpers) was already signed
               # by tauri-bundler inside-out and hasn't changed — only the
               # top-level bundle needs re-sealing (Apple QA1940 convention).
@@ -455,8 +461,12 @@ jobs:
                   APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
               run: |
                   PROFILE_PATH="$RUNNER_TEMP/embedded.provisionprofile"
+                  MERGED_ENTITLEMENTS="$RUNNER_TEMP/Entitlements.merged.plist"
+
                   python3 "$GITHUB_WORKSPACE/.github/scripts/download_macos_profile.py" \
-                    "$PROFILE_PATH"
+                    --output-profile "$PROFILE_PATH" \
+                    --output-entitlements "$MERGED_ENTITLEMENTS" \
+                    --app-entitlements tauri/Entitlements.plist
 
                   cp "$PROFILE_PATH" "$APP_PATH/Contents/embedded.provisionprofile"
                   echo "Provisioning profile embedded"
@@ -464,10 +474,10 @@ jobs:
                   codesign --force \
                     --sign "$APPLE_SIGNING_IDENTITY" \
                     --options runtime \
-                    --entitlements tauri/Entitlements.plist \
+                    --entitlements "$MERGED_ENTITLEMENTS" \
                     --keychain build.keychain \
                     "$APP_PATH"
-                  echo "✅ Re-signed .app with provisioning profile"
+                  echo "✅ Re-signed .app with provisioning profile + merged entitlements"
 
             - name: Build .pkg via productbuild
               id: pkg
