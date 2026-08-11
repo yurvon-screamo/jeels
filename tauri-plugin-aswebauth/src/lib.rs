@@ -30,18 +30,18 @@ mod commands;
 /// Initializes the plugin.
 ///
 /// On iOS, registers the Swift `AsWebAuthPlugin` that wraps
-/// `ASWebAuthenticationSession`. On all other targets the plugin is a no-op
-/// shell whose `start_auth` command always returns an error.
+/// `ASWebAuthenticationSession` via `api.register_ios_plugin()` inside
+/// `.setup()`. On all other targets the plugin is a no-op shell whose
+/// `start_auth` command always returns an error.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    let builder = Builder::<R>::new("aswebauth");
-
-    // Shadow (not mutate) — `ios_plugin_binding` consumes `self` and returns
-    // a new Builder. Using `let builder =` under cfg avoids E0384 on non-iOS
-    // where this line is absent.
-    #[cfg(target_os = "ios")]
-    let builder = builder.ios_plugin_binding(init_plugin_aswebauth);
-
-    builder
+    Builder::<R>::new("aswebauth")
+        .setup(|_app, _api| {
+            #[cfg(target_os = "ios")]
+            {
+                let _handle = _api.register_ios_plugin(init_plugin_aswebauth)?;
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![commands::start_auth])
         .build()
 }
