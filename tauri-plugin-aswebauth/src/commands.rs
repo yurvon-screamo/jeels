@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 
 /// Arguments for the `start_auth` command.
 ///
-/// Serialized from the frontend as `{ "url": "...", "callbackScheme": "origa" }`.
-/// Only constructed on iOS (passed to `run_mobile_plugin`).
-#[derive(Debug, Clone, Deserialize)]
+/// Serialized from Rust to Swift via `run_mobile_plugin` as
+/// `{ "url": "...", "callbackScheme": "origa" }`.
+#[derive(Debug, Clone, Serialize)]
 #[cfg_attr(not(target_os = "ios"), expect(dead_code))]
 pub struct StartAuthArgs {
     /// Full OAuth provider URL (PKCE challenge included).
@@ -19,8 +19,10 @@ pub struct StartAuthArgs {
 
 /// Successful response from `start_auth`.
 ///
-/// Serialized to the frontend as `{ "url": "origa://auth/callback?code=..." }`.
-#[derive(Debug, Serialize)]
+/// Deserialized from Swift's `invoke.resolve(["url": ...])` via
+/// `run_mobile_plugin`, then serialized to the frontend as
+/// `{ "url": "origa://auth/callback?code=..." }`.
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AuthResult {
     /// The full callback URL intercepted by ASWebAuthenticationSession.
     pub url: String,
