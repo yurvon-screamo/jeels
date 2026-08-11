@@ -42,7 +42,7 @@ pub async fn get_cached_lindera_rkyv() -> Result<Option<Vec<u8>>, OrigaError> {
 }
 
 /// Save pre-built lindera structures (rkyv bytes) to the Cache API.
-pub async fn save_lindera_to_cache_rkyv(bytes: &[u8]) -> Result<(), OrigaError> {
+pub async fn save_lindera_to_cache_rkyv(bytes: &mut [u8]) -> Result<(), OrigaError> {
     let start = now_ms();
     save_blob_to_cache(LINDERA_CACHE_NAME, LINDERA_CACHE_KEY, bytes).await?;
     tracing::info!(
@@ -74,7 +74,7 @@ pub async fn delete_cached_lindera() -> Result<(), OrigaError> {
 }
 
 /// Save pre-parsed VocabularyDatabase (rkyv bytes) to the Cache API.
-pub async fn save_vocabulary_to_cache_rkyv(bytes: &[u8]) -> Result<(), OrigaError> {
+pub async fn save_vocabulary_to_cache_rkyv(bytes: &mut [u8]) -> Result<(), OrigaError> {
     save_blob_to_cache(VOCABULARY_CACHE_NAME, VOCABULARY_CACHE_KEY, bytes).await
 }
 
@@ -121,25 +121,34 @@ async fn get_cached_blob(cache_name: &str, cache_key: &str) -> Result<Option<Vec
         })?;
 
     let bytes = js_sys::Uint8Array::new(&array_buffer).to_vec();
+    drop(array_buffer);
     Ok(Some(bytes))
 }
 
 /// Save a blob to a named Cache API store under the given key.
+///
+/// Uses `Uint8Array::view` for zero-copy: the typed array is backed
+/// directly by the WASM linear memory slice — no JS ArrayBuffer allocation
+/// or `copy_from`. Safe as long as no WASM memory growth happens during
+/// the `cache.put` await (no Rust code runs in that window).
 async fn save_blob_to_cache(
     cache_name: &str,
     cache_key: &str,
-    bytes: &[u8],
+    bytes: &mut [u8],
 ) -> Result<(), OrigaError> {
     let cache = open_named_cache(cache_name).await?;
 
-    let array_buffer = js_sys::ArrayBuffer::new(bytes.len() as u32);
-    js_sys::Uint8Array::new(&array_buffer).copy_from(bytes);
+    // SAFETY: `Uint8Array::view` creates a view backed directly by WASM
+    // linear memory. This is safe because no WASM memory growth can occur
+    // during the `cache.put` await below — no Rust code runs in that window,
+    // so the allocator cannot trigger `memory.grow` and invalidate the view.
+    let view = unsafe { js_sys::Uint8Array::view(bytes) };
 
     let blob_property_bag = web_sys::BlobPropertyBag::new();
     blob_property_bag.set_type("application/octet-stream");
 
     let blob_parts = js_sys::Array::new();
-    blob_parts.push(&array_buffer);
+    blob_parts.push(&view);
 
     let blob =
         web_sys::Blob::new_with_buffer_source_sequence_and_options(&blob_parts, &blob_property_bag)
