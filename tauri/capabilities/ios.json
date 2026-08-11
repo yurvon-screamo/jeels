@@ -1,0 +1,10 @@
+{
+	"$schema": "../gen/schemas/mobile-schema.json",
+	"identifier": "ios",
+	"description": "Capability for iOS-only plugins — ASWebAuthenticationSession for OAuth",
+	"platforms": ["iOS"],
+	"windows": ["main"],
+	"permissions": [
+		"aswebauth:allow-start-auth"
+	]
+}
