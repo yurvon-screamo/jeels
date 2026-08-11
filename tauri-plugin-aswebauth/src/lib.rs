@@ -35,10 +35,11 @@ mod commands;
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     let builder = Builder::<R>::new("aswebauth");
 
+    // Shadow (not mutate) — `ios_plugin_binding` consumes `self` and returns
+    // a new Builder. Using `let builder =` under cfg avoids E0384 on non-iOS
+    // where this line is absent.
     #[cfg(target_os = "ios")]
-    {
-        builder = builder.ios_plugin_binding(init_plugin_aswebauth);
-    }
+    let builder = builder.ios_plugin_binding(init_plugin_aswebauth);
 
     builder
         .invoke_handler(tauri::generate_handler![commands::start_auth])

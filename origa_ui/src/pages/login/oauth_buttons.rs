@@ -341,9 +341,13 @@ async fn start_aswebauth(url: &str, callback_scheme: &str) -> Result<String, Str
         .dyn_into::<js_sys::Promise>()
         .map_err(|_| "invoke('start_auth') did not return a Promise".to_string())?;
 
-    let value = JsFuture::from(promise)
-        .await
-        .map_err(|e| format!("invoke('start_auth') rejected: {e:?}"))?;
+    let value = JsFuture::from(promise).await.map_err(|e| {
+        // Preserve the raw rejection string (e.g. "cancelled") so the caller
+        // can pattern-match on it. Wrapping in format!("rejected: ...")
+        // would break the Err(e) if e == "cancelled" branch in open_oauth_url.
+        e.as_string()
+            .unwrap_or_else(|| format!("invoke('start_auth') rejected: {e:?}"))
+    })?;
 
     js_sys::Reflect::get(&value, &JsValue::from_str("url"))
         .ok()
