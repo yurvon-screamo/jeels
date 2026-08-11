@@ -51,14 +51,6 @@ The kanji writing feature shows the correct stroke order as an animation you fol
 
 The rating after each card is binary: **Don't know** or **Know**. There are no intermediate options (no "hard" or "easy" grades). The FSRS scheduler uses these two signals to set intervals.
 
-## Not a dictionary app
-
-Origa includes dictionaries, but it is not a replacement for a dedicated lookup tool. If your primary need is to look up words you encounter, a tool built for that purpose may serve you better. Origa is built around learning and retention.
-
-## Not a translation tool
-
-Origa does not translate arbitrary text. It builds flashcards from text you supply, with translations pulled from its dictionaries. For full-text translation, use a dedicated translator.
-
 ## Interface languages are limited
 
 Origa's interface is currently available in English and Russian. Additional languages are planned but not yet shipped.
@@ -67,4 +59,3 @@ Origa's interface is currently available in English and Russian. Additional lang
 
 - [Capture (OCR and speech)](/docs/capture)
 - [Getting started](/docs/getting-started)
-- [Roadmap](/docs/roadmap)

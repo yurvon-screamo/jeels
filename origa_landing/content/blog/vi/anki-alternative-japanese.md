@@ -55,14 +55,14 @@ Danh sách kiểm tra thực sự hữu ích:
 - **Từ điển tiếng Nhật tích hợp ngôn ngữ của bạn.** Nếu thêm thẻ vẫn cần tra từ điển bên ngoài, bạn chỉ dịch chuyển ma sát, không gỡ bỏ.
 - **Furigana tự động với ẩn thông minh.** Furigana nên xuất hiện trên hán tự chưa học và biến mất trên hán tự đã học — không cần mẫu tùy chỉnh.
 - **Hán tự và từ vựng biết về nhau.** Công cụ nên coi 食べる và 食事 là liên quan, không phải là thẻ không liên quan.
-- **OCR hoặc trích xuất văn bản.** Có thể thêm từ từ ảnh trang manga hoặc ảnh chụp giáo trình là khác biệt giữa học nội dung của bạn và học danh sách từ của ai đó. ([Xem Origa xử lý thế nào](/vi/features).)
+- **OCR hoặc trích xuất văn bản.** Có thể thêm từ từ ảnh trang manga hoặc ảnh chụp giáo trình là khác biệt giữa học nội dung của bạn và học danh sách từ của ai đó. ([Xem Origa xử lý thế nào](/vi/docs/capture).)
 - **Đường dẫn ngữ pháp dùng từ vựng của bạn.** Nếu không ngữ pháp lại là ứng dụng thứ hai.
 
 Nếu một "thay thế" thất bại ở mục đầu tiên (chất lượng lập lịch), nó không phải thay thế — đó là hạ cấp mặc áo khoác thân thiện hơn.
 
 ## Origa xử lý điều này thế nào
 
-Origa là ứng dụng tôi đang phát triển, vì vậy tôi sẽ cụ thể để bạn có thể kiểm tra các tuyên bố. Nó tồn tại vì vấn đề "năm ứng dụng cho một ngôn ngữ" mô tả ở trên chính xác là điều tác giả gặp phải.
+Vì vậy tôi sẽ cụ thể để bạn có thể kiểm tra các tuyên bố. Nó tồn tại vì vấn đề "năm ứng dụng cho một ngôn ngữ" mô tả ở trên chính xác là điều tác giả gặp phải.
 
 Vài điểm khác biệt cụ thể so với Anki, với cảnh báo trung thực rằng **cả hai đều dùng FSRS** — Origa không phát minh ra thuật toán, và Anki không tụt hậu với nó. Chất lượng lập lịch tương đương. Điểm khác biệt nằm ở mọi thứ bao quanh bộ lập lịch.
 
@@ -79,7 +79,7 @@ Vài điểm khác biệt cụ thể so với Anki, với cảnh báo trung th�
 
 Dòng cuối quan trọng nếu bạn cân nhắc chuyển đổi: bạn không phải vứt bỏ hàng năm tiến bộ với Anki. Origa nhập các bộ bài Anki hiện có, vì vậy chi phí di chuyển thấp.
 
-### Hạn chế đã biết (phần trung thực)
+### Hạn chế đã biết
 
 - **Origa không tùy biến sâu như Anki.** Nếu bạn sống trong mẫu thẻ HTML/CSS tùy chỉnh, Origa không thay thế được. Nó tối ưu cho mặc định ít ma sát hơn là kiểm soát tối đa.
 - **Nó mới hơn.** Anki có hơn một thập kỷ củng cố trường hợp biên và hệ sinh thái bộ bài khổng lồ. Thư viện nội dung dựng sẵn của Origa đang phát triển nhưng nhỏ hơn.

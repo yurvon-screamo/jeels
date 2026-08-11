@@ -18,7 +18,7 @@ status: ready
 
 This article is not "learn Japanese in 30 days" and not a top-10 apps list. It is a realistic sequence for self-study: what to learn first, what to defer, which tools help at which stage, and the mistakes almost every beginner makes.
 
-I work on Origa, a Japanese-learning app, so Origa shows up as one option among several — not the one true answer. Origa's honest limitations are listed at the end.
+I work on Origa, a Japanese-learning app, so Origa shows up as one option among several — not the one true answer. Origa's limitations are listed at the end.
 
 ## What "from zero" actually means
 
@@ -84,19 +84,19 @@ At this stage you can already read simple content. The main risk is getting stuc
 
 The best Japanese-learning materials are mostly in English. WaniKani, Bunpro, Tofugu, Tae Kim — all English. If you study Japanese through a non-English intermediate language, you take a double load: first translate the Japanese word into the intermediate language, then the intermediate into your native. This isn't a philosophical protest; it's time lost on every word.
 
-In non-English segments, there's less material and the quality is uneven. Origa was originally built for a non-English-native interface and dictionaries — that's an attempt to close exactly this gap. But honestly: even Origa's library of ready-made content is smaller than the English-first competitors with a decade of history.
+In non-English segments, there's less material and the quality is uneven. Origa was originally built for a non-English-native interface and dictionaries — that's an attempt to close exactly this gap. But even Origa's library of ready-made content is smaller than the English-first competitors with a decade of history.
 
 ## How Origa fits this plan
 
 Origa is not a textbook, not a replacement for Minna no Nihongo, and not a source of grammar from zero. It's a tool that takes three things off your plate:
 
-- **Dictionary and spaced repetition.** Type or paste a Japanese word or sentence — the built-in bilingual dictionary pulls reading, translation, and audio automatically. No copy-paste between apps. (See [how Origa handles dictionaries, kanji, and furigana](/features).)
+- **Dictionary and spaced repetition.** Type or paste a Japanese word or sentence — the built-in bilingual dictionary pulls reading, translation, and audio automatically. No copy-paste between apps. (See [how Origa handles dictionaries, kanji, and furigana](/docs/vocabulary).)
 - **Kanji in context.** Furigana is generated automatically and hidden on the kanji you've already learned. Nothing to configure.
 - **OCR and audio.** If you read manga or photograph a textbook, you can scan the page — words are recognized and become cards. This is for the immersion stage, not for day one.
 
 Origa's logic is to take over the technical routine (creating cards, configuring furigana, switching between dictionary and SRS) so you spend your time on the language itself, not the infrastructure.
 
-## Origa's limitations (honestly)
+## Origa's limitations
 
 - **It is not a textbook.** Origa does not walk you grammar lesson by grammar lesson. Use Minna no Nihongo, Genki, or Tae Kim — and use Origa to retain the vocabulary and kanji from those textbooks.
 - **The app is younger than Anki.** Anki has a decade of refinement and a huge library of ready-made decks. Origa has less prebuilt content, though it is growing.
@@ -107,7 +107,7 @@ Origa's logic is to take over the technical routine (creating cards, configuring
 
 From zero to the level where you read simple furigana'd manga and understand anime dialogue takes about 6–12 months of regular study, 30–60 minutes a day. Faster happens, but rarely and at the cost of an intensity that's hard to sustain. Slower is fine.
 
-The main principle: **regularity beats intensity.** 30 minutes every day for a year delivers more than 5 hours once a week for three months followed by burnout. The tool is secondary — pick one that doesn't annoy you to use, and stick with it. For how Origa compares with Anki, WaniKani, and the other tools, see the [full comparison](/compare); if you decide to try it, [download Origa](/download).
+The main principle: **regularity beats intensity.** 30 minutes every day for a year delivers more than 5 hours once a week for three months followed by burnout. The tool is secondary — pick one that doesn't annoy you to use, and stick with it. If you decide to try Origa, [download it here](/download).
 
 ## FAQ
 

@@ -3,7 +3,7 @@ title: "Origa Documentation"
 slug: /docs
 locale: en
 meta_title: "Origa Documentation — How It Works and How to Use It"
-meta_description: "Guides on how Origa works: getting started, lessons, vocabulary, kanji, grammar, phrases, capture, roadmap, and current limitations."
+meta_description: "Guides on how Origa works: getting started, lessons, vocabulary, kanji, grammar, phrases, capture, and current limitations."
 target_keywords: ["origa documentation", "origa help", "origa guide", "how origa works", "japanese learning app docs"]
 lastmod: 2026-07-23
 status: ready
@@ -32,7 +32,6 @@ If you are new, start here. The guide covers install, sign-in, onboarding, your 
 
 ## Reference
 
-- **[Roadmap](/docs/roadmap)** — what is being worked on, with no committed dates.
 - **[Limitations](/docs/limitations)** — current boundaries of Origa, stated plainly.
 
 ## What this documentation is not

@@ -11,7 +11,7 @@
 #![cfg(feature = "ssr")]
 
 use axum::body::Body;
-use http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, COOKIE, LOCATION, VARY};
+use http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, COOKIE, LOCATION, SET_COOKIE, VARY};
 use http::{HeaderMap, HeaderValue, Method, StatusCode};
 use http_body_util::BodyExt;
 use tower::ServiceExt;
@@ -294,4 +294,73 @@ async fn locale_cookie_among_other_cookies_is_found() {
 
     assert_eq!(status, StatusCode::TEMPORARY_REDIRECT);
     assert_eq!(header_value(&headers, &LOCATION).as_deref(), Some("/vi"));
+}
+
+#[tokio::test]
+async fn lang_query_param_sets_cookie_and_does_not_redirect() {
+    // A first-time visitor with a Russian OS (Accept-Language: ru) can force
+    // the English landing page by visiting "/?lang=en". The server stamps the
+    // `origa_locale=en` cookie so subsequent visits are served directly, and
+    // renders the page immediately (200) instead of redirecting to /ru.
+    let (status, headers) = request("/?lang=en", Method::GET, Some("ru"), None).await;
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        header_value(&headers, &CACHE_CONTROL).as_deref(),
+        Some("no-cache"),
+        "?lang=en must not be edge-cacheable"
+    );
+    assert!(
+        header_value(&headers, &LOCATION).is_none(),
+        "no redirect expected, got Location={:?}",
+        header_value(&headers, &LOCATION)
+    );
+    let set_cookie = header_value(&headers, &SET_COOKIE).expect("Set-Cookie header present");
+    assert!(
+        set_cookie.contains("origa_locale=en"),
+        "Set-Cookie must stamp origa_locale=en, got {set_cookie}"
+    );
+    assert!(
+        set_cookie.contains("path=/"),
+        "Set-Cookie must be scoped to root path, got {set_cookie}"
+    );
+    assert!(
+        set_cookie.contains("max-age=31536000"),
+        "Set-Cookie must persist for one year, got {set_cookie}"
+    );
+    assert!(
+        set_cookie.contains("SameSite=Lax"),
+        "Set-Cookie must use SameSite=Lax, got {set_cookie}"
+    );
+}
+
+#[tokio::test]
+async fn lang_query_param_ru_sets_cookie() {
+    // A non-English ?lang value both sets the cookie AND redirects, so the
+    // visitor lands on the localised path and the preference persists. This
+    // makes `?lang=ru` a shareable deep link into the Russian site.
+    let (status, headers) = request("/?lang=ru", Method::GET, None, None).await;
+
+    assert_eq!(status, StatusCode::TEMPORARY_REDIRECT);
+    assert_eq!(header_value(&headers, &LOCATION).as_deref(), Some("/ru"));
+    let set_cookie = header_value(&headers, &SET_COOKIE).expect("Set-Cookie header present");
+    assert!(
+        set_cookie.contains("origa_locale=ru"),
+        "Set-Cookie must stamp origa_locale=ru, got {set_cookie}"
+    );
+}
+
+#[tokio::test]
+async fn invalid_lang_param_ignored() {
+    // An unrecognised ?lang value (not en/ru/ko/vi) must not 500, set a bogus
+    // cookie, or otherwise alter behaviour — it falls through to the normal
+    // cookie / Accept-Language negotiation exactly as if the param were absent.
+    let (status, headers) = request("/?lang=xyz", Method::GET, Some("ru"), None).await;
+
+    assert_eq!(status, StatusCode::TEMPORARY_REDIRECT);
+    assert_eq!(header_value(&headers, &LOCATION).as_deref(), Some("/ru"));
+    assert!(
+        header_value(&headers, &SET_COOKIE).is_none(),
+        "invalid lang must not stamp a cookie"
+    );
 }

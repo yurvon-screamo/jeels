@@ -68,9 +68,9 @@ Mẫu hình trên đa số ứng dụng « gia sư AI » giống nhau: chúng xu
 
 Origa dùng AI — OCR cục bộ (NDLOCR-Lite), speech-to-text cục bộ (Whisper), tạo furigana, trích từ vựng tự động — nhưng nó **không phải gia sư AI theo nghĩa đàm thoại**. Nó không có chatbot. Nó không giải thích ngữ pháp theo yêu cầu.
 
-Điều Origa làm là dùng AI như điểm vào của đường ống ghi nhớ. Bạn quét một trang, AI đọc các từ; bạn ghi âm, AI phiên âm; bạn dán văn bản, AI trích từ vựng. Mỗi mục nắm được trở thành một thẻ được lên lịch bởi FSRS. AI là lớp đầu vào, không phải lớp dạy. ([Xem Origa dùng AI cho OCR, STT, và trích từ vựng thế nào](/vi/features).)
+Điều Origa làm là dùng AI như điểm vào của đường ống ghi nhớ. Bạn quét một trang, AI đọc các từ; bạn ghi âm, AI phiên âm; bạn dán văn bản, AI trích từ vựng. Mỗi mục nắm được trở thành một thẻ được lên lịch bởi FSRS. AI là lớp đầu vào, không phải lớp dạy. ([Xem Origa dùng AI cho OCR, STT, và trích từ vựng thế nào](/vi/docs/capture).)
 
-Cách diễn giải: gia sư AI và Origa không phải sự thay thế. Gia sư AI giải thích một điểm ngữ pháp; Origa đảm bảo bạn nhớ các từ trong câu ví dụ. Đa số người học nghiêm túc kết thúc bằng việc dùng cả hai — chatbot cho câu hỏi một lần, SRS cho những thứ quan trọng.
+Nói cách khác, gia sư AI và Origa không phải sự thay thế. Gia sư AI giải thích một điểm ngữ pháp; Origa đảm bảo bạn nhớ các từ trong câu ví dụ. Đa số người học nghiêm túc kết thúc bằng việc dùng cả hai — chatbot cho câu hỏi một lần, SRS cho những thứ quan trọng.
 
 ## Cần tìm gì trong một gia sư AI
 
@@ -94,7 +94,7 @@ Cụ thể, nơi AI của Origa ngồi:
 
 Lựa chọn thiết kế rõ ràng: dùng AI nơi nó loại bỏ ma sát khỏi đường ống nắm bắt, và để lớp đàm thoại/giải thích cho các LLM đa năng làm tốt hơn.
 
-## Những hạn chế đã biết (phần trung thực)
+## Những hạn chế đã biết
 
 - **Origa không thay thế gia sư AI.** Nếu nút thắt của bạn là « tôi cần ai đó giải thích ngữ pháp cho tôi », Origa không giúp. Dùng chatbot.
 - **AI cục bộ có giới hạn.** OCR và STT trên thiết bị tốt nhưng không chính xác như các dịch vụ đám mây tốt nhất trên đầu vào cách điệu hoặc nhiễu. Dự kiến sửa tay đôi khi.
@@ -104,7 +104,7 @@ Lựa chọn thiết kế rõ ràng: dùng AI nơi nó loại bỏ ma sát khỏ
 
 Nếu thời gian học của bạn là 30 phút một ngày và bạn phải chọn giữa gia sư AI và SRS, chọn SRS. Lặp lại ngắt quãng là thành phần duy nhất của học ngôn ngữ nơi bằng chứng rõ ràng. Gia sư AI là khoản mua hào nhoáng hơn, nhưng chính SRS mới mang lại tiến bộ năm qua năm.
 
-Nếu bạn có thể chạy cả hai — SRS cho ghi nhớ, gia sư AI cho giải thích theo yêu cầu và thực hành đàm thoại — đó là thiết lập best-of-both-worlds thực tế mà đa số người học trung cấp trở lên hội tụ. Origa che nửa SRS và dùng AI cho đầu vào, không cho đàm thoại. ChatGPT hoặc Claude che nửa đàm thoại. Kết hợp rẻ hơn và hiệu quả hơn một thuê bao gia sư AI đơn lẻ hứa hẹn mọi thứ và giao đàm thoại cộng với ghi nhớ yếu. Về cách Origa so sánh với Anki, WaniKani, và các công cụ khác đã đề cập, xem [so sánh đầy đủ](/vi/compare); nếu nửa SRS là thứ bạn cần, [tải Origa](/vi/download).
+Nếu bạn có thể chạy cả hai — SRS cho ghi nhớ, gia sư AI cho giải thích theo yêu cầu và thực hành đàm thoại — đó là thiết lập best-of-both-worlds thực tế mà đa số người học trung cấp trở lên hội tụ. Origa che nửa SRS và dùng AI cho đầu vào, không cho đàm thoại. ChatGPT hoặc Claude che nửa đàm thoại. Kết hợp rẻ hơn và hiệu quả hơn một thuê bao gia sư AI đơn lẻ hứa hẹn mọi thứ và giao đàm thoại cộng thêm ghi nhớ yếu. Nếu nửa SRS là thứ bạn cần, [tải Origa](/vi/download).
 
 ## Câu hỏi thường gặp
 
