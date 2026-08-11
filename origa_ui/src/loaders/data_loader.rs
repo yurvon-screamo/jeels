@@ -98,8 +98,8 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
     // Cache the parsed VocabularyDatabase for future fast-path loads.
     let cache_start = now_ms();
     match serialize_vocabulary_to_rkyv() {
-        Ok(bytes) => {
-            if let Err(e) = save_vocabulary_to_cache_rkyv(&bytes).await {
+        Ok(mut bytes) => {
+            if let Err(e) = save_vocabulary_to_cache_rkyv(&mut bytes).await {
                 tracing::warn!("Failed to cache vocabulary (rkyv): {:?}", e);
             } else {
                 tracing::info!(

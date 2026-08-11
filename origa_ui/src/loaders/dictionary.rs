@@ -59,16 +59,16 @@ pub async fn load_dictionary() -> Result<(), OrigaError> {
     }
 
     // Cache-miss: download the pre-built rkyv blob from CDN.
-    let cdn = cdn_provider();
-    let bytes = cdn.fetch_bytes(LINDERA_BLOB_CDN_PATH).await?;
+    let mut bytes = cdn_provider().fetch_bytes(LINDERA_BLOB_CDN_PATH).await?;
     tracing::info!(
         "📖 Downloaded lindera blob ({} bytes, {:.2}s)",
         bytes.len(),
         (now_ms() - start) / 1000.0
     );
 
-    // Save to Cache API for future loads (best-effort, non-blocking UX).
-    if let Err(e) = save_lindera_to_cache_rkyv(&bytes).await {
+    // Save to Cache API for future loads using zero-copy Uint8Array::view.
+    // Best-effort — failure here is not fatal.
+    if let Err(e) = save_lindera_to_cache_rkyv(&mut bytes).await {
         tracing::warn!("Failed to cache lindera blob: {:?}", e);
     }
 
