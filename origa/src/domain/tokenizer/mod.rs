@@ -191,61 +191,11 @@ pub fn is_dictionary_loaded() -> bool {
 }
 
 pub fn init_dictionary(data: DictionaryData) -> Result<(), OrigaError> {
-    init_tokenizer(data)
+    let cached = build_cached_lindera(data)?;
+    init_tokenizer_from_cached(cached)
 }
 
 const USER_DICT_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/user_dictionary.bin"));
-
-fn init_tokenizer(data: DictionaryData) -> Result<(), OrigaError> {
-    let DictionaryData {
-        char_def,
-        matrix,
-        dict_da,
-        dict_vals,
-        unk,
-        words_idx,
-        words,
-        metadata,
-    } = data;
-
-    let metadata =
-        lindera_dictionary::dictionary::metadata::Metadata::load(&metadata).map_err(|e| {
-            OrigaError::TokenizerError {
-                reason: format!("Failed to load metadata: {}", e),
-            }
-        })?;
-
-    let prefix_dictionary =
-        lindera_dictionary::dictionary::prefix_dictionary::PrefixDictionary::load(
-            dict_da, dict_vals, words_idx, words, true,
-        );
-
-    let connection_cost_matrix =
-        lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix::load(matrix);
-
-    let character_definition =
-        lindera_dictionary::dictionary::character_definition::CharacterDefinition::load(&char_def)
-            .map_err(|e| OrigaError::TokenizerError {
-                reason: format!("Failed to load character definition: {}", e),
-            })?;
-
-    let unknown_dictionary =
-        lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary::load(&unk).map_err(
-            |e| OrigaError::TokenizerError {
-                reason: format!("Failed to load unknown dictionary: {}", e),
-            },
-        )?;
-
-    let dictionary = lindera_dictionary::dictionary::Dictionary {
-        prefix_dictionary,
-        connection_cost_matrix,
-        character_definition,
-        unknown_dictionary,
-        metadata,
-    };
-
-    init_tokenizer_from_dictionary(dictionary)
-}
 
 fn init_tokenizer_from_dictionary(
     dictionary: lindera_dictionary::dictionary::Dictionary,
