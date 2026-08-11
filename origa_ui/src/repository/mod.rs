@@ -16,8 +16,8 @@ pub mod trailbase_session;
 pub use cdn_provider::cdn as cdn_provider;
 
 pub use dictionary_cache::{
-    get_cached_lindera_rkyv, get_cached_vocabulary_rkyv, save_lindera_to_cache_rkyv,
-    save_vocabulary_to_cache_rkyv,
+    delete_cached_lindera, get_cached_lindera_rkyv, get_cached_vocabulary_rkyv,
+    save_lindera_to_cache_rkyv, save_vocabulary_to_cache_rkyv,
 };
 pub use hybrid_repository::HybridUserRepository;
 pub use session::{

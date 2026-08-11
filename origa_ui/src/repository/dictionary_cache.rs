@@ -62,6 +62,17 @@ pub async fn get_cached_vocabulary_rkyv() -> Result<Option<Vec<u8>>, OrigaError>
     Ok(result)
 }
 
+/// Delete the cached lindera blob (corrupted cache recovery).
+pub async fn delete_cached_lindera() -> Result<(), OrigaError> {
+    let cache = open_named_cache(LINDERA_CACHE_NAME).await?;
+    JsFuture::from(cache.delete_with_str(&cdn_cache_url(LINDERA_CACHE_KEY)))
+        .await
+        .map_err(|e| OrigaError::RepositoryError {
+            reason: format!("Failed to delete lindera cache: {e:?}"),
+        })?;
+    Ok(())
+}
+
 /// Save pre-parsed VocabularyDatabase (rkyv bytes) to the Cache API.
 pub async fn save_vocabulary_to_cache_rkyv(bytes: &[u8]) -> Result<(), OrigaError> {
     save_blob_to_cache(VOCABULARY_CACHE_NAME, VOCABULARY_CACHE_KEY, bytes).await

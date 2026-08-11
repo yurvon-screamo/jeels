@@ -44,6 +44,7 @@ VERSIONED_FILES: list[str] = [
     "dictionaries/dict.words",
     "dictionaries/metadata.json",
     "dictionaries/JmdictFurigana.txt",
+    "dictionaries/cached-lindera.bin",
     "phrases/phrase_index.json",
     "pitch/index.json",
     "well_known_set/jlpt_n5.json",
