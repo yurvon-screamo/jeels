@@ -107,7 +107,7 @@ jobs:
               uses: ./.github/actions/download-cdn
               with:
                   cache-key: cdn-data-v13-${{ hashFiles('end2end/cdn-manifest.txt') }}
-                  cdn-base-url: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+                  cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact
               uses: actions/upload-artifact@v4
