@@ -15,33 +15,61 @@
 // 3. Returns the callback URL via a completion handler.
 // 4. Closes Safari automatically.
 //
-// Non-iOS targets: the plugin compiles but the Swift code is excluded.
-// `init()` returns a no-op plugin that rejects `start_auth` with an error
-// — unreachable because the frontend only invokes it under `is_ios()`.
+// Non-iOS targets: the plugin compiles but registers no mobile handle.
+// `start_auth` returns an error — unreachable because the frontend only
+// invokes it under `is_ios()`.
 
 use tauri::Runtime;
 use tauri::plugin::{Builder, TauriPlugin};
+
+#[cfg(target_os = "ios")]
+use tauri::{Manager, plugin::PluginHandle};
 
 #[cfg(target_os = "ios")]
 tauri::ios_plugin_binding!(init_plugin_aswebauth);
 
 mod commands;
 
+/// Plugin state holding the mobile plugin handle (iOS only).
+///
+/// On iOS, `setup` stores the `PluginHandle` returned by
+/// `register_ios_plugin` so that `start_auth` can delegate to the Swift
+/// `AsWebAuthPlugin` via `run_mobile_plugin`.
+//
+// On non-iOS targets this type is not used — `start_auth` returns an error
+// without touching plugin state.
+#[cfg(target_os = "ios")]
+pub struct AsWebAuthState<R: Runtime> {
+    pub(crate) handle: PluginHandle<R>,
+}
+
 /// Initializes the plugin.
 ///
-/// On iOS, registers the Swift `AsWebAuthPlugin` that wraps
-/// `ASWebAuthenticationSession`. On all other targets the plugin is a no-op
-/// shell whose `start_auth` command always returns an error.
+/// On iOS, registers the Swift `AsWebAuthPlugin` via
+/// `api.register_ios_plugin()` and stores the handle in plugin state.
+/// The `start_auth` command retrieves the handle and calls
+/// `run_mobile_plugin("startAuth", ...)` to invoke the Swift
+/// `ASWebAuthenticationSession` wrapper.
+///
+/// On non-iOS targets the plugin is a no-op — `start_auth` returns an
+/// error because the frontend only invokes it under `is_ios()`.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    let builder = Builder::<R>::new("aswebauth");
+    Builder::<R>::new("aswebauth")
+        .setup(|app, api| {
+            #[cfg(target_os = "ios")]
+            {
+                let handle = api.register_ios_plugin(init_plugin_aswebauth)?;
+                app.manage(AsWebAuthState::<R> { handle });
+            }
 
-    // Shadow (not mutate) — `ios_plugin_binding` consumes `self` and returns
-    // a new Builder. Using `let builder =` under cfg avoids E0384 on non-iOS
-    // where this line is absent.
-    #[cfg(target_os = "ios")]
-    let builder = builder.ios_plugin_binding(init_plugin_aswebauth);
+            // Non-iOS: no mobile handle to register. start_auth is a stub.
+            #[cfg(not(target_os = "ios"))]
+            {
+                let _ = (app, api);
+            }
 
-    builder
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![commands::start_auth])
         .build()
 }
