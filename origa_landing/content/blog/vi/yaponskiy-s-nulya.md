@@ -90,24 +90,24 @@ Trong các phân khúc không phải tiếng Anh, có ít tài liệu hơn và c
 
 Origa không phải sách giáo khoa, không phải thay thế Minna no Nihongo, và không phải nguồn ngữ pháp từ số không. Nó là một công cụ gánh ba việc cho bạn:
 
-- **Từ điển và lặp lại ngắt quãng.** Gõ hoặc dán một từ hoặc câu tiếng Nhật — từ điển song ngữ tích hợp tự động kéo theo âm đọc, dịch và âm thanh. Không copy-paste giữa các ứng dụng. ([Xem Origa xử lý từ điển, hán tự, và furigana thế nào](/vi/features).)
+- **Từ điển và lặp lại ngắt quãng.** Gõ hoặc dán một từ hoặc câu tiếng Nhật — từ điển song ngữ tích hợp tự động kéo theo âm đọc, dịch và âm thanh. Không copy-paste giữa các ứng dụng. ([Xem Origa xử lý từ điển, hán tự, và furigana thế nào](/vi/docs/vocabulary).)
 - **Hán tự trong ngữ cảnh.** Furigana được tạo tự động và ẩn trên các hán tự bạn đã học. Không cần cấu hình gì.
 - **OCR và âm thanh.** Nếu bạn đọc manga hoặc chụp sách giáo khoa, bạn có thể quét trang — từ được nhận dạng và trở thành thẻ. Điều này cho giai đoạn đắm chìm, không phải cho ngày đầu.
 
 Logic của Origa là tiếp quản phần rườm rà kỹ thuật (tạo thẻ, cấu hình furigana, chuyển giữa từ điển và SRS) để bạn dành thời gian cho bản thân ngôn ngữ, không phải hạ tầng.
 
-## Các hạn chế của Origa (trung thực)
+## Các hạn chế của Origa
 
 - **Nó không phải sách giáo khoa.** Origa không dẫn bạn qua bài ngữ pháp. Dùng Minna no Nihongo, Genki, hoặc Tae Kim — và dùng Origa để giữ từ vựng và hán tự từ các sách giáo khoa đó.
 - **Ứng dụng trẻ hơn Anki.** Anki có một thập kỷ tinh chỉnh và thư viện lớn các bộ bài dựng sẵn. Origa có ít nội dung dựng sẵn hơn, dù đang phát triển.
-- **Chưa có iOS.** Origa chạy trên Windows, Linux, macOS, Android, và trong trình duyệt. iOS nằm trong roadmap nhưng chưa có. Nếu bạn chỉ học trên iPhone, đó là blocker hôm nay.
+- **Chưa có iOS.** iOS nằm trong roadmap nhưng chưa có.
 - **Parity desktop/mobile là tốt nhưng không tuyệt đối.** Trước khi chuyển hoàn toàn, kiểm tra bản dựng hiện tại cho nền tảng của bạn.
 
 ## Một kết luận thực tế
 
 Từ số không đến cấp độ nơi bạn đọc manga furigana đơn giản và hiểu đối thoại anime mất khoảng 6–12 tháng học đều đặn, 30–60 phút mỗi ngày. Nhanh hơn xảy ra, nhưng hiếm và với cái giá của cường độ khó duy trì. Chậm hơn là ổn.
 
-Nguyên tắc chính: **đều đặn đánh bại cường độ.** 30 phút mỗi ngày trong một năm mang lại nhiều hơn 5 giờ mỗi tuần một lần trong ba tháng sau đó là kiệt sức. Công cụ là thứ yếu — chọn một cái không làm bạn bực mình khi dùng, và bám lấy nó. Về cách Origa so sánh với Anki, WaniKani, và các công cụ khác, xem [so sánh đầy đủ](/vi/compare); nếu bạn quyết định thử, [tải Origa](/vi/download).
+Nguyên tắc chính: **đều đặn đánh bại cường độ.** 30 phút mỗi ngày trong một năm mang lại nhiều hơn 5 giờ mỗi tuần một lần trong ba tháng sau đó là kiệt sức. Công cụ là thứ yếu — chọn một cái không làm bạn bực mình khi dùng, và bám lấy nó. Nếu bạn quyết định thử, [tải Origa](/vi/download).
 
 ## Câu hỏi thường gặp
 

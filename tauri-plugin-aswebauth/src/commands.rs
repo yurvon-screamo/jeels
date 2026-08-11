@@ -64,3 +64,6 @@ pub async fn start_auth<R: tauri::Runtime>(
 pub async fn start_auth(_url: String, _callback_scheme: String) -> Result<AuthResult, String> {
     Err("ASWebAuthenticationSession is only available on iOS".to_string())
 }
+
+#[cfg(target_os = "ios")]
+use tauri::Runtime;

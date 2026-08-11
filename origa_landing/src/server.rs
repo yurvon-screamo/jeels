@@ -8,7 +8,9 @@ use std::str::FromStr;
 use axum::Router;
 use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Redirect, Response};
-use http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, COOKIE, HeaderName, HeaderValue, VARY};
+use http::header::{
+    ACCEPT_LANGUAGE, CACHE_CONTROL, COOKIE, HeaderName, HeaderValue, SET_COOKIE, VARY,
+};
 use http::{HeaderMap, Method, Request, Uri};
 use leptos::config::LeptosOptions;
 use leptos_axum::{ErrorHandler, LeptosRoutes};
@@ -16,7 +18,7 @@ use tower_http::ServiceExt;
 use tower_http::services::{ServeDir, ServeFile};
 
 use crate::app::{App, shell};
-use crate::content::{LOCALE_COOKIE, Locale};
+use crate::content::{LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE_SECS, Locale};
 
 /// HTML pages: short edge cache so users pick up content/nav changes within
 /// 5 minutes, while still letting Cloudflare absorb most origin traffic.
@@ -178,6 +180,18 @@ pub fn build_router(leptos_options: LeptosOptions) -> Router {
                 HeaderValue::from_static(NO_CACHE),
             ),
         )
+        // IndexNow key file: proves domain ownership to IndexNow-participating
+        // search engines (Yandex, Bing, Naver, Seznam). See ADR-038.
+        .route_service(
+            "/e7825074-6888-4e03-a9ad-91459e4c9940.txt",
+            ServeFile::new(format!(
+                "{public_dir}/e7825074-6888-4e03-a9ad-91459e4c9940.txt"
+            ))
+            .insert_response_header_if_not_present(
+                CACHE_CONTROL,
+                HeaderValue::from_static(NO_CACHE),
+            ),
+        )
         .route(
             "/ru/blog/luchshee-prilozhenie-izucheniya-yaponskogo",
             axum::routing::get(redirect_old_ru_article_slug),
@@ -275,6 +289,14 @@ async fn enforce_cache_policy(request: Request<axum::body::Body>, next: Next) ->
 /// written client-side by the language switcher on every switch — including
 /// to English — so a user on `/ko` who clicks "EN" lands on "/" and is not
 /// bounced back.
+///
+/// `?lang=XX` query parameter: an explicit server-side locale override that
+/// lets a visitor break out of an Accept-Language-driven redirect loop on the
+/// very first visit (before any client-side cookie has been set). When a valid
+/// locale is supplied, the server stamps `Set-Cookie` so subsequent visits are
+/// served directly, then either falls through (English = root) or redirects to
+/// the localised path (non-English). An invalid or absent value falls through
+/// to the normal cookie / Accept-Language negotiation.
 async fn negotiate_locale(
     method: Method,
     uri: Uri,
@@ -284,6 +306,44 @@ async fn negotiate_locale(
 ) -> Response {
     if (method != Method::GET && method != Method::HEAD) || uri.path() != "/" {
         return next.run(request).await;
+    }
+
+    // ?lang=XX: explicit server-side locale override. Lets a first-time
+    // visitor with a non-English OS break out of the redirect loop by
+    // stamping the locale cookie on the response before negotiation runs.
+    if let Some(lang_locale) = query_locale_param(&uri) {
+        let cookie = locale_cookie_value(lang_locale);
+        if lang_locale == Locale::En {
+            // English is the root URL — set the cookie and render directly.
+            // The response carries `no-cache` because the served page depends
+            // on the `?lang` query parameter: an edge cache must not pin a
+            // `?lang=en` response and serve it to a visitor without the param.
+            let mut response = next.run(request).await;
+            response
+                .headers_mut()
+                .insert(CACHE_CONTROL, HeaderValue::from_static(NO_CACHE));
+            response
+                .headers_mut()
+                .insert(VARY, HeaderValue::from_static(VARY_LOCALE));
+            if let Ok(value) = HeaderValue::from_str(&cookie) {
+                response.headers_mut().insert(SET_COOKIE, value);
+            }
+            return response;
+        }
+        // Non-English: redirect to the localised path and stamp the cookie so
+        // the choice persists. The `?lang` param is not carried into the
+        // redirect target — the cookie now records the preference.
+        let mut response = Redirect::temporary(lang_locale.path_prefix()).into_response();
+        response
+            .headers_mut()
+            .insert(CACHE_CONTROL, HeaderValue::from_static(NO_CACHE));
+        response
+            .headers_mut()
+            .insert(VARY, HeaderValue::from_static(VARY_LOCALE));
+        if let Ok(value) = HeaderValue::from_str(&cookie) {
+            response.headers_mut().insert(SET_COOKIE, value);
+        }
+        return response;
     }
 
     let Some(locale) = preferred_locale(&headers) else {
@@ -302,6 +362,33 @@ async fn negotiate_locale(
         .headers_mut()
         .insert(VARY, HeaderValue::from_static(VARY_LOCALE));
     response
+}
+
+/// Extract a valid locale from the `?lang=XX` query parameter on a request to
+/// "/". Returns `None` when the parameter is absent or its value is not one of
+/// the supported locales (en/ru/ko/vi), so the caller can fall through to
+/// normal cookie / Accept-Language negotiation.
+fn query_locale_param(uri: &Uri) -> Option<Locale> {
+    let query = uri.query()?;
+    for pair in query.split('&') {
+        let Some(value) = pair.strip_prefix("lang=") else {
+            continue;
+        };
+        return Locale::from_str(value).ok();
+    }
+    None
+}
+
+/// Build the `Set-Cookie` header value for persisting a locale choice. The
+/// resulting string is always ASCII-safe (constant name + known locale code +
+/// numeric max-age), so `HeaderValue::from_str` on it cannot fail in practice.
+fn locale_cookie_value(locale: Locale) -> String {
+    format!(
+        "{}={}; path=/; max-age={}; SameSite=Lax",
+        LOCALE_COOKIE,
+        locale.as_str(),
+        LOCALE_COOKIE_MAX_AGE_SECS,
+    )
 }
 
 /// Resolve the preferred non-English locale for a request to "/": an explicit

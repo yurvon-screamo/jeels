@@ -18,7 +18,7 @@ Reading manga in Japanese feels like the dream. You open volume one of something
 
 In practice, most learners stall somewhere on page three. They look up the first unknown word, then the second, then the eighth, lose the plot, and go back to studying from a textbook. The dream of "learning Japanese through manga" collapses into the reality that **reading manga is not the same skill as learning from manga**. They're related, and you need both, but conflating them wastes time.
 
-This is a field guide to the second skill — turning manga you read into Japanese you retain. It covers why manga works as a study source, where the friction is, what a realistic workflow looks like, and how the current tooling helps (including Origa, the app I work on, with the honest caveat that it is not a manga reader).
+This is a field guide to the second skill — turning manga you read into Japanese you retain. It covers why manga works as a study source, where the friction is, what a realistic workflow looks like, and how the current tooling helps (including Origa, the app I work on — with the caveat that it is not a manga reader).
 
 ## Why manga works as a study source
 
@@ -59,11 +59,11 @@ There is no single app that is a great manga reader *and* a great SRS *and* a gr
 - **OCR tools built for manga.** The reference open-source stack is `manga-ocr` (a model trained specifically on manga text, including multi-line speech bubbles) wrapped in desktop apps like Poricom or the more flexible YomiNinja. YomiNinja can pipe recognised text straight into Yomitan. On mobile, KanjiSnap (iOS) leans on Apple's Live Text to similar effect. Excellent for lookup friction. The catch is that recognition isn't perfect on stylised manga fonts, and the lookup is usually a one-shot dictionary entry, not an SRS card — you still need to send the word somewhere to retain it.
 - **Dictionary browser extensions** (Yomitan, the maintained successor to Yomichan). Yomitan is not itself an OCR — it's a pop-up dictionary that looks up selected text. It works directly on web-based manga readers where the text is selectable; for images, you pair it with an external OCR (YomiNinja, screenshot tools). Its strength is the Anki export: a lookup can become a card in one click via AnkiConnect.
 - **Anki as the retention layer.** The default SRS for the community. You can build manga-mining decks manually, or use Yomitan's export. Anki handles the scheduling; it does not handle the reading or the OCR.
-- **Origa** (the app I work on). Origa is not a manga reader. It's the SRS side of this workflow. Where it fits: you scan a panel with the phone camera or paste a screenshot, OCR extracts the words, and each word becomes a card with the sentence, reading, translation, and audio — into a deck that schedules itself. The furigana hides on kanji you've already learned, so reading and recall train together. (See [how Origa handles OCR, furigana, and vocabulary linkage](/features).)
+- **Origa** (the SRS tool in this workflow). Origa is not a manga reader. It's the SRS side of this workflow. Where it fits: you scan a panel with the phone camera or paste a screenshot, OCR extracts the words, and each word becomes a card with the sentence, reading, translation, and audio — into a deck that schedules itself. The furigana hides on kanji you've already learned, so reading and recall train together. (See [how Origa handles OCR, furigana, and vocabulary linkage](/docs/capture).)
 
-The honest framing: a good manga-learning setup in 2026 is **a manga reader + an SRS that actually captures what you read**. Origa is trying to be the second half of that — not the first. For how it stacks up against Anki, WaniKani, and the other tools above, see the [full comparison](/compare).
+A good manga-learning setup in 2026 is **a manga reader + an SRS that actually captures what you read**. Origa is trying to be the second half of that — not the first. For how it stacks up against Anki, WaniKani, and the other tools above, see the [full comparison](/compare).
 
-## Known limitations (Origa, honest)
+## Known limitations
 
 - **Origa does not render manga.** It's not a CBR/CBZ viewer, not a reader. You read manga in whatever app you prefer, and you mine from it into Origa.
 - **OCR is good, not perfect.** Hand-drawn or heavily stylised kanji can fail recognition. You'll occasionally need to correct by hand.

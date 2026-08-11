@@ -150,6 +150,16 @@ async fn llms_txt_has_no_cache() {
 }
 
 #[tokio::test]
+async fn indexnow_key_file_has_no_cache() {
+    // The IndexNow key file proves domain ownership. Search engines fetch it
+    // on first submission; if it were immutable-cached and the key rotated,
+    // verification would fail until the edge cache expired. no-cache ensures
+    // the current key is always served. See ADR-038.
+    let cc = cache_control("/e7825074-6888-4e03-a9ad-91459e4c9940.txt").await;
+    assert_eq!(cc.as_deref(), Some("no-cache"));
+}
+
+#[tokio::test]
 async fn missing_image_404_is_not_cached_as_immutable() {
     // Regression for the SEO "Common-1" issue: `ServeDir` stamps
     // `IMMUTABLE_CACHE` on its 404 via `insert_response_header_if_not_present`

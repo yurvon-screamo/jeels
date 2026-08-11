@@ -81,7 +81,7 @@ Các ứng dụng này gửi từ điển trên thiết bị. Tra cứu làm vi�
 
 Origa được dựng để chạy ngoại tuyến đầu cuối. SRS hoạt động ngoại tuyến (lớp 1). Từ điển song ngữ trên thiết bị (lớp 2). Tạo thẻ từ ảnh hoặc ảnh chụp màn hình hoạt động ngoại tuyến (lớp 3) vì OCR (NDLOCR-Lite) chạy cục bộ (lớp 4). Speech-to-text để thêm thẻ từ âm thanh cũng chạy cục bộ. Không có cuộc gọi máy chủ trong luồng học bình thường.
 
-Cách diễn giải: nếu bạn muốn học tiếng Nhật trên chuyến bay 12 tiếng không trả tiền wifi, toàn bộ tính năng của Origa hoạt động. Cái bẫy nằm trong các hạn chế dưới đây.
+Nói cách khác: nếu bạn muốn học tiếng Nhật trên chuyến bay 12 tiếng không trả tiền wifi, toàn bộ tính năng của Origa hoạt động. Cái bẫy nằm trong các hạn chế dưới đây.
 
 ## Bạn đánh đổi gì cho ngoại tuyến
 
@@ -106,12 +106,12 @@ Cụ thể, để các tuyên bố có thể kiểm tra:
 
 Không có tính năng nào trong luồng bình thường của Origa đòi hỏi kết nối internet. Điều duy nhất cần kết nối là tải xuống ban đầu và đồng bộ đám mây tùy chọn.
 
-## Những hạn chế đã biết (Origa, trung thực)
+## Những hạn chế đã biết
 
 - **Kích thước ứng dụng.** Hàng trăm megabyte cho các mô hình AI. Nếu lưu trữ chật trên điện thoại của bạn, điều này quan trọng.
 - **Độ chính xác OCR trên phông cách điệu.** OCR cục bộ tốt trên văn bản tiêu chuẩn, yếu hơn trên lettering manga và phông trang trí. Đôi khi cần sửa tay.
 - **Pin khi sử dụng cường độ cao.** Quét nhiều trang trong một phiên sẽ xả pin nhanh hơn ôn chỉ văn bản.
-- **Chưa có iOS.** Origa chạy trên Windows, Linux, macOS, Android, và web. iOS nằm trong roadmap. Nếu bạn cần học ngoại tuyến trên iPhone hôm nay, AnkiMobile hoặc AnkiDroid-trên-Android-qua-emulator là các tùy chọn thực tế.
+- **Chưa có iOS.** iOS nằm trong roadmap. Nếu bạn cần học ngoại tuyến trên iPhone hôm nay, AnkiMobile là tùy chọn thực tế.
 
 ## Chọn thế nào
 
@@ -119,7 +119,7 @@ Nếu nhu cầu ngoại tuyến của bạn là « ôn bộ bài Anki hiện có
 
 Nếu nhu cầu ngoại tuyến của bạn là « tôi đang du lịch một tháng với kết nối kém và muốn tiếp tục thêm từ vựng từ manga và sách giáo khoa tôi gặp » — bạn cần một ứng dụng nơi OCR và tạo nội dung hoạt động ngoại tuyến, không chỉ ôn. Origa được dựng chính xác cho trường hợp sử dụng đó.
 
-Nếu bạn thực sự không cần ngoại tuyến — nếu bạn học ở nhà trên wifi và không quan tâm đến riêng tư — các ứng dụng online-first (WaniKani, Bunpro, Duolingo) hoàn toàn tốt. Đừng mua « ngoại tuyến ưu tiên » như một tính năng bạn sẽ không dùng; các đánh đổi là thực. Về cách Origa so sánh với các công cụ khác ở trên, xem [so sánh đầy đủ](/vi/compare); nếu ngoại tuyến ưu tiên là ưu tiên của bạn, [tải Origa](/vi/download) và thử trên một chuyến bay.
+Nếu bạn thực sự không cần ngoại tuyến — nếu bạn học ở nhà trên wifi và không quan tâm đến riêng tư — các ứng dụng online-first (WaniKani, Bunpro, Duolingo) hoàn toàn tốt. Đừng mua « ngoại tuyến ưu tiên » như một tính năng bạn sẽ không dùng; các đánh đổi là thực. Nếu ngoại tuyến ưu tiên là ưu tiên của bạn, [tải Origa](/vi/download) và thử trên một chuyến bay.
 
 ## Câu hỏi thường gặp
 
