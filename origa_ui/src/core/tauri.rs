@@ -15,6 +15,26 @@ pub fn is_tauri() -> bool {
     tauri_object().is_some()
 }
 
+/// Returns `true` on iOS (iPhone/iPad/iPod WKWebView).
+///
+/// Uses `navigator.platform` first — on iPad with "Request Desktop Site"
+/// (iOS 13+) the userAgent switches to a desktop-class string without
+/// "iPad", but `navigator.platform` still returns "iPad". Falls back to
+/// userAgent for older WebViews where platform may be unavailable.
+pub fn is_ios() -> bool {
+    window().is_some_and(|w| {
+        let nav = w.navigator();
+        if let Ok(platform) = nav.platform() {
+            if platform.contains("iPhone") || platform.contains("iPad") || platform.contains("iPod")
+            {
+                return true;
+            }
+        }
+        nav.user_agent()
+            .is_ok_and(|ua| ua.contains("iPhone") || ua.contains("iPad") || ua.contains("iPod"))
+    })
+}
+
 /// Returns the `window.__TAURI__` object if available.
 pub fn tauri_object() -> Option<Object> {
     window()

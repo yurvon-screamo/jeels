@@ -97,6 +97,18 @@ pub fn run() {
         builder = builder.plugin(tauri_plugin_haptics::init());
     }
 
+    // iOS-only: ASWebAuthenticationSession for OAuth. The plugin wraps Apple's
+    // native auth session so Safari returns to the app after the OAuth redirect
+    // — the custom-scheme `origa://` is not registered in Info.plist by
+    // tauri-plugin-deep-link (its build.rs removes CFBundleURLTypes for
+    // non-appLink schemes), so ASWebAuthenticationSession intercepts the
+    // callback directly. Android and desktop keep the existing opener +
+    // deep-link listener flow.
+    #[cfg(target_os = "ios")]
+    {
+        builder = builder.plugin(tauri_plugin_aswebauth::init());
+    }
+
     builder = builder
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())

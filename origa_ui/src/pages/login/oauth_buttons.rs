@@ -255,6 +255,42 @@ async fn open_oauth_url(
     let url = client.get_oauth_url(provider.as_str(), &redirect_uri, &challenge);
     report_debug!(debug_sink, "oauth url built: {url}");
 
+    // iOS: ASWebAuthenticationSession opens Safari in a dedicated auth context
+    // and intercepts the `origa://` callback directly — no CFBundleURLTypes
+    // registration needed (tauri-plugin-deep-link build.rs removes it for
+    // custom schemes). The callback URL is returned via the Tauri command's
+    // Promise, bypassing the deep-link listener entirely.
+    //
+    // Non-iOS (Android, desktop, web): opener + deep-link listener flow.
+    if tauri::is_ios() {
+        auth_store.oauth_error.set(None);
+        auth_store.is_oauth_loading.set(true);
+        match start_aswebauth(&url, "origa").await {
+            Ok(callback_url) => {
+                report_debug!(debug_sink, "aswebauth callback: {callback_url}");
+                let result =
+                    super::oauth_listeners::process_oauth_url(&callback_url, &auth_store, &i18n)
+                        .await;
+                super::oauth_listeners::handle_oauth_result(result, &auth_store);
+                auth_store.is_oauth_loading.set(false);
+                return;
+            },
+            Err(e) if e == "cancelled" => {
+                report_debug!(debug_sink, "aswebauth cancelled by user");
+                auth_store.is_oauth_loading.set(false);
+                // User dismissed Safari — do NOT fall through to opener, which
+                // would re-open Safari against the user's intent.
+                return;
+            },
+            Err(e) => {
+                report_debug!(debug_sink, "aswebauth failed: {e}");
+                auth_store.is_oauth_loading.set(false);
+                // Technical failure (plugin not registered, Swift error) —
+                // fall through to the opener + deep-link fallback.
+            },
+        }
+    }
+
     open_url_external(&url, debug_sink);
 
     // On Android the WebView JS is frozen while the app is backgrounded in the
@@ -263,6 +299,60 @@ async fn open_oauth_url(
     // sidesteps the missing resume signal: the timer pauses while frozen and
     // resumes on Activity onResume, recovering the pending callback URL.
     super::oauth_listeners::start_resume_polling(auth_store, i18n);
+}
+
+/// Invokes the iOS `aswebauth` Tauri plugin to start an
+/// `ASWebAuthenticationSession`.
+///
+/// Returns the callback URL (e.g. `origa://auth/callback?code=...`) on
+/// success, or an error string if the session failed or was cancelled.
+///
+/// Uses `__TAURI__.core.invoke` to call `plugin:aswebauth|start_auth` with
+/// `{ url, callbackScheme }`. The Swift plugin intercepts the custom-scheme
+/// redirect and resolves the Promise with the callback URL.
+async fn start_aswebauth(url: &str, callback_scheme: &str) -> Result<String, String> {
+    use crate::core::tauri::invoke_fn;
+    use js_sys::Object as JsObject;
+    use leptos::wasm_bindgen::JsCast;
+    use leptos::wasm_bindgen::JsValue;
+    use wasm_bindgen_futures::JsFuture;
+
+    let invoke_fn = invoke_fn().ok_or("Tauri invoke not available")?;
+
+    let args = JsObject::new();
+    js_sys::Reflect::set(&args, &JsValue::from_str("url"), &JsValue::from_str(url))
+        .map_err(|e| format!("failed to set url arg: {e:?}"))?;
+    js_sys::Reflect::set(
+        &args,
+        &JsValue::from_str("callbackScheme"),
+        &JsValue::from_str(callback_scheme),
+    )
+    .map_err(|e| format!("failed to set callbackScheme arg: {e:?}"))?;
+
+    let result = invoke_fn
+        .call2(
+            &JsValue::UNDEFINED,
+            &JsValue::from_str("plugin:aswebauth|start_auth"),
+            &args,
+        )
+        .map_err(|e| format!("invoke('start_auth') call failed: {e:?}"))?;
+
+    let promise = result
+        .dyn_into::<js_sys::Promise>()
+        .map_err(|_| "invoke('start_auth') did not return a Promise".to_string())?;
+
+    let value = JsFuture::from(promise).await.map_err(|e| {
+        // Preserve the raw rejection string (e.g. "cancelled") so the caller
+        // can pattern-match on it. Wrapping in format!("rejected: ...")
+        // would break the Err(e) if e == "cancelled" branch in open_oauth_url.
+        e.as_string()
+            .unwrap_or_else(|| format!("invoke('start_auth') rejected: {e:?}"))
+    })?;
+
+    js_sys::Reflect::get(&value, &JsValue::from_str("url"))
+        .ok()
+        .and_then(|v| v.as_string())
+        .ok_or("missing 'url' field in start_auth response".to_string())
 }
 
 #[component]

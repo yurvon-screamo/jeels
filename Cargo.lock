@@ -6071,6 +6071,7 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-build",
+ "tauri-plugin-aswebauth",
  "tauri-plugin-deep-link",
  "tauri-plugin-device-ai-apis",
  "tauri-plugin-haptics",
@@ -9034,6 +9035,16 @@ dependencies = [
  "tauri-utils",
  "toml 0.9.12+spec-1.1.0",
  "walkdir",
+]
+
+[[package]]
+name = "tauri-plugin-aswebauth"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
 ]
 
 [[package]]
