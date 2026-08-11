@@ -264,7 +264,7 @@ def main() -> int:
         print(f"ERROR: key file not found: {key_path}", file=sys.stderr)
         return 1
 
-    print(f"Generating ES256 JWT (key_id={key_id}, issuer={issuer_id[:8]}…)")
+    print("Generating ES256 JWT…")
     jwt_token = create_es256_jwt(key_path, key_id, issuer_id)
 
     print(f"Fetching MAC_APP_STORE profiles for {args.bundle_id}…")
