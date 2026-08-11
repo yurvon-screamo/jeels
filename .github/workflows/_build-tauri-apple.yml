@@ -438,6 +438,37 @@ jobs:
                   echo "✅ All 5 entitlements present"
                   rm -f /tmp/entitlements.txt
 
+            - name: Embed provisioning profile & re-sign
+              #
+              # ITMS-90889: tauri-bundler signs the .app but does NOT embed
+              # an embedded.provisionprofile in Contents/. TestFlight rejects
+              # the build without it (tauri #13952). We download the MAC_APP_STORE
+              # profile via App Store Connect API (same .p8 key as altool), drop
+              # it into Contents/, and re-sign the top-level .app bundle to seal
+              # the new file into the signature.
+              #
+              # No --deep: nested code (frameworks, helpers) was already signed
+              # by tauri-bundler inside-out and hasn't changed — only the
+              # top-level bundle needs re-sealing (Apple QA1940 convention).
+              env:
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+                  APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
+              run: |
+                  PROFILE_PATH="$RUNNER_TEMP/embedded.provisionprofile"
+                  python3 "$GITHUB_WORKSPACE/.github/scripts/download_macos_profile.py" \
+                    "$PROFILE_PATH"
+
+                  cp "$PROFILE_PATH" "$APP_PATH/Contents/embedded.provisionprofile"
+                  echo "Provisioning profile embedded"
+
+                  codesign --force \
+                    --sign "$APPLE_SIGNING_IDENTITY" \
+                    --options runtime \
+                    --entitlements tauri/Entitlements.plist \
+                    --keychain build.keychain \
+                    "$APP_PATH"
+                  echo "✅ Re-signed .app with provisioning profile"
+
             - name: Build .pkg via productbuild
               id: pkg
               timeout-minutes: 10
