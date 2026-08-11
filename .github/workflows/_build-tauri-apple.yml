@@ -217,13 +217,24 @@ jobs:
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
               run: |
                   # xcrun altool handles App Store Connect upload using the same
-                  # API key as signing. A failed upload fails the job so the
-                  # problem is visible immediately — the .ipa is preserved as
-                  # artifact for manual upload via Transporter.app.
+                  # API key as signing. altool can return exit 0 even on
+                  # server-side errors (HTTP 409 duplicate version, validation
+                  # failures, etc.) — so we capture output and check for error
+                  # patterns to ensure a failed upload fails the job.
+                  # The .ipa is preserved as artifact for manual upload via
+                  # Transporter.app.
+                  set +e
                   xcrun altool --upload-app --type ios \
                     --file "${{ steps.ipa.outputs.path }}" \
                     --apiKey "$APPLE_API_KEY" \
-                    --apiIssuer "$APPLE_API_ISSUER"
+                    --apiIssuer "$APPLE_API_ISSUER" 2>&1 | tee /tmp/altool_ios.log
+                  EXIT_CODE=${PIPESTATUS[0]}
+
+                  if [ "$EXIT_CODE" -ne 0 ] || \
+                     grep -qiE 'ERROR:|Failed to upload|status : [45][0-9][0-9]' /tmp/altool_ios.log; then
+                    echo "::error::altool iOS upload failed (exit $EXIT_CODE)"
+                    exit 1
+                  fi
 
             - name: Report upload result
               id: upload-report
@@ -554,10 +565,21 @@ jobs:
                   APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
               run: |
+                  # altool can return exit 0 even on server-side errors
+                  # (HTTP 409 duplicate version, validation failures, etc.)
+                  # — capture output and check for error patterns.
+                  set +e
                   xcrun altool --upload-app --type mac \
                     --file "${{ steps.pkg.outputs.path }}" \
                     --apiKey "$APPLE_API_KEY" \
-                    --apiIssuer "$APPLE_API_ISSUER"
+                    --apiIssuer "$APPLE_API_ISSUER" 2>&1 | tee /tmp/altool_mac.log
+                  EXIT_CODE=${PIPESTATUS[0]}
+
+                  if [ "$EXIT_CODE" -ne 0 ] || \
+                     grep -qiE 'ERROR:|Failed to upload|status : [45][0-9][0-9]' /tmp/altool_mac.log; then
+                    echo "::error::altool macOS upload failed (exit $EXIT_CODE)"
+                    exit 1
+                  fi
 
             - name: Report build result
               id: build-report
