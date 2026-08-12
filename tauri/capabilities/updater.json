@@ -1,0 +1,8 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "updater",
+	"description": "Auto-updater capability for Windows and Linux desktop. macOS App Store handles updates, so the updater plugin is not compiled there (see tauri/Cargo.toml target-gate). Referencing its permissions in default.json would fail the build on macOS/iOS/Android.",
+	"platforms": ["windows", "linux"],
+	"windows": ["main"],
+	"permissions": ["updater:default"]
+}
