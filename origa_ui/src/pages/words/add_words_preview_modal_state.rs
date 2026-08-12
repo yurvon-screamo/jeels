@@ -123,8 +123,12 @@ impl PreviewModalState {
                     if disposed.is_disposed() {
                         return;
                     }
-                    let words_to_select: HashSet<String> =
-                        result.words.iter().map(|w| w.base_form.clone()).collect();
+                    let words_to_select: HashSet<String> = result
+                        .words
+                        .iter()
+                        .filter(|w| w.meaning.is_some())
+                        .map(|w| w.base_form.clone())
+                        .collect();
                     analyzed_words.set(result.words);
                     selected_words.set(words_to_select);
                     is_analyzing.set(false);
