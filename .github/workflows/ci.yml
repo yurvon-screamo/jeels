@@ -171,6 +171,52 @@ jobs:
             - name: Run tests
               run: cargo test --workspace --exclude origa_landing
 
+    wasm-test:
+        name: WASM Component Tests
+        permissions:
+            contents: read
+        needs: cdn-download
+        runs-on: ubuntu-24.04
+        env:
+            ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Cache APT packages
+              uses: awalsh128/cache-apt-pkgs-action@v1.6.1
+              with:
+                  packages:
+                      libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+                      protobuf-compiler libspeechd-dev
+                  version: 1.0
+
+            - name: Setup Rust
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: wasm32-unknown-unknown
+                  shared-key: origa-ci-v2
+                  save-if: false
+
+            - name: Cache UniDic dictionary
+              uses: actions/cache@v6
+              with:
+                  path: origa_ui/public/dictionaries/unidic
+                  key: unidic-dict-v1-${{ hashFiles('origa_ui/build.rs') }}
+                  restore-keys: unidic-dict-v1-
+
+            - name: Download CDN artifact
+              uses: actions/download-artifact@v8
+              with:
+                  name: cdn-data
+                  path: cdn/
+
+            - name: Install wasm-pack
+              uses: jetli/wasm-pack-action@v0.4.0
+
+            - name: Run WASM component tests
+              run: wasm-pack test --headless --chrome origa_ui --features csr
+
     e2e-build:
         name: E2E Build
         permissions:
