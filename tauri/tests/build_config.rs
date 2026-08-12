@@ -44,7 +44,6 @@ fn build_capabilities_content(landing: &str, trailbase: &str) -> String {
 \t\t\"core:event:default\",\n\
 \t\t\"tts:default\",\n\
 \t\t\"deep-link:default\",\n\
-\t\t\"updater:default\",\n\
 \t\t{{\n\
 \t\t\t\"identifier\": \"opener:default\",\n\
 \t\t\t\"allow\": [\n\
@@ -153,9 +152,9 @@ fn build_csp_substitutes_staging_hosts() {
 
 /// Verifies that the reference template for `capabilities/default.json`,
 /// invoked with production defaults, reproduces the exact bytes committed in
-/// `tauri/capabilities/default.json` (tab-indented, 429 bytes, trailing
-/// newline). Drift here means the committed file was hand-edited without
-/// updating the template (or vice versa).
+/// `tauri/capabilities/default.json` (tab-indented, trailing newline). Drift
+/// here means the committed file was hand-edited without updating the template
+/// (or vice versa).
 #[test]
 fn capabilities_template_with_production_defaults_matches_committed_file() {
     let content = build_capabilities_content(DEFAULT_LANDING, DEFAULT_TRAILBASE);
@@ -165,12 +164,13 @@ fn capabilities_template_with_production_defaults_matches_committed_file() {
 }
 
 /// The mobile capability file must NOT carry `updater:default`: the updater
-/// plugin is registered under `#[cfg(desktop)]` in `tauri/src/lib.rs`, so on
-/// Android the capability is dead — it references a permission set that no
-/// compiled plugin serves. Shipping it pollutes the security-review surface
-/// (Play reviewers inspect the full capability set) without enabling any
-/// runtime behaviour. This drift guard prevents a regression that reintroduces
-/// `"updater:default"` into the mobile file.
+/// plugin is registered under `#[cfg(any(windows, target_os = "linux"))]` in
+/// `tauri/src/lib.rs`, so on Android/iOS/macOS the capability is dead — it
+/// references a permission set that no compiled plugin serves. Shipping it
+/// pollutes the security-review surface (Play reviewers inspect the full
+/// capability set) without enabling any runtime behaviour. This drift guard
+/// prevents a regression that reintroduces `"updater:default"` into the
+/// mobile file.
 #[test]
 fn capabilities_mobile_has_no_updater_permission() {
     let committed = include_str!("../capabilities/mobile.json");
@@ -178,7 +178,7 @@ fn capabilities_mobile_has_no_updater_permission() {
     assert!(
         !committed.contains("\"updater:default\""),
         "`tauri/capabilities/mobile.json` must not contain \"updater:default\": \
-         the updater plugin is desktop-only (#[cfg(desktop)] in tauri/src/lib.rs), \
+         the updater plugin is Windows/Linux-only, \
          so the mobile capability is dead and should not be committed. Got:\n{committed}"
     );
 
@@ -205,7 +205,7 @@ fn capabilities_template_substitutes_staging_hosts() {
     assert!(content.contains("\"core:event:default\""));
     assert!(content.contains("\"tts:default\""));
     assert!(content.contains("\"deep-link:default\""));
-    assert!(content.contains("\"updater:default\""));
+    assert!(!content.contains("\"updater:default\""));
 
     // Production hosts must NOT leak into the staging build.
     assert!(!content.contains(DEFAULT_LANDING));

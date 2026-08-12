@@ -160,8 +160,9 @@ export class WordsPage extends BasePage {
 
     async analyzeTextNoResults(): Promise<void> {
         await this.drawerAnalyzeBtn.click();
-        // When analysis returns 0 words, the "Слов не найдено" feedback
-        // appears instead of the "Найдено" count line.
+        // When analysis returns 0 words, the "No words found" Alert with
+        // testid "words-no-results" appears, plus the input controls remain
+        // available (no dead-end).
         await expect(this.noResultsFeedback).toBeVisible({ timeout: 10_000 });
     }
 

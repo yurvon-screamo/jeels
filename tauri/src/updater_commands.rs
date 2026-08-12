@@ -65,7 +65,7 @@ const PROGRESS_EVENT: &str = "origa-update-progress";
 /// update exists, its metadata is returned AND the `Update` object is stashed
 /// in `PendingUpdate` so `install_update` can consume it without re-checking.
 #[tauri::command]
-#[cfg(desktop)]
+#[cfg(any(windows, target_os = "linux"))]
 pub async fn check_for_update(
     app: AppHandle,
     pending: State<'_, PendingUpdate>,
@@ -98,7 +98,7 @@ pub async fn check_for_update(
 /// `download_and_install`, so `app.restart()` is unreachable there — it
 /// remains as the restart path for Linux and macOS.
 #[tauri::command]
-#[cfg(desktop)]
+#[cfg(any(windows, target_os = "linux"))]
 pub async fn install_update(
     app: AppHandle,
     pending: State<'_, PendingUpdate>,
