@@ -191,12 +191,12 @@ pub fn run() {
 
             tracing::info!("[deep-link] setup complete");
 
+            // release-devtools feature enables the DevTools panel (F12 /
+            // right-click → Inspect) but does NOT auto-open it. Opening the
+            // panel at startup was annoying users on every launch.
             #[cfg(feature = "release-devtools")]
             {
-                if let Some(window) = app.get_webview_window("main") {
-                    window.open_devtools();
-                    tracing::info!("[devtools] DevTools opened (release-devtools feature enabled)");
-                }
+                tracing::info!("[devtools] DevTools available (F12 / right-click → Inspect)");
             }
 
             Ok(())
