@@ -4,8 +4,8 @@ on:
     pull_request:
         branches: [master]
     push:
-        branches: [master]
-        paths-ignore: ["docs/**", "*.md", "scripts/**", "cdn/**"]
+        tags:
+            - "v*.*.*"
     workflow_dispatch:
 
 concurrency:
