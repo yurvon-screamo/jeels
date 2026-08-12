@@ -144,7 +144,7 @@ pub fn AddWordsPreviewModal(
                     match stage {
                         AnalysisStage::Analyzing => view! {
                             <div class="space-y-4">
-                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
+                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) class="tabs--scrollable".to_string() />
                                 <div class="flex items-center justify-center py-8">
                                     <Text size=TextSize::Default variant=TypographyVariant::Muted>
                                         {t!(i18n, words.analyzing)}
@@ -179,7 +179,7 @@ pub fn AddWordsPreviewModal(
                                         None
                                     }
                                 }}
-                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
+                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) class="tabs--scrollable".to_string() />
                                 {move || {
                                     let mode = input_mode.get();
                                     match mode {

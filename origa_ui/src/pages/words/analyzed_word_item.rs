@@ -1,6 +1,8 @@
 use crate::i18n::{td_string, use_i18n};
 use crate::pages::icons::{CHECK_CIRCLE_ICON, ICON_CLASS_KNOWN, ICON_CLASS_NEW, PLUS_CIRCLE_ICON};
-use crate::ui_components::{Checkbox, FuriganaText, MarkdownText, MarkdownVariant, Tooltip};
+use crate::ui_components::{
+    Checkbox, FuriganaText, MarkdownText, MarkdownVariant, Tooltip, TooltipPlacementMode,
+};
 use leptos::prelude::*;
 use origa::use_cases::AnalyzedWord;
 use std::collections::HashSet;
@@ -52,7 +54,7 @@ pub fn AnalyzedWordItem(
                         />
                     </div>
 
-                        <Tooltip text=Signal::derive(tooltip_text)>
+                        <Tooltip text=Signal::derive(tooltip_text) placement_mode=TooltipPlacementMode::ForceBottom>
                         <span class=format!("{} opacity-60 group-hover:opacity-100 transition-opacity", icon_class)
                               inner_html=status_icon
                         />

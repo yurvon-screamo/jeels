@@ -70,7 +70,7 @@ pub fn WelcomeCard(
     });
 
     view! {
-        <div class="py-6 sm:py-8" data-testid=test_id_val>
+        <div class="py-4 sm:py-6" data-testid=test_id_val>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="font-serif text-2xl sm:text-3xl text-[var(--fg-black)]">
                     {move || greeting.get()} ", "
@@ -81,7 +81,7 @@ pub fn WelcomeCard(
                 <div class="shrink-0">
                     <A href="/lesson">
                         <button
-                            class="btn btn-olive flex items-center justify-center gap-2 w-full sm:w-auto sm:min-w-[280px] px-6 py-1 sm:px-10 sm:py-1.5"
+                            class="btn btn-olive flex items-center justify-center gap-2 w-full sm:w-auto sm:min-w-[280px] px-6 py-3 sm:px-10 sm:py-2.5"
                             data-testid=move || Some(lesson_test_id.get())
                         >
                             <Icon icon=icondata::LuBookOpen width="16" height="16" />

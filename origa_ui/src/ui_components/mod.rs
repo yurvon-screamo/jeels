@@ -118,7 +118,7 @@ pub use text_to_speech::{
     speak_tts_text_with_callback, stop_speech,
 };
 pub use toast::{ToastContainer, ToastData, ToastType};
-pub use tooltip::Tooltip;
+pub use tooltip::{Tooltip, TooltipPlacementMode};
 pub use typography::{DisplayText, Heading, HeadingLevel, Text, TextSize, TypographyVariant};
 pub use update_drawer::UpdateDrawer;
 pub use word_audio::{register_audio, speak_word, speak_word_with_callback, stop_current_audio};
