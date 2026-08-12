@@ -54,17 +54,16 @@ pub fn PhraseCardView(
     };
 
     view! {
-        <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <Tag variant=Signal::derive(move || card_type.tag_variant())>
-                        {card_type.label(&i18n)}
-                    </Tag>
-                    <Tag variant=Signal::derive(move || TagVariant::Filled)>
-                        {t!(i18n, lesson.quiz)}
-                    </Tag>
-                </div>
+        <div class="flex flex-col">
+            <div class="flex items-center gap-2 flex-wrap min-w-0 mb-2 px-1">
+                <Tag variant=Signal::derive(move || card_type.tag_variant())>
+                    {card_type.label(&i18n)}
+                </Tag>
+                <Tag variant=Signal::derive(move || TagVariant::Filled)>
+                    {t!(i18n, lesson.quiz)}
+                </Tag>
             </div>
+            <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-3 sm:mb-6">
@@ -200,5 +199,6 @@ pub fn PhraseCardView(
                 </Show>
             </div>
         </Card>
+        </div>
     }
 }

@@ -443,7 +443,9 @@
       "record": "Record from microphone",
       "recording": "Listening — speak now",
       "live_unavailable": "Live microphone recognition is not available on this device."
-    }
+    },
+    "no_translation_found": "No translation found — won't be added",
+    "tooltip_no_translation": "Word not found in our dictionaries"
   },
   "grammar_page": {
     "add_grammar": "Add grammar",

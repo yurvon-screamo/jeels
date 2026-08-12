@@ -1606,13 +1606,11 @@ input[type="submit"],
     bottom: 0;
     left: 0;
     right: 0;
-    /* Full height INCLUDING the safe-area inset so the bar background fills
-       the space above the home indicator on notched iPhones. Rather than
-       padding the entire safe-area away (which left a huge empty gap below
-       the icons), we use a fraction of it — buttons extend into the lower
-       zone, leaving just enough room for the home indicator line. */
-    height: calc(72px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) * 0.35);
+    /* Compact bar: height fills safe-area for background, but internal
+       padding is minimal so the bar doesn't feel oversized. Icons sit
+       near the bottom, just clearing the home indicator. */
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) * 0.2);
     background: var(--bg-cream);
     border-top: 1px solid var(--border-dark);
     display: flex;
@@ -1640,7 +1638,7 @@ input[type="submit"],
     align-items: center;
     justify-content: center;
     gap: 2px;
-    padding: 8px 4px;
+    padding: 6px 4px;
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -4680,6 +4678,8 @@ rt {
 
 .grammar-detail-container {
     padding: 24px 32px;
+    /* Leave room for the bottom tab bar on mobile (60px + safe-area) */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 .grammar-detail-top-bar {
@@ -4907,6 +4907,8 @@ rt {
 
 .kanji-detail-container {
     padding: 24px 32px;
+    /* Leave room for the bottom tab bar on mobile (60px + safe-area) */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Breadcrumbs */
