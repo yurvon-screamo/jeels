@@ -366,7 +366,7 @@ pub fn MultiLineChart(
             </Show>
 
             // Legend below SVG
-            <div class="flex justify-center gap-5 mt-4">
+            <div class="flex justify-center gap-2 sm:gap-5 mt-4 flex-wrap">
                 <For
                     each=move || legend_items()
                     key=|(key, _, _)| key.clone()
@@ -377,7 +377,7 @@ pub fn MultiLineChart(
                                     class="inline-block"
                                     style=format!("width:12px;height:2px;background-color:{}", color)
                                 ></span>
-                                <span class="font-mono text-[12px] uppercase tracking-[0.1em]" style="color:var(--fg-muted)">
+                                <span class="font-mono text-[11px] sm:text-[12px] uppercase tracking-[0.08em] sm:tracking-[0.1em]" style="color:var(--fg-muted)">
                                     {label}
                                 </span>
                             </div>

@@ -277,7 +277,7 @@ pub fn LessonContent() -> impl IntoView {
         </Show>
 
         <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none()>
-            <div data-testid="lesson-content" class="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col p-4 sm:p-6">
+            <div data-testid="lesson-content" class="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col px-1 sm:px-2 py-1 sm:py-2">
                 <Show when=move || is_syncing_cards.get()>
                     <div data-testid="lesson-sync-indicator" class="absolute top-0 right-0 flex items-center gap-1 text-sm text-muted-foreground p-2">
                         <Spinner test_id="lesson-sync-spinner" class=Signal::derive(|| "".to_string()) size=Signal::derive(|| "sm".to_string()) />

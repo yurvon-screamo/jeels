@@ -23,7 +23,17 @@ pub fn LessonCardQuestion(
     view! {
         <div class="text-center">
             <Show when=move || kanji_stored.get_value().is_none()>
-                <div class="mb-2 sm:mb-4 lesson-question">
+                <div class=move || {
+                    if is_reversed {
+                        // Reversed cards show a translation as the prompt —
+                        // often a long phrase. Use the default markdown size
+                        // (no .lesson-question wrapper) so it doesn't get the
+                        // heading-h2 clamp meant for short Japanese words.
+                        "mb-2 sm:mb-4".to_string()
+                    } else {
+                        "mb-2 sm:mb-4 lesson-question".to_string()
+                    }
+                }>
                     <Heading level=HeadingLevel::H2>
                         <Show
                             when=move || is_reversed
