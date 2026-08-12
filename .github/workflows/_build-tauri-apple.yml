@@ -217,13 +217,24 @@ jobs:
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
               run: |
                   # xcrun altool handles App Store Connect upload using the same
-                  # API key as signing. A failed upload fails the job so the
-                  # problem is visible immediately — the .ipa is preserved as
-                  # artifact for manual upload via Transporter.app.
+                  # API key as signing. altool can return exit 0 even on
+                  # server-side errors (HTTP 409 duplicate version, validation
+                  # failures, etc.) — so we capture output and check for error
+                  # patterns to ensure a failed upload fails the job.
+                  # The .ipa is preserved as artifact for manual upload via
+                  # Transporter.app.
+                  set +e
                   xcrun altool --upload-app --type ios \
                     --file "${{ steps.ipa.outputs.path }}" \
                     --apiKey "$APPLE_API_KEY" \
-                    --apiIssuer "$APPLE_API_ISSUER"
+                    --apiIssuer "$APPLE_API_ISSUER" 2>&1 | tee /tmp/altool_ios.log
+                  EXIT_CODE=${PIPESTATUS[0]}
+
+                  if [ "$EXIT_CODE" -ne 0 ] || \
+                     grep -qiE 'ERROR:|Failed to upload|status : [45][0-9][0-9]' /tmp/altool_ios.log; then
+                    echo "::error::altool iOS upload failed (exit $EXIT_CODE)"
+                    exit 1
+                  fi
 
             - name: Report upload result
               id: upload-report
@@ -438,6 +449,47 @@ jobs:
                   echo "✅ All 5 entitlements present"
                   rm -f /tmp/entitlements.txt
 
+            - name: Embed provisioning profile & re-sign
+              #
+              # ITMS-90889: tauri-bundler signs the .app but does NOT embed
+              # an embedded.provisionprofile in Contents/. TestFlight rejects
+              # the build without it (tauri #13952). We download the MAC_APP_STORE
+              # profile via App Store Connect API (same .p8 key as altool), drop
+              # it into Contents/, and re-sign the top-level .app bundle to seal
+              # the new file into the signature.
+              #
+              # ITMS-90886: the provisioning profile carries entitlements
+              # (com.apple.application-identifier, team-identifier,
+              # keychain-access-groups, etc.) that MUST be present in the
+              # app's signature. We merge the profile's entitlements with
+              # the app's Entitlements.plist and sign with the combined set.
+              #
+              # No --deep: nested code (frameworks, helpers) was already signed
+              # by tauri-bundler inside-out and hasn't changed — only the
+              # top-level bundle needs re-sealing (Apple QA1940 convention).
+              env:
+                  APPLE_API_KEY: ${{ secrets.apple-api-key }}
+                  APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
+              run: |
+                  PROFILE_PATH="$RUNNER_TEMP/embedded.provisionprofile"
+                  MERGED_ENTITLEMENTS="$RUNNER_TEMP/Entitlements.merged.plist"
+
+                  python3 "$GITHUB_WORKSPACE/.github/scripts/download_macos_profile.py" \
+                    --output-profile "$PROFILE_PATH" \
+                    --output-entitlements "$MERGED_ENTITLEMENTS" \
+                    --app-entitlements tauri/Entitlements.plist
+
+                  cp "$PROFILE_PATH" "$APP_PATH/Contents/embedded.provisionprofile"
+                  echo "Provisioning profile embedded"
+
+                  codesign --force \
+                    --sign "$APPLE_SIGNING_IDENTITY" \
+                    --options runtime \
+                    --entitlements "$MERGED_ENTITLEMENTS" \
+                    --keychain build.keychain \
+                    "$APP_PATH"
+                  echo "✅ Re-signed .app with provisioning profile + merged entitlements"
+
             - name: Build .pkg via productbuild
               id: pkg
               timeout-minutes: 10
@@ -513,10 +565,21 @@ jobs:
                   APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
                   APPLE_API_KEY: ${{ secrets.apple-api-key }}
               run: |
+                  # altool can return exit 0 even on server-side errors
+                  # (HTTP 409 duplicate version, validation failures, etc.)
+                  # — capture output and check for error patterns.
+                  set +e
                   xcrun altool --upload-app --type mac \
                     --file "${{ steps.pkg.outputs.path }}" \
                     --apiKey "$APPLE_API_KEY" \
-                    --apiIssuer "$APPLE_API_ISSUER"
+                    --apiIssuer "$APPLE_API_ISSUER" 2>&1 | tee /tmp/altool_mac.log
+                  EXIT_CODE=${PIPESTATUS[0]}
+
+                  if [ "$EXIT_CODE" -ne 0 ] || \
+                     grep -qiE 'ERROR:|Failed to upload|status : [45][0-9][0-9]' /tmp/altool_mac.log; then
+                    echo "::error::altool macOS upload failed (exit $EXIT_CODE)"
+                    exit 1
+                  fi
 
             - name: Report build result
               id: build-report

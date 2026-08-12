@@ -17,7 +17,7 @@ use super::answer_display::extract_card_answer;
 use super::card_type::CardType;
 use super::kanji_card_details::RadicalDisplay;
 use super::lesson_card_answer::LessonCardAnswer;
-use super::lesson_card_header::LessonCardHeader;
+use super::lesson_card_header::{LessonCardAnswerAudio, LessonCardAudio, LessonCardTags};
 use super::lesson_card_question::LessonCardQuestion;
 use super::lesson_state::LessonContext;
 use crate::repository::cdn_provider::prefetch_blob_url;
@@ -262,8 +262,14 @@ pub fn LessonCard(
             && card_type != CardType::Kanji
             && let Some(el) = content_ref.get()
         {
-            let is_overflow = el.scroll_height() > el.client_height();
-            needs_collapse.set(is_overflow);
+            // Only show "Expand" when content significantly overflows the
+            // clamp. A small overflow (e.g. half a line) produces a button
+            // that reveals almost nothing — confusing UX. The 1.3× threshold
+            // means the collapsed view hides at least 30% of the content.
+            let full = el.scroll_height() as f64;
+            let visible = el.client_height() as f64;
+            let is_significant_overflow = visible > 0.0 && full > visible * 1.3;
+            needs_collapse.set(is_significant_overflow);
         }
     });
 
@@ -275,53 +281,71 @@ pub fn LessonCard(
         is_expanded.update(|v| *v = !*v);
     });
 
+    let audio_path_stored = StoredValue::new(audio_path.clone());
+
     view! {
-        <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-            <LessonCardHeader
+        <div class="flex flex-col">
+            <LessonCardTags
                 card_type=card_type
-                question_text=if is_reversed { answer.get_value() } else { display_question.get_value() }
                 grammar_info=grammar_info.clone()
                 show_answer=show_answer
                 card=card.clone()
-                audio_path=audio_path
             />
-
-            <div class="flex-1 flex flex-col justify-center">
-                <Show when=move || !show_answer.get()>
-                    <LessonCardQuestion
-                        question_text=card_question_text.get_value()
-                        kanji=kanji_stored.get_value()
-                        is_reversed=is_reversed
-                        on_show_answer=on_show_answer
-                        known_kanji=known_kanji
-                        native_language=native_language
+            <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
+                <Show when=move || !is_reversed>
+                    <LessonCardAudio
+                        card_type=card_type
+                        question_text=display_question.get_value()
+                        is_reversed=false
+                        audio_path=audio_path_stored.get_value()
                     />
                 </Show>
 
-                <Show when=move || show_answer.get()>
-                    <LessonCardAnswer
-                        question_text=answer_heading.get_value()
-                        answer_text=if is_reversed { question.get_value() } else { answer.get_value() }
-                        answer_translations=answer_translations_stored.get_value()
-                        answer_description=answer_description_stored.get_value()
-                        is_expanded=is_expanded
-                        needs_collapse=needs_collapse
-                        content_ref=content_ref
-                        on_toggle=on_toggle
-                        is_kanji=card_type == CardType::Kanji
-                        is_phrase
-                        is_reversed=is_reversed
-                        on_readings=on_readings_stored.get_value()
-                        kun_readings=kun_readings_stored.get_value()
-                        radicals=radicals_stored.get_value()
-                        example_words=examples_stored.get_value()
-                        grammar_info=grammar_info.clone()
-                        known_kanji=known_kanji
-                        native_language=native_language
+                <Show when=move || is_reversed && show_answer.get()>
+                    <LessonCardAnswerAudio
+                        card_type=card_type
+                        question_text=answer.get_value()
+                        audio_path=audio_path_stored.get_value()
                     />
                 </Show>
-            </div>
-        </Card>
+
+                <div class="flex-1 flex flex-col justify-center">
+                    <Show when=move || !show_answer.get()>
+                        <LessonCardQuestion
+                            question_text=card_question_text.get_value()
+                            kanji=kanji_stored.get_value()
+                            is_reversed=is_reversed
+                            on_show_answer=on_show_answer
+                            known_kanji=known_kanji
+                            native_language=native_language
+                        />
+                    </Show>
+
+                    <Show when=move || show_answer.get()>
+                        <LessonCardAnswer
+                            question_text=answer_heading.get_value()
+                            answer_text=if is_reversed { question.get_value() } else { answer.get_value() }
+                            answer_translations=answer_translations_stored.get_value()
+                            answer_description=answer_description_stored.get_value()
+                            is_expanded=is_expanded
+                            needs_collapse=needs_collapse
+                            content_ref=content_ref
+                            on_toggle=on_toggle
+                            is_kanji=card_type == CardType::Kanji
+                            is_phrase
+                            is_reversed=is_reversed
+                            on_readings=on_readings_stored.get_value()
+                            kun_readings=kun_readings_stored.get_value()
+                            radicals=radicals_stored.get_value()
+                            example_words=examples_stored.get_value()
+                            grammar_info=grammar_info.clone()
+                            known_kanji=known_kanji
+                            native_language=native_language
+                        />
+                    </Show>
+                </div>
+            </Card>
+        </div>
     }
 }
 

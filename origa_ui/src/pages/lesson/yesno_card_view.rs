@@ -10,8 +10,8 @@ use tracing::warn;
 
 use super::answer_display::{CardAnswerDisplay, extract_card_answer};
 use super::card_type::CardType;
+use super::lesson_card_header::{LessonCardAudio, LessonCardTagsQuiz};
 use super::next_card_button::NextCardButton;
-use super::quiz_card_header::QuizCardHeader;
 use super::quiz_result::QuizResult;
 
 #[derive(Clone, Copy, PartialEq, Default, Debug)]
@@ -184,12 +184,18 @@ pub fn YesNoCardView(
     };
 
     view! {
-        <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-            <QuizCardHeader
+        <div class="flex flex-col">
+            <LessonCardTagsQuiz
                 card_type=card_type
-                question_text=display_question.get_value()
                 part_of_speech=part_of_speech
             />
+            <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
+                <LessonCardAudio
+                    card_type=card_type
+                    question_text=display_question.get_value()
+                    is_reversed=false
+                    audio_path=None
+                />
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-3 sm:mb-6">
@@ -318,5 +324,6 @@ pub fn YesNoCardView(
                 </Show>
             </div>
         </Card>
+        </div>
     }
 }

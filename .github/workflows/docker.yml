@@ -119,3 +119,20 @@ jobs:
               run: railway redeploy -y --service ${{ secrets.RAILWAY_SERVICE_ID_UI }}
               env:
                   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+    notify-indexnow:
+        name: Notify IndexNow
+        permissions:
+            contents: read
+        needs: [version, deploy-to-railway]
+        if: success() && startsWith(github.ref, 'refs/tags/v') && needs.version.outputs.version_type == 'stable'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Wait for landing deployment
+              run: sleep 30
+
+            - name: Notify IndexNow about updated URLs
+              run: python scripts/notify_indexnow.py

@@ -161,12 +161,13 @@ pub fn WritingCard(
     let disabled_sv = StoredValue::new(disabled);
 
     view! {
-        <Card class=super::LESSON_CARD_CLASS shadow=true test_id="lesson-card-root">
-            <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col">
+            <div class="flex items-center gap-2 flex-wrap min-w-0 mb-2 px-1">
                 <Tag variant=tag_variant>
                     {card_type_label}
                 </Tag>
             </div>
+            <Card class=super::LESSON_CARD_CLASS shadow=true test_id="lesson-card-root">
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-4">
@@ -219,6 +220,7 @@ pub fn WritingCard(
                 </Show>
             </div>
         </Card>
+        </div>
     }
     .into_any()
 }

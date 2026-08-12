@@ -92,7 +92,7 @@ fn parse_legacy_translation(text: &str) -> (Vec<String>, Option<String>) {
     (translations, description)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 pub struct VocabularyInfo {
     word: String,
     ru_translations: Vec<String>,
@@ -161,6 +161,7 @@ struct VocabularyEntryStoredType {
     en: Option<TranslationValue>,
 }
 
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 pub struct VocabularyDatabase {
     vocabulary_map: HashMap<String, VocabularyInfo>,
 }
@@ -182,6 +183,36 @@ pub struct VocabularyChunkData {
 
 pub fn init_vocabulary(data: VocabularyChunkData) -> Result<(), OrigaError> {
     let db = VocabularyDatabase::from_chunks(data)?;
+    VOCABULARY_DICTIONARY
+        .set(db)
+        .map_err(|_| OrigaError::VocabularyParseError {
+            reason: "Failed to set vocabulary dictionary".to_string(),
+        })
+}
+
+/// Serialize the in-memory VocabularyDatabase to rkyv bytes for Cache API
+/// storage. On subsequent loads, `init_vocabulary_from_rkyv` skips JSON
+/// parsing entirely.
+pub fn serialize_vocabulary_to_rkyv() -> Result<Vec<u8>, OrigaError> {
+    let db = VOCABULARY_DICTIONARY
+        .get()
+        .ok_or(OrigaError::VocabularyParseError {
+            reason: "Vocabulary dictionary not loaded".to_string(),
+        })?;
+    rkyv::to_bytes::<rkyv::rancor::Error>(db)
+        .map_err(|e| OrigaError::VocabularyParseError {
+            reason: format!("Failed to serialize vocabulary: {}", e),
+        })
+        .map(|bytes| bytes.to_vec())
+}
+
+/// Initialize vocabulary from cached rkyv bytes (fast path).
+/// Skips JSON parsing of 11 chunks (~35 MB text).
+pub fn init_vocabulary_from_rkyv(bytes: &[u8]) -> Result<(), OrigaError> {
+    let db: VocabularyDatabase = rkyv::from_bytes::<VocabularyDatabase, rkyv::rancor::Error>(bytes)
+        .map_err(|e| OrigaError::VocabularyParseError {
+            reason: format!("Failed to deserialize vocabulary: {}", e),
+        })?;
     VOCABULARY_DICTIONARY
         .set(db)
         .map_err(|_| OrigaError::VocabularyParseError {
@@ -612,5 +643,46 @@ mod tests {
     fn split_semicolon_joined_translations_drops_empty_entries() {
         let out = split_semicolon_joined_translations(vec!["кошка".to_string(), "   ".to_string()]);
         assert_eq!(out, vec!["кошка"]);
+    }
+
+    #[test]
+    fn rkyv_vocabulary_round_trip() {
+        let data = empty_chunk_data_with(&make_structured_chunk_json());
+        let db = VocabularyDatabase::from_chunks(data).unwrap();
+
+        // Serialize directly (bypass OnceLock — serialize_vocabulary_to_rkyv
+        // requires a populated VOCABULARY_DICTIONARY which OnceLock prevents
+        // in tests).
+        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&db).expect("serialize should succeed");
+        assert!(!bytes.is_empty());
+
+        // Deserialize back.
+        let restored: VocabularyDatabase =
+            rkyv::from_bytes::<VocabularyDatabase, rkyv::rancor::Error>(&bytes).unwrap();
+
+        let ru = restored
+            .get_translations("猫", &NativeLanguage::Russian)
+            .unwrap();
+        assert_eq!(ru, vec!["кошка", "кот"]);
+        let en = restored
+            .get_translations("猫", &NativeLanguage::English)
+            .unwrap();
+        assert_eq!(en, vec!["cat"]);
+        let desc = restored.get_description("猫", &NativeLanguage::Russian);
+        assert_eq!(desc, Some("домашнее животное".to_string()));
+    }
+
+    #[test]
+    fn rkyv_vocabulary_round_trip_preserves_legacy_format() {
+        let data = empty_chunk_data_with(&make_valid_chunk_json());
+        let db = VocabularyDatabase::from_chunks(data).unwrap();
+        let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&db).expect("serialize should succeed");
+
+        let restored: VocabularyDatabase =
+            rkyv::from_bytes::<VocabularyDatabase, rkyv::rancor::Error>(&bytes).unwrap();
+        let ru = restored
+            .get_translations("猫", &NativeLanguage::Russian)
+            .unwrap();
+        assert_eq!(ru, vec!["кошка", "кот"]);
     }
 }

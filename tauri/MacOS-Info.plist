@@ -8,5 +8,16 @@
 	<string>Origa recognizes Japanese speech to transcribe audio input.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Origa records audio to transcribe Japanese speech.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>net.uwuwu.origa</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>origa</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

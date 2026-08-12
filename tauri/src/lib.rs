@@ -8,23 +8,18 @@ mod auth_store;
 // back to Whisper WASM.
 #[cfg(all(target_os = "macos", not(feature = "disable-device-ai")))]
 mod device_ai_commands;
-// `app_store` cfg is set by `tauri/build.rs` when the `ORIGA_APP_STORE`
-// env var is present. `feature = "app-store"` covers local `cargo check
-// --features app-store` invocations. The OR allows either mechanism:
-// tauri-cli does NOT pass `--features` through to cargo, so the env-var
-// path is the only way to gate during `cargo tauri ios build`.
-#[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
+// Auto-updater is Windows/Linux-only. macOS App Store handles updates, and
+// non-App-Store macOS builds are intentionally excluded too — the updater
+// endpoint (GitHub Releases) would conflict with App Store distribution.
+#[cfg(any(windows, target_os = "linux"))]
 mod updater_commands;
 
 use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
-#[cfg(any(
-    feature = "release-devtools",
-    all(desktop, not(any(feature = "app-store", app_store)))
-))]
+#[cfg(any(feature = "release-devtools", any(windows, target_os = "linux")))]
 use tauri::Manager;
 use tauri::{Emitter, Listener};
 use tauri_plugin_deep_link::DeepLinkExt;
-#[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
+#[cfg(any(windows, target_os = "linux"))]
 use updater_commands::{PendingUpdate, check_for_update, install_update};
 
 /// Returns the deep-link URL that launched (or last targeted) the current
@@ -78,7 +73,9 @@ pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
-    #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
+    // Auto-updater + single-instance are Windows/Linux-only. macOS App Store
+    // handles updates; macOS non-App-Store is intentionally excluded too.
+    #[cfg(any(windows, target_os = "linux"))]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             tracing::info!("[deep-link] single-instance activated (app was already running)");
@@ -95,6 +92,18 @@ pub fn run() {
     #[cfg(mobile)]
     {
         builder = builder.plugin(tauri_plugin_haptics::init());
+    }
+
+    // iOS-only: ASWebAuthenticationSession for OAuth. The plugin wraps Apple's
+    // native auth session so Safari returns to the app after the OAuth redirect
+    // — the custom-scheme `origa://` is not registered in Info.plist by
+    // tauri-plugin-deep-link (its build.rs removes CFBundleURLTypes for
+    // non-appLink schemes), so ASWebAuthenticationSession intercepts the
+    // callback directly. Android and desktop keep the existing opener +
+    // deep-link listener flow.
+    #[cfg(target_os = "ios")]
+    {
+        builder = builder.plugin(tauri_plugin_aswebauth::init());
     }
 
     builder = builder
@@ -122,9 +131,9 @@ pub fn run() {
             auth_store_get,
             auth_store_set,
             auth_store_delete,
-            #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
+            #[cfg(any(windows, target_os = "linux"))]
             check_for_update,
-            #[cfg(all(desktop, not(any(feature = "app-store", app_store))))]
+            #[cfg(any(windows, target_os = "linux"))]
             install_update,
             #[cfg(all(target_os = "macos", not(feature = "disable-device-ai")))]
             device_ai_commands::device_ai_recognize_file
@@ -163,7 +172,7 @@ pub fn run() {
 
             tracing::info!("[deep-link] listener for 'deep-link://new-url' registered");
 
-            #[cfg(any(windows, target_os = "linux"))]
+            #[cfg(any(windows, target_os = "linux", target_os = "macos"))]
             {
                 match app.deep_link().register_all() {
                     Ok(()) => {
@@ -182,12 +191,12 @@ pub fn run() {
 
             tracing::info!("[deep-link] setup complete");
 
+            // release-devtools feature enables the DevTools panel (F12 /
+            // right-click → Inspect) but does NOT auto-open it. Opening the
+            // panel at startup was annoying users on every launch.
             #[cfg(feature = "release-devtools")]
             {
-                if let Some(window) = app.get_webview_window("main") {
-                    window.open_devtools();
-                    tracing::info!("[devtools] DevTools opened (release-devtools feature enabled)");
-                }
+                tracing::info!("[devtools] DevTools available (F12 / right-click → Inspect)");
             }
 
             Ok(())

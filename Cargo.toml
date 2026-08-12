@@ -1,5 +1,5 @@
 [workspace]
-members = ["origa", "utils", "origa_ui", "tauri", "origa_landing"]
+members = ["origa", "utils", "origa_ui", "tauri", "origa_landing", "tauri-plugin-aswebauth"]
 resolver = "2"
 
 [workspace.package]
@@ -130,7 +130,9 @@ tauri-plugin-store = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
 tauri-plugin-haptics = "2"
+tauri-plugin-aswebauth = { path = "tauri-plugin-aswebauth" }
 tauri-build = { version = "2", features = [] }
+tauri-plugin = { version = "2", features = ["build"] }
 # device-ai: native AI APIs (ASR/OCR/TTS). Pinned to a fork rev that fixes the
 # upstream mobile bridge (hypothesi's CI never built mobile, so two compile
 # errors went unnoticed: missing get_capabilities on the mobile impl, and

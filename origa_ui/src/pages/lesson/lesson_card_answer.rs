@@ -87,7 +87,7 @@ pub fn LessonCardAnswer(
 
             <div
                 node_ref=content_ref
-                class=move || if is_expanded.get() { "border-t border-[var(--border-light)] pt-4 mt-4" } else { "border-t border-[var(--border-light)] pt-4 mt-4 line-clamp-3" }
+                class=move || if is_expanded.get() { "border-t border-[var(--border-light)] pt-4 mt-4" } else { "border-t border-[var(--border-light)] pt-4 mt-4 line-clamp-6" }
             >
                 <div class="max-w-max mx-auto space-y-4">
                     <Show
@@ -119,9 +119,9 @@ pub fn LessonCardAnswer(
                         when=move || is_kanji
                         fallback=move || {
                             view! {
-                                <div class="flex gap-4 items-baseline text-left">
-                                    <div class="w-16 shrink-0">
-                                        <Text size=TextSize::Default variant=TypographyVariant::Muted>
+                                <div class="flex flex-col gap-1 text-left">
+                                    <div class="text-[var(--text-label-sm)] uppercase tracking-[0.1em] text-[var(--fg-muted)]">
+                                        <Text size=TextSize::Small variant=TypographyVariant::Muted>
                                             {t!(i18n, lesson.answer)}
                                         </Text>
                                     </div>
@@ -168,6 +168,17 @@ pub fn LessonCardAnswer(
                 </div>
             </div>
 
+            <Show when=move || needs_collapse.get()>
+                <div class="mt-2">
+                    <Button
+                        variant=ButtonVariant::Ghost
+                        on_click=Callback::new(move |_: MouseEvent| on_toggle.run(()))
+                    >
+                        {move || if is_expanded.get() { t!(i18n, common.collapse).into_any() } else { t!(i18n, common.expand).into_any() }}
+                    </Button>
+                </div>
+            </Show>
+
             <Show
                 when=move || grammar_info_stored
                     .get_value()
@@ -190,17 +201,6 @@ pub fn LessonCardAnswer(
                             }
                         })
                 }}
-            </Show>
-
-            <Show when=move || needs_collapse.get()>
-                <div class="mt-2">
-                    <Button
-                        variant=ButtonVariant::Ghost
-                        on_click=Callback::new(move |_: MouseEvent| on_toggle.run(()))
-                    >
-                        {move || if is_expanded.get() { t!(i18n, common.collapse).into_any() } else { t!(i18n, common.expand).into_any() }}
-                    </Button>
-                </div>
             </Show>
         </div>
     }

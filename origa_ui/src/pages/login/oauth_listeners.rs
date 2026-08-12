@@ -71,7 +71,7 @@ fn extract_url_from_event(event: &JsValue) -> String {
     String::new()
 }
 
-async fn process_oauth_url(
+pub(crate) async fn process_oauth_url(
     url: &str,
     auth_store: &AuthStore,
     i18n: &I18nContext<Locale>,
@@ -100,7 +100,7 @@ async fn process_oauth_url(
         .to_string())
 }
 
-fn handle_oauth_result(result: Result<Option<User>, String>, auth_store: &AuthStore) {
+pub(crate) fn handle_oauth_result(result: Result<Option<User>, String>, auth_store: &AuthStore) {
     match result {
         Ok(Some(user)) => {
             debug!(user_id = %user.id(), "OAuth success — updating user signal");

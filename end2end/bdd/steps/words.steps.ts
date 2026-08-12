@@ -32,7 +32,7 @@ When('вводит нераспознаваемый текст для анали
     const wordsPage = new WordsPage(page);
     await wordsPage.openAddModal();
     // Latin punctuation only — lindera tokenizes Japanese; this yields 0
-    // AnalyzedWords and triggers the NoResults feedback branch.
+    // AnalyzedWords and triggers the "no words found" notice in Input stage.
     await wordsPage.enterText(",,, ... !!!");
     await wordsPage.analyzeTextNoResults();
 });

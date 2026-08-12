@@ -1228,6 +1228,51 @@ input[type="submit"],
     background: transparent;
 }
 
+/* Scrollable Tabs variant: horizontal scroll for narrow viewports where
+   all tabs don't fit (e.g. 4 input-mode tabs in Add Words on a 360px phone).
+   hide-scrollbar keeps the visual clean while remaining swipeable. */
+.tabs--scrollable {
+    display: flex;
+    border-bottom: 1px solid var(--border-dark);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.tabs--scrollable::-webkit-scrollbar {
+    display: none;
+}
+
+.tabs--scrollable .tab {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-sm, 11px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    color: var(--fg-muted);
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.tabs--scrollable .tab:hover {
+    color: var(--fg-black);
+}
+
+.tabs--scrollable .tab.active {
+    color: var(--fg-black);
+    border-bottom-color: var(--fg-black);
+    background: transparent;
+}
+
+/* Suppress the base .tab::after underline inside scrollable variant —
+   it conflicts with the border-bottom indicator above. */
+.tabs--scrollable .tab::after {
+    display: none;
+}
+
 .tooltip-container {
     position: relative;
     display: inline-block;
@@ -1235,7 +1280,9 @@ input[type="submit"],
 
 .tooltip {
     position: absolute;
-    left: 50%;
+    /* Default center; overridden by --tooltip-shift-x (px) from JS when the
+       tooltip would overflow the viewport left/right edge. */
+    left: calc(50% + var(--tooltip-shift-x, 0px));
     transform: translateX(-50%);
     background: var(--fg-black);
     color: var(--bg-paper);
@@ -1244,13 +1291,13 @@ input[type="submit"],
     font-size: var(--text-label);
     letter-spacing: 0.05em;
     white-space: normal;
-    max-width: 250px;
+    max-width: min(250px, calc(100vw - 16px));
     word-wrap: break-word;
     text-align: center;
     opacity: 0;
     visibility: hidden;
     transition: opacity var(--anima-duration-normal) var(--anima-ease-paper), visibility var(--anima-duration-normal) var(--anima-ease-paper);
-    z-index: 50;
+    z-index: 100;
     /* Prevent invisible tooltip from intercepting pointer events */
     pointer-events: none;
 }
@@ -1259,11 +1306,13 @@ input[type="submit"],
     bottom: calc(100% + 8px);
 }
 
+/* Arrow follows the trigger center, shifted along with the tooltip body via
+   --tooltip-shift-x so it stays visually connected. */
 .tooltip--top::after {
     content: "";
     position: absolute;
     top: 100%;
-    left: 50%;
+    left: calc(50% - var(--tooltip-shift-x, 0px));
     transform: translateX(-50%);
     border: 6px solid transparent;
     border-top-color: var(--fg-black);
@@ -1277,7 +1326,7 @@ input[type="submit"],
     content: "";
     position: absolute;
     bottom: 100%;
-    left: 50%;
+    left: calc(50% - var(--tooltip-shift-x, 0px));
     transform: translateX(-50%);
     border: 6px solid transparent;
     border-bottom-color: var(--fg-black);
@@ -1557,12 +1606,11 @@ input[type="submit"],
     bottom: 0;
     left: 0;
     right: 0;
-    /* Full height INCLUDING the safe-area inset so the bar fills the space
-       above the home indicator on notched iPhones (viewport-fit=cover).
-       Previously height was a flat 72px and padding-bottom ate into it,
-       leaving icons crushed and a gap below the bar. */
-    height: calc(72px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* Compact bar: height fills safe-area for background, but internal
+       padding is minimal so the bar doesn't feel oversized. Icons sit
+       near the bottom, just clearing the home indicator. */
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) * 0.2);
     background: var(--bg-cream);
     border-top: 1px solid var(--border-dark);
     display: flex;
@@ -1590,7 +1638,7 @@ input[type="submit"],
     align-items: center;
     justify-content: center;
     gap: 2px;
-    padding: 8px 4px;
+    padding: 6px 4px;
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -1835,7 +1883,9 @@ rt {
 
 .kanji-popup {
     position: absolute;
-    left: 0;
+    /* Center under the kanji char instead of left:0 so it doesn't
+       systematically overflow the right viewport edge on mobile. */
+    left: 50%;
     top: 100%;
     min-width: 120px;
     max-width: min(240px, calc(100vw - 32px));
@@ -1843,7 +1893,8 @@ rt {
     margin-top: 4px;
     background: var(--bg-paper);
     border: 1px solid var(--border-dark);
-    z-index: 50;
+    z-index: 100;
+    transform: translateX(-50%);
 }
 
 .kanji-popup::after {
@@ -4627,6 +4678,8 @@ rt {
 
 .grammar-detail-container {
     padding: 24px 32px;
+    /* Leave room for the bottom tab bar on mobile (60px + safe-area) */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 .grammar-detail-top-bar {
@@ -4778,6 +4831,23 @@ rt {
     position: relative;
 }
 
+/* On mobile the section cards are already inside the lesson card (which has
+   its own border + shadow). The nested border + ::after shadow create
+   visually heavy double-framing that eats horizontal space on a narrow
+   phone. Strip the frame down to just a title-divider so content gets
+   maximum useful width. */
+@media (max-width: 639px) {
+    .grammar-detail-section-card {
+        border: none;
+        padding: 0 2px;
+        background: transparent;
+    }
+
+    .grammar-detail-section-card::after {
+        display: none;
+    }
+}
+
 .grammar-detail-section-card::after {
     content: "";
     position: absolute;
@@ -4837,6 +4907,8 @@ rt {
 
 .kanji-detail-container {
     padding: 24px 32px;
+    /* Leave room for the bottom tab bar on mobile (60px + safe-area) */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Breadcrumbs */

@@ -1,4 +1,5 @@
 dictionaries/char_def.bin
+dictionaries/cached-lindera.bin
 dictionaries/dict.da
 dictionaries/dict.vals
 dictionaries/dict.words

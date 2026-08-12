@@ -1,11 +1,15 @@
 use origa::dictionary::grammar::{GrammarData, init_grammar, is_grammar_loaded};
 use origa::dictionary::kanji::{KanjiData, init_kanji, is_kanji_loaded};
 use origa::dictionary::radical::{RadicalData, init_radicals, is_radicals_loaded};
-use origa::dictionary::vocabulary::{VocabularyChunkData, init_vocabulary, is_vocabulary_loaded};
+use origa::dictionary::vocabulary::{
+    VocabularyChunkData, init_vocabulary, init_vocabulary_from_rkyv, is_vocabulary_loaded,
+    serialize_vocabulary_to_rkyv,
+};
 use origa::domain::OrigaError;
 use origa::traits::CdnProvider;
 
 use crate::repository::cdn_provider;
+use crate::repository::{get_cached_vocabulary_rkyv, save_vocabulary_to_cache_rkyv};
 use crate::utils::{now_ms, yield_to_browser};
 
 pub async fn load_vocabulary() -> Result<(), OrigaError> {
@@ -17,6 +21,39 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
     let start = now_ms();
     tracing::info!("📖 Loading vocabulary...");
 
+    // Fast path: try loading from rkyv cache (pre-parsed VocabularyDatabase).
+    match get_cached_vocabulary_rkyv().await {
+        Ok(Some(bytes)) => {
+            tracing::info!("📖 Cached vocabulary found, {} bytes", bytes.len());
+            yield_to_browser().await;
+            match init_vocabulary_from_rkyv(&bytes) {
+                Ok(()) => {
+                    tracing::info!(
+                        "📖 Vocabulary loaded from rkyv cache ({:.2}s)",
+                        (now_ms() - start) / 1000.0
+                    );
+                    return Ok(());
+                },
+                Err(e) => {
+                    tracing::warn!(
+                        error = ?e,
+                        "Failed to load vocabulary from rkyv cache, falling back to network"
+                    );
+                },
+            }
+        },
+        Ok(None) => {
+            tracing::debug!("📖 No rkyv vocabulary cache found, loading from network");
+        },
+        Err(e) => {
+            tracing::warn!(
+                "Vocabulary cache read failed, loading from network: {:?}",
+                e
+            );
+        },
+    }
+
+    // Slow path: fetch JSON chunks from CDN and parse.
     let cdn = cdn_provider();
 
     // Batched fetch: 11 JSON chunks (~35 MB total). Fetching all 11 at once
@@ -57,6 +94,25 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
 
     yield_to_browser().await;
     init_vocabulary(data)?;
+
+    // Cache the parsed VocabularyDatabase for future fast-path loads.
+    let cache_start = now_ms();
+    match serialize_vocabulary_to_rkyv() {
+        Ok(mut bytes) => {
+            if let Err(e) = save_vocabulary_to_cache_rkyv(&mut bytes).await {
+                tracing::warn!("Failed to cache vocabulary (rkyv): {:?}", e);
+            } else {
+                tracing::info!(
+                    "📖 Vocabulary cached (rkyv, {} bytes, {:.2}s)",
+                    bytes.len(),
+                    (now_ms() - cache_start) / 1000.0
+                );
+            }
+        },
+        Err(e) => {
+            tracing::warn!("Failed to serialize vocabulary for caching: {:?}", e);
+        },
+    }
 
     tracing::info!("📖 Vocabulary loaded ({:.2}s)", (now_ms() - start) / 1000.0);
     Ok(())

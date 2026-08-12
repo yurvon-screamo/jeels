@@ -21,27 +21,28 @@ pub enum InputMode {
 /// Determines which content the add-words modal renders, without needing
 /// reactive signals or DOM.
 ///
-/// Precedence: analyzing > preview (has words) > no-results (analyzed, empty)
-/// > input (initial/reset).
+/// Precedence: analyzing > preview (has words) > input (initial/reset/empty).
+///
+/// The former `NoResults` variant was removed: when analysis finds 0 words the
+/// modal falls back to `Input` so the user can try a different file or method
+/// instead of being stuck on a dead-end screen. The informational notice is
+/// driven separately by `has_analyzed && analyzed_words.is_empty()` in the view.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AnalysisStage {
-    /// No analysis performed yet, or reset — show input tabs.
+    /// No analysis performed yet, reset, or analysis completed with 0 words —
+    /// show input tabs (optionally with a "no words found" notice).
     Input,
     /// Analysis in progress — spinner / disabled state.
     Analyzing,
-    /// Analysis completed but found 0 words — show feedback message.
-    NoResults,
     /// Analysis completed with results — show preview list.
     Preview,
 }
 
-pub fn analysis_stage(words_count: usize, has_analyzed: bool, is_analyzing: bool) -> AnalysisStage {
+pub fn analysis_stage(words_count: usize, is_analyzing: bool) -> AnalysisStage {
     if is_analyzing {
         AnalysisStage::Analyzing
     } else if words_count > 0 {
         AnalysisStage::Preview
-    } else if has_analyzed {
-        AnalysisStage::NoResults
     } else {
         AnalysisStage::Input
     }
@@ -58,7 +59,7 @@ pub struct PreviewModalState {
     pub is_creating: RwSignal<bool>,
     /// True once an analysis has finished (success with 0+ words, or the user
     /// has run at least one `analyze_text`). Reset to false on `reset()`.
-    /// Drives the NoResults feedback branch in the modal.
+    /// Drives the "no words found" notice in the Input stage.
     pub has_analyzed: RwSignal<bool>,
     pub error_message: RwSignal<Option<String>>,
     pub repository: HybridUserRepository,
@@ -205,21 +206,16 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case::initial_input(0, false, false, AnalysisStage::Input)]
-    #[case::analyzing(0, false, true, AnalysisStage::Analyzing)]
-    #[case::analyzing_with_prior_words(2, true, true, AnalysisStage::Analyzing)]
-    #[case::no_results_after_analysis(0, true, false, AnalysisStage::NoResults)]
-    #[case::preview_with_words(3, true, false, AnalysisStage::Preview)]
-    #[case::preview_ignores_has_analyzed(1, false, false, AnalysisStage::Preview)]
+    #[case::initial_input(0, false, AnalysisStage::Input)]
+    #[case::analyzing(0, true, AnalysisStage::Analyzing)]
+    #[case::analyzing_with_prior_words(2, true, AnalysisStage::Analyzing)]
+    #[case::empty_results_fall_back_to_input(0, false, AnalysisStage::Input)]
+    #[case::preview_with_words(3, false, AnalysisStage::Preview)]
     fn analysis_stage_decision(
         #[case] words_count: usize,
-        #[case] has_analyzed: bool,
         #[case] is_analyzing: bool,
         #[case] expected: AnalysisStage,
     ) {
-        assert_eq!(
-            analysis_stage(words_count, has_analyzed, is_analyzing),
-            expected
-        );
+        assert_eq!(analysis_stage(words_count, is_analyzing), expected);
     }
 }

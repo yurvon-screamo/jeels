@@ -17,9 +17,12 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [features]
 default = ["release-devtools"]
 release-devtools = ["tauri/devtools"]
-# App Store builds: disables self-updater + single-instance + devtools for
-# Mac App Store compliance (Guideline 2.4.5(vii) — no self-update mechanisms,
-# 2.5.1 — no debug code). Use with `--no-default-features --features app-store`.
+# App Store builds: disables devtools for Mac App Store compliance
+# (Guideline 2.5.1 — no debug code). Use with `--no-default-features
+# --features app-store`. The self-updater and single-instance plugins are
+# already platform-gated (Windows/Linux only) in lib.rs, so this feature
+# no longer needs to gate them — but build.rs still uses the `app_store`
+# cfg to strip updater config from TAURI_CONFIG for bundler compliance.
 app-store = []
 # Compile-time kill-switch for the device-ai plugin (native ASR/OCR/TTS).
 # Build with `--features disable-device-ai` to drop the plugin entirely and
@@ -37,16 +40,22 @@ tauri.workspace = true
 tauri-plugin-opener.workspace = true
 tauri-plugin-tts.workspace = true
 tauri-plugin-deep-link.workspace = true
-tauri-plugin-single-instance.workspace = true
 tauri-plugin-store.workspace = true
-tauri-plugin-updater.workspace = true
-tauri-plugin-process.workspace = true
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["fmt"] }
 sentry.workspace = true
+
+# Windows/Linux-only: auto-updater, process runner (for updater restart),
+# and single-instance plugins. macOS App Store handles updates; non-App-Store
+# macOS is intentionally excluded too. Target-scoping keeps the macOS binary
+# clean and avoids pulling updater-specific transitive deps.
+[target.'cfg(any(windows, target_os = "linux"))'.dependencies]
+tauri-plugin-single-instance.workspace = true
+tauri-plugin-updater.workspace = true
+tauri-plugin-process.workspace = true
 
 # device-ai plugin + crate: native ASR/OCR/TTS, primary on macOS/iOS/Android.
 # Excluded on Windows (upstream windows.rs does not compile against windows
@@ -66,6 +75,14 @@ base64.workspace = true
 # in the public API). Target-scoping keeps the desktop binary clean.
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 tauri-plugin-haptics.workspace = true
+
+# iOS-only: ASWebAuthenticationSession plugin for OAuth. Wraps Apple's
+# native auth session API so the browser returns to the app after the OAuth
+# redirect — the tauri-plugin-deep-link build.rs does NOT register
+# CFBundleURLTypes for custom schemes on iOS, so the old opener +
+# desktop-callback.html flow cannot return from Safari.
+[target.'cfg(target_os = "ios")'.dependencies]
+tauri-plugin-aswebauth.workspace = true
 
 # Android-only: rustls-platform-verifier JNI initialization.
 # reqwest (Sentry transport, lindera build) pulls in rustls-platform-verifier

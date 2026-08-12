@@ -29,7 +29,6 @@ mod phrase_card;
 mod phrase_rating_buttons;
 mod pos_label;
 mod quiz_card;
-mod quiz_card_header;
 mod quiz_options;
 mod quiz_options_multi;
 mod quiz_result;
@@ -55,7 +54,7 @@ pub(in crate::pages::lesson) const LESSON_CARD_CLASS: &str =
 pub fn Lesson() -> impl IntoView {
     view! {
         <div class="flex-1 flex flex-col py-4" data-testid="lesson-page">
-            <div class="min-w-[min(90vw,1280px)] max-w-[min(90vw,1280px)] mx-auto px-2 sm:px-4 flex-1 flex flex-col min-h-0" data-testid="lesson-card">
+            <div class="min-w-[min(90vw,1280px)] max-w-[min(90vw,1280px)] mx-auto px-1 sm:px-2 flex-1 flex flex-col min-h-0" data-testid="lesson-card">
                 <LessonContent />
             </div>
         </div>

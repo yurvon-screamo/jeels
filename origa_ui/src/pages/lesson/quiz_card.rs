@@ -9,8 +9,8 @@ use std::collections::HashSet;
 use tracing::warn;
 
 use super::card_type::CardType;
+use super::lesson_card_header::{LessonCardAudio, LessonCardTagsQuiz};
 use super::next_card_button::NextCardButton;
-use super::quiz_card_header::QuizCardHeader;
 use super::quiz_options::QuizOptions;
 use super::quiz_options_multi::QuizOptionsMulti;
 use super::quiz_result::QuizResult;
@@ -200,13 +200,19 @@ pub fn QuizCardView(
     let is_multi = quiz_card.mode() == QuizMode::Multi;
 
     view! {
-        <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-            <QuizCardHeader
+        <div class="flex flex-col">
+            <LessonCardTagsQuiz
                 card_type=card_type
-                question_text=display_question.get_value()
                 quiz_variant=quiz_variant
                 part_of_speech=part_of_speech
             />
+            <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
+                <LessonCardAudio
+                    card_type=card_type
+                    question_text=display_question.get_value()
+                    is_reversed=false
+                    audio_path=None
+                />
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-0.5 sm:mb-1">
@@ -306,5 +312,6 @@ pub fn QuizCardView(
                 </Show>
             </div>
         </Card>
+        </div>
     }
 }

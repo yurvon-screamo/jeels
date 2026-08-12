@@ -16,7 +16,7 @@ status: ready
 
 "Offline" is one of those words that means whatever the marketing department needs it to mean. Some apps call themselves "offline" because their flashcards work without a connection. Others mean "the dictionary is cached locally." A few mean "every feature, including OCR and voice recognition, runs on the device." When you search for the best app to learn Japanese offline, the useful first question is: offline *what*?
 
-This is a breakdown of what offline means in the major categories of Japanese-learning apps, what you actually get without a connection, and what you give up. It includes Origa, the app I work on, with its limits stated plainly — Origa is built for offline-first, but offline-first is not offline-perfect.
+This is a breakdown of what offline means in the major categories of Japanese-learning apps, what you actually get without a connection, and what you give up. It includes Origa, with its limits stated plainly — Origa is built for offline-first, but offline-first is not offline-perfect.
 
 ## Why offline matters
 
@@ -81,7 +81,7 @@ These apps ship their dictionary on-device. Lookup works without a connection. M
 
 Origa was built to run offline end-to-end. The SRS works offline (layer 1). The bilingual dictionary is on-device (layer 2). Card creation from a photo or screenshot works offline (layer 3) because the OCR (NDLOCR-Lite) runs locally (layer 4). Speech-to-text for adding cards from audio also runs locally. There's no server call in the normal study flow.
 
-The framing: if you want to study Japanese on a 12-hour flight without paying for wifi, Origa's whole feature set works. The catch is in the limitations below.
+If you want to study Japanese on a 12-hour flight without paying for wifi, Origa's whole feature set works. The catch is in the limitations below.
 
 ## What you trade for offline
 
@@ -106,7 +106,7 @@ Specifics, so the claims are checkable:
 
 There is no feature in Origa's normal flow that requires an internet connection. The only thing that needs connectivity is the initial download and optional cloud sync.
 
-## Known limitations (Origa, honest)
+## Known limitations
 
 - **App size.** Hundreds of megabytes for the AI models. If storage is tight on your phone, this matters.
 - **OCR accuracy on stylised fonts.** Local OCR is good on standard text, weaker on manga lettering and decorative fonts. Manual correction is sometimes needed.

@@ -102,15 +102,6 @@
         {"claim": "STT struggles with overlapping speakers, noise, fast speech, accents.", "confidence": 0.9, "sources": ["Whisper model capabilities"], "note": "Standard Whisper limitations."}
       ]
     },
-    "roadmap": {
-      "file": "content/docs/{en,ru}/roadmap.md",
-      "claims": [
-        {"claim": "iOS is the next platform in active development.", "confidence": 0.9, "sources": ["README.md:104", "wiki task 'ios-appstore-deployment'"], "note": "Active per task tracker; no committed date."},
-        {"claim": "Planned exercise types: longer passages, manga, contextual sentences, audio-only, video.", "confidence": 0.85, "sources": ["README.md:106"], "note": "README roadmap; intent not commitment."},
-        {"claim": "Planned social features (competitions, challenges).", "confidence": 0.8, "sources": ["README.md:105"], "note": "Vague in source; shape not finalized per doc text."},
-        {"claim": "Additional interface languages planned beyond EN/RU.", "confidence": 0.8, "sources": ["README.md:107"], "note": "Specific languages not named in doc to avoid stale claims."}
-      ]
-    },
     "limitations": {
       "file": "content/docs/{en,ru}/limitations.md",
       "claims": [
@@ -121,7 +112,6 @@
         {"claim": "Sync requires internet; offline = queued.", "confidence": 1.0, "sources": ["hybrid_repository.rs"]},
         {"claim": "Writing practice is animation-based, not handwriting recognition.", "confidence": 1.0, "sources": ["lesson_card_question.rs:51-65"]},
         {"claim": "Two-button rating; no intermediate grades.", "confidence": 1.0, "sources": ["rating_buttons.rs:14-34"]},
-        {"claim": "Origa is not a dedicated dictionary or translation tool.", "confidence": 1.0, "sources": ["product positioning"], "note": "Scope clarification, not feature claim."},
         {"claim": "Interface in English and Russian only.", "confidence": 1.0, "sources": ["i18n.rs:26-37"]}
       ]
     },
@@ -149,12 +139,6 @@
       "claim": "9 internal view-types consolidated to 6 user-facing card shapes.",
       "severity": "info",
       "note": "Applied consistently across getting-started and lesson pages."
-    },
-    {
-      "type": "roadmap-uncertainty",
-      "claim": "Roadmap items are intent, not commitment.",
-      "severity": "info",
-      "note": "Page explicitly states 'no committed dates'. Confidence lowered for roadmap claims."
     }
   ],
   "gate": "READY"

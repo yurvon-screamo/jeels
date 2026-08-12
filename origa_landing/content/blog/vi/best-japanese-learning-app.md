@@ -32,7 +32,7 @@ Vì vậy bức tranh điển hình của người học tiếng Nhật là ba �
 
 Kỹ năng cơ bản là ghi nhớ từ và không quên. Các hệ thống lặp lại ngắt quãng (SRS) thống trị ở đây. Thuật toán FSRS là tiêu chuẩn hiện tại: nó điều chỉnh khoảng ôn dựa trên việc bạn, cụ thể, quên một thẻ cụ thể thế nào.
 
-- **Anki.** Miễn phí, mã nguồn mở, chạy ở mọi nơi. Linh hoạt tối đa: thẻ có thể được bày trí theo ý muốn, bộ bài có thể cấu hình. Mặt trái của sự linh hoạt đó là thẻ cần được tạo và định dạng thủ công. Với tiếng Nhật, điều đó có nghĩa: mở từ điển, sao chép từ, rồi đọc, rồi dịch, rồi tìm audio. Giao diện là tiếng Anh; có bộ bài cộng đồng tiếng Việt, nhưng bản thân ứng dụng được làm cho người nói tiếng Anh. [FSRS](https://docs.ankiweb.net/deck-options.html#fsrs) xuất hiện trong Anki 23.10 (tháng 10 năm 2023) và được bật mặc định cho các bộ sưu tập mới từ bản 24.10.
+- **Anki.** Miễn phí, mã nguồn mở, chạy ở mọi nơi. Linh hoạt tối đa: thẻ có thể được bày trí theo ý muốn, bộ bài có thể cấu hình. Mặt trái của sự linh hoạt đó là thẻ cần được tạo và định dạng thủ công. Với tiếng Nhật, điều đó có nghĩa: mở từ điển, sao chép từ, rồi đọc, rồi dịch, rồi tìm audio. Giao diện là tiếng Anh; có bộ bài cộng đồng tiếng Việt, nhưng bản thân ứng dụng được làm cho người nói tiếng Anh. [FSRS](https://docs.ankiweb.net/deck-options.html#fsrs) đã được tích hợp vào Anki.
 - **Origa.** Ứng dụng tôi đang phát triển. Dùng cùng FSRS, nhưng việc tạo thẻ được rút gọn về việc gõ một từ: từ điển song ngữ tích hợp tự động kéo đọc, dịch nghĩa và audio. Bạn có thể nhập bộ bài Anki có sẵn (`.anki2`, `.anki21`) — tiến độ được chuyển sang. Giao diện và từ điển bằng ngôn ngữ của bạn.
 
 Nếu đau khổ của bạn là tạo thẻ thủ công, một giải pháp thay thế là có ý nghĩa. Nếu bạn đã lắp ráp được hệ thống hoàn hảo trong Anki và nó hoạt động — không có gì phải thay.
@@ -42,7 +42,7 @@ Nếu đau khổ của bạn là tạo thẻ thủ công, một giải pháp tha
 Hán tự là một vấn đề riêng. Cùng một 食 xuất hiện trong hàng chục từ, và việc quan trọng không chỉ là ghi nhớ ký tự mà còn thấy nó trong nhiều ngữ cảnh.
 
 - **[WaniKani](https://www.wanikani.com/).** Lộ trình có cấu trúc theo bộ thủ, giao diện tiếng Anh, trả phí đăng ký. Phù hợp nếu bạn bắt đầu hán tự từ số không và muốn một thứ tự cố định. Nhược điểm — bạn học cái chương trình coi là cần thiết, không phải cái bạn gặp hôm nay trong manga hay bài báo. Toàn bộ đánh giá đổi lấy giữa Origa và WaniKani (bộ thủ vs theo nội dung, trả phí vs miễn phí, chỉ tiếng Anh vs 4 ngôn ngữ giao diện) nằm trong [so sánh đầy đủ](/vi/compare).
-- **Origa.** Furigana được tạo tự động và ẩn trên các hán tự đã học — những gì bạn đã học không còn được gợi ý, buộc bạn phải nhớ cách đọc. Hán tự được liên kết với từ vựng: hệ thống biết rằng 食べる và 食事 chia sẻ một hán tự, và theo dõi nó trên mọi từ mà bạn đã gặp. ([Xem Origa xử lý hán tự, furigana và liên kết từ vựng thế nào](/vi/features).)
+- **Origa.** Furigana được tạo tự động và ẩn trên các hán tự đã học — những gì bạn đã học không còn được gợi ý, buộc bạn phải nhớ cách đọc. Hán tự được liên kết với từ vựng: hệ thống biết rằng 食べる và 食事 chia sẻ một hán tự, và theo dõi nó trên mọi từ mà bạn đã gặp. ([Xem Origa xử lý hán tự, furigana và liên kết từ vựng thế nào](/vi/docs/kanji).)
 
 Hai cách tiếp cận khác nhau: WaniKani dẫn bạn lên chiếc thang của chính nó, Origa dạy những gì bạn thực sự gặp trong nội dung của mình.
 
@@ -96,7 +96,7 @@ Trong hầu hết trường hợp, một bộ làm việc là một ứng dụng
 
 - **Không tùy biến sâu như Anki.** Nếu bạn sống trong các mẫu thẻ HTML/CSS tùy chỉnh, Origa sẽ không thay thế được. Ưu tiên là rào cản gia nhập thấp, không phải kiểm soát tối đa.
 - **Ứng dụng trẻ hơn.** Anki đã được củng cố trường hợp biên hơn một thập kỷ và có thư viện bộ bài dựng sẵn khổng lồ. Thư viện nội dung dựng sẵn của Origa nhỏ hơn, dù đang phát triển.
-- **Không có iOS.** Origa chạy trên Windows, Linux, macOS, Android và trong trình duyệt; iOS đã lên kế hoạch nhưng chưa ra mắt. Nếu bạn chỉ học trên iPhone, đó là chướng ngại thực sự ở ngày hôm nay.
+- **Không có iOS.** iOS đã lên kế hoạch nhưng chưa ra mắt.
 - **Tương đương tính năng desktop/di động là tốt nhưng không tuyệt đối.** Trước khi chuyển hoàn toàn, hãy kiểm tra bản dựng hiện tại cho nền tảng của bạn.
 
 ## FAQ

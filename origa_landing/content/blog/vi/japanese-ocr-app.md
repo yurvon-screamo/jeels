@@ -34,7 +34,7 @@ Có ba trường hợp sử dụng thực, và chúng kéo theo các hướng kh
 
 ### OCR đa năng (Google Lens, Apple Live Text, Microsoft Edge mobile)
 
-**Điểm mạnh:** độ chính xác kinh ngạc trên văn bản in. Live Text trên iOS hiện đại nhận dạng tiếng Nhật trong ảnh gần như tốt như trong ảnh chụp màn hình. Google Lens dịch trên nền OCR, nên bạn có ý nghĩa ngay cả khi không đọc được một ký tự nào.
+**Điểm mạnh:** độ chính xác cao trên văn bản in. Live Text trên iOS hiện đại nhận dạng tiếng Nhật trong ảnh gần như tốt như trong ảnh chụp màn hình. Google Lens dịch trên nền OCR, nên bạn có ý nghĩa ngay cả khi không đọc được một ký tự nào.
 
 **Điểm yếu:** đó là ngõ cụt cho việc học. Kết quả nhận dạng là văn bản thuần — không furigana, không tích hợp với từ điển hoặc SRS, không cách nào lưu khung quét làm thẻ. Bạn đọc dịch một lần và quên từ. Nếu bạn muốn *học* tiếng Nhật, Lens là công cụ tra cứu, không phải công cụ học.
 
@@ -58,7 +58,7 @@ Có ba trường hợp sử dụng thực, và chúng kéo theo các hướng kh
 
 ### OCR tích hợp học tập (nơi Origa ngồi)
 
-Origa được dựng cho trường hợp 3 — khai thác từ vựng. OCR là điểm vào của đường ống tạo thẻ: quét một ảnh, dán ảnh chụp màn hình, hoặc chụp trang sách giáo khoa. OCR chạy cục bộ (NDLOCR-Lite trên thiết bị, không tải lên), trích xuất các từ, và mỗi từ trở thành một thẻ với âm đọc, dịch, âm thanh, và câu nó xuất hiện. ([Xem Origa xử lý OCR, furigana, và liên kết từ vựng thế nào](/vi/features).)
+Origa được dựng cho trường hợp 3 — khai thác từ vựng. OCR là điểm vào của đường ống tạo thẻ: quét một ảnh, dán ảnh chụp màn hình, hoặc chụp trang sách giáo khoa. OCR chạy cục bộ (NDLOCR-Lite trên thiết bị, không tải lên), trích xuất các từ, và mỗi từ trở thành một thẻ với âm đọc, dịch, âm thanh, và câu nó xuất hiện. ([Xem Origa xử lý OCR, furigana, và liên kết từ vựng thế nào](/vi/docs/capture).)
 
 Sự đánh đổi được nêu rõ: Origa không phải công cụ dịch và không phải ứng dụng tra cứu từ điển. Nếu bạn chỉ muốn biết một biển hiệu nói gì một lần, Google Lens nhanh hơn. Origa dành cho người học mục tiêu là không bao giờ phải tra từ đó lại nữa.
 
@@ -82,19 +82,19 @@ Cụ thể, Origa ngồi ở đâu trên mỗi trục đó:
 - **Xử lý furigana:** Origa tự tạo furigana của mình trên các hán tự nó trích, rồi ẩn nó trên các hán tự bạn đã học. OCR không phải phân biệt furigana in vì hệ thống tự sản xuất.
 - **Từ điển tích hợp.** Kết quả OCR đi thẳng vào từ điển song ngữ; bạn không copy-paste vào ứng dụng thứ hai.
 
-Cách diễn giải: Origa là ứng dụng OCR cho người học đã mệt mỏi khi có Lens, một ứng dụng từ điển, và Anki như ba công cụ riêng, và muốn OCR thực sự nạp đường ống học tập của họ.
+Nói cách khác: Origa là ứng dụng OCR cho người học đã mệt mỏi khi có Lens, một ứng dụng từ điển, và Anki như ba công cụ riêng, và muốn OCR thực sự nạp đường ống học tập của họ.
 
-## Những hạn chế đã biết (phần trung thực)
+## Những hạn chế đã biết
 
 - **Origa không phải ứng dụng dịch.** Nếu bạn cần đọc một biển hiệu một lần, dùng Google Lens. Đường ống Origa quá mức cho tra cứu một lần.
 - **OCR không hoàn hảo trên phông cách điệu.** Lettering manga vẽ tay, phông trang trí, và một số hiệu ứng âm bị đọc sai. Dự toán sửa tay.
 - **Nó không phải trình đọc manga.** Bạn có thể quét khung hình, nhưng Origa không hiển thị chính manga. Ghép nó với trình đọc bạn chọn.
-- **Chưa có tích hợp Yomitan hôm nay.** Nếu quy trình của bạn là Yomitan → Anki, Origa chưa vừa vặn vào đường ống đó. Bạn có thể nhập các bộ bài Anki hiện có, nên di chuyển là một chiều và không mất mát, nhưng đường ống trực tiếp chưa có.
+- **Chưa có tích hợp Yomitan hôm nay.** Bạn có thể nhập các bộ bài Anki hiện có, nhưng đường ống Yomitan→Origa trực tiếp chưa có.
 - **Chất lượng OCR di động phụ thuộc camera và ánh sáng.** Giống như mọi ứng dụng OCR điện thoại. Ảnh sắc nét, ánh sáng đều, không nghiêng — các quy tắc thông thường áp dụng.
 
 ## Chọn thế nào
 
-Gần như chắc chắn bạn đã có một ứng dụng OCR đa năng trên điện thoại (Live Text trên iOS, Lens trên Android). Cho đa số nhu cầu dịch một lần, đó là đủ và miễn phí. Câu hỏi là liệu bạn đã vượt « dịch một lần » và cần « nắm bắt và học » chưa. Nếu rồi — nếu bạn tiếp tục thấy cùng một hán tự và không nhớ, nếu bạn đã thử gắn sao từ trong từ điển và không bao giờ ôn, nếu đọc manga của bạn tạo ra từ bạn quên sang chương tiếp theo — thì OCR tích hợp học là mảnh còn thiếu. Về cách Origa so sánh với Anki, WaniKani, và các công cụ khác đã đề cập, xem [so sánh đầy đủ](/vi/compare), hoặc [tải Origa](/vi/download) để thử đường ống đầu cuối.
+Gần như chắc chắn bạn đã có một ứng dụng OCR đa năng trên điện thoại (Live Text trên iOS, Lens trên Android). Cho đa số nhu cầu dịch một lần, đó là đủ và miễn phí. Câu hỏi là liệu bạn đã vượt « dịch một lần » và cần « nắm bắt và học » chưa. Nếu rồi — nếu bạn tiếp tục thấy cùng một hán tự và không nhớ, nếu bạn đã thử gắn sao từ trong từ điển và không bao giờ ôn, nếu đọc manga của bạn tạo ra từ bạn quên sang chương tiếp theo — thì OCR tích hợp học là mảnh còn thiếu. [Tải Origa](/vi/download) để thử đường ống đầu cuối.
 
 ## Câu hỏi thường gặp
 

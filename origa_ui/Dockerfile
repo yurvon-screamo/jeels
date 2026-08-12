@@ -63,6 +63,7 @@ RUN npm install -g tailwindcss@${TAILWINDCSS_VERSION} \
 COPY Cargo.toml Cargo.lock ./
 COPY utils/Cargo.toml ./utils/
 COPY tauri/Cargo.toml ./tauri/
+COPY tauri-plugin-aswebauth/Cargo.toml ./tauri-plugin-aswebauth/
 COPY origa/Cargo.toml ./origa/
 COPY origa_ui/Cargo.toml ./origa_ui/
 COPY origa_landing/Cargo.toml ./origa_landing/
@@ -74,6 +75,8 @@ RUN mkdir -p origa/src && echo "pub fn dummy() {}" > origa/src/lib.rs && \
     echo "fn main() {}" > origa_ui/src/main.rs && \
     mkdir -p utils/src && echo "pub fn dummy() {}" > utils/src/lib.rs && \
     mkdir -p tauri/src && echo "pub fn dummy() {}" > tauri/src/lib.rs && \
+    mkdir -p tauri-plugin-aswebauth/src && echo "pub fn dummy() {}" > tauri-plugin-aswebauth/src/lib.rs && \
+    echo "fn main() {}" > tauri-plugin-aswebauth/build.rs && \
     mkdir -p origa_landing/src && echo "pub fn dummy() {}" > origa_landing/src/lib.rs && \
     echo "fn main() {}" > origa_landing/src/main.rs && \
     echo "fn main() {}" > origa_landing/build.rs
