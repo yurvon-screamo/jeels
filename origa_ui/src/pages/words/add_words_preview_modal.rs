@@ -140,11 +140,7 @@ pub fn AddWordsPreviewModal(
             <div class="space-y-4">
                 {move || {
                     let words = analyzed_words.get();
-                    let stage = analysis_stage(
-                        words.len(),
-                        has_analyzed.get(),
-                        is_analyzing.get(),
-                    );
+                    let stage = analysis_stage(words.len(), is_analyzing.get());
                     match stage {
                         AnalysisStage::Analyzing => view! {
                             <div class="space-y-4">
@@ -167,21 +163,22 @@ pub fn AddWordsPreviewModal(
                                 on_create=handlers.on_create
                             />
                         }.into_any(),
-                        AnalysisStage::NoResults => view! {
-                            <div class="space-y-4">
-                                <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
-                                <div
-                                    class="flex flex-col items-center justify-center py-8 gap-2"
-                                    data-testid="words-no-results"
-                                >
-                                    <Text size=TextSize::Default variant=TypographyVariant::Muted>
-                                        {move || i18n.get_keys().words().words_not_found().inner().to_string()}
-                                    </Text>
-                                </div>
-                            </div>
-                        }.into_any(),
                         AnalysisStage::Input => view! {
                             <div class="space-y-4">
+                                {move || {
+                                    if has_analyzed.get() && analyzed_words.get().is_empty() {
+                                        Some(view! {
+                                            <Alert
+                                                alert_type=Signal::derive(|| AlertType::Warning)
+                                                title=Signal::derive(move || i18n.get_keys().words().words_not_found().inner().to_string())
+                                                message=Signal::derive(move || i18n.get_keys().words().words_not_found_hint().inner().to_string())
+                                                test_id=Signal::derive(|| "words-no-results".to_string())
+                                            />
+                                        })
+                                    } else {
+                                        None
+                                    }
+                                }}
                                 <Tabs tabs=tabs active=active_tab test_id=Signal::derive(|| "words-add-tabs".to_string()) />
                                 {move || {
                                     let mode = input_mode.get();

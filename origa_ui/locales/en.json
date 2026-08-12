@@ -376,6 +376,7 @@
     "word_japanese": "Word (Japanese)",
     "translation_auto": "Translation will be generated automatically",
     "words_not_found": "No words found",
+    "words_not_found_hint": "Try a different file or input method.",
     "decks": "Collections",
     "tab_text": "Text",
     "tab_image": "Image",
