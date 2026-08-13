@@ -35,7 +35,12 @@ pub(super) fn AudioLiveRecorder(
     });
 
     let on_record = move || {
-        if recording.get() || !native_available.get() {
+        if !native_available.get() {
+            return;
+        }
+        // Toggle: if already recording → stop; if idle → start.
+        if recording.get() {
+            recording.set(false);
             return;
         }
         recording.set(true);
@@ -93,7 +98,6 @@ pub(super) fn AudioLiveRecorder(
                                     ButtonVariant::Filled
                                 }
                             })
-                            disabled=Signal::derive(move || recording.get())
                             on_click=Callback::new(move |_| on_record())
                         >
                             {move || {
