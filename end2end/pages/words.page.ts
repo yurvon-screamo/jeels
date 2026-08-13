@@ -178,6 +178,13 @@ export class WordsPage extends BasePage {
             const item = this.analyzedWordItems.nth(i);
             const checkbox = item.locator('input[type="checkbox"]');
             if (await checkbox.isChecked()) {
+                // Skip disabled items (no translation found) — they can't be
+                // toggled and will stay checked regardless.
+                const isDisabled = await item.evaluate((el) =>
+                    el.classList.contains("cursor-not-allowed"),
+                ).catch(() => false);
+                if (isDisabled) continue;
+
                 await item.click();
                 await expect(checkbox).not.toBeChecked({ timeout: 2000 });
             }
