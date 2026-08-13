@@ -445,7 +445,8 @@
       "live_unavailable": "Распознавание с микрофона недоступно на этом устройстве."
     },
     "no_translation_found": "Нет перевода — не будет добавлено",
-    "tooltip_no_translation": "Слово не найдено в наших словарях"
+    "tooltip_no_translation": "Слово не найдено в наших словарях",
+    "already_added": "Добавлено"
   },
   "grammar_page": {
     "add_grammar": "Добавить грамматику",

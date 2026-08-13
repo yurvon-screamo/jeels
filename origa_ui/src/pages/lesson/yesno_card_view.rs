@@ -10,7 +10,7 @@ use tracing::warn;
 
 use super::answer_display::{CardAnswerDisplay, extract_card_answer};
 use super::card_type::CardType;
-use super::lesson_card_header::{LessonCardAudio, LessonCardTagsQuiz};
+use super::lesson_card_header::{CardHeaderAudio, LessonCardTagsQuiz};
 use super::next_card_button::NextCardButton;
 use super::quiz_result::QuizResult;
 
@@ -188,14 +188,14 @@ pub fn YesNoCardView(
             <LessonCardTagsQuiz
                 card_type=card_type
                 part_of_speech=part_of_speech
+                audio=Signal::derive(move || Some(CardHeaderAudio {
+                    card_type,
+                    question_text: display_question.get_value(),
+                    is_reversed: false,
+                    audio_path: None,
+                }))
             />
             <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-                <LessonCardAudio
-                    card_type=card_type
-                    question_text=display_question.get_value()
-                    is_reversed=false
-                    audio_path=None
-                />
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-3 sm:mb-6">
