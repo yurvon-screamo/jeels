@@ -24,7 +24,9 @@ pub fn AnalyzedWordItem(
     // (available to add).
     let has_meaning = analyzed_word.meaning.is_some();
 
-    let (status_icon, icon_class, tooltip_text) = if analyzed_word.is_known {
+    let is_known = analyzed_word.is_known;
+
+    let (status_icon, icon_class, tooltip_text) = if is_known {
         (
             CHECK_CIRCLE_ICON,
             ICON_CLASS_KNOWN,
@@ -88,12 +90,21 @@ pub fn AnalyzedWordItem(
                         />
                     </div>
 
-                    <Show when=move || !status_icon_stored.get_value().is_empty()>
+                    <Show when=move || !status_icon_stored.get_value().is_empty() && !is_known>
                         <Tooltip text=Signal::derive(move || tooltip_stored.get_value()) placement_mode=TooltipPlacementMode::ForceBottom>
                             <span class=format!("{} opacity-60 group-hover:opacity-100 transition-opacity", icon_class_stored.get_value())
                                   inner_html=status_icon_stored.get_value()
                             />
                         </Tooltip>
+                    </Show>
+
+                    <Show when=move || is_known>
+                        <span class=format!("{} opacity-60 group-hover:opacity-100 transition-opacity", icon_class_stored.get_value())
+                              inner_html=status_icon_stored.get_value()
+                        />
+                        <span class="text-[var(--text-label-sm)] text-[var(--accent-sage)] uppercase tracking-[0.1em] font-mono">
+                            {t!(i18n, words.already_added)}
+                        </span>
                     </Show>
                 </div>
 

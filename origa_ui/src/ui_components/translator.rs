@@ -123,6 +123,17 @@ pub fn TranslatorText(
                             view! { <span>{surface.clone()}</span> }.into_any()
                         };
 
+                        // Store fields for the popup closure
+                        let popup_data = StoredValue::new((
+                            surface.clone(),
+                            reading.clone(),
+                            base_form.clone(),
+                            grammar_label.clone(),
+                            grammar_description.clone(),
+                            translation_text.clone(),
+                            show_base,
+                        ));
+
                         if clickable {
                             view! {
                                 <span class=move || {
@@ -154,49 +165,16 @@ pub fn TranslatorText(
                                     </span>
                                     {move || {
                                         if expanded.get() == Some(idx) {
+                                            let (s, r, bf, gl, gd, tt, sb) = popup_data.get_value();
                                             view! {
-                                                <div class="token-popup" on:click=move |ev: leptos::ev::MouseEvent| ev.stop_propagation()>
-                                                    <div class="token-popup-surface">{surface.clone()}</div>
-                                                    <div class="token-popup-reading">{reading.clone()}</div>
-                                                    {if show_base {
-                                                        view! {
-                                                            <div class="token-popup-reading">{base_form.clone()}</div>
-                                                        }.into_any()
-                                                    } else {
-                                                        ().into_any()
-                                                    }}
-                                                    {if let Some(label) = &grammar_label {
-                                                        view! {
-                                                            <div class="token-popup-grammar">{label.clone()}</div>
-                                                        }.into_any()
-                                                    } else {
-                                                        ().into_any()
-                                                    }}
-                                                    {if let Some(description) = &grammar_description {
-                                                        view! {
-                                                            <div class="token-popup-grammar-description">
-                                                                {description.clone()}
-                                                            </div>
-                                                        }.into_any()
-                                                    } else {
-                                                        ().into_any()
-                                                    }}
-                                                    {if let Some(text) = &translation_text {
-                                                        view! {
-                                                            <MarkdownText
-                                                                content=Signal::derive({
-                                                                    let text = text.clone();
-                                                                    move || text.clone()
-                                                                })
-                                                                known_kanji=HashSet::new()
-                                                                variant=Signal::derive(|| MarkdownVariant::Compact)
-                                                                furigana=false
-                                                            />
-                                                        }.into_any()
-                                                    } else {
-                                                        ().into_any()
-                                                    }}
-                                                </div>
+                                                <TokenPopup
+                                                    surface=s
+                                                    reading=r
+                                                    base_form=Signal::derive(move || if sb { Some(bf.clone()) } else { None })
+                                                    grammar_label=Signal::derive(move || gl.clone())
+                                                    grammar_description=Signal::derive(move || gd.clone())
+                                                    translation_text=Signal::derive(move || tt.clone())
+                                                />
                                             }.into_any()
                                         } else {
                                             ().into_any()
@@ -214,4 +192,77 @@ pub fn TranslatorText(
             </Show>
         </span>
     }.into_any()
+}
+
+/// Popup that shows translation/grammar info for a token. Measures its
+/// viewport position on mount and shifts horizontally to stay on-screen.
+#[component]
+fn TokenPopup(
+    surface: String,
+    reading: String,
+    #[prop(optional, into)] base_form: Signal<Option<String>>,
+    #[prop(optional, into)] grammar_label: Signal<Option<String>>,
+    #[prop(optional, into)] grammar_description: Signal<Option<String>>,
+    #[prop(optional, into)] translation_text: Signal<Option<String>>,
+) -> impl IntoView {
+    let popup_ref: NodeRef<leptos::html::Div> = NodeRef::new();
+    let shift_x: RwSignal<f64> = RwSignal::new(0.0);
+
+    Effect::new(move |_| {
+        if let Some(el) = popup_ref.get() {
+            let rect = el.get_bounding_client_rect();
+            let vw = web_sys::window()
+                .and_then(|w| w.inner_width().ok())
+                .and_then(|v| v.as_f64())
+                .unwrap_or(400.0);
+            let margin = 8.0_f64;
+            let popup_right = rect.right();
+            let popup_left = rect.left();
+
+            if popup_right > vw - margin {
+                shift_x.set((vw - margin) - popup_right);
+            } else if popup_left < margin {
+                shift_x.set(margin - popup_left);
+            }
+        }
+    });
+
+    view! {
+        <div
+            class="token-popup"
+            node_ref=popup_ref
+            style=move || format!("--token-popup-shift: {}px", shift_x.get())
+            on:click=move |ev: leptos::ev::MouseEvent| ev.stop_propagation()
+        >
+            <div class="token-popup-surface">{surface}</div>
+            <div class="token-popup-reading">{reading}</div>
+            {move || {
+                base_form.get().map(|bf| view! {
+                    <div class="token-popup-reading">{bf}</div>
+                }.into_any()).unwrap_or_else(|| ().into_any())
+            }}
+            {move || {
+                grammar_label.get().map(|label| view! {
+                    <div class="token-popup-grammar">{label}</div>
+                }.into_any()).unwrap_or_else(|| ().into_any())
+            }}
+            {move || {
+                grammar_description.get().map(|desc| view! {
+                    <div class="token-popup-grammar-description">{desc}</div>
+                }.into_any()).unwrap_or_else(|| ().into_any())
+            }}
+            {move || {
+                translation_text.get().map(|text| {
+                    view! {
+                        <MarkdownText
+                            content=Signal::derive(move || text.clone())
+                            known_kanji=HashSet::new()
+                            variant=Signal::derive(|| MarkdownVariant::Compact)
+                            furigana=false
+                        />
+                    }.into_any()
+                }).unwrap_or_else(|| ().into_any())
+            }}
+        </div>
+    }
 }
