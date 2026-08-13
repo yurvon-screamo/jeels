@@ -9,7 +9,7 @@ use std::collections::HashSet;
 use tracing::warn;
 
 use super::card_type::CardType;
-use super::lesson_card_header::{LessonCardAudio, LessonCardTagsQuiz};
+use super::lesson_card_header::{CardHeaderAudio, LessonCardTagsQuiz};
 use super::next_card_button::NextCardButton;
 use super::quiz_options::QuizOptions;
 use super::quiz_options_multi::QuizOptionsMulti;
@@ -205,14 +205,14 @@ pub fn QuizCardView(
                 card_type=card_type
                 quiz_variant=quiz_variant
                 part_of_speech=part_of_speech
+                audio=Signal::derive(move || Some(CardHeaderAudio {
+                    card_type,
+                    question_text: display_question.get_value(),
+                    is_reversed: false,
+                    audio_path: None,
+                }))
             />
             <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-                <LessonCardAudio
-                    card_type=card_type
-                    question_text=display_question.get_value()
-                    is_reversed=false
-                    audio_path=None
-                />
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-0.5 sm:mb-1">
@@ -291,16 +291,18 @@ pub fn QuizCardView(
                 </Show>
 
                 <Show when=move || !is_multi>
-                    <QuizOptions
-                        options=options.get_value()
-                        selected_option=selected_option
-                        show_result=show_result
-                        quiz_result=quiz_result()
-                        on_select_option=on_select_option
-                        on_dont_know=on_dont_know
-                        dont_know_selected=dont_know_selected
-                        known_kanji=known_kanji
-                    />
+                    <Show when=move || !show_result.get()>
+                        <QuizOptions
+                            options=options.get_value()
+                            selected_option=selected_option
+                            show_result=show_result
+                            quiz_result=quiz_result()
+                            on_select_option=on_select_option
+                            on_dont_know=on_dont_know
+                            dont_know_selected=dont_know_selected
+                            known_kanji=known_kanji
+                        />
+                    </Show>
 
                     <Show when=move || show_result.get() && quiz_result() != QuizResult::DontKnow>
                         <QuizResultDisplay quiz_result=quiz_result() />

@@ -15,16 +15,25 @@ fn quiz_variant_matches_card_type(quiz_variant: QuizVariant, card_type: CardType
     )
 }
 
-/// Unified header rendered ABOVE the lesson card for ALL card types:
+/// Bundled audio props for the tags row.
+#[derive(Clone)]
+pub struct CardHeaderAudio {
+    pub card_type: CardType,
+    pub question_text: String,
+    pub is_reversed: bool,
+    pub audio_path: Option<String>,
+}
+
+/// Tags row rendered ABOVE the card for ALL card types:
 /// tags on the left (card type, POS, quiz variant, grammar badge),
-/// audio button on the right. Both stay outside the Card border so
-/// they never compete with each other for horizontal space inside it.
+/// audio button pushed to the right. Both stay outside the Card border.
 #[component]
 pub fn LessonCardTags(
     card_type: CardType,
     grammar_info: Option<GrammarInfo>,
     show_answer: Signal<bool>,
     card: Card,
+    #[prop(optional, into)] audio: Signal<Option<CardHeaderAudio>>,
 ) -> impl IntoView {
     let i18n = use_i18n();
     let grammar_info = StoredValue::new(grammar_info);
@@ -61,17 +70,46 @@ pub fn LessonCardTags(
                         })
                 }}
             </Show>
+
+            {move || {
+                audio.get().map(|props| {
+                    let audio_view = if props.is_reversed {
+                        view! {
+                            <LessonCardAnswerAudio
+                                card_type=props.card_type
+                                question_text=props.question_text
+                                audio_path=props.audio_path
+                            />
+                        }.into_any()
+                    } else {
+                        view! {
+                            <LessonCardAudio
+                                card_type=props.card_type
+                                question_text=props.question_text
+                                is_reversed=false
+                                audio_path=props.audio_path
+                            />
+                        }.into_any()
+                    };
+                    view! {
+                        <div class="ml-auto">
+                            {audio_view}
+                        </div>
+                    }.into_any()
+                })
+            }}
         </div>
     }
 }
 
 /// Tags row for quiz-type cards (quiz, yesno, phrase) — includes the
-/// quiz variant tag (Meaning/Reading/Grammar).
+/// quiz variant tag (Meaning/Reading/Grammar) and optional audio.
 #[component]
 pub fn LessonCardTagsQuiz(
     card_type: CardType,
     #[prop(optional)] quiz_variant: QuizVariant,
     #[prop(default = None)] part_of_speech: Option<PartOfSpeech>,
+    #[prop(optional, into)] audio: Signal<Option<CardHeaderAudio>>,
 ) -> impl IntoView {
     let i18n = use_i18n();
     let pos_label = StoredValue::new(part_of_speech.map(|p| part_of_speech_label(p, &i18n)));
@@ -111,12 +149,26 @@ pub fn LessonCardTagsQuiz(
                     }
                 }}
             </Show>
+
+            {move || {
+                audio.get().map(|props| {
+                    view! {
+                        <div class="ml-auto">
+                            <LessonCardAudio
+                                card_type=props.card_type
+                                question_text=props.question_text
+                                is_reversed=false
+                                audio_path=props.audio_path
+                            />
+                        </div>
+                    }.into_any()
+                })
+            }}
         </div>
     }
 }
 
-/// Audio button row rendered above the Card alongside tags (or inside,
-/// as the first child). Hidden on reversed question side and kanji cards.
+/// Audio button. Hidden on reversed question side and kanji cards.
 #[component]
 pub fn LessonCardAudio(
     card_type: CardType,
@@ -128,19 +180,17 @@ pub fn LessonCardAudio(
     let path = StoredValue::new(audio_path);
     view! {
         <Show when=move || card_type != CardType::Kanji && !is_reversed>
-            <div class="flex justify-center mb-2">
-                <AudioButtons
-                    text=text.get_value()
-                    audio_path=path.get_value()
-                    class=Signal::derive(|| "shrink-0".to_string())
-                />
-            </div>
+            <AudioButtons
+                text=text.get_value()
+                audio_path=path.get_value()
+                class=Signal::derive(|| "shrink-0".to_string())
+            />
         </Show>
     }
 }
 
-/// Audio button for the answer side of a card — always visible
-/// (the user has already seen the answer, audio is a learning aid).
+/// Audio button for the answer side — always visible (not hidden on
+/// reversed cards, because the user already knows the answer).
 #[component]
 pub fn LessonCardAnswerAudio(
     card_type: CardType,
@@ -151,13 +201,11 @@ pub fn LessonCardAnswerAudio(
     let path = StoredValue::new(audio_path);
     view! {
         <Show when=move || card_type != CardType::Kanji>
-            <div class="flex justify-center mb-2">
-                <AudioButtons
-                    text=text.get_value()
-                    audio_path=path.get_value()
-                    class=Signal::derive(|| "shrink-0".to_string())
-                />
-            </div>
+            <AudioButtons
+                text=text.get_value()
+                audio_path=path.get_value()
+                class=Signal::derive(|| "shrink-0".to_string())
+            />
         </Show>
     }
 }
