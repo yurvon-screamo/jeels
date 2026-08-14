@@ -16,7 +16,7 @@ status: ready
 
 Đọc manga bằng tiếng Nhật cảm giác như một giấc mơ. Bạn mở tập một của bộ bạn thực sự thích, và sau vài chương bạn đã nhặt được từ theo ngữ cảnh, hiểu được những câu đùa không dịch được, và xây dựng được cảm giác ngôn ngữ mà không sách giáo khoa nào cho được.
 
-Trên thực tế, đa số người học mắc kẹt đâu đó ở trang ba. Họ tra từ lạ đầu tiên, rồi từ thứ hai, rồi thứ tám, mất mạch truyện, và quay lại học từ sách giáo khoa. Giấc mơ « học tiếng Nhật qua manga » sụp đổ thành thực tế rằng **đọc manga không phải là cùng một kỹ năng với học từ manga**. Chúng có liên quan, và bạn cần cả hai, nhưng đánh đồng chúng là lãng phí thời gian.
+Trên thực tế, đa số người học mắc kẹt đâu đó ở trang ba. Họ tra từ lạ đầu tiên, rồi từ thứ hai, rồi thứ tám, mất mạch truyện, và quay lại học từ sách giáo khoa. Giấc mơ "học tiếng Nhật qua manga" sụp đổ thành thực tế rằng **đọc manga không phải là cùng một kỹ năng với học từ manga**. Chúng có liên quan, và bạn cần cả hai, nhưng đánh đồng chúng là lãng phí thời gian.
 
 Đây là hướng dẫn thực chiến cho kỹ năng thứ hai — biến manga bạn đọc thành tiếng Nhật bạn ghi nhớ. Nó bao quát lý do manga hoạt động như một nguồn học, ma sát nằm ở đâu, một quy trình thực tế trông như thế nào, và cách công cụ hiện tại hỗ trợ (bao gồm Origa, ứng dụng tôi đang phát triển, với lưu ý trung thực rằng nó không phải là trình đọc manga).
 
@@ -38,7 +38,7 @@ Quy trình mơ ước là: đọc manga, thấy từ lạ, học nó. Thực t�
 
 **Phụ thuộc furigana.** Nếu furigana luôn hiển thị, bạn đọc âm đọc mà không bao giờ nhớ hán tự. Bạn xong tập và nhận biết được không hán tự mới nào. Nếu bạn ẩn furigana, bạn chưa thể đọc gì cả. Không có trạng thái trung gian trừ khi công cụ theo dõi những hán tự bạn đã học và chỉ ẩn furigana trên những hán tự đó.
 
-**Ma sát ghi nhớ.** Tra một từ một lần không có nghĩa là bạn đã học nó. Bạn sẽ quên nó ở chương ba. Không có đường ống SRS, « tôi đã tra nó » và « tôi biết nó » là hai câu không liên quan.
+**Ma sát ghi nhớ.** Tra một từ một lần không có nghĩa là bạn đã học nó. Bạn sẽ quên nó ở chương ba. Không có đường ống SRS, "tôi đã tra nó" và "tôi biết nó" là hai câu không liên quan.
 
 **Mất ngữ cảnh.** Một từ học từ một khung hình đáng nhớ dính tốt hơn một từ học từ một danh sách phẳng. Nếu SRS của bạn lột ngữ cảnh (khung hình, nhân vật, câu thoại), bạn mất phương pháp ghi nhớ vốn làm từ đáng nhớ ngay từ đầu.
 
@@ -70,7 +70,7 @@ Nói cách khác: một thiết lập học manga tốt trong 2026 là **một t
 - **Không chụp ngữ cảnh khung hình tự động.** Bạn có thể quét một khung hình, nhưng Origa không lưu ảnh khung hình với thẻ như thiết lập Yomitan+Anki chuyên dụng có thể. Bạn có câu và âm thanh, không phải hình.
 - **Chưa có tích hợp Yomitan hôm nay.** Nếu quy trình của bạn đã chạy trên Yomitan+Anki, Origa chưa vừa vặn sạch. Bạn có thể nhập các bộ bài Anki hiện có (`.anki2`, `.anki21`, `.anki21b`), nên di chuyển là một chiều và không mất mát, nhưng đường ống Yomitan→Origa trực tiếp chưa có.
 
-Nếu bất kỳ điều nào trong đó phá vỡ quy trình của bạn, tổ hợp Yomitan+Anki vẫn là thiết lập tham chiếu. Origa dành cho người học không muốn cấu hình ba công cụ và chỉ muốn « quét → thẻ → ôn tập » trong một ứng dụng.
+Nếu bất kỳ điều nào trong đó phá vỡ quy trình của bạn, tổ hợp Yomitan+Anki vẫn là thiết lập tham chiếu. Origa dành cho người học không muốn cấu hình ba công cụ và chỉ muốn "quét → thẻ → ôn tập" trong một ứng dụng.
 
 ## Một quy trình khởi đầu cụ thể
 

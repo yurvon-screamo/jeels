@@ -14,9 +14,9 @@ status: ready
 
 # Gia sư AI tiếng Nhật: giỏi cái gì (và không giỏi cái gì)
 
-« Gia sư AI tiếng Nhật » là một trong những danh mục tìm kiếm tăng trưởng nhanh nhất trong học ngôn ngữ. ChatGPT đã làm cho việc có một đối thoại đàm thoại vô tận kiên nhẫn, có thể giải thích ngữ pháp theo yêu cầu, sửa bài viết của bạn, và không bao giờ mệt với câu hỏi của bạn, trở nên khả thi. Một làn sóng ứng dụng đã xây dựng sản phẩm trên nền tảng đó.
+"Gia sư AI tiếng Nhật" là một trong những danh mục tìm kiếm tăng trưởng nhanh nhất trong học ngôn ngữ. ChatGPT đã làm cho việc có một đối thoại đàm thoại vô tận kiên nhẫn, có thể giải thích ngữ pháp theo yêu cầu, sửa bài viết của bạn, và không bao giờ mệt với câu hỏi của bạn, trở nên khả thi. Một làn sóng ứng dụng đã xây dựng sản phẩm trên nền tảng đó.
 
-Bài này không phải xếp hạng. Đây là phân tích về những gì gia sư AI thực sự giỏi, nơi chúng thiếu sót, và nơi chúng phù hợp trong quy trình học tiếng Nhật nghiêm túc. Phiên bản trung thực là gia sư AI xuất sắc ở một nửa công việc và vắng mặt ở nửa còn lại. Đánh đồng hai phần là cách người học kết thúc trả tiền thuê bao chatbot và quên mọi thứ họ « học » sang tháng sau.
+Bài này không phải xếp hạng. Đây là phân tích về những gì gia sư AI thực sự giỏi, nơi chúng thiếu sót, và nơi chúng phù hợp trong quy trình học tiếng Nhật nghiêm túc. Phiên bản trung thực là gia sư AI xuất sắc ở một nửa công việc và vắng mặt ở nửa còn lại. Đánh đồng hai phần là cách người học kết thúc trả tiền thuê bao chatbot và quên mọi thứ họ "học" sang tháng sau.
 
 Bao gồm Origa, ứng dụng tôi đang phát triển, được định vị trung thực — Origa dùng AI, nhưng không phải gia sư AI theo nghĩa đàm thoại mà đa số người dùng.
 
@@ -24,11 +24,11 @@ Bao gồm Origa, ứng dụng tôi đang phát triển, được định vị tr
 
 Khi mô hình nền tảng đủ năng lực (và các mô hình hiện tại, đối với tiếng Nhật đến trình độ trung cấp, là đủ năng lực), gia sư AI xử lý bốn việc tốt hơn bất kỳ sách giáo khoa nào:
 
-**Giải thích ngữ pháp theo yêu cầu.** Bạn thấy ばかり trong manga và giải thích sách giáo khoa không khớp. Dán câu vào chatbot, hỏi « tại sao ばかり được dùng ở đây? », và bạn nhận câu trả lời theo ngữ cảnh trong vài giây. Sách giáo khoa không làm được điều này vì chúng được viết sẵn.
+**Giải thích ngữ pháp theo yêu cầu.** Bạn thấy ばかり trong manga và giải thích sách giáo khoa không khớp. Dán câu vào chatbot, hỏi "tại sao ばかり được dùng ở đây?", và bạn nhận câu trả lời theo ngữ cảnh trong vài giây. Sách giáo khoa không làm được điều này vì chúng được viết sẵn.
 
-**Sửa câu với lý giải.** Viết một câu, hỏi « câu này tự nhiên không? », và một gia sư AI tốt sẽ đánh dấu cái gì sai và giải thích tại sao. Gia sư con người làm việc này tốt hơn, nhưng chuyên gia tiếng Nhật thường tính hàng chục USD mỗi giờ và thường nhiều hơn — AI làm việc đó với một mức thuê bao cố định.
+**Sửa câu với lý giải.** Viết một câu, hỏi "câu này tự nhiên không?", và một gia sư AI tốt sẽ đánh dấu cái gì sai và giải thích tại sao. Gia sư con người làm việc này tốt hơn, nhưng chuyên gia tiếng Nhật thường tính hàng chục USD mỗi giờ và thường nhiều hơn — AI làm việc đó với một mức thuê bao cố định.
 
-**Thực hành đàm thoại không xấu hổ.** Đa số người học không nói to vì xấu hổ. AI không phán xét. Hai phút « hãy nói về ngày của tôi » với AI xây dựng sự tự tin theo cách sách giáo khoa không thể.
+**Thực hành đàm thoại không xấu hổ.** Đa số người học không nói to vì xấu hổ. AI không phán xét. Hai phút "hãy nói về ngày của tôi" với AI xây dựng sự tự tin theo cách sách giáo khoa không thể.
 
 **Hỗ trợ đọc.** Dán một đoạn bạn không thể phân tích, yêu cầu dịch và phân tích. Nhanh hơn là lướt qua ba trang tham chiếu.
 
@@ -38,15 +38,15 @@ Khi mô hình nền tảng đủ năng lực (và các mô hình hiện tại, �
 
 Phần khó là câu tiếp theo, mà đa số marketing ứng dụng bỏ qua: **không năng lực nào trong số đó giúp bạn nhớ gì cả.**
 
-- **Gia sư AI không lên lịch ôn tập của bạn.** Đường cong quên không quan tâm rằng bạn hiểu ばかり vào thứ Ba. Đến thứ Sáu, nó đã biến. Không có lặp lại ngắt quãng, « học » với gia sư AI bay hơi trong một tuần.
-- **Gia sư AI không xây đường ống từ vựng.** Bạn có thể hỏi về một từ, nhận giải thích hay, và không có cách nào nắm bắt từ đó để ôn sau. Đa số ứng dụng gia sư AI có tính năng « lưu »; gần như không ai ôn những gì họ lưu.
+- **Gia sư AI không lên lịch ôn tập của bạn.** Đường cong quên không quan tâm rằng bạn hiểu ばかり vào thứ Ba. Đến thứ Sáu, nó đã biến. Không có lặp lại ngắt quãng, "học" với gia sư AI bay hơi trong một tuần.
+- **Gia sư AI không xây đường ống từ vựng.** Bạn có thể hỏi về một từ, nhận giải thích hay, và không có cách nào nắm bắt từ đó để ôn sau. Đa số ứng dụng gia sư AI có tính năng "lưu"; gần như không ai ôn những gì họ lưu.
 - **Gia sư AI không cho bạn chương trình học.** Chúng đáp ứng những gì bạn hỏi. Nếu bạn không biết hỏi gì, bạn lang thang. Người mới cần cấu trúc; AI cho bạn bất cứ gì bạn mang đến.
 - **Gia sư AI không thay thế nghe hoặc đọc.** Thực hành đàm thoại với bot là một kỹ năng cụ thể, không phải sự thay thế cho 30 phút đắm chìm trong tiếng Nhật thật.
 - **Gia sư AI đạt mức cao nguyên.** Ở trình độ trung cấp trở lên, các sửa chữa trở nên sai tinh tế theo cách người học không thể bắt được. Mô hình tự tin tán thành một câu mà người bản xứ sẽ thấy kỳ. Bạn học lỗi.
 
-Mẫu hình trên đa số ứng dụng « gia sư AI » giống nhau: chúng xuất khả năng đàm thoại/sửa, để sự ghi nhớ cho người dùng, và tính tiền như một giải pháp hoàn chỉnh. Không phải.
+Mẫu hình trên đa số ứng dụng "gia sư AI" giống nhau: chúng xuất khả năng đàm thoại/sửa, để sự ghi nhớ cho người dùng, và tính tiền như một giải pháp hoàn chỉnh. Không phải.
 
-## Ba danh mục ứng dụng « gia sư AI »
+## Ba danh mục ứng dụng "gia sư AI"
 
 ### LLM đa năng (ChatGPT, Claude, Gemini)
 
@@ -60,11 +60,11 @@ Mẫu hình trên đa số ứng dụng « gia sư AI » giống nhau: chúng xu
 
 **Điểm mạnh:** AI được bọc trong UI hình thức học — thẻ kịch bản, huy hiệu tiến bộ, luồng bài học. Đàm thoại được dẫn dắt, nên bạn không phải tự nghĩ chủ đề.
 
-**Điểm yếu:** lớp SRS thường mỏng hoặc vắng. Bài học dựng sẵn; nắm bắt từ vựng yếu; ghi nhớ dài hạn là trên bạn. Định giá thuê bao cộng dồn — Speak Premium Plus ~$30/tháng, Talkpal Premium ~$20/tháng, Praktika ~$100/năm (giá biến động theo khu vực và nền tảng). Riêng cho tiếng Nhật, độ sâu thường nông hơn cho tiếng Anh hoặc tiếng Tây Ban Nha — thị trường nhỏ hơn, và dữ liệu huấn luyện AI cho các kịch bản học tiếng Nhật mỏng hơn.
+**Điểm yếu:** lớp SRS thường mỏng hoặc vắng. Bài học dựng sẵn; nắm bắt từ vựng yếu; ghi nhớ dài hạn là trách nhiệm của bạn. Định giá thuê bao cộng dồn — Speak Premium Plus ~$30/tháng, Talkpal Premium ~$20/tháng, Praktika ~$100/năm (giá biến động theo khu vực và nền tảng). Riêng cho tiếng Nhật, độ sâu thường nông hơn cho tiếng Anh hoặc tiếng Tây Ban Nha — thị trường nhỏ hơn, và dữ liệu huấn luyện AI cho các kịch bản học tiếng Nhật mỏng hơn.
 
 **Tốt nhất cho:** người học muốn thực hành đàm thoại có hướng dẫn và không phiền trả tiền cho cấu trúc.
 
-### AI tích hợp học (nơi Origa ngồi, một phần)
+### AI tích hợp học (Origa ở nhóm này, một phần)
 
 Origa dùng AI — OCR cục bộ (NDLOCR-Lite), speech-to-text cục bộ (Whisper), tạo furigana, trích từ vựng tự động — nhưng nó **không phải gia sư AI theo nghĩa đàm thoại**. Nó không có chatbot. Nó không giải thích ngữ pháp theo yêu cầu.
 
@@ -76,7 +76,7 @@ Nói cách khác, gia sư AI và Origa không phải sự thay thế. Gia sư AI
 
 Một danh sách kiểm tra thực sự phân tách giá trị từ hype:
 
-- **AI có kết nối với cơ chế ghi nhớ không?** Nếu « lưu từ này » không nạp SRS, AI là giải trí.
+- **AI có kết nối với cơ chế ghi nhớ không?** Nếu "lưu từ này" không nạp SRS, AI là giải trí.
 - **Sửa AI có đáng tin ở trình độ của bạn không?** Thử với các câu bạn đã biết câu trả lời. Nếu AI sai trên chúng, nó sẽ tệ hơn trên thứ bạn không biết.
 - **Hướng dẫn AI là tùy chọn hay bắt buộc?** Người mới hưởng lợi từ cấu trúc (luồng có hướng dẫn). Người trung cấp hưởng lợi từ tự do. Chọn hình thức đúng cho trình độ của bạn.
 - **AI chạy ở đâu?** AI đám mây thông minh hơn nhưng ghi log mọi tương tác. AI trên thiết bị riêng tư nhưng kém năng lực hơn. Không có cái nào phổ quát tốt hơn.
@@ -84,7 +84,7 @@ Một danh sách kiểm tra thực sự phân tách giá trị từ hype:
 
 ## Origa dùng AI thế nào
 
-Cụ thể, nơi AI của Origa ngồi:
+Cụ thể, AI của Origa nằm ở đâu:
 
 - **OCR cục bộ (NDLOCR-Lite).** Trên thiết bị. Quét ảnh và ảnh chụp màn hình để trích từ tiếng Nhật.
 - **STT cục bộ (Whisper).** Trên thiết bị. Phiên âm âm thanh bạn ghi để khai thác từ vựng.
@@ -96,7 +96,7 @@ Lựa chọn thiết kế rõ ràng: dùng AI nơi nó loại bỏ ma sát khỏ
 
 ## Những hạn chế đã biết
 
-- **Origa không thay thế gia sư AI.** Nếu nút thắt của bạn là « tôi cần ai đó giải thích ngữ pháp cho tôi », Origa không giúp. Dùng chatbot.
+- **Origa không thay thế gia sư AI.** Nếu nút thắt của bạn là "tôi cần ai đó giải thích ngữ pháp cho tôi", Origa không giúp. Dùng chatbot.
 - **AI cục bộ có giới hạn.** OCR và STT trên thiết bị tốt nhưng không chính xác như các dịch vụ đám mây tốt nhất trên đầu vào cách điệu hoặc nhiễu. Dự kiến sửa tay đôi khi.
 - **Chưa có chương trình học dẫn dắt bởi AI.** Cấu trúc của Origa đến từ các cấp JLPT và nhập sách giáo khoa, không phải từ AI tạo đường học. Đây là lựa chọn cố ý; một chương trình AI sẽ đưa vào cùng vấn đề cao nguyên như gia sư AI.
 

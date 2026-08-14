@@ -26,9 +26,9 @@ Ba kịch bản cụ thể, không triết học:
 - **Riêng tư.** Ứng dụng đám mây gửi giọng nói, ảnh, và lịch sử đọc của bạn lên máy chủ. Dữ liệu đó có giá trị với công ty, và với bất cứ ai mua công ty sau. Xử lý trên thiết bị giữ nó trên điện thoại.
 - **Đăng ký và lock-in.** Ứng dụng trực tuyến ưu tiên thường khóa tính năng sau thanh toán định kỳ. Hủy đăng ký, mất quyền truy cập. Ứng dụng ngoại tuyến ưu tiên, đặc biệt là mở hoặc nguồn công khai, có xu hướng cho bạn giữ những gì đã xây.
 
-Đa số người học không cần ngoại tuyến mỗi phút. Họ cần nó cho việc đi lại, du lịch, và phẩm giá riêng tư nhỏ của việc không có thói quen học của mình bị ghi log. Biết ứng dụng nào cho bạn điều nào trong số này — không có bất ngờ — là « ứng dụng ngoại tuyến tốt nhất » thực sự xuống tới.
+Đa số người học không cần ngoại tuyến mỗi phút. Họ cần nó cho việc đi lại, du lịch, và phẩm giá riêng tư nhỏ của việc không có thói quen học của mình bị ghi log. Biết ứng dụng nào cho bạn điều nào trong số này — không có bất ngờ — là "ứng dụng ngoại tuyến tốt nhất" thực sự xuống tới.
 
-## Bốn lớp của « ngoại tuyến »
+## Bốn lớp của "ngoại tuyến"
 
 Giúp tách biệt các lớp, vì ứng dụng trộn và khớp chúng:
 
@@ -37,7 +37,7 @@ Giúp tách biệt các lớp, vì ứng dụng trộn và khớp chúng:
 3. **Tạo nội dung ngoại tuyến.** Bạn có thể thêm thẻ mới từ văn bản, từ ảnh (OCR), hoặc từ âm thanh (speech-to-text) mà không gửi dữ liệu đi đâu.
 4. **AI ngoại tuyến.** Các mô hình ngôn ngữ điều khiển OCR, nhận dạng giọng nói, tạo furigana, v.v., chạy trên thiết bị.
 
-Một ứng dụng « ngoại tuyến » ở lớp 1 nhưng không ở lớp 3, trên thực tế, là ứng dụng ngừng phát triển ngay khi mất kết nối. Bạn có thể ôn thẻ hôm qua dưới tàu điện ngầm, nhưng không thể thêm thẻ mới từ manga bạn đang đọc. Đó là hạn chế thực, và là nơi đa số ứng dụng « ngoại tuyến » thực sự ngồi.
+Một ứng dụng "ngoại tuyến" ở lớp 1 nhưng không ở lớp 3, trên thực tế, là ứng dụng ngừng phát triển ngay khi mất kết nối. Bạn có thể ôn thẻ hôm qua dưới tàu điện ngầm, nhưng không thể thêm thẻ mới từ manga bạn đang đọc. Đó là hạn chế thực, và là nơi đa số ứng dụng "ngoại tuyến" thực sự ngồi.
 
 ## Bối cảnh, theo danh mục
 
@@ -73,9 +73,9 @@ WaniKani và Bunpro là ứng dụng web. Ôn và bài học đều xảy ra tr�
 
 **Lớp ngoại tuyến:** 2 (tra), đôi khi 1 (từ gắn sao).
 
-Các ứng dụng này gửi từ điển trên thiết bị. Tra cứu làm việc không cần kết nối. Đa số có tính năng « yêu thích » xấp xỉ danh sách thẻ, nhưng không có lặp lại ngắt quãng — đó là danh sách phẳng bạn cuộn qua. Hữu dụng như công cụ, không như hệ thống học.
+Các ứng dụng này gửi từ điển trên thiết bị. Tra cứu làm việc không cần kết nối. Đa số có tính năng "yêu thích" xấp xỉ danh sách thẻ, nhưng không có lặp lại ngắt quãng — đó là danh sách phẳng bạn cuộn qua. Hữu dụng như công cụ, không như hệ thống học.
 
-### Ứng dụng học tích hợp với AI trên thiết bị (nơi Origa ngồi)
+### Ứng dụng học tích hợp với AI trên thiết bị (Origa thuộc nhóm này)
 
 **Lớp ngoại tuyến:** 1, 2, 3, và 4 — theo thiết kế.
 
@@ -99,7 +99,7 @@ Cho đa số người học các đánh đổi này đáng. Cho ai đó có đi�
 Cụ thể, để các tuyên bố có thể kiểm tra:
 
 - **SRS cục bộ.** FSRS chạy trên thiết bị. Ôn hoạt động trong chế độ máy bay.
-- **Từ điển cục bộ.** Từ điển song ngữ (Tiếng Việt/Tiếng Anh/Tiếng Hàn/Tiếng Nga ghép với Tiếng Nhật) được đóng gói với ứng dụng.
+- **Từ điển cục bộ.** Từ điển song ngữ (tiếng Anh và tiếng Nga ghép với tiếng Nhật; tiếng Việt và tiếng Hàn theo kế hoạch) được đóng gói với ứng dụng.
 - **OCR cục bộ (NDLOCR-Lite).** Quét ảnh hoặc dán ảnh chụp màn hình, từ được nhận dạng trên thiết bị.
 - **STT cục bộ (Whisper).** Thêm thẻ từ âm thanh mà không gửi âm thanh đến máy chủ.
 - **Tạo furigana cục bộ.** Furigana trên hán tự được tạo bởi mô hình trên thiết bị và ẩn tự động trên các hán tự bạn đã học.
@@ -115,11 +115,11 @@ Không có tính năng nào trong luồng bình thường của Origa đòi hỏ
 
 ## Chọn thế nào
 
-Nếu nhu cầu ngoại tuyến của bạn là « ôn bộ bài Anki hiện có dưới tàu điện ngầm » — AnkiMobile (iOS) hoặc AnkiDroid (Android) là câu trả lời rẻ nhất, được kiểm chứng nhất.
+Nếu nhu cầu ngoại tuyến của bạn là "ôn bộ bài Anki hiện có dưới tàu điện ngầm" — AnkiMobile (iOS) hoặc AnkiDroid (Android) là câu trả lời rẻ nhất, được kiểm chứng nhất.
 
-Nếu nhu cầu ngoại tuyến của bạn là « tôi đang du lịch một tháng với kết nối kém và muốn tiếp tục thêm từ vựng từ manga và sách giáo khoa tôi gặp » — bạn cần một ứng dụng nơi OCR và tạo nội dung hoạt động ngoại tuyến, không chỉ ôn. Origa được dựng chính xác cho trường hợp sử dụng đó.
+Nếu nhu cầu ngoại tuyến của bạn là "tôi đang du lịch một tháng với kết nối kém và muốn tiếp tục thêm từ vựng từ manga và sách giáo khoa tôi gặp" — bạn cần một ứng dụng nơi OCR và tạo nội dung hoạt động ngoại tuyến, không chỉ ôn. Origa được dựng chính xác cho trường hợp sử dụng đó.
 
-Nếu bạn thực sự không cần ngoại tuyến — nếu bạn học ở nhà trên wifi và không quan tâm đến riêng tư — các ứng dụng online-first (WaniKani, Bunpro, Duolingo) hoàn toàn tốt. Đừng mua « ngoại tuyến ưu tiên » như một tính năng bạn sẽ không dùng; các đánh đổi là thực. Nếu ngoại tuyến ưu tiên là ưu tiên của bạn, [tải Origa](/vi/download) và thử trên một chuyến bay.
+Nếu bạn thực sự không cần ngoại tuyến — nếu bạn học ở nhà trên wifi và không quan tâm đến riêng tư — các ứng dụng online-first (WaniKani, Bunpro, Duolingo) hoàn toàn tốt. Đừng mua "ngoại tuyến ưu tiên" như một tính năng bạn sẽ không dùng; các đánh đổi là thực. Nếu ngoại tuyến ưu tiên là ưu tiên của bạn, [tải Origa](/vi/download) và thử trên một chuyến bay.
 
 ## Câu hỏi thường gặp
 

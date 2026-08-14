@@ -74,7 +74,7 @@ A few concrete differences from Anki, with the caveat that **both use FSRS** —
 | Kanji ↔ vocabulary linkage | You build it | Built-in; kanji tracked across the words you've seen |
 | Grammar | Separate app | Structured grammar reference, examples use words you've learned |
 | OCR card creation | Not built-in | Scan a photo; words extracted into cards |
-| Interface languages | English (community translations exist) | English, Russian, Vietnamese, Korean |
+| Interface languages | English (community translations exist) | English and Russian; Vietnamese and Korean are planned |
 | Import from Anki | — | Imports `.anki2` / `.anki21` decks |
 
 That last row matters if you're considering a switch: you don't have to throw away years of Anki progress. Origa imports existing Anki decks, so the migration cost is low.

@@ -118,7 +118,7 @@ pub static CONTENT: Content = Content {
     faq_q4: "Does Origa help with JLPT?",
     faq_a4: "Yes. Origa tracks your JLPT level, organises the grammar reference by N5 to N1, maps kanji dictionaries to JLPT levels, and shows review analytics so you can see where you stand.",
     faq_q5: "Is Origa available in my language?",
-    faq_a5: "The interface is available in English, Russian, Korean, and Vietnamese, with built-in bilingual dictionaries. You do not need English to start.",
+    faq_a5: "The interface is available in English and Russian, with built-in bilingual dictionaries; Vietnamese and Korean are planned. You do not need English to start.",
 
     compare_meta_title: "Origa vs Anki, WaniKani, Bunpro & Duolingo",
     compare_meta_description: "Compare Origa with Anki, WaniKani, Bunpro and Duolingo. See which Japanese learning tools work best together.",

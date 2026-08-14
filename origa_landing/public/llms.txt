@@ -5,7 +5,8 @@ native phrases in one place. It works fully offline with local AI (OCR, speech-t
 and FSRS spaced repetition.
 
 It is designed for learners who want to study in their own language. The interface is
-available in English, Russian, Korean, and Vietnamese — no English required to start.
+available in English and Russian — no English required to start. Vietnamese and Korean
+are planned.
 
 ## What it does
 - Vocabulary: built-in dictionaries in your language; create cards from text, photos, or audio.
