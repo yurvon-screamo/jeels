@@ -30,31 +30,75 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            background: #7cb342;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #6da632;
+        }
+        .hint {
+            margin-top: 14px;
+            color: #888;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="spinner"></div>
-        <p>Возврат в приложение...</p>
+        <div id="spinner" class="spinner"></div>
+        <p id="status">Возврат в приложение...</p>
+        <!-- Filled by the script below once the deep link is built: kept in the
+             DOM from the start (hidden) so no layout shift appears when shown. -->
+        <a id="open-app" class="btn" href="#" hidden>Вернуться в Origa</a>
+        <p id="hint" class="hint" hidden>Не открылось автоматически? Нажмите кнопку.</p>
     </div>
     <script>
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         const state = params.get('state');
-        
+
         if (code) {
             let deepLink = 'origa://auth/callback?code=' + encodeURIComponent(code);
             if (state) deepLink += '&state=' + encodeURIComponent(state);
+
+            // Opportunistic auto-redirect. Works in Safari/Firefox and in
+            // Chromium when the user has previously allowed the `origa://`
+            // scheme. Do NOT close the tab afterwards: the tab-modal
+            // "Open Origa?" permission dialog lives on this tab, and closing
+            // it within milliseconds kills the dialog before the user can
+            // confirm — the external navigation never reaches the OS.
             window.location.href = deepLink;
 
-            setTimeout(() => window.close(), 100);
+            // Manual fallback for Chromium-based browsers, where the
+            // programmatic navigation without a user gesture may be blocked
+            // or await a permission dialog: a plain link click is a user
+            // gesture, so the scheme navigation is always allowed.
+            const btn = document.getElementById('open-app');
+            const hint = document.getElementById('hint');
+            btn.href = deepLink;
+            btn.hidden = false;
+            hint.hidden = false;
 
+            // After a short delay stop the spinner and state that the code
+            // was received. Deliberately neutral: in Chromium the permission
+            // dialog may still be pending, so the page must not claim the
+            // authorization is "complete". The fallback button stays.
             setTimeout(() => {
-                document.querySelector('.container').innerHTML =
-                    '<p style="font-size:18px">Авторизация завершена.</p><p style="color:#888;margin-top:10px">Можно закрыть эту вкладку</p>';
+                document.getElementById('spinner').remove();
+                document.getElementById('status').textContent = 'Код авторизации получен.';
             }, 500);
         } else {
-            document.querySelector('.container').innerHTML = 
+            document.querySelector('.container').innerHTML =
                 '<p>Ошибка: код авторизации не найден</p><p><a href="https://origa.uwuwu.net" style="color:#7cb342">Вернуться на сайт</a></p>';
         }
     </script>
