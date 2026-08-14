@@ -1812,8 +1812,8 @@ dependencies = [
 
 [[package]]
 name = "device-ai"
-version = "0.1.1"
-source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=9f9509b1e751235ebd6a70d1afb85fdd8e45efed#9f9509b1e751235ebd6a70d1afb85fdd8e45efed"
+version = "0.2.0"
+source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=90805969cebc4e5320bf662db1cfc9f63d4fb6fb#90805969cebc4e5320bf662db1cfc9f63d4fb6fb"
 dependencies = [
  "base64 0.22.1",
  "block2",
@@ -9070,8 +9070,8 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-device-ai-apis"
-version = "0.1.1"
-source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=9f9509b1e751235ebd6a70d1afb85fdd8e45efed#9f9509b1e751235ebd6a70d1afb85fdd8e45efed"
+version = "0.2.0"
+source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=90805969cebc4e5320bf662db1cfc9f63d4fb6fb#90805969cebc4e5320bf662db1cfc9f63d4fb6fb"
 dependencies = [
  "device-ai",
  "serde",
