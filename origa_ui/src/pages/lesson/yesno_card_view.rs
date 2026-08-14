@@ -227,53 +227,57 @@ pub fn YesNoCardView(
                         {move || statement_value.get_value()}
                     </Text>
 
-                    <Text size=TextSize::Default variant=TypographyVariant::Muted class="mt-4">
-                        {t!(i18n, lesson.is_this_correct)}
-                    </Text>
+                    <Show when=move || !show_result.get()>
+                        <Text size=TextSize::Default variant=TypographyVariant::Muted class="mt-4">
+                            {t!(i18n, lesson.is_this_correct)}
+                        </Text>
+                    </Show>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <Button
-                        test_id=Signal::derive(|| "yesno-no-btn".to_string())
-                        variant=Signal::derive(|| ButtonVariant::Default)
-                        class=no_btn_class
-                        disabled=Signal::derive(move || show_result.get())
-                        on_click=Callback::new(move |_| on_answer.run(false))
-                    >
-                        {t!(i18n, lesson.no)} <span class="kbd-hint">"[1]"</span>
-                    </Button>
+                <Show when=move || !show_result.get()>
+                    <div class="grid grid-cols-2 gap-3">
+                        <Button
+                            test_id=Signal::derive(|| "yesno-no-btn".to_string())
+                            variant=Signal::derive(|| ButtonVariant::Default)
+                            class=no_btn_class
+                            disabled=Signal::derive(move || show_result.get())
+                            on_click=Callback::new(move |_| on_answer.run(false))
+                        >
+                            {t!(i18n, lesson.no)} <span class="kbd-hint">"[1]"</span>
+                        </Button>
 
-                    <Button
-                        test_id=Signal::derive(|| "yesno-yes-btn".to_string())
-                        variant=yes_variant
-                        class=yes_btn_class
-                        disabled=Signal::derive(move || show_result.get())
-                        on_click=Callback::new(move |_| on_answer.run(true))
+                        <Button
+                            test_id=Signal::derive(|| "yesno-yes-btn".to_string())
+                            variant=yes_variant
+                            class=yes_btn_class
+                            disabled=Signal::derive(move || show_result.get())
+                            on_click=Callback::new(move |_| on_answer.run(true))
+                        >
+                            {t!(i18n, lesson.yes)} <span class="kbd-hint">"[2]"</span>
+                        </Button>
+                    </div>
+                    <button
+                        data-testid="yesno-dont-know-btn"
+                        class=move || {
+                            let base = "w-full mt-2 p-2 sm:p-4 border text-center transition-all cursor-pointer flex items-center justify-center gap-2";
+                            if dont_know_selected.get() {
+                                format!("{} quiz-option-neutral ring-2 ring-[var(--accent-olive)]", base)
+                            } else if show_result.get() {
+                                format!("{} quiz-option-dimmed pointer-events-none", base)
+                            } else {
+                                format!("{} quiz-option-neutral", base)
+                            }
+                        }
+                        on:click=move |_| {
+                            if !show_result.get() {
+                                on_dont_know.run(());
+                            }
+                        }
                     >
-                        {t!(i18n, lesson.yes)} <span class="kbd-hint">"[2]"</span>
-                    </Button>
-                </div>
-                <button
-                    data-testid="yesno-dont-know-btn"
-                    class=move || {
-                        let base = "w-full mt-2 p-2 sm:p-4 border text-center transition-all cursor-pointer flex items-center justify-center gap-2";
-                        if dont_know_selected.get() {
-                            format!("{} quiz-option-neutral ring-2 ring-[var(--accent-olive)]", base)
-                        } else if show_result.get() {
-                            format!("{} quiz-option-dimmed pointer-events-none", base)
-                        } else {
-                            format!("{} quiz-option-neutral", base)
-                        }
-                    }
-                    on:click=move |_| {
-                        if !show_result.get() {
-                            on_dont_know.run(());
-                        }
-                    }
-                >
-                    <Text size=TextSize::Default>{t!(i18n, lesson.dont_know)}</Text>
-                    <span class="kbd-hint text-[var(--fg-muted)] text-xs font-mono">{t!(i18n, lesson.space_key)}</span>
-                </button>
+                        <Text size=TextSize::Default>{t!(i18n, lesson.dont_know)}</Text>
+                        <span class="kbd-hint text-[var(--fg-muted)] text-xs font-mono">{t!(i18n, lesson.space_key)}</span>
+                    </button>
+                </Show>
 
                 <Show when=move || show_result.get()>
                     <Show when=move || yesno_result() == YesNoResult::Correct>

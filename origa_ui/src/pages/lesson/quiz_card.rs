@@ -311,23 +311,21 @@ pub fn QuizCardView(
                         <QuizResultDisplay quiz_result=quiz_result() />
 
                         // Show the correct answer so the user can learn from
-                        // mistakes (works for Incorrect and DontKnow).
-                        <Show when=move || quiz_result() != QuizResult::Correct>
-                            <div class="mt-3 p-3 bg-[var(--bg-secondary)] text-center">
-                                <MarkdownText
-                                    content=Signal::derive(move || {
-                                        options
-                                            .get_value()
-                                            .iter()
-                                            .find(|o| o.is_correct())
-                                            .map(|o| o.text().to_string())
-                                            .unwrap_or_default()
-                                    })
-                                    variant=MarkdownVariant::Default
-                                    known_kanji=known_kanji.get()
-                                />
-                            </div>
-                        </Show>
+                        // mistakes or confirm their choice.
+                        <div class="mt-3 p-3 bg-[var(--bg-secondary)] text-center">
+                            <MarkdownText
+                                content=Signal::derive(move || {
+                                    options
+                                        .get_value()
+                                        .iter()
+                                        .find(|o| o.is_correct())
+                                        .map(|o| o.text().to_string())
+                                        .unwrap_or_default()
+                                })
+                                variant=MarkdownVariant::Default
+                                known_kanji=known_kanji.get()
+                            />
+                        </div>
                     </Show>
 
                     <Show when=move || waiting_for_next.get() && show_result.get()>
