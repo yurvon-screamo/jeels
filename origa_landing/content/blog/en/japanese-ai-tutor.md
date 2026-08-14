@@ -97,7 +97,7 @@ The design choice is explicit: use AI where it removes friction from the capture
 ## Known limitations
 
 - **Origa does not replace an AI tutor.** If your bottleneck is "I need someone to explain grammar to me," Origa doesn't help. Use a chatbot.
-- **Local AI has limits.** On-device OCR and STT are good but not as accurate as the best cloud services on stylised or noisy input. Expect occasional manual correction.
+- **Local AI has limits.** On-device OCR and STT are good but not as accurate as the best cloud services on stylized or noisy input. Expect occasional manual correction.
 - **No AI-driven curriculum yet.** Origa's structure comes from JLPT levels and textbook imports, not from AI generating a learning path. This is a deliberate choice; an AI curriculum would introduce the same plateau problem as AI tutors.
 
 ## How to decide

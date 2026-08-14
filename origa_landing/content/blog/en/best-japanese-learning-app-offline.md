@@ -99,8 +99,8 @@ For most learners these trade-offs are worth it. For someone with an older phone
 Specifics, so the claims are checkable:
 
 - **Local SRS.** FSRS runs on-device. Review works in airplane mode.
-- **Local dictionary.** Bilingual dictionaries (English/Russian/Vietnamese/Korean paired with Japanese) are bundled with the app.
-- **Local OCR (NDLOCR-Lite).** Scan a photo or paste a screenshot, words are recognised on-device.
+- **Local dictionary.** Bilingual dictionaries (English and Russian paired with Japanese; Vietnamese and Korean are planned) are bundled with the app.
+- **Local OCR (NDLOCR-Lite).** Scan a photo or paste a screenshot, words are recognized on-device.
 - **Local STT (Whisper).** Add a card from audio without sending the audio to a server.
 - **Local furigana generation.** Furigana over kanji is produced by an on-device model and hides automatically on kanji you've learned.
 
@@ -109,7 +109,7 @@ There is no feature in Origa's normal flow that requires an internet connection.
 ## Known limitations
 
 - **App size.** Hundreds of megabytes for the AI models. If storage is tight on your phone, this matters.
-- **OCR accuracy on stylised fonts.** Local OCR is good on standard text, weaker on manga lettering and decorative fonts. Manual correction is sometimes needed.
+- **OCR accuracy on stylized fonts.** Local OCR is good on standard text, weaker on manga lettering and decorative fonts. Manual correction is sometimes needed.
 - **Battery on intensive use.** Scanning many pages in a session will drain battery faster than text-only review.
 - **No iOS yet.** Origa runs on Windows, Linux, macOS, Android, and web. iOS is on the roadmap. If you need offline study on an iPhone today, AnkiMobile or AnkiDroid-on-Android-via-emulator are the realistic options.
 
@@ -130,7 +130,7 @@ Yes. OCR, STT, SRS, dictionary, and furigana all run on-device. You can study en
 Two reasons: privacy (your photos don't leave your device) and travel (you can scan manga on a plane). If neither matters to you, cloud OCR is sometimes more accurate.
 
 **What's the trade-off for offline?**
-App size (hundreds of MB for AI models), battery use during intensive OCR, and slightly lower accuracy than the best cloud services on stylised text.
+App size (hundreds of MB for AI models), battery use during intensive OCR, and slightly lower accuracy than the best cloud services on stylized text.
 
 **Can I sync Origa across devices?**
 Yes, optionally. Sync requires internet; everything else works without.

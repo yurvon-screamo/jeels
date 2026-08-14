@@ -35,13 +35,13 @@ Kỹ năng cơ bản là ghi nhớ từ và không quên. Các hệ thống lặ
 - **Anki.** Miễn phí, mã nguồn mở, chạy ở mọi nơi. Linh hoạt tối đa: thẻ có thể được bày trí theo ý muốn, bộ bài có thể cấu hình. Mặt trái của sự linh hoạt đó là thẻ cần được tạo và định dạng thủ công. Với tiếng Nhật, điều đó có nghĩa: mở từ điển, sao chép từ, rồi đọc, rồi dịch, rồi tìm audio. Giao diện là tiếng Anh; có bộ bài cộng đồng tiếng Việt, nhưng bản thân ứng dụng được làm cho người nói tiếng Anh. [FSRS](https://docs.ankiweb.net/deck-options.html#fsrs) đã được tích hợp vào Anki.
 - **Origa.** Ứng dụng tôi đang phát triển. Dùng cùng FSRS, nhưng việc tạo thẻ được rút gọn về việc gõ một từ: từ điển song ngữ tích hợp tự động kéo đọc, dịch nghĩa và audio. Bạn có thể nhập bộ bài Anki có sẵn (`.anki2`, `.anki21`) — tiến độ được chuyển sang. Giao diện và từ điển bằng ngôn ngữ của bạn.
 
-Nếu đau khổ của bạn là tạo thẻ thủ công, một giải pháp thay thế là có ý nghĩa. Nếu bạn đã lắp ráp được hệ thống hoàn hảo trong Anki và nó hoạt động — không có gì phải thay.
+Nếu khó khăn của bạn là tạo thẻ thủ công, một giải pháp thay thế là hợp lý. Nếu bạn đã lắp ráp được hệ thống hoàn hảo trong Anki và nó hoạt động — không có gì phải thay.
 
 ### Hán tự
 
 Hán tự là một vấn đề riêng. Cùng một 食 xuất hiện trong hàng chục từ, và việc quan trọng không chỉ là ghi nhớ ký tự mà còn thấy nó trong nhiều ngữ cảnh.
 
-- **[WaniKani](https://www.wanikani.com/).** Lộ trình có cấu trúc theo bộ thủ, giao diện tiếng Anh, trả phí đăng ký. Phù hợp nếu bạn bắt đầu hán tự từ số không và muốn một thứ tự cố định. Nhược điểm — bạn học cái chương trình coi là cần thiết, không phải cái bạn gặp hôm nay trong manga hay bài báo. Toàn bộ đánh giá đổi lấy giữa Origa và WaniKani (bộ thủ vs theo nội dung, trả phí vs miễn phí, chỉ tiếng Anh vs 4 ngôn ngữ giao diện) nằm trong [so sánh đầy đủ](/vi/compare).
+- **[WaniKani](https://www.wanikani.com/).** Lộ trình có cấu trúc theo bộ thủ, giao diện tiếng Anh, trả phí đăng ký. Phù hợp nếu bạn bắt đầu hán tự từ số không và muốn một thứ tự cố định. Nhược điểm — bạn học cái chương trình coi là cần thiết, không phải cái bạn gặp hôm nay trong manga hay bài báo. Toàn bộ đánh giá đổi lấy giữa Origa và WaniKani (bộ thủ vs theo nội dung, trả phí vs miễn phí, chỉ tiếng Anh vs. giao diện phi tiếng Anh) nằm trong [so sánh đầy đủ](/vi/compare).
 - **Origa.** Furigana được tạo tự động và ẩn trên các hán tự đã học — những gì bạn đã học không còn được gợi ý, buộc bạn phải nhớ cách đọc. Hán tự được liên kết với từ vựng: hệ thống biết rằng 食べる và 食事 chia sẻ một hán tự, và theo dõi nó trên mọi từ mà bạn đã gặp. ([Xem Origa xử lý hán tự, furigana và liên kết từ vựng thế nào](/vi/docs/kanji).)
 
 Hai cách tiếp cận khác nhau: WaniKani dẫn bạn lên chiếc thang của chính nó, Origa dạy những gì bạn thực sự gặp trong nội dung của mình.
@@ -81,7 +81,7 @@ Origa có cơ sở dữ liệu tích hợp hơn 200.000 cụm từ từ nội du
 
 Nếu bạn học tiếng Nhật qua tiếng Nga (hoặc tiếng Việt, hoặc tiếng Hàn), điều đó tạo ra gánh nặng kép: đầu tiên bạn dịch từ tiếng Nhật sang tiếng Anh (một trung gian thứ hai), rồi từ tiếng Anh sang tiếng mẹ đẻ. Đây không phải phản đối triết học — đó là thời gian bị mất trên từng từ.
 
-Tìm kiếm "ứng dụng học tiếng Nhật bằng [tiếng mẹ đẻ]" gần như không gặp đối thủ mạnh — thị trường chưa được phục vụ đầy đủ. Origa được xây dựng cho việc này từ ngày đầu: giao diện, từ điển và giải thích ngữ pháp bằng tiếng Nga, tiếng Việt và tiếng Hàn. Không phải là một lớp bản địa hóa dịch từ tiếng Anh, mà là ngôn ngữ giao diện gốc.
+Tìm kiếm "ứng dụng học tiếng Nhật bằng [tiếng mẹ đẻ]" gần như không gặp đối thủ mạnh — thị trường chưa được phục vụ đầy đủ. Origa được xây dựng cho việc này từ ngày đầu: giao diện, từ điển và giải thích ngữ pháp bằng tiếng Nga (và tiếng Anh), với tiếng Việt và tiếng Hàn theo kế hoạch — không phải là một lớp bản địa hóa dịch từ tiếng Anh, mà là ngôn ngữ giao diện gốc.
 
 ## Cách chọn
 

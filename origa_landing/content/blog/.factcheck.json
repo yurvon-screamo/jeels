@@ -107,10 +107,10 @@
       "sources": ["README.md", "AGENTS.md"]
     },
     {
-      "claim": "Origa interface languages: English, Russian, Vietnamese, Korean.",
+      "claim": "Origa interface languages: English and Russian shipped; Vietnamese and Korean planned (per README.md Interface Languages table). Blog and landing copy updated 2026-08-14 to match — earlier 'English, Russian, Vietnamese, Korean' wording overstated availability.",
       "confidence": 1.0,
       "status": "verified",
-      "sources": ["origa_landing/src/app.rs", "sitemap.xml"]
+      "sources": ["origa_ui/locales/ (en.json, ru.json)", "cdn/dictionary/chunk_*.json (ru/en translation keys only)", "README.md §Interface Languages"]
     },
     {
       "claim": "WaniKani is radical-based, English interface, paid subscription.",
@@ -193,7 +193,8 @@
   ],
   "flags": [
     "KO and VI translations are machine_translated (LLM). Script-consistency tests guard against the most common LLM artifacts (cross-script hallucination), but native-speaker review is required before paid promotion.",
-    "5 articles (learn-japanese-from-manga, japanese-ocr-app, best-japanese-learning-app-offline, japanese-ai-tutor, yaponskiy-s-nulya) migrated 2026-07-21 from marketing/blog/ drafts. Source drafts verified by external research specialist (round-2 factcheck)."
+    "5 articles (learn-japanese-from-manga, japanese-ocr-app, best-japanese-learning-app-offline, japanese-ai-tutor, yaponskiy-s-nulya) migrated 2026-07-21 from marketing/blog/ drafts. Source drafts verified by external research specialist (round-2 factcheck).",
+    "2026-08-14 fact-drift audit: product claims must be verified against DATA (locales files, CDN indexes), not against other marketing text. The old 'interface in EN/RU/VI/KO' claim was verified against the landing page itself — circular verification."
   ],
   "gate": "READY_WITH_REVIEW_FLAG",
   "gate_reason": "All 7 articles ship with verified competitor claims and inline citations. FSRS wording verified against docs.ankiweb.net. EN/RU are human-quality (originals or human-revised); KO and VI are LLM translations marked in translation_status — eligible to ship (script-consistency verified, content structure sound) but a human review pass is recommended before any paid promotion or rich-result eligibility push on KO/VI markets. The 6th draft (ru-anki-alternativa-yaponskiy) was deferred due to SEO cannibalization with anki-alternative-japanese; decision tracked in uwuwu/origa-blog-anki-cannibalization-decision.",

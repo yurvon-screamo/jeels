@@ -14,15 +14,15 @@ status: ready
 
 # Tiếng Nhật từ con số không: Kế hoạch tự học thực tế để bắt đầu
 
-« Tiếng Nhật từ con số không » là một trong những tìm kiếm phổ biến nhất của người mới — và một trong những tìm kiếm dễ đánh lừa nhất, bởi những mục đích rất khác nhau ẩn sau cụm từ đó. Một người muốn theo kịp đối thoại anime. Người khác cần N3 cho visa làm việc. Người thứ ba chỉ muốn viết hán tự đẹp. Các kế hoạch cho ba trường hợp đó phân kỳ ở mỗi bước.
+"Tiếng Nhật từ con số không" là một trong những tìm kiếm phổ biến nhất của người mới — và một trong những tìm kiếm dễ đánh lừa nhất, bởi những mục đích rất khác nhau ẩn sau cụm từ đó. Một người muốn theo kịp đối thoại anime. Người khác cần N3 cho visa làm việc. Người thứ ba chỉ muốn viết hán tự đẹp. Các kế hoạch cho ba trường hợp đó phân kỳ ở mỗi bước.
 
-Bài này không phải « học tiếng Nhật trong 30 ngày » và không phải danh sách top-10 ứng dụng. Đây là một trình tự thực tế cho tự học: học gì trước, hoãn gì tới sau, công cụ nào giúp ở giai đoạn nào, và những sai lầm gần như mọi người mới đều mắc.
+Bài này không phải "học tiếng Nhật trong 30 ngày" và không phải danh sách top-10 ứng dụng. Đây là một trình tự thực tế cho tự học: học gì trước, hoãn gì tới sau, công cụ nào giúp ở giai đoạn nào, và những sai lầm gần như mọi người mới đều mắc.
 
 Tôi làm Origa, một ứng dụng học tiếng Nhật, nên Origa xuất hiện như một lựa chọn trong số vài cái — không phải câu trả lời đúng duy nhất. Các hạn chế trung thực của Origa được liệt kê ở cuối.
 
-## « Từ số không » thực sự có nghĩa gì
+## "Từ số không" thực sự có nghĩa gì
 
-« Từ số không » trong tiếng Nhật không phải một cấp độ — đó là ba điểm khởi đầu khác nhau mà người mới thường đánh đồng:
+"Từ số không" trong tiếng Nhật không phải một cấp độ — đó là ba điểm khởi đầu khác nhau mà người mới thường đánh đồng:
 
 1. **Số không bảng chữ cái.** Bạn không phân biệt hiragana với katakana và không biết một hán tự nào. Đây là điểm khởi đầu thực sự nhất.
 2. **Số không ngữ âm.** Bạn biết hiragana và katakana và có thể đọc phiên âm, nhưng bạn không biết hán tự và ngữ pháp. Đây là N5 trên lưới JLPT.
@@ -48,7 +48,7 @@ Sau kana, bản thân ngôn ngữ bắt đầu: câu được xây thế nào, �
 
 - Chọn một tài liệu ngữ pháp và theo tuần tự. Đừng nhảy giữa ba sách giáo khoa.
 - Song song, bắt đầu một từ điển và lặp lại ngắt quãng. Ngữ pháp không có từ vựng thì không hoạt động.
-- Mục tiêu của giai đoạn này là hiểu các câu đơn giản như « tôi đã đi cửa hàng hôm qua » và xây dựng câu của riêng bạn trong giới hạn N5.
+- Mục tiêu của giai đoạn này là hiểu các câu đơn giản như "tôi đã đi cửa hàng hôm qua" và xây dựng câu của riêng bạn trong giới hạn N5.
 
 Sách giáo khoa tốt ở giai đoạn này: Minna no Nihongo (みんなの日本語), Genki, Tae Kim's Grammar Guide. Điểm trừ của Minna là bạn thường cần mua một sách riêng cho chú thích ngữ pháp bằng tiếng mẹ đẻ. Điểm cộng là cấu trúc nghiêm ngặt và liên kết cấp độ.
 
@@ -57,24 +57,24 @@ Sách giáo khoa tốt ở giai đoạn này: Minna no Nihongo (みんなの日�
 Hán tự là phần đáng sợ nhất cho người học phương Tây. 2136 hán tự jōyō (thường dùng) là nhiều. Lời khuyên chính: **đừng cố học tất cả hán tự từ một danh sách.** Học những hán tự xuất hiện trong văn bản bạn đọc.
 
 - Thứ tự ít quan trọng hơn bạn nghĩ. Cách tiếp cận theo bộ thủ của WaniKani hoạt động, nhưng đó không phải con đường duy nhất.
-- Gắn mỗi hán tự với các từ mà nó xuất hiện. Một hán tự có thể được đọc hàng chục cách khác nhau tùy từ; học « âm đọc của hán tự » trong chân không gần như vô dụng.
+- Gắn mỗi hán tự với các từ mà nó xuất hiện. Một hán tự có thể được đọc hàng chục cách khác nhau tùy từ; học "âm đọc của hán tự" trong chân không gần như vô dụng.
 - Mục tiêu là vượt N5 (hoặc tương đương theo tự đánh giá). Đó là khoảng 100 hán tự và 800 từ.
 
 ### Giai đoạn 4. Chuyển sang N4 và đắm chìm (6–12 tháng)
 
-Ở giai đoạn này, bạn đã có thể đọc nội dung đơn giản. Rủi ro chính là mắc kẹt trong chế độ « sách giáo khoa đến sách giáo khoa ». Để tiếp tục phát triển, bạn cần ngôn ngữ sống: anime có phụ đề, manga có furigana, bài báo đơn giản, podcast cho người học.
+Ở giai đoạn này, bạn đã có thể đọc nội dung đơn giản. Rủi ro chính là mắc kẹt trong chế độ "sách giáo khoa đến sách giáo khoa". Để tiếp tục phát triển, bạn cần ngôn ngữ sống: anime có phụ đề, manga có furigana, bài báo đơn giản, podcast cho người học.
 
 - Xây một thói quen: 15–30 phút mỗi ngày với nội dung hơi trên trình độ của bạn (cách tiếp cận i+1).
 - Mọi từ lạ bạn gặp là ứng cử viên để ôn. Không có hệ thống, những từ này bay hơi trong một tuần.
-- Đây thường là nơi nhu cầu về một công cụ kết nối « thấy trong nội dung » với « học trong SRS » xuất hiện.
+- Đây thường là nơi nhu cầu về một công cụ kết nối "thấy trong nội dung" với "học trong SRS" xuất hiện.
 
 ## Các sai lầm chính của người mới
 
-**Học ngôn ngữ, không học kỹ năng.** « Tôi học tiếng Nhật » là quá mơ hồ. Chia ra: đọc, nghe, viết, nói. Ở giai đoạn đầu, tập trung vào đọc và nghe; nói tốt hơn là hoãn đến N4, nếu không bạn có thể củng cố phát âm sai.
+**Học ngôn ngữ, không học kỹ năng.** "Tôi học tiếng Nhật" là quá mơ hồ. Chia ra: đọc, nghe, viết, nói. Ở giai đoạn đầu, tập trung vào đọc và nghe; nói tốt hơn là hoãn đến N4, nếu không bạn có thể củng cố phát âm sai.
 
-**Quá nhiều ứng dụng.** Người mới cài năm ứng dụng « tốt nhất cho tiếng Nhật » và không đạt đến mức mà ứng dụng nào trong số đó có giá trị. Một hoặc hai, dùng đều đặn, là tốt hơn.
+**Quá nhiều ứng dụng.** Người mới cài năm ứng dụng "tốt nhất cho tiếng Nhật" và không đạt đến mức mà ứng dụng nào trong số đó có giá trị. Một hoặc hai, dùng đều đặn, là tốt hơn.
 
-**Ảo tưởng Duolingo.** Duolingo tốt cho điểm bắt đầu — làm quen với âm thanh và các bảng âm tiết. Nhưng ngay khi bạn hoàn thành « khóa » đầu tiên, bạn đập vào trần: ngữ pháp được giải thích kém, hán tự gần như không có, độ sâu không đủ ngay cả cho N5. Duolingo là khởi đầu, không phải con đường.
+**Ảo tưởng Duolingo.** Duolingo tốt cho điểm bắt đầu — làm quen với âm thanh và các bảng âm tiết. Nhưng ngay khi bạn hoàn thành "khóa" đầu tiên, bạn đập vào trần: ngữ pháp được giải thích kém, hán tự gần như không có, độ sâu không đủ ngay cả cho N5. Duolingo là khởi đầu, không phải con đường.
 
 **Học hán tự từ danh sách.** 100 hán tự học cách ly sẽ biến thành 30 nhận ra và 70 quên sau một tháng. Hán tự chỉ dính bên trong từ.
 

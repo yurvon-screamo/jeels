@@ -34,7 +34,7 @@ Most apps are built for use case 1. A smaller number handle 2. Almost none handl
 
 ### General-purpose OCR (Google Lens, Apple Live Text, Microsoft Edge mobile)
 
-**Strength:** high accuracy on printed text. Live Text on modern iOS recognises Japanese in photos almost as well as in screenshots. Google Lens translates on top of OCR, so you get the meaning even if you can't read a single character.
+**Strength:** high accuracy on printed text. Live Text on modern iOS recognizes Japanese in photos almost as well as in screenshots. Google Lens translates on top of OCR, so you get the meaning even if you can't read a single character.
 
 **Weakness:** it's a dead-end for learning. The recognition result is plain text — no furigana, no integration with a dictionary or SRS, no way to capture what you scanned as a flashcard. You read the translation once and forget the word. If you want to *learn* Japanese, Lens is a lookup tool, not a study tool.
 
@@ -44,13 +44,13 @@ Most apps are built for use case 1. A smaller number handle 2. Almost none handl
 
 **Strength:** the OCR result flows directly into a dictionary lookup, so you get reading, meaning, conjugation, examples. Imiwa (iOS/Android) has had OCR for years; Nihongo (iOS/Android) ships it as a Pro feature; KanjiSnap (iOS) leans on Apple's Live Text. Many of these apps let you star the word for later — a soft version of vocabulary capture.
 
-**Weakness:** the OCR feature itself is often a secondary citizen. Recognition quality varies, especially on stylised fonts or handwritten text. The "star" list is not a spaced-repetition system — you'll accumulate 500 starred words and never review them. The OCR is a lookup tool with a memory, not a learning tool. Note that some popular dictionaries (Akebi on Android, Shirabe Jisho on iOS/Android) do not have built-in OCR at all — they're excellent lookup tools, but you type or paste the word yourself.
+**Weakness:** the OCR feature itself is often a secondary citizen. Recognition quality varies, especially on stylized fonts or handwritten text. The "star" list is not a spaced-repetition system — you'll accumulate 500 starred words and never review them. The OCR is a lookup tool with a memory, not a learning tool. Note that some popular dictionaries (Akebi on Android, Shirabe Jisho on iOS/Android) do not have built-in OCR at all — they're excellent lookup tools, but you type or paste the word yourself.
 
 **Use case:** reading support, intermediate-level lookup. Use case 2.
 
 ### Manga-specific OCR tools (manga-ocr model, Poricom, YomiNinja, browser extensions)
 
-**Strength:** tuned for the specific problem of manga. The open-source `manga-ocr` model handles vertical text, multi-line speech bubbles, and stylised fonts better than general-purpose engines. Desktop wrappers (Poricom, YomiNinja) and browser extensions (Manga OCR for Chrome, Namida-OCR) integrate the recognition into the reading flow — select a panel, get the text.
+**Strength:** tuned for the specific problem of manga. The open-source `manga-ocr` model handles vertical text, multi-line speech bubbles, and stylized fonts better than general-purpose engines. Desktop wrappers (Poricom, YomiNinja) and browser extensions (Manga OCR for Chrome, Namida-OCR) integrate the recognition into the reading flow — select a panel, get the text.
 
 **Weakness:** narrow. They work on manga, not on textbook scans or photos of real-world text. And the same retention gap applies: the OCR feeds a lookup, not an SRS, unless you've piped it into Anki via Yomitan + AnkiConnect. The manga-mining power users typically run that three-app stack.
 
@@ -87,7 +87,7 @@ The point is: Origa is the OCR app for learners who got tired of having Lens, a 
 ## Known limitations
 
 - **Origa is not a translation app.** If you need to read a sign once, use Google Lens. Origa's pipeline is overkill for one-shot lookups.
-- **OCR is not perfect on stylised fonts.** Hand-drawn manga lettering, decorative fonts, and some sfx get misread. Budget for manual correction.
+- **OCR is not perfect on stylized fonts.** Hand-drawn manga lettering, decorative fonts, and some sfx get misread. Budget for manual correction.
 - **It's not a manga reader.** You can scan panels, but Origa doesn't display the manga itself. Pair it with a reader of your choice.
 - **No Yomitan integration today.** If your workflow is Yomitan → Anki, Origa doesn't slot into that pipeline directly yet. You can import existing Anki decks, but the live pipe isn't there.
 - **Mobile OCR quality depends on camera and lighting.** Same as every phone OCR app. Sharp photo, even light, no skew — the usual rules apply.
@@ -99,7 +99,7 @@ You almost certainly already have a general-purpose OCR app on your phone (Live 
 ## FAQ
 
 **Is Japanese OCR accurate enough to rely on?**
-On clean printed horizontal text, modern OCR (Apple Live Text, Google Lens, NDLOCR) is reliable enough for everyday lookup. On vertical manga text and stylised fonts, expect more errors and budget for manual correction — vendor-published accuracy numbers are rare and always tied to a specific test set, so don't trust round percentages you read in marketing copy. Handwritten or decorative text is still unreliable across the board.
+On clean printed horizontal text, modern OCR (Apple Live Text, Google Lens, NDLOCR) is reliable enough for everyday lookup. On vertical manga text and stylized fonts, expect more errors and budget for manual correction — vendor-published accuracy numbers are rare and always tied to a specific test set, so don't trust round percentages you read in marketing copy. Handwritten or decorative text is still unreliable across the board.
 
 **Does OCR work offline?**
 Depends on the app. Cloud-based OCR (most translation apps) requires internet. On-device OCR (Origa's NDLOCR-Lite, Apple Live Text) works offline. If you study on the train or on a plane, on-device matters.
