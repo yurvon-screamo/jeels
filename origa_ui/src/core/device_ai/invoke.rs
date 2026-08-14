@@ -86,12 +86,33 @@ async fn race_with_timeout(promise: js_sys::Promise, timeout: Duration) -> Resul
     let raced = js_sys::Promise::race(&js_sys::Array::of2(&promise, &timeout_promise));
     let settled = JsFuture::from(raced)
         .await
-        .map_err(|e| format!("plugin command rejected or timed out: {e:?}"))?;
+        .map_err(|e| format!("plugin command rejected: {}", describe_rejection(&e)))?;
 
     if settled.as_string().as_deref() == Some(TIMEOUT_SENTINEL) {
         return Err(format!("plugin command timed out after {timeout:?}"));
     }
     Ok(settled)
+}
+
+/// Formats a plugin rejection for logs, keeping the structured `code` field
+/// (e.g. `NO_SPEECH_DETECTED`, `PERMISSION_DENIED`) if the plugin sent one.
+///
+/// The code is what routing decisions key on (see `asr_provider`), so it must
+/// survive the `String` error transport — this keeps `{code} {message}` in
+/// the log line while callers parse it back out.
+fn describe_rejection(e: &JsValue) -> String {
+    let code = js_sys::Reflect::get(e, &JsValue::from_str("code"))
+        .ok()
+        .and_then(|c| c.as_string());
+    let message = js_sys::Reflect::get(e, &JsValue::from_str("message"))
+        .ok()
+        .and_then(|m| m.as_string());
+    match (code, message) {
+        (Some(code), Some(message)) => format!("[{code}] {message}"),
+        (Some(code), None) => code,
+        (None, Some(message)) => message,
+        (None, None) => format!("{e:?}"),
+    }
 }
 
 /// Builds a promise that resolves with [`TIMEOUT_SENTINEL`] after `timeout`.
