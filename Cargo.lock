@@ -1813,7 +1813,7 @@ dependencies = [
 [[package]]
 name = "device-ai"
 version = "0.2.0"
-source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=017bf58fac4b4c303fd5f9c9d1d3a812133213c1#017bf58fac4b4c303fd5f9c9d1d3a812133213c1"
+source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=8b5765fa068123a40060345549fd6028ee80c624#8b5765fa068123a40060345549fd6028ee80c624"
 dependencies = [
  "base64 0.22.1",
  "block2",
@@ -3283,7 +3283,7 @@ dependencies = [
  "libc",
  "percent-encoding",
  "pin-project-lite",
- "socket2 0.5.10",
+ "socket2 0.6.3",
  "tokio",
  "tower-service",
  "tracing",
@@ -6920,7 +6920,7 @@ dependencies = [
  "quinn-udp",
  "rustc-hash",
  "rustls",
- "socket2 0.5.10",
+ "socket2 0.6.3",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
@@ -6958,7 +6958,7 @@ dependencies = [
  "cfg_aliases",
  "libc",
  "once_cell",
- "socket2 0.5.10",
+ "socket2 0.6.3",
  "tracing",
  "windows-sys 0.60.2",
 ]
@@ -9071,7 +9071,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-device-ai-apis"
 version = "0.2.0"
-source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=017bf58fac4b4c303fd5f9c9d1d3a812133213c1#017bf58fac4b4c303fd5f9c9d1d3a812133213c1"
+source = "git+https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis?rev=8b5765fa068123a40060345549fd6028ee80c624#8b5765fa068123a40060345549fd6028ee80c624"
 dependencies = [
  "device-ai",
  "serde",
