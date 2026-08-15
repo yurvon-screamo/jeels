@@ -143,8 +143,8 @@ tauri-plugin = { version = "2", features = ["build"] }
 #  - Linux: device-ai has no Linux backend (returns FeatureNotAvailable).
 # Windows + Linux keep their current stack — strictly non-regressing.
 # Future: upstream the mobile fix and switch back to hypothesi/...
-tauri-plugin-device-ai-apis = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "017bf58fac4b4c303fd5f9c9d1d3a812133213c1" }
-device-ai = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "017bf58fac4b4c303fd5f9c9d1d3a812133213c1" }
+tauri-plugin-device-ai-apis = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "8b5765fa068123a40060345549fd6028ee80c624" }
+device-ai = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "8b5765fa068123a40060345549fd6028ee80c624" }
 
 # Dev Dependencies
 wasm-bindgen = "0.2"
