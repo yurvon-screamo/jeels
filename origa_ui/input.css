@@ -2123,6 +2123,19 @@ rt {
     min-width: 0;
 }
 
+/* Quiz option texts: Chromium's emergency break (word-break: break-word)
+   ignores kinsoku (UAX #14 LB13), letting a wrapped line start with "," ";"
+   "!" "、". The .markdown-no-break span (emitted by glue_trailing_punctuation)
+   glues a word char to its trailing punctuation; the explicit resets are
+   required because the parent's eager breakers are inherited and would
+   re-enable breaking inside the span. Verified: leading-punct cases
+   13 → 0, overflow 0 → 0 (Playwright matrix, widths 100–200px). */
+.markdown-text .markdown-no-break {
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
+}
+
 .markdown-text h1,
 .markdown-text h2,
 .markdown-text h3,

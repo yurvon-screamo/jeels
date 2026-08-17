@@ -13,6 +13,7 @@ use super::card_type::CardType;
 use super::lesson_card_header::{CardHeaderAudio, LessonCardTagsQuiz};
 use super::next_card_button::NextCardButton;
 use super::quiz_result::QuizResult;
+use super::quiz_result_display::QuizResultDisplay;
 
 #[derive(Clone, Copy, PartialEq, Default, Debug)]
 pub enum YesNoResult {
@@ -280,32 +281,19 @@ pub fn YesNoCardView(
                 </Show>
 
                 <Show when=move || show_result.get()>
-                    <Show when=move || yesno_result() == YesNoResult::Correct>
-                        <div class="mt-6 text-center">
-                            <Text size=TextSize::Default class="text-[var(--success)] font-bold">
-                                {t!(i18n, lesson.correct)}
-                            </Text>
-                        </div>
-                    </Show>
+                    <QuizResultDisplay quiz_result=QuizResult::from(yesno_result()) />
 
-                    <Show when=move || matches!(yesno_result(), YesNoResult::Incorrect)>
-                        <div class="mt-6 text-center">
-                            <Text size=TextSize::Small variant=TypographyVariant::Muted>
-                                {t!(i18n, lesson.correct_answer)}
-                                <span class="font-semibold">
-                                    {correct_answer_text}
-                                </span>
-                            </Text>
-                        </div>
-                    </Show>
-
-                    <Show when=move || yesno_result() == YesNoResult::DontKnow>
-                        <div class="mt-6 text-center">
-                            <Text size=TextSize::Default class="text-[var(--fg-muted)] font-bold">
-                                {t!(i18n, lesson.dont_know_result)}
-                            </Text>
-                        </div>
-                    </Show>
+                    // Show the correct answer (Да/Нет) on every result —
+                    // as a confirmation when correct and as feedback when
+                    // not, same pattern as the single-quiz card.
+                    <div class="mt-2 text-center">
+                        <Text size=TextSize::Small variant=TypographyVariant::Muted>
+                            {t!(i18n, lesson.correct_answer)}
+                            <span class="font-semibold">
+                                {correct_answer_text}
+                            </span>
+                        </Text>
+                    </div>
                 </Show>
 
                 <Show when=move || {
