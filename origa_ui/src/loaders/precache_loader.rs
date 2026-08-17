@@ -30,7 +30,8 @@ pub fn get_base_bundle_resources() -> Vec<String> {
     resources.extend([
         "dictionaries/char_def.bin".to_string(),
         "dictionaries/matrix.mtx".to_string(),
-        "dictionaries/dict.da".to_string(),
+        "dictionaries/dict.trie".to_string(),
+        "dictionaries/dict.valsidx".to_string(),
         "dictionaries/dict.vals".to_string(),
         "dictionaries/unk.bin".to_string(),
         "dictionaries/dict.wordsidx".to_string(),
@@ -241,6 +242,8 @@ mod tests {
 
         assert!(resources.contains(&"dictionaries/char_def.bin".to_string()));
         assert!(resources.contains(&"dictionaries/matrix.mtx".to_string()));
+        assert!(resources.contains(&"dictionaries/dict.trie".to_string()));
+        assert!(resources.contains(&"dictionaries/dict.valsidx".to_string()));
         assert!(resources.contains(&"dictionaries/JmdictFurigana.txt".to_string()));
         assert!(resources.contains(&"dictionary/kanji.json".to_string()));
         assert!(resources.contains(&"dictionary/radicals.json".to_string()));

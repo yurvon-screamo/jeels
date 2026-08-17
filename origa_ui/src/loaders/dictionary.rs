@@ -9,15 +9,18 @@ use origa::traits::CdnProvider;
 /// The eight raw lindera dictionary files (deflate-compressed on the CDN,
 /// inflated on device). lindera 5.x walks the trie in place, so no pre-built
 /// rkyv blob is needed anymore — the raw files ARE the cache.
-const DICTIONARY_FILES: &[(&str, bool)] = &[
-    ("char_def.bin", true),
-    ("matrix.mtx", true),
-    ("dict.trie", true),
-    ("dict.valsidx", true),
-    ("dict.vals", true),
-    ("unk.bin", true),
-    ("dict.wordsidx", true),
-    ("dict.words", true),
+/// Ordered so the largest file (dict.words, 28 MB deflated → 223 MB raw)
+/// inflates FIRST, while every other file is still compressed: peak heap
+/// stays at ~dict.words-raw + everything-compressed instead of the reverse.
+const DICTIONARY_FILES: &[&str] = &[
+    "dict.words",
+    "matrix.mtx",
+    "dict.trie",
+    "dict.vals",
+    "dict.valsidx",
+    "dict.wordsidx",
+    "unk.bin",
+    "char_def.bin",
 ];
 const METADATA_FILE: &str = "metadata.json";
 
@@ -62,13 +65,12 @@ async fn fetch_deflated_files() -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
     let provider = cdn_provider();
     let mut names: Vec<String> = DICTIONARY_FILES
         .iter()
-        .map(|(n, _)| format!("dictionaries/{n}"))
+        .map(|n| format!("dictionaries/{n}"))
         .collect();
     names.push(format!("dictionaries/{METADATA_FILE}"));
 
     let mut results: Vec<(String, Vec<u8>)> = Vec::with_capacity(names.len());
-    // Sequential fetch keeps peak memory at one file at a time; the biggest
-    // (dict.words, 28 MB deflated) dominates.
+    // Sequential fetch keeps peak memory at one file at a time.
     for path in names {
         let bytes = provider.fetch_bytes(&path).await?;
         tracing::debug!("📖 Fetched {path} ({} bytes)", bytes.len());
@@ -85,7 +87,7 @@ async fn inflate_dictionary_data(
     let mut files: std::collections::HashMap<String, Vec<u8>> = std::collections::HashMap::new();
     for (path, bytes) in compressed {
         let name = path.rsplit('/').next().unwrap_or(&path).to_string();
-        let inflated = if DICTIONARY_FILES.iter().any(|(n, _)| *n == name) {
+        let inflated = if DICTIONARY_FILES.contains(&name.as_str()) {
             inflate(&bytes)?
         } else {
             // metadata.json is stored uncompressed
@@ -121,7 +123,9 @@ async fn inflate_dictionary_data(
 fn inflate(data: &[u8]) -> Result<Vec<u8>, OrigaError> {
     use std::io::Read;
     let mut decoder = flate2::read::DeflateDecoder::new(data);
-    let mut out = Vec::new();
+    // Pre-size the output buffer (~8x the deflated size for the word list)
+    // so the 223 MB words buffer never doubles through a realloc spike.
+    let mut out = Vec::with_capacity(data.len() * 8);
     decoder
         .read_to_end(&mut out)
         .map_err(|e| OrigaError::TokenizerError {

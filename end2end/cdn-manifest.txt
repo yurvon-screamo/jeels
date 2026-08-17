@@ -1,6 +1,6 @@
 dictionaries/char_def.bin
-dictionaries/cached-lindera.bin
-dictionaries/dict.da
+dictionaries/dict.trie
+dictionaries/dict.valsidx
 dictionaries/dict.vals
 dictionaries/dict.words
 dictionaries/dict.wordsidx
