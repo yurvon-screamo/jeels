@@ -11,7 +11,7 @@ use wasm_bindgen_futures::JsFuture;
 #[cfg(target_arch = "wasm32")]
 use super::cdn_provider::{CDN_CACHE_NAME, cdn_cache_url};
 #[cfg(target_arch = "wasm32")]
-use super::dictionary_cache::{LINDERA_CACHE_NAME, RKYV_CACHE_NAME, VOCABULARY_CACHE_NAME};
+use super::dictionary_cache::{DICTIONARY_FILES_CACHE_NAME, VOCABULARY_CACHE_NAME};
 #[cfg(target_arch = "wasm32")]
 const MANIFEST_CACHE_KEY: &str = "__origa_cache_manifest__";
 
@@ -47,11 +47,8 @@ pub async fn check_and_invalidate() -> Result<(), OrigaError> {
 
         let has_dict = all_paths.iter().any(|p| p.starts_with("dictionaries/"));
         if has_dict {
-            if let Err(e) = invalidate_rkyv_dictionary().await {
-                tracing::warn!(error = ?e, "Failed to invalidate rkyv dictionary cache");
-            }
-            if let Err(e) = invalidate_cached_lindera().await {
-                tracing::warn!(error = ?e, "Failed to invalidate cached lindera structures");
+            if let Err(e) = invalidate_dictionary_files().await {
+                tracing::warn!(error = ?e, "Failed to invalidate dictionary file cache");
             }
         }
 
@@ -82,11 +79,8 @@ pub async fn check_and_invalidate() -> Result<(), OrigaError> {
 
     let has_dict_stale = stale.iter().any(|p| p.starts_with("dictionaries/"));
     if has_dict_stale {
-        if let Err(e) = invalidate_rkyv_dictionary().await {
-            tracing::warn!(error = ?e, "Failed to invalidate rkyv dictionary cache");
-        }
-        if let Err(e) = invalidate_cached_lindera().await {
-            tracing::warn!(error = ?e, "Failed to invalidate cached lindera structures");
+        if let Err(e) = invalidate_dictionary_files().await {
+            tracing::warn!(error = ?e, "Failed to invalidate dictionary file cache");
         }
     }
 
@@ -247,8 +241,10 @@ async fn invalidate_stale_entries(cache: &web_sys::Cache, stale_paths: &[String]
     }
 }
 
+/// Invalidate the raw dictionary-file cache (lindera 5.x era) so the next
+/// load fetches fresh files from the CDN.
 #[cfg(target_arch = "wasm32")]
-async fn invalidate_rkyv_dictionary() -> Result<(), OrigaError> {
+async fn invalidate_dictionary_files() -> Result<(), OrigaError> {
     let window = web_sys::window().ok_or_else(|| OrigaError::RepositoryError {
         reason: "No window found".to_string(),
     })?;
@@ -257,62 +253,9 @@ async fn invalidate_rkyv_dictionary() -> Result<(), OrigaError> {
         reason: format!("Cache API not available: {:?}", e),
     })?;
 
-    let cache = JsFuture::from(caches.open(RKYV_CACHE_NAME))
-        .await
-        .map_err(|e| OrigaError::RepositoryError {
-            reason: format!("Failed to open rkyv cache: {:?}", e),
-        })?;
+    let _ = JsFuture::from(caches.delete(DICTIONARY_FILES_CACHE_NAME)).await;
 
-    let cache: web_sys::Cache = cache.dyn_into().map_err(|e| OrigaError::RepositoryError {
-        reason: format!("Failed to cast Cache: {:?}", e),
-    })?;
-
-    // Legacy cache key from the pre-built-lindera era. Hardcoded for
-    // invalidation only — no new entries are written under this key.
-    let dict_key = "dictionaries/unidic/cache/dictionary-data";
-
-    JsFuture::from(cache.delete_with_str(&cdn_cache_url(dict_key)))
-        .await
-        .map_err(|e| OrigaError::RepositoryError {
-            reason: format!("Failed to delete rkyv dictionary cache: {:?}", e),
-        })?;
-
-    tracing::info!("Invalidated rkyv dictionary cache");
-    Ok(())
-}
-
-/// Invalidate the CachedLinderaDictionary entry so the next load fetches
-/// fresh dictionary files from CDN and rebuilds the lindera structures.
-#[cfg(target_arch = "wasm32")]
-async fn invalidate_cached_lindera() -> Result<(), OrigaError> {
-    let window = web_sys::window().ok_or_else(|| OrigaError::RepositoryError {
-        reason: "No window found".to_string(),
-    })?;
-
-    let caches = window.caches().map_err(|e| OrigaError::RepositoryError {
-        reason: format!("Cache API not available: {:?}", e),
-    })?;
-
-    let cache = JsFuture::from(caches.open(LINDERA_CACHE_NAME))
-        .await
-        .map_err(|e| OrigaError::RepositoryError {
-            reason: format!("Failed to open lindera cache: {:?}", e),
-        })?;
-
-    let cache: web_sys::Cache = cache.dyn_into().map_err(|e| OrigaError::RepositoryError {
-        reason: format!("Failed to cast Cache: {:?}", e),
-    })?;
-
-    // Delete all entries in the lindera cache (there's only one key,
-    // but delete_with_str on the cache key is sufficient).
-    let cache_key = super::cdn_provider::cdn_cache_url(super::dictionary_cache::LINDERA_CACHE_KEY);
-    JsFuture::from(cache.delete_with_str(&cache_key))
-        .await
-        .map_err(|e| OrigaError::RepositoryError {
-            reason: format!("Failed to delete lindera cache: {:?}", e),
-        })?;
-
-    tracing::info!("Invalidated cached lindera structures");
+    tracing::info!("Invalidated dictionary file cache");
     Ok(())
 }
 

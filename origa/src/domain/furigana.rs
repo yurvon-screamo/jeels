@@ -230,7 +230,8 @@ mod tests {
         let data = DictionaryData {
             char_def: decompress(read_file("char_def.bin")),
             matrix: decompress(read_file("matrix.mtx")),
-            dict_da: decompress(read_file("dict.da")),
+            dict_trie: decompress(read_file("dict.trie")),
+            dict_vals_idx: decompress(read_file("dict.valsidx")),
             dict_vals: decompress(read_file("dict.vals")),
             unk: decompress(read_file("unk.bin")),
             words_idx: decompress(read_file("dict.wordsidx")),
@@ -291,11 +292,13 @@ mod tests {
     fn should_furiganize_unknown_kanji_without_empty_reading() {
         ensure_dictionary();
         let known_kanji: HashSet<char> = HashSet::new();
-        let segments = furiganize_segments("杏璃", &known_kanji).unwrap();
+        // 杏璃 is a single token in SudachiDict now; 蕗 alone is not a lemma,
+        // so a name ending in it takes the unknown-kanji path.
+        let segments = furiganize_segments("杏蕩", &known_kanji).unwrap();
         let ri = segments
             .iter()
-            .find(|s| s.text() == "璃")
-            .expect("「璃」segment should exist");
+            .find(|s| s.text().contains("蕩"))
+            .expect("unknown-kanji segment should exist");
         assert_eq!(ri.reading(), None);
         assert!(
             !ri.has_reading(),

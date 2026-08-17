@@ -51,10 +51,8 @@ pub use score_content::ScoreContentResult;
 pub use srs::RateMode;
 pub use stats::{RatingRatio, TodayOverview, compute_rating_ratio, compute_today_overview};
 pub use tokenizer::{
-    CachedLinderaDictionary, DictionaryData, PartOfSpeech, TokenInfo, TokenTranslation,
-    build_cached_lindera, init_dictionary, init_tokenizer_from_cached,
-    init_tokenizer_from_rkyv_cached, is_dictionary_loaded, lookup_tokens_translations,
-    serialize_cached_lindera_to_rkyv, tokenize_text,
+    DictionaryData, PartOfSpeech, TokenInfo, TokenTranslation, init_dictionary,
+    is_dictionary_loaded, lookup_tokens_translations, tokenize_text,
 };
 pub use user::{ONBOARDING_COMPLETED_KEY, ONBOARDING_SKIPPED_KEY, User, WordKnowledge};
 pub use value_objects::{CardAnswer, DailyLoad, JapaneseLevel, NativeLanguage, Question};

@@ -90,113 +90,21 @@ fn handle_i18n() {
 }
 
 fn handle_lindera_dictionary() {
-    if env::var("LINDERA_DICTIONARIES_PATH").is_ok() || env::var("LINDERA_CACHE").is_ok() {
-        println!("cargo:warning=Using external dictionary path, skipping build");
-        return;
-    }
-
-    let out_dir = env::var("OUT_DIR").unwrap();
+    // The tokenizer dictionary ships as pre-built deflate files in
+    // cdn/dictionaries/ (SudachiDict compiled with the lindera 5.x builder —
+    // see docs/src/sudachidict.md in the lindera repo). Nothing to build at
+    // compile time; verify the files exist so a broken checkout fails fast.
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let public_dict_dir = Path::new(&manifest_dir)
         .join("..")
         .join("cdn")
         .join("dictionaries");
 
-    println!(
-        "cargo:warning=Looking for dictionary at: {}",
-        public_dict_dir.display()
-    );
-    println!("cargo:warning=Exists: {}", public_dict_dir.exists());
-    println!(
-        "cargo:warning=dict.da exists: {}",
-        public_dict_dir.join("dict.da").exists()
-    );
-
-    if public_dict_dir.exists() {
-        let dict_da = public_dict_dir.join("dict.da");
-        if dict_da.exists() {
-            println!("cargo:warning=Dictionary already exists, skipping build");
-            return;
-        }
-    }
-
-    println!("cargo:warning=Building UniDic dictionary...");
-
-    fs::create_dir_all(&public_dict_dir).expect("Failed to create dictionary directory");
-
-    let fetch_params = lindera_dictionary::assets::FetchParams {
-        file_name: "unidic-mecab-2.1.2.tar.gz",
-        input_dir: "unidic-mecab-2.1.2",
-        src_subdir: None,
-        output_dir: "lindera-unidic",
-        dummy_input: "テスト,5131,5131,767,名詞,普通名詞,サ変可能,*,*,*,テスト,テスト-test,テスト,テスト,テスト,テスト,外,*,*,*,*\n",
-        download_urls: &["https://Lindera.dev/unidic-mecab-2.1.2.tar.gz"],
-        md5_hash: "f4502a563e1da44747f61dcd2b269e35",
-    };
-
-    let metadata_json = r#"{
-        "name": "unidic",
-        "encoding": "UTF-8",
-        "compress_algorithm": "deflate",
-        "default_word_cost": -10000,
-        "default_left_context_id": 0,
-        "default_right_context_id": 0,
-        "default_field_value": "*",
-        "flexible_csv": false,
-        "skip_invalid_cost_or_id": false,
-        "normalize_details": false,
-        "dictionary_schema": {
-            "fields": [
-                "surface",
-                "left_context_id",
-                "right_context_id",
-                "cost",
-                "part_of_speech",
-                "part_of_speech_subcategory_1",
-                "part_of_speech_subcategory_2",
-                "part_of_speech_subcategory_3",
-                "conjugation_type",
-                "conjugation_form",
-                "reading",
-                "lexeme",
-                "orthographic_surface_form",
-                "phonological_surface_form",
-                "orthographic_base_form",
-                "phonological_base_form",
-                "word_type",
-                "initial_mutation_type",
-                "initial_mutation_form",
-                "final_mutation_type",
-                "final_mutation_form"
-            ]
-        },
-        "user_dictionary_schema": {
-            "fields": [
-                "surface",
-                "part_of_speech",
-                "reading"
-            ]
-        }
-    }"#;
-
-    let metadata: lindera_dictionary::dictionary::metadata::Metadata =
-        serde_json::from_str(metadata_json).expect("Failed to parse metadata");
-
-    let builder = lindera_dictionary::builder::DictionaryBuilder::new(metadata);
-
-    let runtime = tokio::runtime::Runtime::new().expect("Failed to create tokio runtime");
-    runtime.block_on(async {
-        lindera_dictionary::assets::fetch(fetch_params, builder)
-            .await
-            .expect("Failed to fetch and build dictionary");
-    });
-
-    let built_dict_dir = Path::new(&out_dir).join("lindera-unidic");
-
-    let files_to_copy = [
+    let required = [
         "char_def.bin",
         "matrix.mtx",
-        "dict.da",
+        "dict.trie",
+        "dict.valsidx",
         "dict.vals",
         "unk.bin",
         "dict.wordsidx",
@@ -204,17 +112,14 @@ fn handle_lindera_dictionary() {
         "metadata.json",
     ];
 
-    for file in &files_to_copy {
-        let src = built_dict_dir.join(file);
-        let dst = public_dict_dir.join(file);
-        if src.exists() {
-            fs::copy(&src, &dst).unwrap_or_else(|_| panic!("Failed to copy {}", file));
-        } else {
-            panic!("Dictionary file not found: {}", src.display());
+    for file in required {
+        if !public_dict_dir.join(file).exists() {
+            println!(
+                "cargo:warning=Dictionary file missing: {} (cdn/ is gitignored; restore via scripts/deploy_cdn.py)",
+                public_dict_dir.join(file).display()
+            );
         }
     }
-
-    println!("cargo:warning=UniDic dictionary built successfully");
 }
 
 #[derive(Debug, Default, Deserialize)]

@@ -55,7 +55,8 @@ pub fn load_dictionary_from(dictionary_dir: Option<&Path>) -> Result<(), OrigaEr
     let data = DictionaryData {
         char_def: decompress(read_file("char_def.bin")?)?,
         matrix: decompress(read_file("matrix.mtx")?)?,
-        dict_da: decompress(read_file("dict.da")?)?,
+        dict_trie: decompress(read_file("dict.trie")?)?,
+        dict_vals_idx: decompress(read_file("dict.valsidx")?)?,
         dict_vals: decompress(read_file("dict.vals")?)?,
         unk: decompress(read_file("unk.bin")?)?,
         words_idx: decompress(read_file("dict.wordsidx")?)?,
