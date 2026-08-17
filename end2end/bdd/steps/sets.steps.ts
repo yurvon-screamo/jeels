@@ -17,12 +17,7 @@ Given('у пользователя есть импортированный на�
     await setsPage.clickImportOnCard(0);
     await setsPage.waitForDrawerWords();
     await setsPage.importFromDrawer();
-    // The sets list signal doesn't re-fetch automatically after the drawer
-    // closes; a reload surfaces the reimport-button state.
-    await page.reload();
-    await setsPage.waitForLoad();
-    const imported = await setsPage.getImportedCardCount();
-    expect(imported).toBeGreaterThan(0);
+    await setsPage.expectImportedBadgeWithoutReload();
 });
 
 Then('отображается список доступных наборов', async ({ page }) => {
@@ -38,18 +33,9 @@ Then('отображается импортированный набор', async
 
 When('импортирует первый набор', async ({ page }) => {
     const setsPage = new SetsPage(page);
-    const countBefore = await setsPage.getImportedCardCount();
     await setsPage.clickImportOnCard(0);
     await setsPage.waitForDrawerWords();
     await setsPage.importFromDrawer();
-    // The import use-case persists the imported flag on the server, but the
-    // sets list signal in the UI doesn't re-fetch automatically after the
-    // drawer closes — a reload forces the re-fetch and surfaces the
-    // reimport-button state.
-    await page.reload();
-    await setsPage.waitForLoad();
-    const countAfter = await setsPage.getImportedCardCount();
-    expect(countAfter).toBeGreaterThan(countBefore);
 });
 
 When('отменяет импорт первого набора', async ({ page }) => {
@@ -60,6 +46,27 @@ When('отменяет импорт первого набора', async ({ page 
     await setsPage.cancelImportFromDrawer();
     await expect(setsPage.drawer).not.toBeVisible();
     expect(await setsPage.getImportedCardCount()).toBe(countBefore);
+});
+
+Then('набор отображается как импортированный без перезагрузки страницы', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.expectImportedBadgeWithoutReload();
+});
+
+Then('отображается уведомление об успешном импорте', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.expectImportToastVisible();
+});
+
+When('открывает окно предпросмотра первого набора', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.openFirstSetPreview();
+});
+
+Then('кнопки импорта и отмены полностью видны на экране', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.waitForDrawerWords();
+    await setsPage.expectDrawerActionsInViewport();
 });
 
 Then('набор отображается как импортированный', async ({ page }) => {
