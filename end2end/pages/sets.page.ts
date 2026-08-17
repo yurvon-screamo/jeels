@@ -36,6 +36,7 @@ export class SetsPage extends BasePage {
     readonly drawerImportBtn: Locator;
     readonly drawerCancelBtn: Locator;
     readonly drawerWordItems: Locator;
+    readonly toastSuccess: Locator;
 
     // Pagination
     readonly loadMoreButton: Locator;
@@ -77,6 +78,12 @@ export class SetsPage extends BasePage {
         this.drawerImportBtn = page.getByTestId("sets-drawer-import-btn");
         this.drawerCancelBtn = page.getByTestId("sets-drawer-cancel-btn");
         this.drawerWordItems = this.drawer.getByTestId("sets-drawer-item");
+        // Import success toast. Rendered at page level (outside the drawer),
+        // so it must be visible right after the drawer closes. Toast items
+        // carry the data-testid="toast-<id>" pattern (ui_components/toast.rs).
+        this.toastSuccess = page.locator(
+            ".toast-container [data-testid^='toast-'].toast-success",
+        );
 
         // Pagination
         this.loadMoreButton = page.getByTestId("sets-load-more-btn");
@@ -149,6 +156,51 @@ export class SetsPage extends BasePage {
     async importFromDrawer(): Promise<void> {
         await this.drawerImportBtn.click({ timeout: 5_000 });
         await expect(this.drawer).not.toBeVisible({ timeout: 30_000 });
+    }
+
+    async openFirstSetPreview(): Promise<void> {
+        const card = this.page.getByTestId("sets-card-item").first();
+        await card.getByTestId("sets-card-import-btn").click();
+        await expect(this.drawer).toBeVisible({ timeout: 5_000 });
+    }
+
+    async expectImportedBadgeWithoutReload(): Promise<void> {
+        // is_imported flips the import button to a reimport button
+        // (sets-card-reimport-btn) without a page reload.
+        const reimportBtn = this.page.getByTestId("sets-card-reimport-btn");
+        await expect(reimportBtn.first()).toBeVisible({ timeout: 10_000 });
+    }
+
+    async expectImportToastVisible(): Promise<void> {
+        // The toast must appear immediately after the drawer closes, not on
+        // the next drawer opening. It lives outside the drawer at page level.
+        await expect(this.toastSuccess.first()).toBeVisible({ timeout: 5_000 });
+    }
+
+    async expectDrawerActionsInViewport(): Promise<void> {
+        // Wait for the drawer slide-in animation (0.3s translateY) to settle:
+        // the drawer opens before its content data resolves, and measuring
+        // mid-animation returns pre-animation coordinates.
+        await this.page.waitForFunction(
+            () => {
+                const el = document.querySelector('[data-testid="sets-import-drawer"]');
+                return !el || el.getAnimations().every((a) => a.playState !== "running");
+            },
+            undefined,
+            { timeout: 5_000 },
+        );
+        // toBeVisible() does not catch a footer clipped by a non-scrolling
+        // drawer body: an element can be rendered yet unreachable. Compare
+        // the button boxes against the actual viewport height instead.
+        const viewportHeight = this.page.viewportSize()?.height ?? 0;
+        for (const btn of [this.drawerImportBtn, this.drawerCancelBtn]) {
+            const box = await btn.boundingBox();
+            expect(box, "drawer action button must be rendered").not.toBeNull();
+            expect(
+                box!.y + box!.height,
+                `drawer action button must fit within ${viewportHeight}px viewport`,
+            ).toBeLessThanOrEqual(viewportHeight);
+        }
     }
 
     async cancelImportFromDrawer(): Promise<void> {
