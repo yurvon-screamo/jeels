@@ -209,11 +209,18 @@ mod tests {
         use std::io::Read;
 
         let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        let dict_dir = std::path::PathBuf::from(manifest_dir)
+        let base = std::path::PathBuf::from(manifest_dir)
             .parent()
             .unwrap()
             .join("cdn")
             .join("dictionaries");
+        // Prefer the versioned SudachiDict directory (see deploy_cdn.py).
+        let versioned = base.join("sudachidict-20260723");
+        let dict_dir = if versioned.join("dict.trie").exists() {
+            versioned
+        } else {
+            base
+        };
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);
@@ -227,7 +234,8 @@ mod tests {
         crate::domain::DictionaryData {
             char_def: decompress(read_file("char_def.bin")),
             matrix: decompress(read_file("matrix.mtx")),
-            dict_da: decompress(read_file("dict.da")),
+            dict_trie: decompress(read_file("dict.trie")),
+            dict_vals_idx: decompress(read_file("dict.valsidx")),
             dict_vals: decompress(read_file("dict.vals")),
             unk: decompress(read_file("unk.bin")),
             words_idx: decompress(read_file("dict.wordsidx")),

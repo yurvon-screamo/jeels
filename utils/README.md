@@ -231,19 +231,19 @@ utils find-missing --help
 
 ## Dictionary Requirements
 
-The `tokenize
-,`tokenize-well-known`, and`find-missing` commands require a Japanese
-dictionary (UniDic) to be available. The CLI will search for the
-dictionary in the following locations:
+The tokenizer commands require the SudachiDict dictionary (lindera 5 format,
+built by `scripts/build_sudachidict.py`). The CLI resolves it in the
+following locations:
 
-1. `origa_ui/public/dictionaries/unidic/` (relative to project root)
-2. `CARGO_MANIFEST_DIR/../origa_ui/public/dictionaries/unidic/`
+1. `cdn/dictionaries/sudachidict-20260723/` (versioned, preferred)
+2. `cdn/dictionaries/` (flat legacy layout)
 
-The dictionary files should include:
+The dictionary files include:
 
 - `char_def.bin` (compressed)
 - `matrix.mtx` (compressed)
-- `dict.da` (compressed)
+- `dict.trie` (compressed)
+- `dict.valsidx` (compressed)
 - `dict.vals` (compressed)
 - `unk.bin` (compressed)
 - `dict.wordsidx` (compressed)

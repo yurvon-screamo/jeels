@@ -275,6 +275,17 @@ pub enum Commands {
         english_only: bool,
     },
 
+    /// Re-tokenize phrase_index.json tokens with the current tokenizer
+    RetokenizePhrases {
+        /// Path to phrase_index.json
+        #[arg(long)]
+        index: PathBuf,
+
+        /// Directory containing data_bundle_*.json (phrase texts)
+        #[arg(long)]
+        data_dir: PathBuf,
+    },
+
     /// Enrich phrase index with grammar rule detection
     EnrichPhrasesWithGrammar {
         /// Input phrase_index.json path

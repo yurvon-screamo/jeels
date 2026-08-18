@@ -55,7 +55,8 @@ pub fn load_dictionary_from(dictionary_dir: Option<&Path>) -> Result<(), OrigaEr
     let data = DictionaryData {
         char_def: decompress(read_file("char_def.bin")?)?,
         matrix: decompress(read_file("matrix.mtx")?)?,
-        dict_da: decompress(read_file("dict.da")?)?,
+        dict_trie: decompress(read_file("dict.trie")?)?,
+        dict_vals_idx: decompress(read_file("dict.valsidx")?)?,
         dict_vals: decompress(read_file("dict.vals")?)?,
         unk: decompress(read_file("unk.bin")?)?,
         words_idx: decompress(read_file("dict.wordsidx")?)?,
@@ -72,6 +73,16 @@ fn find_dictionary_directory() -> Result<PathBuf, OrigaError> {
 
     if dict_dir.ends_with("tokenizer") {
         dict_dir.pop();
+    }
+
+    // Prefer the versioned SudachiDict directory; fall back to the legacy
+    // flat layout (old checkouts / cached CDN downloads).
+    let versioned = dict_dir
+        .join("cdn")
+        .join("dictionaries")
+        .join("sudachidict-20260723");
+    if versioned.exists() {
+        return Ok(versioned);
     }
 
     dict_dir = dict_dir.join("cdn").join("dictionaries");

@@ -28,14 +28,15 @@ pub fn get_base_bundle_resources() -> Vec<String> {
     let mut resources: Vec<String> = Vec::new();
 
     resources.extend([
-        "dictionaries/char_def.bin".to_string(),
-        "dictionaries/matrix.mtx".to_string(),
-        "dictionaries/dict.da".to_string(),
-        "dictionaries/dict.vals".to_string(),
-        "dictionaries/unk.bin".to_string(),
-        "dictionaries/dict.wordsidx".to_string(),
-        "dictionaries/dict.words".to_string(),
-        "dictionaries/metadata.json".to_string(),
+        "dictionaries/sudachidict-20260723/char_def.bin".to_string(),
+        "dictionaries/sudachidict-20260723/matrix.mtx".to_string(),
+        "dictionaries/sudachidict-20260723/dict.trie".to_string(),
+        "dictionaries/sudachidict-20260723/dict.valsidx".to_string(),
+        "dictionaries/sudachidict-20260723/dict.vals".to_string(),
+        "dictionaries/sudachidict-20260723/unk.bin".to_string(),
+        "dictionaries/sudachidict-20260723/dict.wordsidx".to_string(),
+        "dictionaries/sudachidict-20260723/dict.words".to_string(),
+        "dictionaries/sudachidict-20260723/metadata.json".to_string(),
         "dictionaries/JmdictFurigana.txt".to_string(),
     ]);
 
@@ -239,8 +240,10 @@ mod tests {
     fn base_bundle_includes_dictionaries() {
         let resources = get_base_bundle_resources();
 
-        assert!(resources.contains(&"dictionaries/char_def.bin".to_string()));
-        assert!(resources.contains(&"dictionaries/matrix.mtx".to_string()));
+        assert!(resources.contains(&"dictionaries/sudachidict-20260723/char_def.bin".to_string()));
+        assert!(resources.contains(&"dictionaries/sudachidict-20260723/matrix.mtx".to_string()));
+        assert!(resources.contains(&"dictionaries/sudachidict-20260723/dict.trie".to_string()));
+        assert!(resources.contains(&"dictionaries/sudachidict-20260723/dict.valsidx".to_string()));
         assert!(resources.contains(&"dictionaries/JmdictFurigana.txt".to_string()));
         assert!(resources.contains(&"dictionary/kanji.json".to_string()));
         assert!(resources.contains(&"dictionary/radicals.json".to_string()));

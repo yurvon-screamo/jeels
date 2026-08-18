@@ -15,7 +15,7 @@ Accepted
 > accept assets outside the `index.html` directory (trunk-rs/trunk#1045), so
 > instead of a direct cross-dir `copy-dir` the canonical `cdn/fonts/` is staged
 > into `origa_ui/public/fonts/` by `build.rs::stage_fonts_for_bundling`
-> (gitignored build mirror, same pattern as `public/dictionaries/unidic/`), and
+> (gitignored build mirror, same pattern as the tokenizer dictionary mirror (`cdn/dictionaries/`, gitignored)), and
 > the existing trunk `copy-dir href="public"` ships it at `dist/fonts/`.
 > `font_face.rs` is the single canonical `@font-face` source (the hardcoded
 > rules previously in `input.css` were dead — the runtime `<style>` won the

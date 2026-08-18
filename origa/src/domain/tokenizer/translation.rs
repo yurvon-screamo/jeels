@@ -97,6 +97,13 @@ pub fn lookup_tokens_translations(
             } else if masu_stem_match.is_some() {
                 get_translation(&surface_form, native_language)
                     .or_else(|| get_translation(&base_form, native_language))
+            } else if token.part_of_speech() == &PartOfSpeech::Interjection {
+                // Interjection lemmas in the tokenizer dictionary frequently
+                // disagree with the translation dictionary (うわー normalizes to
+                // うわ, while the translation dictionary keys the full surface).
+                // Prefer the surface spelling, then the lemma.
+                get_translation(&surface_form, native_language)
+                    .or_else(|| get_translation(&base_form, native_language))
             } else {
                 get_translation(&base_form, native_language)
             };
@@ -671,7 +678,8 @@ mod integration_tests {
             .parent()
             .unwrap()
             .join("cdn")
-            .join("dictionaries");
+            .join("dictionaries")
+            .join("sudachidict-20260723");
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);
@@ -685,7 +693,8 @@ mod integration_tests {
         let data = DictionaryData {
             char_def: decompress(read_file("char_def.bin")),
             matrix: decompress(read_file("matrix.mtx")),
-            dict_da: decompress(read_file("dict.da")),
+            dict_trie: decompress(read_file("dict.trie")),
+            dict_vals_idx: decompress(read_file("dict.valsidx")),
             dict_vals: decompress(read_file("dict.vals")),
             unk: decompress(read_file("unk.bin")),
             words_idx: decompress(read_file("dict.wordsidx")),

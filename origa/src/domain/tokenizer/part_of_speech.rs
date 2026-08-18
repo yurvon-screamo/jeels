@@ -42,6 +42,7 @@ impl PartOfSpeech {
                 | PartOfSpeech::Numeral
                 | PartOfSpeech::Determiner
                 | PartOfSpeech::Conjunction
+                | PartOfSpeech::Interjection
         )
     }
 }
@@ -273,8 +274,10 @@ mod tests {
         }
 
         #[test]
-        fn returns_false_for_interjection() {
-            assert!(!PartOfSpeech::Interjection.is_vocabulary_word());
+        fn returns_true_for_interjection() {
+            // Interjections like ありがとう / こんにちは are real dictionary
+            // words learners study — they must reach card analysis.
+            assert!(PartOfSpeech::Interjection.is_vocabulary_word());
         }
 
         #[test]

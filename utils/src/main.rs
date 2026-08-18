@@ -128,6 +128,9 @@ async fn main() {
             patches,
             dry_run,
         } => run_patch_kanji_readings(input, patches, dry_run),
+        Commands::RetokenizePhrases { index, data_dir } => {
+            commands::retokenize_phrases::run_retokenize_phrases(index, data_dir)
+        },
         Commands::EnrichPhrasesWithGrammar {
             input,
             chunks_dir,
