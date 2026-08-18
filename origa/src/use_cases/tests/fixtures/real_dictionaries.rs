@@ -69,7 +69,13 @@ fn init_tokenizer_dictionary() {
         }
 
         let cdn_dir = get_cdn_dir();
-        let dict_dir = cdn_dir.join("dictionaries");
+        // Prefer the versioned SudachiDict directory (see deploy_cdn.py).
+        let versioned = cdn_dir.join("dictionaries").join("sudachidict-20260723");
+        let dict_dir = if versioned.join("dict.trie").exists() {
+            versioned
+        } else {
+            cdn_dir.join("dictionaries")
+        };
 
         let read_file = |name: &str| std::fs::read(dict_dir.join(name)).unwrap();
 

@@ -24,6 +24,12 @@ const DICTIONARY_FILES: &[&str] = &[
 ];
 const METADATA_FILE: &str = "metadata.json";
 
+/// Versioned dictionary path: old clients keep fetching the UniDic files
+/// from `dictionaries/` (byte-identical to what they already have), new
+/// clients fetch SudachiDict from here. Removing the legacy files is a
+/// separate release, once old-client traffic fades.
+const DICT_PATH_PREFIX: &str = "dictionaries/sudachidict-20260723/";
+
 /// Load the SudachiDict tokenizer dictionary.
 ///
 /// Unified path for cache-hit and cache-miss: fetch eight deflate-compressed
@@ -65,9 +71,9 @@ async fn fetch_deflated_files() -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
     let provider = cdn_provider();
     let mut names: Vec<String> = DICTIONARY_FILES
         .iter()
-        .map(|n| format!("dictionaries/{n}"))
+        .map(|n| format!("{DICT_PATH_PREFIX}{n}"))
         .collect();
-    names.push(format!("dictionaries/{METADATA_FILE}"));
+    names.push(format!("{DICT_PATH_PREFIX}{METADATA_FILE}"));
 
     let mut results: Vec<(String, Vec<u8>)> = Vec::with_capacity(names.len());
     // Sequential fetch keeps peak memory at one file at a time.

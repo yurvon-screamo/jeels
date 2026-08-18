@@ -209,11 +209,18 @@ mod tests {
         use std::io::Read;
 
         let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        let dict_dir = std::path::PathBuf::from(manifest_dir)
+        let base = std::path::PathBuf::from(manifest_dir)
             .parent()
             .unwrap()
             .join("cdn")
             .join("dictionaries");
+        // Prefer the versioned SudachiDict directory (see deploy_cdn.py).
+        let versioned = base.join("sudachidict-20260723");
+        let dict_dir = if versioned.join("dict.trie").exists() {
+            versioned
+        } else {
+            base
+        };
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);

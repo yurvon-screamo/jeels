@@ -204,25 +204,30 @@ mod tests {
             return;
         }
 
+        let base = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .join("cdn")
+            .join("dictionaries");
+        // Prefer the versioned SudachiDict directory (see deploy_cdn.py);
+        // fall back to a stale build-script output.
         let dict_dir = if let Ok(out_dir) = env::var("OUT_DIR") {
             let out_dict = PathBuf::from(out_dir).join("lindera-unidic");
-            if out_dict.exists() {
+            let versioned = base.join("sudachidict-20260723");
+            if versioned.join("dict.trie").exists() {
+                versioned
+            } else if out_dict.exists() {
                 out_dict
             } else {
-                let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-                PathBuf::from(manifest_dir)
-                    .parent()
-                    .unwrap()
-                    .join("cdn")
-                    .join("dictionaries")
+                base
             }
         } else {
-            let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-            PathBuf::from(manifest_dir)
-                .parent()
-                .unwrap()
-                .join("cdn")
-                .join("dictionaries")
+            let versioned = base.join("sudachidict-20260723");
+            if versioned.join("dict.trie").exists() {
+                versioned
+            } else {
+                base
+            }
         };
 
         let read_file = |name: &str| fs::read(dict_dir.join(name)).unwrap();

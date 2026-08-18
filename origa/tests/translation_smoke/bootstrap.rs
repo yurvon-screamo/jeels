@@ -58,7 +58,16 @@ fn try_load_tokenizer_dictionary() -> bool {
         return true;
     }
 
-    let dict_dir = cdn_path(&["dictionaries"]);
+    // Prefer the versioned SudachiDict directory (see deploy_cdn.py).
+    let versioned = cdn_path(&["dictionaries", "sudachidict-20260723"]);
+    let dict_dir = if ["dict.trie", "dict.words", "metadata.json"]
+        .iter()
+        .all(|n| versioned.join(n).exists())
+    {
+        versioned
+    } else {
+        cdn_path(&["dictionaries"])
+    };
     let exists = |name: &str| dict_dir.join(name).exists();
     let required = [
         "char_def.bin",

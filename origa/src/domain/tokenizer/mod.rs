@@ -444,7 +444,8 @@ mod tests {
             .parent()
             .unwrap()
             .join("cdn")
-            .join("dictionaries");
+            .join("dictionaries")
+            .join("sudachidict-20260723");
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);

@@ -205,7 +205,8 @@ mod tests {
         let vocab =
             VocabularyCard::from_known_word("信ずる", &crate::domain::NativeLanguage::Russian)
                 .expect("card with translation must be constructible");
-        user.create_card(Card::Vocabulary(vocab)).expect("card must be created");
+        user.create_card(Card::Vocabulary(vocab))
+            .expect("card must be created");
         let created_id = *user
             .knowledge_set()
             .study_cards()
