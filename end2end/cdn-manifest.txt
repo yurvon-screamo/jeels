@@ -1,5 +1,3 @@
-# FONTS-END
-# FONTS-START
 dictionaries/JmdictFurigana.txt
 dictionaries/char_def.bin
 dictionaries/dict.da
@@ -905,6 +903,31 @@ well_known_set/migii/n5/migii_n5_6.json
 well_known_set/migii/n5/migii_n5_7.json
 well_known_set/migii/n5/migii_n5_8.json
 well_known_set/migii/n5/migii_n5_9.json
+well_known_set/minna_n2/minna_n2_13.json
+well_known_set/minna_n2/minna_n2_14.json
+well_known_set/minna_n2/minna_n2_15.json
+well_known_set/minna_n2/minna_n2_16.json
+well_known_set/minna_n2/minna_n2_17.json
+well_known_set/minna_n2/minna_n2_18.json
+well_known_set/minna_n2/minna_n2_19.json
+well_known_set/minna_n2/minna_n2_20.json
+well_known_set/minna_n2/minna_n2_21.json
+well_known_set/minna_n2/minna_n2_22.json
+well_known_set/minna_n2/minna_n2_23.json
+well_known_set/minna_n2/minna_n2_24.json
+well_known_set/minna_n2/minna_n2_extra.json
+well_known_set/minna_n3/minna_n3_01.json
+well_known_set/minna_n3/minna_n3_02.json
+well_known_set/minna_n3/minna_n3_03.json
+well_known_set/minna_n3/minna_n3_04.json
+well_known_set/minna_n3/minna_n3_05.json
+well_known_set/minna_n3/minna_n3_06.json
+well_known_set/minna_n3/minna_n3_07.json
+well_known_set/minna_n3/minna_n3_08.json
+well_known_set/minna_n3/minna_n3_09.json
+well_known_set/minna_n3/minna_n3_10.json
+well_known_set/minna_n3/minna_n3_11.json
+well_known_set/minna_n3/minna_n3_12.json
 well_known_set/minna_n4/minna_n4_26.json
 well_known_set/minna_n4/minna_n4_27.json
 well_known_set/minna_n4/minna_n4_28.json
