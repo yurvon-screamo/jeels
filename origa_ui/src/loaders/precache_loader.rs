@@ -240,8 +240,8 @@ mod tests {
     fn base_bundle_includes_dictionaries() {
         let resources = get_base_bundle_resources();
 
-        assert!(resources.contains(&"dictionaries/char_def.bin".to_string()));
-        assert!(resources.contains(&"dictionaries/matrix.mtx".to_string()));
+        assert!(resources.contains(&"dictionaries/sudachidict-20260723/char_def.bin".to_string()));
+        assert!(resources.contains(&"dictionaries/sudachidict-20260723/matrix.mtx".to_string()));
         assert!(resources.contains(&"dictionaries/sudachidict-20260723/dict.trie".to_string()));
         assert!(resources.contains(&"dictionaries/sudachidict-20260723/dict.valsidx".to_string()));
         assert!(resources.contains(&"dictionaries/JmdictFurigana.txt".to_string()));
