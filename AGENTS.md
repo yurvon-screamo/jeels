@@ -90,7 +90,7 @@ cargo fmt --check && cargo fmt
 ## Ключевые зависимости
 
 `rs-fsrs` (FSRS), `ort` + NDLOCR-Lite (OCR), `ort` + `rustfft` (Whisper STT),
-`lindera` + UniDic (токенизация), `serde`/`bincode`/`rkyv` (сериализация),
+`lindera 5` + SudachiDict (токенизация; сборка: `scripts/build_sudachidict.py`), `serde`/`bincode`/`rkyv` (сериализация),
 `rusqlite` (БД), Leptos 0.8 + `leptos_router`/`leptos-use`/`leptos_i18n` (frontend),
 `sha2`/`hmac` (TrailBase auth), `tracing`/`tracing-wasm` (логирование).
 Плагины: opener, tts, deep-link (`origa://`), single-instance, updater, process.
