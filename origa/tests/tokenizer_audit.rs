@@ -5,7 +5,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use origa::domain::{JapaneseChar, PartOfSpeech, tokenize_text};
+use origa::domain::{JapaneseChar, tokenize_text};
 
 #[path = "translation_smoke/bootstrap.rs"]
 mod bootstrap;
@@ -71,7 +71,7 @@ fn audit_well_known_sets_whole_word_rate() {
     let mut no_vocab = 0;
     let mut examples: Vec<String> = Vec::new();
 
-    for (w, _) in &words {
+    for w in words.keys() {
         let Ok(tokens) = tokenize_text(w) else {
             no_vocab += 1;
             continue;

@@ -70,6 +70,11 @@ pub struct DictionaryData {
 
 static SEGMENTER: OnceLock<lindera::segmenter::Segmenter> = OnceLock::new();
 
+/// Read-only access to the segmenter (debug tooling / probes).
+pub fn segmenter_pub() -> Option<&'static lindera::segmenter::Segmenter> {
+    SEGMENTER.get()
+}
+
 pub fn is_dictionary_loaded() -> bool {
     SEGMENTER.get().is_some()
 }
@@ -138,28 +143,15 @@ pub fn init_dictionary(data: DictionaryData) -> Result<(), OrigaError> {
     init_tokenizer_from_dictionary(dictionary)
 }
 
-const USER_DICT_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/user_dictionary.bin"));
-
 fn init_tokenizer_from_dictionary(
     dictionary: lindera_dictionary::dictionary::Dictionary,
 ) -> Result<(), OrigaError> {
-    let user_dictionary = if USER_DICT_BYTES.is_empty() {
-        None
-    } else {
-        Some(
-            lindera_dictionary::dictionary::UserDictionary::load(USER_DICT_BYTES).map_err(|e| {
-                OrigaError::TokenizerError {
-                    reason: format!("Failed to load user dictionary: {}", e),
-                }
-            })?,
-        )
-    };
-
-    let segmenter = lindera::segmenter::Segmenter::new(
-        lindera::mode::Mode::Normal,
-        dictionary,
-        user_dictionary,
-    );
+    // No user dictionary: the extra vocabulary (連体詞 compounds, STT katakana)
+    // is baked into the system lexicon at dictionary-build time — see
+    // scripts/build_sudachidict.py. A runtime user dict kept a second POS
+    // schema in play, which silently broke Token::get for its words.
+    let segmenter =
+        lindera::segmenter::Segmenter::new(lindera::mode::Mode::Normal, dictionary, None);
 
     let _ = SEGMENTER.get_or_init(|| segmenter);
     Ok(())
