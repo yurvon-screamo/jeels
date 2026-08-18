@@ -70,11 +70,6 @@ pub struct DictionaryData {
 
 static SEGMENTER: OnceLock<lindera::segmenter::Segmenter> = OnceLock::new();
 
-/// Read-only access to the segmenter (debug tooling / probes).
-pub fn segmenter_pub() -> Option<&'static lindera::segmenter::Segmenter> {
-    SEGMENTER.get()
-}
-
 pub fn is_dictionary_loaded() -> bool {
     SEGMENTER.get().is_some()
 }
