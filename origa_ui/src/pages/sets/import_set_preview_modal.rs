@@ -1,6 +1,7 @@
 use crate::i18n::{t, use_i18n};
 use crate::pages::sets::set_word_item::SetWordItem;
 use crate::pages::sets::types::PreviewWord;
+use crate::pages::shared::LoadMoreButton;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
     Alert, AlertType, Button, ButtonVariant, Drawer, Spinner, Text, TextSize, ToastData,
@@ -14,6 +15,36 @@ use std::collections::HashMap;
 
 use super::import_set_preview_modal_handlers::create_import_preview_handlers;
 use super::import_set_preview_modal_state::ImportPreviewModalState;
+
+const PREVIEW_PAGE_SIZE: usize = 100;
+
+/// Distributes a global word budget across set groups, keeping each group's
+/// original order. Groups are rendered whole up to the budget; the group that
+/// crosses it is cut off at the remaining slots. An empty input yields no
+/// groups regardless of the budget.
+pub(crate) fn cap_groups(
+    groups: HashMap<String, Vec<PreviewWord>>,
+    limit: usize,
+) -> Vec<(String, Vec<PreviewWord>)> {
+    let mut ids: Vec<String> = groups.keys().cloned().collect();
+    ids.sort();
+    let mut out = Vec::with_capacity(ids.len());
+    let mut remaining = limit;
+    for id in ids {
+        if remaining == 0 {
+            break;
+        }
+        let mut words = groups.get(&id).cloned().unwrap_or_default();
+        if words.len() > remaining {
+            words.truncate(remaining);
+        }
+        remaining = remaining.saturating_sub(words.len());
+        if !words.is_empty() {
+            out.push((id, words));
+        }
+    }
+    out
+}
 
 #[component]
 pub fn ImportSetPreviewModal(
@@ -53,6 +84,14 @@ pub fn ImportSetPreviewModal(
     let state = ImportPreviewModalState::new();
     let handlers = create_import_preview_handlers(state.clone(), is_open, toasts, on_import_result);
 
+    // iOS WKWebView jetsams the process around ~1.5 GB of linear memory.
+    // Rendering every preview word at once (a level multi-select loads
+    // 8000+ items, each a FuriganaText + MarkdownText + Checkbox + Tooltip
+    // subtree) blew past that and killed the page to a black screen. The
+    // preview is therefore paginated; the import itself still covers ALL
+    // words (selected_words is untouched by pagination).
+    let visible_words: RwSignal<usize> = RwSignal::new(PREVIEW_PAGE_SIZE);
+
     let preview_words = state.preview_words;
     let selected_words = state.selected_words;
     let is_loading_preview = state.is_loading_preview;
@@ -66,6 +105,11 @@ pub fn ImportSetPreviewModal(
             groups.entry(word.set_id.clone()).or_default().push(word);
         }
         groups
+    });
+
+    let paginated_groups = Memo::new(move |_| {
+        let groups = grouped_words.get();
+        cap_groups(groups, visible_words.get())
     });
 
     let group_word_counts = Memo::new(move |_| {
@@ -98,6 +142,7 @@ pub fn ImportSetPreviewModal(
         let state = state.clone();
         move |_| {
             if is_open.get() {
+                visible_words.set(PREVIEW_PAGE_SIZE);
                 let ids = set_ids.get();
                 let titles = set_titles.get();
                 if ids.len() == 1 {
@@ -163,6 +208,11 @@ pub fn ImportSetPreviewModal(
                         let titles_map = set_titles.get();
                         let kanji = known_kanji.get();
                         let selected = selected_words;
+                        let shown_count = paginated_groups
+                            .get()
+                            .iter()
+                            .map(|(_, g)| g.len())
+                            .sum::<usize>();
 
                         view! {
                             <div data-testid="sets-drawer-found">
@@ -173,7 +223,8 @@ pub fn ImportSetPreviewModal(
                                 </Text>
                             </div>
                             <div class="space-y-6 overflow-y-auto flex-1 min-h-0">
-                                {groups
+                                {paginated_groups
+                                    .get()
                                     .into_iter()
                                     .map(|(set_id, words)| {
                                         let title = titles_map
@@ -216,6 +267,16 @@ pub fn ImportSetPreviewModal(
                                     })
                                     .collect::<Vec<_>>()}
                             </div>
+                            <Show when=move || shown_count < total_words_count.get()>
+                                <div class="pt-2">
+                                    <LoadMoreButton
+                                        visible_count=visible_words
+                                        total=Signal::derive(move || total_words_count.get())
+                                        page_size=PREVIEW_PAGE_SIZE
+                                        test_id=Signal::derive(|| "sets-drawer-load-more-btn".to_string())
+                                    />
+                                </div>
+                            </Show>
                             <div class="flex gap-2 justify-between pt-4 border-t shrink-0">
                                 <Button
                                     variant=ButtonVariant::Ghost
@@ -247,5 +308,52 @@ pub fn ImportSetPreviewModal(
                 }}
             </div>
         </Drawer>
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn word(set: &str, idx: usize) -> PreviewWord {
+        PreviewWord {
+            word: format!("{set}-{idx}"),
+            meaning: None,
+            is_known: false,
+            set_id: set.to_string(),
+            set_title: set.to_string(),
+        }
+    }
+
+    #[test]
+    fn cap_groups_limits_total_rendered_words() {
+        let mut groups = HashMap::new();
+        groups.insert("b".to_string(), (0..60).map(|i| word("b", i)).collect());
+        groups.insert("a".to_string(), (0..80).map(|i| word("a", i)).collect());
+        let capped = cap_groups(groups, 100);
+        let total: usize = capped.iter().map(|(_, g)| g.len()).sum();
+        assert_eq!(total, 100);
+        // deterministic order: sorted ids first
+        assert_eq!(capped[0].0, "a");
+        assert_eq!(capped[0].1.len(), 80);
+        assert_eq!(capped[1].0, "b");
+        assert_eq!(capped[1].1.len(), 20);
+    }
+
+    #[test]
+    fn cap_groups_zero_budget_renders_nothing() {
+        let mut groups = HashMap::new();
+        groups.insert("a".to_string(), vec![word("a", 0), word("a", 1)]);
+        assert!(cap_groups(groups, 0).is_empty());
+    }
+
+    #[test]
+    fn cap_groups_budget_above_total_keeps_everything() {
+        let mut groups = HashMap::new();
+        groups.insert("a".to_string(), vec![word("a", 0)]);
+        groups.insert("b".to_string(), vec![word("b", 0), word("b", 1)]);
+        let capped = cap_groups(groups, 100);
+        assert_eq!(capped.len(), 2);
+        assert_eq!(capped.iter().map(|(_, g)| g.len()).sum::<usize>(), 3);
     }
 }

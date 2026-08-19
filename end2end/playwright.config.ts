@@ -26,6 +26,15 @@ export default defineConfig({
         trace: "on-first-retry",
         screenshot: "only-on-failure",
         video: "retain-on-failure",
+        // Constrain the renderer memory budget so that desktop CI fails like
+        // an iOS WKWebView instead of silently surviving memory-hungry pages
+        // (jetsam kills the iOS app at ~1.5 GB; the black-screen set-import
+        // crash was invisible on desktop for exactly this reason).
+        // 1 GB c-group-style V8 heap cap: JS heap + WASM linear memory grow
+        // inside this budget, so a page that would OOM a phone OOMs the test.
+        launchOptions: {
+            args: ["--js-flags=--max-old-space-size=1024", "--memory-pressure-off"],
+        },
     },
     projects: [
         {
