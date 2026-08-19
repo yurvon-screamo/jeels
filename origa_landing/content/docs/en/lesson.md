@@ -27,9 +27,7 @@ Origa decides the mix based on what is due, what is new, and what view types are
 
 ## Pace and lesson size
 
-The number of new cards per day is set by the pace in your profile settings — six values from 3 to 30. A lesson is built from the day's new cards and the reviews that have come due, up to 22 cards. How Origa schedules reviews and why the daily limit exists is on a separate page: [How Origa decides what to show you](/docs/fsrs).
-
-**Lessons ran out and you are ready to keep going.** That means the daily quota of new cards is spent and no reviews are due. The next day FSRS will schedule new reviews, and lessons will appear again. If the volume is not enough — raise the pace in your profile or add a set of the next level (see "JLPT progress").
+The number of new cards per day is set by the pace in your profile settings — six values from 3 to 30. A lesson is built from the day's new cards and the reviews that have come due, up to 22 cards. When both new cards and reviews are exhausted, Origa says "No cards to study" — this is not an error or an account limit: tomorrow FSRS will schedule new reviews, and lessons will appear again.
 
 ## Card types
 
