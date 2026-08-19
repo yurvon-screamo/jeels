@@ -7,10 +7,6 @@ use crate::api::types::{
 };
 use origa::domain::OrigaError;
 
-fn create_chat_request(prompt: String) -> ChatRequest {
-    create_chat_request_with_model(prompt, "llm".to_string())
-}
-
 fn create_chat_request_with_model(prompt: String, model: String) -> ChatRequest {
     ChatRequest {
         model,
@@ -181,6 +177,20 @@ pub async fn translate_word(
     to_russian: bool,
     to_english: bool,
 ) -> Result<VocabularyEntry, OrigaError> {
+    translate_word_with_model(word, api_base, api_key, "llm", to_russian, to_english).await
+}
+
+/// Same as [translate_word] with an explicit model name. Qwen-family
+/// thinking models get a `/no_think` prefix so the whole token budget
+/// goes into the JSON answer instead of the reasoning channel.
+pub async fn translate_word_with_model(
+    word: &str,
+    api_base: &str,
+    api_key: &str,
+    model: &str,
+    to_russian: bool,
+    to_english: bool,
+) -> Result<VocabularyEntry, OrigaError> {
     let mut entry = VocabularyEntry {
         russian_translation: None,
         english_translation: None,
@@ -191,9 +201,12 @@ pub async fn translate_word(
         return Ok(entry);
     }
 
-    let prompt = get_translation_prompt(word);
+    let mut prompt = get_translation_prompt(word);
+    if model.starts_with("qwen") {
+        prompt = format!("/no_think {prompt}");
+    }
     let client = reqwest::Client::new();
-    let request = create_chat_request(prompt);
+    let request = create_chat_request_with_model(prompt, model.to_string());
     let response = send_chat_request(&client, api_base, api_key, &request).await?;
 
     let raw = response
