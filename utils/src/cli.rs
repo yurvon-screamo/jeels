@@ -86,6 +86,10 @@ pub enum Commands {
         #[arg(long, default_value = "none")]
         api_key: String,
 
+        /// Model name for the OpenAI-compatible endpoint
+        #[arg(long, default_value = "llm")]
+        model: String,
+
         /// Number of concurrent translation requests
         #[arg(short = 'w', long, default_value = "32")]
         workers: usize,
