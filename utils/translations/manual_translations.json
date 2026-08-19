@@ -1,0 +1,370 @@
+{
+  "あいかわらず": {
+    "ru": "- По-прежнему\n- Как всегда",
+    "en": "- As always\n- As usual"
+  },
+  "いい勉強になる": {
+    "ru": "- Хорошая наука\n- Полезный опыт",
+    "en": "- A good lesson\n- A rewarding experience"
+  },
+  "いけない": {
+    "ru": "- Нельзя\n- Плохой\n- Сломаться (о машине)",
+    "en": "- Must not\n- Wrong\n- Broken (of a machine)"
+  },
+  "うかがう": {
+    "ru": "- Спрашивать\n- Навещать\n- Услышать (от кого-то)",
+    "en": "- To ask\n- To visit\n- To hear (from someone)"
+  },
+  "うなる": {
+    "ru": "- Стонать\n- Рычать\n- Гудеть (о моторе)",
+    "en": "- To groan\n- To roar\n- To hum (of a motor)"
+  },
+  "おいでになる": {
+    "ru": "- Быть, находиться (вежливо)\n- Приходить (вежливо)",
+    "en": "- To be (polite)\n- To come (polite)"
+  },
+  "おさがし": {
+    "ru": "- Поиск (то, что вы ищете — вежливо)",
+    "en": "- Looking for (polite form)"
+  },
+  "おなかがいっぱいです": {
+    "ru": "- Я сыт\n- Живот полон",
+    "en": "- I'm full\n- My stomach is full"
+  },
+  "お帰りなさい": {
+    "ru": "- С возвращением",
+    "en": "- Welcome home"
+  },
+  "かなう": {
+    "ru": "- Сбываться (о мечте)\n- Осуществляться",
+    "en": "- To come true (of a dream)\n- To be realized"
+  },
+  "かまわない": {
+    "ru": "- Не беспокоит\n- Не имеет значения",
+    "en": "- Don't mind\n- It doesn't matter"
+  },
+  "かもしれない": {
+    "ru": "- Может быть\n- Возможно",
+    "en": "- Might be\n- Perhaps"
+  },
+  "かも知れない": {
+    "ru": "- Может быть\n- Возможно",
+    "en": "- Might be\n- Perhaps"
+  },
+  "かわいがる": {
+    "ru": "- Любить\n- Лелеять\n- Баловать",
+    "en": "- To love\n- To cherish\n- To pamper"
+  },
+  "くだらない": {
+    "ru": "- Бессмысленный\n- Пустой\n- Скучный",
+    "en": "- Worthless\n- Trivial\n- Boring"
+  },
+  "こちらこそ": {
+    "ru": "- Взаимно\n- Это я должен (благодарить)",
+    "en": "- Likewise\n- It's I who should (thank you)"
+  },
+  "ごめんなさい": {
+    "ru": "- Извините\n- Прошу прощения",
+    "en": "- I'm sorry\n- Excuse me"
+  },
+  "ごらんになる": {
+    "ru": "- Смотреть, видеть (вежливо)",
+    "en": "- To look, to see (honorific)"
+  },
+  "さようなら": {
+    "ru": "- До свидания\n- Прощайте",
+    "en": "- Goodbye\n- Farewell"
+  },
+  "ざらに": {
+    "ru": "- В изобилии\n- Обычно (не редкость)",
+    "en": "- In abundance\n- Common (not rare)"
+  },
+  "しょうがない": {
+    "ru": "- Ничего не поделаешь\n- Безвыходно",
+    "en": "- It can't be helped\n- There is no other way"
+  },
+  "すまない": {
+    "ru": "- Извини\n- Прости (мужской стиль)",
+    "en": "- Sorry\n- Excuse me (masculine)"
+  },
+  "ずらっと": {
+    "ru": "- В ряд\n- Целой чередой",
+    "en": "- In a row\n- In a line"
+  },
+  "ぜひとも": {
+    "ru": "- Непременно\n- Обязательно",
+    "en": "- By all means\n- Definitely"
+  },
+  "それなり": {
+    "ru": "- Соответственно\n- Сам по себе (неплохо)",
+    "en": "- Accordingly\n- In its own way"
+  },
+  "たまらない": {
+    "ru": "- Невыносимый\n- Ужасно (сильно)",
+    "en": "- Irresistible\n- Unbearably (very)"
+  },
+  "ところが": {
+    "ru": "- Однако\n- Вопреки ожиданиям",
+    "en": "- However\n- Contrary to expectation"
+  },
+  "とんでもない": {
+    "ru": "- Немыслимый\n- Ужасный\n- «Не за что» (ответ на благодарность)",
+    "en": "- Absurd\n- Terrible\n- Not at all (reply to thanks)"
+  },
+  "どちらかと言えば": {
+    "ru": "- Если выбирать\n- Скорее",
+    "en": "- If anything\n- Rather"
+  },
+  "どちらも": {
+    "ru": "- Оба\n- И тот и другой",
+    "en": "- Both\n- Either"
+  },
+  "どなる": {
+    "ru": "- Кричать\n- Орать",
+    "en": "- To shout\n- To yell"
+  },
+  "どのくらい": {
+    "ru": "- Сколько (о количестве)\n- Насколько",
+    "en": "- How much\n- How long"
+  },
+  "なくてはならない": {
+    "ru": "- Должен\n- Необходимо",
+    "en": "- Must\n- Have to"
+  },
+  "なぜなら": {
+    "ru": "- Потому что\n- Так как",
+    "en": "- Because\n- The reason is"
+  },
+  "なんだかんだ": {
+    "ru": "- Так или иначе\n- Всякое разное",
+    "en": "- One way or another\n- This and that"
+  },
+  "なんとなく": {
+    "ru": "- Как-то\n- По какой-то причине\n- Смутно",
+    "en": "- Somehow\n- For some reason\n- Vaguely"
+  },
+  "なんとも": {
+    "ru": "- Никак\n- Неописуемо (с отрицаниями)\n- Ничего (в ответ)",
+    "en": "- In no way\n- Terribly (with negatives)\n- Fine (in response)"
+  },
+  "ばからしい": {
+    "ru": "- Глупый\n- Абсурдный",
+    "en": "- Absurd\n- Ridiculous"
+  },
+  "ひょっとして": {
+    "ru": "- Вдруг\n- А вдруг\n- Может быть",
+    "en": "- Perhaps\n- By any chance"
+  },
+  "まもなく": {
+    "ru": "- Вскоре\n- Скоро",
+    "en": "- Soon\n- Before long"
+  },
+  "みちすがら": {
+    "ru": "- По дороге\n- По пути",
+    "en": "- On the way\n- En route"
+  },
+  "もしかしたら": {
+    "ru": "- Вдруг\n- А вдруг\n- Возможно",
+    "en": "- Perhaps\n- By any chance"
+  },
+  "もったいない": {
+    "ru": "- Расточительный\n- Жалко (тратить)\n- Незаслуженный",
+    "en": "- Wasteful\n- Too good for\n- Undeserved"
+  },
+  "やたらに": {
+    "ru": "- Беспорядочно\n- Ужасно (много)",
+    "en": "- Randomly\n- Excessively"
+  },
+  "やむをえない": {
+    "ru": "- Неизбежный\n- Вынужденный",
+    "en": "- Unavoidable\n- Inevitable"
+  },
+  "よかったら": {
+    "ru": "- Если не против\n- Если хочешь",
+    "en": "- If you like\n- If you don't mind"
+  },
+  "わが社": {
+    "ru": "- Наша компания",
+    "en": "- Our company"
+  },
+  "わずかな": {
+    "ru": "- Незначительный\n- Крошечный",
+    "en": "- Slight\n- Tiny"
+  },
+  "インスタントラーメン": {
+    "ru": "- Лапша быстрого приготовления",
+    "en": "- Instant noodles"
+  },
+  "インスタント食品": {
+    "ru": "- Продукты быстрого приготовления",
+    "en": "- Instant food"
+  },
+  "インタビューする": {
+    "ru": "- Брать интервью\n- Интервьюировать",
+    "en": "- To interview"
+  },
+  "カップラーメン": {
+    "ru": "- Лапша в стакане",
+    "en": "- Cup noodles"
+  },
+  "カップ麺": {
+    "ru": "- Лапша в стакане",
+    "en": "- Cup noodles"
+  },
+  "カルチャーショック": {
+    "ru": "- Культурный шок",
+    "en": "- Culture shock"
+  },
+  "コンピューターシステム": {
+    "ru": "- Компьютерная система",
+    "en": "- Computer system"
+  },
+  "コンピューター室": {
+    "ru": "- Компьютерный класс\n- Компьютерный зал",
+    "en": "- Computer room"
+  },
+  "サービスカウンター": {
+    "ru": "- Сервисная стойка\n- Стойка информации",
+    "en": "- Service counter"
+  },
+  "タウンニュース": {
+    "ru": "- Местные новости (бесплатная районная газета)",
+    "en": "- Town news (free local newspaper)"
+  },
+  "ツナミ": {
+    "ru": "- Цунами",
+    "en": "- Tsunami"
+  },
+  "ビジネスマナー": {
+    "ru": "- Деловой этикет",
+    "en": "- Business etiquette"
+  },
+  "ビタミンC": {
+    "ru": "- Витамин C",
+    "en": "- Vitamin C"
+  },
+  "メンタルトレーニング": {
+    "ru": "- Ментальная тренировка\n- Психологическая подготовка",
+    "en": "- Mental training"
+  },
+  "二の句もつげない": {
+    "ru": "- Не находить слов (в ответ)\n- Потерять дар речи",
+    "en": "- Unable to find words to reply\n- Dumbfounded"
+  },
+  "仕方がない": {
+    "ru": "- Ничего не поделаешь\n- Безвыходно",
+    "en": "- It can't be helped\n- There is no other way"
+  },
+  "何とかなる": {
+    "ru": "- Как-нибудь устроится\n- Обойдётся",
+    "en": "- Things will work out somehow"
+  },
+  "何なり": {
+    "ru": "- Что угодно\n- Любой (вежливо)",
+    "en": "- Anything\n- Whatever (polite)"
+  },
+  "何ひとつない": {
+    "ru": "- Совсем ничего нет",
+    "en": "- Nothing at all"
+  },
+  "何故なら": {
+    "ru": "- Потому что\n- Так как",
+    "en": "- Because\n- The reason is"
+  },
+  "傷だらけ": {
+    "ru": "- Весь в царапинах\n- Весь в ранах",
+    "en": "- Covered in wounds\n- Full of scratches"
+  },
+  "其処ら": {
+    "ru": "- Там\n- Та область\n- Обычный (не редкость)",
+    "en": "- There\n- That area\n- Common"
+  },
+  "厭やらしい": {
+    "ru": "- Неприятный\n- Отталкивающий",
+    "en": "- Unpleasant\n- Disgusting"
+  },
+  "口が悪い": {
+    "ru": "- Грубый на язык\n- Ругается (о манере речи)",
+    "en": "- Foul-mouthed\n- Using coarse language"
+  },
+  "四字熟語": {
+    "ru": "- Четырёхсимвольная идиома",
+    "en": "- Four-character idiom"
+  },
+  "左様なら": {
+    "ru": "- До свидания\n- Прощайте",
+    "en": "- Goodbye\n- Farewell"
+  },
+  "御免なさい": {
+    "ru": "- Извини\n- Прошу прощения",
+    "en": "- I'm sorry\n- Excuse me"
+  },
+  "御覧なさい": {
+    "ru": "- Посмотри\n- Взгляни (вежливо)",
+    "en": "- Look!\n- See! (polite imperative)"
+  },
+  "情けは人のためならず": {
+    "ru": "- Добро к другим вернётся к тебе (пословица)",
+    "en": "- Kindness to others benefits yourself in the end (proverb)"
+  },
+  "案ずるより産むがやすし": {
+    "ru": "- Не так страшен чёрт, как его малюют (пословица)",
+    "en": "- Fear is greater than the danger (proverb)"
+  },
+  "止むを得ない": {
+    "ru": "- Неизбежный\n- Вынужденный",
+    "en": "- Unavoidable\n- Inevitable"
+  },
+  "気がない": {
+    "ru": "- Не интересоваться\n- Не хотеть",
+    "en": "- To have no interest\n- To not feel like"
+  },
+  "気が合う": {
+    "ru": "- Быть в ладу\n- Совпадать по характеру",
+    "en": "- To get along well\n- To be congenial"
+  },
+  "気が置けない": {
+    "ru": "- Простой в общении (без формальностей)",
+    "en": "- Unpretentious\n- Easy to be with"
+  },
+  "然しながら": {
+    "ru": "- Однако\n- Тем не менее",
+    "en": "- However\n- Nevertheless"
+  },
+  "猿も木から落ちる": {
+    "ru": "- И на старуху бывает проруха (пословица)",
+    "en": "- Even monkeys fall from trees (proverb)"
+  },
+  "申し訳ない": {
+    "ru": "- Извиняюсь\n- Прошу прощения",
+    "en": "- I'm sorry\n- I apologize"
+  },
+  "目が覚める": {
+    "ru": "- Просыпаться\n- Прозревать (понимать)",
+    "en": "- To wake up\n- To come to one's senses"
+  },
+  "知る由もない": {
+    "ru": "- Никак не мог узнать\n- Невозможно знать",
+    "en": "- To have no way of knowing"
+  },
+  "糸目をつけない": {
+    "ru": "- Не жалеть денег\n- Не считаться с расходами",
+    "en": "- To spare no expense"
+  },
+  "腹が立つ": {
+    "ru": "- Злиться\n- Раздражаться",
+    "en": "- To get angry\n- To be irritated"
+  },
+  "行ってらっしゃい": {
+    "ru": "- Счастливого пути (уходящему)",
+    "en": "- Take care\n- See you (to someone leaving)"
+  },
+  "負けるが勝ち": {
+    "ru": "- Уступить — значит победить (пословица)",
+    "en": "- Losing is winning (proverb)"
+  },
+  "頭が痛い": {
+    "ru": "- Голова болит\n- Головная боль (и о проблеме)",
+    "en": "- To have a headache\n- A vexing problem"
+  }
+}

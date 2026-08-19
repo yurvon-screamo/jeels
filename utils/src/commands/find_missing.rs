@@ -1,5 +1,5 @@
 use crate::api::VocabularyEntry;
-use crate::api::translate_word;
+use crate::api::translate_word_with_model;
 use crate::dictionary::load_dictionary;
 use crate::utils::{collect_json_files, get_base_path};
 use origa::domain::OrigaError;
@@ -142,6 +142,7 @@ async fn translate_words_chunk(
     chunk: &[String],
     api_base: &str,
     api_key: &str,
+    model: &str,
     to_russian: bool,
     to_english: bool,
     results: Arc<Mutex<HashMap<String, VocabularyEntry>>>,
@@ -153,9 +154,13 @@ async fn translate_words_chunk(
         let results = Arc::clone(&results);
         let api_base = api_base.to_string();
         let api_key = api_key.to_string();
+        let model = model.to_string();
 
         let handle = tokio::spawn(async move {
-            let entry = translate_word(&word, &api_base, &api_key, to_russian, to_english).await;
+            let entry = translate_word_with_model(
+                &word, &api_base, &api_key, &model, to_russian, to_english,
+            )
+            .await;
             match entry {
                 Ok(entry) => {
                     if entry.russian_translation.is_none() && entry.english_translation.is_none() {
@@ -183,6 +188,7 @@ async fn generate_missing_vocabulary(
     missing: &HashMap<String, Vec<String>>,
     api_base: &str,
     api_key: &str,
+    model: &str,
     workers: usize,
     russian_only: bool,
     english_only: bool,
@@ -200,6 +206,7 @@ async fn generate_missing_vocabulary(
             chunk,
             api_base,
             api_key,
+            model,
             to_russian,
             to_english,
             Arc::clone(&results),
@@ -260,6 +267,7 @@ pub async fn run_find_missing(
     generate: bool,
     api_base: String,
     api_key: String,
+    model: String,
     workers: usize,
     _chunk_size: usize,
     russian_only: bool,
@@ -288,6 +296,7 @@ pub async fn run_find_missing(
             &missing,
             &api_base,
             &api_key,
+            &model,
             workers,
             russian_only,
             english_only,

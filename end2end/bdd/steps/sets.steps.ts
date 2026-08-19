@@ -146,3 +146,54 @@ Then('отображается больше наборов', async ({ page }) =>
     const setsPage = new SetsPage(page);
     expect(await setsPage.getSetCardCount()).toBeGreaterThan(0);
 });
+
+
+// --- Пагинация предпросмотра импорта (iOS OOM regression) ---
+// Rendering every preview word at once (level multi-select loads 8000+
+// items) blew the WKWebView jetsam limit and killed the page to a black
+// screen; the drawer paginates the preview instead.
+
+When('выбирает все наборы уровня', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.selectAllSets();
+});
+
+When('нажимает кнопку импорта выбранных', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.importSelectedBtn.click();
+});
+
+Then('открывается окно предпросмотра со словами', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.drawer).toBeVisible({ timeout: 30_000 });
+    await expect(setsPage.drawerWordItems.first()).toBeVisible({ timeout: 60_000 });
+});
+
+Then('количество отображённых слов ограничено пагинацией', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    const count = await setsPage.drawerWordItems.count();
+    // PREVIEW_PAGE_SIZE (100) plus a slack for the load-more click below
+    expect(count).toBeLessThanOrEqual(150);
+});
+
+Then('кнопка загрузки ещё слов предпросмотра отображается', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await expect(setsPage.drawerLoadMoreBtn).toBeVisible({ timeout: 30_000 });
+});
+
+When('нажимает кнопку загрузки ещё слов предпросмотра', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.drawerLoadMoreBtn.click();
+});
+
+Then('отображается больше слов предпросмотра', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    const count = await setsPage.drawerWordItems.count();
+    expect(count).toBeGreaterThan(100);
+});
+
+When('отменяет предпросмотр', async ({ page }) => {
+    const setsPage = new SetsPage(page);
+    await setsPage.drawerCancelBtn.click();
+    await expect(setsPage.drawer).not.toBeVisible({ timeout: 30_000 });
+});
