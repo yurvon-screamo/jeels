@@ -36,6 +36,7 @@ export class SetsPage extends BasePage {
     readonly drawerImportBtn: Locator;
     readonly drawerCancelBtn: Locator;
     readonly drawerWordItems: Locator;
+    readonly drawerLoadMoreBtn: Locator;
     readonly toastSuccess: Locator;
 
     // Pagination
@@ -78,6 +79,7 @@ export class SetsPage extends BasePage {
         this.drawerImportBtn = page.getByTestId("sets-drawer-import-btn");
         this.drawerCancelBtn = page.getByTestId("sets-drawer-cancel-btn");
         this.drawerWordItems = this.drawer.getByTestId("sets-drawer-item");
+        this.drawerLoadMoreBtn = this.drawer.getByTestId("sets-drawer-load-more-btn");
         // Import success toast. Rendered at page level (outside the drawer),
         // so it must be visible right after the drawer closes. Toast items
         // carry the data-testid="toast-<id>" pattern (ui_components/toast.rs).
@@ -210,6 +212,16 @@ export class SetsPage extends BasePage {
     async selectSetCheckbox(index: number): Promise<void> {
         const card = this.page.getByTestId("sets-card-item").nth(index);
         await card.locator("label.checkbox-container").click();
+    }
+
+    async selectAllSets(): Promise<void> {
+        const boxes = this.page.locator(
+            '[data-testid="sets-card-item"] label.checkbox-container',
+        );
+        const count = await boxes.count();
+        for (let i = 0; i < count; i++) {
+            await boxes.nth(i).click({ timeout: 10_000 });
+        }
     }
 
     async cancelSelection(): Promise<void> {
