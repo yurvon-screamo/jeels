@@ -25,6 +25,12 @@ Each lesson pulls three kinds of cards:
 
 Origa decides the mix based on what is due, what is new, and what view types are available for each piece of content. If nothing is due and no new cards are available, the lesson is empty.
 
+## Pace and lesson size
+
+The number of new cards per day is set by the pace in your profile settings — six values from 3 to 30. A lesson is built from the day's new cards and the reviews that have come due, up to 22 cards. How Origa schedules reviews and why the daily limit exists is on a separate page: [How Origa decides what to show you](/docs/fsrs).
+
+**Lessons ran out and you are ready to keep going.** That means the daily quota of new cards is spent and no reviews are due. The next day FSRS will schedule new reviews, and lessons will appear again. If the volume is not enough — raise the pace in your profile or add a set of the next level (see "JLPT progress").
+
 ## Card types
 
 You will meet several shapes during a lesson:
@@ -55,7 +61,7 @@ You can start another lesson immediately, or return to the dashboard. The dashbo
 
 ## JLPT progress
 
-Every card is tagged with a JLPT level (N5 through N1). As you learn and retain cards at a level, your JLPT progress for that level rises. The dashboard reflects this so you can see where you stand.
+Every card is tagged with a JLPT level (N5 through N1). Origa shows the lowest JLPT level in which you still have gaps. New cards are issued in ascending level order (N5 → N1) the same way for everyone — the app does not diagnose "where exactly your holes are". The level indicator reflects your material, not its route. As you learn and retain cards at a level, your JLPT progress for that level rises. The dashboard reflects this so you can see where you stand.
 
 JLPT progress is an internal estimate based on the cards you have studied. It is not an official JLPT score.
 

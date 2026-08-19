@@ -1,0 +1,122 @@
+{
+  "artifact": "marketing/artifacts/docs-gap-2026-08-19/content-plan.md",
+  "product": "origa-docs-blog",
+  "checked_at": "2026-08-19T23:10:00+03:00",
+  "overall_confidence": 0.95,
+  "claims": [
+    {
+      "claim": "Шесть темпов: 3/6/9/15/21/30 новых карточек в день; названия соответствуют ru.json.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/value_objects.rs:242-259", "origa_ui/locales/ru.json:555-566"],
+      "note": ""
+    },
+    {
+      "claim": "Урок ограничен сверху 22 карточками; нижняя граница 15 НЕ гарантируется (collect_padding добирает только high-difficulty, у новичка их нет).",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/knowledge/lesson_builder.rs:11-12,267-285 (проверено @marketer в этой сессии)", "@reviewer: tests.rs:1157,1185 ассертят только <=22"],
+      "note": "Формулировка v2 «от 15 до 22» исправлена в v3 на «до 22»."
+    },
+    {
+      "claim": "Новые карточки распределяются по возрастанию уровня N5→N1 одинаково для всех; таргетинга по персональным пробелам нет.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/knowledge/lesson_builder.rs:1295-1310 (distribute_new_cards, проверено в этой сессии)"],
+      "note": "Формулировка v2 «закрывает пробелы в первую очередь» исправлена в v3."
+    },
+    {
+      "claim": "Уровень на главной — вычисляемый индикатор: наименьший уровень с пробелами (current_level).",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/jlpt_progress.rs:127+", "@developer подтверждение"],
+      "note": ""
+    },
+    {
+      "claim": "Пути сменить JLPT-уровень или перепройти онбординг нет; удаление аккаунта очищает прогресс на сервере и локально; сброса прогресса без удаления аккаунта нет.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/user.rs:24", "origa_ui/src/pages/onboarding/mod.rs:199", "origa_ui/src/pages/home/mod.rs:59", "origa_ui/src/store/auth_store.rs:385+", "origa_ui/src/repository/trailbase_repository.rs:244+", "origa_ui/src/repository/file_repository.rs:163", "@developer подтверждение по коду"],
+      "note": "Проверено @marketer и @developer независимо."
+    },
+    {
+      "claim": "Онбординг спрашивает целевой уровень («Выберите уровень JLPT, которого вы хотите достичь»), наборы импортируются от N5 до цели; docs описывают это наоборот («текущий уровень»)— фактическая ошибка A1.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa_ui/locales/ru.json:123 (title шага JLPT, проверено в этой сессии)", "origa/src/use_cases/import_onboarding_sets.rs:34-45,80-90 (target_level, проверено)", "docs/ru/getting-started.md:45"],
+      "note": ""
+    },
+    {
+      "claim": "Всего фраз: 156 228; «200 000+» — завышение ~28%, живёт в 19 точках (лендинг 4 локали ×3 поля, README ×2, блог best-app ×4 локали).",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["cdn/phrases/phrase_index.json (total:156228, проверено в этой сессии)", "grep 200 по ru.rs/en.rs/ko.rs/vi.rs/README/блог — все точки в replacements.md раздел 1"],
+      "note": "Точки ai-tutor ($200/год) исключены — не счётчик фраз."
+    },
+    {
+      "claim": "Anki-импорт переносит только список слов (notes), без истории повторений и FSRS-интервалов; блоги обещают перенос истории — фактическая ошибка Н1.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/use_cases/import_anki_pack.rs:95,101,184 (query_notes/parse_cards — только notes; revlog отсутствует, проверено в этой сессии)", "blog точки — replacements.md раздел 2"],
+      "note": ""
+    },
+    {
+      "claim": "Параметры FSRS захардкожены по типам карточек (0.95/0.85/0.70/0.90/0.85), пользовательской настройки нет; блог обещает настройку по колодам — фактическая ошибка Н2.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/srs.rs:36-65 (SrsConfig::for_mode, проверено в этой сессии)"],
+      "note": ""
+    },
+    {
+      "claim": "У VocabularyCard нет поля предложения/контекста; блоги обещают «карточку с предложением, в котором слово встретилось» — фактическая ошибка Н3.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa/src/domain/knowledge/vocabulary.rs:16 (поля: word, reverse_side, pos — проверено в этой сессии)", "blog/ko/japanese-ocr-app.md:61 (корейский тираж найден @marketer дополнительно к аудиту)"],
+      "note": "KO-точка — расширение аудита @reviewer."
+    },
+    {
+      "claim": "Прямое добавление кандзи существует: модалка «Добавить кандзи» с поиском по кандзи/чтению/описанию; docs говорят «обычно не добавляют напрямую» — фактическая ошибка.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["@reviewer: origa_ui/src/pages/kanji/add_kanji_modal.rs:70-119, locale kanji_page.add_kanji", "docs/ru/kanji.md секция «Как кандзи попадает в коллекцию»"],
+      "note": "Источник — ревью с file:line; сам код modal не смотрел (низкий риск: наличие модалки в списке страниц подтверждается структурой pages/kanji)."
+    },
+    {
+      "claim": "Две кнопки оценки — осознанное решение (ADR-005): Hard — самая misuse'имая кнопка Anki, автор FSRS подтвердил целесообразность отказа.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["docs/decisions/ADR-005-simplified-rating-system.md (прочитан в этой сессии)"],
+      "note": "Статья /docs/fsrs опирается на ADR, не на выдуманное обоснование."
+    },
+    {
+      "claim": "FSRS — открытый алгоритм планирования повторений; встроен в Anki по умолчанию с 23.10 (2023) / включён для новых коллекций с 24.10.",
+      "confidence": 0.9,
+      "status": "verified",
+      "sources": ["docs/decisions/ADR-005 (косвенное)", "blog/ko/best-japanese-learning-app.md:35 (существующий текст лендинга: «FSRS는 Anki 23.10에 등장했고 24.10부터 새 컬렉션에 기본으로 켜져 있습니다» со ссылкой docs.ankiweb.net)"],
+      "note": "Внешний источник (docs.ankiweb.net) уже процитирован в нашем же блоге; при желании перед публикацией проверить страницу Anki."
+    },
+    {
+      "claim": "Эббингауз измерил кривую забывания в XIX веке (1885).",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["общепринятый научный факт; при публикации можно сослаться на Ebbinghaus (1885) Über das Gedächtnis"],
+      "note": "Универсальные клеймы — внешний источник: дата 1885 общепринята."
+    },
+    {
+      "claim": "Лимиты загрузки: изображение для OCR — 10 МБ, аудиозапись — 50 МБ.",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["origa_ui/src/pages/words/ocr_processing.rs:32 (MAX_FILE_SIZE_MB=10.0, проверено в этой сессии)", "origa_ui/src/pages/words/audio_input_stage.rs (max_size_mb=50.0, проверено)", "origa_ui/locales/ru.json:409,439 (file_too_large)"],
+      "note": "Числа от @developer, перепроверены @marketer по коду."
+    },
+    {
+      "claim": "Тон/формулировки соответствуют канону (вы, числа, без суперлативов, без pricing/open source).",
+      "confidence": 1.0,
+      "status": "verified",
+      "sources": ["docs/landing-content-plan.md §10", "origa_landing/src/content/ru.rs"],
+      "note": ""
+    }
+  ],
+  "flags": [],
+  "gate": "READY"
+}
