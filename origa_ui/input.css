@@ -338,6 +338,9 @@ input[type="submit"],
     background: var(--bg-paper);
     border: 1px solid var(--border-dark);
     position: relative;
+    /* Allow vertical touch-scroll to pass through to the scroll container
+       rather than being captured by the card surface on mobile. */
+    touch-action: pan-y;
 }
 
 .border-none {
@@ -1962,7 +1965,9 @@ rt {
 
 .token-popup {
     position: absolute;
-    left: 0;
+    /* Center under the token; JS adjusts --token-popup-shift to keep popup
+       within the viewport on mobile. */
+    left: 50%;
     top: 100%;
     min-width: 280px;
     max-width: min(360px, calc(100vw - 32px));
@@ -1970,7 +1975,8 @@ rt {
     margin-top: 8px;
     background: var(--bg-paper);
     border: 1px solid var(--border-dark);
-    z-index: 50;
+    z-index: 100;
+    transform: translateX(calc(-50% + var(--token-popup-shift, 0px)));
 }
 
 .token-popup::after {
@@ -2090,6 +2096,16 @@ rt {
     overflow: hidden;
 }
 
+/* On mobile, narrow the writing section (including its border-top line)
+   so the practice area doesn't stretch edge-to-edge of the card. */
+@media (max-width: 639px) {
+    .kanji-writing-section {
+        width: 92%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
 .sets-page {
     padding: 24px 0;
 }
@@ -2105,6 +2121,19 @@ rt {
     overflow-wrap: break-word;
     word-break: break-word;
     min-width: 0;
+}
+
+/* Quiz option texts: Chromium's emergency break (word-break: break-word)
+   ignores kinsoku (UAX #14 LB13), letting a wrapped line start with "," ";"
+   "!" "、". The .markdown-no-break span (emitted by glue_trailing_punctuation)
+   glues a word char to its trailing punctuation; the explicit resets are
+   required because the parent's eager breakers are inherited and would
+   re-enable breaking inside the span. Verified: leading-punct cases
+   13 → 0, overflow 0 → 0 (Playwright matrix, widths 100–200px). */
+.markdown-text .markdown-no-break {
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
 }
 
 .markdown-text h1,

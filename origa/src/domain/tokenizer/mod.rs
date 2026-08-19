@@ -59,7 +59,8 @@ impl TokenInfo {
 pub struct DictionaryData {
     pub char_def: Vec<u8>,
     pub matrix: Vec<u8>,
-    pub dict_da: Vec<u8>,
+    pub dict_trie: Vec<u8>,
+    pub dict_vals_idx: Vec<u8>,
     pub dict_vals: Vec<u8>,
     pub unk: Vec<u8>,
     pub words_idx: Vec<u8>,
@@ -67,52 +68,18 @@ pub struct DictionaryData {
     pub metadata: Vec<u8>,
 }
 
-static TOKENIZER: OnceLock<lindera::tokenizer::Tokenizer> = OnceLock::new();
+static SEGMENTER: OnceLock<lindera::segmenter::Segmenter> = OnceLock::new();
 
-/// Pre-built lindera dictionary components for rkyv serialization.
-///
-/// Instead of caching raw `DictionaryData` bytes (~204 MB of decompressed
-/// lindera-format files) and re-running `load()` on every cache hit, we cache
-/// the already-parsed lindera structures. This eliminates:
-/// - `ConnectionCostMatrix::load` CPU work (byte→i16 conversion + transpose)
-/// - `CharacterDefinition::load` rkyv deserialization
-/// - `UnknownDictionary::load` rkyv deserialization
-///
-/// `PrefixDictionary.da` still needs `DoubleArrayAhoCorasick::deserialize`
-/// at access time (the rkyv `DoubleArrayArchiver` stores raw bytes and
-/// reconstructs the automaton on deserialize), but this is unavoidable.
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
-pub struct CachedLinderaDictionary {
-    pub connection_cost_matrix:
-        lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix,
-    pub character_definition:
-        lindera_dictionary::dictionary::character_definition::CharacterDefinition,
-    pub unknown_dictionary: lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary,
-    pub prefix_dictionary: lindera_dictionary::dictionary::prefix_dictionary::PrefixDictionary,
-    pub metadata: lindera_dictionary::dictionary::metadata::Metadata,
+pub fn is_dictionary_loaded() -> bool {
+    SEGMENTER.get().is_some()
 }
 
-/// Serialize a CachedLinderaDictionary to rkyv bytes for Cache API storage.
-pub fn serialize_cached_lindera_to_rkyv(
-    cached: &CachedLinderaDictionary,
-) -> Result<Vec<u8>, OrigaError> {
-    rkyv::to_bytes::<rkyv::rancor::Error>(cached)
-        .map_err(|e| OrigaError::TokenizerError {
-            reason: format!("Failed to serialize cached lindera dictionary: {}", e),
-        })
-        .map(|bytes| bytes.to_vec())
-}
-
-/// Build `CachedLinderaDictionary` from raw `DictionaryData` (consumed).
-///
-/// Runs lindera `load()` on each component to produce the final structures.
-/// DictionaryData fields are moved into lindera (via `impl Into<Data>`) or
-/// borrowed temporarily (for `&[u8]` loads) — no ~204 MB clone.
-pub fn build_cached_lindera(data: DictionaryData) -> Result<CachedLinderaDictionary, OrigaError> {
+pub fn init_dictionary(data: DictionaryData) -> Result<(), OrigaError> {
     let DictionaryData {
         char_def,
         matrix,
-        dict_da,
+        dict_trie,
+        dict_vals_idx,
         dict_vals,
         unk,
         words_idx,
@@ -123,14 +90,21 @@ pub fn build_cached_lindera(data: DictionaryData) -> Result<CachedLinderaDiction
     let metadata =
         lindera_dictionary::dictionary::metadata::Metadata::load(&metadata).map_err(|e| {
             OrigaError::TokenizerError {
-                reason: format!("Failed to load metadata: {}", e),
+                reason: format!("Failed to load metadata: {e}"),
             }
         })?;
 
     let prefix_dictionary =
         lindera_dictionary::dictionary::prefix_dictionary::PrefixDictionary::load(
-            dict_da, dict_vals, words_idx, words, true,
-        );
+            dict_trie,
+            dict_vals_idx,
+            dict_vals,
+            words_idx,
+            words,
+        )
+        .map_err(|e| OrigaError::TokenizerError {
+            reason: format!("Failed to load prefix dictionary: {e}"),
+        })?;
 
     let connection_cost_matrix =
         lindera_dictionary::dictionary::connection_cost_matrix::ConnectionCostMatrix::load(matrix);
@@ -138,89 +112,43 @@ pub fn build_cached_lindera(data: DictionaryData) -> Result<CachedLinderaDiction
     let character_definition =
         lindera_dictionary::dictionary::character_definition::CharacterDefinition::load(&char_def)
             .map_err(|e| OrigaError::TokenizerError {
-                reason: format!("Failed to load character definition: {}", e),
+                reason: format!("Failed to load character definition: {e}"),
             })?;
 
     let unknown_dictionary =
         lindera_dictionary::dictionary::unknown_dictionary::UnknownDictionary::load(&unk).map_err(
             |e| OrigaError::TokenizerError {
-                reason: format!("Failed to load unknown dictionary: {}", e),
+                reason: format!("Failed to load unknown dictionary: {e}"),
             },
         )?;
 
-    Ok(CachedLinderaDictionary {
-        connection_cost_matrix,
-        character_definition,
-        unknown_dictionary,
-        prefix_dictionary,
-        metadata,
-    })
-}
-
-/// Build a lindera `Tokenizer` from cached rkyv bytes (fast path).
-///
-/// Skips all `load()` calls — the structures are already deserialized.
-/// Only `DoubleArrayAhoCorasick::deserialize` runs for PrefixDictionary.da.
-pub fn init_tokenizer_from_rkyv_cached(bytes: &[u8]) -> Result<(), OrigaError> {
-    let cached: CachedLinderaDictionary =
-        rkyv::from_bytes::<CachedLinderaDictionary, rkyv::rancor::Error>(bytes).map_err(|e| {
-            OrigaError::TokenizerError {
-                reason: format!("Failed to deserialize cached lindera dictionary: {}", e),
-            }
+    let connection_cost_matrix =
+        connection_cost_matrix.map_err(|e| OrigaError::TokenizerError {
+            reason: format!("Failed to load connection cost matrix: {e}"),
         })?;
 
-    init_tokenizer_from_cached(cached)
-}
-
-/// Build a `Tokenizer` from already-constructed `CachedLinderaDictionary`
-/// components (cache hit or freshly built from DictionaryData).
-pub fn init_tokenizer_from_cached(cached: CachedLinderaDictionary) -> Result<(), OrigaError> {
     let dictionary = lindera_dictionary::dictionary::Dictionary {
-        prefix_dictionary: cached.prefix_dictionary,
-        connection_cost_matrix: cached.connection_cost_matrix,
-        character_definition: cached.character_definition,
-        unknown_dictionary: cached.unknown_dictionary,
-        metadata: cached.metadata,
+        prefix_dictionary: std::sync::Arc::new(prefix_dictionary),
+        connection_cost_matrix: std::sync::Arc::new(connection_cost_matrix),
+        character_definition: std::sync::Arc::new(character_definition),
+        unknown_dictionary: std::sync::Arc::new(unknown_dictionary),
+        metadata: std::sync::Arc::new(metadata),
     };
 
     init_tokenizer_from_dictionary(dictionary)
 }
 
-pub fn is_dictionary_loaded() -> bool {
-    TOKENIZER.get().is_some()
-}
-
-pub fn init_dictionary(data: DictionaryData) -> Result<(), OrigaError> {
-    let cached = build_cached_lindera(data)?;
-    init_tokenizer_from_cached(cached)
-}
-
-const USER_DICT_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/user_dictionary.bin"));
-
 fn init_tokenizer_from_dictionary(
     dictionary: lindera_dictionary::dictionary::Dictionary,
 ) -> Result<(), OrigaError> {
-    let user_dictionary = if USER_DICT_BYTES.is_empty() {
-        None
-    } else {
-        Some(
-            lindera_dictionary::dictionary::UserDictionary::load(USER_DICT_BYTES).map_err(|e| {
-                OrigaError::TokenizerError {
-                    reason: format!("Failed to load user dictionary: {}", e),
-                }
-            })?,
-        )
-    };
+    // No user dictionary: the extra vocabulary (連体詞 compounds, STT katakana)
+    // is baked into the system lexicon at dictionary-build time — see
+    // scripts/build_sudachidict.py. A runtime user dict kept a second POS
+    // schema in play, which silently broke Token::get for its words.
+    let segmenter =
+        lindera::segmenter::Segmenter::new(lindera::mode::Mode::Normal, dictionary, None);
 
-    let segmenter = lindera::segmenter::Segmenter::new(
-        lindera::mode::Mode::Normal,
-        dictionary,
-        user_dictionary,
-    );
-
-    let tokenizer = lindera::tokenizer::Tokenizer::new(segmenter);
-
-    let _ = TOKENIZER.get_or_init(|| tokenizer);
+    let _ = SEGMENTER.get_or_init(|| segmenter);
     Ok(())
 }
 
@@ -262,14 +190,15 @@ fn flush_segment(
     result: &mut Vec<TokenInfo>,
 ) -> Result<(), OrigaError> {
     if is_japanese {
-        let tokenizer = TOKENIZER.get().ok_or(OrigaError::TokenizerError {
+        let segmenter = SEGMENTER.get().ok_or(OrigaError::TokenizerError {
             reason: "Dictionary not loaded. Call init_dictionary() first.".to_string(),
         })?;
-        let mut tokens = tokenizer
-            .tokenize(segment)
-            .map_err(|e| OrigaError::TokenizerError {
-                reason: e.to_string(),
-            })?;
+        let mut tokens =
+            segmenter
+                .segment(segment.into())
+                .map_err(|e| OrigaError::TokenizerError {
+                    reason: e.to_string(),
+                })?;
         for token in tokens.iter_mut() {
             result.push(token_to_token_info(token));
         }
@@ -280,79 +209,40 @@ fn flush_segment(
     Ok(())
 }
 
+/// Convert a lindera `Token` (SudachiDict schema) into our `TokenInfo`.
+///
+/// Field mapping — SudachiDict exposes a different schema than UniDic:
+/// - `orthographic_base_form` ← `normalized_form` (dictionary/lemma form,
+///   e.g. たべます→食べる); falls back to the surface when the field is
+///   missing or `*` (unknown words, user-dict tokens).
+/// - `phonological_base_form` / `phonological_surface_form` ← `reading`
+///   (katakana). Unknown kanji tokens have no reading — keep the
+///   kanji-free fallback for them.
+/// - `orthographic_surface_form` ← the token surface itself.
 fn token_to_token_info(token: &mut lindera::token::Token) -> TokenInfo {
-    use crate::domain::JapaneseText;
-
     let surface = token.surface.to_string();
 
-    let lexeme_raw = token.get("lexeme").unwrap_or_default().to_string();
-    let lexeme_stripped: &str = if let Some((japanese, _english)) = lexeme_raw.split_once('-') {
-        japanese
-    } else {
-        &lexeme_raw
-    };
-
-    let orth_base_raw = token
-        .get("orthographic_base_form")
-        .unwrap_or_default()
-        .to_string();
-
-    let orthographic_base_form = if orth_base_raw == "*" || orth_base_raw.is_empty() {
-        surface.clone()
-    } else if lexeme_stripped.contains_kanji() && !orth_base_raw.contains_kanji() {
-        lexeme_stripped.to_string()
-    } else {
-        orth_base_raw
-    };
-
-    let orth_surface_raw = token
-        .get("orthographic_surface_form")
-        .unwrap_or_default()
-        .to_string();
-    let orthographic_surface_form = if orth_surface_raw == "*" || orth_surface_raw.is_empty() {
+    let normalized_raw = token.get("normalized_form").unwrap_or_default().to_string();
+    let orthographic_base_form = if normalized_raw == "*" || normalized_raw.is_empty() {
         surface.clone()
     } else {
-        orth_surface_raw
+        normalized_raw
     };
 
-    let phon_base_raw = token
-        .get("phonological_base_form")
-        .unwrap_or_default()
-        .to_string();
+    let orthographic_surface_form = surface.clone();
 
     let reading_raw = token.get("reading").unwrap_or_default().to_string();
-
-    let is_user_dict = !token.word_id.is_system() && !token.word_id.is_unknown();
+    let phonological_base_form = if reading_raw != "*" && !reading_raw.is_empty() {
+        reading_raw.clone()
+    } else {
+        reading_fallback_for_surface(&surface)
+    };
+    let phonological_surface_form = phonological_base_form.clone();
 
     let pos_sub1 = token
         .get("part_of_speech_subcategory_1")
         .unwrap_or_default()
         .to_string();
-
-    let user_dict_reading = is_user_dict
-        && pos_sub1 != "*"
-        && !pos_sub1.is_empty()
-        && pos_sub1.chars().all(|c| c.is_katakana() || c == 'ー');
-
-    let phonological_base_form = if phon_base_raw != "*" && !phon_base_raw.is_empty() {
-        phon_base_raw
-    } else if reading_raw != "*" && !reading_raw.is_empty() {
-        reading_raw
-    } else if user_dict_reading {
-        pos_sub1.clone()
-    } else {
-        reading_fallback_for_surface(&surface)
-    };
-
-    let phon_surface_raw = token
-        .get("phonological_surface_form")
-        .unwrap_or_default()
-        .to_string();
-    let phonological_surface_form = if phon_surface_raw != "*" && !phon_surface_raw.is_empty() {
-        phon_surface_raw
-    } else {
-        phonological_base_form.clone()
-    };
 
     let mut part_of_speech: PartOfSpeech = token
         .get("part_of_speech")
@@ -365,6 +255,17 @@ fn token_to_token_info(token: &mut lindera::token::Token) -> TokenInfo {
     }
 
     if surface == "*" || surface == "×" || surface == "•" {
+        part_of_speech = PartOfSpeech::Symbol;
+    }
+
+    // SudachiDict sometimes merges punctuation runs (！？。) into a single
+    // 名詞 token. A surface without any kana or kanji cannot be a vocabulary
+    // word — force it to Symbol so downstream card analysis drops it.
+    if part_of_speech.is_vocabulary_word()
+        && !surface
+            .chars()
+            .any(|c| c.is_hiragana() || c.is_katakana() || c.is_kanji())
+    {
         part_of_speech = PartOfSpeech::Symbol;
     }
 
@@ -533,48 +434,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn rkyv_cached_lindera_round_trip() {
-        // Build CachedLinderaDictionary from real dictionary data.
-        let data = create_test_dictionary_data();
-        let cached = build_cached_lindera(data).expect("build_cached_lindera should succeed");
-
-        // Serialize to rkyv.
-        let bytes = serialize_cached_lindera_to_rkyv(&cached)
-            .expect("serialize_cached_lindera_to_rkyv should succeed");
-        assert!(!bytes.is_empty());
-
-        // Deserialize back.
-        let restored: CachedLinderaDictionary =
-            rkyv::from_bytes::<CachedLinderaDictionary, rkyv::rancor::Error>(&bytes)
-                .expect("rkyv from_bytes should succeed");
-
-        // Verify ConnectionCostMatrix survived round-trip.
-        assert_eq!(
-            restored.connection_cost_matrix.forward_size,
-            cached.connection_cost_matrix.forward_size,
-        );
-        assert_eq!(
-            restored.connection_cost_matrix.backward_size,
-            cached.connection_cost_matrix.backward_size,
-        );
-        assert_eq!(
-            restored.connection_cost_matrix.costs_data.len(),
-            cached.connection_cost_matrix.costs_data.len(),
-        );
-
-        // Verify Metadata survived.
-        assert_eq!(restored.metadata.name, cached.metadata.name);
-    }
-
-    #[test]
-    fn rkyv_cached_lindera_invalid_bytes_returns_error() {
-        let garbage = b"definitely not rkyv data";
-        let result: Result<CachedLinderaDictionary, rkyv::rancor::Error> =
-            rkyv::from_bytes(garbage);
-        assert!(result.is_err());
-    }
-
     fn create_test_dictionary_data() -> DictionaryData {
         use flate2::read::DeflateDecoder;
         use std::fs;
@@ -585,7 +444,8 @@ mod tests {
             .parent()
             .unwrap()
             .join("cdn")
-            .join("dictionaries");
+            .join("dictionaries")
+            .join("sudachidict-20260723");
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);
@@ -599,7 +459,8 @@ mod tests {
         DictionaryData {
             char_def: decompress(read_file("char_def.bin")),
             matrix: decompress(read_file("matrix.mtx")),
-            dict_da: decompress(read_file("dict.da")),
+            dict_trie: decompress(read_file("dict.trie")),
+            dict_vals_idx: decompress(read_file("dict.valsidx")),
             dict_vals: decompress(read_file("dict.vals")),
             unk: decompress(read_file("unk.bin")),
             words_idx: decompress(read_file("dict.wordsidx")),
@@ -614,7 +475,9 @@ mod tests {
         let tokens = tokenize_text("食べます").unwrap();
         assert_eq!(tokens.len(), 2);
         assert_eq!(tokens[0].orthographic_base_form, "食べる");
-        assert_eq!(tokens[0].phonological_base_form, "タベル");
+        // SudachiDict exposes a single katakana reading (surface pronunciation);
+        // the separate base-reading field UniDic had does not exist.
+        assert_eq!(tokens[0].phonological_base_form, "タベ");
     }
 
     #[test]
@@ -632,7 +495,7 @@ mod tests {
         let tokens = tokenize_text("美味しい").unwrap();
         assert_eq!(tokens.len(), 1);
         assert_eq!(tokens[0].orthographic_base_form, "美味しい");
-        assert_eq!(tokens[0].phonological_base_form, "オイシー");
+        assert_eq!(tokens[0].phonological_base_form, "オイシイ");
     }
 
     #[test]
@@ -641,7 +504,7 @@ mod tests {
         let tokens = tokenize_text("たべます").unwrap();
         assert_eq!(tokens.len(), 2);
         assert_eq!(tokens[0].orthographic_base_form, "食べる");
-        assert_eq!(tokens[0].phonological_base_form, "タベル");
+        assert_eq!(tokens[0].phonological_base_form, "タベ");
     }
 
     #[test]
@@ -677,7 +540,7 @@ mod tests {
         let tokens = tokenize_text("美味しい").unwrap();
         assert_eq!(tokens.len(), 1);
         assert_eq!(tokens[0].orthographic_surface_form, "美味しい");
-        assert_eq!(tokens[0].phonological_surface_form, "オイシー");
+        assert_eq!(tokens[0].phonological_surface_form, "オイシイ");
     }
 
     #[test]
@@ -954,21 +817,64 @@ mod tests {
     fn should_not_use_kanji_surface_as_phonological_reading_for_unknown_kanji() {
         ensure_dictionary();
 
-        let tokens = tokenize_text("杏璃").unwrap();
-        let ri = tokens
-            .iter()
-            .find(|t| t.orthographic_surface_form() == "璃")
-            .expect("「璃」token should exist");
+        // SudachiDict keeps the character name 杏璃 whole. Force an unknown
+        // kanji path through a made-up name to keep the contract covered.
+        let tokens = tokenize_text("杏璃蕗").unwrap();
+        for t in &tokens {
+            assert!(
+                !t.phonological_base_form().chars().any(|c| c.is_kanji()),
+                "phonological_base_form must not contain kanji, got '{}'",
+                t.phonological_base_form()
+            );
+            assert!(
+                !t.phonological_surface_form().chars().any(|c| c.is_kanji()),
+                "phonological_surface_form must not contain kanji, got '{}'",
+                t.phonological_surface_form()
+            );
+        }
+    }
 
-        assert!(
-            !ri.phonological_base_form().chars().any(|c| c.is_kanji()),
-            "phonological_base_form must not contain kanji, got '{}'",
-            ri.phonological_base_form()
-        );
-        assert!(
-            !ri.phonological_surface_form().chars().any(|c| c.is_kanji()),
-            "phonological_surface_form must not contain kanji, got '{}'",
-            ri.phonological_surface_form()
-        );
+    // RED repro: common word 自動車 ("car") is split by the bundled UniDic
+    // subset into 自動 (Noun) + 車 (Suffix) / katakana ジドウ (Noun) + シャ
+    // (Suffix). The Suffix tail is not a vocabulary word, so downstream card
+    // analysis keeps only the leading token — the real word never reaches the
+    // user. Dictionary bundle lacks the 自動車 lemma entirely (no occurrence in
+    // dict.words), so Viterbi cuts at known-word boundaries.
+    #[test]
+    fn should_keep_jidousha_as_single_vocabulary_token() {
+        ensure_dictionary();
+
+        for surface in ["自動車", "飛行機", "図書館", "自転車", "令和", "お父さん"]
+        {
+            let tokens = tokenize_text(surface).unwrap();
+            let vocab: Vec<&TokenInfo> = tokens
+                .iter()
+                .filter(|t| t.part_of_speech().is_vocabulary_word())
+                .collect();
+            let vocab_surfaces: Vec<&str> = vocab
+                .iter()
+                .map(|t| t.orthographic_surface_form())
+                .collect();
+            assert_eq!(
+                vocab.len(),
+                1,
+                "「{surface}」 must survive as a single vocabulary token, got vocab {vocab_surfaces:?} from {:?}",
+                tokens
+                    .iter()
+                    .map(|t| {
+                        format!(
+                            "{}({:?})",
+                            t.orthographic_surface_form(),
+                            t.part_of_speech()
+                        )
+                    })
+                    .collect::<Vec<_>>()
+            );
+            assert_eq!(
+                vocab[0].orthographic_surface_form(),
+                surface,
+                "the vocabulary token must cover the whole word"
+            );
+        }
     }
 }

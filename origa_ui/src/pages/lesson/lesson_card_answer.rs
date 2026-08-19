@@ -87,7 +87,7 @@ pub fn LessonCardAnswer(
 
             <div
                 node_ref=content_ref
-                class=move || if is_expanded.get() { "border-t border-[var(--border-light)] pt-4 mt-4" } else { "border-t border-[var(--border-light)] pt-4 mt-4 line-clamp-6" }
+                class="border-t border-[var(--border-light)] pt-4 mt-4"
             >
                 <div class="max-w-max mx-auto space-y-4">
                     <Show

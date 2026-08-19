@@ -8,6 +8,7 @@ mod kanji_common;
 mod ndlocr;
 mod patch_kanji_readings;
 mod regenerate_invalid;
+pub mod retokenize_phrases;
 mod tokenize;
 mod tokenize_well_known;
 mod validate_dictionary;

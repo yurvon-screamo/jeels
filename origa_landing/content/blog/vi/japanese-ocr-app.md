@@ -16,7 +16,7 @@ status: ready
 
 Gõ tiếng Nhật vào từ điển thì đau. Nếu bạn không biết âm đọc của một hán tự, bạn phải tra theo bộ thủ, nghĩa là đếm nét, xác định bộ, dò theo lưới — 60 giây để tìm một từ. Trên điện thoại còn tệ hơn. Đó là vấn đề OCR giải quyết: chụp văn bản, nhận âm đọc và ý nghĩa trong vài giây.
 
-Nhưng « ứng dụng OCR tiếng Nhật » là một tìm kiếm mơ hồ, và đa số ứng dụng hiện ra dưới nó chỉ giải quyết nửa đầu của một vấn đề dài hơn. Chúng cho bạn âm đọc. Chúng không giúp bạn nhớ nó. Đây là hướng dẫn về những gì các loại ứng dụng OCR khác nhau thực sự giỏi, nơi mỗi loại thiếu sót, và cần tìm gì nếu bạn đang cố học tiếng Nhật — không chỉ giải mã một biển hiệu một lần.
+Nhưng "ứng dụng OCR tiếng Nhật" là một tìm kiếm mơ hồ, và đa số ứng dụng hiện ra dưới nó chỉ giải quyết nửa đầu của một vấn đề dài hơn. Chúng cho bạn âm đọc. Chúng không giúp bạn nhớ nó. Đây là hướng dẫn về những gì các loại ứng dụng OCR khác nhau thực sự giỏi, nơi mỗi loại thiếu sót, và cần tìm gì nếu bạn đang cố học tiếng Nhật — không chỉ giải mã một biển hiệu một lần.
 
 Bao gồm Origa, ứng dụng tôi đang phát triển, với hạn chế được nêu thẳng.
 
@@ -28,7 +28,7 @@ Có ba trường hợp sử dụng thực, và chúng kéo theo các hướng kh
 2. **Hỗ trợ đọc.** Bạn đang đọc manga, sách giáo khoa, hoặc bài báo. Bạn muốn OCR một câu hoặc một khung hình, nhận âm đọc của các từ lạ, và đi tiếp. Bạn đang học, nhưng OCR là công cụ tra cứu.
 3. **Khai thác từ vựng.** Bạn muốn mỗi từ bạn OCR trở thành một thẻ bạn sẽ ôn sau. OCR là một đường ống vào SRS, không phải tra cứu một lần.
 
-Đa số ứng dụng được dựng cho trường hợp 1. Một số ít xử lý 2. Gần như không ai xử lý 3 mà không cần làm tay đáng kể. Biết cái nào bạn cần quyết định ứng dụng nào « tốt nhất » — không có người thắng cho cả ba.
+Đa số ứng dụng được dựng cho trường hợp 1. Một số ít xử lý 2. Gần như không ai xử lý 3 mà không cần làm tay đáng kể. Biết cái nào bạn cần quyết định ứng dụng nào "tốt nhất" — không có người thắng cho cả ba.
 
 ## Ba danh mục
 
@@ -56,7 +56,7 @@ Có ba trường hợp sử dụng thực, và chúng kéo theo các hướng kh
 
 **Trường hợp:** hỗ trợ đọc manga cho người học sẵn sàng cấu hình đường ống đa công cụ. Trường hợp 2.
 
-### OCR tích hợp học tập (nơi Origa ngồi)
+### OCR tích hợp học tập (Origa thuộc nhóm này)
 
 Origa được dựng cho trường hợp 3 — khai thác từ vựng. OCR là điểm vào của đường ống tạo thẻ: quét một ảnh, dán ảnh chụp màn hình, hoặc chụp trang sách giáo khoa. OCR chạy cục bộ (NDLOCR-Lite trên thiết bị, không tải lên), trích xuất các từ, và mỗi từ trở thành một thẻ với âm đọc, dịch, âm thanh, và câu nó xuất hiện. ([Xem Origa xử lý OCR, furigana, và liên kết từ vựng thế nào](/vi/docs/capture).)
 
@@ -70,11 +70,11 @@ Một danh sách kiểm tra thực sự phân tách các danh mục:
 - **Nó chạy trên thiết bị hay đám mây?** OCR đám mây thường chính xác hơn nhưng cần kết nối internet và gửi ảnh của bạn lên máy chủ. OCR trên thiết bị (NDLOCR, khuôn khổ Apple Vision, mô hình ML trên thiết bị) hoạt động ngoại tuyến và riêng tư. Không có cái nào phổ quát tốt hơn — chọn dựa trên việc bạn cần ngoại tuyến + riêng tư hay chính xác tối đa.
 - **Nó xử lý văn bản dọc không?** Tiếng Nhật thường được đặt theo chiều dọc, đặc biệt trong manga và tiểu thuyết. Nhiều engine OCR đa năng được chỉnh cho văn bản ngang và xáo trộn đầu vào dọc.
 - **Nó xử lý furigana không?** Furigana là kana nhỏ in cạnh hán tự. OCR rẻ đọc nó như một từ riêng và làm bẩn đầu ra. OCR tốt hơn hoặc bỏ qua furigana hoặc gắn nó với hán tự đúng.
-- **OCR là cuối đường ống hay đầu?** Đây là câu hỏi mà đa số danh sách « OCR app tốt nhất » bỏ qua. Nếu câu trả lời là « cuối », bạn có công cụ tra cứu. Nếu « đầu », bạn có công cụ học.
+- **OCR là cuối đường ống hay đầu?** Đây là câu hỏi mà đa số danh sách "OCR app tốt nhất" bỏ qua. Nếu câu trả lời là "cuối", bạn có công cụ tra cứu. Nếu "đầu", bạn có công cụ học.
 
 ## Origa xử lý việc này thế nào
 
-Cụ thể, Origa ngồi ở đâu trên mỗi trục đó:
+Cụ thể, Origa nằm ở đâu trên mỗi trục đó:
 
 - **Đường ống:** OCR → trích từ → thẻ với câu + âm đọc + dịch + âm thanh → ôn theo lịch FSRS. Mỗi từ quét trở thành một thẻ bạn sẽ gặp lại.
 - **Trên thiết bị.** NDLOCR-Lite chạy cục bộ. Quét hoạt động trong chế độ máy bay. Không có gì rời thiết bị.
@@ -94,7 +94,7 @@ Nói cách khác: Origa là ứng dụng OCR cho người học đã mệt mỏi
 
 ## Chọn thế nào
 
-Gần như chắc chắn bạn đã có một ứng dụng OCR đa năng trên điện thoại (Live Text trên iOS, Lens trên Android). Cho đa số nhu cầu dịch một lần, đó là đủ và miễn phí. Câu hỏi là liệu bạn đã vượt « dịch một lần » và cần « nắm bắt và học » chưa. Nếu rồi — nếu bạn tiếp tục thấy cùng một hán tự và không nhớ, nếu bạn đã thử gắn sao từ trong từ điển và không bao giờ ôn, nếu đọc manga của bạn tạo ra từ bạn quên sang chương tiếp theo — thì OCR tích hợp học là mảnh còn thiếu. [Tải Origa](/vi/download) để thử đường ống đầu cuối.
+Gần như chắc chắn bạn đã có một ứng dụng OCR đa năng trên điện thoại (Live Text trên iOS, Lens trên Android). Cho đa số nhu cầu dịch một lần, đó là đủ và miễn phí. Câu hỏi là liệu bạn đã vượt "dịch một lần" và cần "nắm bắt và học" chưa. Nếu rồi — nếu bạn tiếp tục thấy cùng một hán tự và không nhớ, nếu bạn đã thử gắn sao từ trong từ điển và không bao giờ ôn, nếu đọc manga của bạn tạo ra từ bạn quên sang chương tiếp theo — thì OCR tích hợp học là mảnh còn thiếu. [Tải Origa](/vi/download) để thử đường ống đầu cuối.
 
 ## Câu hỏi thường gặp
 

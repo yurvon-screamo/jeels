@@ -7,7 +7,8 @@ use crate::loaders::WellKnownSetLoaderImpl;
 use crate::pages::shared::LoadMoreButton;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    Button, ButtonVariant, FilterTag, Input, Spinner, Text, TextSize, TypographyVariant,
+    Button, ButtonVariant, FilterTag, Input, Spinner, Text, TextSize, ToastContainer, ToastData,
+    TypographyVariant,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -35,6 +36,10 @@ pub fn SetsContent() -> impl IntoView {
     let search = RwSignal::new(String::new());
     let selected_sets: RwSignal<HashSet<String>> = RwSignal::new(HashSet::new());
     let visible_count: RwSignal<usize> = RwSignal::new(50);
+    // Toasts live at page level (outside the import drawer): the drawer
+    // unmounts on close, and a toast pushed right after `is_open.set(false)`
+    // would otherwise stay invisible until the drawer is opened again.
+    let toasts: RwSignal<Vec<ToastData>> = RwSignal::new(Vec::new());
     let disposed = StoredValue::new(());
 
     let known_kanji = Memo::new(move |_| {
@@ -419,6 +424,7 @@ pub fn SetsContent() -> impl IntoView {
                 is_open=preview_modal_open
                 set_ids=Signal::derive(move || preview_set_ids.get())
                 set_titles=Signal::derive(move || preview_set_titles.get())
+                toasts=toasts
                 on_import_result=Callback::new(move |imported_ids: Vec<String>| {
                     if !imported_ids.is_empty() {
                         sets.update(|list| {
@@ -432,6 +438,7 @@ pub fn SetsContent() -> impl IntoView {
                     selected_sets.set(HashSet::new());
                 })
             />
+            <ToastContainer toasts=toasts duration_ms=5000 />
         </div>
     }
 }

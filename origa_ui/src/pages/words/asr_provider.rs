@@ -54,6 +54,11 @@ pub(super) async fn recognize_file_via_device_ai(base64_audio: &str) -> Option<S
     }
 }
 
+/// Error code the plugin reports when a live session ended without any
+/// recognized speech (bounded no-speech budget, see the fork's
+/// `speech_live_ctrl.rs`).
+const NO_SPEECH_CODE: &str = "[NO_SPEECH_DETECTED]";
+
 /// Perform one-shot live-microphone recognition via native device-ai.
 /// Returns `Some(text)` on success, or `None` when unavailable/failed.
 pub(super) async fn recognize_live_via_device_ai() -> Option<String> {
@@ -66,8 +71,36 @@ pub(super) async fn recognize_live_via_device_ai() -> Option<String> {
     match device_ai::recognize_live(JA_JP).await {
         Ok(result) => Some(result.text),
         Err(e) => {
+            // "No speech" is an expected user outcome, not a failure of the
+            // native path — returning an empty string routes the caller to
+            // its no-speech message instead of disabling the button.
+            if e.contains(NO_SPEECH_CODE) {
+                info!("ASR (live): no speech detected");
+                return Some(String::new());
+            }
             warn!("device-ai live ASR failed: {e}");
             None
         },
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use super::NO_SPEECH_CODE;
+
+    /// The marker must match how `describe_rejection` formats plugin errors
+    /// (see `core/device_ai/invoke.rs`) — both sides of the contract are
+    /// plain strings, so a drift would silently route "no speech" to the
+    /// "unavailable" fallback.
+    #[test]
+    fn no_speech_marker_matches_invoke_error_format() {
+        let rejection = format!("plugin command rejected: {NO_SPEECH_CODE} No speech detected");
+        assert!(rejection.contains(NO_SPEECH_CODE));
+
+        // Unrelated failures must not match the marker.
+        let timeout = "plugin command timed out after 45s".to_string();
+        assert!(!timeout.contains(NO_SPEECH_CODE));
+        let generic = "plugin command rejected: [SPEECH_RECOGNITION_FAILED] boom".to_string();
+        assert!(!generic.contains(NO_SPEECH_CODE));
     }
 }

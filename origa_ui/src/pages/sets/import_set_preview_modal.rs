@@ -3,8 +3,8 @@ use crate::pages::sets::set_word_item::SetWordItem;
 use crate::pages::sets::types::PreviewWord;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
-    Alert, AlertType, Button, ButtonVariant, Drawer, Spinner, Text, TextSize, ToastContainer,
-    ToastData, TypographyVariant,
+    Alert, AlertType, Button, ButtonVariant, Drawer, Spinner, Text, TextSize, ToastData,
+    TypographyVariant,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -20,6 +20,7 @@ pub fn ImportSetPreviewModal(
     is_open: RwSignal<bool>,
     set_ids: Signal<Vec<String>>,
     set_titles: Signal<HashMap<String, String>>,
+    toasts: RwSignal<Vec<ToastData>>,
     on_import_result: Callback<Vec<String>>,
 ) -> impl IntoView {
     let i18n = use_i18n();
@@ -50,7 +51,6 @@ pub fn ImportSetPreviewModal(
     });
 
     let state = ImportPreviewModalState::new();
-    let toasts: RwSignal<Vec<ToastData>> = RwSignal::new(Vec::new());
     let handlers = create_import_preview_handlers(state.clone(), is_open, toasts, on_import_result);
 
     let preview_words = state.preview_words;
@@ -129,7 +129,7 @@ pub fn ImportSetPreviewModal(
             title=Signal::derive(move || drawer_title.get())
             test_id="sets-import-drawer"
         >
-            <div class="space-y-4">
+            <div class="flex flex-col h-full space-y-4">
                 {move || {
                     let groups = grouped_words.get();
                     let is_loading = is_loading_preview.get();
@@ -172,7 +172,7 @@ pub fn ImportSetPreviewModal(
                                         .replacen("{}", &known_words_count.get().to_string(), 1)}
                                 </Text>
                             </div>
-                            <div class="space-y-6 overflow-y-auto max-h-[60vh]">
+                            <div class="space-y-6 overflow-y-auto flex-1 min-h-0">
                                 {groups
                                     .into_iter()
                                     .map(|(set_id, words)| {
@@ -216,7 +216,7 @@ pub fn ImportSetPreviewModal(
                                     })
                                     .collect::<Vec<_>>()}
                             </div>
-                            <div class="flex gap-2 justify-between pt-4 border-t">
+                            <div class="flex gap-2 justify-between pt-4 border-t shrink-0">
                                 <Button
                                     variant=ButtonVariant::Ghost
                                     on_click=handlers.on_cancel
@@ -246,7 +246,6 @@ pub fn ImportSetPreviewModal(
                     }
                 }}
             </div>
-            <ToastContainer toasts=toasts duration_ms=5000 />
         </Drawer>
     }
 }

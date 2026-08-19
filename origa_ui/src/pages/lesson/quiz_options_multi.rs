@@ -146,6 +146,7 @@ fn MultiOptionButton(
                         content=Signal::derive(move || option_text.clone())
                         variant=MarkdownVariant::Default
                         known_kanji=known_kanji.get()
+                        glue_punctuation=true
                     />
                 </Text>
                 <Show when=move || multi_submitted.get() && tag_stored.get_value().is_some()>

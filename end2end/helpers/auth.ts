@@ -62,40 +62,48 @@ export async function uiLogin(
 	const maxRetries = 3;
 
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
-		await page.goto("http://localhost:1420");
-
-		// The email/password form is collapsed behind a "Sign in with password"
-		// toggle by default (mobile viewport fit). Wait for the toggle to mount
-		// (races with WASM load) then expand it before waiting for the inputs.
-		const passwordToggle = page.getByTestId("login-password-toggle");
-		await passwordToggle.waitFor({ state: "visible", timeout: 30_000 });
-		await passwordToggle.click();
-
-		await page
-			.locator('input[type="email"], input[data-testid="email-input"]')
-			.waitFor({ state: "visible", timeout: 30_000 });
-
-		await page.fill(
-			'input[type="email"], input[data-testid="email-input"]',
-			email,
-		);
-		await page.fill(
-			'input[type="password"], input[data-testid="password-input"]',
-			password,
-		);
-		await page.click(
-			'button[type="submit"], button[data-testid="login-submit"]',
-		);
-
+		// The whole login flow is retried, not just waitForURL: the password
+		// toggle and the inputs race the WASM cold load too, and a toggle
+		// miss used to escape the retry loop as an immediate failure.
 		try {
+			await page.goto("http://localhost:1420", {
+				waitUntil: "domcontentloaded",
+			});
+
+			// The email/password form is collapsed behind a "Sign in with
+			// password" toggle by default (mobile viewport fit). Wait for the
+			// toggle to mount (races with WASM load) then expand it before
+			// waiting for the inputs.
+			const passwordToggle = page.getByTestId("login-password-toggle");
+			await passwordToggle.waitFor({ state: "visible", timeout: 60_000 });
+			await passwordToggle.click();
+
+			await page
+				.locator('input[type="email"], input[data-testid="email-input"]')
+				.waitFor({ state: "visible", timeout: 30_000 });
+
+			await page.fill(
+				'input[type="email"], input[data-testid="email-input"]',
+				email,
+			);
+			await page.fill(
+				'input[type="password"], input[data-testid="password-input"]',
+				password,
+			);
+			await page.click(
+				'button[type="submit"], button[data-testid="login-submit"]',
+			);
+
 			await page.waitForURL(/\/(home|onboarding)/, { timeout: 60_000 });
 			return;
-		} catch {
+		} catch (e) {
 			if (attempt === maxRetries) {
 				throw new Error(
-					`Login failed after ${maxRetries} attempts: page did not navigate to /home or /onboarding for user ${email}`,
+					`Login failed after ${maxRetries} attempts for user ${email}: ${e}`,
 				);
 			}
+			// brief cooldown before the retry — WASM may still be loading
+			await page.waitForTimeout(3_000);
 		}
 	}
 }

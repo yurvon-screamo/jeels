@@ -35,6 +35,9 @@ VERSIONED_FILES: list[str] = [
     "dictionary/kanji.json",
     "dictionary/radicals.json",
     "grammar/grammar.json",
+    # Legacy UniDic files: kept byte-identical for old clients (hashes must
+    # match the remote manifest or every old client re-downloads); remove in
+    # a later release once old-client traffic fades.
     "dictionaries/char_def.bin",
     "dictionaries/matrix.mtx",
     "dictionaries/dict.da",
@@ -44,7 +47,16 @@ VERSIONED_FILES: list[str] = [
     "dictionaries/dict.words",
     "dictionaries/metadata.json",
     "dictionaries/JmdictFurigana.txt",
-    "dictionaries/cached-lindera.bin",
+    # SudachiDict (lindera 5.x, current clients)
+    "dictionaries/sudachidict-20260723/char_def.bin",
+    "dictionaries/sudachidict-20260723/matrix.mtx",
+    "dictionaries/sudachidict-20260723/dict.trie",
+    "dictionaries/sudachidict-20260723/dict.valsidx",
+    "dictionaries/sudachidict-20260723/dict.vals",
+    "dictionaries/sudachidict-20260723/unk.bin",
+    "dictionaries/sudachidict-20260723/dict.wordsidx",
+    "dictionaries/sudachidict-20260723/dict.words",
+    "dictionaries/sudachidict-20260723/metadata.json",
     "phrases/phrase_index.json",
     "pitch/index.json",
     "well_known_set/jlpt_n5.json",

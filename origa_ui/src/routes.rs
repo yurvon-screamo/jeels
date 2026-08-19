@@ -24,7 +24,8 @@ use leptos_router::path;
 use origa::domain::{OrigaError, User};
 use origa::traits::UserRepository;
 use origa::use_cases::{
-    MigrateKanjiCompanionsUseCase, MigrateVocabularyPartOfSpeechUseCase, SeedReadyPhrasesUseCase,
+    MigrateKanjiCompanionsUseCase, MigrateVocabularyLemmasUseCase,
+    MigrateVocabularyPartOfSpeechUseCase, SeedReadyPhrasesUseCase,
 };
 
 use crate::repository::HybridUserRepository;
@@ -155,6 +156,13 @@ pub fn start_dictionary_loading(
         let migrate_vocab_pos = MigrateVocabularyPartOfSpeechUseCase::new(&repository);
         if let Err(e) = migrate_vocab_pos.execute().await {
             tracing::warn!("Failed to migrate vocabulary part of speech: {e}");
+        }
+
+        // SudachiDict lemma migration: 信ずる → 信じる, 現われる → 現れる …
+        // Runs BEFORE phrase seeding so the fresh tokens match the index.
+        let migrate_vocab_lemmas = MigrateVocabularyLemmasUseCase::new(&repository);
+        if let Err(e) = migrate_vocab_lemmas.execute().await {
+            tracing::warn!("Failed to migrate vocabulary lemmas: {e}");
         }
 
         // Phase E: auto per-card pre-cache (background, only when online)

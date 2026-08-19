@@ -164,6 +164,17 @@ impl VocabularyCard {
         self
     }
 
+    /// Replaces the card's word in place (dictionary-lemma migration).
+    ///
+    /// Keeps the reverse side and drops the stale POS: the new lemma may be a
+    /// different part of speech, and `part_of_speech()` re-tokenizes lazily
+    /// when `pos` is `None`.
+    pub fn with_word(mut self, word: Question) -> Self {
+        self.word = word;
+        self.pos = None;
+        self
+    }
+
     pub fn with_grammar_rule(
         &self,
         rule: &GrammarRule,

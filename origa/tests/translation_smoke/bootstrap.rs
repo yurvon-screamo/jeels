@@ -58,12 +58,22 @@ fn try_load_tokenizer_dictionary() -> bool {
         return true;
     }
 
-    let dict_dir = cdn_path(&["dictionaries"]);
+    // Prefer the versioned SudachiDict directory (see deploy_cdn.py).
+    let versioned = cdn_path(&["dictionaries", "sudachidict-20260723"]);
+    let dict_dir = if ["dict.trie", "dict.words", "metadata.json"]
+        .iter()
+        .all(|n| versioned.join(n).exists())
+    {
+        versioned
+    } else {
+        cdn_path(&["dictionaries"])
+    };
     let exists = |name: &str| dict_dir.join(name).exists();
     let required = [
         "char_def.bin",
         "matrix.mtx",
-        "dict.da",
+        "dict.trie",
+        "dict.valsidx",
         "dict.vals",
         "unk.bin",
         "dict.wordsidx",
@@ -89,7 +99,8 @@ fn try_load_tokenizer_dictionary() -> bool {
     let data = DictionaryData {
         char_def: decompress(read_file("char_def.bin")),
         matrix: decompress(read_file("matrix.mtx")),
-        dict_da: decompress(read_file("dict.da")),
+        dict_trie: decompress(read_file("dict.trie")),
+        dict_vals_idx: decompress(read_file("dict.valsidx")),
         dict_vals: decompress(read_file("dict.vals")),
         unk: decompress(read_file("unk.bin")),
         words_idx: decompress(read_file("dict.wordsidx")),

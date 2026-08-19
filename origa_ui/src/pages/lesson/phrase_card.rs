@@ -77,7 +77,8 @@ pub fn PhraseCardView(
                     </Text>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                <Show when=move || !show_result.get()>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3">
                     {move || {
                         options_stored
                             .get_value()
@@ -134,6 +135,8 @@ pub fn PhraseCardView(
                             .collect::<Vec<_>>()
                     }}
                 </div>
+                </Show>
+
                 <Show when=move || !show_result.get()>
                     <button
                         data-testid="quiz-dont-know-btn"

@@ -10,9 +10,10 @@ use tracing::warn;
 
 use super::answer_display::{CardAnswerDisplay, extract_card_answer};
 use super::card_type::CardType;
-use super::lesson_card_header::{LessonCardAudio, LessonCardTagsQuiz};
+use super::lesson_card_header::{CardHeaderAudio, LessonCardTagsQuiz};
 use super::next_card_button::NextCardButton;
 use super::quiz_result::QuizResult;
+use super::quiz_result_display::QuizResultDisplay;
 
 #[derive(Clone, Copy, PartialEq, Default, Debug)]
 pub enum YesNoResult {
@@ -188,14 +189,14 @@ pub fn YesNoCardView(
             <LessonCardTagsQuiz
                 card_type=card_type
                 part_of_speech=part_of_speech
+                audio=Signal::derive(move || Some(CardHeaderAudio {
+                    card_type,
+                    question_text: display_question.get_value(),
+                    is_reversed: false,
+                    audio_path: None,
+                }))
             />
             <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-                <LessonCardAudio
-                    card_type=card_type
-                    question_text=display_question.get_value()
-                    is_reversed=false
-                    audio_path=None
-                />
 
             <div class="flex-1 flex flex-col justify-center">
                 <div class="text-center mb-3 sm:mb-6">
@@ -227,81 +228,72 @@ pub fn YesNoCardView(
                         {move || statement_value.get_value()}
                     </Text>
 
-                    <Text size=TextSize::Default variant=TypographyVariant::Muted class="mt-4">
-                        {t!(i18n, lesson.is_this_correct)}
-                    </Text>
+                    <Show when=move || !show_result.get()>
+                        <Text size=TextSize::Default variant=TypographyVariant::Muted class="mt-4">
+                            {t!(i18n, lesson.is_this_correct)}
+                        </Text>
+                    </Show>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <Button
-                        test_id=Signal::derive(|| "yesno-no-btn".to_string())
-                        variant=Signal::derive(|| ButtonVariant::Default)
-                        class=no_btn_class
-                        disabled=Signal::derive(move || show_result.get())
-                        on_click=Callback::new(move |_| on_answer.run(false))
-                    >
-                        {t!(i18n, lesson.no)} <span class="kbd-hint">"[1]"</span>
-                    </Button>
+                <Show when=move || !show_result.get()>
+                    <div class="grid grid-cols-2 gap-3">
+                        <Button
+                            test_id=Signal::derive(|| "yesno-no-btn".to_string())
+                            variant=Signal::derive(|| ButtonVariant::Default)
+                            class=no_btn_class
+                            disabled=Signal::derive(move || show_result.get())
+                            on_click=Callback::new(move |_| on_answer.run(false))
+                        >
+                            {t!(i18n, lesson.no)} <span class="kbd-hint">"[1]"</span>
+                        </Button>
 
-                    <Button
-                        test_id=Signal::derive(|| "yesno-yes-btn".to_string())
-                        variant=yes_variant
-                        class=yes_btn_class
-                        disabled=Signal::derive(move || show_result.get())
-                        on_click=Callback::new(move |_| on_answer.run(true))
+                        <Button
+                            test_id=Signal::derive(|| "yesno-yes-btn".to_string())
+                            variant=yes_variant
+                            class=yes_btn_class
+                            disabled=Signal::derive(move || show_result.get())
+                            on_click=Callback::new(move |_| on_answer.run(true))
+                        >
+                            {t!(i18n, lesson.yes)} <span class="kbd-hint">"[2]"</span>
+                        </Button>
+                    </div>
+                    <button
+                        data-testid="yesno-dont-know-btn"
+                        class=move || {
+                            let base = "w-full mt-2 p-2 sm:p-4 border text-center transition-all cursor-pointer flex items-center justify-center gap-2";
+                            if dont_know_selected.get() {
+                                format!("{} quiz-option-neutral ring-2 ring-[var(--accent-olive)]", base)
+                            } else if show_result.get() {
+                                format!("{} quiz-option-dimmed pointer-events-none", base)
+                            } else {
+                                format!("{} quiz-option-neutral", base)
+                            }
+                        }
+                        on:click=move |_| {
+                            if !show_result.get() {
+                                on_dont_know.run(());
+                            }
+                        }
                     >
-                        {t!(i18n, lesson.yes)} <span class="kbd-hint">"[2]"</span>
-                    </Button>
-                </div>
-                <button
-                    data-testid="yesno-dont-know-btn"
-                    class=move || {
-                        let base = "w-full mt-2 p-2 sm:p-4 border text-center transition-all cursor-pointer flex items-center justify-center gap-2";
-                        if dont_know_selected.get() {
-                            format!("{} quiz-option-neutral ring-2 ring-[var(--accent-olive)]", base)
-                        } else if show_result.get() {
-                            format!("{} quiz-option-dimmed pointer-events-none", base)
-                        } else {
-                            format!("{} quiz-option-neutral", base)
-                        }
-                    }
-                    on:click=move |_| {
-                        if !show_result.get() {
-                            on_dont_know.run(());
-                        }
-                    }
-                >
-                    <Text size=TextSize::Default>{t!(i18n, lesson.dont_know)}</Text>
-                    <span class="kbd-hint text-[var(--fg-muted)] text-xs font-mono">{t!(i18n, lesson.space_key)}</span>
-                </button>
+                        <Text size=TextSize::Default>{t!(i18n, lesson.dont_know)}</Text>
+                        <span class="kbd-hint text-[var(--fg-muted)] text-xs font-mono">{t!(i18n, lesson.space_key)}</span>
+                    </button>
+                </Show>
 
                 <Show when=move || show_result.get()>
-                    <Show when=move || yesno_result() == YesNoResult::Correct>
-                        <div class="mt-6 text-center">
-                            <Text size=TextSize::Default class="text-[var(--success)] font-bold">
-                                {t!(i18n, lesson.correct)}
-                            </Text>
-                        </div>
-                    </Show>
+                    <QuizResultDisplay quiz_result=QuizResult::from(yesno_result()) />
 
-                    <Show when=move || matches!(yesno_result(), YesNoResult::Incorrect)>
-                        <div class="mt-6 text-center">
-                            <Text size=TextSize::Small variant=TypographyVariant::Muted>
-                                {t!(i18n, lesson.correct_answer)}
-                                <span class="font-semibold">
-                                    {correct_answer_text}
-                                </span>
-                            </Text>
-                        </div>
-                    </Show>
-
-                    <Show when=move || yesno_result() == YesNoResult::DontKnow>
-                        <div class="mt-6 text-center">
-                            <Text size=TextSize::Default class="text-[var(--fg-muted)] font-bold">
-                                {t!(i18n, lesson.dont_know_result)}
-                            </Text>
-                        </div>
-                    </Show>
+                    // Show the correct answer (Да/Нет) on every result —
+                    // as a confirmation when correct and as feedback when
+                    // not, same pattern as the single-quiz card.
+                    <div class="mt-2 text-center">
+                        <Text size=TextSize::Small variant=TypographyVariant::Muted>
+                            {t!(i18n, lesson.correct_answer)}
+                            <span class="font-semibold">
+                                {correct_answer_text}
+                            </span>
+                        </Text>
+                    </div>
                 </Show>
 
                 <Show when=move || {

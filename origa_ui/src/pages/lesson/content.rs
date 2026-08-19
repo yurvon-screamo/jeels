@@ -277,7 +277,10 @@ pub fn LessonContent() -> impl IntoView {
         </Show>
 
         <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none()>
-            <div data-testid="lesson-content" class="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col px-0.5 sm:px-1 py-1 sm:py-2 overscroll-contain">
+            // No nested scroll container here — the whole page scrolls.
+            // A separate scroll layer over the lesson zone used to fight the
+            // page scroll on mobile (jitter + snap-back) and was removed.
+            <div data-testid="lesson-content" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
                 <Show when=move || is_syncing_cards.get()>
                     <div data-testid="lesson-sync-indicator" class="absolute top-0 right-0 flex items-center gap-1 text-sm text-muted-foreground p-2">
                         <Spinner test_id="lesson-sync-spinner" class=Signal::derive(|| "".to_string()) size=Signal::derive(|| "sm".to_string()) />

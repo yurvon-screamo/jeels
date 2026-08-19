@@ -76,7 +76,7 @@ pub fn PasswordCard(#[prop(optional, into)] test_id: Signal<String>) -> impl Int
         <div data-testid=test_id_val class="p-6 space-y-0">
             <div>
                 <div
-                    class="flex items-center justify-between cursor-pointer select-none"
+                    class="flex items-center justify-between cursor-pointer select-none touch-manipulation"
                     on:click=move |_| is_expanded.update(|v| *v = !*v)
                 >
                     <Text size=TextSize::Large>

@@ -17,7 +17,7 @@ use super::answer_display::extract_card_answer;
 use super::card_type::CardType;
 use super::kanji_card_details::RadicalDisplay;
 use super::lesson_card_answer::LessonCardAnswer;
-use super::lesson_card_header::{LessonCardAnswerAudio, LessonCardAudio, LessonCardTags};
+use super::lesson_card_header::{CardHeaderAudio, LessonCardTags};
 use super::lesson_card_question::LessonCardQuestion;
 use super::lesson_state::LessonContext;
 use crate::repository::cdn_provider::prefetch_blob_url;
@@ -283,6 +283,26 @@ pub fn LessonCard(
 
     let audio_path_stored = StoredValue::new(audio_path.clone());
 
+    let audio_props = Signal::derive(move || {
+        if is_reversed && show_answer.get() {
+            Some(CardHeaderAudio {
+                card_type,
+                question_text: answer.get_value(),
+                is_reversed: true,
+                audio_path: audio_path_stored.get_value(),
+            })
+        } else if !is_reversed {
+            Some(CardHeaderAudio {
+                card_type,
+                question_text: display_question.get_value(),
+                is_reversed: false,
+                audio_path: audio_path_stored.get_value(),
+            })
+        } else {
+            None
+        }
+    });
+
     view! {
         <div class="flex flex-col">
             <LessonCardTags
@@ -290,25 +310,9 @@ pub fn LessonCard(
                 grammar_info=grammar_info.clone()
                 show_answer=show_answer
                 card=card.clone()
+                audio=audio_props
             />
             <Card class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string()) shadow=true test_id="lesson-card-root">
-                <Show when=move || !is_reversed>
-                    <LessonCardAudio
-                        card_type=card_type
-                        question_text=display_question.get_value()
-                        is_reversed=false
-                        audio_path=audio_path_stored.get_value()
-                    />
-                </Show>
-
-                <Show when=move || is_reversed && show_answer.get()>
-                    <LessonCardAnswerAudio
-                        card_type=card_type
-                        question_text=answer.get_value()
-                        audio_path=audio_path_stored.get_value()
-                    />
-                </Show>
-
                 <div class="flex-1 flex flex-col justify-center">
                     <Show when=move || !show_answer.get()>
                         <LessonCardQuestion

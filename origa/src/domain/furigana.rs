@@ -110,6 +110,28 @@ fn apply_reading_spans(
     known_kanji: &HashSet<char>,
 ) -> Vec<FuriganaSegment> {
     let chars: Vec<char> = text.chars().collect();
+
+    // Reading spans come from the JmdictFurigana entry matched by lemma, but
+    // they are laid over the token surface. With SudachiDict the surface can
+    // be shorter than the dictionary word (and indices are char-based there),
+    // so an out-of-range span used to panic mid-poll and kill the wasm
+    // executor. Any span that does not fit the surface exactly is dropped and
+    // the reading is attached to the whole text instead.
+    let spans_fit = !spans.is_empty()
+        && spans
+            .iter()
+            .all(|s| s.end_index < chars.len() && s.start_index <= s.end_index);
+    if !spans_fit {
+        if let Some(first) = spans.first() {
+            return vec![FuriganaSegment::new(
+                text.to_string(),
+                Some(first.text.clone()),
+                false,
+            )];
+        }
+        return vec![FuriganaSegment::new(text.to_string(), None, false)];
+    }
+
     let mut segments = Vec::new();
     let mut last_end: usize = 0;
 
@@ -204,25 +226,30 @@ mod tests {
             return;
         }
 
+        let base = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .join("cdn")
+            .join("dictionaries");
+        // Prefer the versioned SudachiDict directory (see deploy_cdn.py);
+        // fall back to a stale build-script output.
         let dict_dir = if let Ok(out_dir) = env::var("OUT_DIR") {
             let out_dict = PathBuf::from(out_dir).join("lindera-unidic");
-            if out_dict.exists() {
+            let versioned = base.join("sudachidict-20260723");
+            if versioned.join("dict.trie").exists() {
+                versioned
+            } else if out_dict.exists() {
                 out_dict
             } else {
-                let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-                PathBuf::from(manifest_dir)
-                    .parent()
-                    .unwrap()
-                    .join("cdn")
-                    .join("dictionaries")
+                base
             }
         } else {
-            let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-            PathBuf::from(manifest_dir)
-                .parent()
-                .unwrap()
-                .join("cdn")
-                .join("dictionaries")
+            let versioned = base.join("sudachidict-20260723");
+            if versioned.join("dict.trie").exists() {
+                versioned
+            } else {
+                base
+            }
         };
 
         let read_file = |name: &str| fs::read(dict_dir.join(name)).unwrap();
@@ -230,7 +257,8 @@ mod tests {
         let data = DictionaryData {
             char_def: decompress(read_file("char_def.bin")),
             matrix: decompress(read_file("matrix.mtx")),
-            dict_da: decompress(read_file("dict.da")),
+            dict_trie: decompress(read_file("dict.trie")),
+            dict_vals_idx: decompress(read_file("dict.valsidx")),
             dict_vals: decompress(read_file("dict.vals")),
             unk: decompress(read_file("unk.bin")),
             words_idx: decompress(read_file("dict.wordsidx")),
@@ -291,11 +319,13 @@ mod tests {
     fn should_furiganize_unknown_kanji_without_empty_reading() {
         ensure_dictionary();
         let known_kanji: HashSet<char> = HashSet::new();
-        let segments = furiganize_segments("杏璃", &known_kanji).unwrap();
+        // 杏璃 is a single token in SudachiDict now; 蕗 alone is not a lemma,
+        // so a name ending in it takes the unknown-kanji path.
+        let segments = furiganize_segments("杏蕩", &known_kanji).unwrap();
         let ri = segments
             .iter()
-            .find(|s| s.text() == "璃")
-            .expect("「璃」segment should exist");
+            .find(|s| s.text().contains("蕩"))
+            .expect("unknown-kanji segment should exist");
         assert_eq!(ri.reading(), None);
         assert!(
             !ri.has_reading(),
@@ -445,6 +475,28 @@ mod tests {
         assert!(!kanji_segments.is_empty());
         assert!(kanji_segments.iter().all(|s| s.has_reading()));
         assert!(kanji_segments.iter().all(|s| s.is_known()));
+    }
+
+    #[test]
+    fn apply_reading_spans_span_beyond_surface_degrades_to_full_reading() {
+        // Regression (grammar drawer N3 crash): a JmdictFurigana entry matched
+        // by lemma can carry reading spans indexed against the dictionary
+        // word, while the SudachiDict token surface is shorter. Indexing
+        // chars[start..=end] then panics with "range end index out of range"
+        // inside a poll, taking down the wasm executor and the whole page.
+        let spans = vec![ReadingSpan {
+            start_index: 0,
+            end_index: 2, // "触" entry word 触れ合い (4 chars), surface 触 (1 char)
+            text: "ふれあ".to_string(),
+        }];
+        let known_kanji: HashSet<char> = HashSet::new();
+        let segments = apply_reading_spans("触", &spans, &known_kanji);
+
+        // The span cannot be laid over the surface: degrade to one segment
+        // carrying the whole reading instead of panicking.
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments[0].text(), "触");
+        assert_eq!(segments[0].reading(), Some("ふれあ"));
     }
 
     #[test]

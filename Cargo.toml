@@ -63,8 +63,8 @@ hmac = "0.12"
 
 # Japan
 rs-fsrs = "1.2"
-lindera = { version = "2.2", default-features = false }
-lindera-dictionary = { version = "2.2" }
+lindera = { version = "5.3.0", default-features = false }
+lindera-dictionary = { version = "5.3.0" }
 flate2 = "1.1"
 zip = { version = "4", default-features = false, features = ["deflate"] }
 rkyv = { version = "0.8", features = ["bytecheck"] }
@@ -143,8 +143,8 @@ tauri-plugin = { version = "2", features = ["build"] }
 #  - Linux: device-ai has no Linux backend (returns FeatureNotAvailable).
 # Windows + Linux keep their current stack — strictly non-regressing.
 # Future: upstream the mobile fix and switch back to hypothesi/...
-tauri-plugin-device-ai-apis = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "9f9509b1e751235ebd6a70d1afb85fdd8e45efed" }
-device-ai = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "9f9509b1e751235ebd6a70d1afb85fdd8e45efed" }
+tauri-plugin-device-ai-apis = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "8b5765fa068123a40060345549fd6028ee80c624" }
+device-ai = { git = "https://github.com/yurvon-screamo/tauri-plugin-device-ai-apis", rev = "8b5765fa068123a40060345549fd6028ee80c624" }
 
 # Dev Dependencies
 wasm-bindgen = "0.2"

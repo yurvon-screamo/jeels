@@ -62,6 +62,7 @@ pub fn QuizOptions(
                                         content=Signal::derive(move || option_text.clone())
                                         variant=MarkdownVariant::Default
                                         known_kanji=known_kanji.get()
+                                        glue_punctuation=true
                                     />
                                 </Text>
                                 <Show when=move || !show_result.get()>
