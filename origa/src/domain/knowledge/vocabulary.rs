@@ -31,6 +31,24 @@ impl VocabularyCard {
         }
     }
 
+    /// Creates a card with an explicit part-of-speech, bypassing tokenization.
+    /// Used by companion-card creation and component tests that need a specific
+    /// POS without loading the full lindera dictionary. The `reverse_side`
+    /// parameter creates a pre-reversed card (translation in `word`, original
+    /// Japanese in `reverse_side`) without calling `revert()` (which requires
+    /// a loaded translation dictionary).
+    pub fn new_with_pos(
+        word: Question,
+        pos: Option<PartOfSpeech>,
+        reverse_side: Option<Question>,
+    ) -> Self {
+        Self {
+            word,
+            reverse_side,
+            pos,
+        }
+    }
+
     /// Creates a card from a single known word after validating that a translation exists.
     /// The part of speech is resolved with a single tokenization pass at construction time
     /// so subsequent reads do not re-tokenize.

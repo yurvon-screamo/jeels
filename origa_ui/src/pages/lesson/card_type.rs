@@ -2,6 +2,9 @@ use crate::i18n::*;
 use crate::ui_components::TagVariant;
 use origa::domain::Card as DomainCard;
 
+#[cfg(test)]
+use origa::domain::VocabularyCard;
+
 #[derive(Clone, Copy, PartialEq, Default, Debug)]
 pub enum CardType {
     #[default]
@@ -71,6 +74,38 @@ impl From<&DomainCard> for CardType {
             DomainCard::Kanji(_) => CardType::Kanji,
             DomainCard::Grammar(_) => CardType::Grammar,
             DomainCard::Phrase(_) => CardType::Phrase,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ui_components::TagVariant;
+
+    #[test]
+    fn tag_variant_mapping() {
+        assert_eq!(CardType::Vocabulary.tag_variant(), TagVariant::Default);
+        assert_eq!(CardType::Kanji.tag_variant(), TagVariant::Olive);
+        assert_eq!(CardType::Grammar.tag_variant(), TagVariant::Terracotta);
+        assert_eq!(CardType::Phrase.tag_variant(), TagVariant::Sage);
+    }
+
+    #[test]
+    fn sort_order_is_grammar_first_then_kanji_vocab_phrase() {
+        assert_eq!(CardType::Grammar.sort_order(), 0);
+        assert_eq!(CardType::Kanji.sort_order(), 1);
+        assert_eq!(CardType::Vocabulary.sort_order(), 2);
+        assert_eq!(CardType::Phrase.sort_order(), 3);
+    }
+
+    #[test]
+    fn from_domain_card_vocabulary() {
+        // Only test the From impl when the dictionary is available
+        let card = VocabularyCard::from_known_word("猫", &origa::domain::NativeLanguage::Russian);
+        if let Ok(vocab) = card {
+            let domain = DomainCard::Vocabulary(vocab);
+            assert_eq!(CardType::from(&domain), CardType::Vocabulary);
         }
     }
 }

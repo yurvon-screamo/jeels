@@ -44,6 +44,10 @@ mod selected_count;
 mod sidebar;
 mod skeleton;
 
+#[cfg(all(target_arch = "wasm32", test))]
+mod component_i18n_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod component_wasm_tests;
 mod filter_tag;
 mod stepper;
 mod tabs;
@@ -62,6 +66,8 @@ pub use alert::{Alert, AlertType};
 pub use audio_buttons::AudioButtons;
 pub use audio_player::AudioPlayer;
 pub use avatar::Avatar;
+#[cfg(all(target_arch = "wasm32", test))]
+pub use avatar::AvatarSize;
 pub use boot_splash::hide_boot_splash;
 pub use bottom_nav::BottomTabBar;
 pub use button::{Button, ButtonSize, ButtonVariant};
