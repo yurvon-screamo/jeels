@@ -24,6 +24,7 @@ If you are new, start here. The guide covers install, sign-in, onboarding, your 
 ## By feature
 
 - **[Lessons](/docs/lesson)** — what is in a lesson, card types, the two-button rating, and how spaced repetition schedules your reviews.
+- **[How Origa decides what to show you](/docs/fsrs)** — the forgetting curve, FSRS, paces and daily limits: why cards run out and why that is normal.
 - **[Vocabulary](/docs/vocabulary)** — built-in dictionaries, audio pronunciation, four ways to add cards, and pre-built word sets.
 - **[Kanji](/docs/kanji)** — automatic furigana that hides as you learn, writing practice with stroke order, and JLPT-mapped kanji.
 - **[Grammar](/docs/grammar)** — JLPT-organized reference with examples built from vocabulary you already know.
