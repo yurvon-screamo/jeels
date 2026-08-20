@@ -245,7 +245,7 @@ pub static CONTENT: Content = Content {
     legal_terms_link: "Terms of Service",
 
     privacy_meta_title: "Privacy Policy | Origa",
-    privacy_meta_description: "What data Origa collects (account, learning progress, settings), why it is collected, where it is stored, and your rights.",
+    privacy_meta_description: "What data Origa collects (account, learning progress, diagnostics), why it is collected, where it is stored, and your rights.",
     privacy_h1: "Privacy Policy",
     privacy_last_updated_label: "Last updated",
     privacy_body: PR_BODY_EN,
@@ -272,9 +272,10 @@ pub const PR_BODY_EN: &str = r#"
       <tr><td>Settings</td><td>Interface language and daily study-load preference.</td></tr>
       <tr><td>Imported sets</td><td>Identifiers of content sets you imported (the set contents themselves are public catalog data).</td></tr>
       <tr><td>Optional profile</td><td>A Telegram user identifier, only if you choose to link a Telegram account.</td></tr>
+      <tr><td>Diagnostics</td><td>Crash reports, performance traces, and technical logs, sent to Sentry (sentry.io), a third-party error-monitoring service. They include the app version, operating system version, and device model. These records are not linked to your account, email, or learning progress.</td></tr>
     </tbody>
   </table>
-  <p>Origa does <strong>not</strong> collect analytics, crash reports, advertising identifiers, or precise device information. The on-device machine-learning models (OCR for camera text recognition, Whisper for speech recognition) run entirely on your device; camera frames and audio are processed locally and are never uploaded.</p>
+  <p>Origa does <strong>not</strong> collect advertising identifiers, precise location, contacts, or browsing and search history. The on-device machine-learning models (OCR for camera text recognition, Whisper for speech recognition) run entirely on your device; camera frames and audio are processed locally and are never uploaded.</p>
 </section>
 <section>
   <h2>How data is used</h2>
@@ -282,13 +283,15 @@ pub const PR_BODY_EN: &str = r#"
     <li>To authenticate you and keep your account secure.</li>
     <li>To synchronise your learning progress between your devices.</li>
     <li>To display your progress, level and review schedule inside the app.</li>
+    <li>To diagnose crashes and performance problems, so they can be fixed.</li>
   </ul>
-  <p>The email received from an OAuth provider is used solely to identify your account and to synchronise progress; it is not sold or transferred to third parties.</p>
+  <p>The email received from an OAuth provider is used solely to identify your account and to synchronise progress; it is not sold or transferred to third parties. Diagnostic records sent to Sentry serve no advertising purpose and are not combined with data from other services.</p>
 </section>
 <section>
   <h2>Where data is stored</h2>
   <ul>
     <li>Account and progress data: the TrailBase server at <code>app.origa.uwuwu.net</code>, hosted in Singapore.</li>
+    <li>Crash reports, performance traces and technical logs: Sentry (sentry.io), hosted in the USA. These records are not linked to your account.</li>
     <li>Static assets (dictionaries, machine-learning models, phrase audio): the CDN at <code>s3.origa.uwuwu.net</code>. These are public catalog content, not user data.</li>
     <li>OAuth sign-in is handled by Google and Yandex according to their respective privacy policies.</li>
   </ul>
@@ -316,9 +319,10 @@ pub const PR_BODY_EN: &str = r#"
   <ul>
     <li>Google OAuth (accounts.google.com) — optional sign-in provider.</li>
     <li>Yandex OAuth (oauth.yandex.ru) — optional sign-in provider.</li>
+    <li>Sentry (sentry.io) — crash reporting and error monitoring; receives crash reports, performance traces and technical logs, not linked to your account.</li>
     <li>Static CDN (s3.origa.uwuwu.net) — public catalog content.</li>
   </ul>
-  <p>Origa does not include advertising SDKs, analytics SDKs, or cross-device tracking SDKs.</p>
+  <p>Origa does not include advertising SDKs or cross-device tracking SDKs, and the data listed above is not used for advertising and is not transferred to data brokers.</p>
 </section>
 <section>
   <h2>Changes to this policy</h2>

@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use crate::components::seo::{PageMeta, SchemaOrg, breadcrumb_schema};
 use crate::content::Locale;
 
-const EFFECTIVE_DATE: &str = "2026-07-07";
+const EFFECTIVE_DATE: &str = "2026-08-20";
 
 #[component]
 pub fn PrivacyPage() -> impl IntoView {

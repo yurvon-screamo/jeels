@@ -248,7 +248,7 @@ pub static CONTENT: Content = Content {
     legal_terms_link: "Terms of Service",
 
     privacy_meta_title: "Privacy Policy | Origa",
-    privacy_meta_description: "What data Origa collects (account, learning progress, settings), why it is collected, where it is stored, and your rights.",
+    privacy_meta_description: "What data Origa collects (account, learning progress, diagnostics), why it is collected, where it is stored, and your rights.",
     privacy_h1: "Privacy Policy",
     privacy_last_updated_label: "Last updated",
     privacy_body: super::en::PR_BODY_EN,
