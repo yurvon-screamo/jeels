@@ -93,3 +93,4 @@ scripts/.font_cache/
 scripts/.cdn_migration_cache/
 scripts/migrate-cdn-log.txt
 scripts/t3-migrate-log.txt
+.media/store/.fonts/
