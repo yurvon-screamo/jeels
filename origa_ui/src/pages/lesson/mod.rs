@@ -2,6 +2,7 @@ mod answer_display;
 pub mod card_type;
 pub(crate) mod complete_screen;
 mod content;
+mod empty_state_view;
 mod grammar_details_expand;
 mod grammar_info_badge;
 mod header;

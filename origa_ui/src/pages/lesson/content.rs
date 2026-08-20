@@ -1,4 +1,5 @@
 use super::complete_screen::LessonCompleteScreen;
+use super::empty_state_view::LessonEmptyState;
 use super::header::LessonHeader;
 use super::lesson_card_container::LessonCardContainer;
 use super::lesson_state::{LessonContext, LessonMode, LessonState};
@@ -9,7 +10,7 @@ use crate::store::auth_store::AuthStore;
 use crate::ui_components::{Spinner, Text, TextSize, TypographyVariant};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use origa::domain::Card;
+use origa::domain::{Card, LessonEmptyDiagnosis, diagnose_empty_lesson};
 use origa::traits::UserRepository;
 use origa::use_cases::SelectCardsToLessonUseCase;
 use origa::use_cases::{classify_orphaned_phrases, delete_phrase_cards_by_phrase_ids};
@@ -63,6 +64,7 @@ pub fn LessonContent() -> impl IntoView {
     let is_loading = RwSignal::new(true);
     let is_completed = RwSignal::new(false);
     let error_message = RwSignal::new(None::<String>);
+    let empty_diagnosis = RwSignal::new(None::<LessonEmptyDiagnosis>);
     let reload_trigger = RwSignal::new(0u32);
     let is_muted = RwSignal::new(false);
     let is_syncing_cards = RwSignal::new(false);
@@ -123,6 +125,8 @@ pub fn LessonContent() -> impl IntoView {
                 return;
             }
             is_loading.set(true);
+            error_message.set(None);
+            empty_diagnosis.set(None);
 
             let use_case = SelectCardsToLessonUseCase::new(&repo);
             let jlpt_content = crate::loaders::get_jlpt_content();
@@ -206,13 +210,42 @@ pub fn LessonContent() -> impl IntoView {
                     let core_count = lesson_data.core_count;
                     core_count_signal.set(core_count);
                     if cards.is_empty() {
-                        error_message.set(Some(
-                            i18n.get_keys_untracked()
-                                .lesson()
-                                .no_cards()
-                                .inner()
-                                .to_string(),
-                        ));
+                        // `lesson.no_cards` remains the fallback ONLY for
+                        // feature-gated modes (grammar practice): their
+                        // emptiness has different causes the Normal-mode
+                        // diagnosis does not model.
+                        #[cfg(feature = "grammar_practice_lesson_mode")]
+                        let is_gated_mode = matches!(
+                            resolved_mode.get_value(),
+                            LessonMode::GrammarPractice { .. }
+                        );
+                        #[cfg(not(feature = "grammar_practice_lesson_mode"))]
+                        let is_gated_mode = false;
+
+                        if is_gated_mode {
+                            error_message.set(Some(
+                                i18n.get_keys_untracked()
+                                    .lesson()
+                                    .no_cards()
+                                    .inner()
+                                    .to_string(),
+                            ));
+                        } else {
+                            // Single extra fetch, only on the (rare) empty
+                            // path: the diagnosis needs the user's daily
+                            // load, which the lesson selection did not carry.
+                            let diagnosis = match repo.get_current_user().await {
+                                Ok(Some(user)) => Some(diagnose_empty_lesson(
+                                    user.knowledge_set(),
+                                    *user.daily_load(),
+                                )),
+                                _ => Some(LessonEmptyDiagnosis::default()),
+                            };
+                            if is_disposed.is_disposed() {
+                                return;
+                            }
+                            empty_diagnosis.set(diagnosis);
+                        }
                     } else {
                         lesson_state.set(LessonState {
                             mode: resolved_mode.get_value().clone(),
@@ -269,6 +302,8 @@ pub fn LessonContent() -> impl IntoView {
             </div>
         </Show>
 
+        <LessonEmptyState diagnosis=empty_diagnosis />
+
         <Show when=move || is_completed.get()>
             <LessonCompleteScreen
                 is_completed
@@ -276,7 +311,7 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none()>
+        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()>
             // No nested scroll container here — the whole page scrolls.
             // A separate scroll layer over the lesson zone used to fight the
             // page scroll on mobile (jitter + snap-back) and was removed.
