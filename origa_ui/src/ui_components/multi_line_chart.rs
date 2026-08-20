@@ -52,6 +52,49 @@ fn format_axis_value(v: f64) -> String {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn global_bounds_empty_input_falls_back_to_unit_range() {
+        let (min, max) = compute_global_bounds(&[]);
+        assert_eq!(min, 0.0);
+        assert_eq!(max, 1.0);
+    }
+
+    #[test]
+    fn global_bounds_spans_all_lines() {
+        let lines = vec![
+            ChartLine {
+                data: vec![("a".into(), 5.0), ("b".into(), 20.0)],
+                color: "#000".into(),
+                label: "one".into(),
+            },
+            ChartLine {
+                data: vec![("c".into(), 1.0)],
+                color: "#111".into(),
+                label: "two".into(),
+            },
+        ];
+        let (min, max) = compute_global_bounds(&lines);
+        assert_eq!(min, 1.0);
+        assert_eq!(max, 20.0);
+    }
+
+    #[test]
+    fn format_axis_value_below_thousand_keeps_integer() {
+        assert_eq!(format_axis_value(250.4), "250");
+        assert_eq!(format_axis_value(0.0), "0");
+    }
+
+    #[test]
+    fn format_axis_value_thousand_and_above_uses_k_suffix() {
+        assert_eq!(format_axis_value(1000.0), "1.0k");
+        assert_eq!(format_axis_value(2500.0), "2.5k");
+    }
+}
+
 #[component]
 pub fn MultiLineChart(
     #[prop(into)] lines: Signal<Vec<ChartLine>>,

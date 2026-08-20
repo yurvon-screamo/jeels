@@ -24,6 +24,40 @@ fn format_delta(delta: i32) -> String {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_delta_positive_uses_up_arrow() {
+        assert_eq!(format_delta(5), "▲ +5");
+    }
+
+    #[test]
+    fn format_delta_negative_uses_down_arrow() {
+        assert_eq!(format_delta(-3), "▼ -3");
+    }
+
+    #[test]
+    fn format_delta_zero_is_plain_zero() {
+        assert_eq!(format_delta(0), "0");
+    }
+
+    #[test]
+    fn delta_color_positive_good_direction_is_success() {
+        // New words learned: up is good.
+        assert_eq!(delta_color(4, true), "var(--success)");
+        // Words regressed to hard: up is bad.
+        assert_eq!(delta_color(4, false), "var(--error)");
+        assert_eq!(delta_color(-4, false), "var(--success)");
+    }
+
+    #[test]
+    fn delta_color_zero_is_muted() {
+        assert_eq!(delta_color(0, true), "var(--fg-muted)");
+    }
+}
+
 #[component]
 pub fn TodayOverviewCard(
     overview: Signal<TodayOverview>,

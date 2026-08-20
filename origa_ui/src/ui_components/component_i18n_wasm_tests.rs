@@ -15,29 +15,13 @@ use std::collections::HashSet;
 
 use leptos::prelude::*;
 use leptos::task::tick;
-use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
 use crate::i18n::Locale;
+use crate::test_support::{create_wrapper, mount_to_wrapper};
 use crate::ui_components::{FuriganaText, LevelSelector, Stepper, StepperStep, WordTranslations};
 
 wasm_bindgen_test_configure!(run_in_browser);
-
-fn create_wrapper() -> web_sys::Element {
-    console_error_panic_hook::set_once();
-    let document = web_sys::window().unwrap().document().unwrap();
-    let wrapper = document.create_element("div").unwrap();
-    let _ = document.body().unwrap().append_child(&wrapper);
-    wrapper
-}
-
-fn mount_to_wrapper<F>(wrapper: &web_sys::Element, f: F)
-where
-    F: FnOnce() -> AnyView + 'static,
-{
-    let dispose = leptos::mount::mount_to(wrapper.clone().unchecked_into(), f);
-    std::mem::forget(dispose);
-}
 
 /// Mount a component that needs i18n context. The closure provides the
 /// context inside the reactive scope before rendering the component.
@@ -290,11 +274,6 @@ async fn stepper_pending_step_no_special_class() {
     });
     tick().await;
 
-    let html = wrapper
-        .query_selector(".stepper")
-        .unwrap()
-        .unwrap()
-        .inner_html();
     // Step index 2 (label "C") should be pending: just "stepper-step" without active/completed
     // Count steps without active/completed
     let all_steps = wrapper

@@ -1,12 +1,14 @@
 pub mod auth_handlers;
-pub mod email_password_form;
-pub mod header;
+pub(crate) mod email_password_form;
+mod header;
 mod language_toggle;
+#[cfg(all(target_arch = "wasm32", test))]
+mod login_wasm_tests;
 pub mod oauth_buttons;
 pub mod oauth_listeners;
-pub mod password_input;
-mod password_section;
-mod validation;
+pub(crate) mod password_input;
+pub(crate) mod password_section;
+pub(crate) mod validation;
 
 pub use header::LoginHeader;
 use language_toggle::LoginLanguageToggle;

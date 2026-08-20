@@ -22,7 +22,7 @@ mod fsrs_metrics;
 mod furigana;
 mod furigana_hover;
 mod input;
-mod kanji_animation;
+pub(crate) mod kanji_animation;
 mod kanji_drawing;
 mod language_toggle;
 mod layout;
@@ -48,7 +48,25 @@ mod skeleton;
 mod component_i18n_wasm_tests;
 #[cfg(all(target_arch = "wasm32", test))]
 mod component_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod content_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod context_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod feedback_wasm_tests;
 mod filter_tag;
+#[cfg(all(target_arch = "wasm32", test))]
+mod form_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod layout_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod overlay_wasm_tests;
+#[cfg(all(target_arch = "wasm32", test))]
+mod router_wasm_tests;
+
+// Test-only re-exports (kept with the test module declarations).
+#[cfg(all(target_arch = "wasm32", test))]
+pub(crate) use toast::Toast;
 mod stepper;
 mod tabs;
 mod tag;

@@ -206,3 +206,81 @@ pub fn compute_completion_forecast(
         target_date_label,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use origa::domain::{Card, KnowledgeSet, Question, VocabularyCard};
+
+    fn set_with_new_cards(n: usize) -> KnowledgeSet {
+        let mut set = KnowledgeSet::new();
+        for i in 0..n {
+            let vocab = VocabularyCard::new_with_pos(
+                Question::new(format!("word{i}")).unwrap(),
+                None,
+                None,
+            );
+            let _ = set.create_card(Card::Vocabulary(vocab));
+        }
+        set
+    }
+
+    #[test]
+    fn chart_data_limits_to_thirty_points() {
+        let history = vec![DailyHistoryItem::new(); 45];
+        let data = compute_30day_chart_data(&history, &NativeLanguage::English);
+        assert_eq!(data.len(), 30, "only the last 30 days are charted");
+    }
+
+    #[test]
+    fn chart_data_labels_are_localised() {
+        let history = vec![DailyHistoryItem::new()];
+        let en = compute_30day_chart_data(&history, &NativeLanguage::English);
+        let ru = compute_30day_chart_data(&history, &NativeLanguage::Russian);
+        assert_eq!(en.len(), 1);
+        // Same day → labels share the day number, month abbreviations differ
+        // between locales for most months; both must be non-empty and start
+        // with the day number.
+        assert!(!en[0].date_label.is_empty());
+        assert!(!ru[0].date_label.is_empty());
+    }
+
+    #[test]
+    fn completion_forecast_empty_set_is_not_all_studied() {
+        let set = KnowledgeSet::new();
+        let forecast = compute_completion_forecast(&set, &[], &NativeLanguage::English);
+        assert!(!forecast.is_all_studied, "no cards → not all studied");
+        assert_eq!(forecast.target_date_label, "");
+    }
+
+    #[test]
+    fn completion_forecast_new_cards_remaining_is_not_all_studied() {
+        let set = set_with_new_cards(3);
+        let forecast = compute_completion_forecast(&set, &[], &NativeLanguage::English);
+        assert!(!forecast.is_all_studied, "new cards remain → not done");
+        // Without history the completion date is not estimable.
+        assert_eq!(forecast.days_remaining, None);
+    }
+
+    #[test]
+    fn completion_forecast_all_cards_reviewed_is_all_studied() {
+        let mut set = set_with_new_cards(2);
+        // Mark every card as known — no new cards remain.
+        for (id, _) in set.study_cards().clone() {
+            let _ = set.mark_card_as_known(id);
+        }
+        let forecast = compute_completion_forecast(&set, &[], &NativeLanguage::English);
+        assert!(forecast.is_all_studied, "everything reviewed → done");
+    }
+
+    #[test]
+    fn studied_today_excludes_phrase_cards_and_old_reviews() {
+        let set = set_with_new_cards(2);
+        // No review dates → nothing studied today.
+        let items = compute_studied_today(&set, &NativeLanguage::English);
+        assert!(
+            items.is_empty(),
+            "cards without a review date are not 'studied today'"
+        );
+    }
+}

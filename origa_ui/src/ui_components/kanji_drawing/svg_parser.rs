@@ -213,3 +213,136 @@ pub(crate) fn parse_number(chars: &[char], start: usize) -> Option<(f64, usize)>
     let num: f64 = num_str.parse().ok()?;
     Some((num, pos))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_stroke_paths_extracts_d_attributes() {
+        let svg = r#"<svg><path d="M 10 10 L 20 20"/><path d="M 1 2 C 3 4 5 6 7 8"/></svg>"#;
+        let strokes = parse_stroke_paths(svg);
+        assert_eq!(strokes.len(), 2);
+        assert_eq!(strokes[0].d, "M 10 10 L 20 20");
+        assert_eq!(strokes[1].d, "M 1 2 C 3 4 5 6 7 8");
+    }
+
+    #[test]
+    fn parse_stroke_paths_skips_background_strokes() {
+        let svg = r#"<path class="bg" d="M 0 0 L 1 1"/><path d="M 5 5 L 6 6"/>"#;
+        let strokes = parse_stroke_paths(svg);
+        assert_eq!(strokes.len(), 1, "bg stroke must be filtered out");
+        assert_eq!(strokes[0].d, "M 5 5 L 6 6");
+    }
+
+    #[test]
+    fn parse_stroke_paths_empty_input_yields_nothing() {
+        assert!(parse_stroke_paths("").is_empty());
+        assert!(parse_stroke_paths("<circle cx=\"1\"/>").is_empty());
+    }
+
+    #[test]
+    fn parse_path_commands_absolute_move_line_close() {
+        // Compact comma-separated format used by CDN kanji SVG files.
+        let cmds = parse_svg_path_commands("M10,20L30,40Z");
+        assert_eq!(
+            cmds,
+            vec![
+                PathCommand::MoveTo(10.0, 20.0),
+                PathCommand::LineTo(30.0, 40.0),
+                PathCommand::ClosePath,
+            ]
+        );
+    }
+
+    #[test]
+    fn parse_path_commands_relative_coordinates() {
+        // m 10 10 l 5 0 → MoveTo(10,10) then relative LineTo(15,10)
+        let cmds = parse_svg_path_commands("m10,10l5,0");
+        assert_eq!(
+            cmds,
+            vec![
+                PathCommand::MoveTo(10.0, 10.0),
+                PathCommand::LineTo(15.0, 10.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn parse_path_commands_implicit_line_after_move() {
+        // SVG allows implicit repetition: "M1,2 3,4" = M 1 2 L 3 4
+        let cmds = parse_svg_path_commands("M1,2 3,4");
+        assert_eq!(
+            cmds,
+            vec![PathCommand::MoveTo(1.0, 2.0), PathCommand::LineTo(3.0, 4.0),]
+        );
+    }
+
+    #[test]
+    fn parse_path_commands_absolute_cubic_bezier() {
+        let cmds = parse_svg_path_commands("M0,0C1,2 3,4 5,6");
+        assert_eq!(
+            cmds,
+            vec![
+                PathCommand::MoveTo(0.0, 0.0),
+                PathCommand::CurveTo(1.0, 2.0, 3.0, 4.0, 5.0, 6.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn parse_path_commands_relative_cubic_bezier_offsets_from_current() {
+        let cmds = parse_svg_path_commands("M10,10c1,1 2,2 3,3");
+        assert_eq!(
+            cmds,
+            vec![
+                PathCommand::MoveTo(10.0, 10.0),
+                PathCommand::CurveTo(11.0, 11.0, 12.0, 12.0, 13.0, 13.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn parse_path_commands_negative_and_comma_separated_numbers() {
+        let cmds = parse_svg_path_commands("M-5.5,-2.5L+3,4");
+        assert_eq!(
+            cmds,
+            vec![
+                PathCommand::MoveTo(-5.5, -2.5),
+                PathCommand::LineTo(3.0, 4.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn parse_path_commands_real_cdn_stroke_path() {
+        // Verbatim fragment of cdn/kanji_animations/丁.svg — the actual
+        // production input format.
+        let d = "M14,24.17c2.44,0.56,6.92,0.82,9.35,0.56c18.9-1.99,39.53-5.36,60.62-6.48";
+        let cmds = parse_svg_path_commands(d);
+        assert_eq!(cmds.len(), 3);
+        assert_eq!(cmds[0], PathCommand::MoveTo(14.0, 24.17));
+
+        // Relative curve: offsets added to the current point (14, 24.17).
+        // f64 addition carries float error (24.17+0.82), so compare with a
+        // tolerance instead of exact equality.
+        match cmds[1] {
+            PathCommand::CurveTo(x1, y1, x2, y2, x, y) => {
+                assert!((x1 - 16.44).abs() < 1e-9);
+                assert!((y1 - 24.73).abs() < 1e-9);
+                assert!((x2 - 20.92).abs() < 1e-9);
+                assert!((y2 - 24.99).abs() < 1e-9);
+                assert!((x - 23.35).abs() < 1e-9);
+                assert!((y - 24.73).abs() < 1e-9);
+            },
+            other => panic!("expected CurveTo, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_path_commands_empty_and_noise_input() {
+        assert!(parse_svg_path_commands("").is_empty());
+        // Unknown command letters are skipped without breaking the parser.
+        assert!(parse_svg_path_commands("Q 1 2 3 4").is_empty());
+    }
+}

@@ -38,6 +38,51 @@ impl YesNoResult {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_answer_before_result_is_always_none() {
+        assert_eq!(
+            YesNoResult::from_answer(true, true, false),
+            YesNoResult::None
+        );
+    }
+
+    #[test]
+    fn from_answer_correct_statement_yes_is_correct() {
+        assert_eq!(
+            YesNoResult::from_answer(true, true, true),
+            YesNoResult::Correct
+        );
+    }
+
+    #[test]
+    fn from_answer_correct_statement_no_is_incorrect() {
+        assert_eq!(
+            YesNoResult::from_answer(true, false, true),
+            YesNoResult::Incorrect
+        );
+    }
+
+    #[test]
+    fn from_answer_wrong_statement_no_is_correct() {
+        assert_eq!(
+            YesNoResult::from_answer(false, false, true),
+            YesNoResult::Correct
+        );
+    }
+
+    #[test]
+    fn from_answer_wrong_statement_yes_is_incorrect() {
+        assert_eq!(
+            YesNoResult::from_answer(false, true, true),
+            YesNoResult::Incorrect
+        );
+    }
+}
+
 #[component]
 pub fn YesNoCardView(
     yesno_card: YesNoCard,

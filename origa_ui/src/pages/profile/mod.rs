@@ -1,9 +1,9 @@
-mod content;
-mod danger_zone_card;
-mod legal_card;
-mod password_card;
-mod personal_data_card;
-mod settings_card;
+pub(crate) mod content;
+pub(crate) mod danger_zone_card;
+pub(crate) mod legal_card;
+pub(crate) mod password_card;
+pub(crate) mod personal_data_card;
+pub(crate) mod settings_card;
 
 pub use content::ProfileContent;
 pub use danger_zone_card::DangerZoneCard;

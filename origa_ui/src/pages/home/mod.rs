@@ -1,13 +1,16 @@
 pub mod activity_chart;
-pub mod category_grid;
+pub(crate) mod category_grid;
 pub mod content;
-pub mod content_sync;
+pub(crate) mod content_sync;
 pub mod dashboard_stats;
 pub mod home_skeleton;
 pub mod jlpt_progress_card;
 pub mod recent_study;
 pub mod today_overview;
 pub mod welcome_card;
+
+#[cfg(all(target_arch = "wasm32", test))]
+mod home_wasm_tests;
 
 pub use activity_chart::ActivityChart;
 pub use content::HomeContent;
