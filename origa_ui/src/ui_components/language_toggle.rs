@@ -45,7 +45,7 @@ pub fn NativeLanguageToggle(
                     "bg-transparent p-0 transition-colors duration-150 ease-in-out anima-focus-ring {}",
                     en_class.get()
                 )
-                attr:aria-current=move || if selected_language.get() == NativeLanguage::English { "true" } else { "false" }
+                aria-current=move || if selected_language.get() == NativeLanguage::English { "true" } else { "false" }
                 on:click=move |_| {
                     selected_language.set(NativeLanguage::English);
                     if let Some(cb) = &on_change { cb.run(NativeLanguage::English); }
@@ -63,7 +63,7 @@ pub fn NativeLanguageToggle(
                     "bg-transparent p-0 transition-colors duration-150 ease-in-out anima-focus-ring {}",
                     ru_class.get()
                 )
-                attr:aria-current=move || if selected_language.get() == NativeLanguage::Russian { "true" } else { "false" }
+                aria-current=move || if selected_language.get() == NativeLanguage::Russian { "true" } else { "false" }
                 on:click=move |_| {
                     selected_language.set(NativeLanguage::Russian);
                     if let Some(cb) = &on_change { cb.run(NativeLanguage::Russian); }
