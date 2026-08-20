@@ -8,6 +8,8 @@ mod set_card;
 mod set_word_item;
 mod sets_level_group;
 mod sets_type_group;
+#[cfg(all(target_arch = "wasm32", test))]
+mod sets_wasm_tests;
 mod types;
 
 pub use content::SetsContent;

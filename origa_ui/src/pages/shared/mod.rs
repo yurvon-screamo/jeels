@@ -12,6 +12,8 @@ mod jlpt_filter;
 mod mark_as_known_button;
 mod mark_known_callback;
 mod pagination;
+#[cfg(all(target_arch = "wasm32", test))]
+mod shared_wasm_tests;
 mod toggle_favorite_callback;
 
 pub use card_answer_helper::{format_answer_parts, format_answer_text};

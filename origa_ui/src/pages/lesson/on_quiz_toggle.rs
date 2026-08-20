@@ -17,3 +17,41 @@ pub fn create_on_quiz_toggle(lesson_state: RwSignal<LessonState>) -> Callback<us
         });
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quiz_toggle_adds_then_removes_option() {
+        let state = RwSignal::new(LessonState::default());
+        let toggle = create_on_quiz_toggle(state);
+
+        toggle.run(1);
+        assert!(
+            state.get().selected_quiz_options.contains(&1),
+            "first toggle selects the option"
+        );
+
+        toggle.run(1);
+        assert!(
+            !state.get().selected_quiz_options.contains(&1),
+            "second toggle deselects the option"
+        );
+    }
+
+    #[test]
+    fn quiz_toggle_ignored_while_showing_answer() {
+        let state = RwSignal::new(LessonState {
+            showing_answer: true,
+            ..LessonState::default()
+        });
+        let toggle = create_on_quiz_toggle(state);
+
+        toggle.run(2);
+        assert!(
+            !state.get().selected_quiz_options.contains(&2),
+            "toggles must be ignored after the answer is shown"
+        );
+    }
+}

@@ -1,10 +1,12 @@
 mod onboarding_actions;
-mod onboarding_state;
+pub(crate) mod onboarding_state;
 
-mod apps_step;
-mod intro_step;
-mod jlpt_step;
-mod load_step;
+pub(crate) mod apps_step;
+pub(crate) mod intro_step;
+pub(crate) mod jlpt_step;
+pub(crate) mod load_step;
+#[cfg(all(target_arch = "wasm32", test))]
+mod onboarding_wasm_tests;
 mod progress;
 mod scoring_card_view;
 mod scoring_helpers;

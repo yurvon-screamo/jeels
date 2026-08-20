@@ -1,6 +1,8 @@
 mod content;
-mod header;
-mod phrase_card_item;
+pub(crate) mod header;
+pub(crate) mod phrase_card_item;
+#[cfg(all(target_arch = "wasm32", test))]
+mod phrases_wasm_tests;
 
 pub use content::PhrasesContent;
 pub use header::PhrasesHeader;

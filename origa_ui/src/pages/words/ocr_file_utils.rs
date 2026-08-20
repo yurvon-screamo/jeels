@@ -152,3 +152,28 @@ pub(super) async fn execute_ocr(
             .map_err(|e| format!("OCR failed: {:?}", e))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn base64_decode_roundtrips_ascii() {
+        // "hello" -> "aGVsbG8="
+        assert_eq!(base64_decode("aGVsbG8=").unwrap(), b"hello".to_vec());
+    }
+
+    #[test]
+    fn base64_decode_invalid_input_is_error() {
+        assert!(base64_decode("!!!not-base64!!!").is_err());
+    }
+
+    #[test]
+    fn speed_and_eta_without_start_time_is_zero() {
+        assert_eq!(calculate_speed_and_eta(None, 100, 1000), (0, 0));
+    }
+
+    // NOTE: the "completed transfer → ETA 0" case needs a real clock
+    // (`js_sys::Date::now` is wasm-only); it is exercised implicitly by the
+    // WASM OCR-stage tests.
+}

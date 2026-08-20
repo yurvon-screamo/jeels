@@ -2,7 +2,7 @@ mod add_word_modal;
 mod add_words_preview_modal;
 mod add_words_preview_modal_handlers;
 mod add_words_preview_modal_state;
-mod analyzed_word_item;
+pub(crate) mod analyzed_word_item;
 mod anki_import_stage;
 mod asr_provider;
 mod audio_input_stage;
@@ -13,7 +13,9 @@ mod image_input_stage;
 mod ocr_device_ai;
 mod ocr_file_utils;
 mod ocr_processing;
-mod vocabulary_card_item;
+pub(crate) mod vocabulary_card_item;
+#[cfg(all(target_arch = "wasm32", test))]
+mod words_wasm_tests;
 
 pub use content::WordsContent;
 pub use header::WordsHeader;

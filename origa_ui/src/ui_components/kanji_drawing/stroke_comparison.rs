@@ -164,3 +164,79 @@ fn resample_points(points: &[(f64, f64)], count: usize) -> Vec<(f64, f64)> {
     }
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A dense point cloud along a horizontal line in canvas space.
+    fn horizontal_points(y: f64, x0: f64, x1: f64, steps: usize) -> Vec<(f64, f64)> {
+        (0..=steps)
+            .map(|i| {
+                let t = i as f64 / steps as f64;
+                (x0 + (x1 - x0) * t, y)
+            })
+            .collect()
+    }
+
+    #[test]
+    fn stroke_similar_exact_line_traced_matches() {
+        // d="M10,10L99,10" in viewBox 109 → canvas coords ×(320/109)
+        let scale = 320.0 / 109.0;
+        let y = 10.0 * scale;
+        let user = horizontal_points(y, 10.0 * scale, 99.0 * scale, 30);
+        assert!(
+            is_stroke_similar(&user, "M10,10L99,10"),
+            "a dense trace of the target line must match"
+        );
+    }
+
+    #[test]
+    fn stroke_similar_far_away_line_does_not_match() {
+        let user = horizontal_points(250.0, 30.0, 280.0, 30);
+        assert!(
+            !is_stroke_similar(&user, "M10,10L99,10"),
+            "a line on the opposite side of the canvas must not match"
+        );
+    }
+
+    #[test]
+    fn stroke_similar_too_few_points_rejected() {
+        let user = horizontal_points(30.0, 30.0, 280.0, 3);
+        assert!(
+            !is_stroke_similar(&user, "M10,10L99,10"),
+            "fewer than MIN_STROKE_POINTS must be rejected outright"
+        );
+    }
+
+    #[test]
+    fn stroke_similar_partial_coverage_below_threshold_rejected() {
+        // Cover only the left ~40% of the stroke: coverage ≈ 0.4 < 0.8.
+        let scale = 320.0 / 109.0;
+        let y = 10.0 * scale;
+        let user = horizontal_points(y, 10.0 * scale, 45.0 * scale, 30);
+        assert!(
+            !is_stroke_similar(&user, "M10,10L99,10"),
+            "partial trace below the success threshold must fail"
+        );
+    }
+
+    #[test]
+    fn stroke_similar_bezier_traced_within_tolerance_matches() {
+        // A shallow curve approximated by its chord stays within the
+        // 25px canvas tolerance of the true bezier samples.
+        let scale = 320.0 / 109.0;
+        let y0 = 30.0 * scale;
+        let y1 = 50.0 * scale;
+        let user = (0..=30)
+            .map(|i| {
+                let t = i as f64 / 30.0;
+                (10.0 * scale + (99.0 - 10.0) * scale * t, y0 + (y1 - y0) * t)
+            })
+            .collect::<Vec<_>>();
+        assert!(
+            is_stroke_similar(&user, "M10,30C40,30 70,50 99,50"),
+            "chord trace of a shallow bezier must match within tolerance"
+        );
+    }
+}

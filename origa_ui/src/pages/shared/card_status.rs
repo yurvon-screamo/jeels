@@ -3,7 +3,7 @@ use crate::ui_components::TagVariant;
 use leptos_i18n::I18nContext;
 use origa::domain::StudyCard;
 
-#[derive(Clone, Copy, PartialEq, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum CardStatus {
     #[default]
     New,
@@ -52,5 +52,31 @@ impl CardStatus {
             CardStatus::InProgress => TagVariant::Filled,
             CardStatus::Learned => TagVariant::Olive,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use origa::domain::{Card, Question, StudyCard, VocabularyCard};
+
+    fn fresh_vocab_card(word: &str) -> StudyCard {
+        let vocab =
+            VocabularyCard::new_with_pos(Question::new(word.to_string()).unwrap(), None, None);
+        StudyCard::new(Card::Vocabulary(vocab))
+    }
+
+    #[test]
+    fn tag_variant_maps_every_status() {
+        assert_eq!(CardStatus::New.tag_variant(), TagVariant::Default);
+        assert_eq!(CardStatus::Hard.tag_variant(), TagVariant::Terracotta);
+        assert_eq!(CardStatus::InProgress.tag_variant(), TagVariant::Filled);
+        assert_eq!(CardStatus::Learned.tag_variant(), TagVariant::Olive);
+    }
+
+    #[test]
+    fn from_study_card_fresh_card_is_new() {
+        let card = fresh_vocab_card("ねこ");
+        assert_eq!(CardStatus::from_study_card(&card), CardStatus::New);
     }
 }

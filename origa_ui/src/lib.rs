@@ -14,6 +14,8 @@ mod repository;
 mod routes;
 mod sentry;
 mod store;
+#[cfg(all(target_arch = "wasm32", test))]
+mod test_support;
 mod ui_components;
 pub mod utils;
 
