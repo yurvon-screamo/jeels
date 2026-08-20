@@ -290,6 +290,72 @@ impl From<DailyLoad> for i32 {
     }
 }
 
+impl DailyLoad {
+    /// Per-lesson allowance of NEW anchored (interleaved) phrases, derived
+    /// from the daily new-card pace. Historically this was a per-DAY budget
+    /// (`new_cards_per_day * 2 - phrases_studied_today`) which starved every
+    /// lesson after the first one of the day; it is now granted fresh to
+    /// every lesson (ADR: per-lesson phrase cap). At Hard/Heavy/Maximum the
+    /// binding constraint is usually structural (`INTERLEAVED_PHRASES_PER_WORD`
+    /// × anchor words), not this cap — see the ADR for the parity rationale.
+    pub fn new_phrases_per_lesson(&self) -> usize {
+        self.new_cards_per_day() * PHRASES_PER_NEW_CARD
+    }
+}
+
+/// How many new anchored phrases one new vocabulary card is worth. Kept next
+/// to the budget derivation so the relationship is discoverable.
+pub(crate) const PHRASES_PER_NEW_CARD: usize = 2;
+
+/// Derived lesson-building limits for one user ([DailyLoad]).
+///
+/// `new_cards_per_day` bounds how many new cards may enter lessons on a
+/// given day; `new_phrases_per_lesson` bounds how many NEW anchored phrases
+/// a single lesson may interleave (fresh for every lesson of the day).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DailyBudget {
+    new_cards_per_day: usize,
+    new_phrases_per_lesson: usize,
+}
+
+impl DailyBudget {
+    /// Derives the budget from the user's pace preference. The single
+    /// production construction point (`SelectCardsToLessonUseCase`).
+    pub fn from_load(load: DailyLoad) -> Self {
+        Self {
+            new_cards_per_day: load.new_cards_per_day(),
+            new_phrases_per_lesson: load.new_phrases_per_lesson(),
+        }
+    }
+
+    /// Arbitrary budget for tests that exercise limit mechanics with
+    /// non-product values (e.g. `daily_new_limit = 1`).
+    #[cfg(test)]
+    pub fn new(new_cards_per_day: usize, new_phrases_per_lesson: usize) -> Self {
+        Self {
+            new_cards_per_day,
+            new_phrases_per_lesson,
+        }
+    }
+
+    /// Test convenience: the budget a [`DailyLoad`] with `cards` new cards
+    /// per day would yield (phrase cap = cards × 2). Matches the historical
+    /// first-lesson-of-the-day allowance for tests written before the
+    /// per-lesson cap.
+    #[cfg(test)]
+    pub fn with_daily_cards(cards: usize) -> Self {
+        Self::new(cards, cards * PHRASES_PER_NEW_CARD)
+    }
+
+    pub fn new_cards_per_day(&self) -> usize {
+        self.new_cards_per_day
+    }
+
+    pub fn new_phrases_per_lesson(&self) -> usize {
+        self.new_phrases_per_lesson
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -667,6 +733,7 @@ mod tests {
 #[cfg(test)]
 mod tests_daily_load {
     use super::*;
+    use rstest::rstest;
 
     #[test]
     fn default_is_medium() {
@@ -694,5 +761,26 @@ mod tests_daily_load {
     #[test]
     fn from_i32_unknown_falls_back_to_medium() {
         assert_eq!(DailyLoad::from(999), DailyLoad::Medium);
+    }
+
+    #[rstest]
+    #[case::minimal(DailyLoad::Minimal, 3, 6)]
+    #[case::light(DailyLoad::Light, 6, 12)]
+    #[case::medium(DailyLoad::Medium, 9, 18)]
+    #[case::hard(DailyLoad::Hard, 15, 30)]
+    #[case::heavy(DailyLoad::Heavy, 21, 42)]
+    #[case::maximum(DailyLoad::Maximum, 30, 60)]
+    fn daily_budget_from_load_phrases_double_new_cards(
+        #[case] load: DailyLoad,
+        #[case] expected_cards: usize,
+        #[case] expected_phrases: usize,
+    ) {
+        let budget = DailyBudget::from_load(load);
+        assert_eq!(budget.new_cards_per_day(), expected_cards);
+        assert_eq!(
+            budget.new_phrases_per_lesson(),
+            expected_phrases,
+            "per-lesson phrase cap must equal the former first-lesson daily allowance"
+        );
     }
 }

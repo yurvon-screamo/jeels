@@ -1,5 +1,6 @@
 use super::lesson_builder::MAX_LESSON_SIZE;
 use super::*;
+use crate::domain::DailyBudget;
 use crate::domain::JapaneseLevel;
 use crate::domain::JlptContent;
 use crate::domain::NativeLanguage;
@@ -94,7 +95,7 @@ fn cards_to_lesson_includes_favorite_cards() {
     knowledge_set.toggle_favorite(card_id).unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -121,7 +122,7 @@ fn cards_to_lesson_includes_high_difficulty_cards() {
         .unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -528,7 +529,7 @@ fn recalculate_daily_stats_preserves_new_cards_on_create_card() {
     }
 
     let lesson_cards = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -596,8 +597,12 @@ fn new_cards_sorted_by_jlpt_level() {
         .create_card(create_vocab_card("走る"))
         .unwrap();
 
-    let result =
-        knowledge_set.cards_to_lesson(2, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+    let result = knowledge_set.cards_to_lesson(
+        DailyBudget::with_daily_cards(2),
+        &jlpt_content,
+        JapaneseLevel::N5,
+        NativeLanguage::Russian,
+    );
 
     assert!(
         result.contains_key(study_taberu.card_id()),
@@ -629,8 +634,12 @@ fn new_cards_unknown_level_go_last() {
         .create_card(create_vocab_card("食べる"))
         .unwrap();
 
-    let result =
-        knowledge_set.cards_to_lesson(1, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+    let result = knowledge_set.cards_to_lesson(
+        DailyBudget::with_daily_cards(1),
+        &jlpt_content,
+        JapaneseLevel::N5,
+        NativeLanguage::Russian,
+    );
 
     assert!(
         result.contains_key(study_taberu.card_id()),
@@ -676,7 +685,7 @@ fn new_cards_jlpt_sort_does_not_affect_other_categories() {
         .unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &jlpt_content,
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -742,7 +751,7 @@ fn new_cards_interleaved_by_type_within_jlpt_level() {
         .unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        15,
+        DailyBudget::with_daily_cards(15),
         &jlpt_content,
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -795,8 +804,12 @@ fn new_cards_interleave_handles_missing_type() {
         knowledge_set.create_card(create_vocab_card(word)).unwrap();
     }
 
-    let result =
-        knowledge_set.cards_to_lesson(5, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+    let result = knowledge_set.cards_to_lesson(
+        DailyBudget::with_daily_cards(5),
+        &jlpt_content,
+        JapaneseLevel::N5,
+        NativeLanguage::Russian,
+    );
 
     assert_eq!(
         result.len(),
@@ -845,8 +858,12 @@ fn new_cards_interleave_across_jlpt_levels() {
         .create_card(Card::Kanji(KanjiCard::new_test("n4k1".to_string())))
         .unwrap();
 
-    let result =
-        knowledge_set.cards_to_lesson(4, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+    let result = knowledge_set.cards_to_lesson(
+        DailyBudget::with_daily_cards(4),
+        &jlpt_content,
+        JapaneseLevel::N5,
+        NativeLanguage::Russian,
+    );
 
     let distinct_card_ids: HashSet<Ulid> = result.values().map(|lc| lc.card_id()).collect();
     assert_eq!(
@@ -911,8 +928,12 @@ fn new_cards_interleave_preserves_jlpt_priority() {
         knowledge_set.create_card(create_vocab_card(word)).unwrap();
     }
 
-    let result =
-        knowledge_set.cards_to_lesson(3, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+    let result = knowledge_set.cards_to_lesson(
+        DailyBudget::with_daily_cards(3),
+        &jlpt_content,
+        JapaneseLevel::N5,
+        NativeLanguage::Russian,
+    );
 
     assert!(
         result.contains_key(study_n5.card_id()),
@@ -965,10 +986,10 @@ fn phrase_new_cards_limited() {
             .unwrap();
     }
 
-    // daily_new_limit = 1 -> new-phrase budget = 1 * PHRASE_NEW_RATIO (2).
-    // Four phrases are available, so the budget must be the binding constraint.
+    // DailyBudget::with_daily_cards(1) -> per-lesson phrase cap = 1 * 2.
+    // Four phrases are available, so the cap must be the binding constraint.
     let result = knowledge_set.cards_to_lesson(
-        1,
+        DailyBudget::with_daily_cards(1),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -979,7 +1000,7 @@ fn phrase_new_cards_limited() {
 
     assert_eq!(
         total_phrases, 2,
-        "New phrase cards must be capped at daily_new_limit * PHRASE_NEW_RATIO (2), got {total_phrases}"
+        "New phrase cards must be capped at new_phrases_per_lesson (1 × 2), got {total_phrases}"
     );
     assert_eq!(
         core_phrases, 2,
@@ -1027,9 +1048,9 @@ fn phrase_new_cards_zero_when_limit_below_ratio() {
             .unwrap();
     }
 
-    // daily_new_limit=0 → phrase_new_limit=0
+    // DailyBudget::with_daily_cards(0) → new_phrases_per_lesson = 0
     let result = knowledge_set.cards_to_lesson(
-        0,
+        DailyBudget::with_daily_cards(0),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1047,7 +1068,7 @@ fn phrase_new_cards_zero_when_limit_below_ratio() {
 
     assert_eq!(
         phrase_count, 0,
-        "Phrase cards should be 0 when daily_new_limit is 0, got {phrase_count}"
+        "Phrase cards should be 0 when new_phrases_per_lesson is 0, got {phrase_count}"
     );
 }
 
@@ -1103,7 +1124,7 @@ fn limited_types_still_respect_daily_limit() {
     }
 
     let result = knowledge_set.cards_to_lesson(
-        5,
+        DailyBudget::with_daily_cards(5),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1147,7 +1168,7 @@ fn lesson_size_respects_max_limit() {
     }
 
     let result = knowledge_set.cards_to_lesson(
-        100,
+        DailyBudget::with_daily_cards(100),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1175,7 +1196,7 @@ fn high_difficulty_cards_respect_max_lesson_size() {
     }
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1212,7 +1233,7 @@ fn phrases_added_after_core_cards_learning() {
     }
 
     let result = knowledge_set.cards_to_lesson(
-        5,
+        DailyBudget::with_daily_cards(5),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1258,7 +1279,7 @@ fn phrases_added_after_core_cards_review() {
     }
 
     let result = knowledge_set.cards_to_lesson(
-        5,
+        DailyBudget::with_daily_cards(5),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1304,7 +1325,7 @@ fn onboarding_scoring_does_not_consume_daily_limit() {
     );
 
     let result = knowledge_set.cards_to_lesson(
-        15,
+        DailyBudget::with_daily_cards(15),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1335,7 +1356,7 @@ fn favorite_card_appears_once_when_due_high_difficulty() {
     knowledge_set.toggle_favorite(card_id).unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1369,7 +1390,7 @@ fn favorite_card_appears_once_when_new() {
     knowledge_set.toggle_favorite(card_id).unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,
@@ -1400,7 +1421,7 @@ fn favorite_card_appears_once_when_due_known() {
     knowledge_set.toggle_favorite(card_id).unwrap();
 
     let result = knowledge_set.cards_to_lesson(
-        10,
+        DailyBudget::with_daily_cards(10),
         &JlptContent::new(),
         JapaneseLevel::N5,
         NativeLanguage::Russian,

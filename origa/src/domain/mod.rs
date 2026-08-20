@@ -34,8 +34,9 @@ pub use jlpt_progress::{
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,
     GrammarRuleCard, KanjiCard, KnowledgeSet, LessonCard, LessonCardView, LessonData,
-    LessonViewGenerator, MultiQuizResult, PhraseCard, QuizCard, QuizMode, QuizOption, StudyCard,
-    VocabularyCard, YesNoCard, estimate_completion_date,
+    LessonEmptyDiagnosis, LessonViewGenerator, MultiQuizResult, PhraseCard, QuizCard, QuizMode,
+    QuizOption, StudyCard, VocabularyCard, YesNoCard, diagnose_empty_lesson,
+    estimate_completion_date,
 };
 
 /// Re-exported so the UI can stay layering-clean: presentation code reaches
@@ -55,7 +56,9 @@ pub use tokenizer::{
     is_dictionary_loaded, lookup_tokens_translations, tokenize_text,
 };
 pub use user::{ONBOARDING_COMPLETED_KEY, ONBOARDING_SKIPPED_KEY, User, WordKnowledge};
-pub use value_objects::{CardAnswer, DailyLoad, JapaneseLevel, NativeLanguage, Question};
+pub use value_objects::{
+    CardAnswer, DailyBudget, DailyLoad, JapaneseLevel, NativeLanguage, Question,
+};
 pub use well_known_set::{
     SetType, TypeMeta, TypesMeta, WellKnownSet, WellKnownSetMeta, get_types_meta, id_to_set_type,
     resolve_set_path, set_types_meta,
