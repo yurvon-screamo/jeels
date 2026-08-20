@@ -168,6 +168,20 @@ pub fn start_dictionary_loading(
         // Phase E: auto per-card pre-cache (background, only when online)
         if connectivity.is_online.get_untracked() {
             if let Some(user) = auth_store.user.get_untracked() {
+                // Validate cache if marked as complete
+                let cache_state = offline_store.card_cache_state.get_untracked();
+                if cache_state == crate::store::offline_bundle_store::CardCacheState::Complete {
+                    const CARD_CACHE_MARKER_KEY: &str = "/__origa_card_cache_complete__";
+                    let is_cache_valid =
+                        crate::repository::cdn_provider::is_cached(CARD_CACHE_MARKER_KEY).await;
+                    if !is_cache_valid {
+                        tracing::warn!("Card cache marker not found, resetting to Idle");
+                        offline_store.set_card_cache_state(
+                            crate::store::offline_bundle_store::CardCacheState::Idle,
+                        );
+                    }
+                }
+
                 let cards: Vec<origa::domain::StudyCard> = user
                     .knowledge_set()
                     .study_cards()

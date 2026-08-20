@@ -94,7 +94,7 @@ pub fn start_card_precache(
     }
 
     tracing::info!(card_count = cards.len(), "Starting card pre-cache");
-    offline_store.card_cache_state.set(CardCacheState::Running);
+    offline_store.set_card_cache_state(CardCacheState::Running);
     let store_clone = offline_store.clone();
 
     leptos::task::spawn_local(async move {
@@ -105,11 +105,21 @@ pub fn start_card_precache(
                     total = result.total,
                     "Card pre-cache complete"
                 );
-                store_clone.card_cache_state.set(CardCacheState::Complete);
+                store_clone.set_card_cache_state(CardCacheState::Complete);
+
+                // Store marker to enable cache validation on next startup
+                if let Err(e) = crate::repository::cdn_provider::store_cache_marker(
+                    "/__origa_card_cache_complete__",
+                    "ok",
+                )
+                .await
+                {
+                    tracing::warn!(error = ?e, "Failed to store card cache marker");
+                }
             },
             Err(e) => {
                 tracing::warn!(error = %e, "Card pre-cache failed, returning to Idle");
-                store_clone.card_cache_state.set(CardCacheState::Idle);
+                store_clone.set_card_cache_state(CardCacheState::Idle);
             },
         }
     });
