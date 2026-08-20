@@ -62,6 +62,17 @@ const DOCS: &[(Locale, &str, &str)] = &[
         "lesson",
         include_str!("../../content/docs/ru/lesson.md"),
     ),
+    // fsrs
+    (
+        Locale::En,
+        "fsrs",
+        include_str!("../../content/docs/en/fsrs.md"),
+    ),
+    (
+        Locale::Ru,
+        "fsrs",
+        include_str!("../../content/docs/ru/fsrs.md"),
+    ),
     // vocabulary
     (
         Locale::En,
