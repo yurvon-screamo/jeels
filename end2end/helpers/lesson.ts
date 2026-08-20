@@ -61,11 +61,25 @@ export async function completeLessonFlexible(
         const isComplete = await lessonPage.completeScreen.isVisible().catch(() => false);
         if (isComplete) break;
 
+        // Pure-manual advance (ADR-033): after submitting a quiz/yesno
+        // answer the user is held on the feedback card until they click
+        // "Next" (or press Space/Enter). The check MUST run before the
+        // `anyInteractive` wait below: on VOCABULARY quiz cards the options
+        // are hidden once the result is shown (quiz_card.rs renders either
+        // QuizOptions or QuizResultDisplay, never both), so during the
+        // feedback phase NO interactive element from `anyInteractive` is
+        // visible and the wait would time out. Phrase quizzes keep their
+        // options visible — hence the separate check (never both in one
+        // `.or()`, which would trip Playwright strict mode; see below).
+        if (await lessonPage.lessonCardNextBtn.isVisible().catch(() => false)) {
+            await lessonPage.clickNextCard();
+            continue;
+        }
+
         // `anyInteractive` deliberately excludes `lessonCardNextBtn`: after
-        // submitting a quiz/yesno answer, both the (still-visible) quiz
-        // options and the freshly-shown NextCardButton are in the DOM, so
-        // including both in the same `.or()` chain would trip Playwright
-        // strict mode. The NextCardButton is checked separately below.
+        // submitting a phrase quiz both the (still-visible) quiz options
+        // and the freshly-shown NextCardButton are in the DOM, so including
+        // both in the same `.or()` chain would trip Playwright strict mode.
         const anyInteractive = lessonPage.showAnswerBtn
             .or(lessonPage.quizOptions[0])
             .or(lessonPage.yesnoYesBtn)
@@ -73,15 +87,6 @@ export async function completeLessonFlexible(
         await expect(anyInteractive).toBeVisible({ timeout: 15_000 });
 
         if (await lessonPage.completeScreen.isVisible().catch(() => false)) break;
-
-        // Pure-manual advance (ADR-033): after submitting a quiz/yesno
-        // answer the user is held on the feedback card until they click
-        // "Next" (or press Space/Enter). The previous 1500ms auto-advance
-        // timer was removed — the helper must explicitly advance.
-        if (await lessonPage.lessonCardNextBtn.isVisible().catch(() => false)) {
-            await lessonPage.clickNextCard();
-            continue;
-        }
 
         if (await lessonPage.showAnswerBtn.isVisible().catch(() => false)) {
             await lessonPage.showAnswer();

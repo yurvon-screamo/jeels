@@ -21,6 +21,13 @@ export class LessonPage extends BasePage {
     // Error states
     readonly lessonError: Locator;
 
+    // Empty state (diagnosed deck exhaustion / daily limit / next review)
+    readonly lessonEmptyState: Locator;
+    readonly lessonEmptyImportBtn: Locator;
+    readonly lessonEmptyProfileBtn: Locator;
+    readonly lessonEmptyNextReview: Locator;
+
+
     // Content
     readonly lessonContent: Locator;
 
@@ -74,6 +81,13 @@ export class LessonPage extends BasePage {
 
         // Error states
         this.lessonError = page.getByTestId("lesson-error");
+
+        // Empty state
+        this.lessonEmptyState = page.getByTestId("lesson-empty-state");
+        this.lessonEmptyImportBtn = page.getByTestId("lesson-empty-import-btn");
+        this.lessonEmptyProfileBtn = page.getByTestId("lesson-empty-profile-btn");
+        this.lessonEmptyNextReview = page.getByTestId("lesson-empty-next-review");
+
 
         // Content
         this.lessonContent = page.getByTestId("lesson-content");
@@ -146,6 +160,20 @@ export class LessonPage extends BasePage {
     async expectErrorVisible(): Promise<void> {
         await expect(this.lessonError).toBeVisible();
     }
+
+    async expectEmptyStateVisible(): Promise<void> {
+        await expect(this.lessonEmptyState).toBeVisible();
+        await expect(this.lessonContent).toBeHidden();
+    }
+
+    async clickEmptyImportSets(): Promise<void> {
+        await this.lessonEmptyImportBtn.click();
+    }
+
+    async clickEmptyIncreaseLoad(): Promise<void> {
+        await this.lessonEmptyProfileBtn.click();
+    }
+
 
     async waitForSync(): Promise<void> {
         await expect(this.syncIndicator).toBeVisible({ timeout: 10_000 });
