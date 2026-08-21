@@ -10,17 +10,15 @@ use crate::domain::{JapaneseLevel, JlptContent, NativeLanguage};
 
 const MIN_LESSON_SIZE: usize = 15;
 pub(crate) const MAX_LESSON_SIZE: usize = 22;
-const PHRASE_NEW_RATIO: usize = 2;
 
 /// Приоритет карточек без определённого JLPT уровня — ниже всех известных уровней (N1=1)
 const UNKNOWN_JLPT_PRIORITY: u8 = 0;
 
 /// Per-lesson cap on no-anchor (formerly "tail") phrases — phrases whose
 /// tokens are all known but none of which anchor to a lesson vocab word. They
-/// are MIXED INTO the lesson (no dedicated end zone, see PR #203). Under
-/// Option alpha this slot is independent of `phrase_new_budget`: a depleted
-/// budget no longer starves the no-anchor section, so up to this many no-anchor
-/// phrases (due + new) appear every lesson.
+/// are MIXED INTO the lesson (no dedicated end zone, see PR #203). This slot
+/// is independent of the new-anchored-phrase allowance: up to this many
+/// no-anchor phrases (due + new) appear every lesson.
 const TAIL_PHRASE_PER_LESSON: usize = 5;
 
 /// Tail phrases only reinforce already-mastered material: no single known word
@@ -50,14 +48,6 @@ const CARD_TYPE_WEIGHTS: [(CardType, usize); 3] = [
     (CardType::Kanji, 1),
     (CardType::Grammar, 1),
 ];
-
-/// Remaining new-ANCHORED-phrase allowance for the day. Encapsulates
-/// `PHRASE_NEW_RATIO` so callers cannot reach past it. Under Option alpha this
-/// budget governs only ANCHORED (interleaved) new phrases; no-anchor phrases
-/// are capped per lesson by `TAIL_PHRASE_PER_LESSON` and do not decrement it.
-pub(crate) fn compute_phrase_new_budget(daily_new_limit: usize, studied: usize) -> usize {
-    (daily_new_limit * PHRASE_NEW_RATIO).saturating_sub(studied)
-}
 
 /// Collects the lesson core (favorites, due/new/known cards, padding) WITHOUT
 /// any phrases. The core is shuffled here so downstream interleaving sees a
@@ -302,10 +292,10 @@ fn phrase_tail_eligible(phrase_id: &Ulid, known_pool: &HashSet<String>) -> bool 
 
 /// Bundles the immutable inputs driving no-anchor ("tail") phrase selection.
 /// Grouping them keeps `collect_phrase_cards` below the argument-count
-/// threshold and makes the selection context explicit at the call site. Under
-/// Option alpha the no-anchor section does NOT draw from `phrase_new_budget`
-/// (that budget governs only anchored phrases), so it is intentionally absent
-/// here — see `TAIL_PHRASE_PER_LESSON` for the per-lesson cap.
+/// threshold and makes the selection context explicit at the call site. The
+/// no-anchor section does NOT draw from `phrase_new_budget` (that budget
+/// governs only anchored phrases), so it is intentionally absent here — see
+/// `TAIL_PHRASE_PER_LESSON` for the per-lesson cap.
 struct TailPhraseSelection<'a> {
     all_cards: &'a [(&'a Ulid, &'a StudyCard)],
     excluded_card_ids: &'a HashSet<Ulid>,
@@ -343,11 +333,10 @@ fn collect_phrase_cards<'a>(
         }
     }
 
-    // New no-anchor phrases are admitted on the per-word cap alone: under
-    // Option alpha they do NOT decrement `phrase_new_budget` (reserved for
-    // anchored phrases), so a depleted budget can no longer starve the
-    // no-anchor section. The total is bounded per lesson by
-    // `TAIL_PHRASE_PER_LESSON` via the truncate below.
+    // New no-anchor phrases are admitted on the per-word cap alone: they do
+    // NOT decrement `phrase_new_budget` (reserved for anchored phrases), so
+    // a depleted budget never starves the no-anchor section. The total is
+    // bounded per lesson by `TAIL_PHRASE_PER_LESSON` via the truncate below.
     for (id, card) in selection.all_cards.iter().copied() {
         if !phrase_eligible(&id, &card) || !card.memory().is_new() {
             continue;
@@ -572,12 +561,18 @@ fn collect_anchored_phrase_card_ids(
 /// after the first showing of every lesson-vocab word it references,
 /// distributing the rest instead of dumping them at the end. All phrases become
 /// part of the core (`core_count` grows to the whole lesson), removing the
-/// dedicated tail zone. Under Option alpha: `phrase_new_budget` bounds NEW
-/// ANCHORED phrases (per-word cap `INTERLEAVED_PHRASES_PER_WORD`, plus the
-/// daily budget — there is deliberately no per-lesson TOTAL cap on anchored
-/// phrases); NEW no-anchor phrases are admitted independently, capped per
-/// lesson by `TAIL_PHRASE_PER_LESSON`, so a depleted budget can no longer
-/// starve the no-anchor section.
+/// dedicated tail zone.
+///
+/// `phrase_new_budget` is the PER-LESSON allowance of NEW ANCHORED phrases,
+/// initialized by the caller from
+/// [`crate::domain::DailyBudget::new_phrases_per_lesson`] — fresh for every
+/// lesson of the day, deliberately not a daily budget (an evening lesson must
+/// not be starved by a morning one). It bounds new anchored phrases only
+/// (per-word cap `INTERLEAVED_PHRASES_PER_WORD` also applies; there is
+/// deliberately no per-lesson TOTAL cap on anchored phrases). NEW no-anchor
+/// phrases are admitted independently, capped per lesson by
+/// `TAIL_PHRASE_PER_LESSON`, so a depleted budget never starves the
+/// no-anchor section.
 pub(crate) fn add_phrases(
     mut lesson_data: LessonData,
     knowledge_set: &KnowledgeSet,
@@ -639,9 +634,9 @@ pub(crate) fn add_phrases(
     }
 
     // No-anchor phrases: whole known-pool eligibility, per-word cap, and a
-    // per-lesson count bounded by `TAIL_PHRASE_PER_LESSON`. Under Option alpha
-    // they do NOT draw from `phrase_new_budget` (which stays reserved for the
-    // anchored pass above), so they survive even a depleted budget.
+    // per-lesson count bounded by `TAIL_PHRASE_PER_LESSON`. They do NOT draw
+    // from `phrase_new_budget` (which stays reserved for the anchored pass
+    // above), so they survive even a depleted budget.
     let mut all_cards = knowledge_set.study_cards().iter().collect::<Vec<_>>();
     all_cards.sort_by_key(|(_, card)| card.memory().next_review_date());
     let known_pool =
@@ -1351,6 +1346,7 @@ fn distribute_new_cards<'a, R: rand::Rng>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::DailyBudget;
     use crate::domain::RateMode;
     use crate::domain::knowledge::LessonCardView;
     use crate::domain::knowledge::{GrammarRuleCard, KanjiCard, PhraseCard, VocabularyCard};
@@ -1410,12 +1406,43 @@ mod tests {
         Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HR").expect("valid ULID")
     }
 
+    fn phrase_id_w1_a() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HT").expect("valid ULID")
+    }
+
+    fn phrase_id_w1_b() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HV").expect("valid ULID")
+    }
+
+    fn phrase_id_w2_a() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HZ").expect("valid ULID")
+    }
+
+    fn phrase_id_w2_b() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03J0").expect("valid ULID")
+    }
+
+    fn phrase_id_hello_anchor() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HW").expect("valid ULID")
+    }
+
+    fn phrase_id_bye_anchor() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HX").expect("valid ULID")
+    }
+
+    fn phrase_id_morning_anchor() -> Ulid {
+        Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HY").expect("valid ULID")
+    }
+
     fn ensure_test_phrase_index() {
         PHRASE_INDEX_INIT.get_or_init(|| {
             if crate::dictionary::phrase::is_phrases_loaded() {
                 return;
             }
-            let index_json = r#"{"v":1,"h":"test","total":8,"phrases":[
+            // Anchored-phrase entries carry one deliberately unknown token
+            // ("x1"…"x7") so they are NEVER tail-eligible: they can only
+            // enter a lesson through the anchored (interleaved) path.
+            let index_json = r#"{"v":1,"h":"test","total":15,"phrases":[
                 {"i":"01KPJ5S3N1DRFFD236Z4EZ03HJ","t":["test","hello"],"c":0},
                 {"i":"01KPJ5S3N1DRFFD236Z4EZ03HK","t":["test","bye"],"c":0,"g":["01KJ9AVWBGC2BT0DMFPDYYFEWB"]},
                 {"i":"01KPJ5S3N1DRFFD236Z4EZ03HN","t":["test","morning"],"c":0,"g":["01KJ9AVWBGC2BT0DMFPDYYFEWB","01G00000000000000024000000"]},
@@ -1423,7 +1450,14 @@ mod tests {
                 {"i":"01KPJ5S3N1DRFFD236Z4EZ03HP","t":["test","は"],"c":0},
                 {"i":"01KPJ5S3N1DRFFD236Z4EZ03HQ","t":["hello","extra1"],"c":0},
                 {"i":"01KPJ5S3N1DRFFD236Z4EZ03HR","t":["hello","extra2"],"c":0},
-                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HS","t":["alpha","beta"],"c":0}
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HS","t":["alpha","beta"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HT","t":["w1","x1"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HV","t":["w1","x2"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HW","t":["hello","x3"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HX","t":["bye","x4"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HY","t":["morning","x5"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03HZ","t":["w2","x6"],"c":0},
+                {"i":"01KPJ5S3N1DRFFD236Z4EZ03J0","t":["w2","x7"],"c":0}
             ]}"#;
             crate::dictionary::phrase::init_phrase_index(index_json)
                 .expect("Failed to init test phrase index");
@@ -1567,10 +1601,10 @@ mod tests {
         );
     }
 
-    /// Under Option alpha the no-anchor section ignores `phrase_new_budget`:
-    /// a depleted budget must NOT starve no-anchor phrases, whose count is
-    /// bounded per lesson by `TAIL_PHRASE_PER_LESSON` (plus the per-word cap)
-    /// instead. With `budget = 0` the no-anchor phrases still appear.
+    /// The no-anchor section ignores `phrase_new_budget`: a depleted budget
+    /// must NOT starve no-anchor phrases, whose count is bounded per lesson
+    /// by `TAIL_PHRASE_PER_LESSON` (plus the per-word cap) instead. With
+    /// `budget = 0` the no-anchor phrases still appear.
     #[test]
     fn no_anchor_phrases_ignore_new_phrase_budget() {
         ensure_test_phrase_index();
@@ -1604,7 +1638,7 @@ mod tests {
 
         assert_eq!(
             zero_budget, 0,
-            "Option alpha: no-anchor phrases must not decrement phrase_new_budget"
+            "no-anchor phrases must not decrement phrase_new_budget"
         );
         assert!(
             count >= 1,
@@ -2128,7 +2162,7 @@ mod tests {
         }
 
         let lesson = ks.cards_to_lesson(
-            1,
+            DailyBudget::with_daily_cards(1),
             &JlptContent::new(),
             JapaneseLevel::N5,
             NativeLanguage::Russian,
@@ -2177,7 +2211,7 @@ mod tests {
         }
 
         let lesson = ks.cards_to_lesson(
-            1,
+            DailyBudget::with_daily_cards(1),
             &JlptContent::new(),
             JapaneseLevel::N5,
             NativeLanguage::Russian,
@@ -2234,13 +2268,13 @@ mod tests {
         );
     }
 
-    /// Under Option alpha the new-phrase budget bounds only NEW ANCHORED
-    /// phrases; NEW no-anchor phrases are additive (capped per lesson by
+    /// The new-phrase allowance bounds only NEW ANCHORED phrases; NEW
+    /// no-anchor phrases are additive (capped per lesson by
     /// `TAIL_PHRASE_PER_LESSON`). The combined new-phrase count therefore may
-    /// reach `budget + TAIL_PHRASE_PER_LESSON` but must not exceed it. Due
+    /// reach `allowance + TAIL_PHRASE_PER_LESSON` but must not exceed it. Due
     /// phrases are free on both sides.
     #[test]
-    fn new_phrases_respect_option_alpha_combined_ceiling() {
+    fn new_phrases_respect_anchored_plus_tail_combined_ceiling() {
         ensure_test_phrase_index();
 
         let mut ks = KnowledgeSet::new();
@@ -2260,12 +2294,12 @@ mod tests {
             ks.create_card(phrase_card(pid)).expect("create phrase");
         }
 
-        let daily_new_limit = 1;
-        let budget = compute_phrase_new_budget(daily_new_limit, 0);
-        assert_eq!(budget, 2, "fixture sanity: PHRASE_NEW_RATIO=2");
+        let budget = DailyBudget::with_daily_cards(1);
+        let allowance = budget.new_phrases_per_lesson();
+        assert_eq!(allowance, 2, "fixture sanity: PHRASES_PER_NEW_CARD=2");
 
         let lesson = ks.cards_to_lesson(
-            daily_new_limit,
+            budget,
             &JlptContent::new(),
             JapaneseLevel::N5,
             NativeLanguage::Russian,
@@ -2278,15 +2312,186 @@ mod tests {
             .filter(|(id, _)| ks.get_card(*id).is_some_and(|sc| sc.memory().is_new()))
             .count();
 
-        let combined_ceiling = budget + TAIL_PHRASE_PER_LESSON;
+        let combined_ceiling = allowance + TAIL_PHRASE_PER_LESSON;
         assert!(
             new_phrases_in_lesson <= combined_ceiling,
-            "new phrases (anchored ≤ budget + no-anchor ≤ TAIL_PHRASE_PER_LESSON) must respect \
-             the Option-alpha combined ceiling: {new_phrases_in_lesson} > {combined_ceiling}"
+            "new phrases (anchored ≤ allowance + no-anchor ≤ TAIL_PHRASE_PER_LESSON) must respect \
+             the combined ceiling: {new_phrases_in_lesson} > {combined_ceiling}"
         );
         assert!(
             new_phrases_in_lesson >= 1,
             "scenario should place at least one new phrase"
+        );
+    }
+
+    /// Counts NEW phrase cards in the lesson that are ANCHORED — their index
+    /// tokens intersect the lesson's core vocabulary words. Only anchored
+    /// phrases consume the new-phrase allowance; no-anchor ("tail") phrases
+    /// do not, so tests of the allowance must filter with this predicate
+    /// (a plain "any new phrase" count would also pass under the old code,
+    /// which kept seeding tail phrases).
+    fn new_anchored_phrase_count(ks: &KnowledgeSet, lesson: &LessonData) -> usize {
+        let core_vocab_words: HashSet<String> = lesson
+            .cards
+            .iter()
+            .filter_map(|(_, lc)| match lc.card() {
+                Card::Vocabulary(v) => Some(v.word().text().to_string()),
+                _ => None,
+            })
+            .collect();
+
+        lesson
+            .cards
+            .iter()
+            .filter(|(_, lc)| lesson_phrase_id(lc).is_some())
+            .filter(|(id, _)| ks.get_card(*id).is_some_and(|sc| sc.memory().is_new()))
+            .filter(|(_, lc)| {
+                lesson_phrase_id(lc)
+                    .and_then(|pid| crate::dictionary::phrase::get_index_entry(&pid))
+                    .is_some_and(|entry| {
+                        entry.tokens().iter().any(|t| core_vocab_words.contains(t))
+                    })
+            })
+            .count()
+    }
+
+    /// The per-lesson allowance preserves the historical first-lesson
+    /// ceiling: with a sufficient pool the FIRST lesson of the day may
+    /// interleave `daily × 2` new anchored phrases (parity with the former
+    /// daily budget's unspent first-lesson value).
+    #[test]
+    fn first_lesson_new_anchored_phrases_reach_daily_double_bound() {
+        ensure_test_phrase_index();
+
+        let mut ks = KnowledgeSet::new();
+        for word in ["w1", "w2"] {
+            ks.create_card(vocab_card(word))
+                .expect("create anchor vocab");
+        }
+        for pid in [
+            phrase_id_w1_a(),
+            phrase_id_w1_b(),
+            phrase_id_w2_a(),
+            phrase_id_w2_b(),
+        ] {
+            ks.create_card(phrase_card(pid)).expect("create phrase");
+        }
+
+        let budget = DailyBudget::with_daily_cards(2);
+        let lesson = ks.cards_to_lesson(
+            budget,
+            &JlptContent::new(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+        );
+
+        let new_anchored = new_anchored_phrase_count(&ks, &lesson);
+        assert_eq!(
+            new_anchored, 4,
+            "first lesson must reach the daily×2 allowance bound (2 words × 2 phrases)"
+        );
+    }
+
+    /// The new-anchored-phrase allowance is per LESSON, not per day: after a
+    /// morning lesson consumes the full historical daily budget (its phrases
+    /// rated through `rate_card` — the only path incrementing the studied
+    /// counter), a second lesson the same day still receives the full
+    /// allowance. Under the former daily budget the second lesson would
+    /// receive no new anchored phrases at all.
+    #[test]
+    fn second_lesson_same_day_receives_fresh_phrase_allowance() {
+        use crate::domain::memory::Rating;
+
+        ensure_test_phrase_index();
+
+        let mut ks = KnowledgeSet::new();
+        // w1 = lesson-1 new anchor; hello/bye/morning = due-known anchors
+        // (mark_card_as_known: stability 22, next_review in the past) that
+        // carry the lesson-2 anchored phrases.
+        ks.create_card(vocab_card("w1")).expect("create w1");
+        for word in ["hello", "bye", "morning"] {
+            let sc = ks
+                .create_card(vocab_card(word))
+                .expect("create known vocab");
+            ks.mark_card_as_known(*sc.card_id()).expect("mark known");
+        }
+        for pid in [
+            phrase_id_w1_a(),
+            phrase_id_w1_b(),
+            phrase_id_hello_anchor(),
+            phrase_id_bye_anchor(),
+            phrase_id_morning_anchor(),
+        ] {
+            ks.create_card(phrase_card(pid)).expect("create phrase");
+        }
+
+        let budget = DailyBudget::with_daily_cards(1);
+        let lesson1 = ks.cards_to_lesson(
+            budget,
+            &JlptContent::new(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+        );
+
+        let new_anchored_1 = new_anchored_phrase_count(&ks, &lesson1);
+        assert_eq!(
+            new_anchored_1, 2,
+            "lesson 1 must consume the full allowance (daily×2 = 2)"
+        );
+
+        let lesson1_new_phrase_slots: Vec<Ulid> = lesson1
+            .cards
+            .iter()
+            .filter(|(id, lc)| {
+                lesson_phrase_id(lc).is_some()
+                    && ks.get_card(*id).is_some_and(|sc| sc.memory().is_new())
+            })
+            .map(|(id, _)| *id)
+            .collect();
+        for slot_id in lesson1_new_phrase_slots {
+            ks.rate_card(slot_id, Rating::Good, RateMode::StandardLesson)
+                .expect("rate phrase");
+        }
+
+        // Fixture sanity: the studied counter equals the FULL historical
+        // daily budget (daily×2 = 2), so the former per-day implementation
+        // would grant the second lesson an allowance of exactly zero.
+        assert_eq!(
+            ks.phrase_cards_studied_today(),
+            2,
+            "fixture sanity: historical daily phrase budget fully spent"
+        );
+
+        let lesson2 = ks.cards_to_lesson(
+            budget,
+            &JlptContent::new(),
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+        );
+
+        let lesson2_vocab: HashSet<String> = lesson2
+            .cards
+            .iter()
+            .filter_map(|(_, lc)| match lc.card() {
+                Card::Vocabulary(v) => Some(v.word().text().to_string()),
+                _ => None,
+            })
+            .collect();
+        for anchor in ["hello", "bye", "morning"] {
+            assert!(
+                lesson2_vocab.contains(anchor),
+                "lesson 2 core must contain the due-known anchor {anchor}"
+            );
+        }
+
+        let new_anchored_2 = new_anchored_phrase_count(&ks, &lesson2);
+        // Deterministic fixture: 3 due-known anchors × 1 phrase each, no
+        // per-word contention, allowance 2 — the second lesson must consume
+        // the FULL allowance, not merely "some" phrases.
+        assert_eq!(
+            new_anchored_2, 2,
+            "second lesson of the day must receive the full per-lesson \
+             allowance (the former daily budget would leave none)"
         );
     }
 
@@ -2543,7 +2748,7 @@ mod tests {
             .expect("create phrase"); // tokens [test, hello]
 
         let lesson = ks.cards_to_lesson(
-            5,
+            DailyBudget::with_daily_cards(5),
             &JlptContent::new(),
             JapaneseLevel::N5,
             NativeLanguage::Russian,
@@ -3349,7 +3554,7 @@ mod tests {
         let ks = build_multishow_scenario(vocab_n, kanji_n);
 
         let lesson = ks.cards_to_lesson(
-            30,
+            DailyBudget::with_daily_cards(30),
             &JlptContent::new(),
             JapaneseLevel::N5,
             NativeLanguage::Russian,
@@ -3369,13 +3574,13 @@ mod tests {
         }
     }
 
-    // --- Phrase no-starvation regression (Symptom 2, Option alpha) ---
+    // --- Phrase no-starvation regression ---
     //
-    // NEW no-anchor phrases must still appear when anchored phrases exhaust the
-    // shared new-phrase budget. Under Option alpha the no-anchor slot
+    // NEW no-anchor phrases must still appear when anchored phrases exhaust
+    // the new-phrase allowance. The no-anchor slot
     // (TAIL_PHRASE_PER_LESSON) is independent of phrase_new_budget, so a
-    // tail-eligible NEW phrase anchored to no lesson word is admitted even with
-    // a depleted budget.
+    // tail-eligible NEW phrase anchored to no lesson word is admitted even
+    // with a depleted allowance.
 
     fn phrase_id_independent() -> Ulid {
         Ulid::from_string("01KPJ5S3N1DRFFD236Z4EZ03HS").expect("valid ULID")
@@ -3743,8 +3948,12 @@ mod tests {
                 .unwrap();
         }
 
-        let lesson =
-            ks.cards_to_lesson(9, &jlpt_content, JapaneseLevel::N5, NativeLanguage::Russian);
+        let lesson = ks.cards_to_lesson(
+            DailyBudget::with_daily_cards(9),
+            &jlpt_content,
+            JapaneseLevel::N5,
+            NativeLanguage::Russian,
+        );
 
         // Multi-show expansion may add an extra slot for the same grammar
         // card_id, so we count DISTINCT grammar card_ids, not raw slots.

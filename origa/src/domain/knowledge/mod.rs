@@ -1,5 +1,6 @@
 mod card;
 mod daily_history;
+mod empty_diagnosis;
 mod grammar;
 mod kanji;
 mod kanji_companions;
@@ -14,6 +15,7 @@ pub mod vocabulary;
 
 pub use card::{Card, CardType, StudyCard};
 pub use daily_history::{DailyHistoryItem, estimate_completion_date};
+pub use empty_diagnosis::{LessonEmptyDiagnosis, diagnose_empty_lesson};
 pub use grammar::GrammarRuleCard;
 pub use kanji::{ExampleKanjiWord, KanjiCard};
 pub use lesson::{
@@ -30,7 +32,8 @@ use ulid::Ulid;
 
 use crate::dictionary::kanji::get_kanji_info;
 use crate::domain::{
-    JapaneseLevel, JlptContent, NativeLanguage, OrigaError, RateMode, Rating, srs::rate_memory,
+    DailyBudget, JapaneseLevel, JlptContent, NativeLanguage, OrigaError, RateMode, Rating,
+    srs::rate_memory,
 };
 
 pub(crate) const MAX_COMPANION_WORDS: usize = 3;
@@ -287,20 +290,24 @@ impl KnowledgeSet {
 
     pub fn cards_to_lesson(
         &self,
-        daily_new_limit: usize,
+        budget: DailyBudget,
         jlpt_content: &JlptContent,
         user_level: JapaneseLevel,
         native_language: NativeLanguage,
     ) -> LessonData {
-        let (core, primary_card_ids) =
-            lesson_builder::build_lesson_core(self, daily_new_limit, jlpt_content, native_language);
+        let (core, primary_card_ids) = lesson_builder::build_lesson_core(
+            self,
+            budget.new_cards_per_day(),
+            jlpt_content,
+            native_language,
+        );
         let with_companions =
             kanji_companions::add_kanji_companions(core, self, user_level, native_language);
         let interleaved = lesson_builder::interleave_core_by_type(with_companions);
-        let mut phrase_new_budget = lesson_builder::compute_phrase_new_budget(
-            daily_new_limit,
-            self.phrase_cards_studied_today(),
-        );
+        // NEW anchored phrases are capped per LESSON (not per day): every
+        // lesson of the day receives the full allowance, so an evening
+        // lesson is no longer starved by a morning one (see DailyBudget).
+        let mut phrase_new_budget = budget.new_phrases_per_lesson();
         let with_phrases =
             lesson_builder::add_phrases(interleaved, self, native_language, &mut phrase_new_budget);
         let expanded = lesson_builder::expand_repeated_views(

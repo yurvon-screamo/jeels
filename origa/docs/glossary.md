@@ -152,6 +152,8 @@ Blocklist companion-слов [deleted_companion_words] — множество с
 
 Нагрузка [DailyLoad] — предпочтение пользователя по количеству новых карточек в день: Minimal (3) → Maximum. В коде: `domain::value_objects::DailyLoad`.
 
+Дневной бюджет [DailyBudget] — производные от Нагрузки лимиты одного урока: сколько новых карточек допускается в день (`new_cards_per_day`) и сколько новых якорных фраз допускается в один урок (`new_phrases_per_lesson` = 2 × new_cards_per_day). Бюджет фраз привязан к уроку, а не к суткам: каждый урок получает полный лимит. В коде: `domain::value_objects::DailyBudget`.
+
 ---
 
 ## JLPT

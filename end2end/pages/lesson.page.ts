@@ -21,6 +21,12 @@ export class LessonPage extends BasePage {
     // Error states
     readonly lessonError: Locator;
 
+    // Empty state (diagnosed deck exhaustion / daily limit / next review)
+    readonly lessonEmptyState: Locator;
+    readonly lessonEmptyImportBtn: Locator;
+    readonly lessonEmptyProfileBtn: Locator;
+    readonly lessonEmptyNextReview: Locator;
+
     // Content
     readonly lessonContent: Locator;
 
@@ -74,6 +80,12 @@ export class LessonPage extends BasePage {
 
         // Error states
         this.lessonError = page.getByTestId("lesson-error");
+
+        // Empty state
+        this.lessonEmptyState = page.getByTestId("lesson-empty-state");
+        this.lessonEmptyImportBtn = page.getByTestId("lesson-empty-import-btn");
+        this.lessonEmptyProfileBtn = page.getByTestId("lesson-empty-profile-btn");
+        this.lessonEmptyNextReview = page.getByTestId("lesson-empty-next-review");
 
         // Content
         this.lessonContent = page.getByTestId("lesson-content");
@@ -147,17 +159,56 @@ export class LessonPage extends BasePage {
         await expect(this.lessonError).toBeVisible();
     }
 
+    async expectEmptyStateVisible(): Promise<void> {
+        await expect(this.lessonEmptyState).toBeVisible();
+        await expect(this.lessonContent).toBeHidden();
+        // The empty state and the error message are mutually exclusive by
+        // construction (content.rs sets exactly one); assert the invariant
+        // so a regression fails here instead of confusing downstream steps.
+        await expect(this.lessonError).toBeHidden();
+    }
+
+    async clickEmptyImportSets(): Promise<void> {
+        await this.lessonEmptyImportBtn.click();
+    }
+
+    async clickEmptyIncreaseLoad(): Promise<void> {
+        await this.lessonEmptyProfileBtn.click();
+    }
+
+    /**
+     * Bounded click timeout shared by card-control methods (showAnswer,
+     * rate, selectQuizOption, yesno, next-card). Under WASM re-render races
+     * the resolved element can be detached mid-click; without a timeout
+     * Playwright retries the stale handle until the TEST timeout. Callers
+     * (completeLessonFlexible) re-resolve locators on the next loop
+     * iteration, so a bounded failure just retries against the fresh DOM.
+     * Mirrors ACTION_TIMEOUT from helpers/lesson.ts (that module imports
+     * this page; keeping the constant here avoids a cycle).
+     */
+    private static readonly CARD_ACTION_TIMEOUT = 10_000;
+
+    /**
+     * Advance to the next card under the pure-manual advance model
+     * (ADR-033). After a quiz/yesno/phrase answer is submitted, the user is
+     * held on the feedback card until they press Space/Enter or click the
+     * "Next" button.
+     */
+    async clickNextCard(): Promise<void> {
+        await this.lessonCardNextBtn.click({ timeout: LessonPage.CARD_ACTION_TIMEOUT });
+    }
+
     async waitForSync(): Promise<void> {
         await expect(this.syncIndicator).toBeVisible({ timeout: 10_000 });
         await expect(this.syncIndicator).toBeHidden({ timeout: 30_000 });
     }
 
     async showAnswer(): Promise<void> {
-        await this.showAnswerBtn.click();
+        await this.showAnswerBtn.click({ timeout: LessonPage.CARD_ACTION_TIMEOUT });
     }
 
     async rate(rating: Rating): Promise<void> {
-        await this.ratingMap[rating].click();
+        await this.ratingMap[rating].click({ timeout: LessonPage.CARD_ACTION_TIMEOUT });
     }
 
     async getProgressText(): Promise<string> {
@@ -182,16 +233,6 @@ export class LessonPage extends BasePage {
     }
 
     async selectQuizOption(index: number): Promise<void> {
-        await this.quizOptions[index].click();
-    }
-
-    /**
-     * Advance to the next card under the pure-manual advance model
-     * (ADR-033). After a quiz/yesno/phrase answer is submitted, the user is
-     * held on the feedback card until they press Space/Enter or click the
-     * "Next" button. This method clicks that button.
-     */
-    async clickNextCard(): Promise<void> {
-        await this.lessonCardNextBtn.click();
+        await this.quizOptions[index].click({ timeout: LessonPage.CARD_ACTION_TIMEOUT });
     }
 }

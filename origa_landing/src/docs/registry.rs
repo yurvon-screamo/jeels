@@ -147,6 +147,7 @@ const DOCS: &[(Locale, &str, &str)] = &[
 pub const SIDEBAR_SLUGS: &[&str] = &[
     "getting-started",
     "lesson",
+    "fsrs",
     "vocabulary",
     "kanji",
     "grammar",
