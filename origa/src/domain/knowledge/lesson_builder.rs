@@ -2485,15 +2485,13 @@ mod tests {
         }
 
         let new_anchored_2 = new_anchored_phrase_count(&ks, &lesson2);
-        assert!(
-            new_anchored_2 >= 1,
-            "second lesson of the day must still receive new anchored phrases \
-             (the former daily budget would leave none)"
-        );
-        assert!(
-            new_anchored_2 <= budget.new_phrases_per_lesson(),
-            "second lesson must respect the per-lesson cap: {new_anchored_2} > {}",
-            budget.new_phrases_per_lesson()
+        // Deterministic fixture: 3 due-known anchors × 1 phrase each, no
+        // per-word contention, allowance 2 — the second lesson must consume
+        // the FULL allowance, not merely "some" phrases.
+        assert_eq!(
+            new_anchored_2, 2,
+            "second lesson of the day must receive the full per-lesson \
+             allowance (the former daily budget would leave none)"
         );
     }
 

@@ -9,7 +9,8 @@ export const MAX_LESSON_ITERATIONS = 50;
 // ("element was detached from the DOM, retrying" forever). A bounded
 // action timeout turns that hang into a fast failure, and the loop's
 // next iteration re-resolves the locators against the fresh DOM.
-const ACTION_TIMEOUT = 10_000;
+// LessonPage re-exports this as CARD_ACTION_TIMEOUT for its methods.
+export const ACTION_TIMEOUT = 10_000;
 
 export async function setupLessonWithCards(page: Page): Promise<LessonPage> {
     await skipOnboarding(page);
@@ -104,6 +105,5 @@ export async function completeLessonFlexible(
             await lessonPage.yesnoYesBtn.click({ timeout: ACTION_TIMEOUT });
         } else {
             break;
-        }
-    }
+        }    }
 }

@@ -105,19 +105,37 @@ mod tests {
 
     #[test]
     fn next_review_label_is_local_short_datetime() {
-        // 2026-08-20 12:00 UTC — the label must be a non-empty dd.mm hh:mm
-        // string regardless of the host timezone.
+        // 2026-08-20 12:00 UTC — the label must match the dd.mm hh:mm shape
+        // regardless of the host timezone (the date part can shift ±1 day
+        // across timezones, the shape cannot).
         let dt = chrono::DateTime::parse_from_rfc3339("2026-08-20T12:00:00Z")
             .expect("valid rfc3339")
             .with_timezone(&chrono::Utc);
         let label = format_next_review(dt);
-        assert!(
-            label.contains('.'),
-            "label must use the dd.mm form, got: {label}"
+
+        // dd.mm hh:mm = exactly 11 chars: 2 digits, '.', 2 digits, ' ',
+        // 2 digits, ':', 2 digits — parsed without a regex crate.
+        let bytes = label.as_bytes();
+        assert_eq!(
+            label.len(),
+            11,
+            "label must be exactly dd.mm hh:mm (11 chars), got: {label}"
         );
+        let digit_at = |i: usize| bytes.get(i).is_some_and(u8::is_ascii_digit);
+        let shape_ok = digit_at(0)
+            && digit_at(1)
+            && bytes.get(2) == Some(&b'.')
+            && digit_at(3)
+            && digit_at(4)
+            && bytes.get(5) == Some(&b' ')
+            && digit_at(6)
+            && digit_at(7)
+            && bytes.get(8) == Some(&b':')
+            && digit_at(9)
+            && digit_at(10);
         assert!(
-            label.contains(':'),
-            "label must include the hh:mm time, got: {label}"
+            shape_ok,
+            "label must match dd.mm hh:mm exactly, got: {label}"
         );
     }
 }

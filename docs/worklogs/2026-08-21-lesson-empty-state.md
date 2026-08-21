@@ -8,7 +8,8 @@
 
 ## Что сделано
 
-1. **BDD-first** (`end2end`): `lesson_empty_state.feature` (5 сценариев),
+1. **BDD-first** (`end2end`): `lesson_empty_state.feature` (4 сценария —
+   лимитный сценарий слит с навигационным дублем),
    шаги, локаторы LessonPage; шаг «начинается новый урок или ошибка»
    переименован в «…или пустое состояние» + dead-step grep.
 2. **Domain** (`origa`): `DailyBudget` VO (`value_objects.rs`),

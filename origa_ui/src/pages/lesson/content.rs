@@ -239,7 +239,16 @@ pub fn LessonContent() -> impl IntoView {
                                     user.knowledge_set(),
                                     *user.daily_load(),
                                 )),
-                                _ => Some(LessonEmptyDiagnosis::default()),
+                                Ok(None) => {
+                                    tracing::warn!(
+                                        "Empty lesson diagnosis degraded: no current user"
+                                    );
+                                    Some(LessonEmptyDiagnosis::default())
+                                },
+                                Err(e) => {
+                                    tracing::warn!("Empty lesson diagnosis degraded: {e}");
+                                    Some(LessonEmptyDiagnosis::default())
+                                },
                             };
                             if is_disposed.is_disposed() {
                                 return;
