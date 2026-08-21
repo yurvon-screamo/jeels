@@ -186,7 +186,7 @@ async fn set_word_item_renders_word_and_known_icon() {
             <SetWordItem
                 word="ねこ".to_string()
                 known_meaning=None
-                is_known=true
+                outcome=origa::domain::WordImportOutcome::AlreadyExists
                 selected_words=selected_words
                 known_kanji=HashSet::new()
                 on_toggle=Callback::new(|()| ())
@@ -224,7 +224,7 @@ async fn set_word_item_click_row_toggles_selection() {
             <SetWordItem
                 word="いぬ".to_string()
                 known_meaning=None
-                is_known=false
+                outcome=origa::domain::WordImportOutcome::New
                 selected_words=selected_words
                 known_kanji=HashSet::new()
                 on_toggle=Callback::new(move |()| toggled.set(true))
@@ -247,6 +247,43 @@ async fn set_word_item_click_row_toggles_selection() {
 }
 
 #[wasm_bindgen_test]
+async fn set_word_item_without_dictionary_entry_does_not_toggle() {
+    let wrapper = create_wrapper();
+    let (set_toggled, get_toggled) = shared_cell::<RwSignal<bool>>();
+    mount_with_i18n(&wrapper, move || {
+        let toggled = RwSignal::new(false);
+        set_toggled.set(Some(toggled));
+        let selected_words: RwSignal<HashSet<String>> = RwSignal::new(HashSet::new());
+        view! {
+            <SetWordItem
+                word="は".to_string()
+                known_meaning=None
+                outcome=origa::domain::WordImportOutcome::NoDictionaryEntry
+                selected_words=selected_words
+                known_kanji=HashSet::new()
+                on_toggle=Callback::new(move |()| toggled.set(true))
+            />
+        }
+        .into_any()
+    });
+    let toggled = get_toggled.get().expect("captured");
+    tick().await;
+
+    wrapper
+        .query_selector("[data-testid=\"sets-drawer-item\"]")
+        .unwrap()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlElement>()
+        .click();
+    tick().await;
+
+    assert!(
+        !toggled.get(),
+        "a word without a dictionary entry must not be selectable"
+    );
+}
+
+#[wasm_bindgen_test]
 async fn set_word_item_known_meaning_rendered() {
     let wrapper = create_wrapper();
     mount_with_i18n(&wrapper, || {
@@ -255,7 +292,7 @@ async fn set_word_item_known_meaning_rendered() {
             <SetWordItem
                 word="ねこ".to_string()
                 known_meaning=Some("кошка".to_string())
-                is_known=false
+                outcome=origa::domain::WordImportOutcome::New
                 selected_words=selected_words
                 known_kanji=HashSet::new()
                 on_toggle=Callback::new(|()| ())

@@ -341,13 +341,10 @@ pub fn YesNoCardView(
                     </div>
                 </Show>
 
-                <Show when=move || {
-                    show_result.get()
-                        && super::quiz_card::should_show_answer_display(
-                            QuizResult::from(yesno_result()),
-                            card_type,
-                        )
-                }>
+                // The yes/no verdict alone is not the answer the learner
+                // wants — the actual card answer (translation / meaning /
+                // description) is revealed on every result, correct or not.
+                <Show when=move || show_result.get()>
                     <CardAnswerDisplay
                         translations=Signal::derive(move || answer_vocab_translations_stored.get_value())
                         description=Signal::derive(move || answer_vocab_description_stored.get_value())

@@ -4,6 +4,7 @@ mod header;
 mod import_set_preview_modal;
 mod import_set_preview_modal_handlers;
 mod import_set_preview_modal_state;
+mod import_slice_budget;
 mod set_card;
 mod set_word_item;
 mod sets_level_group;

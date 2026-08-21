@@ -32,24 +32,6 @@ pub fn SettingsCard(#[prop(optional, into)] test_id: Signal<String>) -> impl Int
                             <span class="font-mono">{version::BUILD_DATE}</span>
                         </div>
                     </div>
-                    // Data sources attribution. Collapsed <details> keeps the card
-                    // visually unchanged; license terms (KanjiVG, JMdict) require
-                    // attribution when derived data is distributed.
-                    <details>
-                        <summary class="cursor-pointer select-none text-sm text-[var(--fg-muted)]">
-                            {t!(i18n, profile.data_sources)}
-                        </summary>
-                        <div class="mt-2 space-y-1 text-xs text-[var(--fg-muted)]">
-                            <div>{t!(i18n, profile.data_sources_kanji)}</div>
-                            <div>{t!(i18n, profile.data_sources_dictionary)}</div>
-                            <div>{t!(i18n, profile.data_sources_audio)}</div>
-                            <div>{t!(i18n, profile.data_sources_tokenizer)}</div>
-                            <div>{t!(i18n, profile.data_sources_ocr)}</div>
-                            <div>{t!(i18n, profile.data_sources_stt)}</div>
-                            <div>{t!(i18n, profile.data_sources_fonts)}</div>
-                            <div>{t!(i18n, profile.data_sources_sets)}</div>
-                        </div>
-                    </details>
                 </div>
             </div>
         </div>
