@@ -9,6 +9,8 @@ lastmod: 2026-08-21
 status: ready
 ---
 
+<!-- markdownlint-disable-file MD025 — frontmatter `title` is metadata, not a rendered H1; the body has a single H1 by design. -->
+
 # Data sources
 
 Origa builds on open data and models. This page lists what the app uses and the terms each derived work is distributed under.
