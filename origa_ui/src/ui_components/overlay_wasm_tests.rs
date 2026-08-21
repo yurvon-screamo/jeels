@@ -59,8 +59,10 @@ async fn drawer_closed_renders_nothing() {
 #[wasm_bindgen_test]
 async fn drawer_open_renders_title_body_and_backdrop() {
     let wrapper = create_wrapper();
-    mount_to_wrapper(&wrapper, || {
+    let (set_open, get_open) = shared_cell::<RwSignal<bool>>();
+    mount_to_wrapper(&wrapper, move || {
         let is_open = RwSignal::new(true);
+        set_open.set(Some(is_open));
         view! {
             <Drawer is_open=is_open title=Signal::derive(|| "Filters".to_string()) test_id="dr2">
                 "drawer content"
@@ -68,6 +70,7 @@ async fn drawer_open_renders_title_body_and_backdrop() {
         }
         .into_any()
     });
+    let is_open = get_open.get().expect("captured");
     tick().await;
 
     let drawer = wrapper
@@ -94,6 +97,11 @@ async fn drawer_open_renders_title_body_and_backdrop() {
         close.is_ok_and(|c| c.is_some()),
         "open drawer must render close button"
     );
+
+    // The mount leaks its owner, so the scroll lock would stay held for the
+    // rest of the test run — close the drawer to release it.
+    is_open.set(false);
+    tick().await;
 }
 
 #[wasm_bindgen_test]
@@ -164,6 +172,11 @@ async fn drawer_reactive_open_mounts_content() {
             .is_some(),
         "setting is_open=true must mount the drawer"
     );
+
+    // The mount leaks its owner, so the scroll lock would stay held for the
+    // rest of the test run — close the drawer to release it.
+    is_open.set(false);
+    tick().await;
 }
 
 #[wasm_bindgen_test]
@@ -194,6 +207,108 @@ async fn drawer_escape_key_closes() {
     tick().await;
 
     assert!(!is_open.get(), "Escape must close the drawer");
+}
+
+#[wasm_bindgen_test]
+async fn drawer_open_locks_body_scroll_and_close_restores_it() {
+    crate::utils::scroll_lock::reset_for_tests();
+    let wrapper = create_wrapper();
+    let (set_open, get_open) = shared_cell::<RwSignal<bool>>();
+    mount_to_wrapper(&wrapper, move || {
+        let is_open = RwSignal::new(false);
+        set_open.set(Some(is_open));
+        view! {
+            <Drawer is_open=is_open title=Signal::derive(|| "T".to_string()) test_id="dr6">"b"</Drawer>
+        }
+        .into_any()
+    });
+    let is_open = get_open.get().expect("captured");
+    tick().await;
+
+    let body = web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .body()
+        .unwrap();
+    assert_ne!(
+        body.style().get_property_value("position").unwrap(),
+        "fixed",
+        "closed drawer must not lock the body"
+    );
+
+    // Act: open → locked
+    is_open.set(true);
+    tick().await;
+    assert_eq!(
+        body.style().get_property_value("position").unwrap(),
+        "fixed",
+        "open drawer must lock the body scroll"
+    );
+
+    // Act: close → restored
+    is_open.set(false);
+    tick().await;
+    assert_ne!(
+        body.style().get_property_value("position").unwrap(),
+        "fixed",
+        "closed drawer must restore the body scroll"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn nested_drawers_keep_body_locked_until_the_last_one_closes() {
+    crate::utils::scroll_lock::reset_for_tests();
+    let wrapper = create_wrapper();
+    let (set_outer, get_outer) = shared_cell::<RwSignal<bool>>();
+    let (set_inner, get_inner) = shared_cell::<RwSignal<bool>>();
+    mount_to_wrapper(&wrapper, move || {
+        let outer = RwSignal::new(false);
+        set_outer.set(Some(outer));
+        let inner = RwSignal::new(false);
+        set_inner.set(Some(inner));
+        view! {
+            <Drawer is_open=outer title=Signal::derive(|| "O".to_string()) test_id="dr7o">"o"</Drawer>
+            <Drawer is_open=inner title=Signal::derive(|| "I".to_string()) test_id="dr7i">"i"</Drawer>
+        }
+        .into_any()
+    });
+    let outer = get_outer.get().expect("captured");
+    let inner = get_inner.get().expect("captured");
+    tick().await;
+
+    let body = web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .body()
+        .unwrap();
+
+    outer.set(true);
+    inner.set(true);
+    tick().await;
+    assert_eq!(
+        body.style().get_property_value("position").unwrap(),
+        "fixed",
+        "two open drawers must lock the body"
+    );
+
+    // Close one — the other still holds the lock.
+    inner.set(false);
+    tick().await;
+    assert_eq!(
+        body.style().get_property_value("position").unwrap(),
+        "fixed",
+        "body must stay locked while one drawer is still open"
+    );
+
+    outer.set(false);
+    tick().await;
+    assert_ne!(
+        body.style().get_property_value("position").unwrap(),
+        "fixed",
+        "closing the last drawer must restore the body"
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════

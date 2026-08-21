@@ -793,6 +793,9 @@ input[type="submit"],
     overflow-y: auto;
     padding-right: 8px;
     /* Небольшой отступ для скроллбара */
+    /* Scroll chaining stops here: wheel/touch at the edges of the drawer
+       body must not scroll the page behind the drawer. */
+    overscroll-behavior: contain;
 }
 
 /* ------------------------ */

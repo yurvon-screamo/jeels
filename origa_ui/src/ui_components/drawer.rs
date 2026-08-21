@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 use leptos_use::use_event_listener;
 
+use crate::utils::scroll_lock;
+
 #[component]
 pub fn Drawer(
     #[prop(optional)] is_open: RwSignal<bool>,
@@ -10,6 +12,29 @@ pub fn Drawer(
     #[prop(optional, into)] test_id: Signal<String>,
     children: ChildrenFn,
 ) -> impl IntoView {
+    // Scroll lock is held exactly once per open transition: `hold` guards
+    // against double-lock on repeated Effect runs, and both close paths
+    // (signal transition + component unmount) release it idempotently.
+    // A signal (not a plain Cell) so both closures stay shareable.
+    let hold = RwSignal::new(false);
+    let hold_for_effect = hold;
+    Effect::new(move |_| {
+        if is_open.get() {
+            if !hold_for_effect.get() {
+                hold_for_effect.set(true);
+                scroll_lock::lock_scroll();
+            }
+        } else if hold_for_effect.get() {
+            hold_for_effect.set(false);
+            scroll_lock::unlock_scroll();
+        }
+    });
+    on_cleanup(move || {
+        if hold.get() {
+            scroll_lock::unlock_scroll();
+        }
+    });
+
     let close_drawer = move |ev: leptos::ev::MouseEvent| {
         is_open.set(false);
         if let Some(on_close) = on_close {

@@ -1,4 +1,5 @@
 use crate::i18n::{t, use_i18n};
+use crate::utils::scroll_lock;
 use leptos::ev::MouseEvent;
 use leptos::prelude::*;
 
@@ -14,6 +15,11 @@ pub fn UpdateDrawer(
     on_update: Callback<()>,
     download_progress: Signal<Option<f32>>,
 ) -> impl IntoView {
+    // The parent mounts this component only while the update prompt is
+    // visible, so mount/unmount maps directly onto lock/unlock.
+    scroll_lock::lock_scroll();
+    on_cleanup(scroll_lock::unlock_scroll);
+
     let i18n = use_i18n();
     let test_id_val = move || {
         let val = test_id.get();
