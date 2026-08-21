@@ -174,6 +174,18 @@ export class LessonPage extends BasePage {
         await this.lessonEmptyProfileBtn.click();
     }
 
+    /**
+     * Advance to the next card under the pure-manual advance model
+     * (ADR-033). After a quiz/yesno/phrase answer is submitted, the user is
+     * held on the feedback card until they press Space/Enter or click the
+     * "Next" button. The click is bounded (10s): under WASM re-render races
+     * the resolved element can be detached mid-click, and without a timeout
+     * Playwright retries the stale handle until the TEST timeout; callers
+     * re-resolve locators on their next loop iteration.
+     */
+    async clickNextCard(): Promise<void> {
+        await this.lessonCardNextBtn.click({ timeout: 10_000 });
+    }
 
     async waitForSync(): Promise<void> {
         await expect(this.syncIndicator).toBeVisible({ timeout: 10_000 });
@@ -211,15 +223,5 @@ export class LessonPage extends BasePage {
 
     async selectQuizOption(index: number): Promise<void> {
         await this.quizOptions[index].click();
-    }
-
-    /**
-     * Advance to the next card under the pure-manual advance model
-     * (ADR-033). After a quiz/yesno/phrase answer is submitted, the user is
-     * held on the feedback card until they press Space/Enter or click the
-     * "Next" button. This method clicks that button.
-     */
-    async clickNextCard(): Promise<void> {
-        await this.lessonCardNextBtn.click();
     }
 }

@@ -3,6 +3,13 @@ import { HomePage, LessonPage, WordsPage } from "../pages";
 import { skipOnboarding } from "./navigation";
 
 export const MAX_LESSON_ITERATIONS = 50;
+// Bounded timeout for individual card actions. Without it a click on a
+// card-control element races with WASM re-renders: Playwright keeps
+// retrying the DETACHED element handle until the whole test times out
+// ("element was detached from the DOM, retrying" forever). A bounded
+// action timeout turns that hang into a fast failure, and the loop's
+// next iteration re-resolves the locators against the fresh DOM.
+const ACTION_TIMEOUT = 10_000;
 
 export async function setupLessonWithCards(page: Page): Promise<LessonPage> {
     await skipOnboarding(page);
@@ -72,7 +79,7 @@ export async function completeLessonFlexible(
         // options visible — hence the separate check (never both in one
         // `.or()`, which would trip Playwright strict mode; see below).
         if (await lessonPage.lessonCardNextBtn.isVisible().catch(() => false)) {
-            await lessonPage.clickNextCard();
+            await lessonPage.clickNextCard().catch(() => {});
             continue;
         }
 
@@ -94,7 +101,7 @@ export async function completeLessonFlexible(
         } else if (await lessonPage.quizOptions[0].isVisible().catch(() => false)) {
             await lessonPage.selectQuizOption(0);
         } else if (await lessonPage.yesnoYesBtn.isVisible().catch(() => false)) {
-            await lessonPage.yesnoYesBtn.click();
+            await lessonPage.yesnoYesBtn.click({ timeout: ACTION_TIMEOUT });
         } else {
             break;
         }
