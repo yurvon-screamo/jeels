@@ -62,7 +62,7 @@ pub fn CardAnswerDisplay(
                 fallback=move || {
                     view! {
                         <Show when=move || !text.get().is_empty()>
-                            <div class="lesson-answer text-left">
+                            <div class="lesson-answer">
                                 <MarkdownText
                                     content=text
                                     variant=Signal::derive(|| MarkdownVariant::Default)
@@ -77,7 +77,7 @@ pub fn CardAnswerDisplay(
                     let trans = translations.get().unwrap_or_default();
                     let desc = description.get();
                     view! {
-                        <div class="lesson-answer text-left">
+                        <div class="lesson-answer">
                             <WordTranslations
                                 translations=Signal::derive(move || trans.clone())
                                 description=Signal::derive(move || desc.clone())

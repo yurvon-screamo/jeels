@@ -389,6 +389,62 @@ async fn card_answer_display_text_fallback_renders_markdown() {
 }
 
 #[wasm_bindgen_test]
+async fn card_answer_display_translations_are_centered() {
+    let wrapper = create_wrapper();
+    mount_to_wrapper(&wrapper, || {
+        view! {
+            <CardAnswerDisplay
+                translations=Signal::derive(|| Some(vec!["кошка".to_string()]))
+                description=Signal::derive(|| None::<String>)
+                text=Signal::derive(|| String::new())
+                known_kanji=Signal::derive(|| HashSet::new())
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let class_name = wrapper
+        .query_selector(".lesson-answer")
+        .unwrap()
+        .unwrap()
+        .get_attribute("class")
+        .unwrap_or_default();
+    assert!(
+        !class_name.contains("text-left"),
+        "answer block must match the centered card layout; got classes: {class_name}"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn card_answer_display_text_fallback_is_centered() {
+    let wrapper = create_wrapper();
+    mount_to_wrapper(&wrapper, || {
+        view! {
+            <CardAnswerDisplay
+                translations=Signal::derive(|| None::<Vec<String>>)
+                description=Signal::derive(|| None::<String>)
+                text=Signal::derive(|| "текст ответа".to_string())
+                known_kanji=Signal::derive(|| HashSet::new())
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let class_name = wrapper
+        .query_selector(".lesson-answer")
+        .unwrap()
+        .unwrap()
+        .get_attribute("class")
+        .unwrap_or_default();
+    assert!(
+        !class_name.contains("text-left"),
+        "answer block must match the centered card layout; got classes: {class_name}"
+    );
+}
+
+#[wasm_bindgen_test]
 async fn card_answer_display_empty_renders_nothing() {
     let wrapper = create_wrapper();
     mount_to_wrapper(&wrapper, || {
@@ -632,6 +688,33 @@ async fn yesno_card_view_shows_statement_and_buttons() {
     assert!(
         page.contains("ねこ"),
         "the word must render somewhere in the view; got: {page}"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn yesno_card_view_correct_answer_still_shows_the_answer() {
+    let wrapper = create_wrapper();
+    mount_with_i18n(&wrapper, || {
+        view! {
+            <YesNoCardView
+                yesno_card=yesno_fixture(true)
+                show_result=Signal::from(true)
+                selected_answer=Some(true)
+                on_answer=Callback::new(|_: bool| {})
+                on_dont_know=Callback::new(|()| {})
+                dont_know_selected=Signal::from(false)
+                native_language=origa::domain::NativeLanguage::Russian
+                known_kanji=Signal::derive(|| HashSet::new())
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let answer = wrapper.query_selector(".lesson-answer");
+    assert!(
+        answer.is_ok_and(|a| a.is_some()),
+        "a correct answer must still reveal the card's answer, not just the Да/Нет verdict"
     );
 }
 
