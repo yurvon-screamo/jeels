@@ -2,7 +2,9 @@
 pub struct PreviewWord {
     pub word: String,
     pub meaning: Option<String>,
-    pub is_known: bool,
+    /// Import-path classification (see `WordImportOutcome`): drives the
+    /// status icon, the tooltip, and whether the word is selectable.
+    pub outcome: origa::domain::WordImportOutcome,
     pub set_id: String,
     pub set_title: String,
 }

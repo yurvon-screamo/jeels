@@ -2,6 +2,7 @@ mod error;
 mod furigana;
 mod furigana_annotator;
 pub(crate) mod grammar;
+mod import_preview;
 mod japanese;
 mod jlpt_content;
 mod jlpt_progress;
@@ -25,6 +26,7 @@ pub use grammar::quiz_generation::{
     generate_grammar_distractors, generate_grammar_practice_questions,
 };
 pub use grammar::{detect_format_map_rules, detect_grammar_rules_in_text, detect_keyword_rules};
+pub use import_preview::{WordImportClassifier, WordImportOutcome, WordImportPreview};
 pub use japanese::{JapaneseChar, JapaneseText};
 pub use japanese::{hiragana_to_katakana, katakana_to_hiragana};
 pub use jlpt_content::{JlptContent, JlptContentError};

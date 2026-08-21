@@ -1,8 +1,11 @@
 use crate::loaders::WellKnownSetLoaderImpl;
+use crate::pages::sets::import_slice_budget::slice_end;
 use crate::pages::sets::types::PreviewWord;
 use crate::repository::HybridUserRepository;
+use crate::utils::yield_to_browser;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+use origa::domain::{User, WordImportOutcome, WordImportPreview};
 use origa::traits::UserRepository;
 use origa::use_cases::{
     CreateCardsFromAnalysisResult, CreateCardsFromAnalysisUseCase, WordToCreate,
@@ -84,7 +87,12 @@ impl ImportPreviewModalState {
                 .first()
                 .and_then(|id| set_titles.get().get(id).cloned())
                 .unwrap_or_else(|| set_id.clone());
-            let words_preview = build_set_preview_words(&user, &set_id, &set_title, set.words());
+            let words_preview = build_set_preview_words(
+                &user,
+                &[(set_id, set_title, set.words().to_vec())],
+                disposed,
+            )
+            .await;
             finalize_preview(
                 words_preview,
                 preview_words,
@@ -136,19 +144,17 @@ impl ImportPreviewModalState {
                 },
             };
             let titles = set_titles.get();
-            let mut words_preview = Vec::new();
+            // Classify ONE concatenated word list so lemma duplicates
+            // across sets share one seen-lemmas state with the import.
+            let mut groups = Vec::with_capacity(loaded_sets.len());
             for (set_id, set) in loaded_sets {
                 let set_title = titles
                     .get(&set_id)
                     .cloned()
                     .unwrap_or_else(|| set_id.clone());
-                words_preview.extend(build_set_preview_words(
-                    &user,
-                    &set_id,
-                    &set_title,
-                    set.words(),
-                ));
+                groups.push((set_id, set_title, set.words().to_vec()));
             }
+            let words_preview = build_set_preview_words(&user, &groups, disposed).await;
             finalize_preview(
                 words_preview,
                 preview_words,
@@ -264,29 +270,79 @@ fn finalize_preview(
     if disposed.is_disposed() {
         return;
     }
-    let words_to_select: HashSet<String> = words_preview.iter().map(|w| w.word.clone()).collect();
+    // Words without a dictionary entry cannot be imported (the import
+    // would fail them), so they start unselected.
+    let words_to_select: HashSet<String> = words_preview
+        .iter()
+        .filter(|w| w.outcome != WordImportOutcome::NoDictionaryEntry)
+        .map(|w| w.word.clone())
+        .collect();
     preview_words.set(words_preview);
     selected_words.set(words_to_select);
     is_loading_preview.set(false);
 }
 
-fn build_set_preview_words(
-    user: &origa::domain::User,
-    set_id: &str,
-    set_title: &str,
-    set_words: &[String],
+/// Classifies every word through the domain import classifier
+/// (tokenize → lemma → dictionary → duplicate check), yielding to the
+/// browser between time-budgeted slices so a large multi-set preview
+/// cannot freeze the UI. The per-load classifier state dies with this
+/// call — reopening the drawer classifies against fresh card data.
+async fn build_set_preview_words(
+    user: &User,
+    groups: &[(String, String, Vec<String>)],
+    disposed: StoredValue<()>,
 ) -> Vec<PreviewWord> {
-    set_words
+    let flat: Vec<&String> = groups
         .iter()
-        .map(|word| {
-            let knowledge = user.is_word_known(word);
-            PreviewWord {
-                word: word.clone(),
-                meaning: knowledge.meaning,
-                is_known: knowledge.is_known,
-                set_id: set_id.to_string(),
-                set_title: set_title.to_string(),
+        .flat_map(|(_, _, words)| words.iter())
+        .collect();
+    let mut classifier = user.word_import_classifier();
+    let mut classified: HashMap<String, WordImportPreview> = HashMap::with_capacity(flat.len());
+    let now = performance_now_ms();
+    let mut cursor = 0;
+
+    while cursor < flat.len() {
+        let end = slice_end(flat.len(), cursor, &now);
+        for word in &flat[cursor..end] {
+            let preview = classifier.classify(word);
+            classified.insert((*word).clone(), preview);
+        }
+        cursor = end;
+        if cursor < flat.len() {
+            yield_to_browser().await;
+            if disposed.is_disposed() {
+                return Vec::new();
             }
-        })
-        .collect()
+        }
+    }
+
+    let mut words_preview = Vec::with_capacity(flat.len());
+    for (set_id, set_title, words) in groups {
+        for word in words {
+            // Every word went through the loop above; classifying again on
+            // a cache miss is idempotent (the classifier caches internally)
+            // and keeps this path panic-free.
+            let preview = classified
+                .get(word)
+                .cloned()
+                .unwrap_or_else(|| classifier.classify(word));
+            words_preview.push(PreviewWord {
+                word: word.clone(),
+                meaning: preview.meaning,
+                outcome: preview.outcome,
+                set_id: set_id.clone(),
+                set_title: set_title.clone(),
+            });
+        }
+    }
+    words_preview
+}
+
+fn performance_now_ms() -> impl Fn() -> f64 {
+    move || {
+        web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now())
+            .unwrap_or(0.0)
+    }
 }

@@ -6,6 +6,7 @@ mod create_vocabulary_card;
 mod grammar;
 mod import_anki_pack;
 mod import_onboarding_target_level;
+mod import_preview;
 mod jlpt_progress_journey;
 mod learning_lesson;
 mod learning_short_term;

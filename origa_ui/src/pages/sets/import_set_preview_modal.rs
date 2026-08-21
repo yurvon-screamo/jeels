@@ -9,7 +9,7 @@ use crate::ui_components::{
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use origa::domain::User;
+use origa::domain::{User, WordImportOutcome};
 use origa::traits::UserRepository;
 use std::collections::HashMap;
 
@@ -17,6 +17,13 @@ use super::import_set_preview_modal_handlers::create_import_preview_handlers;
 use super::import_set_preview_modal_state::ImportPreviewModalState;
 
 const PREVIEW_PAGE_SIZE: usize = 100;
+
+/// Group headers distinguish sets in a multi-set import. In a single-set
+/// import the drawer title already names the set and the "found N words"
+/// line already counts it, so a group header would duplicate both.
+fn should_render_group_headers(set_ids: &[String]) -> bool {
+    set_ids.len() > 1
+}
 
 /// Distributes a global word budget across set groups, keeping each group's
 /// original order. Groups are rendered whole up to the budget; the group that
@@ -159,14 +166,41 @@ pub fn ImportSetPreviewModal(
         groups.values().map(|g| g.len()).sum::<usize>()
     });
 
-    let known_words_count = Memo::new(move |_| {
-        let groups = grouped_words.get();
-        groups
+    // Summary buckets count UNIQUE words — the import processes a HashSet
+    // of selected words, so a word listed in two sets counts once. The
+    // buckets converge with the import toast: New → "created",
+    // AlreadyExists + DuplicateInSelection → "skipped"; NoDictionaryEntry
+    // words are unselectable and never reach the import.
+    let import_breakdown = Memo::new(move |_| {
+        let words = preview_words.get();
+        let mut unique: HashMap<String, WordImportOutcome> = HashMap::new();
+        for word in words {
+            unique.entry(word.word.clone()).or_insert(word.outcome);
+        }
+        let new_count = unique
             .values()
-            .flat_map(|g| g.iter())
-            .filter(|w| w.is_known)
-            .count()
+            .filter(|o| **o == WordImportOutcome::New)
+            .count();
+        let existing_count = unique
+            .values()
+            .filter(|o| {
+                matches!(
+                    o,
+                    WordImportOutcome::AlreadyExists | WordImportOutcome::DuplicateInSelection
+                )
+            })
+            .count();
+        let no_dictionary_count = unique
+            .values()
+            .filter(|o| **o == WordImportOutcome::NoDictionaryEntry)
+            .count();
+        (unique.len(), new_count, existing_count, no_dictionary_count)
     });
+
+    // In a single-set import the drawer title already names the set and the
+    // "found N words" line already counts it — a per-group header would
+    // repeat both. Multi-set imports keep group headers to tell sets apart.
+    let show_group_headers = Memo::new(move |_| should_render_group_headers(&set_ids.get()));
 
     view! {
         <Drawer
@@ -174,7 +208,7 @@ pub fn ImportSetPreviewModal(
             title=Signal::derive(move || drawer_title.get())
             test_id="sets-import-drawer"
         >
-            <div class="flex flex-col h-full space-y-4">
+            <div class="flex flex-col h-full">
                 {move || {
                     let groups = grouped_words.get();
                     let is_loading = is_loading_preview.get();
@@ -208,6 +242,7 @@ pub fn ImportSetPreviewModal(
                         let titles_map = set_titles.get();
                         let kanji = known_kanji.get();
                         let selected = selected_words;
+                        let with_group_headers = show_group_headers.get();
                         let shown_count = paginated_groups
                             .get()
                             .iter()
@@ -215,14 +250,16 @@ pub fn ImportSetPreviewModal(
                             .sum::<usize>();
 
                         view! {
-                            <div data-testid="sets-drawer-found">
+                            <div class="mb-4" data-testid="sets-drawer-found">
                                 <Text size=TextSize::Small variant=TypographyVariant::Muted>
                                     {i18n.get_keys().sets().found_words().inner().to_string()
-                                        .replacen("{}", &total_words_count.get().to_string(), 1)
-                                        .replacen("{}", &known_words_count.get().to_string(), 1)}
+                                        .replacen("{}", &import_breakdown.get().0.to_string(), 1)
+                                        .replacen("{}", &import_breakdown.get().1.to_string(), 1)
+                                        .replacen("{}", &import_breakdown.get().2.to_string(), 1)
+                                        .replacen("{}", &import_breakdown.get().3.to_string(), 1)}
                                 </Text>
                             </div>
-                            <div class="space-y-6 overflow-y-auto flex-1 min-h-0">
+                            <div class="space-y-6">
                                 {paginated_groups
                                     .get()
                                     .into_iter()
@@ -233,27 +270,37 @@ pub fn ImportSetPreviewModal(
                                             .unwrap_or_else(|| set_id.clone());
                                         let word_count = group_word_counts.get().get(&set_id).copied().unwrap_or(0);
 
-                                        view! {
-                                            <div class="border-b border-gray-200 pb-4 last:border-0">
+                                        // Plain conditional (not <Show>): the
+                                        // whole preview block re-renders on
+                                        // signal changes, so per-render state
+                                        // is enough here.
+                                        let group_header = with_group_headers.then(|| {
+                                            view! {
                                                 <h3 class="font-semibold text-base mb-3 text-gray-700">
                                                     {title}
                                                     <span class="text-gray-400 font-normal ml-2">
                                                         {i18n.get_keys().sets().words_count().inner().to_string().replacen("{}", &word_count.to_string(), 1)}
                                                     </span>
                                                 </h3>
+                                            }
+                                        });
+
+                                        view! {
+                                            <div class="border-b border-gray-200 pb-4 last:border-0">
+                                                {group_header}
                                                 <div class="space-y-2">
                                                     {words
                                                         .into_iter()
                                                         .map(|word| {
                                                             let word_text = word.word.clone();
                                                             let known_meaning = word.meaning.clone();
-                                                            let is_known = word.is_known;
+                                                            let outcome = word.outcome;
 
                                                             view! {
                                                                 <SetWordItem
                                                                     word=word_text.clone()
                                                                     known_meaning=known_meaning
-                                                                    is_known=is_known
+                                                                    outcome=outcome
                                                                     selected_words=selected
                                                                     known_kanji=kanji.clone()
                                                                     on_toggle=Callback::new(move |_| handlers.on_word_toggle.run(word_text.clone()))
@@ -268,7 +315,7 @@ pub fn ImportSetPreviewModal(
                                     .collect::<Vec<_>>()}
                             </div>
                             <Show when=move || shown_count < total_words_count.get()>
-                                <div class="pt-2">
+                                <div class="pt-2 mt-4">
                                     <LoadMoreButton
                                         visible_count=visible_words
                                         total=Signal::derive(move || total_words_count.get())
@@ -277,7 +324,7 @@ pub fn ImportSetPreviewModal(
                                     />
                                 </div>
                             </Show>
-                            <div class="flex gap-2 justify-between pt-4 border-t shrink-0">
+                            <div class="sticky bottom-0 mt-4 pt-4 pb-2 border-t bg-[var(--bg-paper)] flex gap-2 justify-between">
                                 <Button
                                     variant=ButtonVariant::Ghost
                                     on_click=handlers.on_cancel
@@ -319,10 +366,25 @@ mod tests {
         PreviewWord {
             word: format!("{set}-{idx}"),
             meaning: None,
-            is_known: false,
+            outcome: origa::domain::WordImportOutcome::New,
             set_id: set.to_string(),
             set_title: set.to_string(),
         }
+    }
+
+    // Single-set import: the group header would repeat the drawer title
+    // and the word count.
+    #[test]
+    fn should_render_group_headers_single_set_is_false() {
+        assert!(!should_render_group_headers(&["jlpt-n5".to_string()]));
+    }
+
+    #[test]
+    fn should_render_group_headers_multi_set_is_true() {
+        assert!(should_render_group_headers(&[
+            "jlpt-n5".to_string(),
+            "minna-1".to_string()
+        ]));
     }
 
     #[test]

@@ -1,14 +1,18 @@
 use crate::i18n::{td_string, use_i18n};
-use crate::pages::icons::{CHECK_CIRCLE_ICON, ICON_CLASS_KNOWN, ICON_CLASS_NEW, PLUS_CIRCLE_ICON};
+use crate::pages::icons::{
+    CHECK_CIRCLE_ICON, ICON_CLASS_KNOWN, ICON_CLASS_MUTED, ICON_CLASS_NEW, PLUS_CIRCLE_ICON,
+    X_CIRCLE_ICON,
+};
 use crate::ui_components::{Checkbox, FuriganaText, MarkdownText, MarkdownVariant, Tooltip};
 use leptos::prelude::*;
+use origa::domain::WordImportOutcome;
 use std::collections::HashSet;
 
 #[component]
 pub fn SetWordItem(
     word: String,
     known_meaning: Option<String>,
-    is_known: bool,
+    outcome: WordImportOutcome,
     selected_words: RwSignal<HashSet<String>>,
     known_kanji: HashSet<char>,
     on_toggle: Callback<()>,
@@ -17,30 +21,58 @@ pub fn SetWordItem(
     let word_for_memo = word.clone();
     let is_selected = Memo::new(move |_| selected_words.get().contains(&word_for_memo));
 
-    let (status_icon, tooltip_text, icon_class) = if is_known {
-        (
-            CHECK_CIRCLE_ICON,
-            td_string!(i18n.get_locale(), common.tooltip_known),
-            ICON_CLASS_KNOWN,
-        )
-    } else {
-        (
+    // Words without a dictionary entry cannot be imported — the import
+    // would fail them — so they render as permanently unselectable.
+    let is_importable = outcome != WordImportOutcome::NoDictionaryEntry;
+
+    let (status_icon, tooltip_text, icon_class) = match outcome {
+        WordImportOutcome::New => (
             PLUS_CIRCLE_ICON,
             td_string!(i18n.get_locale(), common.tooltip_new),
             ICON_CLASS_NEW,
-        )
+        ),
+        WordImportOutcome::AlreadyExists => (
+            CHECK_CIRCLE_ICON,
+            td_string!(i18n.get_locale(), common.tooltip_known),
+            ICON_CLASS_KNOWN,
+        ),
+        WordImportOutcome::DuplicateInSelection => (
+            CHECK_CIRCLE_ICON,
+            td_string!(i18n.get_locale(), sets.tooltip_duplicate_in_selection),
+            ICON_CLASS_KNOWN,
+        ),
+        WordImportOutcome::NoDictionaryEntry => (
+            X_CIRCLE_ICON,
+            td_string!(i18n.get_locale(), sets.tooltip_no_dictionary),
+            ICON_CLASS_MUTED,
+        ),
     };
 
     view! {
         <div
-            class="group flex items-start gap-4 py-3 px-4 border-b border-[var(--border-dark)] hover:bg-[var(--bg-aged)] transition-colors cursor-pointer"
+            class=move || {
+                let base = "group flex items-start gap-4 py-3 px-4 border-b border-[var(--border-dark)] transition-colors";
+                if is_importable {
+                    format!("{base} hover:bg-[var(--bg-aged)] cursor-pointer")
+                } else {
+                    format!("{base} opacity-60")
+                }
+            }
             data-testid="sets-drawer-item"
-            on:click=move |_| on_toggle.run(())
+            on:click=move |_| {
+                if is_importable {
+                    on_toggle.run(());
+                }
+            }
         >
             <div class="pt-1">
                 <Checkbox
-                    checked=Signal::derive(move || is_selected.get())
-                    on_change=Callback::new(move |_| on_toggle.run(()))
+                    checked=Signal::derive(move || is_selected.get() && is_importable)
+                    on_change=Callback::new(move |_| {
+                        if is_importable {
+                            on_toggle.run(());
+                        }
+                    })
                 />
             </div>
 
@@ -53,7 +85,7 @@ pub fn SetWordItem(
                         />
                     </div>
 
-                    <Tooltip text=Signal::derive(|| tooltip_text.to_string())>
+                    <Tooltip text=Signal::derive(move || tooltip_text.to_string())>
                         <span class=format!("{} opacity-60 group-hover:opacity-100 transition-opacity", icon_class)
                               inner_html=status_icon
                         />
