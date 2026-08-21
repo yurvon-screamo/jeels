@@ -41,10 +41,6 @@ impl CategoryProgress {
         }
         ((self.learned + self.projected) as f64 / self.total as f64) * 100.0
     }
-
-    pub fn is_complete(&self, threshold: f64) -> bool {
-        self.percentage() >= threshold
-    }
 }
 
 impl Default for CategoryProgress {
@@ -81,10 +77,6 @@ impl LevelProgressDetail {
             + self.grammar.projected_percentage())
             / 3.0
     }
-
-    pub fn is_complete(&self, threshold: f64) -> bool {
-        self.overall_percentage() >= threshold
-    }
 }
 
 impl Default for LevelProgressDetail {
@@ -115,6 +107,40 @@ pub struct JlptProgress {
     levels: HashMap<JapaneseLevel, LevelProgressDetail>,
 }
 
+/// Minimum learned percentage of a level required before its knowledge may
+/// overflow into the next one. Guards against inflation: 50% N3 + 50% N2
+/// must not read as N2, so the base of each carried pair must be at least
+/// this solid.
+const ADVANCE_FLOOR_PERCENT: f64 = 70.0;
+
+/// Combined learned percentage of a (level, next level) pair required to
+/// count the level as passed. Textbook learners (Minna no Nihongo, Irodori)
+/// rarely reach 90% inside a single official level because their vocabulary
+/// only partially overlaps it, so completion is judged on the summed
+/// knowledge of two adjacent levels instead.
+const ADVANCE_SUM_PERCENT: f64 = 100.0;
+
+/// The three progress categories tracked per JLPT level. Exists only to
+/// select a category inside [`JlptProgress::carry_chain`] without generics:
+/// a generic `impl Fn` selector would be monomorphized in dependent crates
+/// and tips `origa_ui_bin` over its recursion limit (see ADR-027 §B3).
+#[derive(Clone, Copy)]
+enum Category {
+    Kanji,
+    Words,
+    Grammar,
+}
+
+impl Category {
+    fn percentage_of(self, detail: &LevelProgressDetail) -> f64 {
+        match self {
+            Category::Kanji => detail.kanji.percentage(),
+            Category::Words => detail.words.percentage(),
+            Category::Grammar => detail.grammar.percentage(),
+        }
+    }
+}
+
 impl JlptProgress {
     pub fn new() -> Self {
         let mut levels = HashMap::new();
@@ -124,44 +150,46 @@ impl JlptProgress {
         Self { levels }
     }
 
+    /// The user's active JLPT level, decided by knowledge overflow rather
+    /// than per-level completion: each card category independently walks
+    /// N5→N1 (see [`Self::carry_chain`]) and the reported level is the least
+    /// advanced of the three chains, so one weak category cannot be
+    /// compensated by another.
     pub fn current_level(&self) -> JapaneseLevel {
-        let all_empty = JapaneseLevel::ALL.iter().all(|&level| {
-            self.levels
-                .get(&level)
-                .map(|d| d.overall_percentage() == 0.0)
-                .unwrap_or(true)
-        });
+        self.carry_chain(Category::Kanji)
+            .min(self.carry_chain(Category::Words))
+            .min(self.carry_chain(Category::Grammar))
+    }
 
-        if all_empty {
-            return JapaneseLevel::N5;
-        }
-
-        let completed_levels: Vec<_> = JapaneseLevel::ALL
+    /// Walks `JapaneseLevel::ALL` in order and returns the level the category
+    /// has overflowed into: advances from L to L+1 while `pct(L)` is at least
+    /// [`ADVANCE_FLOOR_PERCENT`] and `pct(L) + pct(L+1)` covers
+    /// [`ADVANCE_SUM_PERCENT`]. Levels are indexed by their position in
+    /// `JapaneseLevel::ALL` — NOT by `as_number()`, which is inverted
+    /// (N5 = 5 … N1 = 1).
+    fn carry_chain(&self, category: Category) -> JapaneseLevel {
+        let percentages: Vec<f64> = JapaneseLevel::ALL
             .iter()
-            .filter(|&&level| {
+            .map(|&level| {
                 self.levels
                     .get(&level)
-                    .map(|d| d.is_complete(90.0))
-                    .unwrap_or(false)
+                    .map(|detail| category.percentage_of(detail))
+                    .unwrap_or(0.0)
             })
             .collect();
 
-        if completed_levels.is_empty() {
-            return JapaneseLevel::N5;
+        let last_index = percentages.len() - 1;
+        let mut index = 0;
+        while index < last_index {
+            let current = percentages[index];
+            let next = percentages[index + 1];
+            if current >= ADVANCE_FLOOR_PERCENT && current + next >= ADVANCE_SUM_PERCENT {
+                index += 1;
+            } else {
+                break;
+            }
         }
-
-        let max_completed = completed_levels
-            .into_iter()
-            .min_by_key(|&&level| level.as_number())
-            .unwrap();
-
-        match max_completed {
-            JapaneseLevel::N1 => JapaneseLevel::N1,
-            JapaneseLevel::N2 => JapaneseLevel::N1,
-            JapaneseLevel::N3 => JapaneseLevel::N2,
-            JapaneseLevel::N4 => JapaneseLevel::N3,
-            JapaneseLevel::N5 => JapaneseLevel::N4,
-        }
+        JapaneseLevel::ALL[index]
     }
 
     pub fn level_progress(&self, level: JapaneseLevel) -> Option<&LevelProgressDetail> {
@@ -205,6 +233,7 @@ impl Default for JlptProgress {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
     #[test]
     fn category_progress_percentage_calculation() {
@@ -255,24 +284,6 @@ mod tests {
 
         // Assert
         assert!((progress.projected_percentage() - 0.0).abs() < 0.001);
-    }
-
-    #[test]
-    fn category_progress_is_complete_threshold() {
-        let progress = CategoryProgress {
-            learned: 90,
-            projected: 0,
-            total: 100,
-        };
-        assert!(progress.is_complete(90.0));
-        assert!(!progress.is_complete(95.0));
-
-        let progress_below = CategoryProgress {
-            learned: 89,
-            projected: 0,
-            total: 100,
-        };
-        assert!(!progress_below.is_complete(90.0));
     }
 
     #[test]
@@ -332,34 +343,156 @@ mod tests {
         assert_eq!(progress.current_level(), JapaneseLevel::N5);
     }
 
-    #[test]
-    fn jlpt_progress_current_level_n5_completed_returns_n4() {
-        let mut progress = JlptProgress::new();
-        let n5_complete = LevelProgressDetail {
-            kanji: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-            words: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-            grammar: CategoryProgress {
-                learned: 90,
-                projected: 0,
-                total: 100,
-            },
+    fn progress_with_categories(
+        kanji: &[usize],
+        words: &[usize],
+        grammar: &[usize],
+    ) -> JlptProgress {
+        let category = |percentages: &[usize], index: usize| CategoryProgress {
+            learned: percentages.get(index).copied().unwrap_or(0),
+            projected: 0,
+            total: 100,
         };
-        progress.update_level(JapaneseLevel::N5, n5_complete);
+        let mut progress = JlptProgress::new();
+        for (index, &level) in JapaneseLevel::ALL.iter().enumerate() {
+            progress.update_level(
+                level,
+                LevelProgressDetail {
+                    kanji: category(kanji, index),
+                    words: category(words, index),
+                    grammar: category(grammar, index),
+                },
+            );
+        }
+        progress
+    }
+
+    fn uniform_progress(percentages: &[usize]) -> JlptProgress {
+        progress_with_categories(percentages, percentages, percentages)
+    }
+
+    #[rstest]
+    #[case::textbook_spread(&[80, 40], JapaneseLevel::N4)]
+    #[case::floor_boundary_inclusive(&[70, 30], JapaneseLevel::N4)]
+    #[case::full_level_with_empty_next(&[100, 0], JapaneseLevel::N4)]
+    #[case::multi_step(&[90, 80, 75], JapaneseLevel::N3)]
+    fn jlpt_progress_current_level_carries_summed_knowledge_to_next_level(
+        #[case] percentages: &[usize],
+        #[case] expected: JapaneseLevel,
+    ) {
+        assert_eq!(
+            uniform_progress(percentages).current_level(),
+            expected,
+            "percentages {percentages:?}"
+        );
+    }
+
+    #[rstest]
+    // Sum 125 ≥ 100, but the base never reaches the floor.
+    #[case::weak_base(&[65, 60], JapaneseLevel::N5)]
+    #[case::just_below_floor(&[69, 99], JapaneseLevel::N5)]
+    // The textbook anti-case: 50% + 50% must not read as the next level.
+    #[case::fifty_fifty(&[50, 50], JapaneseLevel::N5)]
+    // Sequential chain, not greedy pair-scanning: N4 at 40% blocks N3 even
+    // though 40 + 90 ≥ 100.
+    #[case::mid_chain_gap(&[100, 40, 90], JapaneseLevel::N4)]
+    #[case::inflated_upper_level(&[100, 100, 50, 50], JapaneseLevel::N3)]
+    fn jlpt_progress_current_level_base_below_floor_blocks_advance(
+        #[case] percentages: &[usize],
+        #[case] expected: JapaneseLevel,
+    ) {
+        assert_eq!(
+            uniform_progress(percentages).current_level(),
+            expected,
+            "percentages {percentages:?}"
+        );
+    }
+
+    #[rstest]
+    #[case::partial_next(&[80, 15], JapaneseLevel::N5)]
+    #[case::almost_full_base(&[95, 4], JapaneseLevel::N5)]
+    fn jlpt_progress_current_level_sum_below_threshold_keeps_level(
+        #[case] percentages: &[usize],
+        #[case] expected: JapaneseLevel,
+    ) {
+        assert_eq!(
+            uniform_progress(percentages).current_level(),
+            expected,
+            "percentages {percentages:?}"
+        );
+    }
+
+    #[test]
+    fn jlpt_progress_current_level_weak_category_cannot_be_compensated() {
+        // Arrange — kanji and words at 100% N5, grammar at 40%: the old
+        // average (80%) and the min-of-chains both keep N5, but only the
+        // chain semantics guarantees grammar alone is the blocker.
+        let progress = progress_with_categories(&[100], &[100], &[40]);
+
+        // Act & Assert
+        assert_eq!(progress.current_level(), JapaneseLevel::N5);
+    }
+
+    #[test]
+    fn jlpt_progress_current_level_reports_least_advanced_category_chain() {
+        // Arrange — kanji carries to N3, words to N4, grammar stays at N5.
+        let progress = progress_with_categories(&[100, 100, 80], &[100, 50], &[30]);
+
+        // Act & Assert
+        assert_eq!(progress.current_level(), JapaneseLevel::N5);
+    }
+
+    #[test]
+    fn jlpt_progress_current_level_one_category_short_of_sum_keeps_level() {
+        // Arrange — grammar at 90% alone: above the floor, but 90 + 0 < 100.
+        // Under the retired average-threshold rule this user was promoted
+        // (avg 96.7%); the carry rule requires summed knowledge instead.
+        let progress = progress_with_categories(&[100], &[100], &[90]);
+
+        // Act & Assert
+        assert_eq!(progress.current_level(), JapaneseLevel::N5);
+    }
+
+    #[test]
+    fn jlpt_progress_current_level_zero_total_level_caps_category_chain() {
+        // Arrange — grammar content exists only for N5; N4+ totals are empty
+        // (percentage reads as 0), while kanji and words are fully learned.
+        let mut progress = JlptProgress::new();
+        for (index, &level) in JapaneseLevel::ALL.iter().enumerate() {
+            let grammar_learned = if index == 0 { 100 } else { 0 };
+            let grammar_total = if index == 0 { 100 } else { 0 };
+            progress.update_level(
+                level,
+                LevelProgressDetail {
+                    kanji: CategoryProgress {
+                        learned: 100,
+                        projected: 0,
+                        total: 100,
+                    },
+                    words: CategoryProgress {
+                        learned: 100,
+                        projected: 0,
+                        total: 100,
+                    },
+                    grammar: CategoryProgress {
+                        learned: grammar_learned,
+                        projected: 0,
+                        total: grammar_total,
+                    },
+                },
+            );
+        }
+
+        // Act & Assert — kanji/words chains reach N1; the grammar chain may
+        // step into the empty N4 (100 + 0 ≥ 100) but never past it (0 is
+        // below the floor), so the reported level is N4.
         assert_eq!(progress.current_level(), JapaneseLevel::N4);
     }
 
     #[test]
     fn jlpt_progress_current_level_uses_learned_not_projected() {
         // Arrange — N5 has 0 learned but 100% projected. Projected must NOT
-        // count toward `is_complete(90.0)` so the current level stays N5.
+        // count toward the carry advance, so the current level stays N5.
         let mut progress = JlptProgress::new();
         let n5_only_projected = LevelProgressDetail {
             kanji: CategoryProgress {
@@ -385,58 +518,15 @@ mod tests {
     }
 
     #[test]
-    fn jlpt_progress_current_level_n5_n4_completed_returns_n3() {
-        let mut progress = JlptProgress::new();
-
-        let complete = LevelProgressDetail {
-            kanji: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-            words: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-            grammar: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-        };
-
-        progress.update_level(JapaneseLevel::N5, complete.clone());
-        progress.update_level(JapaneseLevel::N4, complete);
+    fn jlpt_progress_current_level_two_full_levels_carries_into_third() {
+        let progress = uniform_progress(&[100, 100]);
 
         assert_eq!(progress.current_level(), JapaneseLevel::N3);
     }
 
     #[test]
-    fn jlpt_progress_current_level_n1_completed_stays_n1() {
-        let mut progress = JlptProgress::new();
-
-        let complete = LevelProgressDetail {
-            kanji: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-            words: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-            grammar: CategoryProgress {
-                learned: 100,
-                projected: 0,
-                total: 100,
-            },
-        };
-
-        for level in JapaneseLevel::ALL {
-            progress.update_level(level, complete.clone());
-        }
+    fn jlpt_progress_current_level_full_knowledge_stays_at_n1() {
+        let progress = uniform_progress(&[100, 100, 100, 100, 100]);
 
         assert_eq!(progress.current_level(), JapaneseLevel::N1);
     }
