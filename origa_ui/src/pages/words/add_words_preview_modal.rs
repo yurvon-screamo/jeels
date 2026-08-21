@@ -251,7 +251,7 @@ fn PreviewStage(
                 }}
             </Text>
         </div>
-        <div class="space-y-2 overflow-y-auto">
+        <div class="space-y-2">
             <For
                 each=move || analyzed_words.clone()
                 key=|word| word.base_form.clone()
