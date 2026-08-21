@@ -139,6 +139,17 @@ const DOCS: &[(Locale, &str, &str)] = &[
         "limitations",
         include_str!("../../content/docs/ru/limitations.md"),
     ),
+    // data-sources
+    (
+        Locale::En,
+        "data-sources",
+        include_str!("../../content/docs/en/data-sources.md"),
+    ),
+    (
+        Locale::Ru,
+        "data-sources",
+        include_str!("../../content/docs/ru/data-sources.md"),
+    ),
 ];
 
 /// Sidebar navigation order. The `index` page is excluded (it is the docs
@@ -154,6 +165,7 @@ pub const SIDEBAR_SLUGS: &[&str] = &[
     "phrases",
     "capture",
     "limitations",
+    "data-sources",
 ];
 
 static REGISTRY: OnceLock<Vec<DocPage>> = OnceLock::new();
