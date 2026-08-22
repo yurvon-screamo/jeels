@@ -10,14 +10,6 @@ on:
                 description: "Force Apple builds (consumes ~30 min of macOS runner per target)"
                 type: boolean
                 default: false
-            # TEMPORARY (remove before merge): one-off branch validation of
-            # upload-release-cdn — runs the CDN upload with a fake stable
-            # version so the MS Store pipeline is proven end-to-end before
-            # the first real release tag.
-            cdn_test_version:
-                description: "TEMP: fake X.Y.Z to run upload-release-cdn from this branch"
-                type: string
-                default: ""
 
 concurrency:
     group: tauri-${{ github.ref }}
@@ -350,23 +342,19 @@ jobs:
         # MUST NOT block the GitHub Release. RC builds stay GitHub-only.
         # Do NOT add upload-release-cdn to release.needs — that regresses
         # isolation.
-        # TEMPORARY (remove before merge): the `(workflow_dispatch &&
-        # inputs.cdn_test_version)` disjunct lets upload-release-cdn run from
-        # a branch for a one-off end-to-end validation; version/version_type
-        # are overridden below so the stable-only gates see a fake stable.
+        # Stable-only: only v*.*.* stable tags upload; the branch-validation
+        # escape hatch (workflow_dispatch + fake version) used to prove this
+        # pipeline end-to-end was temporary and removed before merge.
         if: >
             always() &&
             needs.build-tauri.result == 'success' &&
-            (
-                startsWith(github.ref, 'refs/tags/v') &&
-                needs.version.outputs.version_type == 'stable' ||
-                (github.event_name == 'workflow_dispatch' && inputs.cdn_test_version != '')
-            )
+            startsWith(github.ref, 'refs/tags/v') &&
+            needs.version.outputs.version_type == 'stable'
         needs: [version, build-tauri]
         uses: ./.github/workflows/_upload-release-cdn.yml
         with:
-            version: ${{ inputs.cdn_test_version != '' && inputs.cdn_test_version || needs.version.outputs.version }}
-            version_type: ${{ inputs.cdn_test_version != '' && 'stable' || needs.version.outputs.version_type }}
+            version: ${{ needs.version.outputs.version }}
+            version_type: ${{ needs.version.outputs.version_type }}
         secrets:
             cdn-access-key-id: ${{ secrets.ORIGA_CDN_S3_ACCESS_KEY_ID }}
             cdn-secret-access-key: ${{ secrets.ORIGA_CDN_S3_SECRET_ACCESS_KEY }}
