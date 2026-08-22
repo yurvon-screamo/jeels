@@ -72,11 +72,19 @@ jobs:
                   AWS_SECRET_ACCESS_KEY: ${{ secrets.cdn-secret-access-key }}
                   ORIGA_CDN_BASE_URL: ${{ vars.ORIGA_CDN_BASE_URL }}
               run: |
+                  # pipefail: a failed upload MUST fail the job — with the
+                  # default pipeline semantics `tee` would swallow the
+                  # script's exit code and the guard below would mask the
+                  # failure as a green run with a warning (seen live).
+                  set -o pipefail
                   uv run python upload_release_artifacts.py \
                     --version "${{ inputs.version }}" \
                     --artifact-dir ../windows-build \
                     | tee upload.log
 
+                  # The job is green here — the upload succeeded. A missing
+                  # URL in the log is a summary-extraction regression only:
+                  # warn loudly but do not fail the release job for cosmetics.
                   MS_STORE_URL="$(grep -o 'https://.*/releases/latest/Origa_x64-setup.exe' upload.log | tail -1)"
                   if [ -z "$MS_STORE_URL" ]; then
                     echo "::warning::Could not extract the MS Store URL from the upload log — check the script output above."

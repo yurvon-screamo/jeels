@@ -423,10 +423,21 @@ def upload_file(
             f"ContentType={content_type}]"
         )
         return
+    from boto3.exceptions import S3UploadFailedError as Boto3S3UploadFailedError
     from botocore.exceptions import BotoCoreError, ClientError
     from s3transfer.exceptions import RetriesExceededError, S3UploadFailedError
 
-    upload_errors = (BotoCoreError, ClientError, RetriesExceededError, S3UploadFailedError)
+    # boto3 wraps transfer failures in its OWN S3UploadFailedError
+    # (boto3.exceptions), distinct from s3transfer's class of the same name —
+    # catching only the s3transfer flavor lets real upload failures escape
+    # as raw tracebacks (seen live: UploadPart InternalError on T3).
+    upload_errors = (
+        BotoCoreError,
+        ClientError,
+        RetriesExceededError,
+        S3UploadFailedError,
+        Boto3S3UploadFailedError,
+    )
     extra_args: dict[str, str] = {
         "CacheControl": cache_control,
         "ContentType": content_type,

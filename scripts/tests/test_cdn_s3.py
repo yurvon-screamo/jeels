@@ -472,6 +472,53 @@ def test_upload_file_retries_once_without_checksum_on_store_rejection(
     assert "retrying without checksum" in capsys.readouterr().err
 
 
+def test_upload_file_catches_boto3_flavored_upload_error(tmp_path, monkeypatch, capsys):
+    # Live regression (2026-08-22 CI run): T3 answered UploadPart with
+    # InternalError; boto3 re-raised it as boto3.exceptions.S3UploadFailedError
+    # — a DIFFERENT class from s3transfer.exceptions.S3UploadFailedError. The
+    # old catch tuple missed it and the operator got a raw traceback instead
+    # of the retry (checksum case) or the keyed error message.
+    from boto3.exceptions import S3UploadFailedError as Boto3Flavor
+
+    local = tmp_path / "Origa_x64-setup.exe"
+    local.write_bytes(b"x" * 10)
+    err = Boto3Flavor("Failed to upload x: InternalError on UploadPart")
+    flaky = _FlakyUploadClient(err)
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: flaky)
+
+    upload_file(
+        local,
+        "releases/latest/Origa_x64-setup.exe",
+        "no-cache",
+        dry_run=False,
+        checksum_algorithm="SHA256",
+    )
+
+    # Now caught: the retry (without checksum) fires and succeeds.
+    assert len(flaky.calls) == 2
+    assert "ChecksumAlgorithm" not in flaky.calls[1]["ExtraArgs"]
+    assert "retrying without checksum" in capsys.readouterr().err
+
+
+def test_upload_file_boto3_flavor_without_checksum_fails_with_key(
+    tmp_path, monkeypatch, capsys
+):
+    # The same boto3-flavored failure on a checksum-less upload must exit
+    # non-zero with the offending key, never a raw traceback.
+    from boto3.exceptions import S3UploadFailedError as Boto3Flavor
+
+    local = tmp_path / "Origa_x64-setup.exe"
+    local.write_bytes(b"x" * 10)
+    err = Boto3Flavor("Failed to upload x: InternalError on UploadPart")
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: _FakeUploadClient(err))
+
+    with pytest.raises(SystemExit) as exc:
+        upload_file(local, "releases/latest/Origa_x64-setup.exe", "no-cache", dry_run=False)
+
+    assert exc.value.code == 1
+    assert "releases/latest/Origa_x64-setup.exe" in capsys.readouterr().err
+
+
 class _FlakyUploadClient:
     """Fails the first upload_file call, records every call."""
 
