@@ -104,6 +104,22 @@ def test_multipart_threshold_forces_multipart_under_cli_default():
     assert 2 * 1024 * 1024 > MULTIPART_THRESHOLD_BYTES
 
 
+def test_transfer_config_is_cached_per_chunk_size():
+    # ADR-041: the ~58MB installer uploads with 8MB parts; the cache must be
+    # keyed by chunk_size or a large-file upload would silently reuse the
+    # 16KB config (3.5k sequential PUTs instead of 7).
+    _cdn_s3._transfer_configs.clear()
+    cfg_16k = _transfer_config(16 * 1024)
+    cfg_8m = _transfer_config(8 * 1024 * 1024)
+
+    assert cfg_16k is not cfg_8m
+    assert cfg_8m.multipart_threshold == 8 * 1024 * 1024
+    assert cfg_8m.multipart_chunksize == 8 * 1024 * 1024
+    # Repeated requests reuse the cached object.
+    assert _transfer_config(8 * 1024 * 1024) is cfg_8m
+    assert _transfer_config() is cfg_16k
+
+
 # ---------------------------------------------------------------------------
 # content_type_for
 # ---------------------------------------------------------------------------
@@ -117,6 +133,9 @@ def test_multipart_threshold_forces_multipart_under_cli_default():
         ("grammar.json", "application/json"),
         # Override lookup is case-insensitive — real extensions vary in case.
         ("UPPER.WOFF2", "font/woff2"),
+        # The Windows installer must never depend on a runner image's
+        # mimetypes registry (ADR-041).
+        ("Origa_x64-setup.exe", "application/octet-stream"),
     ],
 )
 def test_content_type_override(filename: str, expected: str):
@@ -340,3 +359,241 @@ def test_sync_directory_uses_normalized_prefix_key(tmp_path, monkeypatch):
     sync_directory(local_dir, "fonts/", "immutable", dry_run=False)
 
     assert [key for _, key, _, _ in calls] == ["fonts/x.woff2"]
+
+
+# ---------------------------------------------------------------------------
+# Credential-source contract: env credentials override the local profile
+# (ADR-041) — applies to every script built on this transport.
+# ---------------------------------------------------------------------------
+
+
+class _FakeSession:
+    """Records how the boto3 Session was constructed."""
+
+    profile_name: str | None = None
+    client_kwargs: dict[str, object] = {}
+
+    def __init__(self, profile_name: str | None = None) -> None:
+        _FakeSession.profile_name = profile_name
+
+    def client(self, _service: str, **kwargs: object) -> str:
+        _FakeSession.client_kwargs = kwargs
+        return "fake-s3-client"
+
+
+@pytest.fixture
+def _fresh_client(monkeypatch):
+    # The real _s3_client is a module singleton; reset it so each case
+    # exercises Session construction itself.
+    monkeypatch.setattr(_cdn_s3, "_s3_client", None)
+    monkeypatch.setattr("boto3.Session", _FakeSession)
+    yield
+    _FakeSession.profile_name = None
+    _FakeSession.client_kwargs = {}
+
+
+def test_env_credentials_take_precedence_over_profile(monkeypatch, _fresh_client):
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "tid_ci_key")
+    client = _cdn_s3._s3_upload_client()
+
+    assert client == "fake-s3-client"
+    # Env branch: Session() without an explicit profile — the boto3 env
+    # credential chain owns resolution.
+    assert _FakeSession.profile_name is None
+
+
+def test_local_profile_used_when_no_env_credentials(monkeypatch, _fresh_client):
+    monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+    _cdn_s3._s3_upload_client()
+
+    assert _FakeSession.profile_name == _cdn_s3.S3_PROFILE
+    kwargs = _FakeSession.client_kwargs
+    assert kwargs["endpoint_url"] == _cdn_s3.S3_ENDPOINT
+
+
+# ---------------------------------------------------------------------------
+# upload_file — chunk_size / checksum_algorithm (ADR-041 release uploads)
+# ---------------------------------------------------------------------------
+
+
+def test_upload_file_passes_chunk_size_config_and_checksum(tmp_path, monkeypatch):
+    local = tmp_path / "Origa_x64-setup.exe"
+    local.write_bytes(b"x" * 100)
+    fake = _FakeUploadClient()
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: fake)
+
+    chunk = 8 * 1024 * 1024
+    upload_file(
+        local,
+        "releases/v1.2.3/Origa_x64-setup.exe",
+        "public, max-age=300, must-revalidate",
+        dry_run=False,
+        chunk_size=chunk,
+        checksum_algorithm="SHA256",
+    )
+
+    call = fake.calls[0]
+    assert call["ExtraArgs"]["ChecksumAlgorithm"] == "SHA256"
+    # The actual TransferConfig handed to the client — not just the argument
+    # — must use the requested chunk size.
+    assert call["Config"] is _cdn_s3._transfer_config(chunk)
+    assert call["Config"].multipart_chunksize == chunk
+
+
+def test_upload_file_retries_once_without_checksum_on_store_rejection(
+    tmp_path, monkeypatch, capsys
+):
+    # S3-compatible stores may reject the checksum extension on multipart
+    # creation; the upload must fall back to a checksum-less retry rather
+    # than aborting the release. A wide catch is deliberate — a failure
+    # unrelated to checksums simply fails the retry identically.
+    from botocore.exceptions import ClientError
+
+    local = tmp_path / "Origa_x64-setup.exe"
+    local.write_bytes(b"x" * 10)
+    err = ClientError(
+        {"Error": {"Code": "NotImplemented", "Message": "checksum unsupported"}},
+        "CreateMultipartUpload",
+    )
+    flaky = _FlakyUploadClient(err)
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: flaky)
+
+    upload_file(
+        local,
+        "releases/latest/Origa_x64-setup.exe",
+        "no-cache",
+        dry_run=False,
+        checksum_algorithm="SHA256",
+    )
+
+    assert len(flaky.calls) == 2
+    assert flaky.calls[0]["ExtraArgs"]["ChecksumAlgorithm"] == "SHA256"
+    assert "ChecksumAlgorithm" not in flaky.calls[1]["ExtraArgs"]
+    assert "retrying without checksum" in capsys.readouterr().err
+
+
+def test_upload_file_catches_boto3_flavored_upload_error(tmp_path, monkeypatch, capsys):
+    # Live regression (2026-08-22 CI run): T3 answered UploadPart with
+    # InternalError; boto3 re-raised it as boto3.exceptions.S3UploadFailedError
+    # — a DIFFERENT class from s3transfer.exceptions.S3UploadFailedError. The
+    # old catch tuple missed it and the operator got a raw traceback instead
+    # of the retry (checksum case) or the keyed error message.
+    from boto3.exceptions import S3UploadFailedError as Boto3Flavor
+
+    local = tmp_path / "Origa_x64-setup.exe"
+    local.write_bytes(b"x" * 10)
+    err = Boto3Flavor("Failed to upload x: InternalError on UploadPart")
+    flaky = _FlakyUploadClient(err)
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: flaky)
+
+    upload_file(
+        local,
+        "releases/latest/Origa_x64-setup.exe",
+        "no-cache",
+        dry_run=False,
+        checksum_algorithm="SHA256",
+    )
+
+    # Now caught: the retry (without checksum) fires and succeeds.
+    assert len(flaky.calls) == 2
+    assert "ChecksumAlgorithm" not in flaky.calls[1]["ExtraArgs"]
+    assert "retrying without checksum" in capsys.readouterr().err
+
+
+def test_upload_file_boto3_flavor_without_checksum_fails_with_key(
+    tmp_path, monkeypatch, capsys
+):
+    # The same boto3-flavored failure on a checksum-less upload must exit
+    # non-zero with the offending key, never a raw traceback.
+    from boto3.exceptions import S3UploadFailedError as Boto3Flavor
+
+    local = tmp_path / "Origa_x64-setup.exe"
+    local.write_bytes(b"x" * 10)
+    err = Boto3Flavor("Failed to upload x: InternalError on UploadPart")
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: _FakeUploadClient(err))
+
+    with pytest.raises(SystemExit) as exc:
+        upload_file(local, "releases/latest/Origa_x64-setup.exe", "no-cache", dry_run=False)
+
+    assert exc.value.code == 1
+    assert "releases/latest/Origa_x64-setup.exe" in capsys.readouterr().err
+
+
+class _FlakyUploadClient:
+    """Fails the first upload_file call, records every call."""
+
+    def __init__(self, exc: BaseException) -> None:
+        self.calls: list[dict[str, object]] = []
+        self._exc = exc
+
+    def upload_file(self, **kwargs: object) -> None:
+        # Record a copy: defensive against any future production path that
+        # reuses/mutates the ExtraArgs dict between attempts.
+        recorded = {**kwargs}
+        extra_args = recorded.get("ExtraArgs")
+        if isinstance(extra_args, dict):
+            recorded["ExtraArgs"] = dict(extra_args)
+        self.calls.append(recorded)
+        if len(self.calls) == 1:
+            raise self._exc
+
+
+# ---------------------------------------------------------------------------
+# stat_object — boto3 HEAD (Linux-CI-safe, unlike the pwsh head_object)
+# ---------------------------------------------------------------------------
+
+
+class _FakeHeadClient:
+    """Serves one canned head_object response or raises."""
+
+    def __init__(
+        self,
+        response: dict[str, object] | None = None,
+        exc: BaseException | None = None,
+    ) -> None:
+        self.calls: list[dict[str, object]] = []
+        self._response = response or {}
+        self._exc = exc
+
+    def head_object(self, **kwargs: object) -> dict[str, object]:
+        self.calls.append(kwargs)
+        if self._exc is not None:
+            raise self._exc
+        return self._response
+
+
+def test_stat_object_returns_metadata_and_checksum_mode(monkeypatch):
+    fake = _FakeHeadClient(
+        {
+            "CacheControl": "no-cache",
+            "ContentLength": 58_372_366,
+            "ChecksumSHA256": "AbCd+/==",
+        }
+    )
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: fake)
+
+    metadata = _cdn_s3.stat_object("releases/latest/Origa_x64-setup.exe")
+
+    assert metadata == _cdn_s3.ObjectMetadata(
+        cache_control="no-cache",
+        content_length=58_372_366,
+        checksum_sha256="AbCd+/==",
+    )
+
+    checksum_meta = _cdn_s3.stat_object(
+        "releases/latest/Origa_x64-setup.exe", with_checksum=True
+    )
+    assert checksum_meta is not None
+    assert checksum_meta.checksum_sha256 == "AbCd+/=="
+    assert fake.calls[-1]["ChecksumMode"] == "ENABLED"
+    assert "ChecksumMode" not in fake.calls[0]
+
+
+def test_stat_object_returns_none_with_warning_on_error(monkeypatch, capsys):
+    from botocore.exceptions import ClientError
+
+    err = ClientError({"Error": {"Code": "404", "Message": "NoSuchKey"}}, "HeadObject")
+    monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: _FakeHeadClient(exc=err))
+
+    assert _cdn_s3.stat_object("releases/v9.9.9/missing.exe") is None
+    assert "WARNING" in capsys.readouterr().err

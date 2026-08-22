@@ -1,0 +1,101 @@
+name: Upload installer to CDN
+
+# Reusable workflow for uploading the stable Windows installer to the S3
+# CDN behind s3.origa.uwuwu.net (ADR-041). Microsoft Store submissions
+# require a DIRECT installer link (HTTP 200); GitHub Releases URLs answer
+# with a 302 to objects.githubusercontent.com and get rejected, so the
+# fixed-name NSIS alias (ADR-025) is mirrored to:
+#
+#   releases/v<version>/Origa_x64-setup.exe  - permanent versioned archive
+#   releases/latest/Origa_x64-setup.exe      - the MS Store direct link
+#
+# STABLE-ONLY contract: prerelease (RC) and alpha are gated out by the
+# caller (tauri.yml upload-release-cdn if-clause); this workflow also
+# self-gates on inputs.version_type == 'stable' (same belt-and-suspenders
+# pattern as _upload-rustore.yml). The script itself rejects any version
+# that is not a bare X.Y.Z.
+#
+# Verification is built into the script: authenticated HEAD (Cache-Control
+# + Content-Length mandatory) and a full public GET of both URLs with a
+# sha256 comparison — the GET is the only check that exercises the proxy
+# edge on the real ~58 MB body.
+#
+# Credentials: scoped data-plane S3 keys via env (see
+# _cdn_s3._s3_upload_client) — env credentials deliberately take
+# precedence over any profile, and no profile exists on the runner anyway.
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                type: string
+                required: true
+            version_type:
+                type: string
+                required: true
+        secrets:
+            cdn-access-key-id:
+                required: true
+            cdn-secret-access-key:
+                required: true
+
+permissions:
+    contents: read
+
+jobs:
+    upload:
+        if: inputs.version_type == 'stable'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download Windows artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: windows-build
+                  path: windows-build/
+
+            - name: Setup uv
+              uses: astral-sh/setup-uv@v5
+              with:
+                  enable-cache: false
+
+            - name: Sync Python dependencies
+              working-directory: scripts
+              run: uv sync --frozen
+
+            - name: Upload installer to CDN releases/
+              working-directory: scripts
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets.cdn-access-key-id }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets.cdn-secret-access-key }}
+                  ORIGA_CDN_BASE_URL: ${{ vars.ORIGA_CDN_BASE_URL }}
+              run: |
+                  # pipefail: a failed upload MUST fail the job — with the
+                  # default pipeline semantics `tee` would swallow the
+                  # script's exit code and the guard below would mask the
+                  # failure as a green run with a warning (seen live).
+                  set -o pipefail
+                  uv run python upload_release_artifacts.py \
+                    --version "${{ inputs.version }}" \
+                    --artifact-dir ../windows-build \
+                    | tee upload.log
+
+                  # The job is green here — the upload succeeded. A missing
+                  # URL in the log is a summary-extraction regression only:
+                  # warn loudly but do not fail the release job for cosmetics.
+                  MS_STORE_URL="$(grep -o 'https://.*/releases/latest/Origa_x64-setup.exe' upload.log | tail -1)"
+                  if [ -z "$MS_STORE_URL" ]; then
+                    echo "::warning::Could not extract the MS Store URL from the upload log — check the script output above."
+                    exit 0
+                  fi
+                  {
+                    echo "## Microsoft Store direct link"
+                    echo ""
+                    echo "Stable \`${{ inputs.version }}\` installer is live on the CDN:"
+                    echo ""
+                    echo "``"
+                    echo "$MS_STORE_URL"
+                    echo "``"
+                  } >> "$GITHUB_STEP_SUMMARY"

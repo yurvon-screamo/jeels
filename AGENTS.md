@@ -97,15 +97,15 @@ cargo fmt --check && cargo fmt
 
 ## CDN / S3
 
-Tigris object storage (S3-compatible), bucket `s3://origa-cdn` под user-owned account `yurvon-screamo`. CDN URL `https://s3.origa.uwuwu.net` вшивается через `build.rs`. Трейт: `origa/src/traits/cdn_provider.rs`, реализация: `origa_ui/src/repository/cdn_provider.rs`. Bucket management — через `t3` CLI. См. [ADR-037](docs/decisions/ADR-037-migrate-cdn-to-user-tigris-deprecate-s3-proxy.md) и [runbook](docs/runbooks/migrate-cdn-to-user-tigris.md).
+Tigris object storage (S3-compatible, endpoint `t3.storageapi.dev`) под Railway — bucket `adaptable-foodbox-ucep7wx`, раздача через Railway s3-proxy + edge caching: URL `https://s3.origa.uwuwu.net` вшивается через `build.rs`. Трейт: `origa/src/traits/cdn_provider.rs`, реализация: `origa_ui/src/repository/cdn_provider.rs`. Миграция на user-owned Tigris (ADR-037) была откачена в #372 (DPI-throttle на Cloudflare-роутинге для РФ); orphaned-ресурсы той миграции (user-Tigris bucket `origa-cdn` ~4 GB, R2, Worker) ждут cleanup.
 
-Профиль `~/.aws/credentials [origa-cdn]` — для `deploy_cdn.py` / `refresh_cache_control.py` (Editor role на `origa-cdn`).
+Профиль `~/.aws/credentials [origa]` — для `deploy_cdn.py` / `refresh_cache_control.py` / `upload_release_artifacts.py`. Контракт кредов (ADR-041): env `AWS_ACCESS_KEY_ID` при наличии приоритетнее профиля — CI передаёт scoped-ключи через env.
 
 Все объекты — статические, но кэшируются по-разному в зависимости от частоты изменений. Политика в `scripts/_cdn_cache.py`, применяется в `deploy_cdn.py`.
 
 - **Truly-static** (`public, max-age=31536000, immutable`): ML-модели (`ndlocr/`, `whisper/`), kanji SVG/frames (`kanji_animations/`, `kanji_frames/`), audio фраз (`phrases/audio/`), системный словарь lindera (`dictionaries/`)
-- **Release-updated** (`public, max-age=300, must-revalidate`): контент-JSON — `grammar/`, `dictionary/`, `phrases/phrase_index.json`, `phrases/data/`, `pitch/`, `well_known_set/`
-- **Always-fresh** (`no-cache`): `manifest.json`
+- **Release-updated** (`public, max-age=300, must-revalidate`): контент-JSON — `grammar/`, `dictionary/`, `phrases/phrase_index.json`, `phrases/data/`, `pitch/`, `well_known_set/`, а также версионированные инсталлеры `releases/v*.*.*/` (перезаписываемы при re-run тега)
+- **Always-fresh** (`no-cache`): `manifest.json`, `releases/latest/` (прямой линк для Microsoft Store, ADR-041)
 
 immutable уместен только для truly-static файлов. `grammar`/`phrases`/`dictionary` обновляются каждый релиз (W-11, P-3, L-4, S-3) — для них immutable означал CDN edge-cache poisoning (PR #182): S3 обновлялся, а edge держал годовой кэш и отдавал устаревшую версию, пока кэш не сбросили вручную.
 
@@ -115,6 +115,15 @@ python scripts/deploy_cdn.py --dry-run  # показать что будет з�
 ```
 
 Манифест (`manifest.json`) содержит SHA256 хеши версионных файлов и позволяет клиенту обнаруживать обновления. Деплоится с `Cache-Control: no-cache`.
+
+### Релизные инсталлеры (`releases/`, ADR-041)
+
+Microsoft Store требует прямую ссылку (HTTP 200) — GitHub Releases дают 302. Stable-релизы зеркалируют NSIS-алиас `Origa_x64-setup.exe` (ADR-025) в bucket job'ом `upload-release-cdn` (`tauri.yml`): `releases/v<version>/` (архив) + `releases/latest/` (ссылка для стора). Заливка верифицируется: authenticated HEAD (Cache-Control, размер, чексумма при simple-формате) + полный публичный GET с sha256. RC не заливаются.
+
+```powershell
+# вручную (bootstrap текущего stable; exe скачать из GitHub Release):
+cd scripts; uv run python upload_release_artifacts.py --version 1.2.3 --artifact-dir <dir>
+```
 
 Обновить Cache-Control на существующих объектах (one-time, после смены политики — новые upload'ы уже корректны, но старые объекты хранят прежний заголовок):
 
