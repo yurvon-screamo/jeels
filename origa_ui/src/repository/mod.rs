@@ -5,6 +5,9 @@ mod file_repository;
 mod hybrid_repository;
 mod knowledge_set_codec;
 pub(crate) mod legacy_migration;
+#[cfg(test)]
+pub(crate) mod session;
+#[cfg(not(test))]
 mod session;
 pub mod trailbase_auth;
 pub mod trailbase_client;
