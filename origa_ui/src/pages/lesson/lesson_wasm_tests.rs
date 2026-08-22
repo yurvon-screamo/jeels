@@ -14,6 +14,7 @@ use wasm_bindgen_test::*;
 
 use super::answer_display::CardAnswerDisplay;
 use super::grammar_info_badge::GrammarInfoBadge;
+use super::kanji_card_details::{KanjiCardDetails, RadicalDisplay};
 use super::lesson_card_question::LessonCardQuestion;
 use super::lesson_progress::LessonProgress;
 use super::next_card_button::NextCardButton;
@@ -31,6 +32,98 @@ use crate::test_support::{
 };
 
 wasm_bindgen_test_configure!(run_in_browser);
+
+// ═══════════════════════════════════════════════════════════════════════
+// KanjiCardDetails: radical translation degradation
+// ═══════════════════════════════════════════════════════════════════════
+
+/// A radical whose localized name/description are empty strings ("no
+/// translation for this language yet" — see `RadicalInfo::name`) must
+/// degrade to the bare symbol: no blank muted text nodes may render.
+#[wasm_bindgen_test]
+async fn kanji_card_details_hides_empty_radical_translation() {
+    let wrapper = create_wrapper();
+    let (set_more_label, get_more_label) = shared_cell::<String>();
+    mount_with_i18n(&wrapper, move || {
+        let i18n = crate::i18n::use_i18n();
+        // The details toggle is unlabelled by test id; identify it by its
+        // localized "more details" label taken from the same i18n context
+        // instead of grabbing the first button in the DOM.
+        set_more_label.set(Some(
+            crate::i18n::td_string!(i18n.get_locale_untracked(), common.more_details).to_string(),
+        ));
+        let radicals = vec![
+            RadicalDisplay {
+                symbol: '日',
+                name: "Sun".to_string(),
+                description: "The sun radical".to_string(),
+            },
+            RadicalDisplay {
+                symbol: '山',
+                name: String::new(),
+                description: String::new(),
+            },
+        ];
+        view! {
+            <KanjiCardDetails
+                kanji="明".to_string()
+                name="bright".to_string()
+                radicals=Some(radicals)
+                example_words=None
+                on_readings=None
+                kun_readings=None
+                known_kanji=Signal::from(HashSet::new())
+                native_language=origa::domain::NativeLanguage::English
+            />
+        }
+        .into_any()
+    });
+    let more_label = get_more_label.take().expect("label captured");
+    tick().await;
+
+    // Expand the details section: find the toggle by its localized label.
+    let buttons = wrapper.query_selector_all("button").unwrap();
+    let toggle = (0..buttons.length())
+        .filter_map(|index| buttons.get(index))
+        .find(|node| {
+            node.dyn_ref::<web_sys::Element>()
+                .is_some_and(|el| el.text_content().as_deref() == Some(more_label.as_str()))
+        })
+        .expect("the more-details toggle must render");
+    toggle
+        .dyn_into::<web_sys::HtmlElement>()
+        .expect("toggle is an element")
+        .click();
+    tick().await;
+
+    let text = wrapper.text_content().unwrap_or_default();
+    assert!(text.contains('日'), "the bare radical symbol must render");
+    assert!(
+        text.contains('山'),
+        "the untranslated radical symbol must render"
+    );
+    assert!(
+        text.contains("Sun"),
+        "the translated radical name must render"
+    );
+
+    let muted_nodes = wrapper
+        .query_selector_all(".text-muted-foreground")
+        .unwrap();
+    for index in 0..muted_nodes.length() {
+        let node = muted_nodes.get(index).expect("index within bounds");
+        let muted_text = node
+            .dyn_into::<web_sys::Element>()
+            .expect("node is an element")
+            .text_content()
+            .unwrap_or_default();
+        assert_ne!(
+            muted_text.trim(),
+            "",
+            "no blank muted text nodes may render for untranslated radicals"
+        );
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // RatingButtons / RatingButtonsView

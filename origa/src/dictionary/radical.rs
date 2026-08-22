@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::OnceLock};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
-use crate::domain::{JapaneseLevel, OrigaError};
+use crate::domain::{JapaneseLevel, NativeLanguage, OrigaError};
 
 pub static RADICAL_DICTIONARY: OnceLock<RadicalDatabase> = OnceLock::new();
 
@@ -81,6 +81,10 @@ pub struct RadicalInfo {
     stroke_count: u32,
     name: String,
     description: String,
+    /// English projection of `name`; empty until the CDN data ships it.
+    name_en: Option<String>,
+    /// English projection of `description`; empty until the CDN data ships it.
+    description_en: Option<String>,
     jlpt: JapaneseLevel,
     kanji: Vec<char>,
 }
@@ -94,12 +98,24 @@ impl RadicalInfo {
         self.stroke_count
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
+    /// Localized radical name. An empty string means "no translation for this
+    /// language yet" (legacy CDN data without the `_en` fields) — callers hide
+    /// empty copy and degrade to the bare radical symbol instead of showing
+    /// Russian to an English user.
+    pub fn name(&self, lang: &NativeLanguage) -> &str {
+        match lang {
+            NativeLanguage::English => self.name_en.as_deref().unwrap_or(""),
+            NativeLanguage::Russian => &self.name,
+        }
     }
 
-    pub fn description(&self) -> &str {
-        &self.description
+    /// Localized radical description; see [`RadicalInfo::name`] for the
+    /// empty-string fallback contract.
+    pub fn description(&self, lang: &NativeLanguage) -> &str {
+        match lang {
+            NativeLanguage::English => self.description_en.as_deref().unwrap_or(""),
+            NativeLanguage::Russian => &self.description,
+        }
     }
 
     pub fn jlpt(&self) -> &JapaneseLevel {
@@ -136,6 +152,8 @@ impl RadicalDatabase {
                         stroke_count: v.stroke_count,
                         name: v.name,
                         description: v.description,
+                        name_en: v.name_en,
+                        description_en: v.description_en,
                         jlpt,
                         kanji,
                     },
@@ -176,6 +194,8 @@ struct RadicalStoredType {
     kanji: Vec<String>,
     name: String,
     description: String,
+    name_en: Option<String>,
+    description_en: Option<String>,
     jlpt: String,
 }
 
@@ -207,7 +227,7 @@ mod tests {
         let db = RadicalDatabase::from_json(json).unwrap();
         let info = db.get_radical_info(&'日').unwrap();
         assert_eq!(info.stroke_count(), 4);
-        assert_eq!(info.name(), "sun, day");
+        assert_eq!(info.name(&NativeLanguage::Russian), "sun, day");
         assert!(info.kanji().contains(&'明'));
     }
 
@@ -297,8 +317,8 @@ mod tests {
 
         assert_eq!(info.radical(), '木');
         assert_eq!(info.stroke_count(), 4);
-        assert_eq!(info.name(), "tree, wood");
-        assert_eq!(info.description(), "Tree radical");
+        assert_eq!(info.name(&NativeLanguage::Russian), "tree, wood");
+        assert_eq!(info.description(&NativeLanguage::Russian), "Tree radical");
         assert_eq!(info.jlpt(), &JapaneseLevel::N4);
         assert_eq!(info.kanji().len(), 3);
         assert!(info.kanji().contains(&'林'));
@@ -349,7 +369,7 @@ mod tests {
 
         assert_eq!(info.radical(), '水');
         assert_eq!(info.stroke_count(), 4);
-        assert_eq!(info.name(), "water");
+        assert_eq!(info.name(&NativeLanguage::Russian), "water");
         assert!(info.kanji().contains(&'海'));
     }
 
@@ -395,6 +415,78 @@ mod tests {
         assert!(list.iter().any(|r| r.radical() == '金'));
     }
 
+    // English name/description projection (language-aware accessors)
+    #[test]
+    fn radical_info_name_returns_english_for_english_language() {
+        let json = r#"{
+            "radicals": {
+                "日": {
+                    "strokeCount": 4,
+                    "kanji": [],
+                    "name": "Солнце",
+                    "name_en": "Sun",
+                    "description": "Радикал «Солнце»",
+                    "description_en": "The sun radical",
+                    "jlpt": "N5"
+                }
+            }
+        }"#;
+
+        let db = RadicalDatabase::from_json(json).unwrap();
+        let info = db.get_radical_info(&'日').unwrap();
+
+        assert_eq!(info.name(&NativeLanguage::English), "Sun");
+        assert_eq!(
+            info.description(&NativeLanguage::English),
+            "The sun radical"
+        );
+    }
+
+    #[test]
+    fn radical_info_name_returns_russian_for_russian_language() {
+        let json = r#"{
+            "radicals": {
+                "日": {
+                    "strokeCount": 4,
+                    "kanji": [],
+                    "name": "Солнце",
+                    "name_en": "Sun",
+                    "description": "Радикал «Солнце»",
+                    "description_en": "The sun radical",
+                    "jlpt": "N5"
+                }
+            }
+        }"#;
+
+        let db = RadicalDatabase::from_json(json).unwrap();
+        let info = db.get_radical_info(&'日').unwrap();
+
+        assert_eq!(info.name(&NativeLanguage::Russian), "Солнце");
+        assert_eq!(
+            info.description(&NativeLanguage::Russian),
+            "Радикал «Солнце»"
+        );
+    }
+
+    #[test]
+    fn radical_info_without_english_fields_returns_empty_for_english() {
+        // Legacy radicals.json (pre-EN data) must keep deserializing; the
+        // English projection degrades to an empty string so the UI can hide
+        // untranslated copy instead of showing Russian to an English user.
+        let json = r#"{
+            "radicals": {
+                "日": {"strokeCount": 4, "kanji": [], "name": "Солнце", "description": "Радикал «Солнце»", "jlpt": "N5"}
+            }
+        }"#;
+
+        let db = RadicalDatabase::from_json(json).unwrap();
+        let info = db.get_radical_info(&'日').unwrap();
+
+        assert_eq!(info.name(&NativeLanguage::English), "");
+        assert_eq!(info.description(&NativeLanguage::English), "");
+        assert_eq!(info.name(&NativeLanguage::Russian), "Солнце");
+    }
+
     // Parametrized tests with rstest
     #[rstest]
     #[case('日', 4, "sun")]
@@ -418,7 +510,7 @@ mod tests {
         let info = db.get_radical_info(&radical_char).unwrap();
 
         assert_eq!(info.stroke_count(), expected_stroke_count);
-        assert_eq!(info.name(), expected_name);
+        assert_eq!(info.name(&NativeLanguage::Russian), expected_name);
     }
 
     #[rstest]
