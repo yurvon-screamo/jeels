@@ -9,6 +9,7 @@ pub(crate) mod load_step;
 mod onboarding_wasm_tests;
 mod progress;
 mod scoring_card_view;
+mod scoring_finish_button;
 mod scoring_helpers;
 mod scoring_mark_all;
 mod scoring_progress;
@@ -40,6 +41,7 @@ use origa::domain::User;
 use origa::traits::UserRepository;
 use origa::use_cases::UpdateUserProfileUseCase;
 use progress::ProgressStep;
+use scoring_finish_button::ScoringFinishButton;
 use scoring_step::ScoringStep;
 use summary_step::SummaryStep;
 
@@ -70,6 +72,7 @@ pub fn Onboarding() -> impl IntoView {
     let sets_loaded = RwSignal::new(false);
     let is_loading = RwSignal::new(true);
     let is_importing = RwSignal::new(false);
+    let is_finishing = RwSignal::new(false);
     let disposed = StoredValue::new(());
     let mark_all_trigger: RwSignal<u32> = RwSignal::new(0);
     let scoring_completed: RwSignal<bool> = RwSignal::new(false);
@@ -256,7 +259,12 @@ pub fn Onboarding() -> impl IntoView {
 
     let on_skip = create_on_skip_callback(repository.clone(), state, disposed, navigate_for_skip);
 
-    let on_finish = create_on_finish_callback(repository.clone(), disposed, navigate_for_finish);
+    let on_finish = create_on_finish_callback(
+        repository.clone(),
+        is_finishing,
+        disposed,
+        navigate_for_finish,
+    );
 
     let on_start_import =
         create_on_start_import_callback(repository, state, current_user, is_importing, disposed);
@@ -405,15 +413,11 @@ pub fn Onboarding() -> impl IntoView {
                                     </Show>
 
                                     <Show when=move || scoring_completed.get()>
-                                        <Button
-                                            variant=ButtonVariant::Olive
-                                            on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                                                on_finish.run(());
-                                            })
+                                        <ScoringFinishButton
+                                            is_finishing
+                                            on_finish
                                             test_id="onboarding-finish"
-                                        >
-                                            {t!(i18n, onboarding.finish)}
-                                        </Button>
+                                        />
                                     </Show>
                                 </div>
                             </div>

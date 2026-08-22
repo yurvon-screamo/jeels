@@ -101,6 +101,79 @@ where
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// ScoringFinishButton
+// ═══════════════════════════════════════════════════════════════════════
+
+#[wasm_bindgen_test]
+async fn scoring_finish_button_shows_loading_state_while_finishing() {
+    use crate::pages::onboarding::scoring_finish_button::ScoringFinishButton;
+
+    let wrapper = create_wrapper();
+    let (set_finishing, get_finishing) = shared_cell::<RwSignal<bool>>();
+    let (set_invoked, get_invoked) = shared_cell::<RwSignal<bool>>();
+    let (set_completing_label, get_completing_label) = shared_cell::<String>();
+    mount_with_i18n(&wrapper, move || {
+        let i18n = crate::i18n::use_i18n();
+        set_completing_label.set(Some(
+            crate::i18n::td_string!(i18n.get_locale_untracked(), onboarding.completing).to_string(),
+        ));
+        let is_finishing = RwSignal::new(false);
+        let invoked = RwSignal::new(false);
+        set_finishing.set(Some(is_finishing));
+        set_invoked.set(Some(invoked));
+        // Mirrors `create_on_finish_callback`: the callback flips the loading
+        // flag before its async work runs.
+        let on_finish = Callback::new(move |_: ()| {
+            is_finishing.set(true);
+            invoked.set(true);
+        });
+        view! {
+            <ScoringFinishButton is_finishing on_finish test_id="sfb1" />
+        }
+        .into_any()
+    });
+    let is_finishing = get_finishing.get().expect("captured");
+    let invoked = get_invoked.get().expect("captured");
+    let completing_label = get_completing_label.take().expect("label captured");
+    tick().await;
+
+    // Act: click Finish
+    wrapper
+        .query_selector("[data-testid=\"sfb1\"]")
+        .unwrap()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlButtonElement>()
+        .click();
+    tick().await;
+
+    // Assert: the callback ran and the button entered its loading state
+    assert!(invoked.get(), "click must invoke the finish callback");
+    assert!(is_finishing.get(), "callback must flip the loading flag");
+    let button = wrapper
+        .query_selector("[data-testid=\"sfb1\"]")
+        .unwrap()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlButtonElement>();
+    assert!(
+        button.disabled(),
+        "the finish button must be disabled while finishing"
+    );
+    assert_eq!(
+        button.get_attribute("data-loading").as_deref(),
+        Some("true"),
+        "the finish button must flag data-loading while finishing"
+    );
+    assert!(
+        button
+            .text_content()
+            .as_deref()
+            .is_some_and(|text| text.contains(&completing_label)),
+        "the finish button must swap its label to the completing text while finishing; got {:?}",
+        button.text_content()
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // JlptStep
 // ═══════════════════════════════════════════════════════════════════════
 
