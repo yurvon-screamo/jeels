@@ -329,3 +329,29 @@ jobs:
         secrets:
             rustore-key-id: ${{ secrets.RUSTORE_KEY_ID }}
             rustore-private-key: ${{ secrets.RUSTORE_PRIVATE_KEY }}
+
+    upload-release-cdn:
+        name: Upload installer to CDN (MS Store direct link)
+        # Stable-only: mirrors the stable Windows installer (ADR-025 alias)
+        # to the CDN releases/ prefix so Microsoft Store gets a DIRECT link
+        # (GitHub Releases 302-redirect and are rejected by the store).
+        # See ADR-041 and .github/workflows/_upload-release-cdn.yml.
+        #
+        # Intentionally NOT a dependency of `release` — same isolation
+        # rationale as upload-rustore above: a transient CDN/S3 failure
+        # MUST NOT block the GitHub Release. RC builds stay GitHub-only.
+        # Do NOT add upload-release-cdn to release.needs — that regresses
+        # isolation.
+        if: >
+            always() &&
+            needs.build-tauri.result == 'success' &&
+            startsWith(github.ref, 'refs/tags/v') &&
+            needs.version.outputs.version_type == 'stable'
+        needs: [version, build-tauri]
+        uses: ./.github/workflows/_upload-release-cdn.yml
+        with:
+            version: ${{ needs.version.outputs.version }}
+            version_type: ${{ needs.version.outputs.version_type }}
+        secrets:
+            cdn-access-key-id: ${{ secrets.ORIGA_CDN_S3_ACCESS_KEY_ID }}
+            cdn-secret-access-key: ${{ secrets.ORIGA_CDN_S3_SECRET_ACCESS_KEY }}

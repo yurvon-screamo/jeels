@@ -26,9 +26,16 @@ EXPECTED_SYNC_DIR_POLICY: dict[str, str] = {
     "whisper": IMMUTABLE,
     "fonts": IMMUTABLE,
     "phrases/data": RELEASE_UPDATED,
+    "well_known_set/duolingo": RELEASE_UPDATED,
     "well_known_set/irodori_nyuumon": RELEASE_UPDATED,
     "well_known_set/irodori_shokyuu1": RELEASE_UPDATED,
     "well_known_set/irodori_shokyuu2": RELEASE_UPDATED,
+    "well_known_set/migii": RELEASE_UPDATED,
+    "well_known_set/minna_n5": RELEASE_UPDATED,
+    "well_known_set/minna_n4": RELEASE_UPDATED,
+    "well_known_set/minna_n3": RELEASE_UPDATED,
+    "well_known_set/minna_n2": RELEASE_UPDATED,
+    "well_known_set/spy_family": RELEASE_UPDATED,
 }
 
 
@@ -39,6 +46,22 @@ EXPECTED_SYNC_DIR_POLICY: dict[str, str] = {
 
 def test_manifest_is_no_cache():
     assert cache_control_for("manifest.json") == NO_CACHE
+
+
+def test_ms_store_latest_installer_alias_is_no_cache():
+    # ADR-041: releases/latest/ is the direct link handed to Microsoft
+    # Store; it must never be edge-cached across a release cutover.
+    assert cache_control_for("releases/latest/Origa_x64-setup.exe") == NO_CACHE
+
+
+def test_versioned_installer_archive_is_release_updated():
+    # NOT immutable: re-running a tag overwrites the key with different
+    # installer bytes (NSIS builds are not reproducible); immutable would
+    # poison the edge for a year (PR #182 lesson). 5-min must-revalidate
+    # self-heals the overwrite.
+    assert (
+        cache_control_for("releases/v1.2.3/Origa_x64-setup.exe") == RELEASE_UPDATED
+    )
 
 
 # ---------------------------------------------------------------------------
