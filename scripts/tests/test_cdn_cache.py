@@ -60,7 +60,7 @@ def test_versioned_installer_archive_is_release_updated():
     # poison the edge for a year (PR #182 lesson). 5-min must-revalidate
     # self-heals the overwrite.
     assert (
-        cache_control_for("releases/v1.2.3/Origa_x64-setup.exe") == RELEASE_UPDATED
+        cache_control_for("releases/1.2.3/Origa_x64-setup.exe") == RELEASE_UPDATED
     )
 
 

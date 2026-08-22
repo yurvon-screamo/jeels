@@ -76,7 +76,7 @@ def test_release_entries_versioned_key_precedes_latest_alias():
     entries = ura.release_entries("1.2.3")
 
     assert [key for key, _ in entries] == [
-        "releases/v1.2.3/Origa_x64-setup.exe",
+        "releases/1.2.3/Origa_x64-setup.exe",
         "releases/latest/Origa_x64-setup.exe",
     ]
     # Policies come from the shared tiered cache: archive is revalidatable
@@ -162,7 +162,7 @@ def test_dry_run_prints_plan_without_uploads(tmp_path, monkeypatch, capsys):
     ura.main()
 
     out = capsys.readouterr().out
-    assert "[DRY-RUN] releases/v1.2.3/Origa_x64-setup.exe" in out
+    assert "[DRY-RUN] releases/1.2.3/Origa_x64-setup.exe" in out
     assert "[DRY-RUN] releases/latest/Origa_x64-setup.exe" in out
 
 
@@ -196,7 +196,7 @@ def test_main_uploads_both_keys_versioned_first(tmp_path, monkeypatch):
     ura.main()
 
     assert [u["key"] for u in uploads] == [
-        "releases/v1.2.3/Origa_x64-setup.exe",
+        "releases/1.2.3/Origa_x64-setup.exe",
         "releases/latest/Origa_x64-setup.exe",
     ]
     assert all(u["dry"] is False for u in uploads)
@@ -220,7 +220,7 @@ def _ok_metadata(payload: bytes, checksum: str | None) -> _cdn_s3.ObjectMetadata
 def test_verify_head_accepts_simple_checksum_match(monkeypatch, capsys):
     payload = b"x" * 100
     _, sha_b64 = _digests(payload)
-    key = "releases/v1.2.3/Origa_x64-setup.exe"
+    key = "releases/1.2.3/Origa_x64-setup.exe"
     monkeypatch.setattr(
         _cdn_s3,
         "stat_object",
@@ -243,7 +243,7 @@ def test_verify_head_treats_composite_checksum_as_informational(
     # every stable release. Integrity rests on the public GET check.
     payload = b"x" * 100
     _, sha_b64 = _digests(payload)
-    key = "releases/v1.2.3/Origa_x64-setup.exe"
+    key = "releases/1.2.3/Origa_x64-setup.exe"
     composite = "nQJRx6+aaaaaaaaaaaaa==-7"
     monkeypatch.setattr(
         _cdn_s3, "stat_object", _FakeStat({key: _ok_metadata(payload, composite)})
@@ -259,7 +259,7 @@ def test_verify_head_treats_composite_checksum_as_informational(
 def test_verify_head_fails_on_simple_checksum_mismatch(monkeypatch):
     payload = b"x" * 100
     _, local_b64 = _digests(payload)
-    key = "releases/v1.2.3/Origa_x64-setup.exe"
+    key = "releases/1.2.3/Origa_x64-setup.exe"
     wrong_b64 = base64.b64encode(hashlib.sha256(b"other").digest()).decode("ascii")
     monkeypatch.setattr(
         _cdn_s3, "stat_object", _FakeStat({key: _ok_metadata(payload, wrong_b64)})
@@ -340,7 +340,7 @@ def test_verify_head_falls_back_to_plain_head_when_checksum_mode_rejected(
     # A store that rejects ChecksumMode makes the first HEAD return None;
     # the plain retry must keep the mandatory metadata checks alive.
     payload = b"x" * 10
-    key = "releases/v1.2.3/Origa_x64-setup.exe"
+    key = "releases/1.2.3/Origa_x64-setup.exe"
     _, local_b64 = _digests(payload)
     plain = _cdn_s3.ObjectMetadata(
         cache_control="public, max-age=300, must-revalidate",
@@ -372,7 +372,7 @@ def test_empty_cdn_base_url_env_falls_back_to_default(tmp_path, monkeypatch, cap
     _make_installer(tmp_path, payload)
     sha_hex, sha_b64 = _digests(payload)
     stat_map = {
-        "releases/v1.2.3/Origa_x64-setup.exe": _cdn_s3.ObjectMetadata(
+        "releases/1.2.3/Origa_x64-setup.exe": _cdn_s3.ObjectMetadata(
             "public, max-age=300, must-revalidate", len(payload), None
         ),
         "releases/latest/Origa_x64-setup.exe": _cdn_s3.ObjectMetadata(
@@ -398,7 +398,7 @@ def test_main_happy_path_prints_ms_store_link(tmp_path, monkeypatch, capsys):
     _make_installer(tmp_path, payload)
     sha_hex, sha_b64 = _digests(payload)
     stat_map = {
-        "releases/v1.2.3/Origa_x64-setup.exe": _cdn_s3.ObjectMetadata(
+        "releases/1.2.3/Origa_x64-setup.exe": _cdn_s3.ObjectMetadata(
             "public, max-age=300, must-revalidate", len(payload), sha_b64
         ),
         "releases/latest/Origa_x64-setup.exe": _cdn_s3.ObjectMetadata(
@@ -427,12 +427,18 @@ def test_main_happy_path_prints_ms_store_link(tmp_path, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert uploads == [
-        "releases/v1.2.3/Origa_x64-setup.exe",
+        "releases/1.2.3/Origa_x64-setup.exe",
         "releases/latest/Origa_x64-setup.exe",
     ]
     assert (
         f"{ura.DEFAULT_CDN_BASE_URL}/releases/latest/{ura.INSTALLER_NAME}" in out
     )
+    # The store submission contract: the VERSIONED URL (no "v" prefix) is
+    # what goes into the MS Store form, and it must be labeled as such.
+    assert (
+        f"{ura.DEFAULT_CDN_BASE_URL}/releases/1.2.3/{ura.INSTALLER_NAME}" in out
+    )
+    assert "store submission (versioned)" in out
     # Bootstrap contract: the full sha256 (for cross-checking against the
     # GitHub Release digest) and the version are part of the output.
     sha_hex, _ = _digests(payload)
