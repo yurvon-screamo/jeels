@@ -6123,10 +6123,13 @@ rt {
     gap: 8px;
 }
 
+/* No border here by design: the only production consumer of .legal-card is
+   the Profile page, where it sits inside a bordered <Card> — an own border
+   would draw a second frame (double-frame bug). The Login page renders the
+   borderless .legal-links row instead and never uses this class. */
 .legal-card {
     position: relative;
     background: var(--bg-paper);
-    border: 1px solid var(--border-dark);
     padding: 24px;
 }
 
