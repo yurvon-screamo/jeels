@@ -7,7 +7,7 @@ script uploads the fixed-name NSIS installer (the ADR-025 alias built by
 ``_build-tauri.yml``) to the S3-backed CDN behind ``s3.origa.uwuwu.net``,
 producing two keys per stable release (ADR-041):
 
-- ``releases/v<version>/Origa_x64-setup.exe`` — permanent versioned archive.
+- ``releases/<version>/Origa_x64-setup.exe`` (no "v" prefix — see release_entries) — permanent versioned archive.
   Release-updated Cache-Control on purpose: a re-run of the same tag
   overwrites the key with different installer bytes, so ``immutable`` would
   poison the edge for a year (the PR #182 lesson).
@@ -61,8 +61,15 @@ def _fail(message: str) -> NoReturn:
 
 
 def release_entries(version: str) -> list[tuple[str, str]]:
-    """(key, Cache-Control) pairs; the versioned key MUST precede the alias."""
-    versioned = f"releases/v{version}/{INSTALLER_NAME}"
+    """(key, Cache-Control) pairs; the versioned key MUST precede the alias.
+
+    The version path segment carries NO \"v\" prefix: Microsoft Store parses
+    the version out of the package URL (their example is
+    ``.../downloads/1.1/setup.exe\") and rejects \"v0.6.4\" as a versioned
+    URL — the submission fails with a generic \"must point to a versioned
+    package\" error.
+    """
+    versioned = f"releases/{version}/{INSTALLER_NAME}"
     latest = f"releases/latest/{INSTALLER_NAME}"
     return [
         (versioned, _cdn_cache.cache_control_for(versioned)),
@@ -219,7 +226,9 @@ def main() -> None:
     for key, _ in entries:
         verify_public_get(f"{base_url}/{key}", sha256_hex, size)
 
-    print(f"\nMicrosoft Store direct link:\n  {base_url}/releases/latest/{INSTALLER_NAME}")
+    print("\nRelease URLs:")
+    print(f"  store submission (versioned): {base_url}/releases/{args.version}/{INSTALLER_NAME}")
+    print(f"  latest alias (humans):        {base_url}/releases/latest/{INSTALLER_NAME}")
 
 
 if __name__ == "__main__":

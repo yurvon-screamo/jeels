@@ -104,8 +104,8 @@ Tigris object storage (S3-compatible, endpoint `t3.storageapi.dev`) под Railw
 Все объекты — статические, но кэшируются по-разному в зависимости от частоты изменений. Политика в `scripts/_cdn_cache.py`, применяется в `deploy_cdn.py`.
 
 - **Truly-static** (`public, max-age=31536000, immutable`): ML-модели (`ndlocr/`, `whisper/`), kanji SVG/frames (`kanji_animations/`, `kanji_frames/`), audio фраз (`phrases/audio/`), системный словарь lindera (`dictionaries/`)
-- **Release-updated** (`public, max-age=300, must-revalidate`): контент-JSON — `grammar/`, `dictionary/`, `phrases/phrase_index.json`, `phrases/data/`, `pitch/`, `well_known_set/`, а также версионированные инсталлеры `releases/v*.*.*/` (перезаписываемы при re-run тега)
-- **Always-fresh** (`no-cache`): `manifest.json`, `releases/latest/` (прямой линк для Microsoft Store, ADR-041)
+- **Release-updated** (`public, max-age=300, must-revalidate`): контент-JSON — `grammar/`, `dictionary/`, `phrases/phrase_index.json`, `phrases/data/`, `pitch/`, `well_known_set/`, а также версионированные инсталлеры `releases/<X.Y.Z>/` (перезаписываемы при re-run тега; без префикса `v` — MS Store парсит версию из URL)
+- **Always-fresh** (`no-cache`): `manifest.json`, `releases/latest/` (человекочитаемый алиас последнего stable; в MS Store сабмитится версионируемый `releases/<X.Y.Z>/`, ADR-041)
 
 immutable уместен только для truly-static файлов. `grammar`/`phrases`/`dictionary` обновляются каждый релиз (W-11, P-3, L-4, S-3) — для них immutable означал CDN edge-cache poisoning (PR #182): S3 обновлялся, а edge держал годовой кэш и отдавал устаревшую версию, пока кэш не сбросили вручную.
 
@@ -118,7 +118,7 @@ python scripts/deploy_cdn.py --dry-run  # показать что будет з�
 
 ### Релизные инсталлеры (`releases/`, ADR-041)
 
-Microsoft Store требует прямую ссылку (HTTP 200) — GitHub Releases дают 302. Stable-релизы зеркалируют NSIS-алиас `Origa_x64-setup.exe` (ADR-025) в bucket job'ом `upload-release-cdn` (`tauri.yml`): `releases/v<version>/` (архив) + `releases/latest/` (ссылка для стора). Заливка верифицируется: authenticated HEAD (Cache-Control, размер, чексумма при simple-формате) + полный публичный GET с sha256. RC не заливаются.
+Microsoft Store требует прямую версионируемую ссылку (HTTP 200 + версия в пути без префикса `v`, напр. `.../releases/0.6.4/setup.exe`) — GitHub Releases дают 302. Stable-релизы зеркалируют NSIS-алиас `Origa_x64-setup.exe` (ADR-025) в bucket job'ом `upload-release-cdn` (`tauri.yml`): `releases/<version>/` (архив — именно его сабмитят в стор) + `releases/latest/` (алиас для людей). Заливка верифицируется: authenticated HEAD (Cache-Control, размер, чексумма при simple-формате) + полный публичный GET с sha256. RC не заливаются.
 
 ```powershell
 # вручную (bootstrap текущего stable; exe скачать из GitHub Release):

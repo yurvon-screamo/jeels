@@ -15,8 +15,9 @@ Files are split into three categories by how often they change:
   flushed by hand.
 - ALWAYS-FRESH (no-cache): manifest.json — the client's change-detection
   beacon, re-fetched every session — and ``releases/latest/`` — the
-  stable-alias Windows installer URL handed to Microsoft Store (ADR-041),
-  which must never be edge-cached across a release cutover.
+  human-facing stable installer alias (the store submission uses the
+  versioned ``releases/<X.Y.Z>/`` URL, ADR-041); the alias must never be
+  edge-cached across a release cutover.
 
 Any path matching no rule falls back to the conservative release-updated
 policy: a 5-min 304 revalidation is cheap when unchanged and bounds staleness

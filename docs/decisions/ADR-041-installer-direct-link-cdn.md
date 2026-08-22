@@ -34,14 +34,24 @@ alias `Origa_x64-setup.exe` — into the existing CDN bucket under a new
 
 | Key | Purpose | Cache-Control |
 | --- | --- | --- |
-| `releases/v<X.Y.Z>/Origa_x64-setup.exe` | permanent versioned archive | `public, max-age=300, must-revalidate` (release-updated) |
-| `releases/latest/Origa_x64-setup.exe` | the direct link handed to Microsoft Store | `no-cache` |
+| `releases/<X.Y.Z>/Origa_x64-setup.exe` | permanent versioned archive — **the URL submitted to the store** | `public, max-age=300, must-revalidate` (release-updated) |
+| `releases/latest/Origa_x64-setup.exe` | convenience alias (landing page, manual testing) | `no-cache` |
 
-`https://s3.origa.uwuwu.net/releases/latest/Origa_x64-setup.exe` is a
-stable URL — submitted to the store once, it always serves the latest
-stable installer. RC/prerelease tags are gated out (stable-only contract at
-three layers: `tauri.yml` if-clause, reusable-workflow self-gate, strict
-`^\d+\.\d+\.\d+$` version validation in the script).
+**Submission contract learned from the store's validation (2026-08-23):**
+the store REQUIRES the submitted URL to be versioned — it parses a version
+out of the path (its example is `.../downloads/1.1/setup.exe`) and rejects
+anything it cannot parse as `X.Y.Z`. Two consequences: (1) the version
+segment carries NO `v` prefix — `releases/v0.6.4/` fails validation with
+the generic "must point to a versioned package" error while
+`releases/0.6.4/` passes; (2) the submitted URL is the VERSIONED key per
+release (each app update = new URL + resubmission), so the `latest` alias
+is NOT what goes into the store form — it exists for humans, not for the
+store bot.
+
+`https://s3.origa.uwuwu.net/releases/<X.Y.Z>/Origa_x64-setup.exe` is the
+per-release store URL. RC/prerelease tags are gated out (stable-only
+contract at three layers: `tauri.yml` if-clause, reusable-workflow
+self-gate, strict `^\d+\.\d+\.\d+$` version validation in the script).
 
 ### Why the existing Railway bucket
 
@@ -143,7 +153,7 @@ uv run python upload_release_artifacts.py --version <X.Y.Z> --artifact-dir <dir>
 - Railway egress if the link leaks publicly (MS Store fetches are rare;
   monitored via Railway metrics — see ADR-037 for the investigation
   workflow).
-- `releases/v*` re-upload on tag re-run briefly serves mixed cache states
+- `releases/<X.Y.Z>*` re-upload on tag re-run briefly serves mixed cache states
   (≤5 min, bounded by must-revalidate).
 
 ## Alternatives considered

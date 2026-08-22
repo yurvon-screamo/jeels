@@ -425,7 +425,7 @@ def test_upload_file_passes_chunk_size_config_and_checksum(tmp_path, monkeypatch
     chunk = 8 * 1024 * 1024
     upload_file(
         local,
-        "releases/v1.2.3/Origa_x64-setup.exe",
+        "releases/1.2.3/Origa_x64-setup.exe",
         "public, max-age=300, must-revalidate",
         dry_run=False,
         chunk_size=chunk,
@@ -595,5 +595,5 @@ def test_stat_object_returns_none_with_warning_on_error(monkeypatch, capsys):
     err = ClientError({"Error": {"Code": "404", "Message": "NoSuchKey"}}, "HeadObject")
     monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: _FakeHeadClient(exc=err))
 
-    assert _cdn_s3.stat_object("releases/v9.9.9/missing.exe") is None
+    assert _cdn_s3.stat_object("releases/9.9.9/missing.exe") is None
     assert "WARNING" in capsys.readouterr().err
