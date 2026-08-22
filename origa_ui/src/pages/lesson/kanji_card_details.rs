@@ -95,18 +95,35 @@ pub fn KanjiCardDetails(
                                     .unwrap_or_default()
                                     .into_iter()
                                     .map(|radical| {
+                                        // Empty name/description mean "no
+                                        // translation for this language yet"
+                                        // (see RadicalInfo::name) — the row
+                                        // degrades to the bare symbol instead
+                                        // of rendering blank lines. Option
+                                        // renders as nothing when None.
+                                        let name_view = (!radical.name.is_empty()).then(|| {
+                                            view! {
+                                                <Text size=TextSize::Small class="text-muted-foreground">
+                                                    {radical.name.clone()}
+                                                </Text>
+                                            }
+                                        });
+                                        let description_view =
+                                            (!radical.description.is_empty()).then(|| {
+                                                view! {
+                                                    <Text size=TextSize::Small class="text-muted-foreground text-xs">
+                                                        {radical.description.clone()}
+                                                    </Text>
+                                                }
+                                            });
                                         view! {
                                             <div class="flex items-center gap-2 px-2 py-1 bg-secondary/30 rounded">
                                                 <Text size=TextSize::Large class="text-primary">
                                                     {radical.symbol}
                                                 </Text>
                                                 <div class="flex flex-col">
-                                                    <Text size=TextSize::Small class="text-muted-foreground">
-                                                        {radical.name}
-                                                    </Text>
-                                                    <Text size=TextSize::Small class="text-muted-foreground text-xs">
-                                                        {radical.description}
-                                                    </Text>
+                                                    {name_view}
+                                                    {description_view}
                                                 </div>
                                             </div>
                                         }

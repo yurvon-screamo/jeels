@@ -128,6 +128,7 @@ pub(super) fn create_on_start_import_callback(
 /// with the up-to-date known-vocabulary hash.
 pub(super) fn create_on_finish_callback<N>(
     repository: crate::repository::HybridUserRepository,
+    is_finishing: RwSignal<bool>,
     disposed: StoredValue<()>,
     navigate: N,
 ) -> Callback<()>
@@ -137,6 +138,7 @@ where
     Callback::new(move |_: ()| {
         let repo = repository.clone();
         let nav = navigate.clone();
+        is_finishing.set(true);
         spawn_local(async move {
             let use_case = CompleteOnboardingScoringUseCase::new(&repo);
             match use_case.execute().await {

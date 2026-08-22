@@ -78,8 +78,8 @@ fn extract_kanji_data(kanji_card: &DomainCard, native_language: NativeLanguage) 
                     .map(
                         |info| crate::pages::lesson::kanji_card_details::RadicalDisplay {
                             symbol: info.radical(),
-                            name: info.name().to_string(),
-                            description: info.description().to_string(),
+                            name: info.name(&native_language).to_string(),
+                            description: info.description(&native_language).to_string(),
                         },
                     )
                     .collect(),

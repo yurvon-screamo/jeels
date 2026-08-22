@@ -1,4 +1,6 @@
 pub mod auth_handlers;
+#[cfg(all(target_arch = "wasm32", test))]
+mod auth_handlers_wasm_tests;
 pub(crate) mod email_password_form;
 mod header;
 mod language_toggle;

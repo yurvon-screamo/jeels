@@ -23,6 +23,12 @@ export default defineConfig({
         : [["html", { open: "on-failure", host: "0.0.0.0" }]],
     use: {
         baseURL: "http://localhost:1420",
+        // Tests assert Russian UI copy (BDD features + page objects), and a
+        // brand-new profile now inherits the browser locale (see
+        // create_new_user_from_session) instead of a hardcoded default. Pin
+        // the context locale so the suite is deterministic regardless of the
+        // runner's default navigator.languages (en-US on CI runners).
+        locale: "ru-RU",
         trace: "on-first-retry",
         screenshot: "only-on-failure",
         video: "retain-on-failure",

@@ -1,7 +1,7 @@
 use super::filters::{ImportFilter, LevelFilter, TypeFilter, available_set_types};
 use super::import_set_preview_modal::ImportSetPreviewModal;
 use super::sets_level_group::SetsLevelGroup;
-use super::types::SetInfo;
+use super::types::{SetInfo, set_info_from_meta};
 use crate::i18n::{t, use_i18n};
 use crate::loaders::WellKnownSetLoaderImpl;
 use crate::pages::shared::LoadMoreButton;
@@ -87,6 +87,7 @@ pub fn SetsContent() -> impl IntoView {
                         return;
                     }
                     load_error.set(false);
+                    let lang = crate::i18n::locale_to_native_language(&i18n.get_locale_untracked());
                     let set_list: Vec<SetInfo> = meta_list
                         .into_iter()
                         .map(|meta| {
@@ -95,15 +96,7 @@ pub fn SetsContent() -> impl IntoView {
                                 .map(|u| u.is_set_imported(&meta.id))
                                 .unwrap_or(false);
 
-                            SetInfo {
-                                set_id: meta.id,
-                                title: meta.title_ru,
-                                description: meta.desc_ru,
-                                word_count: Some(meta.word_count),
-                                set_type: meta.set_type,
-                                level: meta.level,
-                                is_imported,
-                            }
+                            set_info_from_meta(&meta, is_imported, &lang)
                         })
                         .collect();
                     sets_for_load.set(set_list);

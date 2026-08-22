@@ -1,10 +1,10 @@
-use crate::i18n::{I18nContext, Locale};
+use crate::i18n::{I18nContext, Locale, locale_to_native_language};
 use crate::repository::{
     TrailBaseClient, get_session, set_session_async, take_pkce_verifier_async, uuid_to_ulid,
 };
 use crate::store::auth_store::AuthStore;
 use chrono::Utc;
-use origa::domain::{DailyLoad, JlptProgress, KnowledgeSet, NativeLanguage, User};
+use origa::domain::{DailyLoad, JlptProgress, KnowledgeSet, User};
 use origa::traits::UserRepository;
 use std::collections::HashSet;
 
@@ -28,7 +28,7 @@ pub async fn get_or_create_profile(
     match auth_store.repository().get_current_user().await {
         Ok(Some(user)) => Ok(user),
         Ok(None) => {
-            let new_user = create_new_user_from_session(email)?;
+            let new_user = create_new_user_from_session(email, i18n)?;
 
             // First-time profile creation is an explicit sync checkpoint: the
             // canonical user must exist remotely before any other device can
@@ -82,7 +82,18 @@ pub async fn get_or_create_profile(
 /// first save is already attributed to the canonical user. Field defaults mirror
 /// `User::new`; they are duplicated here only because identity is restricted to
 /// the `merge` change in the domain layer.
-fn create_new_user_from_session(email: &str) -> Result<User, String> {
+///
+/// The native language is inherited from the login screen's language selection:
+/// the caller passes the very `I18nContext` the login page rendered with, so a
+/// brand-new profile starts in the language the user has already picked —
+/// otherwise the App-level locale sync would immediately overwrite that choice
+/// with this default (see the login language race). The context is an explicit
+/// argument (not `use_context`) because production calls this after `.await`
+/// points inside `spawn_local`, where no reactive owner is scoped.
+pub(super) fn create_new_user_from_session(
+    email: &str,
+    i18n: &I18nContext<Locale>,
+) -> Result<User, String> {
     let session = get_session().ok_or_else(|| {
         "No active session: cannot create user profile without a TrailBase id".to_string()
     })?;
@@ -98,12 +109,14 @@ fn create_new_user_from_session(email: &str) -> Result<User, String> {
 
     let username = email.split('@').next().unwrap_or(email).to_string();
 
+    let native_language = locale_to_native_language(&i18n.get_locale_untracked());
+
     Ok(User::from_row(
         user_id,
         email.to_string(),
         username,
         JlptProgress::new(),
-        NativeLanguage::Russian,
+        native_language,
         None,
         KnowledgeSet::new(),
         Utc::now(),

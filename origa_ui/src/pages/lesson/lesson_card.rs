@@ -102,8 +102,8 @@ pub fn LessonCard(
                 r.iter()
                     .map(|info| RadicalDisplay {
                         symbol: info.radical(),
-                        name: info.name().to_string(),
-                        description: info.description().to_string(),
+                        name: info.name(&lang).to_string(),
+                        description: info.description(&lang).to_string(),
                     })
                     .collect(),
             ),

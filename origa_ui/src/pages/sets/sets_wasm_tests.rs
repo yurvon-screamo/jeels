@@ -18,6 +18,48 @@ use crate::test_support::{create_wrapper, mount_with_i18n, mount_with_router, sh
 
 wasm_bindgen_test_configure!(run_in_browser);
 
+fn sample_meta() -> origa::domain::WellKnownSetMeta {
+    origa::domain::WellKnownSetMeta {
+        id: "duolingo-1-1".into(),
+        set_type: "duolingo".into(),
+        level: origa::domain::JapaneseLevel::N5,
+        title_ru: "Слова из модуля 1".into(),
+        title_en: "Words from Module 1".into(),
+        desc_ru: "Русское описание набора".into(),
+        desc_en: "English set description".into(),
+        word_count: 42,
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// set_info_from_meta (language projection)
+// ═══════════════════════════════════════════════════════════════════════
+
+#[wasm_bindgen_test]
+fn set_info_for_english_user_takes_english_title_and_description() {
+    let info = super::types::set_info_from_meta(
+        &sample_meta(),
+        false,
+        &origa::domain::NativeLanguage::English,
+    );
+
+    assert_eq!(info.title, "Words from Module 1");
+    assert_eq!(info.description, "English set description");
+}
+
+#[wasm_bindgen_test]
+fn set_info_for_russian_user_takes_russian_title_and_description() {
+    let info = super::types::set_info_from_meta(
+        &sample_meta(),
+        true,
+        &origa::domain::NativeLanguage::Russian,
+    );
+
+    assert_eq!(info.title, "Слова из модуля 1");
+    assert_eq!(info.description, "Русское описание набора");
+    assert!(info.is_imported, "imported flag must pass through");
+}
+
 fn sample_set(imported: bool) -> SetInfo {
     SetInfo {
         set_id: "set-1".into(),
