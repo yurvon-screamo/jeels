@@ -77,7 +77,7 @@ rustfft = "6.2"
 ort = { version = "2.0.0-rc.12", default-features = false }
 ort-web = "0.2.1"
 as-slice = "0.2"
-getrandom = "0.3"
+getrandom = "0.4"
 
 # Origa workspace crates
 origa = { path = "./origa" }
