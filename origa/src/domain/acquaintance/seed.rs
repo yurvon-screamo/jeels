@@ -29,14 +29,21 @@ pub fn seed_first_review(
     history: &mut MemoryHistory,
     first_due: DateTime<Utc>,
 ) -> Result<(), OrigaError> {
-    let memory_state = MemoryState::with_card_state(
+    history.seed(build_seeded_memory_state(first_due)?);
+    Ok(())
+}
+
+/// Создаёт начальное состояние памяти для карты, закрывшей руку знакомства:
+/// значения подобраны так, чтобы карта не считалась known/high-difficulty, а
+/// завтрашний рейтинг эволюционировал её как обычную молодую `Review`-карту
+/// (см. тесты ниже).
+pub fn build_seeded_memory_state(first_due: DateTime<Utc>) -> Result<MemoryState, OrigaError> {
+    Ok(MemoryState::with_card_state(
         Stability::new(SEED_STABILITY)?,
         Difficulty::new(SEED_DIFFICULTY)?,
         first_due,
         CardState::Review,
-    );
-    history.seed(memory_state);
-    Ok(())
+    ))
 }
 
 #[cfg(test)]

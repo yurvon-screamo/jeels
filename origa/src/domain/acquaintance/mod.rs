@@ -17,6 +17,7 @@ mod seed;
 mod training_tests;
 
 pub use entry::AcquaintanceEntry;
-pub use hand::{AcquaintanceHand, CRITERION_SUCCESSSES};
+pub use hand::{AcquaintanceHand, CRITERION_SUCCESSSES, HAND_MAX_SIZE};
 pub use phase::{AcquaintanceSubphase, AnswerOutcome};
+pub(crate) use seed::build_seeded_memory_state;
 pub use seed::seed_first_review;

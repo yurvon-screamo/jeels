@@ -142,6 +142,45 @@ pub(crate) fn update_history(
     }
 }
 
+/// Учёт закрытия руки знакомства (docs/acquaintance-mode.md §4): дневной
+/// лимит тратится одной операцией на все карты руки; рейтинговый путь
+/// (`update_history`) для этих карт не вызывается.
+pub(crate) fn register_new_cards_without_rating(
+    study_cards: &HashMap<Ulid, StudyCard>,
+    lesson_history: &mut Vec<DailyHistoryItem>,
+    count: usize,
+) {
+    let Some(stats) = ComputedStats::compute(study_cards) else {
+        return;
+    };
+
+    let today = Utc::now().date_naive();
+    if let Some(existing_item) = lesson_history
+        .iter_mut()
+        .find(|item| item.timestamp().date_naive() == today)
+    {
+        for _ in 0..count {
+            existing_item.increment_new_cards_studied();
+        }
+        let update = stats.to_daily_update(
+            existing_item.positive_ratings(),
+            existing_item.negative_ratings(),
+            existing_item.total_ratings(),
+            existing_item.new_cards_studied_today(),
+            existing_item.phrase_cards_studied_today(),
+        );
+        existing_item.update_stats(update);
+    } else {
+        let mut item = DailyHistoryItem::new();
+        for _ in 0..count {
+            item.increment_new_cards_studied();
+        }
+        let update = stats.to_daily_update(0, 0, 0, item.new_cards_studied_today(), 0);
+        item.update_stats(update);
+        lesson_history.push(item);
+    }
+}
+
 pub(crate) fn recalculate_daily_stats(
     study_cards: &HashMap<Ulid, StudyCard>,
     lesson_history: &mut Vec<DailyHistoryItem>,

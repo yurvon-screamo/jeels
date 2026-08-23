@@ -17,6 +17,9 @@ use super::phase::{AcquaintanceSubphase, AnswerOutcome};
 /// за тренировку (несловесные карты).
 pub const CRITERION_SUCCESSSES: u8 = 3;
 
+/// Максимальный размер руки знакомства (docs/acquaintance-mode.md §6).
+pub const HAND_MAX_SIZE: usize = 7;
+
 /// Рука знакомства: партия незнакомых карт одного урока.
 #[derive(Debug)]
 pub struct AcquaintanceHand {

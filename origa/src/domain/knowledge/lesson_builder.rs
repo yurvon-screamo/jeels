@@ -1129,6 +1129,15 @@ fn resolve_jlpt_level(card: &Card, jlpt_content: &JlptContent) -> Option<Japanes
     jlpt_content.find_level(&card.content_key(), CardType::from(card))
 }
 
+/// Единая политика сортировочного приоритета новых карт: номер JLPT-уровня
+/// (N5=5 .. N1=1); карты без известного уровня — в самом конце пула.
+/// Используется и билдером урока, и выбором руки знакомства (CN3).
+pub(crate) fn jlpt_sort_key(card: &Card, jlpt_content: &JlptContent) -> u8 {
+    resolve_jlpt_level(card, jlpt_content)
+        .map(|level| level.as_number())
+        .unwrap_or(UNKNOWN_JLPT_PRIORITY)
+}
+
 /// Distributes `allowed` slots across card types proportionally to
 /// `CARD_TYPE_WEIGHTS`, treating the weights as **percentages** (not as a
 /// round-robin pattern). Uses the largest-remainder method with a
@@ -1293,9 +1302,7 @@ fn distribute_new_cards<'a, R: rand::Rng>(
     // Reverse: N5(5) → highest priority → first key in BTreeMap.
     let mut groups: GroupedNewCards = BTreeMap::new();
     for card in new_cards {
-        let priority = resolve_jlpt_level(card.1.card(), jlpt_content)
-            .map(|l| l.as_number())
-            .unwrap_or(UNKNOWN_JLPT_PRIORITY);
+        let priority = jlpt_sort_key(card.1.card(), jlpt_content);
         groups
             .entry(Reverse(priority))
             .or_default()

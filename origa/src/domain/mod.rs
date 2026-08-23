@@ -20,7 +20,7 @@ mod well_known_set;
 
 pub use acquaintance::{
     AcquaintanceEntry, AcquaintanceHand, AcquaintanceSubphase, AnswerOutcome, CRITERION_SUCCESSSES,
-    seed_first_review,
+    HAND_MAX_SIZE, seed_first_review,
 };
 pub use error::{ErrorCategory, OrigaError};
 pub use furigana::{FuriganaSegment, furiganize_segments, furiganize_text, furiganize_text_html};
@@ -38,6 +38,7 @@ pub use jlpt_content::{JlptContent, JlptContentError};
 pub use jlpt_progress::{
     CategoryCounts, CategoryProgress, JlptProgress, LevelProgressDetail, ProgressUpdate,
 };
+pub(crate) use knowledge::jlpt_sort_key;
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,
     GrammarRuleCard, KanjiCard, KnowledgeSet, LessonCard, LessonCardView, LessonData,

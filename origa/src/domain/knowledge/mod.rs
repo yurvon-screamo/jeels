@@ -22,6 +22,7 @@ pub use lesson::{
     GrammarInfo, GrammarQuizCard, LessonCard, LessonCardView, LessonData, LessonViewGenerator,
     MultiQuizResult, QuizCard, QuizMode, QuizOption, YesNoCard,
 };
+pub(crate) use lesson_builder::jlpt_sort_key;
 pub use phrase::PhraseCard;
 pub use stats_tracker::StatsTracker;
 pub use vocabulary::VocabularyCard;
@@ -427,6 +428,38 @@ impl KnowledgeSet {
         } else {
             Err(OrigaError::CardNotFound { card_id })
         }
+    }
+
+    /// Закрытие руки знакомства (docs/acquaintance-mode.md): каждой ещё
+    /// новой карте руки сидируется состояние памяти с первым ревью в
+    /// `first_due`; уже незнакомость потерявшие карты пропускаются
+    /// (идемпотентность как у `mark_card_as_known`). Дневной лимит
+    /// списывается одной операцией за фактически сидированные карты.
+    pub fn complete_acquaintance_hand(
+        &mut self,
+        card_ids: &[Ulid],
+        first_due: chrono::DateTime<chrono::Utc>,
+    ) -> Result<(), OrigaError> {
+        use crate::domain::acquaintance::build_seeded_memory_state;
+
+        let mut seeded = 0usize;
+        for card_id in card_ids {
+            let Some(card) = self.study_cards.get_mut(card_id) else {
+                return Err(OrigaError::CardNotFound { card_id: *card_id });
+            };
+            if !card.memory().is_new() {
+                continue;
+            }
+            let memory_state = build_seeded_memory_state(first_due)?;
+            card.seed_first_review(memory_state);
+            seeded += 1;
+        }
+
+        if seeded > 0 {
+            self.stats
+                .register_acquaintance_completions(&self.study_cards, seeded);
+        }
+        Ok(())
     }
 
     #[cfg(test)]
