@@ -1990,6 +1990,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2972feb8dffe7bc8c5463b1dacda1b0dfbed3710e50f977d965429692d74cd8"
 
 [[package]]
+name = "ego-tree"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b04dc5a38e4f151a79d9f2451ae6037fb6eaf5cba34771f44781f80e508498e3"
+
+[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5967,7 +5973,7 @@ dependencies = [
  "bincode",
  "chrono",
  "console_error_panic_hook",
- "ego-tree",
+ "ego-tree 0.11.0",
  "flate2",
  "futures",
  "gloo-net",
@@ -7657,7 +7663,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cc3d051b884f40e309de6c149734eab57aa8cc1347992710dc80bcc1c2194c15"
 dependencies = [
  "cssparser 0.34.0",
- "ego-tree",
+ "ego-tree 0.10.0",
  "getopts",
  "html5ever 0.29.1",
  "precomputed-hash",
