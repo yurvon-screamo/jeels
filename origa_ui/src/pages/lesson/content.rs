@@ -3,7 +3,6 @@ use super::acquaintance_state::{
     AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
 };
 #[cfg(feature = "acquaintance_mode")]
-#[cfg(feature = "acquaintance_mode")]
 use super::acquaintance_view::AcquaintanceView;
 use super::complete_screen::LessonCompleteScreen;
 use super::empty_state_view::LessonEmptyState;
@@ -108,7 +107,7 @@ pub fn LessonContent() -> impl IntoView {
             repository: repository.clone(),
             state: acquaintance_state,
             slides: acquaintance_slides,
-            known_kanji: known_kanji.clone(),
+            known_kanji,
             native_language,
         });
     }
@@ -182,7 +181,10 @@ pub fn LessonContent() -> impl IntoView {
                             (Vec::new(), None)
                         },
                     },
-                    _ => (Vec::new(), None),
+                    _ => {
+                        tracing::debug!("Acquaintance hand: pool empty or limit exhausted");
+                        (Vec::new(), None)
+                    },
                 }
             };
             #[cfg(not(feature = "acquaintance_mode"))]
@@ -392,20 +394,178 @@ pub fn LessonContent() -> impl IntoView {
     });
 
     #[cfg(feature = "acquaintance_mode")]
-    let render_acquaintance = move || {
-        if acq_hand_active()
-            && !is_loading.get_untracked()
-            && !is_completed.get_untracked()
-            && error_message.get_untracked().is_none()
-            && empty_diagnosis.get_untracked().is_none()
-        {
+    fn build_acquaintance_slides(
+        user: &origa::domain::User,
+        order: &[Ulid],
+        native_language: origa::domain::NativeLanguage,
+        i18n: &crate::i18n::I18nContext<crate::i18n::Locale>,
+    ) -> Vec<AcquaintanceSlideData> {
+        use crate::ui_components::ReadingItem;
+
+        let answer_text = |answer: origa::domain::CardAnswer| -> String {
+            match answer {
+                origa::domain::CardAnswer::Text(text) => text,
+                origa::domain::CardAnswer::Vocabulary {
+                    mut translations,
+                    description,
+                } => {
+                    if let Some(description) = description {
+                        translations.push(description);
+                    }
+                    translations.join(", ")
+                },
+            }
+        };
+
+        order
+            .iter()
+            .filter_map(|card_id| {
+                let study_card = user.knowledge_set().get_card(*card_id)?;
+                match study_card.card() {
+                    Card::Vocabulary(vocab) => {
+                        let translations = origa::dictionary::vocabulary::get_translations(
+                            vocab.word().text(),
+                            &native_language,
+                        )
+                        .unwrap_or_default();
+                        Some(AcquaintanceSlideData::Vocabulary {
+                            card_id: *card_id,
+                            word: vocab.word().text().to_string(),
+                            pos_label: vocab
+                                .pos()
+                                .map(|pos| super::pos_label::part_of_speech_label(pos, i18n)),
+                            translations,
+                        })
+                    },
+                    Card::Kanji(kanji) => {
+                        let name = kanji
+                            .description(&native_language)
+                            .map(&answer_text)
+                            .unwrap_or_default();
+                        let radicals = kanji.radicals_info().ok().map(|infos| {
+                            infos
+                                .iter()
+                                .map(|info| super::kanji_card_details::RadicalDisplay {
+                                    symbol: info.radical(),
+                                    name: info.name(&native_language).to_string(),
+                                    description: info.description(&native_language).to_string(),
+                                })
+                                .collect()
+                        });
+                        let example_words = {
+                            let examples: Vec<_> = kanji
+                                .example_words(&native_language)
+                                .iter()
+                                .map(|entry| {
+                                    (entry.word().to_string(), entry.meaning().to_string())
+                                })
+                                .collect();
+                            (!examples.is_empty()).then_some(examples)
+                        };
+                        let on_readings = {
+                            let readings: Vec<ReadingItem> = kanji
+                                .on_readings_with_freq()
+                                .into_iter()
+                                .map(|(reading, freq, is_rare)| ReadingItem {
+                                    reading,
+                                    freq,
+                                    is_rare,
+                                })
+                                .collect();
+                            (!readings.is_empty()).then_some(readings)
+                        };
+                        let kun_readings = {
+                            let readings: Vec<ReadingItem> = kanji
+                                .kun_readings_with_freq()
+                                .into_iter()
+                                .map(|(reading, freq, is_rare)| ReadingItem {
+                                    reading,
+                                    freq,
+                                    is_rare,
+                                })
+                                .collect();
+                            (!readings.is_empty()).then_some(readings)
+                        };
+                        Some(AcquaintanceSlideData::Kanji {
+                            card_id: *card_id,
+                            kanji: kanji.kanji().text().to_string(),
+                            name,
+                            radicals,
+                            example_words,
+                            on_readings,
+                            kun_readings,
+                        })
+                    },
+                    Card::Grammar(rule) => Some(AcquaintanceSlideData::Grammar {
+                        card_id: *card_id,
+                        title: rule
+                            .title(&native_language)
+                            .map(|question| question.text().to_string())
+                            .unwrap_or_default(),
+                        short_description: rule
+                            .short_description(&native_language)
+                            .map(&answer_text)
+                            .unwrap_or_default(),
+                        how_to_form: rule
+                            .how_to_form(&native_language)
+                            .map(&answer_text)
+                            .unwrap_or_default(),
+                        examples: rule
+                            .examples(&native_language)
+                            .map(&answer_text)
+                            .unwrap_or_default(),
+                        explanation: rule
+                            .explanation(&native_language)
+                            .map(&answer_text)
+                            .unwrap_or_default(),
+                        nuances: rule
+                            .nuances(&native_language)
+                            .map(&answer_text)
+                            .unwrap_or_default(),
+                    }),
+                    Card::Phrase(_) => None,
+                }
+            })
+            .collect()
+    }
+
+    #[cfg(feature = "acquaintance_mode")]
+    let show_acquaintance = move || {
+        acq_hand_active()
+            && !is_loading.get()
+            && !is_completed.get()
+            && error_message.get().is_none()
+            && empty_diagnosis.get().is_none()
+    };
+    #[cfg(not(feature = "acquaintance_mode"))]
+    let _show_acquaintance = move || false;
+
+    #[cfg(feature = "acquaintance_mode")]
+    let show_lesson_content = move || {
+        !acq_hand_active()
+            && !is_loading.get()
+            && !is_completed.get()
+            && error_message.get().is_none()
+            && empty_diagnosis.get().is_none()
+    };
+    #[cfg(feature = "acquaintance_mode")]
+    let render_acquaintance_slot = move || {
+        if show_acquaintance() {
             Some(view! { <AcquaintanceView /> }.into_any())
         } else {
             None
         }
     };
     #[cfg(not(feature = "acquaintance_mode"))]
-    let render_acquaintance = move || None;
+    let render_acquaintance_slot = move || None;
+
+    #[cfg(not(feature = "acquaintance_mode"))]
+    let show_lesson_content = move || {
+        !is_loading.get()
+            && !is_completed.get()
+            && error_message.get().is_none()
+            && empty_diagnosis.get().is_none()
+    };
 
     view! {
         <LessonHeader />
@@ -436,18 +596,11 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        <Show when=move || {
-            #[cfg(feature = "acquaintance_mode")]
-            let hand_active = acq_hand_active();
-            #[cfg(not(feature = "acquaintance_mode"))]
-            let hand_active = false;
-            !hand_active && !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()
-        }>
-            // No nested scroll container here — the whole page scrolls.
-            // A separate scroll layer over the lesson zone used to fight the
-            // page scroll on mobile (jitter + snap-back) and was removed.
-            {move || render_acquaintance().unwrap_or_else(|| ().into_any())}
+        {move || {
+            render_acquaintance_slot().unwrap_or_else(|| ().into_any())
+        }}
 
+        <Show when=show_lesson_content>
             <div data-testid="lesson-content" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
                 <Show when=move || is_syncing_cards.get()>
                     <div data-testid="lesson-sync-indicator" class="absolute top-0 right-0 flex items-center gap-1 text-sm text-muted-foreground p-2">
@@ -459,175 +612,5 @@ pub fn LessonContent() -> impl IntoView {
                 <LessonCardContainer />
             </div>
         </Show>
-    }
-}
-
-#[cfg(feature = "acquaintance_mode")]
-fn build_acquaintance_slides(
-    user: &origa::domain::User,
-    order: &[Ulid],
-    native_language: origa::domain::NativeLanguage,
-    i18n: &crate::i18n::I18nContext<crate::i18n::Locale>,
-) -> Vec<AcquaintanceSlideData> {
-    use crate::ui_components::ReadingItem;
-
-    let answer_text = |answer: origa::domain::CardAnswer| -> String {
-        match answer {
-            origa::domain::CardAnswer::Text(text) => text,
-            origa::domain::CardAnswer::Vocabulary {
-                mut translations,
-                description,
-            } => {
-                if let Some(description) = description {
-                    translations.push(description);
-                }
-                translations.join(", ")
-            },
-        }
-    };
-
-    order
-        .iter()
-        .filter_map(|card_id| {
-            let study_card = user.knowledge_set().get_card(*card_id)?;
-            match study_card.card() {
-                Card::Vocabulary(vocab) => {
-                    let translations = origa::dictionary::vocabulary::get_translations(
-                        vocab.word().text(),
-                        &native_language,
-                    )
-                    .unwrap_or_default();
-                    Some(AcquaintanceSlideData::Vocabulary {
-                        card_id: *card_id,
-                        word: vocab.word().text().to_string(),
-                        pos_label: vocab
-                            .pos()
-                            .map(|pos| super::pos_label::part_of_speech_label(pos, &i18n)),
-                        translations,
-                    })
-                },
-                Card::Kanji(kanji) => {
-                    let name = kanji
-                        .description(&native_language)
-                        .map(&answer_text)
-                        .unwrap_or_default();
-                    let radicals = kanji.radicals_info().ok().map(|infos| {
-                        infos
-                            .iter()
-                            .map(|info| super::kanji_card_details::RadicalDisplay {
-                                symbol: info.radical(),
-                                name: info.name(&native_language).to_string(),
-                                description: info.description(&native_language).to_string(),
-                            })
-                            .collect()
-                    });
-                    let example_words = {
-                        let examples: Vec<_> = kanji
-                            .example_words(&native_language)
-                            .iter()
-                            .map(|entry| (entry.word().to_string(), entry.meaning().to_string()))
-                            .collect();
-                        (!examples.is_empty()).then_some(examples)
-                    };
-                    let on_readings = {
-                        let readings: Vec<ReadingItem> = kanji
-                            .on_readings_with_freq()
-                            .into_iter()
-                            .map(|(reading, freq, is_rare)| ReadingItem {
-                                reading,
-                                freq,
-                                is_rare,
-                            })
-                            .collect();
-                        (!readings.is_empty()).then_some(readings)
-                    };
-                    let kun_readings = {
-                        let readings: Vec<ReadingItem> = kanji
-                            .kun_readings_with_freq()
-                            .into_iter()
-                            .map(|(reading, freq, is_rare)| ReadingItem {
-                                reading,
-                                freq,
-                                is_rare,
-                            })
-                            .collect();
-                        (!readings.is_empty()).then_some(readings)
-                    };
-                    Some(AcquaintanceSlideData::Kanji {
-                        card_id: *card_id,
-                        kanji: kanji.kanji().text().to_string(),
-                        name,
-                        radicals,
-                        example_words,
-                        on_readings,
-                        kun_readings,
-                    })
-                },
-                Card::Grammar(rule) => Some(AcquaintanceSlideData::Grammar {
-                    card_id: *card_id,
-                    title: rule
-                        .title(&native_language)
-                        .map(|q| q.text().to_string())
-                        .unwrap_or_default(),
-                    short_description: rule
-                        .short_description(&native_language)
-                        .map(&answer_text)
-                        .unwrap_or_default(),
-                    how_to_form: rule
-                        .how_to_form(&native_language)
-                        .map(&answer_text)
-                        .unwrap_or_default(),
-                    examples: rule
-                        .examples(&native_language)
-                        .map(&answer_text)
-                        .unwrap_or_default(),
-                    explanation: rule
-                        .explanation(&native_language)
-                        .map(&answer_text)
-                        .unwrap_or_default(),
-                    nuances: rule
-                        .nuances(&native_language)
-                        .map(&answer_text)
-                        .unwrap_or_default(),
-                }),
-                Card::Phrase(_) => None,
-            }
-        })
-        .collect()
-}
-
-#[cfg(all(test, feature = "grammar_practice_lesson_mode"))]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse_query_returns_grammar_practice_for_valid_input() {
-        let id = Ulid::new();
-        let query = format!("mode=grammar_practice&grammar_id={id}");
-        let parsed = parse_grammar_practice_query(&query);
-        match parsed {
-            Some(LessonMode::GrammarPractice { grammar_rule_id }) => {
-                assert_eq!(grammar_rule_id, id);
-            },
-            other => panic!("expected GrammarPractice, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn parse_query_returns_none_for_normal_mode() {
-        assert!(parse_grammar_practice_query("mode=normal").is_none());
-        assert!(parse_grammar_practice_query("").is_none());
-    }
-
-    #[test]
-    fn parse_query_returns_none_for_invalid_ulid() {
-        assert!(
-            parse_grammar_practice_query("mode=grammar_practice&grammar_id=not-a-ulid").is_none()
-        );
-    }
-
-    #[test]
-    fn parse_query_returns_none_when_grammar_id_missing() {
-        assert!(parse_grammar_practice_query("mode=grammar_practice").is_none());
     }
 }

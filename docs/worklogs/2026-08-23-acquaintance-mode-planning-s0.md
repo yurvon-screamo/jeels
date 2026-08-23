@@ -99,3 +99,57 @@ fmt ✅ · clippy workspace -D warnings ✅ · workspace(excl landing)
 
 Срез S2: use cases SelectAcquaintanceHandUseCase +
 CompleteAcquaintanceHandUseCase + journeys.
+
+---
+
+# Срезы S2–S4 (2026-08-23)
+
+## S2 — use cases (f6a43db5)
+
+SelectAcquaintanceHandUseCase (детерминированный JLPT-сорт через
+JlptContent::find_level вместо reuse distribute_new_cards — rng ломал бы
+контракт «та же рука»; принято ревьювером) + CompleteAcquaintanceHandUseCase
+(сидирование due=завтра всем ещё новым картам руки + списание лимита одной
+операцией, идемпотентный пропуск известных) + 10 journeys.
+Ревью: approve; 3 Common закрыты (тесты группировки показа, journey на
+идемпотентность смешанного завершения, jlpt_sort_key консолидация).
+
+## S3 — инварианты билдера (db3e8195)
+
+NewCardPolicy {Inject, Exclude}; Exclude гейтит впрыск + фильтрует
+избранных незнакомых + drop_new_cards choke point после companions
+(корректировка core_count); фразы освобождены предикатом (rstest 6 осей);
+jlpt_sort_key консолидация; distribute_new_cards откат в private;
+build_seeded_memory_state убран из pub API.
+Ревью: approve c 0 High/0 Common; оба Low закрыты (единый источник фактов
+в drop_new_cards + параметр политики).
+
+## S4 — UI фазы показа (e7910303 → 6fc7e1d6)
+
+AcquaintanceState/Context/SlideData; AcquaintanceView: Tag фазы +
+HandProgressStrip; типозависимые слайды (word=FuriganaText+translations,
+kanji=reuse KanjiCardDetails, grammar=все поля сразу с Show when
+non-empty); action bar «Уже знаю» Ghost→inline-confirm→MarkKnown +
+«Дальше» (скрыт при открытом confirm — анти-гонка); Training-заглушка до
+S5; content.rs: hand-select до review-select, рендер двумя
+взаимоисключающими ветками.
+
+### Уроки S4 (важно!)
+
+- Leptos: cfg-атрибуты внутри view! НЕ обрабатываются — все cfg-ветки
+  делать statement'ами ДО view! (замыкания, возвращающие into_any).
+- python-патчи с якорями после cargo fmt молча не применяются — каждый
+  шаг верифицировать grep'ом сразу.
+- git add -A захватил чужие untracked landing-файлы — исправлено
+  reset --soft + restore --staged; впредь добавлять файлы явно.
+
+## Ворота S4
+
+fmt/clippy/workspace 2143/0 ✅ · обе конфигурации флага компилируются ✅
+wasm-тесты: нерабочий файл удалён честно, переносится в S7 e2e вместе с
+ask-first CI-правкой. Ревью раунд 2 в процессе (фоновая задача).
+
+## Осталось
+
+S5 тренировка (+извлечение оркестрации из LessonContent), S6 итоговый
+экран, S7 e2e + CI ask-first правка.

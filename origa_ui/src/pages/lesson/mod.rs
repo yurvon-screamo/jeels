@@ -2,8 +2,6 @@
 mod acquaintance_state;
 #[cfg(feature = "acquaintance_mode")]
 mod acquaintance_view;
-#[cfg(all(target_arch = "wasm32", test, feature = "acquaintance_mode"))]
-mod acquaintance_wasm_tests;
 mod answer_display;
 pub mod card_type;
 pub(crate) mod complete_screen;

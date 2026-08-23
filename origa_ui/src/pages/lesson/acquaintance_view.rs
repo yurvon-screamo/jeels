@@ -24,7 +24,7 @@ pub fn AcquaintanceView() -> impl IntoView {
 
     let phase_label = Signal::derive(move || {
         let ctx = ctx_stored.get_value();
-        match ctx.state.get().stage {
+        match ctx.state.with(|state| state.stage) {
             AcquaintanceStage::Presentation => i18n
                 .get_keys()
                 .acquaintance()
@@ -43,7 +43,8 @@ pub fn AcquaintanceView() -> impl IntoView {
 
     let total = Signal::derive(move || {
         let ctx = ctx_stored.get_value();
-        ctx.state.get().hand.map(|h| h.len()).unwrap_or(0)
+        ctx.state
+            .with(|state| state.hand.as_ref().map(|h| h.len()).unwrap_or(0))
     });
     // S4: в показе прогресс нулевой; S5 подключит счётчики подфаз руки.
     let progress = Signal::derive(move || vec![0u8; total.get()]);
@@ -248,7 +249,6 @@ fn GrammarSlide(
     let kk = known_kanji.get_untracked();
     let kk_for_how_to = kk.clone();
     let kk_for_examples = kk.clone();
-    let kk_for_explanation = kk.clone();
     view! {
         <div class="space-y-4" data-testid="acquaintance-grammar-slide">
             <h2 class="font-serif text-3xl text-[var(--fg-black)]">
@@ -311,9 +311,14 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
     });
 
     let repo_stored = StoredValue::new(ctx.repository.clone());
+    // Защита от двойного клика «Да, знаю» на время асинхронной записи.
+    let known_in_flight = RwSignal::new(false);
     let on_yes_know = {
-        let mark_known_and_advance = mark_known_and_advance;
         Callback::new(move |_: ()| {
+            if known_in_flight.get_untracked() {
+                return;
+            }
+            known_in_flight.set(true);
             let index = ctx.state.get_untracked().slide_index;
             let Some(card_id) = ctx
                 .slides
@@ -327,8 +332,11 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
             spawn_local(async move {
                 // «Уже знаю» идёт существующим механизмом mark-as-known и не
                 // тратит дневной лимит (docs/acquaintance-mode.md §4).
-                let _ = MarkCardAsKnownUseCase::new(&repo).execute(card_id).await;
+                if let Err(e) = MarkCardAsKnownUseCase::new(&repo).execute(card_id).await {
+                    tracing::error!("Mark-as-known failed for {card_id}: {e}");
+                }
                 mark_known_and_advance.run(card_id);
+                known_in_flight.set(false);
             });
         })
     };
@@ -391,9 +399,6 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                     test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
                 >
                     <span>{t!(i18n, lesson.next)}</span>
-                    <span class="kbd-hint text-[var(--fg-light)]">
-                        {t!(i18n, lesson.space_key)}
-                    </span>
                 </Button>
             </Show>
         </div>
