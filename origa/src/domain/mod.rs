@@ -1,3 +1,4 @@
+mod acquaintance;
 mod error;
 mod furigana;
 mod furigana_annotator;
@@ -17,6 +18,9 @@ mod user;
 pub(crate) mod value_objects;
 mod well_known_set;
 
+pub use acquaintance::{
+    AcquaintanceEntry, AcquaintanceHand, AcquaintanceSubphase, AnswerOutcome, seed_first_review,
+};
 pub use error::{ErrorCategory, OrigaError};
 pub use furigana::{FuriganaSegment, furiganize_segments, furiganize_text, furiganize_text_html};
 pub use furigana_annotator::{AnnotatedSpan, annotate_text};

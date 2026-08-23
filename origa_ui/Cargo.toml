@@ -62,6 +62,10 @@ csr = ["leptos/csr"]
 # reuses the normal card selection; full grammar quiz card wiring is a
 # follow-up that requires a domain design decision.
 grammar_practice_lesson_mode = []
+# Acquaintance mode (docs/acquaintance-mode.md): hand-of-new-cards pre-phase
+# of the lesson (presentation -> training -> SRS). Domain compiles
+# unconditionally; this flag gates only the UI pre-phase wiring (S4-S6).
+acquaintance_mode = []
 
 [build-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

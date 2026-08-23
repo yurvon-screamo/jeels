@@ -110,6 +110,15 @@ impl MemoryHistory {
         }
     }
 
+    /// Создаёт начальное состояние памяти без семантики ревью
+    /// (режим знакомства, docs/acquaintance-mode.md §3): счётчики повторений,
+    /// `last_review_date` и `last_rating` не трогаются — тренировка не
+    /// является ревью. Единственный вызывающий — домен знакомства;
+    /// наружу сырая перезапись состояния не отдаётся (см. `apply_review`).
+    pub(crate) fn seed(&mut self, memory_state: MemoryState) {
+        self.current_state = Some(memory_state);
+    }
+
     pub fn last_review_date(&self) -> Option<DateTime<Utc>> {
         self.last_review_date
     }
