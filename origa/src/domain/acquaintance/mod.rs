@@ -5,8 +5,18 @@
 //! назавтра. Рука эфемерна: состояние не персистится, прерывание — это
 //! отсутствие записи.
 
+#[cfg(test)]
+mod completion_tests;
+mod entry;
 mod hand;
+#[cfg(test)]
+mod hand_tests;
+mod phase;
 mod seed;
+#[cfg(test)]
+mod training_tests;
 
-pub use hand::{AcquaintanceEntry, AcquaintanceHand, AcquaintanceSubphase, AnswerOutcome};
+pub use entry::AcquaintanceEntry;
+pub use hand::{AcquaintanceHand, CRITERION_SUCCESSSES};
+pub use phase::{AcquaintanceSubphase, AnswerOutcome};
 pub use seed::seed_first_review;

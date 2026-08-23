@@ -1,76 +1,89 @@
-//! Типы руки знакомства: состав, подфазы тренировки слов и исходы ответов.
+//! Рука знакомства: атомарная партия незнакомых карт одного урока.
 //!
-//! Каркас контракта (docs/acquaintance-mode.md §9.2). Логика витков,
-//! подфаз и критериев добавляется срезом S1; порядок показа рука получает
-//! уже сгруппированным от `SelectAcquaintanceHandUseCase`.
+//! Правила поведения — docs/acquaintance-mode.md, правило «Тренировка»:
+//! полные ротации случайного порядка (порядок витка принадлежит UI),
+//! критерий `CRITERION_SUCCESSSES` успехов на карту; подфазы яп→рус → рус→яп
+//! относятся только к словам, несловесные карты копят единый счётчик сквозь
+//! обе подфазы. Закрывшие критерий продолжают отвечаться с замороженным
+//! прогрессом.
 
-use crate::domain::CardType;
+use crate::domain::{CardType, OrigaError};
 use ulid::Ulid;
 
-/// Подфаза тренировки слов. Несловесные карты (кандзи, грамматика) имеют
-/// единственное направление и в подфазах не участвуют.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AcquaintanceSubphase {
-    /// яп→рус: фронт — японская сторона.
-    Forward,
-    /// рус→яп: фронт — перевод.
-    Reverse,
-}
+use super::entry::AcquaintanceEntry;
+use super::phase::{AcquaintanceSubphase, AnswerOutcome};
 
-/// Исход одного ответа в тренировке. Единственный источник истины для
-/// перерисовки UI (полоса руки, тег фазы): рассинхрон между доменом и
-/// отображением невозможен по построению.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AnswerOutcome {
-    /// Успех засчитан; `progress` — число успехов карты в текущей подфазе.
-    Counted { progress: u8 },
-    /// Карта уже закрыла критерий: ответ не меняет её прогресс.
-    ProgressFrozen,
-    /// Все слова закрыли подфазу: счётчики слов обнулены, направление сменилось.
-    SubphaseAdvanced,
-    /// Последняя карта закрыла последний критерий — тренировка завершена.
-    HandCompleted,
-}
+/// Число успешных ответов, требуемое карте: в каждой подфазе (слова) /
+/// за тренировку (несловесные карты).
+pub const CRITERION_SUCCESSSES: u8 = 3;
 
-/// Карта внутри руки вместе со счётчиком успехов текущей подфазы
-/// (для несловесных карт — общий счётчик единственного направления).
-pub struct AcquaintanceEntry {
-    card_id: Ulid,
-    card_type: CardType,
-    successes: u8,
-}
-
-impl AcquaintanceEntry {
-    pub fn card_id(&self) -> Ulid {
-        self.card_id
-    }
-
-    pub fn card_type(&self) -> CardType {
-        self.card_type
-    }
-
-    pub fn successes(&self) -> u8 {
-        self.successes
-    }
-}
-
-/// Рука знакомства: атомарная партия незнакомых карт одного урока.
+/// Рука знакомства: партия незнакомых карт одного урока.
+#[derive(Debug)]
 pub struct AcquaintanceHand {
     entries: Vec<AcquaintanceEntry>,
+    subphase: Option<AcquaintanceSubphase>,
 }
 
 impl AcquaintanceHand {
+    /// Собирает руку из уже сгруппированного показательного порядка
+    /// (кандзи первым, его слова этой руки рядом — группирует вызывающий).
+    /// Фразы в режиме знакомства не участвуют.
+    pub fn new(cards: Vec<(Ulid, CardType)>) -> Result<Self, OrigaError> {
+        if cards.is_empty() {
+            return Err(OrigaError::InvalidAcquaintanceHand {
+                reason: "hand is empty".to_string(),
+            });
+        }
+
+        let mut seen = std::collections::HashSet::new();
+        for (card_id, card_type) in &cards {
+            if *card_type == CardType::Phrase {
+                return Err(OrigaError::InvalidAcquaintanceHand {
+                    reason: format!(
+                        "phrase card {card_id} does not participate in acquaintance mode"
+                    ),
+                });
+            }
+            if !seen.insert(*card_id) {
+                return Err(OrigaError::InvalidAcquaintanceHand {
+                    reason: format!("duplicate card {card_id}"),
+                });
+            }
+        }
+
+        let has_words = cards
+            .iter()
+            .any(|(_, card_type)| *card_type == CardType::Vocabulary);
+        Ok(Self {
+            entries: cards
+                .into_iter()
+                .map(|(card_id, card_type)| AcquaintanceEntry {
+                    card_id,
+                    card_type,
+                    forward_successes: 0,
+                    reverse_successes: 0,
+                })
+                .collect(),
+            subphase: has_words.then_some(AcquaintanceSubphase::Forward),
+        })
+    }
+
     #[cfg(test)]
-    pub(crate) fn new_test(entries: Vec<(Ulid, CardType, u8)>) -> Self {
+    pub(crate) fn new_test(
+        entries: Vec<(Ulid, CardType, u8, u8)>,
+        subphase: Option<AcquaintanceSubphase>,
+    ) -> Self {
         Self {
             entries: entries
                 .into_iter()
-                .map(|(card_id, card_type, successes)| AcquaintanceEntry {
+                .map(|(card_id, card_type, forward, reverse)| AcquaintanceEntry {
                     card_id,
                     card_type,
-                    successes,
+                    forward_successes: forward,
+                    reverse_successes: reverse,
                 })
                 .collect(),
+            subphase,
         }
     }
 
@@ -84,6 +97,11 @@ impl AcquaintanceHand {
         self.entries.iter().find(|entry| entry.card_id == card_id)
     }
 
+    /// Текущая подфаза тренировки слов; `None`, если слов в руке нет.
+    pub fn subphase(&self) -> Option<AcquaintanceSubphase> {
+        self.subphase
+    }
+
     pub fn len(&self) -> usize {
         self.entries.len()
     }
@@ -91,52 +109,59 @@ impl AcquaintanceHand {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    /// Обрабатывает ответ юзера по карте текущего витка.
+    ///
+    /// Успех продвигает видимый счётчик карты и при необходимости
+    /// переключает подфазу или закрывает руку; провал и ответы по картам,
+    /// закрывшим критерий текущей подфазы (или общий — для несловесных),
+    /// прогресс не меняют.
+    pub fn record_answer(
+        &mut self,
+        card_id: Ulid,
+        remembered: bool,
+    ) -> Result<AnswerOutcome, OrigaError> {
+        let entry_index = self
+            .entries
+            .iter()
+            .position(|entry| entry.card_id == card_id)
+            .ok_or(OrigaError::CardNotFound { card_id })?;
 
-    #[test]
-    fn presentation_order_preserves_given_order() {
-        // Arrange
-        let (a, b, c) = (Ulid::new(), Ulid::new(), Ulid::new());
-        let hand = AcquaintanceHand::new_test(vec![
-            (a, CardType::Kanji, 0),
-            (b, CardType::Vocabulary, 1),
-            (c, CardType::Grammar, 2),
-        ]);
+        let subphase = self.subphase;
+        if self.entries[entry_index].progress_in(subphase) >= CRITERION_SUCCESSSES {
+            // Закрывшие критерий продолжают отвечаться с замороженным
+            // прогрессом — и на успех, и на провал.
+            return Ok(AnswerOutcome::ProgressFrozen);
+        }
+        if !remembered {
+            return Ok(AnswerOutcome::Failed);
+        }
 
-        // Act
-        let order = hand.presentation_order();
+        self.entries[entry_index].record_success(subphase);
 
-        // Assert
-        assert_eq!(order, vec![a, b, c]);
-    }
+        if let Some(AcquaintanceSubphase::Forward) = self.subphase {
+            let answered_is_word = self.entries[entry_index].is_word();
+            let all_words_closed_forward = self
+                .entries
+                .iter()
+                .filter(|entry| entry.is_word())
+                .all(|word| word.forward_successes >= CRITERION_SUCCESSSES);
+            if answered_is_word && all_words_closed_forward {
+                self.subphase = Some(AcquaintanceSubphase::Reverse);
+                return Ok(AnswerOutcome::SubphaseAdvanced);
+            }
+        }
 
-    #[test]
-    fn entry_lookup_returns_entry_by_card_id() {
-        // Arrange
-        let (a, b) = (Ulid::new(), Ulid::new());
-        let hand =
-            AcquaintanceHand::new_test(vec![(a, CardType::Kanji, 2), (b, CardType::Vocabulary, 0)]);
+        if self
+            .entries
+            .iter()
+            .all(|entry| entry.criterion_met(self.subphase))
+        {
+            return Ok(AnswerOutcome::HandCompleted);
+        }
 
-        // Act / Assert
-        assert_eq!(hand.entry(a).map(|entry| entry.successes()), Some(2));
-        assert_eq!(
-            hand.entry(b).map(|entry| entry.card_type()),
-            Some(CardType::Vocabulary)
-        );
-        assert!(hand.entry(Ulid::new()).is_none());
-    }
-
-    #[test]
-    fn empty_hand_reports_empty() {
-        // Arrange / Act
-        let hand = AcquaintanceHand::new_test(vec![]);
-
-        // Assert
-        assert!(hand.is_empty());
-        assert_eq!(hand.len(), 0);
+        Ok(AnswerOutcome::Counted {
+            progress: self.entries[entry_index].progress_in(subphase),
+        })
     }
 }

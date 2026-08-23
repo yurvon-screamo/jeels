@@ -59,6 +59,43 @@
 fmt ✅ · clippy workspace -D warnings ✅ · тесты: workspace(excl landing)
 2107/0 + landing 58+3/0 + origa целиком 1662/0 (8 новых acquaintance-тестов) ✅
 
+---
+
+# Срез S1 (2026-08-23)
+
+## Что сделано
+
+1. **Машина руки** (`hand.rs` 167 строк + `entry.rs` 55 + `phase.rs` 30):
+   - `AcquaintanceHand::new` — валидации (пустота/дубликаты/Phrase →
+     `InvalidAcquaintanceHand`), стартовая подфаза Forward при наличии слов;
+   - `record_answer(card_id, remembered) -> Result<AnswerOutcome>` —
+     подсчёт до критерия 3, заморозка закрывших (по прогрессу текущей
+     подфазы / общему для несловесных), провал = честный no-op исход,
+     авто-смена Forward→Reverse когда все слова закрыли Forward,
+     `HandCompleted` на последнем критерии;
+   - два счётчика у слов (forward/reverse) вместо сброса одного —
+     несловесные карты получают иммунитет от смены подфаз бесплатно.
+2. **Ошибка**: `OrigaError::InvalidAcquaintanceHand { reason }` (Domain).
+3. **Тесты**: 17 юнитов в трёх файлах (hand_tests/completion_tests/
+   training_tests) — все пути правила «Тренировка»: подсчёт, провал,
+   заморозка (слово в подфазе при незакрытых соседях; несловесная после
+   критерия), смена подфаз со сбросом видимого прогресса, накопление
+   неслова сквозь подфазы, завершение смешанной руки/руки без слов/
+   вырожденной из одной карты, unknown id → CardNotFound.
+
+## Отклонения от буквы плана (приняты ревьювером)
+
+- `AnswerOutcome::Failed` добавлен (план не имел no-op исхода для провала).
+- Заморозка по прогрессу текущей подфазы, полная завершимость — по обоим
+  счётчикам слова.
+
+## Ворота
+
+fmt ✅ · clippy workspace -D warnings ✅ · workspace(excl landing)
+2122/0 + landing 61/0 + origa 1678/0 ✅ · файлы ≤167 строк ✅
+Ревью: `approve` (1 Common — два недостающих теста, доложены сразу).
+
 ## Следующий шаг
 
-Срез S1: полная доменная машина руки (витки, подфазы, критерии) + rstest.
+Срез S2: use cases SelectAcquaintanceHandUseCase +
+CompleteAcquaintanceHandUseCase + journeys.
