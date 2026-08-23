@@ -220,6 +220,15 @@
       "set_plural": "{count} sets"
     }
   },
+  "acquaintance": {
+    "phase_presentation": "ACQUAINTANCE · PRESENTATION",
+    "phase_training": "ACQUAINTANCE · TRAINING",
+    "already_know": "Already know",
+    "confirm_known": "Mark as known?",
+    "yes_i_know": "Yes, I know",
+    "cancel": "No",
+    "training_placeholder": "Training phase is coming in the next slice"
+  },
   "lesson": {
     "loading": "Preparing cards for the lesson...",
     "syncing": "Syncing...",

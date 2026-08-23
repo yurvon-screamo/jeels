@@ -21,7 +21,7 @@ pub const CRITERION_SUCCESSSES: u8 = 3;
 pub const HAND_MAX_SIZE: usize = 7;
 
 /// Рука знакомства: партия незнакомых карт одного урока.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AcquaintanceHand {
     entries: Vec<AcquaintanceEntry>,
     subphase: Option<AcquaintanceSubphase>,

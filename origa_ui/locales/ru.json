@@ -220,6 +220,15 @@
       "set_plural": "{count} наборов"
     }
   },
+  "acquaintance": {
+    "phase_presentation": "ЗНАКОМСТВО · ПОКАЗ",
+    "phase_training": "ЗНАКОМСТВО · ТРЕНИРОВКА",
+    "already_know": "Уже знаю",
+    "confirm_known": "Отметить известной?",
+    "yes_i_know": "Да, знаю",
+    "cancel": "Нет",
+    "training_placeholder": "Фаза тренировки — следующий срез"
+  },
   "lesson": {
     "loading": "Подготовка карточек для урока...",
     "syncing": "Синхронизация...",

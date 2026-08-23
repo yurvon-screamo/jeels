@@ -1,3 +1,9 @@
+#[cfg(feature = "acquaintance_mode")]
+use super::acquaintance_state::{
+    AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
+};
+#[cfg(feature = "acquaintance_mode")]
+use super::acquaintance_view::AcquaintanceView;
 use super::complete_screen::LessonCompleteScreen;
 use super::empty_state_view::LessonEmptyState;
 use super::header::LessonHeader;
@@ -12,6 +18,8 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use origa::domain::{Card, LessonEmptyDiagnosis, diagnose_empty_lesson};
 use origa::traits::UserRepository;
+#[cfg(feature = "acquaintance_mode")]
+use origa::use_cases::SelectAcquaintanceHandUseCase;
 use origa::use_cases::SelectCardsToLessonUseCase;
 use origa::use_cases::{classify_orphaned_phrases, delete_phrase_cards_by_phrase_ids};
 use std::collections::HashSet;
@@ -91,6 +99,32 @@ pub fn LessonContent() -> impl IntoView {
     };
     provide_context(lesson_ctx);
 
+    #[cfg(feature = "acquaintance_mode")]
+    {
+        let acquaintance_state = RwSignal::new(AcquaintanceState::default());
+        let acquaintance_slides = RwSignal::new(Vec::<AcquaintanceSlideData>::new());
+        provide_context(AcquaintanceContext {
+            repository: repository.clone(),
+            state: acquaintance_state,
+            slides: acquaintance_slides,
+            known_kanji: known_kanji.clone(),
+            native_language,
+        });
+    }
+
+    // Активна ли сейчас префаза руки — производное от стадии в домене.
+    #[cfg(feature = "acquaintance_mode")]
+    let acq_state_signal = use_context::<AcquaintanceContext>()
+        .expect("acquaintance context not provided")
+        .state;
+    #[cfg(feature = "acquaintance_mode")]
+    let acq_hand_active = move || {
+        acq_state_signal
+            .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
+    };
+    #[cfg(not(feature = "acquaintance_mode"))]
+    let acq_hand_active = move || false;
+
     let repo_for_user_data = repository.clone();
     Effect::new(move |_| {
         let repo = repo_for_user_data.clone();
@@ -128,8 +162,58 @@ pub fn LessonContent() -> impl IntoView {
             error_message.set(None);
             empty_diagnosis.set(None);
 
-            let use_case = SelectCardsToLessonUseCase::new(&repo);
             let jlpt_content = crate::loaders::get_jlpt_content();
+
+            #[cfg(feature = "acquaintance_mode")]
+            let (hand_order, hand_user_snapshot) = {
+                let select_hand = SelectAcquaintanceHandUseCase::new(&repo);
+                match select_hand.execute(jlpt_content).await {
+                    Ok(Some(ids)) if !ids.is_empty() => match repo.get_current_user().await {
+                        Ok(Some(user)) => (ids, Some(user)),
+                        _ => (Vec::new(), None),
+                    },
+                    _ => (Vec::new(), None),
+                }
+            };
+            #[cfg(not(feature = "acquaintance_mode"))]
+            let (_hand_order, _hand_user_snapshot): (
+                Vec<Ulid>,
+                Option<origa::domain::User>,
+            ) = (Vec::new(), None);
+
+            #[cfg(feature = "acquaintance_mode")]
+            if !hand_order.is_empty() {
+                if let Some(user) = &hand_user_snapshot {
+                    let pairs: Vec<(Ulid, origa::domain::CardType)> = hand_order
+                        .iter()
+                        .filter_map(|card_id| {
+                            user.knowledge_set().get_card(*card_id).map(|study_card| {
+                                (*card_id, origa::domain::CardType::from(study_card.card()))
+                            })
+                        })
+                        .collect();
+                    if let Ok(hand) = origa::domain::AcquaintanceHand::new(pairs) {
+                        let slides = build_acquaintance_slides(
+                            user,
+                            &hand.presentation_order(),
+                            native_language.get_untracked(),
+                            &i18n,
+                        );
+                        acq_state_signal.update(|state| {
+                            state.stage = AcquaintanceStage::Presentation;
+                            state.hand = Some(hand);
+                            state.slide_index = 0;
+                            state.skipped_ids.clear();
+                            state.confirm_known = false;
+                        });
+                        if let Some(acq_ctx) = use_context::<AcquaintanceContext>() {
+                            acq_ctx.slides.set(slides);
+                        }
+                    }
+                }
+            }
+
+            let use_case = SelectCardsToLessonUseCase::new(&repo);
             #[cfg(feature = "acquaintance_mode")]
             let new_card_policy = origa::domain::NewCardPolicy::Exclude;
             #[cfg(not(feature = "acquaintance_mode"))]
@@ -324,10 +408,20 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()>
+        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none() && !acq_hand_active()>
             // No nested scroll container here — the whole page scrolls.
             // A separate scroll layer over the lesson zone used to fight the
             // page scroll on mobile (jitter + snap-back) and was removed.
+            {move || {
+                #[cfg(feature = "acquaintance_mode")]
+                {
+                    if acq_hand_active() {
+                        return view! { <AcquaintanceView /> }.into_any();
+                    }
+                }
+                ().into_any()
+            }}
+
             <div data-testid="lesson-content" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
                 <Show when=move || is_syncing_cards.get()>
                     <div data-testid="lesson-sync-indicator" class="absolute top-0 right-0 flex items-center gap-1 text-sm text-muted-foreground p-2">
@@ -340,6 +434,140 @@ pub fn LessonContent() -> impl IntoView {
             </div>
         </Show>
     }
+}
+
+#[cfg(feature = "acquaintance_mode")]
+fn build_acquaintance_slides(
+    user: &origa::domain::User,
+    order: &[Ulid],
+    native_language: origa::domain::NativeLanguage,
+    i18n: &crate::i18n::I18nContext<crate::i18n::Locale>,
+) -> Vec<AcquaintanceSlideData> {
+    use crate::ui_components::ReadingItem;
+
+    let answer_text = |answer: origa::domain::CardAnswer| -> String {
+        match answer {
+            origa::domain::CardAnswer::Text(text) => text,
+            origa::domain::CardAnswer::Vocabulary {
+                mut translations,
+                description,
+            } => {
+                if let Some(description) = description {
+                    translations.push(description);
+                }
+                translations.join(", ")
+            },
+        }
+    };
+
+    order
+        .iter()
+        .filter_map(|card_id| {
+            let study_card = user.knowledge_set().get_card(*card_id)?;
+            match study_card.card() {
+                Card::Vocabulary(vocab) => {
+                    let translations = origa::dictionary::vocabulary::get_translations(
+                        vocab.word().text(),
+                        &native_language,
+                    )
+                    .unwrap_or_default();
+                    Some(AcquaintanceSlideData::Vocabulary {
+                        card_id: *card_id,
+                        word: vocab.word().text().to_string(),
+                        pos_label: vocab
+                            .pos()
+                            .map(|pos| super::pos_label::part_of_speech_label(pos, &i18n)),
+                        translations,
+                    })
+                },
+                Card::Kanji(kanji) => {
+                    let name = kanji
+                        .description(&native_language)
+                        .map(&answer_text)
+                        .unwrap_or_default();
+                    let radicals = kanji.radicals_info().ok().map(|infos| {
+                        infos
+                            .iter()
+                            .map(|info| super::kanji_card_details::RadicalDisplay {
+                                symbol: info.radical(),
+                                name: info.name(&native_language).to_string(),
+                                description: info.description(&native_language).to_string(),
+                            })
+                            .collect()
+                    });
+                    let example_words = {
+                        let examples: Vec<_> = kanji
+                            .example_words(&native_language)
+                            .iter()
+                            .map(|entry| (entry.word().to_string(), entry.meaning().to_string()))
+                            .collect();
+                        (!examples.is_empty()).then_some(examples)
+                    };
+                    let on_readings = {
+                        let readings: Vec<ReadingItem> = kanji
+                            .on_readings_with_freq()
+                            .into_iter()
+                            .map(|(reading, freq, is_rare)| ReadingItem {
+                                reading,
+                                freq,
+                                is_rare,
+                            })
+                            .collect();
+                        (!readings.is_empty()).then_some(readings)
+                    };
+                    let kun_readings = {
+                        let readings: Vec<ReadingItem> = kanji
+                            .kun_readings_with_freq()
+                            .into_iter()
+                            .map(|(reading, freq, is_rare)| ReadingItem {
+                                reading,
+                                freq,
+                                is_rare,
+                            })
+                            .collect();
+                        (!readings.is_empty()).then_some(readings)
+                    };
+                    Some(AcquaintanceSlideData::Kanji {
+                        card_id: *card_id,
+                        kanji: kanji.kanji().text().to_string(),
+                        name,
+                        radicals,
+                        example_words,
+                        on_readings,
+                        kun_readings,
+                    })
+                },
+                Card::Grammar(rule) => Some(AcquaintanceSlideData::Grammar {
+                    card_id: *card_id,
+                    title: rule
+                        .title(&native_language)
+                        .map(|q| q.text().to_string())
+                        .unwrap_or_default(),
+                    short_description: rule
+                        .short_description(&native_language)
+                        .map(&answer_text)
+                        .unwrap_or_default(),
+                    how_to_form: rule
+                        .how_to_form(&native_language)
+                        .map(&answer_text)
+                        .unwrap_or_default(),
+                    examples: rule
+                        .examples(&native_language)
+                        .map(&answer_text)
+                        .unwrap_or_default(),
+                    explanation: rule
+                        .explanation(&native_language)
+                        .map(&answer_text)
+                        .unwrap_or_default(),
+                    nuances: rule
+                        .nuances(&native_language)
+                        .map(&answer_text)
+                        .unwrap_or_default(),
+                }),
+                Card::Phrase(_) => None,
+            }
+        })
+        .collect()
 }
 
 #[cfg(all(test, feature = "grammar_practice_lesson_mode"))]

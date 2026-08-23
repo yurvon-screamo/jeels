@@ -1,3 +1,11 @@
+#[cfg(feature = "acquaintance_mode")]
+#[cfg(feature = "acquaintance_mode")]
+mod acquaintance_state;
+#[cfg(feature = "acquaintance_mode")]
+#[cfg(feature = "acquaintance_mode")]
+mod acquaintance_view;
+#[cfg(all(target_arch = "wasm32", test, feature = "acquaintance_mode"))]
+mod acquaintance_wasm_tests;
 mod answer_display;
 pub mod card_type;
 pub(crate) mod complete_screen;
@@ -5,6 +13,9 @@ mod content;
 mod empty_state_view;
 mod grammar_details_expand;
 mod grammar_info_badge;
+#[cfg(feature = "acquaintance_mode")]
+#[cfg(feature = "acquaintance_mode")]
+mod hand_progress_strip;
 mod header;
 mod kanji_card_details;
 mod keyboard_handler;

@@ -8,7 +8,7 @@ use super::phase::AcquaintanceSubphase;
 
 /// Карта внутри руки. Слова ведут два счётчика (по подфазам), несловесные
 /// карты — один (`forward_successes`), действующий во всех витках.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AcquaintanceEntry {
     pub(super) card_id: Ulid,
     pub(super) card_type: CardType,
