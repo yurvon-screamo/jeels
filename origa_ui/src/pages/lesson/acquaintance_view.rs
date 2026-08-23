@@ -171,7 +171,6 @@ fn WordSlide(
     let word_stored = StoredValue::new(word.clone());
     let pos_stored = StoredValue::new(pos_label.clone());
     let translations_stored = StoredValue::new(translations.clone());
-    let _ = (&word, &translations);
     view! {
         <div class="text-center space-y-4" data-testid="acquaintance-word-slide">
             <p class="font-serif text-5xl leading-tight text-[var(--fg-black)] break-words">
@@ -222,7 +221,7 @@ fn KanjiSlide(
                 example_words
                 on_readings
                 kun_readings
-                known_kanji=Signal::derive(move || known_kanji.get())
+                known_kanji=known_kanji.get_untracked()
                 native_language=native_language
             />
         </div>
@@ -247,30 +246,41 @@ fn GrammarSlide(
     let stored_explanation = StoredValue::new(explanation);
     let stored_nuances = StoredValue::new(nuances);
     let kk = known_kanji.get_untracked();
+    let kk_for_how_to = kk.clone();
+    let kk_for_examples = kk.clone();
+    let kk_for_explanation = kk.clone();
     view! {
         <div class="space-y-4" data-testid="acquaintance-grammar-slide">
             <h2 class="font-serif text-3xl text-[var(--fg-black)]">
                 {stored_title.get_value()}
             </h2>
             <p class="font-mono text-sm">{stored_short.get_value()}</p>
-            <div class="border border-[var(--border-light)] bg-[var(--bg-warm)] p-4">
+            <Show when=move || !stored_how_to.get_value().is_empty()>
+                <div class="border border-[var(--border-light)] bg-[var(--bg-warm)] p-4">
+                    <MarkdownText
+                        content=Signal::derive(move || stored_how_to.get_value())
+                        known_kanji=kk_for_how_to.clone()
+                        variant=Signal::derive(|| MarkdownVariant::Compact)
+                    />
+                </div>
+            </Show>
+            <Show when=move || !stored_examples.get_value().is_empty()>
                 <MarkdownText
-                    content=Signal::derive(move || stored_how_to.get_value())
-                    known_kanji=kk.clone()
-                    variant=Signal::derive(|| MarkdownVariant::Compact)
+                    content=Signal::derive(move || stored_examples.get_value())
+                    known_kanji=kk_for_examples.clone()
+                    variant=Signal::derive(|| MarkdownVariant::Default)
                 />
-            </div>
-            <MarkdownText
-                content=Signal::derive(move || stored_examples.get_value())
-                known_kanji=kk.clone()
-                variant=Signal::derive(|| MarkdownVariant::Default)
-            />
-            <p class="font-mono text-sm text-[var(--fg-muted)] whitespace-pre-line">
-                {stored_explanation.get_value()}
-            </p>
-            <p class="font-mono text-sm text-[var(--fg-muted)] whitespace-pre-line">
-                {stored_nuances.get_value()}
-            </p>
+            </Show>
+            <Show when=move || !stored_explanation.get_value().is_empty()>
+                <p class="font-mono text-sm text-[var(--fg-muted)] whitespace-pre-line">
+                    {stored_explanation.get_value()}
+                </p>
+            </Show>
+            <Show when=move || !stored_nuances.get_value().is_empty()>
+                <p class="font-mono text-sm text-[var(--fg-muted)] whitespace-pre-line">
+                    {stored_nuances.get_value()}
+                </p>
+            </Show>
         </div>
     }
 }

@@ -46,7 +46,10 @@ fn mount_acquaintance(slides: Vec<AcquaintanceSlideData>, hand_len: usize) -> Ac
 fn strip_renders_one_cell_per_hand_card() {
     let owner = Owner::new();
     owner.set();
-    let (total, progress) = (Signal::derive(|| 3usize), Signal::derive(|| vec![1u8, 3, 0]));
+    let (total, progress) = (
+        Signal::derive(|| 3usize),
+        Signal::derive(|| vec![1u8, 3, 0]),
+    );
     let _view = mount_to_body(move || {
         view! { <HandProgressStrip total total_progress=progress /> }
     });
@@ -56,11 +59,7 @@ fn strip_renders_one_cell_per_hand_card() {
         .query_selector("[data-testid=\"acquaintance-strip\"]")
         .unwrap()
         .unwrap();
-    assert_eq!(
-        strip.children().length(),
-        3,
-        "ячейка на каждую карту руки"
-    );
+    assert_eq!(strip.children().length(), 3, "ячейка на каждую карту руки");
 }
 
 #[test]
@@ -111,5 +110,9 @@ fn presentation_bar_confirms_known_via_inline_panel() {
         .unwrap();
     cancel_btn.click();
     tick();
-    assert!(document.query_selector("[data-testid=\"acquaintance-know-confirm-panel\"]").is_err());
+    assert!(
+        document
+            .query_selector("[data-testid=\"acquaintance-know-confirm-panel\"]")
+            .is_err()
+    );
 }

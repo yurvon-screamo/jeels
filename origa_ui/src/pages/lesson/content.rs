@@ -114,16 +114,18 @@ pub fn LessonContent() -> impl IntoView {
 
     // Активна ли сейчас префаза руки — производное от стадии в домене.
     #[cfg(feature = "acquaintance_mode")]
-    let acq_state_signal = use_context::<AcquaintanceContext>()
-        .expect("acquaintance context not provided")
-        .state;
+    let acq_ctx = use_context::<AcquaintanceContext>().expect("acquaintance context not provided");
+    #[cfg(feature = "acquaintance_mode")]
+    let acq_state_signal = acq_ctx.state;
+    #[cfg(feature = "acquaintance_mode")]
+    let acq_slides_signal = acq_ctx.slides;
     #[cfg(feature = "acquaintance_mode")]
     let acq_hand_active = move || {
         acq_state_signal
             .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
     };
     #[cfg(not(feature = "acquaintance_mode"))]
-    let acq_hand_active = move || false;
+    let _acq_hand_active = move || false;
 
     let repo_for_user_data = repository.clone();
     Effect::new(move |_| {
@@ -161,6 +163,8 @@ pub fn LessonContent() -> impl IntoView {
             is_loading.set(true);
             error_message.set(None);
             empty_diagnosis.set(None);
+            #[cfg(feature = "acquaintance_mode")]
+            acq_state_signal.update(|state| *state = Default::default());
 
             let jlpt_content = crate::loaders::get_jlpt_content();
 
@@ -206,9 +210,7 @@ pub fn LessonContent() -> impl IntoView {
                             state.skipped_ids.clear();
                             state.confirm_known = false;
                         });
-                        if let Some(acq_ctx) = use_context::<AcquaintanceContext>() {
-                            acq_ctx.slides.set(slides);
-                        }
+                        acq_slides_signal.set(slides);
                     }
                 }
             }
@@ -408,7 +410,7 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none() && !acq_hand_active()>
+        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()>
             // No nested scroll container here — the whole page scrolls.
             // A separate scroll layer over the lesson zone used to fight the
             // page scroll on mobile (jitter + snap-back) and was removed.

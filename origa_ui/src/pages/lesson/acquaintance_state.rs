@@ -100,3 +100,60 @@ pub struct AcquaintanceContext {
     pub known_kanji: RwSignal<HashSet<char>>,
     pub native_language: RwSignal<NativeLanguage>,
 }
+
+#[cfg(test)]
+mod advance_presentation_tests {
+    use super::*;
+    use origa::domain::CardType;
+    use std::collections::HashSet;
+
+    fn state_with_hand(count: usize) -> AcquaintanceState {
+        let pairs: Vec<(Ulid, CardType)> = (0..count)
+            .map(|_| (Ulid::new(), CardType::Vocabulary))
+            .collect();
+        let hand = AcquaintanceHand::new(pairs).unwrap();
+        AcquaintanceState {
+            stage: AcquaintanceStage::Presentation,
+            hand: Some(hand),
+            slide_index: 0,
+            confirm_known: false,
+            skipped_ids: HashSet::new(),
+        }
+    }
+
+    #[test]
+    fn advance_moves_through_slides_then_reports_exhausted() {
+        // Arrange
+        let mut state = state_with_hand(2);
+
+        // Act / Assert
+        assert!(!state.advance_presentation());
+        assert_eq!(state.slide_index, 1);
+        assert!(state.advance_presentation(), "показ исчерпан");
+    }
+
+    #[test]
+    fn advance_skips_known_marked_cards() {
+        // Arrange: средняя карта помечена «Уже знаю»
+        let [a, b, c] = [Ulid::new(), Ulid::new(), Ulid::new()];
+        let pairs = vec![
+            (a, CardType::Vocabulary),
+            (b, CardType::Vocabulary),
+            (c, CardType::Vocabulary),
+        ];
+        let hand = AcquaintanceHand::new(pairs).unwrap();
+        let mut state = AcquaintanceState {
+            stage: AcquaintanceStage::Presentation,
+            hand: Some(hand),
+            slide_index: 0,
+            confirm_known: false,
+            skipped_ids: HashSet::from([b]),
+        };
+
+        // Act / Assert: первый advance перепрыгивает b и показывает c
+        assert!(!state.advance_presentation());
+        assert_eq!(state.slide_index, 2);
+        // следующий advance исчерпывает показ
+        assert!(state.advance_presentation());
+    }
+}
