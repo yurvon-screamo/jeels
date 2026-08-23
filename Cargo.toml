@@ -97,7 +97,7 @@ leptos_router = { version = "0.8" }
 leptos_axum = "0.8"
 leptos_icons = "0.7"
 icondata = "0.7"
-leptos-use = { version = "0.18" }
+leptos-use = { version = "0.19" }
 leptos_i18n = { version = "0.6", default-features = false, features = ["csr", "plurals", "cookie"] }
 leptos_i18n_build = { version = "0.6", default-features = false, features = ["csr", "plurals"] }
 pulldown-cmark = "0.12"
