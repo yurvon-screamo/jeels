@@ -38,6 +38,7 @@ pub use jlpt_content::{JlptContent, JlptContentError};
 pub use jlpt_progress::{
     CategoryCounts, CategoryProgress, JlptProgress, LevelProgressDetail, ProgressUpdate,
 };
+pub use knowledge::NewCardPolicy;
 pub(crate) use knowledge::jlpt_sort_key;
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,

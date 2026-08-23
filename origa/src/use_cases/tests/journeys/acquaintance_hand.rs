@@ -1,7 +1,9 @@
 //! Journeys режима знакомства (docs/acquaintance-mode.md): закрытие руки,
 //! прерывание, «Уже знаю» и учёт дневного лимита.
 
-use crate::domain::{NativeLanguage, OrigaError, RateMode, Rating, User};
+use crate::domain::{
+    DailyBudget, JlptContent, NativeLanguage, NewCardPolicy, OrigaError, RateMode, Rating, User,
+};
 use crate::traits::UserRepository;
 use crate::use_cases::tests::fixtures::{InMemoryUserRepository, create_test_vocab_card};
 use crate::use_cases::{
@@ -262,5 +264,64 @@ async fn rating_a_seeded_card_tomorrow_keeps_fsrs_evolution_normal() {
     assert!(
         stability_after >= stability_before,
         "успешное первое ревью не должно уменьшать стабильность"
+    );
+}
+
+#[test]
+fn favorited_unknown_card_never_enters_exclude_review_but_enters_inject() {
+    // Arrange: A — новая избранная, B — известная должная, C — новая обычная
+    let mut user = User::new(
+        "test@example.com".to_string(),
+        NativeLanguage::Russian,
+        None,
+    );
+    let a = *user
+        .create_card(create_test_vocab_card("あかい"))
+        .unwrap()
+        .card_id();
+    let b = *user
+        .create_card(create_test_vocab_card("ちいさい"))
+        .unwrap()
+        .card_id();
+    let c = *user
+        .create_card(create_test_vocab_card("おおきい"))
+        .unwrap()
+        .card_id();
+    user.toggle_favorite(a).unwrap();
+    user.mark_card_as_known(b).unwrap();
+
+    let budget = DailyBudget::from_load(*user.daily_load());
+    let level = user.current_japanese_level();
+    let lang = *user.native_language();
+    let jlpt_content = JlptContent::new();
+
+    // Act
+    let inject = user
+        .knowledge_set()
+        .cards_to_lesson(budget, &jlpt_content, level, lang);
+    let exclude = user.knowledge_set().cards_to_lesson_with_policy(
+        budget,
+        &jlpt_content,
+        level,
+        lang,
+        NewCardPolicy::Exclude,
+    );
+
+    // Assert Inject (историческое поведение): избранная новая попадает в урок
+    assert!(
+        inject.card_ids().contains(&a),
+        "Inject сохраняет легаси-поведение впрыска новых"
+    );
+
+    // Assert Exclude: ни одна незнакомая карта не прошла, известная — на месте
+    for (id, _) in &exclude.cards {
+        let memory = user.knowledge_set().get_card(*id).unwrap().memory();
+        assert!(!memory.is_new(), "Exclude пропустил незнакомую карту {id}");
+    }
+    assert!(!exclude.card_ids().contains(&a));
+    assert!(!exclude.card_ids().contains(&c));
+    assert!(
+        exclude.card_ids().contains(&b),
+        "известная должная карта остаётся в ревью"
     );
 }

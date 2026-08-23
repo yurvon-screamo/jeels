@@ -1,7 +1,9 @@
 use rstest::rstest;
 use ulid::Ulid;
 
-use crate::domain::{JlptContent, NativeLanguage, OrigaError, RateMode, Rating, User};
+use crate::domain::{
+    JlptContent, NativeLanguage, NewCardPolicy, OrigaError, RateMode, Rating, User,
+};
 use crate::traits::UserRepository;
 use crate::use_cases::tests::fixtures::{InMemoryUserRepository, create_user_with_vocab_cards};
 use crate::use_cases::{CreateGrammarCardUseCase, RateCardUseCase, SelectCardsToLessonUseCase};
@@ -12,7 +14,10 @@ async fn select_cards_to_lesson_returns_cards() {
     let repo = InMemoryUserRepository::with_user(user);
     let use_case = SelectCardsToLessonUseCase::new(&repo);
 
-    let cards = use_case.execute(&JlptContent::new()).await.unwrap();
+    let cards = use_case
+        .execute(NewCardPolicy::Inject, &JlptContent::new())
+        .await
+        .unwrap();
 
     assert!(!cards.is_empty());
 }
@@ -26,7 +31,10 @@ async fn select_cards_to_lesson_returns_empty_for_empty_knowledge_set() {
     ));
     let use_case = SelectCardsToLessonUseCase::new(&repo);
 
-    let cards = use_case.execute(&JlptContent::new()).await.unwrap();
+    let cards = use_case
+        .execute(NewCardPolicy::Inject, &JlptContent::new())
+        .await
+        .unwrap();
 
     assert!(cards.is_empty());
 }
@@ -62,7 +70,10 @@ async fn full_lesson_cycle_updates_history() {
     let select_use_case = SelectCardsToLessonUseCase::new(&repo);
     let rate_use_case = RateCardUseCase::new(&repo);
 
-    let cards = select_use_case.execute(&JlptContent::new()).await.unwrap();
+    let cards = select_use_case
+        .execute(NewCardPolicy::Inject, &JlptContent::new())
+        .await
+        .unwrap();
     for (_, lc) in cards {
         rate_use_case
             .execute(lc.card_id(), RateMode::StandardLesson, Rating::Good)

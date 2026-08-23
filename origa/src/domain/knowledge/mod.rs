@@ -22,6 +22,7 @@ pub use lesson::{
     GrammarInfo, GrammarQuizCard, LessonCard, LessonCardView, LessonData, LessonViewGenerator,
     MultiQuizResult, QuizCard, QuizMode, QuizOption, YesNoCard,
 };
+pub use lesson_builder::NewCardPolicy;
 pub(crate) use lesson_builder::jlpt_sort_key;
 pub use phrase::PhraseCard;
 pub use stats_tracker::StatsTracker;
@@ -296,14 +297,41 @@ impl KnowledgeSet {
         user_level: JapaneseLevel,
         native_language: NativeLanguage,
     ) -> LessonData {
+        self.cards_to_lesson_with_policy(
+            budget,
+            jlpt_content,
+            user_level,
+            native_language,
+            NewCardPolicy::Inject,
+        )
+    }
+
+    /// Вариант с явной политикой новых карт (docs/acquaintance-mode.md §9.3
+    /// S3): `Exclude` держит незнакомые карты вне урока независимо от пути
+    /// попадания (впрыск/избранное/padding/companions); фразы освобождены.
+    pub fn cards_to_lesson_with_policy(
+        &self,
+        budget: DailyBudget,
+        jlpt_content: &JlptContent,
+        user_level: JapaneseLevel,
+        native_language: NativeLanguage,
+        new_card_policy: NewCardPolicy,
+    ) -> LessonData {
         let (core, primary_card_ids) = lesson_builder::build_lesson_core(
             self,
             budget.new_cards_per_day(),
             jlpt_content,
             native_language,
+            new_card_policy,
         );
         let with_companions =
             kanji_companions::add_kanji_companions(core, self, user_level, native_language);
+        let with_companions = match new_card_policy {
+            NewCardPolicy::Inject => with_companions,
+            NewCardPolicy::Exclude => {
+                lesson_builder::drop_new_cards(with_companions, self, new_card_policy)
+            },
+        };
         let interleaved = lesson_builder::interleave_core_by_type(with_companions);
         // NEW anchored phrases are capped per LESSON (not per day): every
         // lesson of the day receives the full allowance, so an evening

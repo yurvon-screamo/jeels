@@ -130,7 +130,11 @@ pub fn LessonContent() -> impl IntoView {
 
             let use_case = SelectCardsToLessonUseCase::new(&repo);
             let jlpt_content = crate::loaders::get_jlpt_content();
-            let cards_result = use_case.execute(jlpt_content).await;
+            #[cfg(feature = "acquaintance_mode")]
+            let new_card_policy = origa::domain::NewCardPolicy::Exclude;
+            #[cfg(not(feature = "acquaintance_mode"))]
+            let new_card_policy = origa::domain::NewCardPolicy::Inject;
+            let cards_result = use_case.execute(new_card_policy, jlpt_content).await;
 
             if is_disposed.is_disposed() {
                 return;
