@@ -302,7 +302,7 @@ jobs:
                   path: origa_ui/dist/
 
             - name: Import Mac App cert + create keychain
-              uses: apple-actions/import-codesign-certs@v3
+              uses: apple-actions/import-codesign-certs@v7
               with:
                   p12-file-base64: ${{ secrets.apple-mac-app-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
@@ -313,7 +313,7 @@ jobs:
                   keychain-password: ${{ secrets.apple-mac-cert-password }}
 
             - name: Import Mac Installer cert (reuse keychain)
-              uses: apple-actions/import-codesign-certs@v3
+              uses: apple-actions/import-codesign-certs@v7
               with:
                   p12-file-base64: ${{ secrets.apple-mac-installer-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
