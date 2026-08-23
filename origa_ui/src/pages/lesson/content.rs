@@ -3,6 +3,7 @@ use super::acquaintance_state::{
     AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
 };
 #[cfg(feature = "acquaintance_mode")]
+#[cfg(feature = "acquaintance_mode")]
 use super::acquaintance_view::AcquaintanceView;
 use super::complete_screen::LessonCompleteScreen;
 use super::empty_state_view::LessonEmptyState;
@@ -174,7 +175,12 @@ pub fn LessonContent() -> impl IntoView {
                 match select_hand.execute(jlpt_content).await {
                     Ok(Some(ids)) if !ids.is_empty() => match repo.get_current_user().await {
                         Ok(Some(user)) => (ids, Some(user)),
-                        _ => (Vec::new(), None),
+                        other => {
+                            tracing::error!(
+                                "Acquaintance hand skipped: user unavailable ({other:?})"
+                            );
+                            (Vec::new(), None)
+                        },
                     },
                     _ => (Vec::new(), None),
                 }
@@ -196,7 +202,11 @@ pub fn LessonContent() -> impl IntoView {
                             })
                         })
                         .collect();
-                    if let Ok(hand) = origa::domain::AcquaintanceHand::new(pairs) {
+                    let built_hand = origa::domain::AcquaintanceHand::new(pairs);
+                    if let Err(e) = &built_hand {
+                        tracing::error!("Acquaintance hand build failed: {e}");
+                    }
+                    if let Ok(hand) = built_hand {
                         let slides = build_acquaintance_slides(
                             user,
                             &hand.presentation_order(),
@@ -381,6 +391,22 @@ pub fn LessonContent() -> impl IntoView {
         });
     });
 
+    #[cfg(feature = "acquaintance_mode")]
+    let render_acquaintance = move || {
+        if acq_hand_active()
+            && !is_loading.get_untracked()
+            && !is_completed.get_untracked()
+            && error_message.get_untracked().is_none()
+            && empty_diagnosis.get_untracked().is_none()
+        {
+            Some(view! { <AcquaintanceView /> }.into_any())
+        } else {
+            None
+        }
+    };
+    #[cfg(not(feature = "acquaintance_mode"))]
+    let render_acquaintance = move || None;
+
     view! {
         <LessonHeader />
 
@@ -410,19 +436,17 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()>
+        <Show when=move || {
+            #[cfg(feature = "acquaintance_mode")]
+            let hand_active = acq_hand_active();
+            #[cfg(not(feature = "acquaintance_mode"))]
+            let hand_active = false;
+            !hand_active && !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()
+        }>
             // No nested scroll container here — the whole page scrolls.
             // A separate scroll layer over the lesson zone used to fight the
             // page scroll on mobile (jitter + snap-back) and was removed.
-            {move || {
-                #[cfg(feature = "acquaintance_mode")]
-                {
-                    if acq_hand_active() {
-                        return view! { <AcquaintanceView /> }.into_any();
-                    }
-                }
-                ().into_any()
-            }}
+            {move || render_acquaintance().unwrap_or_else(|| ().into_any())}
 
             <div data-testid="lesson-content" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
                 <Show when=move || is_syncing_cards.get()>

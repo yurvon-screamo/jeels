@@ -384,14 +384,18 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                 </div>
             </Show>
 
-            <Button
-                variant=Signal::derive(|| ButtonVariant::Filled)
-                on_click=Callback::new(move |_| advance.run(()))
-                test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
-            >
-                <span>{t!(i18n, lesson.next)}</span>
-                <span class="kbd-hint text-[var(--fg-light)]">{t!(i18n, lesson.space_key)}</span>
-            </Button>
+            <Show when=move || !ctx.state.get().confirm_known fallback=move || ()>
+                <Button
+                    variant=Signal::derive(|| ButtonVariant::Filled)
+                    on_click=Callback::new(move |_| advance.run(()))
+                    test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
+                >
+                    <span>{t!(i18n, lesson.next)}</span>
+                    <span class="kbd-hint text-[var(--fg-light)]">
+                        {t!(i18n, lesson.space_key)}
+                    </span>
+                </Button>
+            </Show>
         </div>
     }
 }
