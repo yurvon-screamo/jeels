@@ -181,8 +181,13 @@ pub fn LessonContent() -> impl IntoView {
                             (Vec::new(), None)
                         },
                     },
-                    _ => {
+                    // Легитимная пустота: пул исчерпан или лимит дня.
+                    Ok(_) => {
                         tracing::debug!("Acquaintance hand: pool empty or limit exhausted");
+                        (Vec::new(), None)
+                    },
+                    Err(e) => {
+                        tracing::error!("Acquaintance hand selection failed: {e}");
                         (Vec::new(), None)
                     },
                 }

@@ -15,9 +15,9 @@ pub enum AcquaintanceStage {
     #[default]
     Inactive,
     Presentation,
-    /// Срез S5 заменит заглушку полноценной тренировкой.
+    /// Срез S5 заменил заглушку полноценной тренировкой.
     Training,
-    // Summary добавляется срезом S6 (итоговый экран руки).
+    Summary,
 }
 
 /// UI-состояние руки: доменная машина (`AcquaintanceHand`) хранит правила,

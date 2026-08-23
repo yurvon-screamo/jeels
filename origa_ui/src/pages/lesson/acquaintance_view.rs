@@ -37,7 +37,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                 .phase_training()
                 .inner()
                 .to_string(),
-            AcquaintanceStage::Inactive => String::new(),
+            AcquaintanceStage::Summary | AcquaintanceStage::Inactive => String::new(),
         }
     });
 
@@ -76,6 +76,29 @@ pub fn AcquaintanceView() -> impl IntoView {
                     >
                         {t!(i18n, acquaintance.training_placeholder)}
                     </Text>
+                </div>
+            </Show>
+            <Show when=move || {
+                let ctx = ctx_stored.get_value();
+                ctx.state.get().stage == AcquaintanceStage::Summary
+            }>
+                <div data-testid="acquaintance-summary" class="text-center py-10 space-y-6">
+                    <div class="stamp inline-block">
+                        {t!(i18n, acquaintance.summary_stamp)}
+                    </div>
+                    <div>
+                        <Button
+                            variant=Signal::derive(|| ButtonVariant::Filled)
+                            on_click=Callback::new(move |_| {
+                                ctx_stored.get_value().state.update(|state| {
+                                    state.stage = AcquaintanceStage::Inactive;
+                                });
+                            })
+                            test_id=Signal::derive(|| "acquaintance-to-reviews-btn".to_string())
+                        >
+                            {t!(i18n, acquaintance.to_reviews)}
+                        </Button>
+                    </div>
                 </div>
             </Show>
         </div>
@@ -318,7 +341,6 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
             if known_in_flight.get_untracked() {
                 return;
             }
-            known_in_flight.set(true);
             let index = ctx.state.get_untracked().slide_index;
             let Some(card_id) = ctx
                 .slides
@@ -328,6 +350,7 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
             else {
                 return;
             };
+            known_in_flight.set(true);
             let repo = repo_stored.get_value();
             spawn_local(async move {
                 // «Уже знаю» идёт существующим механизмом mark-as-known и не

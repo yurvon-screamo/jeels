@@ -227,7 +227,13 @@
     "confirm_known": "Отметить известной?",
     "yes_i_know": "Да, знаю",
     "cancel": "Нет",
-    "training_placeholder": "Фаза тренировки — следующий срез"
+    "training_placeholder": "Фаза тренировки — следующий срез",
+    "summary_stamp": "РУКА ЗАКРЫТА",
+    "to_reviews": "К ревью",
+    "dont_remember": "Не помню",
+    "remember": "Помню",
+    "dir_forward": "ЯП → РУС",
+    "dir_reverse": "РУС → ЯП"
   },
   "lesson": {
     "loading": "Подготовка карточек для урока...",

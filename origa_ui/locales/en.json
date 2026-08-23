@@ -227,7 +227,13 @@
     "confirm_known": "Mark as known?",
     "yes_i_know": "Yes, I know",
     "cancel": "No",
-    "training_placeholder": "Training phase is coming in the next slice"
+    "training_placeholder": "Training phase is coming in the next slice",
+    "summary_stamp": "HAND CLOSED",
+    "to_reviews": "To reviews",
+    "dont_remember": "Don't remember",
+    "remember": "Remember",
+    "dir_forward": "JP → RU",
+    "dir_reverse": "RU → JP"
   },
   "lesson": {
     "loading": "Preparing cards for the lesson...",
