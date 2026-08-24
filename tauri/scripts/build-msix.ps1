@@ -130,7 +130,12 @@ Copy-Item $ExePath (Join-Path $Stage "Origa.exe")
 # inside the content directory; the committed source keeps the idiomatic
 # Package.appxmanifest name.
 Copy-Item (Join-Path $TauriDir "msix\Package.appxmanifest") (Join-Path $Stage "AppxManifest.xml")
-Copy-Item (Join-Path $TauriDir "msix\Assets") (Join-Path $Stage "Assets") -Recurse
+# Only the assets the manifest references — MakeAppx packs whatever is here.
+$StageAssets = Join-Path $Stage "Assets"
+New-Item -ItemType Directory -Path $StageAssets | Out-Null
+foreach ($asset in @("Square44x44Logo.png", "Square150x150Logo.png")) {
+    Copy-Item (Join-Path $TauriDir "msix\Assets\$asset") $StageAssets
+}
 
 # Some Tauri/wry versions emit WebView2Loader.dll next to the raw cargo
 # binary; include it whenever present (absent = statically linked).
