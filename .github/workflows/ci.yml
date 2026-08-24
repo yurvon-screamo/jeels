@@ -77,6 +77,11 @@ jobs:
                   cargo clippy --locked -p origa-app -p tauri-plugin-aswebauth \
                     --target aarch64-apple-darwin --all-targets -- -D warnings
 
+            - name: Test tauri-plugin-aswebauth (darwin)
+              run: |
+                  cargo test --locked -p tauri-plugin-aswebauth \
+                    --target aarch64-apple-darwin
+
     lint:
         name: Lint
         permissions:

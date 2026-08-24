@@ -82,8 +82,10 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     let mtm = MainThreadMarker::new().ok_or("start_session must run on the main thread")?;
 
     // Apple only loads http(s) auth pages; reject anything else early so a
-    // compromised renderer cannot aim the session at custom schemes.
-    if !(url.starts_with("https://") || url.starts_with("http://")) {
+    // compromised renderer cannot aim the session at custom schemes. Scheme
+    // comparison is case-insensitive per RFC 3986.
+    let lower = url.to_ascii_lowercase();
+    if !(lower.starts_with("https://") || lower.starts_with("http://")) {
         return Err(format!("rejected non-http(s) authentication URL: {url}"));
     }
 
