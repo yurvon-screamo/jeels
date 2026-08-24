@@ -65,6 +65,13 @@ pub fn App() -> impl IntoView {
 
     let update_info_clone = update_info;
     spawn_local(async move {
+        // Store builds ship without self-update machinery (policy 10.2.5):
+        // skip the startup check instead of firing IPC commands that are not
+        // registered in that flavor.
+        if updater::is_store_build().await {
+            tracing::debug!("updater: skipping startup check in store build");
+            return;
+        }
         if let Some(info) = updater::check_for_updates().await {
             if disposed.is_disposed() {
                 return;

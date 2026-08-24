@@ -8,10 +8,13 @@ mod auth_store;
 // back to Whisper WASM.
 #[cfg(all(target_os = "macos", not(feature = "disable-device-ai")))]
 mod device_ai_commands;
-// Auto-updater is Windows/Linux-only. macOS App Store handles updates, and
-// non-App-Store macOS builds are intentionally excluded too — the updater
-// endpoint (GitHub Releases) would conflict with App Store distribution.
-#[cfg(any(windows, target_os = "linux"))]
+// Auto-updater is Windows/Linux-only and is additionally compiled OUT of
+// app-store builds (`ORIGA_APP_STORE=1`): Microsoft Store policy 10.2.5
+// (and Mac App Store 2.4.5(vii)) forbid self-update outside the respective
+// store. macOS App Store handles updates itself, and non-App-Store macOS
+// builds are intentionally excluded too — the updater endpoint
+// (GitHub Releases) would conflict with App Store distribution.
+#[cfg(all(any(windows, target_os = "linux"), not(app_store)))]
 mod updater_commands;
 
 use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
@@ -22,8 +25,19 @@ use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
 use tauri::Manager;
 use tauri::{Emitter, Listener};
 use tauri_plugin_deep_link::DeepLinkExt;
-#[cfg(any(windows, target_os = "linux"))]
+#[cfg(all(any(windows, target_os = "linux"), not(app_store)))]
 use updater_commands::{PendingUpdate, check_for_update, install_update};
+
+/// Reports whether the binary is an app-store distribution (`ORIGA_APP_STORE=1`
+/// at compile time: Microsoft Store MSIX or Mac App Store). The frontend
+/// queries this to hide self-update UI — store policy 10.2.5 / 2.4.5(vii)
+/// forbid updating outside the respective store, and in store builds the
+/// updater commands below are not even registered. Registered unconditionally
+/// so the WASM side can query it in every build flavor.
+#[tauri::command]
+fn is_store_build() -> bool {
+    cfg!(app_store)
+}
 
 /// Returns the deep-link URL that launched (or last targeted) the current
 /// Activity. The frontend polls this on mount because the `deep-link://new-url`
@@ -76,8 +90,9 @@ pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default();
 
-    // Auto-updater + single-instance are Windows/Linux-only. macOS App Store
-    // handles updates; macOS non-App-Store is intentionally excluded too.
+    // Single-instance focus-on-launch is Windows/Linux-only and STAYS in
+    // app-store builds: under MSIX the OS delivers `origa://` protocol
+    // activations to an already-running instance through this plugin.
     #[cfg(any(windows, target_os = "linux"))]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -87,6 +102,14 @@ pub fn run() {
                 .expect("no main window")
                 .set_focus();
         }));
+    }
+
+    // Auto-updater + process runner are Windows/Linux-only and compiled OUT
+    // of app-store builds (see `mod updater_commands` above for the policy
+    // references). The PendingUpdate state is only consumed by the gated
+    // IPC commands, so it is gated with the same condition.
+    #[cfg(all(any(windows, target_os = "linux"), not(app_store)))]
+    {
         builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
         builder = builder.plugin(tauri_plugin_process::init());
         builder = builder.manage(PendingUpdate::new());
@@ -135,9 +158,10 @@ pub fn run() {
             auth_store_get,
             auth_store_set,
             auth_store_delete,
-            #[cfg(any(windows, target_os = "linux"))]
+            is_store_build,
+            #[cfg(all(any(windows, target_os = "linux"), not(app_store)))]
             check_for_update,
-            #[cfg(any(windows, target_os = "linux"))]
+            #[cfg(all(any(windows, target_os = "linux"), not(app_store)))]
             install_update,
             #[cfg(all(target_os = "macos", not(feature = "disable-device-ai")))]
             device_ai_commands::device_ai_recognize_file
