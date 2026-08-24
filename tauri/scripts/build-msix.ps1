@@ -93,13 +93,22 @@ else {
 # --- 2. Build ----------------------------------------------------------------
 
 if (-not $SkipBuild) {
-    $env:ORIGA_APP_STORE = "1"  # build.rs: cfg(app_store), strips updater config
+    # build.rs: cfg(app_store), strips updater config. Save/restore so a
+    # local smoke run does not silently poison the rest of the shell session
+    # (subsequent cargo builds would come out store-flavored).
+    $hadStoreEnv = Test-Path Env:\ORIGA_APP_STORE
+    $prevStoreEnv = if ($hadStoreEnv) { $env:ORIGA_APP_STORE } else { $null }
+    $env:ORIGA_APP_STORE = "1"
     Push-Location $TauriDir
     try {
         npx tauri build --no-bundle
         if ($LASTEXITCODE -ne 0) { throw "tauri build failed with exit code $LASTEXITCODE" }
     }
-    finally { Pop-Location }
+    finally {
+        Pop-Location
+        if ($hadStoreEnv) { $env:ORIGA_APP_STORE = $prevStoreEnv }
+        else { Remove-Item Env:\ORIGA_APP_STORE -ErrorAction SilentlyContinue }
+    }
 }
 
 $ExePath = Join-Path $TauriDir "target\release\origa-app.exe"
@@ -130,10 +139,18 @@ if (Test-Path $Loader) {
 
 $ManifestPath = Join-Path $Stage "Package.appxmanifest"
 $manifest = Get-Content $ManifestPath -Raw
+
+function ConvertTo-XmlText([string]$Value) {
+    # Identity/Publisher values are pasted from Partner Center by hand and
+    # may contain XML-hostile characters; unescaped '&'/'<' crash MakeAppx
+    # with an opaque parse error.
+    [System.Security.SecurityElement]::Escape($Value)
+}
+
 foreach ($pair in @(
-        @("__PARTNER_CENTER_IDENTITY_NAME__", $IdentityName),
-        @("__PARTNER_CENTER_PUBLISHER__", $Publisher),
-        @("__PARTNER_CENTER_PUBLISHER_DISPLAY_NAME__", $PublisherDisplayName)
+        @("__PARTNER_CENTER_IDENTITY_NAME__", (ConvertTo-XmlText $IdentityName)),
+        @("__PARTNER_CENTER_PUBLISHER__", (ConvertTo-XmlText $Publisher)),
+        @("__PARTNER_CENTER_PUBLISHER_DISPLAY_NAME__", (ConvertTo-XmlText $PublisherDisplayName))
     )) {
     if ($manifest -notmatch [regex]::Escape($pair[0])) {
         throw "Placeholder '$($pair[0])' missing from manifest — template drift."
@@ -141,6 +158,11 @@ foreach ($pair in @(
     $manifest = $manifest.Replace($pair[0], $pair[1])
 }
 $manifest = $manifest.Replace('Version="0.0.0.0"', "Version=`"$MsixVersion`"")
+if ($manifest -notmatch ('Version="' + [regex]::Escape($MsixVersion) + '"')) {
+    # Silent no-op here would ship a 0.0.0.0 package that Partner Center
+    # rejects with a misleading version error — fail loudly instead.
+    throw "Version placeholder replacement failed — template drift in Package.appxmanifest."
+}
 Set-Content -Path $ManifestPath -Value $manifest -Encoding UTF8
 
 # --- 5. Ephemeral self-signed certificate ------------------------------------
@@ -151,17 +173,20 @@ $passwordFile = Join-Path $OutputDirectory "Origa.msix.pfx.password.txt"
 
 if (-not $KeepUnsigned) {
     # CN must equal the manifest Publisher or Add-AppxPackage rejects the
-    # signature. Ephemeral per-run cert: the .pfx travels WITH the artifact,
-    # otherwise nothing can validate/install it outside this machine.
+    # signature. On CI the cert store is clean, so this is ephemeral per
+    # run; locally an existing matching cert is reused. The .pfx travels
+    # WITH the artifact — without it nobody outside this machine can
+    # validate or install the package.
     $pfxPassword = [System.Guid]::NewGuid().ToString("N")
     $securePassword = ConvertTo-SecureString -String $pfxPassword -Force -AsPlainText
     $subject = "CN=$Publisher"
+    Write-Host "Looking for a code-signing certificate '$subject' in CurrentUser\My"
     $cert = Get-ChildItem Cert:\CurrentUser\My |
         Where-Object { $_.Subject -eq $subject } |
         Sort-Object NotBefore -Descending |
         Select-Object -First 1
     if (-not $cert) {
-        Write-Host "Generating ephemeral self-signed code-signing certificate '$subject'"
+        Write-Host "Not found — generating a new self-signed certificate"
         $cert = New-SelfSignedCertificate `
             -Type Custom `
             -Subject $subject `

@@ -61,6 +61,11 @@ jobs:
               uses: ./.github/actions/setup-rust
               with:
                   shared-key: origa-win-store-v1
+                  # Branch-scoped cache: this workflow only runs on tag refs
+                  # and PR merge-refs, neither of which persists into the
+                  # master cache scope — store builds stay cold-by-design
+                  # (accepted residual, ADR-042). The key still isolates the
+                  # flavor from other windows caches.
                   save-if: ${{ github.ref == 'refs/heads/master' }}
 
             - name: Install Tauri CLI (npm)

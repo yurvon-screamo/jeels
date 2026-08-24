@@ -472,12 +472,25 @@ fn lib_rs_compiles_update_machinery_out_of_store_builds() {
     );
 
     // Single-instance stays available in store builds: deep-link protocol
-    // activation depends on it (see ADR-042).
-    let single_instance_block = "#[cfg(any(windows, target_os = \"linux\"))]\n    {\n        builder = builder.plugin(tauri_plugin_single_instance::init";
+    // activation depends on it (see ADR-042). Positional check — find the
+    // registration call and inspect the cfg attribute immediately above it,
+    // so the guard survives indentation/reflow churn.
+    let anchor = lib_rs
+        .find("builder = builder.plugin(tauri_plugin_single_instance::init")
+        .expect("single-instance registration missing from lib.rs");
+    let window_start = lib_rs[..anchor]
+        .rfind("#[cfg(")
+        .expect("cfg attribute above single-instance registration missing");
+    let nearest_cfg = &lib_rs[window_start..anchor];
     assert!(
-        lib_rs.contains(single_instance_block),
-        "single-instance registration must remain plain-platform-gated \
-         (not `not(app_store)`) — MSIX deep-link activation needs it."
+        !nearest_cfg.contains("not(app_store)"),
+        "single-instance registration must NOT be gated on not(app_store) — \
+         MSIX deep-link protocol activation needs it in store builds. \
+         Got: {nearest_cfg}"
+    );
+    assert!(
+        nearest_cfg.contains(r#"any(windows, target_os = "linux")"#),
+        "single-instance must stay Windows/Linux-gated. Got: {nearest_cfg}"
     );
 }
 

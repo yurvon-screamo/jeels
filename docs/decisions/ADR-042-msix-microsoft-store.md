@@ -132,10 +132,25 @@ references (verified by grep).
 - **First Windows×app_store compile happens at the first stable tag** (PR
   CI checks only the Linux flavor of the gate). Accepted residual: if it
   breaks, the release itself is unaffected — the Store package is simply
-  absent that tag.
+  absent that tag. Related: the windows store rust-cache is cold-by-design
+  (branch scoping never persists tag/PR runs into master scope).
 - **Re-submission requires a version bump.** The Store rejects duplicate
   versions per product even though ADR-041 tolerated re-tag overwrites.
 - **Partner Center product must be recreated** (one-time manual step): the
   old "EXE or MSI app" product blocks the name; delete it, create
   "MSIX or PWA app", copy Product Identity into the manifest placeholders,
   dispatch-rebuild, upload the `.msix` in the submission's Packages page.
+- **The ephemeral signing material is public.** This repo is public: for 7
+  days anyone can download the artifact's `.pfx` + password. After real
+  Partner Center values are injected the risk is minimal — installing still
+  requires manually importing that cert and trusting it; the Store replaces
+  the signature at publication regardless.
+- **DevTools stay compiled in** for now. Disabling them requires the
+  `app-store` cargo feature, which tauri-cli does not propagate to cargo;
+  both store packaging paths (macOS env-var route, MSIX) currently ship
+  with `release-devtools`. Same posture as the existing NSIS channel.
+- **Legacy bucket objects.** The already-uploaded `releases/*` keys remain
+  in the CDN bucket under the default release-updated policy after rule
+  removal; harmless orphans. Optional one-time cleanup:
+  `aws s3 rm s3://adaptable-foodbox-ucep7wx/releases/ --recursive`
+  (profile `[origa]`).

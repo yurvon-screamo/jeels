@@ -130,10 +130,13 @@ jobs:
               # The ORIGA_APP_STORE env var triggers build.rs to emit
               # cargo:rustc-cfg=app_store, gating out the auto-updater and
               # process-runner plugins plus their IPC commands (single-instance
-              # STAYS — deep-link protocol activation needs it; devtools are
-              # disabled via the app-store feature). Without this check,
-              # regressions in the gated code path surface only at tag-push
-              # on macos-15 (~30 min, blocks release).
+              # STAYS — deep-link protocol activation needs it). Note:
+              # devtools are NOT affected by this env var — disabling them
+              # requires the app-store cargo feature, which tauri-cli does
+              # not propagate; both store packaging paths (macOS, MSIX)
+              # currently ship with devtools enabled (see ADR-042). Without
+              # this check, regressions in the gated code path surface only
+              # at tag-push on macos-15 (~30 min, blocks release).
               run: ORIGA_APP_STORE=1 cargo check -p origa-app
 
     cdn-download:
@@ -526,9 +529,12 @@ jobs:
     # the first package is built and uploaded before this lands on master.
     # REMOVED in a follow-up commit of the same PR once verified — release
     # builds go exclusively through tauri.yml's build-windows-store job.
+    # pull_request-only: must not double-build MSIX on stable tags, and it
+    # is part of the CI Gate while it exists.
     store-msix-pr-test:
         name: TEMP Store MSIX PR smoke
-        needs: [version, wasm-test]
+        if: github.event_name == 'pull_request'
+        needs: [version, e2e-build]
         uses: ./.github/workflows/_build-windows-store.yml
         with:
             version: ${{ needs.version.outputs.version }}
@@ -588,7 +594,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check]
+        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check, store-msix-pr-test]
         if: always()
         runs-on: ubuntu-latest
         steps:
@@ -611,5 +617,6 @@ jobs:
                   check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
                   check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
                   check "build-tauri" "${{ needs.build-tauri.result }}" "success"
+                  check "store-msix-pr-test" "${{ needs.store-msix-pr-test.result }}" "success"
 
             - run: echo "All checks passed"
