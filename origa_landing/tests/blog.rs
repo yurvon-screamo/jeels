@@ -18,12 +18,15 @@ mod common;
 // Published article slugs
 // =========================================================================
 
-/// Canonical list of every published blog slug. Each slug ships in all 4
-/// locales (EN/RU/KO/VI) under one filename — locale-specific variants live
-/// in `content/blog/<locale>/<slug>.md`. The const is shared by every
-/// script-consistency test and the parameterized JSON-LD/hreflang tests so
-/// that adding a new article is a one-line edit (append here + register in
-/// `ARTICLES`) instead of a five-file sweep.
+/// Canonical list of every published blog slug. Slugs with `en`/`ru` entries
+/// only (the 2026-08 cluster) are covered by the same tests as full-coverage
+/// slugs except where noted: hreflang expectations differ (see
+/// `PARTIAL_COVERAGE_SLUGS`) and script-consistency checks skip EN-fallback
+/// renders. Locale-specific variants live in `content/blog/<locale>/<slug>.md`.
+/// The const is shared by every script-consistency test and the
+/// parameterized JSON-LD/hreflang tests so that adding a new article is a
+/// one-line edit (append here + register in `ARTICLES`) instead of a
+/// five-file sweep.
 const ALL_SLUGS: &[&str] = &[
     "anki-alternative-japanese",
     "best-japanese-learning-app",
@@ -32,6 +35,22 @@ const ALL_SLUGS: &[&str] = &[
     "best-japanese-learning-app-offline",
     "japanese-ai-tutor",
     "yaponskiy-s-nulya",
+    "learn-hiragana-katakana",
+    "jlpt-n5-preparation",
+    "japanese-textbooks-beginners",
+    "how-many-kanji-to-learn",
+    "learn-japanese-from-anime",
+];
+
+/// Slugs published in EN + RU only (no KO/VI translations yet). Their pages
+/// advertise a 3-entry hreflang set {en, ru, x-default} instead of the full
+/// 5-entry set, and `/ko|vi/blog/<slug>` serves the EN article as a fallback.
+const PARTIAL_COVERAGE_SLUGS: &[&str] = &[
+    "learn-hiragana-katakana",
+    "jlpt-n5-preparation",
+    "japanese-textbooks-beginners",
+    "how-many-kanji-to-learn",
+    "learn-japanese-from-anime",
 ];
 
 // =========================================================================
@@ -43,7 +62,7 @@ async fn en_article_returns_200_with_h1() {
     let (status, body) = get("/blog/anki-alternative-japanese").await;
     assert_eq!(status, StatusCode::OK);
     assert!(
-        body.contains("blog-post__title"),
+        body.contains(r#"<article class="blog-post">"#),
         "EN article must render inside .blog-post; got first 600 chars: {}",
         body.chars().take(600).collect::<String>()
     );
@@ -58,7 +77,7 @@ async fn ru_article_returns_200_with_localized_h1() {
     let (status, body) = get("/ru/blog/best-japanese-learning-app").await;
     assert_eq!(status, StatusCode::OK);
     assert!(
-        body.contains("blog-post__title"),
+        body.contains(r#"<article class="blog-post">"#),
         "RU article must render inside .blog-post; got first 600 chars: {}",
         body.chars().take(600).collect::<String>()
     );
@@ -73,7 +92,7 @@ async fn ko_article_returns_200_with_localized_h1() {
     let (status, body) = get("/ko/blog/anki-alternative-japanese").await;
     assert_eq!(status, StatusCode::OK);
     assert!(
-        body.contains("blog-post__title"),
+        body.contains(r#"<article class="blog-post">"#),
         "KO article must render inside .blog-post; got first 600 chars: {}",
         body.chars().take(600).collect::<String>()
     );
@@ -89,7 +108,7 @@ async fn vi_article_returns_200_with_localized_h1() {
     let (status, body) = get("/vi/blog/best-japanese-learning-app").await;
     assert_eq!(status, StatusCode::OK);
     assert!(
-        body.contains("blog-post__title"),
+        body.contains(r#"<article class="blog-post">"#),
         "VI article must render inside .blog-post"
     );
     assert!(
@@ -124,7 +143,7 @@ async fn unknown_slug_returns_404() {
     let (status, body) = get("/blog/this-slug-does-not-exist").await;
     assert_eq!(status, StatusCode::NOT_FOUND);
     assert!(
-        !body.contains("blog-post__title"),
+        !body.contains(r#"<article class="blog-post">"#),
         "404 must not render a blog article; got: {}",
         body.chars().take(400).collect::<String>()
     );
@@ -293,6 +312,10 @@ async fn vi_articles_do_not_contain_kanji() {
     // the single highest-impact content fix. This test guards against regressions
     // when new VI articles are added or existing ones edited.
     //
+    // EN-fallback renders (`/vi/blog/<slug>` with no VI translation) serve the
+    // English article, where "kanji" is the correct term — they are skipped
+    // via the `noindex` robots marker only fallback pages carry.
+    //
     // The substring "kanji" is matched case-insensitively. Two proper nouns
     // that contain the substring are subtracted from the count because they
     // are product names, not the conceptual term:
@@ -305,6 +328,9 @@ async fn vi_articles_do_not_contain_kanji() {
 
     for slug in ALL_SLUGS {
         let (_, body) = get(&format!("/vi/blog/{slug}")).await;
+        if body.contains(r#"name="robots" content="noindex"#) {
+            continue;
+        }
         let body_start = body
             .find("<div class=\"blog-post__body\"")
             .unwrap_or(body.len());
@@ -646,7 +672,7 @@ async fn blog_index_does_not_shadow_article_route() {
     let (status, body) = get("/blog/anki-alternative-japanese").await;
     assert_eq!(status, StatusCode::OK);
     assert!(
-        body.contains("blog-post__title"),
+        body.contains(r#"<article class="blog-post">"#),
         "article route must still match (router shadow regression)"
     );
     assert!(
@@ -779,24 +805,59 @@ async fn article_returns_200_with_h1(#[case] slug: &str, #[case] locale: &str) {
     let (status, body) = get(&uri).await;
     assert_eq!(status, StatusCode::OK, "expected 200 for {uri}");
     assert!(
-        body.contains("blog-post__title"),
+        body.contains(r#"<article class="blog-post">"#),
         "{uri}: article must render inside .blog-post; got first 600 chars: {}",
         body.chars().take(600).collect::<String>()
     );
 }
 
 #[rstest]
-#[case("anki-alternative-japanese")]
-#[case("best-japanese-learning-app")]
-#[case("learn-japanese-from-manga")]
-#[case("japanese-ocr-app")]
-#[case("best-japanese-learning-app-offline")]
-#[case("japanese-ai-tutor")]
-#[case("yaponskiy-s-nulya")]
+#[case("learn-hiragana-katakana", "en")]
+#[case("learn-hiragana-katakana", "ru")]
+#[case("jlpt-n5-preparation", "en")]
+#[case("jlpt-n5-preparation", "ru")]
+#[case("japanese-textbooks-beginners", "en")]
+#[case("japanese-textbooks-beginners", "ru")]
+#[case("how-many-kanji-to-learn", "en")]
+#[case("how-many-kanji-to-learn", "ru")]
+#[case("learn-japanese-from-anime", "en")]
+#[case("learn-japanese-from-anime", "ru")]
+// EN+RU-only cluster: KO/VI prefixes serve the EN fallback (covered by
+// `all_article_urls_return_200`), so native-render cases stop at RU.
 #[tokio::test]
-async fn article_hreflang_lists_all_4_locales(#[case] slug: &str) {
+async fn partial_coverage_article_returns_200_with_h1(#[case] slug: &str, #[case] locale: &str) {
+    let uri = format!("{}/blog/{slug}", locale_prefix(locale));
+    let (status, body) = get(&uri).await;
+    assert_eq!(status, StatusCode::OK, "expected 200 for {uri}");
+    assert!(
+        body.contains(r#"<article class="blog-post">"#),
+        "{uri}: article must render inside .blog-post; got first 600 chars: {}",
+        body.chars().take(600).collect::<String>()
+    );
+}
+
+/// Full-coverage slugs advertise hreflang for all four locales plus
+/// x-default; partial (EN+RU) slugs advertise only {en, ru, x-default}.
+#[rstest]
+#[case("anki-alternative-japanese", &["en", "ru", "ko", "vi"])]
+#[case("best-japanese-learning-app", &["en", "ru", "ko", "vi"])]
+#[case("learn-japanese-from-manga", &["en", "ru", "ko", "vi"])]
+#[case("japanese-ocr-app", &["en", "ru", "ko", "vi"])]
+#[case("best-japanese-learning-app-offline", &["en", "ru", "ko", "vi"])]
+#[case("japanese-ai-tutor", &["en", "ru", "ko", "vi"])]
+#[case("yaponskiy-s-nulya", &["en", "ru", "ko", "vi"])]
+#[case("learn-hiragana-katakana", &["en", "ru"])]
+#[case("jlpt-n5-preparation", &["en", "ru"])]
+#[case("japanese-textbooks-beginners", &["en", "ru"])]
+#[case("how-many-kanji-to-learn", &["en", "ru"])]
+#[case("learn-japanese-from-anime", &["en", "ru"])]
+#[tokio::test]
+async fn article_hreflang_lists_exactly_its_translations(
+    #[case] slug: &str,
+    #[case] locales: &[&str],
+) {
     let (_, body) = get(&format!("/blog/{slug}")).await;
-    for locale in ["en", "ru", "ko", "vi"] {
+    for locale in locales {
         let needle = format!(r#"hreflang="{locale}" href="https://"#);
         assert!(
             body.contains(&needle),
@@ -806,6 +867,14 @@ async fn article_hreflang_lists_all_4_locales(#[case] slug: &str) {
     assert!(
         body.contains(r#"hreflang="x-default""#),
         "EN article {slug} must declare hreflang=x-default"
+    );
+    // Alternates must point only at translations that exist: a full-coverage
+    // slug emits 4 locale alternates + x-default, a partial one 2 + x-default.
+    let expected = locales.len() + 1;
+    let actual = body.matches(r#"rel="alternate" hreflang="#).count();
+    assert_eq!(
+        actual, expected,
+        "EN article {slug} must emit exactly {expected} hreflang links"
     );
 }
 
@@ -879,6 +948,11 @@ async fn article_has_internal_link_to_compare(#[case] slug: &str) {
 #[case("best-japanese-learning-app-offline", "learn japanese offline")]
 #[case("japanese-ai-tutor", "japanese ai tutor")]
 #[case("yaponskiy-s-nulya", "japanese from zero")]
+#[case("learn-hiragana-katakana", "learn hiragana")]
+#[case("jlpt-n5-preparation", "jlpt n5")]
+#[case("japanese-textbooks-beginners", "best japanese textbook")]
+#[case("how-many-kanji-to-learn", "how many kanji to learn")]
+#[case("learn-japanese-from-anime", "learn japanese from anime")]
 #[tokio::test]
 async fn article_has_keywords_meta_from_frontmatter(#[case] slug: &str, #[case] keyword: &str) {
     // Every article's first target_keyword must surface in the keywords meta

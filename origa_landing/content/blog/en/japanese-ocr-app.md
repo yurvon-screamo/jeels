@@ -52,7 +52,7 @@ Most apps are built for use case 1. A smaller number handle 2. Almost none handl
 
 **Strength:** tuned for the specific problem of manga. The open-source `manga-ocr` model handles vertical text, multi-line speech bubbles, and stylized fonts better than general-purpose engines. Desktop wrappers (Poricom, YomiNinja) and browser extensions (Manga OCR for Chrome, Namida-OCR) integrate the recognition into the reading flow — select a panel, get the text.
 
-**Weakness:** narrow. They work on manga, not on textbook scans or photos of real-world text. And the same retention gap applies: the OCR feeds a lookup, not an SRS, unless you've piped it into Anki via Yomitan + AnkiConnect. The manga-mining power users typically run that three-app stack.
+**Weakness:** narrow. They work on manga, not on textbook scans or photos of real-world text. And the same retention gap applies: the OCR feeds a lookup, not an SRS, unless you've piped it into Anki via Yomitan + AnkiConnect. The manga-mining power users typically run that three-app stack. How such a pipeline fits into actual study — see [the manga learning guide](/blog/learn-japanese-from-manga).
 
 **Use case:** manga-reading support for learners willing to configure a multi-tool pipeline. Use case 2.
 
@@ -98,17 +98,22 @@ You almost certainly already have a general-purpose OCR app on your phone (Live 
 
 ## FAQ
 
-**Is Japanese OCR accurate enough to rely on?**
+### Is Japanese OCR accurate enough to rely on?
+
 On clean printed horizontal text, modern OCR (Apple Live Text, Google Lens, NDLOCR) is reliable enough for everyday lookup. On vertical manga text and stylized fonts, expect more errors and budget for manual correction — vendor-published accuracy numbers are rare and always tied to a specific test set, so don't trust round percentages you read in marketing copy. Handwritten or decorative text is still unreliable across the board.
 
-**Does OCR work offline?**
+### Does OCR work offline?
+
 Depends on the app. Cloud-based OCR (most translation apps) requires internet. On-device OCR (Origa's NDLOCR-Lite, Apple Live Text) works offline. If you study on the train or on a plane, on-device matters.
 
-**Can I OCR manga into flashcards?**
+### Can I OCR manga into flashcards?
+
 Yes, but you need a pipeline that connects OCR to an SRS. Origa does this end-to-end. The alternative is Yomitan → Anki, which is more configurable but requires setup.
 
-**Why not just use Google Lens?**
+### Why not just use Google Lens?
+
 Lens is excellent for one-shot translation. It is not a learning tool — the OCR result is plain text with no path to spaced repetition. If you want to remember what you scanned, you need a different category of app.
 
-**Does Origa's OCR send my photos to a server?**
+### Does Origa's OCR send my photos to a server?
+
 No. NDLOCR-Lite runs on the device. Scans never leave your phone or computer.

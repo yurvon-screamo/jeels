@@ -420,6 +420,22 @@
     background-repeat: no-repeat;
 }
 
+.home-stats {
+    padding: var(--space-md) var(--space-lg);
+    max-width: 1024px;
+    margin: 0 auto;
+}
+
+.home-stats__line {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-align: center;
+    line-height: 2;
+}
+
 .home-dual {
     background: var(--bg-paper);
     padding: var(--space-xxxl) var(--space-lg);
@@ -2004,14 +2020,19 @@
     margin: 0 0 var(--space-sm);
 }
 
-.blog-post__title {
+/* The article's single `<h1>` comes from the markdown body (the template no
+   longer renders one from the frontmatter — two identical H1s per page was a
+   crawler-relevance defect). These rules give the body heading the exact
+   visual treatment the removed `.blog-post__title` had. */
+.blog-post__body h1:first-of-type {
     font-family: var(--font-serif);
     font-size: clamp(2rem, 6vw, 3.25rem);
     font-weight: 300;
     line-height: 1.1;
     letter-spacing: -0.01em;
     color: var(--fg-black);
-    margin: 0 0 var(--space-sm);
+    margin-top: 0;
+    margin-bottom: var(--space-md);
 }
 
 .blog-post__updated {
@@ -2296,16 +2317,6 @@
     margin: 0 0 var(--space-sm);
 }
 
-.docs-article__title {
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 6vw, 3.25rem);
-    font-weight: 300;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-    color: var(--fg-black);
-    margin: 0 0 var(--space-sm);
-}
-
 .docs-article__updated {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
@@ -2338,6 +2349,19 @@
     color: var(--fg-black);
     margin-top: var(--space-lg);
     margin-bottom: var(--space-xs);
+}
+
+/* Same single-H1 contract as the blog body: the docs `<h1>` comes from the
+   markdown, styled here to match the removed `.docs-article__title`. */
+.docs-article__body h1:first-of-type {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 6vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--fg-black);
+    margin-top: 0;
+    margin-bottom: var(--space-md);
 }
 
 .docs-article__body h2:first-child,

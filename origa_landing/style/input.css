@@ -2,6 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted web fonts served from the project CDN (fonts/landing/ prefix,
+   immutable cache tier — see scripts/_cdn_cache.py). Replaces the former
+   fonts.googleapis.com stylesheet, which was a third-party availability risk
+   for RU visitors. `cyrillic_latin` / `latin_latin-ext` are combined-subset
+   files from google-webfonts-helper; unicode-range is omitted because each
+   file already covers both of its scripts. DM Mono ships no Cyrillic —
+   Cyrillic body text falls back to the system monospace stack, unchanged
+   from the Google Fonts era. */
+@font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/cormorant-garamond-v21-cyrillic_latin-300.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/cormorant-garamond-v21-cyrillic_latin-regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Cormorant Garamond";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/cormorant-garamond-v21-cyrillic_latin-italic.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/cormorant-garamond-v21-cyrillic_latin-500.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/cormorant-garamond-v21-cyrillic_latin-600.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Cormorant Garamond";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/cormorant-garamond-v21-cyrillic_latin-700.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Mono";
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/dm-mono-v16-latin_latin-ext-300.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/dm-mono-v16-latin_latin-ext-regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Mono";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/dm-mono-v16-latin_latin-ext-italic.woff2") format("woff2");
+}
+@font-face {
+    font-family: "DM Mono";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("https://s3.origa.uwuwu.net/fonts/landing/dm-mono-v16-latin_latin-ext-500.woff2") format("woff2");
+}
+
 :root {
     /* Colors */
     --bg-cream: #f7f4ee;

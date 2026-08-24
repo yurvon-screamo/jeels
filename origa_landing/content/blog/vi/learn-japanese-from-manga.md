@@ -44,7 +44,7 @@ Quy trình mơ ước là: đọc manga, thấy từ lạ, học nó. Thực t�
 
 ## Một quy trình thực tế trông như thế nào
 
-Một quy trình thực sự hoạt động có ba giai đoạn, lặp lại mỗi phiên:
+Khai thác manga giả định bạn đã thuộc kana và có vốn từ tối thiểu cỡ N5 — nếu chưa, hãy bắt đầu từ [kế hoạch bắt đầu từ số không](/vi/blog/yaponskiy-s-nulya). Một quy trình thực sự hoạt động có ba giai đoạn, lặp lại mỗi phiên:
 
 1. **Đọc.** Chọn một chương, không cả tập. Đọc cho câu chuyện trước. Đánh dấu từ lạ nhưng đừng dừng lại để học giữa chừng — điều đó phá vỡ mạch.
 2. **Khai thác.** Sau chương, quay lại 5–15 từ bạn đã đánh dấu. Thêm mỗi từ vào SRS với câu nó xuất hiện, âm đọc, và (lý tưởng) ảnh khung hình.
@@ -95,17 +95,22 @@ Nếu sau một tháng khai thác đều đặn mà cả hai đều không xảy
 
 ## Câu hỏi thường gặp
 
-**Tôi có cần biết hán tự trước khi đọc manga không?**
+### Tôi có cần biết hán tự trước khi đọc manga không?
+
 Không. Bắt đầu với manga dày furigana (shōnen/shōjo) ở trình độ đọc N5-N4. Bạn sẽ học hán tự trong ngữ cảnh nhanh hơn từ một danh sách. Cái bẫy là bạn cần SRS để giữ những gì bạn đọc — nếu không bạn sẽ quên hán tự trong vòng một tuần.
 
-**Tôi có thể học tiếng Nhật chỉ từ manga không?**
+### Tôi có thể học tiếng Nhật chỉ từ manga không?
+
 Không. Manga cho bạn đọc và nghe (nếu bạn đọc cùng drama CD hoặc anime), nhưng yếu ở đầu ra, luyện ngữ pháp, và định dạng thi chuyên biệt JLPT. Ghép nó với tài liệu ngữ pháp và SRS. Hoặc dựng SRS vào cùng ứng dụng — đó là thông điệp của Origa.
 
-**Một manga tốt nhất để bắt đầu là gì?**
+### Một manga tốt nhất để bắt đầu là gì?
+
 *Yotsuba&!* (よつばと!). Từ vựng đời thường, ngữ pháp nhẹ, furigana đầy đủ, chương ngắn. Nếu bạn thấy quá dễ sau tập hai, hãy đi tiếp. Đừng tối ưu hóa lựa chọn — hãy bắt đầu.
 
-**OCR có đủ chính xác trên manga không?**
+### OCR có đủ chính xác trên manga không?
+
 Cho manga in tiêu chuẩn: có, ~90%+ trên các khung hình điển hình. Cho khung hình chữ viết tay cách điệu hoặc nặng hiệu ứng âm: kém tin cậy hơn. Luôn kỳ vọng sửa một từ trong mười bằng tay.
 
-**Origa có thay thế trình đọc manga không?**
+### Origa có thay thế trình đọc manga không?
+
 Không. Origa là SRS ngồi bên cạnh bất kỳ trình đọc nào bạn dùng. Quét từ trình đọc, khai thác vào Origa, ôn trong Origa. Nếu đó là nửa bạn cần, [tải Origa](/vi/download).

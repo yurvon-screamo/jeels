@@ -30,14 +30,17 @@ pub static CONTENT: Content = Content {
     footer_resources: "Resources",
     footer_license: "License",
 
-    home_meta_title: "Origa — Learn Japanese: Kanji, Grammar, JLPT, Offline",
+    home_meta_title: "Origa — App to Learn Japanese: Kanji, Grammar, JLPT, Offline",
     home_meta_description: "Learn Japanese free — vocabulary, kanji, grammar, 200K+ native phrases and JLPT analytics. Offline, in your own language.",
     home_schema_feature_list: "Vocabulary, Kanji, Grammar, Listening, JLPT Analytics, Offline Mode",
-    home_hero_title: "Learn Japanese in your own language",
+    home_hero_title: "The app to learn Japanese in your own language",
     home_hero_subtitle: "Vocabulary, kanji, grammar, listening and 200,000+ native phrases — all in one app. No English required.",
     home_cta_primary: "Download",
     home_cta_secondary: "Open web app",
     home_hero_tagline: "Cross-platform · Offline-first · Privacy-first",
+    home_stats_line: "200,000+ native phrases with audio · N5–N1 grammar & kanji · Windows · Linux · macOS · Android · Web · Offline",
+    home_faq_free_question: "Is Origa free?",
+    home_faq_free_answer: "Yes. The apps for every platform and the web version are free.",
     home_problem_h2: "Five apps for one language",
     home_problem_text: "Vocabulary in Anki. Kanji in WaniKani. Grammar in Bunpro. Listening on YouTube. You stitch together five subscriptions and hope they somehow connect. Origa is one app — vocabulary, kanji, grammar, listening and 200,000+ phrases, built to work together from day one.",
     home_features_h2: "Everything you need. Nothing you don't.",
@@ -320,6 +323,7 @@ pub const PR_BODY_EN: &str = r#"
     <li>Google OAuth (accounts.google.com) — optional sign-in provider.</li>
     <li>Yandex OAuth (oauth.yandex.ru) — optional sign-in provider.</li>
     <li>Sentry (sentry.io) — crash reporting and error monitoring; receives crash reports, performance traces and technical logs, not linked to your account.</li>
+    <li>Yandex.Metrika (mc.yandex.ru) — anonymized site-traffic statistics: pages viewed, device type, referral source, on-site behavior. Uses <code>_ym_*</code> cookies; the counter is not linked to your account or learning progress.</li>
     <li>Static CDN (s3.origa.uwuwu.net) — public catalog content.</li>
   </ul>
   <p>Origa does not include advertising SDKs or cross-device tracking SDKs, and the data listed above is not used for advertising and is not transferred to data brokers.</p>

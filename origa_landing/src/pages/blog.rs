@@ -191,6 +191,19 @@ fn render_article(
             (post.frontmatter.title.as_str(), &breadcrumb_path),
         ],
     );
+    let faq_entries = crate::blog::faq::extract_faq(&post.html);
+    let faq_json = if faq_entries.is_empty() {
+        None
+    } else {
+        let pairs: Vec<(&str, &str)> = faq_entries
+            .iter()
+            .map(|entry| (entry.question.as_str(), entry.answer.as_str()))
+            .collect();
+        Some(crate::components::seo::faq_schema(
+            meta.canonical_locale,
+            &pairs,
+        ))
+    };
     let translation_locales = blog::locales_for_slug(post.slug);
 
     view! {
@@ -227,6 +240,10 @@ fn render_article(
 
         <SchemaOrg json=article_json/>
         <SchemaOrg json=breadcrumb_json/>
+        {match faq_json {
+            Some(json) => view! { <SchemaOrg json/> }.into_any(),
+            None => ().into_any(),
+        }}
 
         <ArticleBody requested_locale post is_fallback />
     }
@@ -252,11 +269,15 @@ fn ArticleBody(
         <article class="blog-post">
             <header class="blog-post__header">
                 <p class="blog-post__locale-marker">{locale_marker}</p>
-                <h1 class="blog-post__title">{post.frontmatter.title.clone()}</h1>
                 <p class="blog-post__updated">
                     {c.blog_updated_label} " " {post.frontmatter.lastmod.clone()}
                 </p>
             </header>
+            // The single `<h1>` comes from the markdown body itself (every
+            // article opens with `# Title`). Rendering a second one here from
+            // the frontmatter produced two identical H1s per page — a
+            // relevance-diluting signal for crawlers. The body heading is
+            // styled via `.blog-post__body h1:first-of-type`.
             <div class="blog-post__body" inner_html=post.html.as_str()></div>
         </article>
     }

@@ -102,23 +102,28 @@ Lựa chọn thiết kế rõ ràng: dùng AI nơi nó loại bỏ ma sát khỏ
 
 ## Quyết định thế nào
 
-Nếu thời gian học của bạn là 30 phút một ngày và bạn phải chọn giữa gia sư AI và SRS, chọn SRS. Lặp lại ngắt quãng là thành phần duy nhất của học ngôn ngữ nơi bằng chứng rõ ràng. Gia sư AI là khoản mua hào nhoáng hơn, nhưng chính SRS mới mang lại tiến bộ năm qua năm.
+Nếu thời gian học của bạn là 30 phút một ngày và bạn phải chọn giữa gia sư AI và SRS, chọn SRS. Lặp lại ngắt quãng là thành phần duy nhất của học ngôn ngữ nơi bằng chứng rõ ràng; luyện nói chỉ thực sự có ý nghĩa khi bạn đã có nền tảng khoảng N4 ([kế hoạch bắt đầu từ số không](/vi/blog/yaponskiy-s-nulya)). Gia sư AI là khoản mua hào nhoáng hơn, nhưng chính SRS mới mang lại tiến bộ năm qua năm.
 
 Nếu bạn có thể chạy cả hai — SRS cho ghi nhớ, gia sư AI cho giải thích theo yêu cầu và thực hành đàm thoại — đó là thiết lập best-of-both-worlds thực tế mà đa số người học trung cấp trở lên hội tụ. Origa che nửa SRS và dùng AI cho đầu vào, không cho đàm thoại. ChatGPT hoặc Claude che nửa đàm thoại. Kết hợp rẻ hơn và hiệu quả hơn một thuê bao gia sư AI đơn lẻ hứa hẹn mọi thứ và giao đàm thoại cộng thêm ghi nhớ yếu. Nếu nửa SRS là thứ bạn cần, [tải Origa](/vi/download).
 
 ## Câu hỏi thường gặp
 
-**Tôi có thể học tiếng Nhật chỉ với ChatGPT không?**
+### Tôi có thể học tiếng Nhật chỉ với ChatGPT không?
+
 Bạn có thể thực hành đàm thoại và nhận giải thích ngữ pháp. Bạn sẽ không nhớ những gì bạn học mà không có SRS riêng biệt. ChatGPT đơn lẻ là gia sư không có chương trình hoặc trí nhớ — hữu dụng, không đầy đủ.
 
-**Các ứng dụng gia sư AI có tốt hơn ChatGPT không?**
+### Các ứng dụng gia sư AI có tốt hơn ChatGPT không?
+
 Cho các kịch bản có hướng dẫn và bài học cấu trúc, có — chúng bọc AI trong một luồng học. Cho sự linh hoạt thô, không. Lựa chọn tốt nhất phụ thuộc vào việc bạn muốn cấu trúc (dùng ứng dụng gia sư AI) hay linh hoạt (dùng ChatGPT trực tiếp).
 
-**Origa có chatbot AI không?**
+### Origa có chatbot AI không?
+
 Không. Origa dùng AI cho OCR, speech-to-text, và trích từ vựng — phía đầu vào của học. Cho AI đàm thoại, ghép Origa với ChatGPT, Claude, hoặc ứng dụng gia sư AI chuyên dụng.
 
-**AI cục bộ có tốt như AI đám mây không?**
+### AI cục bộ có tốt như AI đám mây không?
+
 Cho OCR và STT trên đầu vào tiếng Nhật điển hình: gần, đôi khi bằng. Cho AI đàm thoại: không, các mô hình đám mây đáng kể hơn. Đánh đổi là riêng tư và dùng ngoại tuyến vs. năng lực thô.
 
-**Thiết lập rẻ nhất hoạt động là gì?**
+### Thiết lập rẻ nhất hoạt động là gì?
+
 Mức miễn phí của ChatGPT cho câu hỏi ngữ pháp + Anki (desktop miễn phí, AnkiDroid miễn phí) cho SRS. Đó là $0/tháng và che phần lớn những gì ứng dụng gia sư AI trả phí cung cấp, nếu bạn sẵn sàng cấu hình Anki.
