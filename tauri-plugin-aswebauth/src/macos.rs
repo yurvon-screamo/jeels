@@ -36,6 +36,13 @@ use crate::commands::AuthResult;
 /// The crate keeps it as `NSObject`; we store an `NSWindow` in it.
 type PresentationAnchor = NSObject;
 
+/// Session + provider kept alive by the completion block (see the slot
+/// comment in `start_session`).
+type SessionBundle = (
+    Retained<ASWebAuthenticationSession>,
+    Retained<AuthAnchorProvider>,
+);
+
 define_class!(
     // SAFETY:
     // - Superclass `NSObject` has no subclassing requirements.
@@ -131,14 +138,7 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     // (but before `start`) keeps the session and provider alive for as long
     // as the system holds the block; taking them at completion time breaks
     // the session ↔ block retain cycle so everything deallocates cleanly.
-    let bundle_slot: Rc<
-        RefCell<
-            Option<(
-                Retained<ASWebAuthenticationSession>,
-                Retained<AuthAnchorProvider>,
-            )>,
-        >,
-    > = Rc::new(RefCell::new(None));
+    let bundle_slot: Rc<RefCell<Option<SessionBundle>>> = Rc::new(RefCell::new(None));
 
     let tx_for_completion = tx.clone();
     let bundle_for_completion = Rc::clone(&bundle_slot);
