@@ -1,8 +1,5 @@
-#[cfg(feature = "acquaintance_mode")]
 mod acquaintance_keyboard;
-#[cfg(feature = "acquaintance_mode")]
 mod acquaintance_state;
-#[cfg(feature = "acquaintance_mode")]
 mod acquaintance_view;
 mod answer_display;
 pub mod card_type;
@@ -11,7 +8,6 @@ mod content;
 mod empty_state_view;
 mod grammar_details_expand;
 mod grammar_info_badge;
-#[cfg(feature = "acquaintance_mode")]
 mod hand_progress_strip;
 mod header;
 mod kanji_card_details;
@@ -44,7 +40,6 @@ mod quiz_result;
 pub(crate) mod quiz_result_display;
 mod rating_buttons;
 mod rating_buttons_view;
-#[cfg(feature = "acquaintance_mode")]
 mod training_view;
 mod writing_card;
 mod yesno_card_view;

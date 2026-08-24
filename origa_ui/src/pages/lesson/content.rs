@@ -1,8 +1,6 @@
-#[cfg(feature = "acquaintance_mode")]
 use super::acquaintance_state::{
     AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
 };
-#[cfg(feature = "acquaintance_mode")]
 use super::acquaintance_view::AcquaintanceView;
 use super::complete_screen::LessonCompleteScreen;
 use super::empty_state_view::LessonEmptyState;
@@ -18,7 +16,6 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use origa::domain::{Card, LessonEmptyDiagnosis, diagnose_empty_lesson};
 use origa::traits::UserRepository;
-#[cfg(feature = "acquaintance_mode")]
 use origa::use_cases::SelectAcquaintanceHandUseCase;
 use origa::use_cases::SelectCardsToLessonUseCase;
 use origa::use_cases::{classify_orphaned_phrases, delete_phrase_cards_by_phrase_ids};
@@ -99,7 +96,6 @@ pub fn LessonContent() -> impl IntoView {
     };
     provide_context(lesson_ctx);
 
-    #[cfg(feature = "acquaintance_mode")]
     {
         let acquaintance_state = RwSignal::new(AcquaintanceState::default());
         let acquaintance_slides = RwSignal::new(Vec::<AcquaintanceSlideData>::new());
@@ -113,19 +109,13 @@ pub fn LessonContent() -> impl IntoView {
     }
 
     // Активна ли сейчас префаза руки — производное от стадии в домене.
-    #[cfg(feature = "acquaintance_mode")]
     let acq_ctx = use_context::<AcquaintanceContext>().expect("acquaintance context not provided");
-    #[cfg(feature = "acquaintance_mode")]
     let acq_state_signal = acq_ctx.state;
-    #[cfg(feature = "acquaintance_mode")]
     let acq_slides_signal = acq_ctx.slides;
-    #[cfg(feature = "acquaintance_mode")]
     let acq_hand_active = move || {
         acq_state_signal
             .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
     };
-    #[cfg(not(feature = "acquaintance_mode"))]
-    let _acq_hand_active = move || false;
 
     let repo_for_user_data = repository.clone();
     Effect::new(move |_| {
@@ -163,12 +153,10 @@ pub fn LessonContent() -> impl IntoView {
             is_loading.set(true);
             error_message.set(None);
             empty_diagnosis.set(None);
-            #[cfg(feature = "acquaintance_mode")]
             acq_state_signal.update(|state| *state = Default::default());
 
             let jlpt_content = crate::loaders::get_jlpt_content();
 
-            #[cfg(feature = "acquaintance_mode")]
             let (hand_order, hand_user_snapshot) = {
                 let select_hand = SelectAcquaintanceHandUseCase::new(&repo);
                 match select_hand.execute(jlpt_content).await {
@@ -192,13 +180,7 @@ pub fn LessonContent() -> impl IntoView {
                     },
                 }
             };
-            #[cfg(not(feature = "acquaintance_mode"))]
-            let (_hand_order, _hand_user_snapshot): (
-                Vec<Ulid>,
-                Option<origa::domain::User>,
-            ) = (Vec::new(), None);
 
-            #[cfg(feature = "acquaintance_mode")]
             if !hand_order.is_empty() {
                 if let Some(user) = &hand_user_snapshot {
                     let pairs: Vec<(Ulid, origa::domain::CardType)> = hand_order
@@ -233,10 +215,7 @@ pub fn LessonContent() -> impl IntoView {
             }
 
             let use_case = SelectCardsToLessonUseCase::new(&repo);
-            #[cfg(feature = "acquaintance_mode")]
             let new_card_policy = origa::domain::NewCardPolicy::Exclude;
-            #[cfg(not(feature = "acquaintance_mode"))]
-            let new_card_policy = origa::domain::NewCardPolicy::Inject;
             let cards_result = use_case.execute(new_card_policy, jlpt_content).await;
 
             if is_disposed.is_disposed() {
@@ -398,7 +377,6 @@ pub fn LessonContent() -> impl IntoView {
         });
     });
 
-    #[cfg(feature = "acquaintance_mode")]
     fn build_acquaintance_slides(
         user: &origa::domain::User,
         order: &[Ulid],
@@ -534,7 +512,6 @@ pub fn LessonContent() -> impl IntoView {
             .collect()
     }
 
-    #[cfg(feature = "acquaintance_mode")]
     let show_acquaintance = move || {
         acq_hand_active()
             && !is_loading.get()
@@ -542,10 +519,7 @@ pub fn LessonContent() -> impl IntoView {
             && error_message.get().is_none()
             && empty_diagnosis.get().is_none()
     };
-    #[cfg(not(feature = "acquaintance_mode"))]
-    let _show_acquaintance = move || false;
 
-    #[cfg(feature = "acquaintance_mode")]
     let show_lesson_content = move || {
         !acq_hand_active()
             && !is_loading.get()
@@ -553,23 +527,12 @@ pub fn LessonContent() -> impl IntoView {
             && error_message.get().is_none()
             && empty_diagnosis.get().is_none()
     };
-    #[cfg(feature = "acquaintance_mode")]
     let render_acquaintance_slot = move || {
         if show_acquaintance() {
             Some(view! { <AcquaintanceView /> }.into_any())
         } else {
             None
         }
-    };
-    #[cfg(not(feature = "acquaintance_mode"))]
-    let render_acquaintance_slot = move || None;
-
-    #[cfg(not(feature = "acquaintance_mode"))]
-    let show_lesson_content = move || {
-        !is_loading.get()
-            && !is_completed.get()
-            && error_message.get().is_none()
-            && empty_diagnosis.get().is_none()
     };
 
     view! {

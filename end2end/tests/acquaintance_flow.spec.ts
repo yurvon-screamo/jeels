@@ -3,17 +3,8 @@ import { setupTestUser } from "../helpers/auth";
 import { skipOnboarding } from "../helpers/navigation";
 
 /**
- * S7: сквозной сценарий режима знакомства под флагом
- * `acquaintance_mode` (compile-time feature).
- *
- * Запуск требует приложения, собранного с флагом:
- *   cd origa_ui && trunk serve --features csr,acquaintance_mode
- * и переменной окружения ACQUAINTANCE_MODE=1 для этого проекта Playwright.
- * В дефолтной CI-сборке спека пропускается.
+ * S7: сквозной сценарий режима знакомства — часть основного потока урока.
  */
-const FLAG_BUILD = process.env.ACQUAINTANCE_MODE === "1";
-
-test.skip(!FLAG_BUILD, "requires origa_ui built with --features acquaintance_mode");
 
 test.describe("Acquaintance mode", () => {
 	let page: import("@playwright/test").Page;
@@ -24,10 +15,10 @@ test.describe("Acquaintance mode", () => {
 		page = await context.newPage();
 		await skipOnboarding(page);
 
-		// Добавляем слово в пул — оно станет картой руки.
-		// Слова добавляются через существующие helpers словника в
-		// setupLessonWithCards; здесь тот же путь, но урок не стартуем:
-		// рука выбирается при загрузке страницы урока автоматически.
+		// Рука формируется из пула новых карт свежего тестового пользователя
+		// при загрузке страницы урока (SelectAcquaintanceHandUseCase).
+		// Зависимость: поведение Select на пустом/непустом пуле — при его
+		// изменении этот файл нужно синхронизировать.
 	});
 
 	test("happy path: показ → тренировка → итог → ревью", async () => {

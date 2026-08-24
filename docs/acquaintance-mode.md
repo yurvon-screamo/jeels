@@ -54,9 +54,8 @@
 - Миграций схемы **нет**: сидирование пишет в существующую `Option<MemoryState>`
   внутри `MemoryHistory`; новых таблиц/полей персистентности нет; состояние руки
   нигде не сохраняется.
-- Выключение флага безопасно: сидированные карты становятся обычными
-  запланированными; недозакрытые руки остаются new в пуле и при повторном
-  включении обрабатываются с начала.
+- Режим включён в сборке постоянно; откат — revert коммитов срезов S0–S7
+  (миграций нет, состояние руки нигде не персистится).
 - Структура `User`/`KnowledgeSet` не меняется.
 
 ## 6. Дефолтные параметры
@@ -451,7 +450,7 @@ anima-stamp) → сетка карт руки (слово/знак/констр�
 | Домен (`origa/src/domain/acquaintance.rs`) | Чистая машина состояния руки. Компилируется **безусловно** — секция `[features]` в crate `origa` не заводится |
 | Use cases (`origa/src/use_cases/`) | SelectAcquaintanceHandUseCase, CompleteAcquaintanceHandUseCase; «Уже знаю» — переиспользование MarkCardAsKnownUseCase без изменений |
 | Билдер урока (`lesson_builder.rs`) | Параметр политики `NewCardPolicy { Inject, Exclude }` вместо cfg-гейтинга; существующие вызовы передают Inject |
-| UI (`origa_ui`) | Префаза страницы урока + компоненты; флаг компиляции `acquaintance_mode` в `origa_ui/Cargo.toml` рядом с прецедентом `grammar_practice_lesson_mode` |
+| UI (`origa_ui`) | Префаза страницы урока + компоненты; включено в сборке постоянно (временный compile-time флаг удалён после стабилизации) |
 
 ### 9.2 Контракты
 
@@ -500,8 +499,8 @@ impl CompleteAcquaintanceHandUseCase {
 ```
 
 Точка оркестрации: страница урока при инициализации контекста урока — сначала
-Select (Some → префаза руки; None/флаг выкл → построение ревью-части с политикой
-Inject или Exclude по флагу).
+Select (Some → префаза руки; None → построение ревью-части, всегда с политикой
+Exclude: новые карты попадают в урок только через руку).
 
 ### 9.3 Срезы (risk-first, линейные)
 
@@ -518,7 +517,8 @@ Inject или Exclude по флагу).
 
 Ворота каждого среза: `cargo clippy --workspace --all-targets -- -D warnings`,
 `cargo fmt`, `cargo test --workspace`, qlty; `ORIGA_CDN_BASE_URL` установлена;
-wasm-тесты S4–S6 гоняются дважды: default и `--features csr,acquaintance_mode`.
+wasm-тесты гоняются одним прогоном `--features csr` (режим знакомства включён
+в сборке постоянно, отдельного флагового прогона больше нет).
 
 > **Локальные ворота (Windows/nightly):** полный `cargo test --workspace`
 > падает компиляцией `origa_ui_bin` (`queries overflow the depth limit` —

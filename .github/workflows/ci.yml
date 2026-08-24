@@ -215,7 +215,7 @@ jobs:
               uses: jetli/wasm-pack-action@v0.4.0
 
             - name: Run WASM component tests
-              run: wasm-pack test --headless --chrome origa_ui --features csr,acquaintance_mode
+              run: wasm-pack test --headless --chrome origa_ui --features csr
 
     e2e-build:
         name: E2E Build

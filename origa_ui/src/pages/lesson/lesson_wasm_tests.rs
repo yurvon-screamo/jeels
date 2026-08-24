@@ -1072,10 +1072,9 @@ async fn quiz_result_display_multi_partial_lists_missed_and_wrong() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// Acquaintance training (feature = acquaintance_mode)
+// Acquaintance training (режим знакомства — часть основного потока)
 // ═══════════════════════════════════════════════════════════════════════
 
-#[cfg(feature = "acquaintance_mode")]
 mod acquaintance_training {
     use super::*;
     use crate::pages::lesson::acquaintance_state::{
