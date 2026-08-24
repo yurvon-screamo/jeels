@@ -61,6 +61,17 @@ export async function uiLogin(
 ): Promise<void> {
 	const maxRetries = 3;
 
+	// The first-run resource-download consent screen (App Review 4.2.3(ii))
+	// blocks authenticated routes until the user clicks Download. Tests are
+	// not about that screen, so pre-approve the download before any app
+	// script runs on the app origin. Matches gloo_storage JSON encoding
+	// (`LocalStorage::set(key, true)` stores the literal `true`).
+	await page.context().addInitScript(() => {
+		if (window.location.origin === "http://localhost:1420") {
+			window.localStorage.setItem("origa_resource_download_consented", "true");
+		}
+	});
+
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
 		// The whole login flow is retried, not just waitForURL: the password
 		// toggle and the inputs race the WASM cold load too, and a toggle

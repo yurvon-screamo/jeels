@@ -618,7 +618,7 @@
     "loading_finalizing_progress": "Preparing study materials • {} of {}",
     "resource_download": {
       "title": "Download study materials",
-      "body": "Origa downloads Japanese dictionaries and study materials (~40 MB) to your device. This happens once; the data is cached locally for offline use.",
+      "body": "Origa downloads Japanese dictionaries and study materials (~230 MB) to your device. This happens once; the data is cached locally for offline use.",
       "start": "Download"
     },
     "selected_count": "Selected: {}",

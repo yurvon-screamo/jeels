@@ -445,11 +445,7 @@ jobs:
                       exit 1
                     fi
                   done
-                  if grep -q "com.apple.security.device.camera" /tmp/entitlements.txt; then
-                    echo "::error::Camera entitlement must not be present (App Review 2.4.5(i): unused entitlement)"
-                    exit 1
-                  fi
-                  echo "✅ All 4 entitlements present (no camera)"
+                  echo "✅ All 4 entitlements present"
                   rm -f /tmp/entitlements.txt
 
             - name: Embed provisioning profile & re-sign

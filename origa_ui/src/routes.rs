@@ -9,9 +9,7 @@ use crate::loaders::{
     phrase_loader::load_phrases,
     pitch_audio_loader::load_pitch_audio,
 };
-use crate::pages::shared::{
-    ResourceDownloadConsent, is_resource_download_consented, persist_resource_download_consent,
-};
+use crate::pages::shared::{ResourceDownloadConsent, is_resource_download_consented};
 use crate::pages::{
     Grammar, GrammarDetail, Home, Kanji, KanjiDetail, Lesson, Login, Onboarding, Phrases, Profile,
     Sets, Words,
@@ -213,7 +211,7 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
     let is_all_data_loaded = auth_store.is_all_data_loaded();
     let is_checking = auth_store.is_checking_session;
 
-    // Guideline 4.2.3(ii) consent gate: the mandatory ~40 MB resource fetch
+    // Guideline 4.2.3(ii) consent gate: the mandatory ~230 MB resource fetch
     // only starts after the user approves it on the consent screen. Both
     // trigger points are gated — this effect (auto-start) and the view branch
     // below (consent screen vs loading overlay).
@@ -272,11 +270,11 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
             view! {
                 <ResourceDownloadConsent
                     on_start=move |_| {
-                        // The consent screen hands off to the standard loading
-                        // overlay; `is_data_loading_started` is set first so
+                        // The consent screen persists the approval (its click
+                        // handler) and hands off to the standard loading
+                        // overlay. `is_data_loading_started` is set first so
                         // the auto-start effect (reacting to the consent flip)
                         // does not launch a second fetch.
-                        persist_resource_download_consent();
                         auth_store_for_start.is_data_loading_started.set(true);
                         download_consented.set(true);
                         start_dictionary_loading(

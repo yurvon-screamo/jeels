@@ -76,8 +76,12 @@ pub async fn start_auth<R: tauri::Runtime>(
         let Some(tx) = tx_for_sync_errors.take() else {
             return;
         };
-        if let Err(start_error) = crate::macos::start_session(&app, &url, &callback_scheme, tx) {
+        // Synchronous setup failures (no window, bad URL) must reach the
+        // frontend with their cause — no completion handler will fire to
+        // deliver them instead.
+        if let Err(start_error) = crate::macos::start_session(&app, &url, &callback_scheme, &tx) {
             tracing::warn!("[aswebauth] session failed to start: {start_error}");
+            let _ = tx.send(Err(start_error));
         }
     })
     .map_err(|e| format!("failed to dispatch onto the main thread: {e}"))?;

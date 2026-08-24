@@ -395,7 +395,7 @@ pub(super) fn AudioInputStage(
                                                 .get()
                                                 .then(|| {
                                                     view! {
-                                                        <p class="text-xs text-[var(--fg-muted)]" data-testid="stt-model-download-notice">
+                                                        <p class="text-xs text-[var(--fg-muted)]">
                                                             {i18n.get_keys().words().audio().model_download_notice().inner().to_string()}
                                                         </p>
                                                     }

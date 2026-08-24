@@ -45,21 +45,17 @@ jobs:
     # Compile gate for macOS-only native code (tauri-plugin-aswebauth,
     # device-ai commands): the workspace clippy job runs on Linux and never
     # sees `cfg(target_os = "macos")` code, so without this check such code
-    # would first compile on a release tag. Runs check + clippy for both
-    # darwin triples used by the MAS universal build. Public repo — macos
-    # runners are free; check/clippy (no bundling) keeps the job in minutes.
+    # would first compile on a release tag. Apple-silicon only — Intel Macs
+    # are legacy. Public repo — macos runners are free; check/clippy (no
+    # bundling) keeps the job in minutes.
     macos-check:
-        name: Check (aarch64 + x86_64 macOS)
+        name: Check (aarch64 macOS)
         permissions:
             contents: read
         runs-on: macos-15
         if: github.actor != 'dependabot[bot]'
         env:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
-        strategy:
-            fail-fast: false
-            matrix:
-                target: [aarch64-apple-darwin, x86_64-apple-darwin]
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -67,19 +63,19 @@ jobs:
             - name: Setup Rust
               uses: ./.github/actions/setup-rust
               with:
-                  targets: ${{ matrix.target }}
+                  targets: aarch64-apple-darwin
                   shared-key: origa-macos-check-v1
                   save-if: ${{ github.ref == 'refs/heads/master' }}
 
             - name: Check tauri app + aswebauth plugin
               run: |
                   cargo check --locked -p origa-app -p tauri-plugin-aswebauth \
-                    --target ${{ matrix.target }}
+                    --target aarch64-apple-darwin
 
             - name: Clippy tauri app + aswebauth plugin
               run: |
                   cargo clippy --locked -p origa-app -p tauri-plugin-aswebauth \
-                    --target ${{ matrix.target }} --all-targets -- -D warnings
+                    --target aarch64-apple-darwin --all-targets -- -D warnings
 
     lint:
         name: Lint

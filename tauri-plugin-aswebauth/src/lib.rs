@@ -43,9 +43,9 @@ pub(crate) mod macos;
 /// `register_ios_plugin` so that `start_auth` can delegate to the Swift
 /// `AsWebAuthPlugin` via `run_mobile_plugin`.
 ///
-// On non-iOS targets this type is not used — macOS keeps no state (the
-// session lives entirely inside one `start_auth` call), and other platforms
-// return an error without touching plugin state.
+/// On non-iOS targets this type is not used: macOS keeps no state (the
+/// session lives entirely inside one `start_auth` call), and other platforms
+/// return an error without touching plugin state.
 #[cfg(target_os = "ios")]
 pub struct AsWebAuthState<R: Runtime> {
     pub(crate) handle: PluginHandle<R>,

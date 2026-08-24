@@ -8908,6 +8908,7 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

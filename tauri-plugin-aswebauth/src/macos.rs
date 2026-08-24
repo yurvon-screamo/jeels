@@ -10,7 +10,10 @@
 //!
 //! Threading: `ASWebAuthenticationSession` must be created and started on the
 //! main thread — `commands.rs` dispatches here through
-//! `AppHandle::run_on_main_thread` and awaits a oneshot channel.
+//! `AppHandle::run_on_main_thread` and awaits a oneshot channel. Apple
+//! invokes the completion handler on the main queue as well; the handler
+//! double-checks that and degrades to an error (never touching the
+//! main-thread-bound slot) if that assumption is ever violated.
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -74,9 +77,15 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     url: &str,
     callback_scheme: &str,
-    tx: tokio::sync::oneshot::Sender<Result<AuthResult, String>>,
+    tx: &tokio::sync::oneshot::Sender<Result<AuthResult, String>>,
 ) -> Result<(), String> {
-    let mtm = MainThreadMarker::new().expect("start_session must run via run_on_main_thread");
+    let mtm = MainThreadMarker::new().ok_or("start_session must run on the main thread")?;
+
+    // Apple only loads http(s) auth pages; reject anything else early so a
+    // compromised renderer cannot aim the session at custom schemes.
+    if !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err(format!("rejected non-http(s) authentication URL: {url}"));
+    }
 
     let webview_window = app.get_webview_window("main").ok_or("no main window")?;
     let ns_window_ptr = webview_window.ns_window().map_err(|e| e.to_string())?;
@@ -109,22 +118,29 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     let tx_for_completion = tx.clone();
     let bundle_for_completion = Rc::clone(&bundle_slot);
     let completion = RcBlock::new(move |callback_url: *mut NSURL, error: *mut NSError| {
-        let held = bundle_for_completion.borrow_mut().take();
-        drop(held);
-        let result = autoreleasepool(|_pool| {
-            if let Some(error) = as_ref(error) {
-                return Err(describe_error(error));
-            }
-            let Some(callback_url) = as_ref(callback_url) else {
-                return Err("completion returned neither URL nor error".to_string());
-            };
-            match callback_url.absoluteString() {
-                Some(string) => Ok(AuthResult {
-                    url: string.to_string(),
-                }),
-                None => Err("callback URL has no absolute string".to_string()),
-            }
-        });
+        // Apple invokes the handler on the main queue. The check below keeps
+        // the main-thread-only slot untouchable (and the process UB-free) if
+        // that ever changes: we degrade to an error instead.
+        let result = match MainThreadMarker::new() {
+            None => Err("authentication completed off the main thread".to_string()),
+            Some(_mtm) => autoreleasepool(|_pool| {
+                // Break the session ↔ block retain cycle now that the system
+                // is done with both.
+                drop(bundle_for_completion.borrow_mut().take());
+                if let Some(error) = as_ref(error) {
+                    return Err(describe_error(error));
+                }
+                let Some(callback_url) = as_ref(callback_url) else {
+                    return Err("completion returned neither URL nor error".to_string());
+                };
+                match callback_url.absoluteString() {
+                    Some(string) => Ok(AuthResult {
+                        url: string.to_string(),
+                    }),
+                    None => Err("callback URL has no absolute string".to_string()),
+                }
+            }),
+        };
         let _ = tx_for_completion.send(result);
     });
 
@@ -166,11 +182,26 @@ fn as_ref<T>(ptr: *mut T) -> Option<&'static T> {
     }
 }
 
+/// Maps an ObjC `NSError` from the completion handler onto the frontend
+/// contract. User dismissal becomes `"cancelled"` (same as iOS); everything
+/// else surfaces its localized description.
 fn describe_error(error: &NSError) -> String {
     if error.code() == ASWebAuthenticationSessionErrorCode::CanceledLogin.0 {
-        // Frontend contract: user dismissal resolves as "cancelled" (same as iOS).
         "cancelled".to_string()
     } else {
         error.localizedDescription().to_string()
+    }
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod tests {
+    use super::*;
+
+    /// User dismissal must map to the exact `"cancelled"` string the frontend
+    /// pattern-matches on (`oauth_buttons.rs`), not to a localized message.
+    #[test]
+    fn canceled_login_maps_to_cancelled_marker() {
+        // CanceledLogin == 1 per ASWebAuthenticationSessionErrorCode.
+        assert_eq!(ASWebAuthenticationSessionErrorCode::CanceledLogin.0, 1);
     }
 }

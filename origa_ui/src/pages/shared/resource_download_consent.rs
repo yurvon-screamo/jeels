@@ -3,7 +3,7 @@
 //! App Review Guideline 4.2.3(ii): when the app must download additional
 //! resources to be usable, the download size must be disclosed and the user
 //! must be prompted before it starts. This screen gates the dictionary /
-//! study-material fetch (~40 MB) behind an explicit "Download" click; the
+//! study-material fetch (~230 MB) behind an explicit "Download" click; the
 //! choice is persisted so subsequent launches load without prompting.
 
 use crate::i18n::{t, use_i18n};
@@ -41,7 +41,6 @@ pub fn ResourceDownloadConsent(#[prop(into)] on_start: Callback<()>) -> impl Int
                 <Text
                     size=TextSize::Large
                     variant=TypographyVariant::Primary
-                    test_id=Signal::derive(|| "resource-consent-title".to_string())
                 >
                     {t!(i18n, ui.resource_download.title)}
                 </Text>
@@ -49,7 +48,6 @@ pub fn ResourceDownloadConsent(#[prop(into)] on_start: Callback<()>) -> impl Int
                     <Text
                         size=TextSize::Default
                         variant=TypographyVariant::Muted
-                        test_id=Signal::derive(|| "resource-consent-body".to_string())
                     >
                         {t!(i18n, ui.resource_download.body)}
                     </Text>

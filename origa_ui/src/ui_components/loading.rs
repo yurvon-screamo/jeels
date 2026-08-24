@@ -41,33 +41,21 @@ pub fn LoadingOverlay(
         if val.is_empty() { None } else { Some(val) }
     };
 
-    let bar_value = RwSignal::new(0u32);
-    let bar_max = RwSignal::new(0u32);
-    let bar_visible = RwSignal::new(false);
-    Effect::new(move |_| match progress.get() {
-        Some((completed, total)) if total > 0 => {
-            bar_value.set(completed.min(total));
-            bar_max.set(total);
-            bar_visible.set(true);
-        },
-        _ => bar_visible.set(false),
-    });
-
     view! {
         <div data-testid=test_id_val class=move || format!("loading-overlay anima-page-fade {}", class.get())>
             <Spinner class=Signal::derive(|| "".to_string()) size=Signal::derive(|| "".to_string()) test_id="loading-spinner" />
             <p class="loading-overlay-message">{move || message.get()}</p>
             {move || {
-                if !bar_visible.get() {
-                    return None;
-                }
                 // Same track/fill markup as `ProgressBar`, inlined because the
                 // component takes `RwSignal` props while this overlay derives
                 // values from a parent-owned signal.
-                let percentage = (bar_value.get() as f64 / bar_max.get() as f64 * 100.0)
-                    .min(100.0);
+                let (completed, total) = progress.get()?;
+                if total == 0 {
+                    return None;
+                }
+                let percentage = (completed as f64 / total as f64 * 100.0).min(100.0);
                 Some(view! {
-                    <div class="loading-overlay-progress" data-testid="loading-progress-bar">
+                    <div class="loading-overlay-progress">
                         <div class="progress-track">
                             <div
                                 class="progress-fill"
