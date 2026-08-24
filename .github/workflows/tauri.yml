@@ -10,6 +10,10 @@ on:
                 description: "Force Apple builds (consumes ~30 min of macOS runner per target)"
                 type: boolean
                 default: false
+            force_store_msix:
+                description: "Force Microsoft Store MSIX build (smoke-testing outside stable tags)"
+                type: boolean
+                default: false
 
 concurrency:
     group: tauri-${{ github.ref }}
@@ -127,6 +131,32 @@ jobs:
             android-keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
             android-key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
             android-key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+
+    build-windows-store:
+        name: Build Windows Store MSIX
+        # Isolation doctrine (mirrors upload-rustore): this job is
+        # intentionally ABSENT from release.needs — a transient MSIX build
+        # failure MUST NOT block the GitHub Release. Do NOT add
+        # build-windows-store to release.needs — that regresses isolation.
+        # Stable tags only: the Store is a stable channel, and MSIX versions
+        # must be strictly increasing per product (see ADR-042). Smoke-test
+        # builds of other refs go through force_store_msix (workflow_dispatch)
+        # and produce 0.0.0.<run_number> versions that must never be submitted.
+        if: >-
+            always() &&
+            needs.build-frontend.result == 'success' &&
+            ((startsWith(github.ref, 'refs/tags/v') &&
+              needs.version.outputs.version_type == 'stable') ||
+             inputs.force_store_msix == true) &&
+            github.actor != 'dependabot[bot]'
+        needs: [version, build-frontend]
+        uses: ./.github/workflows/_build-windows-store.yml
+        with:
+            version: ${{ needs.version.outputs.version }}
+            version_type: ${{ needs.version.outputs.version_type }}
+            commit_sha: ${{ needs.version.outputs.commit_sha }}
+            build_date: ${{ needs.version.outputs.build_date }}
+            wasm_artifact_name: frontend-dist
 
     build-apple:
         name: Build Apple (iOS + macOS)

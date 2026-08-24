@@ -128,10 +128,12 @@ jobs:
 
             - name: Verify App Store cfg compiles
               # The ORIGA_APP_STORE env var triggers build.rs to emit
-              # cargo:rustc-cfg=app_store, gating out updater /
-              # single-instance / devtools. Without this check, regressions
-              # in the gated code path surface only at tag-push on
-              # macos-15 (~30 min, blocks release).
+              # cargo:rustc-cfg=app_store, gating out the auto-updater and
+              # process-runner plugins plus their IPC commands (single-instance
+              # STAYS — deep-link protocol activation needs it; devtools are
+              # disabled via the app-store feature). Without this check,
+              # regressions in the gated code path surface only at tag-push
+              # on macos-15 (~30 min, blocks release).
               run: ORIGA_APP_STORE=1 cargo check -p origa-app
 
     cdn-download:
@@ -519,6 +521,21 @@ jobs:
             android-keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
             android-key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
             android-key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+
+    # TEMPORARY (PR smoke): exercises the MSIX pipeline on every PR push so
+    # the first package is built and uploaded before this lands on master.
+    # REMOVED in a follow-up commit of the same PR once verified — release
+    # builds go exclusively through tauri.yml's build-windows-store job.
+    store-msix-pr-test:
+        name: TEMP Store MSIX PR smoke
+        needs: [version, wasm-test]
+        uses: ./.github/workflows/_build-windows-store.yml
+        with:
+            version: ${{ needs.version.outputs.version }}
+            version_type: development
+            commit_sha: ${{ needs.version.outputs.commit_sha }}
+            build_date: ${{ needs.version.outputs.build_date }}
+            wasm_artifact_name: wasm-dist
 
     docker-build-landing:
         name: Docker Build (landing)
