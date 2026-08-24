@@ -127,7 +127,7 @@ cd tauri; ./scripts/build-msix.ps1 -Version 0.7.0
 Add-AppxPackage -Path target/msix/Origa_0.7.0_x64.msix
 ```
 
-Updater в store-сборке скомпилирован out (`not(app_store)` гейт, политика 10.2.5); прямые загрузки NSIS обновляются через Tauri updater как раньше. Identity-плейсхолдеры `__PARTNER_CENTER_*__` в манифесте заполняются после создания «MSIX or PWA app» продукта в Partner Center. Пересабмит = бамп версии. Runbook: ADR-042.
+Updater в store-сборке скомпилирован out (`not(app_store)` гейт, политика 10.2.5); прямые загрузки NSIS обновляются через Tauri updater как раньше. Identity-плейсхолдеры `INJECT-PC-*` в манифесте заполняются после создания «MSIX or PWA app» продукта в Partner Center. Пересабмит = бамп версии. Runbook: ADR-042.
 
 Обновить Cache-Control на существующих объектах (one-time, после смены политики — новые upload'ы уже корректны, но старые объекты хранят прежний заголовок):
 
