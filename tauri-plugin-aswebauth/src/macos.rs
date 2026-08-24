@@ -71,38 +71,60 @@ impl AuthAnchorProvider {
     }
 }
 
-/// Creates and starts an auth session on the main thread. Sends exactly one
-/// result through `tx`: either from the completion handler or synchronously
-/// when the session cannot start.
+/// Creates and starts an auth session on the main thread. Guarantees exactly
+/// one send through `tx`: from the completion handler, or synchronously with
+/// the real failure cause when the session cannot be created or started.
 pub(crate) fn start_session<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     url: &str,
     callback_scheme: &str,
-    tx: &tokio::sync::oneshot::Sender<Result<AuthResult, String>>,
-) -> Result<(), String> {
-    let mtm = MainThreadMarker::new().ok_or("start_session must run on the main thread")?;
+    tx: tokio::sync::oneshot::Sender<Result<AuthResult, String>>,
+) {
+    // Every early-exit path owns `tx` and sends the failure itself, so the
+    // frontend always learns the real cause.
+    let Some(mtm) = MainThreadMarker::new() else {
+        let _ = tx.send(Err("start_session must run on the main thread".to_string()));
+        return;
+    };
 
     // Apple only loads http(s) auth pages; reject anything else early so a
     // compromised renderer cannot aim the session at custom schemes. Scheme
     // comparison is case-insensitive per RFC 3986.
     let lower = url.to_ascii_lowercase();
     if !(lower.starts_with("https://") || lower.starts_with("http://")) {
-        return Err(format!("rejected non-http(s) authentication URL: {url}"));
+        let _ = tx.send(Err(format!(
+            "rejected non-http(s) authentication URL: {url}"
+        )));
+        return;
     }
 
-    let webview_window = app.get_webview_window("main").ok_or("no main window")?;
-    let ns_window_ptr = webview_window.ns_window().map_err(|e| e.to_string())?;
+    let Some(webview_window) = app.get_webview_window("main") else {
+        let _ = tx.send(Err("no main window".to_string()));
+        return;
+    };
+    let ns_window_ptr = match webview_window.ns_window() {
+        Ok(ptr) => ptr,
+        Err(e) => {
+            let _ = tx.send(Err(format!("failed to get the main NSWindow: {e}")));
+            return;
+        },
+    };
     // SAFETY: Tauri returns a valid `NSWindow` pointer for the main window on
     // macOS; `Retained::retain` balances its +1 with our eventual release.
-    let window: Retained<NSWindow> = unsafe { Retained::retain(ns_window_ptr.cast()) }
-        .ok_or("failed to retain the main NSWindow")?;
+    let retained_window = unsafe { Retained::retain(ns_window_ptr.cast()) };
+    let Some(window) = retained_window else {
+        let _ = tx.send(Err("failed to retain the main NSWindow".to_string()));
+        return;
+    };
 
     let provider = AuthAnchorProvider::new(window, mtm);
     let proto = ProtocolObject::from_ref(&*provider);
 
     let url_string = NSString::from_str(url);
-    let ns_url = NSURL::initWithString(NSURL::alloc(), &url_string)
-        .ok_or_else(|| format!("invalid authentication URL: {url}"))?;
+    let Some(ns_url) = NSURL::initWithString(NSURL::alloc(), &url_string) else {
+        let _ = tx.send(Err(format!("invalid authentication URL: {url}")));
+        return;
+    };
     let scheme = NSString::from_str(callback_scheme);
 
     // The slot is owned by the completion block. Filling it after creation
@@ -180,9 +202,9 @@ pub(crate) fn start_session<R: tauri::Runtime>(
         // No completion will fire — drop the bundle so the session and the
         // system's copy of the block deallocate instead of leaking.
         *bundle_slot.borrow_mut() = None;
+        tracing::warn!("[aswebauth] ASWebAuthenticationSession::start returned false");
         let _ = tx.send(Err("failed to start the authentication session".to_string()));
     }
-    Ok(())
 }
 
 fn as_ref<T>(ptr: *mut T) -> Option<&'static T> {

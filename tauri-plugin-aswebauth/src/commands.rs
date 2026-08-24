@@ -72,19 +72,13 @@ pub async fn start_auth<R: tauri::Runtime>(
     let (tx, rx) = tokio::sync::oneshot::channel::<Result<AuthResult, String>>();
 
     let app_for_session = app.clone();
-    let mut tx_for_sync_errors = Some(tx);
+    let mut tx_for_session = Some(tx);
     app.run_on_main_thread(move || {
-        let Some(tx) = tx_for_sync_errors.take() else {
-            return;
-        };
-        // Synchronous setup failures (no window, bad URL) must reach the
-        // frontend with their real cause — no completion handler will fire to
-        // deliver them instead.
-        if let Err(start_error) =
-            crate::macos::start_session(&app_for_session, &url, &callback_scheme, &tx)
-        {
-            tracing::warn!("[aswebauth] session failed to start: {start_error}");
-            let _ = tx.send(Err(start_error));
+        // `start_session` owns the sender and guarantees exactly one send:
+        // from the completion handler, or synchronously with the real setup
+        // failure cause when the session cannot even be created.
+        if let Some(tx) = tx_for_session.take() {
+            crate::macos::start_session(&app_for_session, &url, &callback_scheme, tx);
         }
     })
     .map_err(|e| format!("failed to dispatch onto the main thread: {e}"))?;
