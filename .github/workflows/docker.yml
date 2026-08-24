@@ -53,6 +53,7 @@ jobs:
                           ORIGA_LANDING_BASE_URL=https://${{ vars.ORIGA_BASE_URI }}
                           ORIGA_APP_BASE_URL=https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}
                           ORIGA_BUILD_DATE=${{ needs.version.outputs.build_date }}
+                          ORIGA_YANDEX_METRIKA_ID=${{ secrets.ORIGA_YANDEX_METRIKA_ID || '' }}
                     - image: ui
                       dockerfile: ./origa_ui/Dockerfile
                       build_args: |

@@ -1,10 +1,10 @@
 //! Build-time integrity checks for the generated `public/sitemap.xml`.
 //!
 //! `build.rs::generate_sitemap` renders `public/sitemap.xml.tmpl`,
-//! substituting `{{LASTMOD}}` with the build date. These tests read the
-//! generated file (produced at compile time, before tests run) and assert the
-//! sitemaps.org 0.9 contract holds:
-//!   - one `<lastmod>` per `<url>` (20 URLs: 5 pages × 4 locales),
+//! substituting `{{LASTMOD}}` with per-URL dates (see `build.rs`). These tests
+//! read the generated file (produced at compile time, before tests run) and
+//! assert the sitemaps.org 0.9 contract holds:
+//!   - one `<lastmod>` per `<url>` (90 URLs as of 2026-08),
 //!   - each `<lastmod>` is an ISO-8601 date,
 //!   - `<lastmod>` follows `<loc>` (the schema-required element order),
 //!   - no unresolved `{{...}}` placeholder leaks into the output.
@@ -53,27 +53,39 @@ fn is_iso_date(value: &str) -> bool {
 
 #[test]
 fn lastmod_appears_once_per_url() {
-    // Each <url> element carries exactly one <lastmod>. As of 2026-07-23 the
+    // Each <url> element carries exactly one <lastmod>. As of 2026-08-24 the
     // count is: 7 static page groups × 4 locales (28) + 4 blog index URLs +
-    // 7 articles × 4 locales (28) + docs (2 index + 8 articles × 2 locales = 18)
-    // = 78 <url> entries. The count assertion catches drift in either
-    // direction — a missing locale variant or a duplicate entry.
+    // 7 full articles × 4 locales (28) + 5 EN+RU articles × 2 locales (10)
+    // + docs (2 index + 9 article pairs × 2 locales = 20) = 90 <url> entries.
+    // The count assertion catches drift in either direction — a missing
+    // locale variant or a duplicate entry.
     let values = lastmod_values(&sitemap_contents());
-    assert_eq!(values.len(), 78, "expected one <lastmod> per <url>");
+    assert_eq!(values.len(), 90, "expected one <lastmod> per <url>");
 }
 
 #[test]
 fn every_url_block_has_full_hreflang_alternate_set() {
-    // Every URL carries the full hreflang set for its locale coverage:
-    // - Blog and static pages: 5 entries (en/ru/ko/vi + x-default) — all 4
-    //   locales are translated.
-    // - Docs pages: 3 entries (en/ru + x-default) — docs ship in EN and RU
-    //   only; KO/VI serve EN content with noindex and are not in the sitemap.
+    // Every URL carries the hreflang set for its locale coverage:
+    // - Blog and static pages with all 4 locales: 5 entries (en/ru/ko/vi +
+    //   x-default).
+    // - Docs pages and the EN+RU-only blog cluster (2026-08): 3 entries
+    //   (en/ru + x-default) — alternates must point only at translations
+    //   that exist (see `PARTIAL_COVERAGE_SLUGS` in tests/blog.rs).
+    const PARTIAL_COVERAGE_PATHS: &[&str] = &[
+        "/blog/learn-hiragana-katakana",
+        "/blog/jlpt-n5-preparation",
+        "/blog/japanese-textbooks-beginners",
+        "/blog/how-many-kanji-to-learn",
+        "/blog/learn-japanese-from-anime",
+    ];
     let xml = sitemap_contents();
     for block in xml.split("<url>").skip(1) {
         let url_block = block.split("</url>").next().unwrap_or(block);
         let alternate_count = url_block.matches("<xhtml:link rel=\"alternate\"").count();
-        let expected = if url_block.contains("/docs") { 3 } else { 5 };
+        let is_docs = url_block.contains("/docs");
+        let is_partial_blog =
+            !is_docs && PARTIAL_COVERAGE_PATHS.iter().any(|p| url_block.contains(p));
+        let expected = if is_docs || is_partial_blog { 3 } else { 5 };
         assert_eq!(
             alternate_count, expected,
             "expected {expected} hreflang alternates for this URL; got {alternate_count} in:\n{url_block}"
@@ -128,4 +140,70 @@ fn lastmod_follows_loc_in_every_url() {
             _ => panic!("<url> block missing <loc>/<lastmod>: {url_block}"),
         }
     }
+}
+
+/// Find the `<lastmod>` payload of the `<url>` block whose `<loc>` equals
+/// `url`. Panics when absent — callers pin real URLs from the template.
+fn lastmod_for_url(xml: &str, url: &str) -> String {
+    let needle = format!("<loc>{url}</loc>");
+    for block in xml.split("<url>").skip(1) {
+        let url_block = block.split("</url>").next().unwrap_or(block);
+        if url_block.contains(&needle) {
+            let start = url_block
+                .find("<lastmod>")
+                .unwrap_or_else(|| panic!("no <lastmod> in block for {url}"))
+                + "<lastmod>".len();
+            let end = url_block[start..]
+                .find("</lastmod>")
+                .unwrap_or_else(|| panic!("unterminated <lastmod> for {url}"));
+            return url_block[start..start + end].to_string();
+        }
+    }
+    panic!("URL {url} not found in sitemap");
+}
+
+#[test]
+fn article_urls_carry_frontmatter_lastmod() {
+    // The core freshness contract: article URLs must expose their own
+    // frontmatter dates, not the build date. Pins two known pairs so a
+    // regression in `build.rs::apply_per_url_lastmod` cannot pass silently.
+    // Update these expectations when the pinned articles are actually edited.
+    let xml = sitemap_contents();
+    assert_eq!(
+        lastmod_for_url(&xml, "https://origa.uwuwu.net/ru/blog/yaponskiy-s-nulya"),
+        "2026-07-21",
+        "RU yaponskiy-s-nulya must use its frontmatter lastmod"
+    );
+    assert_eq!(
+        lastmod_for_url(
+            &xml,
+            "https://origa.uwuwu.net/blog/anki-alternative-japanese"
+        ),
+        "2026-07-20",
+        "EN anki-alternative must use its frontmatter lastmod"
+    );
+    assert_eq!(
+        lastmod_for_url(&xml, "https://origa.uwuwu.net/ru/docs/fsrs"),
+        "2026-08-19",
+        "RU fsrs doc must use its frontmatter lastmod"
+    );
+    assert_eq!(
+        lastmod_for_url(&xml, "https://origa.uwuwu.net/blog/how-many-kanji-to-learn"),
+        "2026-08-23",
+        "new-cluster article must use its frontmatter lastmod"
+    );
+}
+
+#[test]
+fn lastmod_values_are_not_uniform_across_urls() {
+    // Regression guard for the original defect: every deploy used to stamp
+    // ALL urls with the same fresh date, which teaches crawlers to distrust
+    // lastmod entirely. With frontmatter-driven dates the set must contain
+    // more than one distinct value.
+    let values = lastmod_values(&sitemap_contents());
+    let unique: std::collections::HashSet<&String> = values.iter().collect();
+    assert!(
+        unique.len() > 1,
+        "sitemap lastmod values must vary across URLs; got all-identical {unique:?}"
+    );
 }

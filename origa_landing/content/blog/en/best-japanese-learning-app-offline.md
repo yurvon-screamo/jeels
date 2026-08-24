@@ -115,7 +115,7 @@ There is no feature in Origa's normal flow that requires an internet connection.
 
 ## How to choose
 
-If your offline need is "review my existing Anki deck on the subway" — AnkiMobile (iOS) or AnkiDroid (Android) is the cheapest, most proven answer.
+If your offline need is "review my existing Anki deck on the subway" — AnkiMobile (iOS) or AnkiDroid (Android) is the cheapest, most proven answer ([when to stay with Anki](/blog/anki-alternative-japanese)).
 
 If your offline need is "I'm travelling for a month with bad connectivity and I want to keep adding vocabulary from manga and textbooks I encounter" — you need an app where OCR and content creation work offline, not just review. Origa is built for that exact use case.
 
@@ -123,17 +123,22 @@ If you don't actually need offline — if you study at home on wifi and don't ca
 
 ## FAQ
 
-**Does Origa work fully offline?**
+### Does Origa work fully offline?
+
 Yes. OCR, STT, SRS, dictionary, and furigana all run on-device. You can study end-to-end without an internet connection after the initial install.
 
-**Why would I want offline OCR?**
+### Why would I want offline OCR?
+
 Two reasons: privacy (your photos don't leave your device) and travel (you can scan manga on a plane). If neither matters to you, cloud OCR is sometimes more accurate.
 
-**What's the trade-off for offline?**
+### What's the trade-off for offline?
+
 App size (hundreds of MB for AI models), battery use during intensive OCR, and slightly lower accuracy than the best cloud services on stylized text.
 
-**Can I sync Origa across devices?**
+### Can I sync Origa across devices?
+
 Yes, optionally. Sync requires internet; everything else works without.
 
-**Is Anki better for offline than Origa?**
+### Is Anki better for offline than Origa?
+
 Anki is better if your offline need is pure review of an existing deck — it's lighter and more proven. Origa is better if you need to create new cards offline from photos, audio, or text. They're optimised for different parts of the workflow.

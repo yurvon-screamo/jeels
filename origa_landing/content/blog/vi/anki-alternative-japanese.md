@@ -105,21 +105,26 @@ Dùng Anki nếu bạn coi trọng sự kiểm soát, học nhiều hơn một m
 
 Cân nhắc Origa nếu ma sát của bạn đặc biệt là tạo thẻ tiếng Nhật, bạn muốn furigana và liên kết hán tự được xử lý giúp, bạn học qua ngôn ngữ không phải tiếng Anh, hoặc bạn mệt việc may ngữ pháp vào công cụ từ vựng. Nhập bộ bài Anki trước — nếu quy trình phù hợp, giữ nó; nếu không, bạn quay lại nơi bạn đã bắt đầu. ([Tải Origa](/vi/download).)
 
-Phiên bản trung thực của "thay thế Anki tốt nhất" là "cái gỡ bỏ *ma sát của bạn*". Tìm ra bước nào trong quy trình hiện tại ngốn nhiều thời gian nhất, và chọn công cụ gỡ bỏ bước đó mà không làm giảm chất lượng lập lịch.
+Phiên bản trung thực của "thay thế Anki tốt nhất" là "cái gỡ bỏ *ma sát của bạn*". Tìm ra bước nào trong quy trình hiện tại ngốn nhiều thời gian nhất, và chọn công cụ gỡ bỏ bước đó mà không làm giảm chất lượng lập lịch. Tiêu chí chọn theo từng nhóm nhiệm vụ được tổng hợp trong [tổng quan ứng dụng học tiếng Nhật](/vi/blog/best-japanese-learning-app).
 
 ## FAQ
 
-**Lặp lại ngắt quãng của Origa có giống Anki không?**
+### Lặp lại ngắt quãng của Origa có giống Anki không?
+
 Cả hai dùng FSRS. Origa không phát minh ra nó và không tuyên bố điều đó. Điểm khác biệt là những gì bao quanh bộ lập lịch — tạo thẻ, furigana, theo dõi hán tự, ngữ pháp — chứ không phải bản thân thuật toán.
 
-**Tôi có thể giữ bộ bài Anki không?**
+### Tôi có thể giữ bộ bài Anki không?
+
 Có. Origa nhập các định dạng `.anki2`, `.anki21`, và `.anki21b`, vì vậy bộ bài và lịch sử ôn tập được chuyển.
 
-**Origa có miễn phí không?**
+### Origa có miễn phí không?
+
 Có, hiện tại miễn phí sử dụng trên tất cả các nền tảng.
 
-**Có hoạt động ngoại tuyến không?**
+### Có hoạt động ngoại tuyến không?
+
 Có. Các mô hình OCR và nhận dạng giọng nói chạy cục bộ, vì vậy tạo thẻ và ôn tập không cần kết nối internet.
 
-**Nếu tôi chỉ học trên iPhone thì sao?**
+### Nếu tôi chỉ học trên iPhone thì sao?
+
 Chưa. Origa chạy trên Windows, Linux, macOS, Android và web. iOS đã lên kế hoạch nhưng chưa có sẵn hôm nay — nếu iPhone là thiết bị duy nhất của bạn, hãy đợi bản phát hành iOS hoặc ở lại Anki.

@@ -187,6 +187,66 @@ const ARTICLES: &[(Locale, &str, &str)] = &[
         "yaponskiy-s-nulya",
         include_str!("../../content/blog/vi/yaponskiy-s-nulya.md"),
     ),
+    // Articles 8–12: SEO cluster expansion (2026-08) — EN + RU only. KO/VI
+    // translations are not published yet, so `locales_for_slug` returns two
+    // locales and hreflang alternates stay at {en, ru, x-default}. When a
+    // KO/VI translation ships, append its tuple here and widen the sitemap
+    // template's hreflang set for that slug.
+    // Article 8: "Learn Hiragana and Katakana".
+    (
+        Locale::En,
+        "learn-hiragana-katakana",
+        include_str!("../../content/blog/en/learn-hiragana-katakana.md"),
+    ),
+    (
+        Locale::Ru,
+        "learn-hiragana-katakana",
+        include_str!("../../content/blog/ru/learn-hiragana-katakana.md"),
+    ),
+    // Article 9: "JLPT N5 Preparation".
+    (
+        Locale::En,
+        "jlpt-n5-preparation",
+        include_str!("../../content/blog/en/jlpt-n5-preparation.md"),
+    ),
+    (
+        Locale::Ru,
+        "jlpt-n5-preparation",
+        include_str!("../../content/blog/ru/jlpt-n5-preparation.md"),
+    ),
+    // Article 10: "Japanese Textbooks for Beginners".
+    (
+        Locale::En,
+        "japanese-textbooks-beginners",
+        include_str!("../../content/blog/en/japanese-textbooks-beginners.md"),
+    ),
+    (
+        Locale::Ru,
+        "japanese-textbooks-beginners",
+        include_str!("../../content/blog/ru/japanese-textbooks-beginners.md"),
+    ),
+    // Article 11: "How Many Kanji Do You Need".
+    (
+        Locale::En,
+        "how-many-kanji-to-learn",
+        include_str!("../../content/blog/en/how-many-kanji-to-learn.md"),
+    ),
+    (
+        Locale::Ru,
+        "how-many-kanji-to-learn",
+        include_str!("../../content/blog/ru/how-many-kanji-to-learn.md"),
+    ),
+    // Article 12: "Learning Japanese Through Anime".
+    (
+        Locale::En,
+        "learn-japanese-from-anime",
+        include_str!("../../content/blog/en/learn-japanese-from-anime.md"),
+    ),
+    (
+        Locale::Ru,
+        "learn-japanese-from-anime",
+        include_str!("../../content/blog/ru/learn-japanese-from-anime.md"),
+    ),
 ];
 
 static REGISTRY: OnceLock<Vec<BlogPost>> = OnceLock::new();

@@ -8,6 +8,7 @@
 //! article (`status: draft` in frontmatter) is a programmer error and panics
 //! on first access — drafts must not ship.
 
+pub mod faq;
 pub mod frontmatter;
 pub mod registry;
 pub mod render;
