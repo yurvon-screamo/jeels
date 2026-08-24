@@ -99,13 +99,13 @@ cargo fmt --check && cargo fmt
 
 Tigris object storage (S3-compatible, endpoint `t3.storageapi.dev`) под Railway — bucket `adaptable-foodbox-ucep7wx`, раздача через Railway s3-proxy + edge caching: URL `https://s3.origa.uwuwu.net` вшивается через `build.rs`. Трейт: `origa/src/traits/cdn_provider.rs`, реализация: `origa_ui/src/repository/cdn_provider.rs`. Миграция на user-owned Tigris (ADR-037) была откачена в #372 (DPI-throttle на Cloudflare-роутинге для РФ); orphaned-ресурсы той миграции (user-Tigris bucket `origa-cdn` ~4 GB, R2, Worker) ждут cleanup.
 
-Профиль `~/.aws/credentials [origa]` — для `deploy_cdn.py` / `refresh_cache_control.py` / `upload_release_artifacts.py`. Контракт кредов (ADR-041): env `AWS_ACCESS_KEY_ID` при наличии приоритетнее профиля — CI передаёт scoped-ключи через env.
+Профиль `~/.aws/credentials [origa]` — для `deploy_cdn.py` / `refresh_cache_control.py`. Контракт кредов: env `AWS_ACCESS_KEY_ID` при наличии приоритетнее профиля — CI передаёт scoped-ключи через env.
 
 Все объекты — статические, но кэшируются по-разному в зависимости от частоты изменений. Политика в `scripts/_cdn_cache.py`, применяется в `deploy_cdn.py`.
 
 - **Truly-static** (`public, max-age=31536000, immutable`): ML-модели (`ndlocr/`, `whisper/`), kanji SVG/frames (`kanji_animations/`, `kanji_frames/`), audio фраз (`phrases/audio/`), системный словарь lindera (`dictionaries/`)
-- **Release-updated** (`public, max-age=300, must-revalidate`): контент-JSON — `grammar/`, `dictionary/`, `phrases/phrase_index.json`, `phrases/data/`, `pitch/`, `well_known_set/`, а также версионированные инсталлеры `releases/<X.Y.Z>/` (перезаписываемы при re-run тега; без префикса `v` — MS Store парсит версию из URL)
-- **Always-fresh** (`no-cache`): `manifest.json`, `releases/latest/` (человекочитаемый алиас последнего stable; в MS Store сабмитится версионируемый `releases/<X.Y.Z>/`, ADR-041)
+- **Release-updated** (`public, max-age=300, must-revalidate`): контент-JSON — `grammar/`, `dictionary/`, `phrases/phrase_index.json`, `phrases/data/`, `pitch/`, `well_known_set/`
+- **Always-fresh** (`no-cache`): `manifest.json`
 
 immutable уместен только для truly-static файлов. `grammar`/`phrases`/`dictionary` обновляются каждый релиз (W-11, P-3, L-4, S-3) — для них immutable означал CDN edge-cache poisoning (PR #182): S3 обновлялся, а edge держал годовой кэш и отдавал устаревшую версию, пока кэш не сбросили вручную.
 
@@ -116,14 +116,18 @@ python scripts/deploy_cdn.py --dry-run  # показать что будет з�
 
 Манифест (`manifest.json`) содержит SHA256 хеши версионных файлов и позволяет клиенту обнаруживать обновления. Деплоится с `Cache-Control: no-cache`.
 
-### Релизные инсталлеры (`releases/`, ADR-041)
+### Microsoft Store (MSIX, ADR-042)
 
-Microsoft Store требует прямую версионируемую ссылку (HTTP 200 + версия в пути без префикса `v`, напр. `.../releases/0.6.4/setup.exe`) — GitHub Releases дают 302. Stable-релизы зеркалируют NSIS-алиас `Origa_x64-setup.exe` (ADR-025) в bucket job'ом `upload-release-cdn` (`tauri.yml`): `releases/<version>/` (архив — именно его сабмитят в стор) + `releases/latest/` (алиас для людей). Заливка верифицируется: authenticated HEAD (Cache-Control, размер, чексумма при simple-формате) + полный публичный GET с sha256. RC не заливаются.
+Store-дистрибуция — **MSIX-пакет**: Store сам подписывает и хостит его, CA-сертификат не нужен (linked-EXE путь ADR-041 с CDN-зеркалом `releases/` удалён — Store отклонял неподписанный EXE по 10.2.9, а подписка недоступна). Сборка: `tauri/scripts/build-msix.ps1` (единственный источник: store-build `ORIGA_APP_STORE=1` + стейджинг + MakeAppx/signtool с эфемерной самоподписью). CI: job `build-windows-store` в отдельном reusable `_build-windows-store.yml` — stable-теги + `workflow_dispatch` input `force_store_msix` (smoke → версия `0.0.0.<run>`, НЕ сабмитить). Артефакт `.msix` + `.pfx` + пароль живёт 7 дней в Actions.
 
 ```powershell
-# вручную (bootstrap текущего stable; exe скачать из GitHub Release):
-cd scripts; uv run python upload_release_artifacts.py --version 1.2.3 --artifact-dir <dir>
+# локальная smoke-сборка и установка:
+cd tauri; ./scripts/build-msix.ps1 -Version 0.7.0
+# импортировать tauri/target/msix/Origa.msix.pfx в Cert:\CurrentUser\Trusted People (пароль в .password.txt)
+Add-AppxPackage -Path tauri/target/msix/Origa_0.7.0_x64.msix
 ```
+
+Updater в store-сборке скомпилирован out (`not(app_store)` гейт, политика 10.2.5); прямые загрузки NSIS обновляются через Tauri updater как раньше. Identity-плейсхолдеры `__PARTNER_CENTER_*__` в манифесте заполняются после создания «MSIX or PWA app» продукта в Partner Center. Пересабмит = бамп версии. Runbook: ADR-042.
 
 Обновить Cache-Control на существующих объектах (one-time, после смены политики — новые upload'ы уже корректны, но старые объекты хранят прежний заголовок):
 
