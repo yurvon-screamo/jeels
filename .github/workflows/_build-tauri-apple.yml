@@ -438,7 +438,6 @@ jobs:
                   codesign -d --entitlements - "$APP_PATH" 2>&1 | tee /tmp/entitlements.txt
                   for KEY in com.apple.security.app-sandbox \
                              com.apple.security.network.client \
-                             com.apple.security.device.camera \
                              com.apple.security.device.microphone \
                              com.apple.security.files.user-selected.read-write; do
                     if ! grep -q "$KEY" /tmp/entitlements.txt; then
@@ -446,7 +445,11 @@ jobs:
                       exit 1
                     fi
                   done
-                  echo "✅ All 5 entitlements present"
+                  if grep -q "com.apple.security.device.camera" /tmp/entitlements.txt; then
+                    echo "::error::Camera entitlement must not be present (App Review 2.4.5(i): unused entitlement)"
+                    exit 1
+                  fi
+                  echo "✅ All 4 entitlements present (no camera)"
                   rm -f /tmp/entitlements.txt
 
             - name: Embed provisioning profile & re-sign
