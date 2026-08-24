@@ -102,23 +102,28 @@ The design choice is explicit: use AI where it removes friction from the capture
 
 ## How to decide
 
-If your study time is 30 minutes a day and you have to choose between an AI tutor and an SRS, choose the SRS. Spaced repetition is the one component of language learning where the evidence is unambiguous. The AI tutor is the more glamorous purchase, but it's the SRS that delivers the year-over-year progress.
+If your study time is 30 minutes a day and you have to choose between an AI tutor and an SRS, choose the SRS. Spaced repetition is the one component of language learning where the evidence is unambiguous; speaking practice makes sense once you have roughly an N4 base ([the zero-to-start plan](/blog/yaponskiy-s-nulya)). The AI tutor is the more glamorous purchase, but it's the SRS that delivers the year-over-year progress.
 
 If you can run both — an SRS for retention, an AI tutor for on-demand explanation and conversation practice — that's the actual best-of-both-worlds setup most intermediate-and-up learners converge on. Origa covers the SRS half and uses AI for input, not for conversation. ChatGPT or Claude covers the conversation half. The combination is cheaper and more effective than a single AI-tutor subscription that promises everything and delivers conversation plus weak retention. If the SRS half is what you need, [download Origa](/download).
 
 ## FAQ
 
-**Can I learn Japanese just with ChatGPT?**
+### Can I learn Japanese just with ChatGPT?
+
 You can practice conversation and get grammar explanations. You will not retain what you learn without a separate SRS. ChatGPT alone is a tutor without a curriculum or a memory — useful, incomplete.
 
-**Are AI tutor apps better than ChatGPT?**
+### Are AI tutor apps better than ChatGPT?
+
 For guided scenarios and structured lessons, yes — they wrap the AI in a learning flow. For raw flexibility, no. The best choice depends on whether you want structure (use an AI tutor app) or flexibility (use ChatGPT directly).
 
-**Does Origa have an AI chatbot?**
+### Does Origa have an AI chatbot?
+
 No. Origa uses AI for OCR, speech-to-text, and vocabulary extraction — the input side of learning. For conversational AI, pair Origa with ChatGPT, Claude, or a dedicated AI tutor app.
 
-**Is local AI as good as cloud AI?**
+### Is local AI as good as cloud AI?
+
 For OCR and STT on typical Japanese input: close, sometimes equal. For conversational AI: no, cloud models are substantially better. The trade-off is privacy and offline use vs. raw capability.
 
-**What's the cheapest setup that works?**
+### What's the cheapest setup that works?
+
 ChatGPT free tier for grammar questions + Anki (free desktop, free AnkiDroid) for SRS. That's $0/month and covers most of what paid AI tutor apps offer, if you're willing to configure Anki.

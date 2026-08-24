@@ -3,7 +3,7 @@ use leptos_router::components::A;
 
 use crate::components::cta::CtaSection;
 use crate::components::seo::{
-    PageMeta, SchemaOrg, organization_schema, software_application_schema,
+    PageMeta, SchemaOrg, faq_schema, organization_schema, software_application_schema,
 };
 use crate::content::Locale;
 
@@ -18,10 +18,22 @@ pub fn HomePage() -> impl IntoView {
     let features_href = format!("{prefix}/features");
     let download_href = format!("{prefix}/download");
 
+    // Mini-FAQ: the "free?" pair is homepage-specific; the other two reuse
+    // the features-page strings so the same answer never diverges between
+    // pages. Visible Q&A mirrors the FAQPage JSON-LD 1:1 (same contract as
+    // `features.rs`).
+    let faq_pairs = [
+        (c.home_faq_free_question, c.home_faq_free_answer),
+        (c.faq_q3, c.faq_a3),
+        (c.faq_q5, c.faq_a5),
+    ];
+    let faq_json = faq_schema(locale, &faq_pairs);
+
     view! {
         <PageMeta locale title=c.home_meta_title description=c.home_meta_description/>
         <SchemaOrg json=software_application_schema(locale)/>
         <SchemaOrg json=organization_schema()/>
+        <SchemaOrg json=faq_json/>
 
         // Section 1: Hero (Split layout)
         <section class="home-hero">
@@ -44,6 +56,13 @@ pub fn HomePage() -> impl IntoView {
                     style=format!("background-image: url(/images/{lang}.hero.png)")
                 ></div>
             </div>
+        </section>
+
+        <hr class="divider-full" />
+
+        // Section 1b: stat strip — concrete, scannable facts under the hero
+        <section class="home-stats">
+            <p class="home-stats__line">{c.home_stats_line}</p>
         </section>
 
         <hr class="divider-full" />
@@ -123,7 +142,26 @@ pub fn HomePage() -> impl IntoView {
 
         <hr class="divider-full" />
 
-        // Section 4: Final CTA (dark olive) with platforms
+        // Section 4: Mini-FAQ (visible Q&A mirrors the FAQPage JSON-LD 1:1)
+        <section class="feat-faq">
+            <div class="feat-faq__inner">
+                <h2>{c.features_faq_h2}</h2>
+                <div class="feat-faq__list">
+                    {faq_pairs.map(|(question, answer)| {
+                        view! {
+                            <div class="feat-faq__item">
+                                <p class="feat-faq__question">{question}</p>
+                                <p class="feat-faq__answer">{answer}</p>
+                            </div>
+                        }
+                    }).collect_view()}
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider-full" />
+
+        // Section 5: Final CTA (dark olive) with platforms
         <CtaSection title=c.home_cta_title button_text=c.home_cta_primary download_href=download_href />
     }
 }

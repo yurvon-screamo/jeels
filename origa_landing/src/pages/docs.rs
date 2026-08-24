@@ -216,11 +216,13 @@ fn DocsLayout(
                 <article class="docs-article">
                     <header class="docs-article__header">
                         <p class="docs-article__locale-marker">{locale_marker}</p>
-                        <h1 class="docs-article__title">{page.frontmatter.title.clone()}</h1>
                         <p class="docs-article__updated">
                             {c.docs_updated_label} " " {page.frontmatter.lastmod.clone()}
                         </p>
                     </header>
+                    // Single `<h1>` comes from the markdown body (same
+                    // contract as the blog article layout — see
+                    // `ArticleBody` in `pages/blog.rs`).
                     <div class="docs-article__body" inner_html=page.html.as_str()></div>
                 </article>
             </main>

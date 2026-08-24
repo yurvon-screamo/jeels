@@ -52,7 +52,7 @@ Có ba trường hợp sử dụng thực, và chúng kéo theo các hướng kh
 
 **Điểm mạnh:** chỉnh cho vấn đề cụ thể của manga. Mô hình mã nguồn mở `manga-ocr` xử lý văn bản dọc, bong bóng thoại nhiều dòng, và phông cách điệu tốt hơn các engine đa năng. Các trình bao desktop (Poricom, YomiNinja) và tiện ích trình duyệt (Manga OCR cho Chrome, Namida-OCR) tích hợp nhận dạng vào luồng đọc — chọn khung hình, nhận văn bản.
 
-**Điểm yếu:** hẹp. Chúng hoạt động trên manga, không trên ảnh chụp sách giáo khoa hoặc văn bản đời thực. Và cùng khoảng trống ghi nhớ áp dụng: OCR nạp tra cứu, không nạp SRS, trừ khi bạn đã dẫn nó vào Anki qua Yomitan + AnkiConnect. Những người dùng mạnh thường chạy stack ba ứng dụng đó.
+**Điểm yếu:** hẹp. Chúng hoạt động trên manga, không trên ảnh chụp sách giáo khoa hoặc văn bản đời thực. Và cùng khoảng trống ghi nhớ áp dụng: OCR nạp tra cứu, không nạp SRS, trừ khi bạn đã dẫn nó vào Anki qua Yomitan + AnkiConnect. Những người dùng mạnh thường chạy stack ba ứng dụng đó. Cách pipeline này khớp vào việc học thật sự — xem [hướng dẫn học tiếng Nhật qua manga](/vi/blog/learn-japanese-from-manga).
 
 **Trường hợp:** hỗ trợ đọc manga cho người học sẵn sàng cấu hình đường ống đa công cụ. Trường hợp 2.
 
@@ -98,17 +98,22 @@ Gần như chắc chắn bạn đã có một ứng dụng OCR đa năng trên �
 
 ## Câu hỏi thường gặp
 
-**OCR tiếng Nhật có đủ chính xác để dựa vào không?**
+### OCR tiếng Nhật có đủ chính xác để dựa vào không?
+
 Trên văn bản in ngang sạch, OCR hiện đại (Apple Live Text, Google Lens, NDLOCR) đủ tin cậy cho tra cứu hàng ngày. Trên văn bản manga dọc và phông cách điệu, dự kiến nhiều lỗi hơn và dự toán sửa tay — số liệu chính xác do nhà cung cấp công bố hiếm và luôn gắn với một bộ thử nghiệm cụ thể, nên đừng tin các phần trăm tròn bạn đọc trong văn bản tiếp thị. Văn bản viết tay hoặc trang trí vẫn không đáng tin cậy trên bảng tổng thể.
 
-**OCR có hoạt động ngoại tuyến không?**
+### OCR có hoạt động ngoại tuyến không?
+
 Tùy ứng dụng. OCR dựa trên đám mây (đa số ứng dụng dịch) cần internet. OCR trên thiết bị (NDLOCR-Lite của Origa, Apple Live Text) hoạt động ngoại tuyến. Nếu bạn học trên tàu hoặc máy bay, trên thiết bị quan trọng.
 
-**Tôi có thể OCR manga vào thẻ không?**
+### Tôi có thể OCR manga vào thẻ không?
+
 Có, nhưng bạn cần một đường ống kết nối OCR với SRS. Origa làm việc này đầu cuối. Thay thế là Yomitan → Anki, linh hoạt hơn nhưng cần thiết lập.
 
-**Tại sao không chỉ dùng Google Lens?**
+### Tại sao không chỉ dùng Google Lens?
+
 Lens xuất sắc cho dịch một lần. Nó không phải công cụ học — kết quả OCR là văn bản thuần không có đường đến lặp lại ngắt quãng. Nếu bạn muốn nhớ những gì bạn quét, bạn cần một danh mục ứng dụng khác.
 
-**OCR của Origa có gửi ảnh của tôi lên máy chủ không?**
+### OCR của Origa có gửi ảnh của tôi lên máy chủ không?
+
 Không. NDLOCR-Lite chạy trên thiết bị. Quét không bao giờ rời điện thoại hoặc máy tính của bạn.
