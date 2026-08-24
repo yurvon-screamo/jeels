@@ -1,14 +1,14 @@
 use super::acquaintance_state::{AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage};
 use super::hand_progress_strip::HandProgressStrip;
 use super::kanji_card_details::{KanjiCardDetails, RadicalDisplay};
+use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
-    Button, ButtonVariant, FuriganaText, MarkdownText, MarkdownVariant, ReadingItem, Tag, Text,
-    TextSize, TypographyVariant,
+    Button, ButtonVariant, FuriganaText, MarkdownText, MarkdownVariant, ReadingItem, Tag,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use origa::domain::NativeLanguage;
+use origa::domain::{AcquaintanceSubphase, NativeLanguage};
 use origa::use_cases::MarkCardAsKnownUseCase;
 use std::collections::HashSet;
 use ulid::Ulid;
@@ -31,12 +31,28 @@ pub fn AcquaintanceView() -> impl IntoView {
                 .phase_presentation()
                 .inner()
                 .to_string(),
-            AcquaintanceStage::Training => i18n
-                .get_keys()
-                .acquaintance()
-                .phase_training()
-                .inner()
-                .to_string(),
+            AcquaintanceStage::Training => {
+                let base = i18n
+                    .get_keys()
+                    .acquaintance()
+                    .phase_training()
+                    .inner()
+                    .to_string();
+                match ctx
+                    .state
+                    .with(|state| state.hand.as_ref().and_then(|h| h.subphase()))
+                {
+                    Some(AcquaintanceSubphase::Forward) => format!(
+                        "{base} · {}",
+                        i18n.get_keys().acquaintance().dir_forward().inner()
+                    ),
+                    Some(AcquaintanceSubphase::Reverse) => format!(
+                        "{base} · {}",
+                        i18n.get_keys().acquaintance().dir_reverse().inner()
+                    ),
+                    None => base,
+                }
+            },
             AcquaintanceStage::Summary | AcquaintanceStage::Inactive => String::new(),
         }
     });
@@ -46,8 +62,25 @@ pub fn AcquaintanceView() -> impl IntoView {
         ctx.state
             .with(|state| state.hand.as_ref().map(|h| h.len()).unwrap_or(0))
     });
-    // S4: в показе прогресс нулевой; S5 подключит счётчики подфаз руки.
-    let progress = Signal::derive(move || vec![0u8; total.get()]);
+    // Прогресс полосы: видимый счётчик каждой карты в текущей подфазе
+    // (в показе все нули, в тренировке — из доменной машины).
+    let progress = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        ctx.state.with(|state| {
+            let Some(hand) = state.hand.as_ref() else {
+                return Vec::new();
+            };
+            let subphase = hand.subphase();
+            hand.presentation_order()
+                .iter()
+                .map(|id| {
+                    hand.entry(*id)
+                        .map(|e| e.progress_in(subphase))
+                        .unwrap_or(0)
+                })
+                .collect()
+        })
+    });
 
     view! {
         <div data-testid="acquaintance-view" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
@@ -68,15 +101,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                 let ctx = ctx_stored.get_value();
                 ctx.state.get().stage == AcquaintanceStage::Training
             }>
-                <div data-testid="acquaintance-training-placeholder" class="text-center py-8">
-                    <Text
-                        size=TextSize::Default
-                        variant=TypographyVariant::Muted
-                        test_id="acquaintance-training-placeholder-text"
-                    >
-                        {t!(i18n, acquaintance.training_placeholder)}
-                    </Text>
-                </div>
+                <TrainingBody ctx=ctx_stored.get_value() />
             </Show>
             <Show when=move || {
                 let ctx = ctx_stored.get_value();
