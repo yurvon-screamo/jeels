@@ -8,8 +8,6 @@
 	<string>Origa recognizes Japanese speech to transcribe audio input.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Origa records audio to transcribe Japanese speech.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Origa uses the camera to capture Japanese text for OCR.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

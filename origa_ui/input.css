@@ -2336,6 +2336,22 @@ rt {
     text-wrap: balance;
 }
 
+/* Consent screen content for the first-run resource download (Guideline
+   4.2.3(ii)): centered column with title, body copy and the Download button. */
+.resource-download-consent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 32rem;
+    padding: 0 1.5rem;
+}
+
+/* Progress bar inside the loading overlay — constrained width so the thin
+   track stays legible against the full-screen overlay. */
+.loading-overlay-progress {
+    width: min(320px, 80vw);
+}
+
 .btn-loading {
     position: relative;
     pointer-events: none;

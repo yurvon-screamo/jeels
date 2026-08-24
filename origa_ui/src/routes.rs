@@ -3,10 +3,13 @@ use crate::loaders::{
     dictionary::load_dictionary,
     furigana_dict_loader::load_furigana_dict,
     jlpt_content_loader::load_jlpt_content,
-    loading_message::{LoadingFlags, format_loading_message, loading_message_state},
+    loading_message::{
+        LOADING_RESOURCES_TOTAL, LoadingFlags, format_loading_message, loading_message_state,
+    },
     phrase_loader::load_phrases,
     pitch_audio_loader::load_pitch_audio,
 };
+use crate::pages::shared::{ResourceDownloadConsent, is_resource_download_consented};
 use crate::pages::{
     Grammar, GrammarDetail, Home, Kanji, KanjiDetail, Lesson, Login, Onboarding, Phrases, Profile,
     Sets, Words,
@@ -208,9 +211,27 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
     let is_all_data_loaded = auth_store.is_all_data_loaded();
     let is_checking = auth_store.is_checking_session;
 
+    // Guideline 4.2.3(ii) consent gate: the mandatory ~230 MB resource fetch
+    // only starts after the user approves it on the consent screen. Both
+    // trigger points are gated — this effect (auto-start) and the view branch
+    // below (consent screen vs loading overlay).
+    let download_consented = RwSignal::new(is_resource_download_consented());
+
+    let repository =
+        use_context::<HybridUserRepository>().expect("repository context not provided");
+    let connectivity = use_context::<ConnectivityStore>().expect("ConnectivityStore not provided");
+    let offline_bundle =
+        use_context::<OfflineBundleStore>().expect("OfflineBundleStore not provided");
+
     Effect::new({
         let auth_store = auth_store.clone();
+        let repository = repository.clone();
+        let connectivity = connectivity.clone();
+        let offline_bundle = offline_bundle.clone();
         move |_| {
+            if !download_consented.get() {
+                return;
+            }
             if !is_checking.get()
                 && is_authenticated.get()
                 && !is_all_data_loaded.get()
@@ -219,9 +240,9 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
                 auth_store.is_data_loading_started.set(true);
                 start_dictionary_loading(
                     auth_store.clone(),
-                    use_context::<HybridUserRepository>().expect("repository context not provided"),
-                    use_context::<ConnectivityStore>().expect("ConnectivityStore not provided"),
-                    use_context::<OfflineBundleStore>().expect("OfflineBundleStore not provided"),
+                    repository.clone(),
+                    connectivity.clone(),
+                    offline_bundle.clone(),
                 );
             }
         }
@@ -241,7 +262,32 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
                 <LoadingOverlay message=loading_msg />
             }
             .into_any()
-        } else if is_authenticated.get() && !is_all_data_loaded.get() {
+        } else if is_authenticated.get() && !is_all_data_loaded.get() && !download_consented.get() {
+            let auth_store_for_start = auth_store.clone();
+            let repository_for_start = repository.clone();
+            let connectivity_for_start = connectivity.clone();
+            let offline_bundle_for_start = offline_bundle.clone();
+            view! {
+                <ResourceDownloadConsent
+                    on_start=move |_| {
+                        // The consent screen persists the approval (its click
+                        // handler) and hands off to the standard loading
+                        // overlay. `is_data_loading_started` is set first so
+                        // the auto-start effect (reacting to the consent flip)
+                        // does not launch a second fetch.
+                        auth_store_for_start.is_data_loading_started.set(true);
+                        download_consented.set(true);
+                        start_dictionary_loading(
+                            auth_store_for_start.clone(),
+                            repository_for_start.clone(),
+                            connectivity_for_start.clone(),
+                            offline_bundle_for_start.clone(),
+                        );
+                    }
+                />
+            }
+            .into_any()
+        } else if is_authenticated.get() && !is_all_data_loaded.get() && download_consented.get() {
             let store = auth_store.clone();
             let loading_msg: Signal<String> = Signal::derive(move || {
                 let i18n = crate::i18n::use_i18n();
@@ -271,8 +317,26 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
                     .to_string();
                 format_loading_message(state, &fetching_template, &finalizing_template)
             });
+            // Progress bar mirrors the "X of Y" message (Guideline 4.2.3(ii)).
+            let progress: Signal<Option<(u32, u32)>> = Signal::derive(move || {
+                let completed = [
+                    store.is_vocabulary_loaded.get(),
+                    store.is_kanji_loaded.get(),
+                    store.is_grammar_loaded.get(),
+                    store.is_radicals_loaded.get(),
+                    store.is_phrases_loaded.get(),
+                    store.is_pitch_audio_loaded.get(),
+                    store.is_dictionary_loaded.get(),
+                    store.is_furigana_loaded.get(),
+                    store.is_jlpt_content_loaded.get(),
+                ]
+                .into_iter()
+                .filter(|loaded| *loaded)
+                .count() as u32;
+                Some((completed, LOADING_RESOURCES_TOTAL as u32))
+            });
             view! {
-                <LoadingOverlay message=loading_msg />
+                <LoadingOverlay message=loading_msg progress />
             }
             .into_any()
         } else if is_authenticated.get() {

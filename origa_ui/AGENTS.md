@@ -114,26 +114,24 @@ Routes defined in `routes.rs`: `/` (home), `/login`, `/onboarding`, `/profile`,
 well-known set metadata, and env vars (`ORIGA_CDN_BASE_URL` required, plus optional
 `ORIGA_CDN_REGION`, `ORIGA_VERSION`, `ORIGA_COMMIT`, `ORIGA_BUILD_DATE`, `ORIGA_PUBLIC_BASE_URL`).
 
-### `recursion_limit` landmine (bin crate)
+### `recursion_limit` (bin crate) — RESOLVED, keep the guardrails
 
-`lib.rs` has `#![recursion_limit = "512"]` but `main.rs` (the `origa_ui_bin`
-crate) does NOT — it inherits the default 128. The bin mounts the entire `<App/>`
-view tree, and tachys encodes every element's attributes/classes as deeply
-nested generic type tuples, so the bin is near the 128 query-depth ceiling. Adding
-**new attributes** (`class`, `data-testid`, a second class) to a deep component
-tips it over → `error: queries overflow the depth limit!` during
-layout/monomorphization (platform-independent; fails `cargo test --workspace`).
-Raising the bin's limit to 512 lets it compile but produces mass linker errors
-from over-monomorphization — so raising the limit is NOT a fix.
+Both `lib.rs` and `main.rs` now carry `#![recursion_limit = "512"]` (the bin
+used to inherit 128 and overflow with "queries overflow the depth limit!" —
+raising the limit alone used to cause mass linker errors from
+over-monomorphization, but that escape hatch is gone: dev-profile debuginfo is
+capped in the root Cargo.toml `[profile.dev]`, so oversized artifacts no longer
+kill link.exe).
 
-**Guidance:** prefer changing an existing element's class **string** (type-neutral:
-`Class<&str>` stays `Class<&str>`) over adding new attributes. The structural fix
-is to split deep views into sub-components (delegating rendering to the lib crate,
-which has the higher limit) or to add the attribute to a shallower element. A
-component **prop** (e.g. `Card`'s `test_id`) is also type-neutral — it is packed
-into the Props struct, not added as a view-tree type-param, so passing it does NOT
-trip this limit (only attributes on a bare HTML element do). See ADR-027 §B3 and
-ADR-029 for concrete cases.
+The depth pressure itself is real and still applies: tachys encodes every
+element's attributes/classes as nested generic type tuples, so piling
+**new attributes** onto deep components grows compile times toward the raised
+limit. **Guidance:** prefer changing an existing element's class **string**
+(type-neutral: `Class<&str>` stays `Class<&str>`) over adding new attributes.
+A component **prop** (e.g. `Card`'s `test_id`) is also type-neutral — it is
+packed into the Props struct, not added as a view-tree type-param. Splitting
+deep views into sub-components remains the structural fix. See ADR-027 §B3,
+ADR-029 and PR #441 for concrete cases.
 
 ## Development
 

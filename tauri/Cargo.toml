@@ -76,12 +76,14 @@ base64.workspace = true
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 tauri-plugin-haptics.workspace = true
 
-# iOS-only: ASWebAuthenticationSession plugin for OAuth. Wraps Apple's
+# Apple-only: ASWebAuthenticationSession plugin for OAuth. Wraps Apple's
 # native auth session API so the browser returns to the app after the OAuth
-# redirect — the tauri-plugin-deep-link build.rs does NOT register
-# CFBundleURLTypes for custom schemes on iOS, so the old opener +
-# desktop-callback.html flow cannot return from Safari.
-[target.'cfg(target_os = "ios")'.dependencies]
+# redirect — required by App Review Guideline 4 (default-browser login is
+# rejected for Mac App Store distribution). On iOS the tauri-plugin-deep-link
+# build.rs does NOT register CFBundleURLTypes for custom schemes, so the old
+# opener + desktop-callback.html flow cannot return from Safari; on macOS the
+# session intercepts the `origa://` callback itself.
+[target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
 tauri-plugin-aswebauth.workspace = true
 
 # Android-only: rustls-platform-verifier JNI initialization.

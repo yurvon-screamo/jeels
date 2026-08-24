@@ -12,6 +12,7 @@ mod jlpt_filter;
 mod mark_as_known_button;
 mod mark_known_callback;
 mod pagination;
+mod resource_download_consent;
 #[cfg(all(target_arch = "wasm32", test))]
 mod shared_wasm_tests;
 mod toggle_favorite_callback;
@@ -30,4 +31,5 @@ pub use jlpt_filter::{JlptCounts, JlptFilter, JlptFilterBtn, jlpt_level_idx};
 pub use mark_as_known_button::MarkAsKnownButton;
 pub use mark_known_callback::create_mark_as_known_callback;
 pub use pagination::LoadMoreButton;
+pub use resource_download_consent::{ResourceDownloadConsent, is_resource_download_consented};
 pub use toggle_favorite_callback::create_toggle_favorite_callback;

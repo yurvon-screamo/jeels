@@ -438,7 +438,6 @@ jobs:
                   codesign -d --entitlements - "$APP_PATH" 2>&1 | tee /tmp/entitlements.txt
                   for KEY in com.apple.security.app-sandbox \
                              com.apple.security.network.client \
-                             com.apple.security.device.camera \
                              com.apple.security.device.microphone \
                              com.apple.security.files.user-selected.read-write; do
                     if ! grep -q "$KEY" /tmp/entitlements.txt; then
@@ -446,7 +445,7 @@ jobs:
                       exit 1
                     fi
                   done
-                  echo "✅ All 5 entitlements present"
+                  echo "✅ All 4 entitlements present"
                   rm -f /tmp/entitlements.txt
 
             - name: Embed provisioning profile & re-sign
