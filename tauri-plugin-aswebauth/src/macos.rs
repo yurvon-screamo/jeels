@@ -144,7 +144,9 @@ pub(crate) fn start_session<R: tauri::Runtime>(
                 }
             }),
         };
-        let _ = tx_for_completion.send(result);
+        // Blocks are `Fn` (callable repeatedly by contract), so clone the
+        // sender per invocation instead of moving it out of the closure.
+        let _ = tx_for_completion.clone().send(result);
     });
 
     let session = unsafe {
