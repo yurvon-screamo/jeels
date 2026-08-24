@@ -26,13 +26,6 @@ fn main() {
         });
     println!("cargo:rustc-env=ORIGA_APP_BASE_URL={app_base_url}");
 
-    // Optional Yandex.Metrika counter ID (behavioral analytics for the RU
-    // market). Empty/absent = the counter is not emitted at all — mirroring
-    // the SENTRY_DSN gating contract (ADR-036): no ID, zero footprint.
-    let metrika_id = std::env::var("ORIGA_YANDEX_METRIKA_ID").unwrap_or_default();
-    println!("cargo:rustc-env=ORIGA_YANDEX_METRIKA_ID={metrika_id}");
-    println!("cargo:rerun-if-env-changed=ORIGA_YANDEX_METRIKA_ID");
-
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
 
     build_css();

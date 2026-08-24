@@ -7,9 +7,6 @@ use crate::content::Locale;
 use crate::pages::*;
 
 pub fn shell(_options: LeptosOptions) -> impl IntoView {
-    // Compile-time counter ID (set via ORIGA_YANDEX_METRIKA_ID, see
-    // `build.rs`). Empty = analytics fully absent from the HTML.
-    const METRIKA_ID: &str = env!("ORIGA_YANDEX_METRIKA_ID");
     view! {
         <!DOCTYPE html>
         <html>
@@ -44,12 +41,6 @@ pub fn shell(_options: LeptosOptions) -> impl IntoView {
                 <meta name="yandex-verification" content="95bbd9366a113be4" />
                 <meta name="google-site-verification" content="8HXC9phyHedz5AeimJ12tIo7HtXXHrnm2ewE4Qm3zEw" />
                 <meta name="msvalidate.01" content="36F67711155024DF2B7F9B5EBF72E9D0" />
-                {if METRIKA_ID.is_empty() {
-                    ().into_any()
-                } else {
-                    let snippet = metrika_inline_script(METRIKA_ID);
-                    view! { <script inner_html=snippet /> }.into_any()
-                }}
                 <MetaTags />
             </head>
             <body class="min-h-screen paper-texture">
@@ -123,29 +114,4 @@ pub fn App() -> impl IntoView {
             </Routes>
         </Router>
     }
-}
-
-/// Standard Yandex.Metrika async snippet for `counter_id`. The webvisor and
-/// click-map options stay off to keep the data collection within what the
-/// privacy policy discloses. `defer`-style loading: the script tag is
-/// injected by the snippet itself, so first paint is never blocked.
-fn metrika_inline_script(counter_id: &str) -> String {
-    format!(
-        r#"
-            (function(m,e,t,r,i,k,a){{
-                m[i]=m[i]||function(){{(m[i].a=m[i].a||[]).push(arguments)}};
-                m[i].l=1*new Date();
-                for(var j=0;j<document.scripts.length;j++){{if(document.scripts[j].src===r){{return;}}}}
-                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-            }})
-            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-
-            ym({counter_id}, "init", {{
-                clickmap:false,
-                trackLinks:true,
-                accurateTrackBounce:true,
-                webvisor:false
-            }});
-        "#
-    )
 }

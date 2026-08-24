@@ -323,7 +323,6 @@ pub const PR_BODY_EN: &str = r#"
     <li>Google OAuth (accounts.google.com) — optional sign-in provider.</li>
     <li>Yandex OAuth (oauth.yandex.ru) — optional sign-in provider.</li>
     <li>Sentry (sentry.io) — crash reporting and error monitoring; receives crash reports, performance traces and technical logs, not linked to your account.</li>
-    <li>Yandex.Metrika (mc.yandex.ru) — anonymized site-traffic statistics: pages viewed, device type, referral source, on-site behavior. Uses <code>_ym_*</code> cookies; the counter is not linked to your account or learning progress.</li>
     <li>Static CDN (s3.origa.uwuwu.net) — public catalog content.</li>
   </ul>
   <p>Origa does not include advertising SDKs or cross-device tracking SDKs, and the data listed above is not used for advertising and is not transferred to data brokers.</p>

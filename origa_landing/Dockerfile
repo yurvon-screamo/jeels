@@ -17,10 +17,6 @@ ENV ORIGA_APP_BASE_URL=${ORIGA_APP_BASE_URL}
 ARG ORIGA_BUILD_DATE
 ENV ORIGA_BUILD_DATE=${ORIGA_BUILD_DATE}
 
-# Optional Yandex.Metrika counter ID; empty = counter not emitted (see build.rs)
-ARG ORIGA_YANDEX_METRIKA_ID
-ENV ORIGA_YANDEX_METRIKA_ID=${ORIGA_YANDEX_METRIKA_ID}
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
