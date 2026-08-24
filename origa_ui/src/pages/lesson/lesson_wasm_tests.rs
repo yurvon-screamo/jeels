@@ -1070,3 +1070,145 @@ async fn quiz_result_display_multi_partial_lists_missed_and_wrong() {
         "wrong selection text must be listed; got: {text}"
     );
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// Acquaintance training (feature = acquaintance_mode)
+// ═══════════════════════════════════════════════════════════════════════
+
+#[cfg(feature = "acquaintance_mode")]
+mod acquaintance_training {
+    use super::*;
+    use crate::pages::lesson::acquaintance_state::{
+        AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
+    };
+    use crate::pages::lesson::acquaintance_view::AcquaintanceView;
+    use crate::pages::lesson::training_view::TrainingBody;
+    use ulid::Ulid;
+
+    fn acq_context(stage: AcquaintanceStage) -> AcquaintanceContext {
+        let state = RwSignal::new(AcquaintanceState::default());
+        // stage выставляется отдельно через update (Default = Inactive).
+        state.update(|s| s.stage = stage);
+        AcquaintanceContext {
+            repository: crate::repository::HybridUserRepository::new(),
+            state,
+            slides: RwSignal::new(Vec::new()),
+            known_kanji: RwSignal::new(HashSet::new()),
+            native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
+        }
+    }
+
+    #[wasm_bindgen_test]
+    async fn training_reveals_answer_and_rating_buttons_with_hints() {
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        let hand = origa::domain::AcquaintanceHand::new(vec![(
+            card_id,
+            origa::domain::CardType::Vocabulary,
+        )])
+        .unwrap();
+        ctx.state.update(|state| state.hand = Some(hand));
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "\u{732b}".to_string(),
+            pos_label: None,
+            translations: vec!["\u{43a}\u{43e}\u{448}\u{43a}\u{430}".to_string()],
+        }]);
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            view! { <TrainingBody ctx=c2.clone() /> }.into_any()
+        });
+        tick().await;
+
+        // Фронт виден, ответа ещё нет.
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-front\"]")
+                .unwrap()
+                .is_some(),
+            "фронт тренировки отрендерен"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-answer\"]")
+                .unwrap()
+                .is_none()
+        );
+
+        // Раскрытие по кнопке.
+        let reveal = wrapper
+            .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap();
+        reveal.click();
+        tick().await;
+
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-answer\"]")
+                .unwrap()
+                .is_some(),
+            "ответ раскрыт после клика"
+        );
+
+        let remember = wrapper
+            .query_selector("[data-testid=\"acquaintance-rating-remember\"]")
+            .unwrap()
+            .unwrap();
+        let text = remember.text_content().unwrap();
+        assert!(
+            text.contains("[2]"),
+            "хинт [2] должен быть на кнопке «Помню», got: {text}"
+        );
+
+        let dont_know_text = wrapper
+            .query_selector("[data-testid=\"acquaintance-rating-dont-know\"]")
+            .unwrap()
+            .unwrap()
+            .text_content()
+            .unwrap();
+        assert!(dont_know_text.contains("[1]"), "хинт [1] на «Не помню»");
+
+        let reveal_text = wrapper
+            .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+            .unwrap()
+            .unwrap()
+            .text_content()
+            .unwrap();
+        assert!(
+            reveal_text.contains("Space") || reveal_text.contains("Пробел"),
+            "хинт Space на раскрытии"
+        );
+    }
+
+    #[wasm_bindgen_test]
+    async fn summary_screen_shows_stamp_and_to_reviews_button() {
+        let ctx = acq_context(AcquaintanceStage::Summary);
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-summary\"]")
+                .unwrap()
+                .is_some(),
+            "итоговый экран отрендерен"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-to-reviews-btn\"]")
+                .unwrap()
+                .is_some(),
+            "кнопка «К ревью» на месте"
+        );
+    }
+}

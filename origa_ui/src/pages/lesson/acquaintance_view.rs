@@ -1,6 +1,8 @@
+use super::acquaintance_keyboard::{AcquaintanceKeyAction, resolve_key_action};
 use super::acquaintance_state::{AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage};
 use super::hand_progress_strip::HandProgressStrip;
 use super::kanji_card_details::{KanjiCardDetails, RadicalDisplay};
+use super::keyboard_handler::is_typing_target;
 use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
@@ -8,6 +10,7 @@ use crate::ui_components::{
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+use leptos_use::use_event_listener;
 use origa::domain::{AcquaintanceSubphase, NativeLanguage};
 use origa::use_cases::MarkCardAsKnownUseCase;
 use std::collections::HashSet;
@@ -411,6 +414,19 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
         })
     };
 
+    // Space = «Дальше» в показе (спека §8.3).
+    let kb_ctx = StoredValue::new(ctx.clone());
+    let _ = use_event_listener(document(), leptos::ev::keydown, move |ev| {
+        if is_typing_target(ev.target().as_ref()) {
+            return;
+        }
+        let stage = kb_ctx.get_value().state.get().stage;
+        if resolve_key_action(stage, false, &ev.key()) == Some(AcquaintanceKeyAction::Advance) {
+            ev.prevent_default();
+            advance.run(());
+        }
+    });
+
     let on_confirm_open = {
         let ctx = ctx.clone();
         Callback::new(move |_: ()| {
@@ -475,6 +491,9 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                     test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
                 >
                     <span>{t!(i18n, lesson.next)}</span>
+                    <span class="kbd-hint text-[var(--fg-light)]">
+                        {t!(i18n, lesson.space_key)}
+                    </span>
                 </Button>
             </Show>
         </div>

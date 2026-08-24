@@ -1,4 +1,6 @@
 #[cfg(feature = "acquaintance_mode")]
+mod acquaintance_keyboard;
+#[cfg(feature = "acquaintance_mode")]
 mod acquaintance_state;
 #[cfg(feature = "acquaintance_mode")]
 mod acquaintance_view;

@@ -1,9 +1,50 @@
+use super::acquaintance_keyboard::{
+    AcquaintanceKeyboardActions, create_acquaintance_keyboard_handler,
+};
 use super::acquaintance_state::{AcquaintanceContext, AcquaintanceSlideData};
+use super::keyboard_handler::is_typing_target;
 use crate::i18n::*;
 use crate::ui_components::{Button, ButtonVariant, FuriganaText, is_speech_supported, speak_word};
 use leptos::prelude::*;
+use leptos_use::use_event_listener;
 use origa::domain::{AcquaintanceSubphase, AnswerOutcome};
 use ulid::Ulid;
+
+/// Раскрытие ответа: и кнопка, и Space ведут себя одинаково.
+fn do_reveal(
+    ctx_stored: &StoredValue<AcquaintanceContext>,
+    current_id: &Memo<Ulid>,
+    showing_answer: &RwSignal<bool>,
+) {
+    showing_answer.set(true);
+    let card_id = current_id.get_untracked();
+    if !card_id.is_nil() {
+        speak_reverse_answer(&ctx_stored.get_value(), card_id);
+    }
+}
+
+/// Запись ответа: и кнопки [1]/[2], и клавиши 1/2 ведут себя одинаково.
+fn do_rate(
+    ctx_stored: &StoredValue<AcquaintanceContext>,
+    current_id: &Memo<Ulid>,
+    showing_answer: &RwSignal<bool>,
+    rotation_index: &RwSignal<usize>,
+    training_order: &RwSignal<Vec<Ulid>>,
+    remembered: bool,
+) {
+    let outcome = record_on_hand(
+        &ctx_stored.get_value(),
+        current_id.get_untracked(),
+        remembered,
+    );
+    finish_answer(
+        &ctx_stored.get_value(),
+        showing_answer,
+        rotation_index,
+        training_order,
+        outcome,
+    );
+}
 
 /// Fisher–Yates поверх xorshift64; источник энтропии — случайные биты
 /// новых Ulid (крейт уже в дереве), внешних зависимостей не добавляет.
@@ -61,6 +102,39 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
         order[rotation_index.get() % order.len()]
     });
 
+    // Клавиатура: те же хендлы, что у кнопок (спека §8.3).
+    let handle_keydown = {
+        let c = ctx_stored;
+        create_acquaintance_keyboard_handler(
+            c.get_value(),
+            showing_answer,
+            AcquaintanceKeyboardActions {
+                // Advance разрешён только в показе; в тренировке — Reveal/Rate.
+                on_advance: Box::new(|| {}),
+                on_reveal: Box::new(move || {
+                    do_reveal(&c, &current_id, &showing_answer);
+                }),
+                on_rate: Box::new(move |remembered: bool| {
+                    do_rate(
+                        &c,
+                        &current_id,
+                        &showing_answer,
+                        &rotation_index,
+                        &training_order,
+                        remembered,
+                    );
+                }),
+            },
+        )
+    };
+
+    let _ = use_event_listener(document(), leptos::ev::keydown, move |ev| {
+        if is_typing_target(ev.target().as_ref()) {
+            return;
+        }
+        handle_keydown(ev);
+    });
+
     view! {
         <div class="min-h-[60vh] flex flex-col" data-testid="acquaintance-training">
             <div class="flex-1 py-6">
@@ -83,16 +157,12 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                     <Button
                         variant=Signal::derive(|| ButtonVariant::Filled)
                         on_click=Callback::new(move |_| {
-                            showing_answer.set(true);
-                            // Спека §8.2: рус→яп ответ = слово + повтор аудио.
-                            let card_id = current_id.get_untracked();
-                            if !card_id.is_nil() {
-                                speak_reverse_answer(&ctx_stored.get_value(), card_id);
-                            }
+                            do_reveal(&ctx_stored, &current_id, &showing_answer);
                         })
                         test_id=Signal::derive(|| "acquaintance-reveal-btn".to_string())
                     >
                         {t!(i18n, lesson.show_answer)}
+                        <span class="kbd-hint">{t!(i18n, lesson.space_key)}</span>
                     </Button>
                 </div>
             </Show>
@@ -101,36 +171,36 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                     <Button
                         variant=Signal::derive(|| ButtonVariant::Default)
                         on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                            let outcome =
-                                record_on_hand(&ctx_stored.get_value(), current_id.get_untracked(), false);
-                            finish_answer(
-                                &ctx_stored.get_value(),
+                            do_rate(
+                                &ctx_stored,
+                                &current_id,
                                 &showing_answer,
                                 &rotation_index,
                                 &training_order,
-                                outcome,
+                                false,
                             );
                         })
                         test_id=Signal::derive(|| "acquaintance-rating-dont-know".to_string())
                     >
                         {t!(i18n, acquaintance.dont_remember)}
+                        <span class="kbd-hint">"[1]"</span>
                     </Button>
                     <Button
                         variant=Signal::derive(|| ButtonVariant::Olive)
                         on_click=Callback::new(move |_: leptos::ev::MouseEvent| {
-                            let outcome =
-                                record_on_hand(&ctx_stored.get_value(), current_id.get_untracked(), true);
-                            finish_answer(
-                                &ctx_stored.get_value(),
+                            do_rate(
+                                &ctx_stored,
+                                &current_id,
                                 &showing_answer,
                                 &rotation_index,
                                 &training_order,
-                                outcome,
+                                true,
                             );
                         })
                         test_id=Signal::derive(|| "acquaintance-rating-remember".to_string())
                     >
                         {t!(i18n, acquaintance.remember)}
+                        <span class="kbd-hint">"[2]"</span>
                     </Button>
                 </div>
             </Show>
