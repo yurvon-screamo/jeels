@@ -2,12 +2,13 @@
 <!--
   Microsoft Store (MSIX) package manifest for Origa.
 
-  The `__PARTNER_CENTER_*__` placeholders are replaced by
+  The `INJECT-PC-*` placeholders are replaced by
   tauri/scripts/build-msix.ps1 from its parameters. They MUST be filled with
   the exact values from Partner Center → Product management → Product
   Identity after the "MSIX or PWA app" product is created there:
-    - Identity/Name       ← Package/Identity Name
-    - Identity/Publisher  ← Package/Identity Publisher (the CN=... value)
+    - Identity Name       ← Package/Identity Name (schema charset is
+                            [-.A-Za-z0-9]+, hence the dash-style placeholder)
+    - Identity Publisher  ← Package/Identity Publisher (the full CN=... value)
     - PublisherDisplayName← the publisher display name shown on the listing
 
   Store certification validates these against the reserved product identity
@@ -22,13 +23,13 @@
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
 
     <Identity
-        Name="__PARTNER_CENTER_IDENTITY_NAME__"
-        Publisher="__PARTNER_CENTER_PUBLISHER__"
+        Name="INJECT-PC-IDENTITY-NAME"
+        Publisher="CN=INJECT-PC-PUBLISHER"
         Version="0.0.0.0" />
 
     <Properties>
         <DisplayName>Origa</DisplayName>
-        <PublisherDisplayName>__PARTNER_CENTER_PUBLISHER_DISPLAY_NAME__</PublisherDisplayName>
+        <PublisherDisplayName>INJECT-PC-PUBLISHER-DISPLAY-NAME</PublisherDisplayName>
         <Logo>Assets\Square150x150Logo.png</Logo>
     </Properties>
 

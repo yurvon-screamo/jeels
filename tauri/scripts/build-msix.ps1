@@ -49,9 +49,9 @@
 [CmdletBinding()]
 param(
     [string]$Version = "",
-    [string]$IdentityName = "INJECT_PARTNER_CENTER_IDENTITY_NAME",
-    [string]$Publisher = "INJECT_PARTNER_CENTER_PUBLISHER",
-    [string]$PublisherDisplayName = "INJECT_PARTNER_CENTER_PUBLISHER_DISPLAY_NAME",
+    [string]$IdentityName = "INJECT-PC-IDENTITY-NAME",
+    [string]$Publisher = "CN=INJECT-PC-PUBLISHER",
+    [string]$PublisherDisplayName = "INJECT-PC-PUBLISHER-DISPLAY-NAME",
     [string]$OutputDirectory = "",
     [switch]$SkipBuild,
     [switch]$KeepUnsigned
@@ -62,7 +62,9 @@ $ErrorActionPreference = "Stop"
 $TauriDir = Split-Path -Parent $PSScriptRoot
 $RepoRoot = Split-Path -Parent $TauriDir
 if (-not $OutputDirectory) {
-    $OutputDirectory = Join-Path $TauriDir "target\msix"
+    # Cargo is workspace-rooted: all artifacts land in <repo>/target, not
+    # tauri/target (the existing NSIS jobs read bundle paths from there too).
+    $OutputDirectory = Join-Path $RepoRoot "target\msix"
 }
 
 function Find-SdkTool {
@@ -111,7 +113,7 @@ if (-not $SkipBuild) {
     }
 }
 
-$ExePath = Join-Path $TauriDir "target\release\origa-app.exe"
+$ExePath = Join-Path $RepoRoot "target\release\origa-app.exe"
 if (-not (Test-Path $ExePath)) {
     throw "Built binary not found at '$ExePath'. Run the build step first."
 }
@@ -124,12 +126,15 @@ if (Test-Path $Stage) { Remove-Item $Stage -Recurse -Force }
 New-Item -ItemType Directory -Path $Stage | Out-Null
 
 Copy-Item $ExePath (Join-Path $Stage "Origa.exe")
-Copy-Item (Join-Path $TauriDir "msix\Package.appxmanifest") $Stage
+# MakeAppx requires the manifest to be literally named AppxManifest.xml
+# inside the content directory; the committed source keeps the idiomatic
+# Package.appxmanifest name.
+Copy-Item (Join-Path $TauriDir "msix\Package.appxmanifest") (Join-Path $Stage "AppxManifest.xml")
 Copy-Item (Join-Path $TauriDir "msix\Assets") (Join-Path $Stage "Assets") -Recurse
 
 # Some Tauri/wry versions emit WebView2Loader.dll next to the raw cargo
 # binary; include it whenever present (absent = statically linked).
-$Loader = Join-Path $TauriDir "target\release\WebView2Loader.dll"
+$Loader = Join-Path $RepoRoot "target\release\WebView2Loader.dll"
 if (Test-Path $Loader) {
     Copy-Item $Loader $Stage
     Write-Host "Staged WebView2Loader.dll"
@@ -137,7 +142,7 @@ if (Test-Path $Loader) {
 
 # --- 4. Manifest identity + version injection --------------------------------
 
-$ManifestPath = Join-Path $Stage "Package.appxmanifest"
+$ManifestPath = Join-Path $Stage "AppxManifest.xml"
 $manifest = Get-Content $ManifestPath -Raw
 
 function ConvertTo-XmlText([string]$Value) {
@@ -148,9 +153,9 @@ function ConvertTo-XmlText([string]$Value) {
 }
 
 foreach ($pair in @(
-        @("__PARTNER_CENTER_IDENTITY_NAME__", (ConvertTo-XmlText $IdentityName)),
-        @("__PARTNER_CENTER_PUBLISHER__", (ConvertTo-XmlText $Publisher)),
-        @("__PARTNER_CENTER_PUBLISHER_DISPLAY_NAME__", (ConvertTo-XmlText $PublisherDisplayName))
+        @("INJECT-PC-IDENTITY-NAME", (ConvertTo-XmlText $IdentityName)),
+        @("CN=INJECT-PC-PUBLISHER", (ConvertTo-XmlText $Publisher)),
+        @("INJECT-PC-PUBLISHER-DISPLAY-NAME", (ConvertTo-XmlText $PublisherDisplayName))
     )) {
     if ($manifest -notmatch [regex]::Escape($pair[0])) {
         throw "Placeholder '$($pair[0])' missing from manifest — template drift."
@@ -179,7 +184,9 @@ if (-not $KeepUnsigned) {
     # validate or install the package.
     $pfxPassword = [System.Guid]::NewGuid().ToString("N")
     $securePassword = ConvertTo-SecureString -String $pfxPassword -Force -AsPlainText
-    $subject = "CN=$Publisher"
+    # $Publisher arrives as a full subject ("CN=..."); normalize anyway for
+    # callers that pass a bare name.
+    $subject = if ($Publisher -like "CN=*") { $Publisher } else { "CN=$Publisher" }
     Write-Host "Looking for a code-signing certificate '$subject' in CurrentUser\My"
     $cert = Get-ChildItem Cert:\CurrentUser\My |
         Where-Object { $_.Subject -eq $subject } |

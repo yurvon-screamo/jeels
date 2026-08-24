@@ -67,8 +67,9 @@ layout is winapp-compatible either way.
 
 ### Manifest contract (`tauri/msix/Package.appxmanifest`)
 
-- Identity Name/Publisher/PublisherDisplayName: `__PARTNER_CENTER_*__`
-  placeholders, filled after the "MSIX or PWA app" product is created in
+- Identity Name/Publisher/PublisherDisplayName: `INJECT-PC-*` placeholders
+  (dash-style — the Identity schema charset is `[-.A-Za-z0-9]+`), filled
+  after the "MSIX or PWA app" product is created in
   Partner Center (values live in Product management → Product Identity;
   certification compares them byte-for-byte).
 - Language `en-US` (mandatory field; UI-localized EN/RU lives inside the

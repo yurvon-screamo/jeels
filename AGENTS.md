@@ -123,8 +123,8 @@ Store-дистрибуция — **MSIX-пакет**: Store сам подпис�
 ```powershell
 # локальная smoke-сборка и установка:
 cd tauri; ./scripts/build-msix.ps1 -Version 0.7.0
-# импортировать tauri/target/msix/Origa.msix.pfx в Cert:\CurrentUser\Trusted People (пароль в .password.txt)
-Add-AppxPackage -Path tauri/target/msix/Origa_0.7.0_x64.msix
+# импортировать target/msix/Origa.msix.pfx в Cert:\CurrentUser\Trusted People (пароль в .password.txt)
+Add-AppxPackage -Path target/msix/Origa_0.7.0_x64.msix
 ```
 
 Updater в store-сборке скомпилирован out (`not(app_store)` гейт, политика 10.2.5); прямые загрузки NSIS обновляются через Tauri updater как раньше. Identity-плейсхолдеры `__PARTNER_CENTER_*__` в манифесте заполняются после создания «MSIX or PWA app» продукта в Partner Center. Пересабмит = бамп версии. Runbook: ADR-042.

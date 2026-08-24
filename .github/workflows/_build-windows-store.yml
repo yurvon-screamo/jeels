@@ -84,7 +84,7 @@ jobs:
               with:
                   name: windows-msix
                   path: |
-                      tauri/target/msix/*.msix
-                      tauri/target/msix/*.pfx
-                      tauri/target/msix/*.password.txt
+                      target/msix/*.msix
+                      target/msix/*.pfx
+                      target/msix/*.password.txt
                   retention-days: 7
