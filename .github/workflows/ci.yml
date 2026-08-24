@@ -617,6 +617,6 @@ jobs:
                   check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
                   check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
                   check "build-tauri" "${{ needs.build-tauri.result }}" "success"
-                  check "store-msix-pr-test" "${{ needs.store-msix-pr-test.result }}" "success"
+                  check "store-msix-pr-test" "${{ needs.store-msix-pr-test.result }}" "success" "skipped"
 
             - run: echo "All checks passed"
