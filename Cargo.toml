@@ -241,3 +241,17 @@ opt-level = 1
 debug = 0
 strip = true
 codegen-units = 16
+
+# Windows MSVC dev builds: full debuginfo (the default `debug = 2`) balloons
+# the Leptos UI crate's PDB past the ~4 GB format limit and link.exe fails
+# with LNK1318 "Unexpected PDB error; LIMIT" (rust-lang/rust#130729 — huge
+# monomorphized Leptos view types). Line tables keep file/line/function names
+# in backtraces while shrinking the PDB by an order of magnitude; external
+# dependencies drop debug info entirely ("*" does not match workspace members,
+# so Origa crates keep line tables). Debugger locals/type inspection is lost
+# in dev builds — temporarily raise `debug` locally when you need it.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
