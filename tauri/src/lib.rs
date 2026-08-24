@@ -15,7 +15,10 @@ mod device_ai_commands;
 mod updater_commands;
 
 use auth_store::{auth_store_delete, auth_store_get, auth_store_set};
-#[cfg(any(feature = "release-devtools", any(windows, target_os = "linux")))]
+// `Manager` consumers: single-instance focus (Windows/Linux) and the iOS
+// plugin-state registration (`app.manage`). The macOS path registers no
+// state, so the import stays out of macOS builds.
+#[cfg(any(windows, target_os = "linux", target_os = "ios"))]
 use tauri::Manager;
 use tauri::{Emitter, Listener};
 use tauri_plugin_deep_link::DeepLinkExt;
