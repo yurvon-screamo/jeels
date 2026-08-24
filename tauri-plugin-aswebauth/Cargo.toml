@@ -8,9 +8,11 @@ repository.workspace = true
 readme.workspace = true
 links = "tauri-plugin-aswebauth"
 
-# ASWebAuthenticationSession is iOS-only. The crate compiles on all targets
-# (it is a workspace member) but the plugin is registered only under
-# `#[cfg(target_os = "ios")]` in tauri/src/lib.rs.
+# ASWebAuthenticationSession wrapper for Apple platforms. The crate compiles
+# on all targets (it is a workspace member) but the plugin is registered only
+# under Apple cfgs in tauri/src/lib.rs:
+# - iOS: delegates to the Swift mobile plugin (`ios/Sources`).
+# - macOS: native Rust implementation in `src/macos.rs` via objc2.
 
 [build-dependencies]
 tauri-plugin.workspace = true
@@ -19,3 +21,15 @@ tauri-plugin.workspace = true
 tauri.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2.workspace = true
+block2.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+objc2-foundation = { workspace = true, features = ["NSURL", "NSString", "NSError"] }
+objc2-app-kit = { workspace = true, features = ["NSWindow", "NSResponder"] }
+objc2-authentication-services = { workspace = true, features = [
+    "ASWebAuthenticationSession",
+    "ASFoundation",
+    "block2",
+] }

@@ -16,6 +16,7 @@ tokio = { version = "1.48", default-features = false, features = [
     "rt",
     "macros",
     "time",
+    "sync",
 ] }
 base64 = "0.22"
 tempfile = "3.25"
@@ -133,6 +134,15 @@ tauri-plugin-haptics = "2"
 tauri-plugin-aswebauth = { path = "tauri-plugin-aswebauth" }
 tauri-build = { version = "2", features = [] }
 tauri-plugin = { version = "2", features = ["build"] }
+
+# Apple frameworks (macOS-only consumers; see tauri-plugin-aswebauth).
+# Versions are pinned to the objc2 generation already pulled in by wry/tauri
+# so the whole graph shares a single copy of the runtime types.
+objc2 = "0.6"
+block2 = "0.6"
+objc2-foundation = "0.3"
+objc2-app-kit = "0.3"
+objc2-authentication-services = "0.3"
 # device-ai: native AI APIs (ASR/OCR/TTS). Pinned to a fork rev that fixes the
 # upstream mobile bridge (hypothesi's CI never built mobile, so two compile
 # errors went unnoticed: missing get_capabilities on the mobile impl, and

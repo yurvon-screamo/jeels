@@ -84,12 +84,24 @@ pub fn OAuthButtons(
 ) -> impl IntoView {
     let i18n = use_i18n();
     let auth_store = use_context::<AuthStore>().expect("AuthStore not provided");
+    let auth_store_apple = auth_store.clone();
     let auth_store_google = auth_store.clone();
     let auth_store_yandex = auth_store.clone();
     let test_id_val = move || {
         let val = test_id.get();
         if val.is_empty() { None } else { Some(val) }
     };
+
+    // Sign in with Apple is the first button per App Store HIG: it must
+    // precede other third-party sign-in options wherever they are offered.
+    let apple_test_id = Signal::derive(move || {
+        let val = test_id.get();
+        if val.is_empty() {
+            "oauth-apple".to_string()
+        } else {
+            format!("{}-apple", val)
+        }
+    });
 
     let google_test_id = Signal::derive(move || {
         let val = test_id.get();
@@ -111,6 +123,21 @@ pub fn OAuthButtons(
 
     view! {
         <div class="space-y-3" data-testid=test_id_val>
+            <button
+                type="button"
+                class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[var(--border-dark)] bg-[var(--fg-black)] hover:opacity-90 transition-colors"
+                data-testid=apple_test_id
+                on:click=move |_: leptos::ev::MouseEvent| {
+                    let auth_store = auth_store_apple.clone();
+                    spawn_local(async move {
+                        open_oauth_url(OAuthProvider::Apple, debug_sink, auth_store, i18n).await;
+                    });
+                }
+            >
+                <AppleIcon />
+                <span class="text-[var(--bg-paper)]">{t!(i18n, login.apple_login)}</span>
+            </button>
+
             <button
                 type="button"
                 class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[var(--border-dark)] bg-[var(--bg-cream)] hover:bg-[var(--bg-aged)] transition-colors"
@@ -255,14 +282,16 @@ async fn open_oauth_url(
     let url = client.get_oauth_url(provider.as_str(), &redirect_uri, &challenge);
     report_debug!(debug_sink, "oauth url built: {url}");
 
-    // iOS: ASWebAuthenticationSession opens Safari in a dedicated auth context
-    // and intercepts the `origa://` callback directly — no CFBundleURLTypes
-    // registration needed (tauri-plugin-deep-link build.rs removes it for
-    // custom schemes). The callback URL is returned via the Tauri command's
-    // Promise, bypassing the deep-link listener entirely.
+    // Apple platforms (iOS + macOS): ASWebAuthenticationSession opens the
+    // OAuth page in a dedicated auth context and intercepts the `origa://`
+    // callback directly — the callback URL is returned via the Tauri
+    // command's Promise, bypassing the deep-link listener entirely. App
+    // Review rejects default-browser sign-in on the Mac App Store
+    // (Guideline 4), so Apple platforms must never take the opener path.
     //
-    // Non-iOS (Android, desktop, web): opener + deep-link listener flow.
-    if tauri::is_ios() {
+    // Other platforms (Android, Windows, Linux, web): opener + deep-link
+    // listener flow.
+    if tauri::is_apple() {
         auth_store.oauth_error.set(None);
         auth_store.is_oauth_loading.set(true);
         match start_aswebauth(&url, "origa").await {
@@ -278,15 +307,25 @@ async fn open_oauth_url(
             Err(e) if e == "cancelled" => {
                 report_debug!(debug_sink, "aswebauth cancelled by user");
                 auth_store.is_oauth_loading.set(false);
-                // User dismissed Safari — do NOT fall through to opener, which
-                // would re-open Safari against the user's intent.
+                // User dismissed Safari — do NOT fall through to the opener;
+                // re-opening the browser would go against their intent.
                 return;
             },
             Err(e) => {
                 report_debug!(debug_sink, "aswebauth failed: {e}");
                 auth_store.is_oauth_loading.set(false);
-                // Technical failure (plugin not registered, Swift error) —
-                // fall through to the opener + deep-link fallback.
+                // Technical failure must NOT silently degrade to the default
+                // browser — that is exactly the behavior App Review rejects.
+                // Surface the failure to the user instead.
+                let message = i18n
+                    .get_keys_untracked()
+                    .login()
+                    .oauth_session_error()
+                    .inner()
+                    .replace("{}", &e);
+                auth_store.oauth_error.set(Some(message));
+                tracing::warn!("OAuth authentication session failed: {e}");
+                return;
             },
         }
     }
@@ -353,6 +392,18 @@ async fn start_aswebauth(url: &str, callback_scheme: &str) -> Result<String, Str
         .ok()
         .and_then(|v| v.as_string())
         .ok_or("missing 'url' field in start_auth response".to_string())
+}
+
+#[component]
+fn AppleIcon() -> impl IntoView {
+    view! {
+        <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill="currentColor"
+                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+            />
+        </svg>
+    }
 }
 
 #[component]

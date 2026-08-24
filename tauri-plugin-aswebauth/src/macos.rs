@@ -1,0 +1,176 @@
+// Copyright 2026 yurvon-screamo
+// SPDX-License-Identifier: MIT
+
+//! macOS implementation of `start_auth` via `ASWebAuthenticationSession`.
+//!
+//! Mirrors the iOS Swift plugin semantics: the OAuth URL opens in a dedicated
+//! authentication browser session, and the intercepted `origa://` callback
+//! URL resolves the command promise. User cancellation resolves as
+//! `"cancelled"` so the frontend can treat both platforms identically.
+//!
+//! Threading: `ASWebAuthenticationSession` must be created and started on the
+//! main thread — `commands.rs` dispatches here through
+//! `AppHandle::run_on_main_thread` and awaits a oneshot channel.
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use block2::RcBlock;
+use objc2::rc::Retained;
+use objc2::runtime::{NSObject, ProtocolObject};
+use objc2::{MainThreadOnly, define_class, msg_send};
+use objc2_app_kit::NSWindow;
+use objc2_authentication_services::{
+    ASWebAuthenticationPresentationContextProviding, ASWebAuthenticationSession,
+    ASWebAuthenticationSessionErrorCode,
+};
+use objc2_foundation::{MainThreadMarker, NSError, NSString, NSURL, autoreleasepool};
+use tauri::Manager;
+
+use crate::commands::AuthResult;
+
+/// Type alias used by the generated protocol for the presentation anchor.
+/// The crate keeps it as `NSObject`; we store an `NSWindow` in it.
+type PresentationAnchor = NSObject;
+
+define_class!(
+    // SAFETY:
+    // - Superclass `NSObject` has no subclassing requirements.
+    // - The type does not implement `Drop`.
+    #[unsafe(super = NSObject)]
+    #[thread_kind = MainThreadOnly]
+    #[ivars = Retained<PresentationAnchor>]
+    struct AuthAnchorProvider;
+
+    // SAFETY: `NSObjectProtocol` has no safety requirements.
+    unsafe impl NSObjectProtocol for AuthAnchorProvider {}
+
+    // SAFETY: The method signature matches the generated protocol declaration.
+    unsafe impl ASWebAuthenticationPresentationContextProviding for AuthAnchorProvider {
+        #[unsafe(method(presentationAnchorForWebAuthenticationSession:))]
+        unsafe fn presentation_anchor(
+            &self,
+            _session: &ASWebAuthenticationSession,
+        ) -> Retained<PresentationAnchor> {
+            self.ivars().clone()
+        }
+    }
+);
+
+impl AuthAnchorProvider {
+    fn new(window: Retained<NSWindow>, mtm: MainThreadMarker) -> Retained<Self> {
+        // NSWindow → NSResponder → NSObject: two hops up the superclass chain.
+        let anchor: Retained<PresentationAnchor> = window.into_super().into_super();
+        let this = Self::alloc(mtm).set_ivars(anchor);
+        // SAFETY: The signature of `NSObject`'s `init` is correct.
+        unsafe { msg_send![super(this), init] }
+    }
+}
+
+/// Creates and starts an auth session on the main thread. Sends exactly one
+/// result through `tx`: either from the completion handler or synchronously
+/// when the session cannot start.
+pub(crate) fn start_session<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    url: &str,
+    callback_scheme: &str,
+    tx: tokio::sync::oneshot::Sender<Result<AuthResult, String>>,
+) -> Result<(), String> {
+    let mtm = MainThreadMarker::new().expect("start_session must run via run_on_main_thread");
+
+    let webview_window = app.get_webview_window("main").ok_or("no main window")?;
+    let ns_window_ptr = webview_window.ns_window().map_err(|e| e.to_string())?;
+    // SAFETY: Tauri returns a valid `NSWindow` pointer for the main window on
+    // macOS; `Retained::retain` balances its +1 with our eventual release.
+    let window: Retained<NSWindow> = unsafe { Retained::retain(ns_window_ptr.cast()) }
+        .ok_or("failed to retain the main NSWindow")?;
+
+    let provider = AuthAnchorProvider::new(window, mtm);
+    let proto = ProtocolObject::from_ref(&*provider);
+
+    let url_string = NSString::from_str(url);
+    let ns_url = NSURL::initWithString(NSURL::alloc(), &url_string)
+        .ok_or_else(|| format!("invalid authentication URL: {url}"))?;
+    let scheme = NSString::from_str(callback_scheme);
+
+    // The slot is owned by the completion block. Filling it after creation
+    // (but before `start`) keeps the session and provider alive for as long
+    // as the system holds the block; taking them at completion time breaks
+    // the session ↔ block retain cycle so everything deallocates cleanly.
+    let bundle_slot: Rc<
+        RefCell<
+            Option<(
+                Retained<ASWebAuthenticationSession>,
+                Retained<AuthAnchorProvider>,
+            )>,
+        >,
+    > = Rc::new(RefCell::new(None));
+
+    let tx_for_completion = tx.clone();
+    let bundle_for_completion = Rc::clone(&bundle_slot);
+    let completion = RcBlock::new(move |callback_url: *mut NSURL, error: *mut NSError| {
+        let held = bundle_for_completion.borrow_mut().take();
+        drop(held);
+        let result = autoreleasepool(|_pool| {
+            if let Some(error) = as_ref(error) {
+                return Err(describe_error(error));
+            }
+            let Some(callback_url) = as_ref(callback_url) else {
+                return Err("completion returned neither URL nor error".to_string());
+            };
+            match callback_url.absoluteString() {
+                Some(string) => Ok(AuthResult {
+                    url: string.to_string(),
+                }),
+                None => Err("callback URL has no absolute string".to_string()),
+            }
+        });
+        let _ = tx_for_completion.send(result);
+    });
+
+    let session = unsafe {
+        ASWebAuthenticationSession::initWithURL_callbackURLScheme_completionHandler(
+            ASWebAuthenticationSession::alloc(),
+            &ns_url,
+            Some(&scheme),
+            RcBlock::as_ptr(&completion),
+        )
+    };
+
+    // Weak property on the session side — our strong reference lives in the
+    // bundle slot, so the provider outlives the presentation window request.
+    unsafe { session.setPresentationContextProvider(Some(proto)) };
+    // Share the user's existing Safari login between sessions (Apple default).
+    unsafe { session.setPrefersEphemeralWebBrowserSession(false) };
+
+    *bundle_slot.borrow_mut() = Some((session.clone(), provider));
+
+    // SAFETY: The session was created above; `start` has no additional safety
+    // requirements beyond a valid receiver.
+    if !unsafe { session.start() } {
+        // No completion will fire — drop the bundle so the session and the
+        // system's copy of the block deallocate instead of leaking.
+        *bundle_slot.borrow_mut() = None;
+        let _ = tx.send(Err("failed to start the authentication session".to_string()));
+    }
+    Ok(())
+}
+
+fn as_ref<T>(ptr: *mut T) -> Option<&'static T> {
+    if ptr.is_null() {
+        None
+    } else {
+        // SAFETY: Callers pass pointers handed over by the ObjC runtime;
+        // they are valid for the duration of the completion handler.
+        Some(unsafe { &*ptr })
+    }
+}
+
+fn describe_error(error: &NSError) -> String {
+    if error.code() == ASWebAuthenticationSessionErrorCode::CanceledLogin.0 {
+        // Frontend contract: user dismissal resolves as "cancelled" (same as iOS).
+        "cancelled".to_string()
+    } else {
+        error.localizedDescription().to_string()
+    }
+}
