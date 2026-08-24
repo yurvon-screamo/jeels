@@ -56,11 +56,11 @@ fn lastmod_appears_once_per_url() {
     // Each <url> element carries exactly one <lastmod>. As of 2026-08-24 the
     // count is: 7 static page groups × 4 locales (28) + 4 blog index URLs +
     // 7 full articles × 4 locales (28) + 5 EN+RU articles × 2 locales (10)
-    // + docs (2 index + 9 article pairs × 2 locales = 20) = 90 <url> entries.
+    // + docs (2 index + 10 article pairs × 2 locales = 22) = 92 <url> entries.
     // The count assertion catches drift in either direction — a missing
     // locale variant or a duplicate entry.
     let values = lastmod_values(&sitemap_contents());
-    assert_eq!(values.len(), 90, "expected one <lastmod> per <url>");
+    assert_eq!(values.len(), 92, "expected one <lastmod> per <url>");
 }
 
 #[test]

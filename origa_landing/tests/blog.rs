@@ -305,15 +305,16 @@ async fn vi_articles_do_not_contain_kanji() {
     // English article, where "kanji" is the correct term — they are skipped
     // via the `noindex` robots marker only fallback pages carry.
     //
-    // The substring "kanji" is matched case-insensitively. Two proper nouns
-    // that contain the substring are subtracted from the count because they
-    // are product names, not the conceptual term:
-    //   - "KanjiSnap" — iOS OCR app
-    //   - "WaniKani"  — does NOT contain "kanji" (substring is "kani"); listed
-    //     here for documentation only, no subtraction needed.
+    // The substring "kanji" is matched case-insensitively. Proper nouns that
+    // contain the substring are subtracted from the count because they are
+    // not the conceptual term:
+    //   - "KanjiSnap"      — iOS OCR app
+    //   - "/docs/kanji"    — docs route slug (URL paths are not localized)
+    //   - "WaniKani"       — does NOT contain "kanji" (substring is "kani");
+    //     listed here for documentation only, no subtraction needed.
     // If a future article cites another `<…>Kanji<…>` proper noun, add it to
     // `PROPER_NOUNS_WITH_KANJI_SUBSTRING` rather than weakening the assertion.
-    const PROPER_NOUNS_WITH_KANJI_SUBSTRING: &[&str] = &["kanjisnap"];
+    const PROPER_NOUNS_WITH_KANJI_SUBSTRING: &[&str] = &["kanjisnap", "/docs/kanji"];
 
     for slug in ALL_SLUGS {
         let (_, body) = get(&format!("/vi/blog/{slug}")).await;
