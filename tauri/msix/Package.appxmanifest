@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Microsoft Store (MSIX) package manifest for Origa.
+
+  The `__PARTNER_CENTER_*__` placeholders are replaced by
+  tauri/scripts/build-msix.ps1 from its parameters. They MUST be filled with
+  the exact values from Partner Center → Product management → Product
+  Identity after the "MSIX or PWA app" product is created there:
+    - Identity/Name       ← Package/Identity Name
+    - Identity/Publisher  ← Package/Identity Publisher (the CN=... value)
+    - PublisherDisplayName← the publisher display name shown on the listing
+
+  Store certification validates these against the reserved product identity
+  byte-for-byte; mismatched values are rejected at upload time.
+
+  Version="0.0.0.0" is a build-time placeholder — build-msix.ps1 rewrites it
+  (stable X.Y.Z → X.Y.Z.0, anything else → 0.0.0.<run_number> smoke value).
+-->
+<Package
+    xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
+
+    <Identity
+        Name="__PARTNER_CENTER_IDENTITY_NAME__"
+        Publisher="__PARTNER_CENTER_PUBLISHER__"
+        Version="0.0.0.0" />
+
+    <Properties>
+        <DisplayName>Origa</DisplayName>
+        <PublisherDisplayName>__PARTNER_CENTER_PUBLISHER_DISPLAY_NAME__</PublisherDisplayName>
+        <Logo>Assets\Square150x150Logo.png</Logo>
+    </Properties>
+
+    <Resources>
+        <!-- UI ships EN+RU inside the app itself; the package language only
+             drives resource resolution, one neutral-enough entry suffices.
+             Every MSIX must declare at least one language. -->
+        <Resource Language="en-us" />
+    </Resources>
+
+    <Dependencies>
+        <!-- 19041 (Win10 2004): first release line with the uap10 manifest
+             attributes and a stable evergreen WebView2 story. -->
+        <TargetDeviceFamily
+            Name="Windows.Desktop"
+            MinVersion="10.0.19041.0"
+            MaxVersionTested="10.0.26100.0" />
+    </Dependencies>
+
+    <Capabilities>
+        <!-- Mandatory for packaged Win32 (Tauri) desktop apps. Certification
+             flags it as a WARNING, reviews it, and grants it — do not remove. -->
+        <rescap:Capability Name="runFullTrust" />
+    </Capabilities>
+
+    <Applications>
+        <Application
+            Id="Origa"
+            Executable="Origa.exe"
+            EntryPoint="Windows.FullTrustApplication">
+            <uap:VisualElements
+                DisplayName="Origa"
+                Description="Japanese language learning — FSRS spaced repetition, OCR, STT"
+                BackgroundColor="transparent"
+                Square150x150Logo="Assets\Square150x150Logo.png"
+                Square44x44Logo="Assets\Square44x44Logo.png">
+                <uap:DefaultTile Wide310x310Logo="Assets\Square310x310Logo.png" ShortName="Origa" />
+            </uap:VisualElements>
+            <Extensions>
+                <!-- `origa://` deep links: OAuth callbacks land here instead
+                     of the NSIS-registry route used by direct downloads. -->
+                <uap:Extension Category="windows.protocol">
+                    <uap:Protocol Name="origa" />
+                </uap:Extension>
+            </Extensions>
+        </Application>
+    </Applications>
+</Package>
