@@ -6,6 +6,7 @@ use crate::ui_components::{
 };
 use crate::utils::use_drag_and_drop;
 use leptos::prelude::*;
+use leptos::task::spawn_local;
 use std::sync::Arc;
 use wasm_bindgen::JsCast;
 use web_sys::js_sys::Function;
@@ -46,6 +47,17 @@ pub fn ImageInputStage(
     let error_message = RwSignal::new(None::<String>);
     let ocr_loading_state = OcrLoadingState::new();
     let disposed = StoredValue::new(());
+    // Guideline 4.2.3(ii): disclose the NDLOCR fallback model download size
+    // before the user commits to recognition. The native device-ai path
+    // (macOS, iOS, Android) downloads nothing, so the notice is only shown
+    // when the capabilities query reports native OCR unavailable.
+    let needs_model_download = RwSignal::new(false);
+    spawn_local(async move {
+        let native_available =
+            crate::core::device_ai::available(crate::core::device_ai::Feature::TextRecognition)
+                .await;
+        needs_model_download.set(!native_available);
+    });
 
     Effect::new(move |_| {
         if !is_open.get() {
@@ -247,6 +259,21 @@ pub fn ImageInputStage(
                                         <Text size=TextSize::Small variant=TypographyVariant::Muted>
                                             {t!(i18n, words.image.file_types)}
                                         </Text>
+                                        {move || {
+                                            needs_model_download
+                                                .get()
+                                                .then(|| {
+                                                    view! {
+                                                        <Text
+                                                            size=TextSize::Small
+                                                            variant=TypographyVariant::Muted
+                                                            test_id=Signal::derive(|| "ocr-model-download-notice".to_string())
+                                                        >
+                                                            {t!(i18n, words.image.model_download_notice)}
+                                                        </Text>
+                                                    }
+                                                })
+                                        }}
                                     </div>
                                 </label>
                             </div>

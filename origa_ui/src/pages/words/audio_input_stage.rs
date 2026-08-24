@@ -207,6 +207,17 @@ pub(super) fn AudioInputStage(
     let audio_state = RwSignal::new(AudioState::Idle);
     let error_message = RwSignal::new(None::<String>);
     let status_text = RwSignal::new(None::<String>);
+    // Guideline 4.2.3(ii): disclose the Whisper fallback download size before
+    // the user commits to transcription. The native device-ai path (macOS,
+    // iOS, Android) downloads nothing, so the notice is only shown when the
+    // capabilities query reports native ASR unavailable.
+    let needs_model_download = RwSignal::new(false);
+    spawn_local(async move {
+        let native_available =
+            crate::core::device_ai::available(crate::core::device_ai::Feature::SpeechRecognition)
+                .await;
+        needs_model_download.set(!native_available);
+    });
 
     Effect::new(move |_| {
         if !is_open.get() {
@@ -379,6 +390,17 @@ pub(super) fn AudioInputStage(
                                         </svg>
                                         <p class="text-sm text-[var(--fg-muted)]">{i18n.get_keys().words().audio().drop_zone().inner().to_string()}</p>
                                         <p class="text-xs text-[var(--fg-muted)]">{i18n.get_keys().words().audio().file_type().inner().to_string()}</p>
+                                        {move || {
+                                            needs_model_download
+                                                .get()
+                                                .then(|| {
+                                                    view! {
+                                                        <p class="text-xs text-[var(--fg-muted)]" data-testid="stt-model-download-notice">
+                                                            {i18n.get_keys().words().audio().model_download_notice().inner().to_string()}
+                                                        </p>
+                                                    }
+                                                })
+                                        }}
                                     </div>
                                 </label>
                             </div>
