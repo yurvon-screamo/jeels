@@ -153,3 +153,29 @@ ask-first CI-правкой. Ревью раунд 2 в процессе (фон
 
 S5 тренировка (+извлечение оркестрации из LessonContent), S6 итоговый
 экран, S7 e2e + CI ask-first правка.
+
+---
+
+# Срезы S5–S7 (2026-08-24)
+
+## S5+S6 — тренировка и итог (8fad1d82)
+
+TrainingBody: последовательная ротация presentation_order (шафл витка
+отложен), фронты по типу×подфазе, рейтинг → AcquaintanceHand::record_answer,
+HandCompleted → CompleteAcquaintanceHandUseCase → Summary. Полоса из
+entry.progress_in(subphase); тег фазы с направлением. S6: штамп +
+«К ревью» → stage=Inactive → обычный урок.
+
+Уроки: код писать ТОЛЬКО после чтения фактических сигнатур домена
+(record_answer -> Result<AnswerOutcome>, execute(Vec<Ulid>)) — попытка
+«по памяти» дала три несобираемых файла подряд.
+
+## S7 — e2e (f9916382)
+
+acquaintance_flow.spec.ts за env-гейтом ACQUAINTANCE_MODE=1: happy path
+и «Уже знаю». Дефолтный CI пропускает; включение прогона под флагом —
+ask-first правка ci.yml (документировано в end2end/AGENTS.md).
+
+## Осталось
+
+Ревью S5–S7 (запущено), пуш коммитов, ручной smoke на реальной сборке.
