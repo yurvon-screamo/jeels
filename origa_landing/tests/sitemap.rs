@@ -70,7 +70,7 @@ fn every_url_block_has_full_hreflang_alternate_set() {
     //   x-default).
     // - Docs pages and the EN+RU-only blog cluster (2026-08): 3 entries
     //   (en/ru + x-default) — alternates must point only at translations
-    //   that exist (see `PARTIAL_COVERAGE_SLUGS` in tests/blog.rs).
+    //   that exist (see the partial-coverage cases in tests/blog.rs).
     const PARTIAL_COVERAGE_PATHS: &[&str] = &[
         "/blog/learn-hiragana-katakana",
         "/blog/jlpt-n5-preparation",
