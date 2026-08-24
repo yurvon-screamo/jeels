@@ -78,7 +78,7 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     url: &str,
     callback_scheme: &str,
-    tx: tokio::sync::oneshot::Sender<Result<AuthResult, String>>,
+    tx: std::sync::mpsc::Sender<Result<AuthResult, String>>,
 ) {
     // Every early-exit path owns `tx` and sends the failure itself, so the
     // frontend always learns the real cause.

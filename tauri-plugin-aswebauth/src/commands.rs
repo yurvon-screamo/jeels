@@ -69,7 +69,7 @@ pub async fn start_auth<R: tauri::Runtime>(
     url: String,
     callback_scheme: String,
 ) -> Result<AuthResult, String> {
-    let (tx, rx) = tokio::sync::oneshot::channel::<Result<AuthResult, String>>();
+    let (tx, rx) = std::sync::mpsc::channel::<Result<AuthResult, String>>();
 
     let app_for_session = app.clone();
     let mut tx_for_session = Some(tx);
@@ -83,8 +83,14 @@ pub async fn start_auth<R: tauri::Runtime>(
     })
     .map_err(|e| format!("failed to dispatch onto the main thread: {e}"))?;
 
-    rx.await
-        .map_err(|_| "authentication session dropped before completing".to_string())?
+    // The completion handler fires when the user finishes the flow — seconds
+    // later. A blocking recv on a dedicated worker thread is the cheapest
+    // bridge to async here (same pattern as device_ai_commands).
+    let received = tauri::async_runtime::spawn_blocking(move || rx.recv())
+        .await
+        .map_err(|e| format!("authentication worker failed: {e}"))?;
+
+    received.map_err(|_| "authentication session dropped before completing".to_string())?
 }
 
 /// Other platforms stub — always returns an error. Unreachable because the
