@@ -42,6 +42,45 @@ jobs:
               id: version
               uses: ./.github/actions/version
 
+    # Compile gate for macOS-only native code (tauri-plugin-aswebauth,
+    # device-ai commands): the workspace clippy job runs on Linux and never
+    # sees `cfg(target_os = "macos")` code, so without this check such code
+    # would first compile on a release tag. Runs check + clippy for both
+    # darwin triples used by the MAS universal build. Public repo — macos
+    # runners are free; check/clippy (no bundling) keeps the job in minutes.
+    macos-check:
+        name: Check (aarch64 + x86_64 macOS)
+        permissions:
+            contents: read
+        runs-on: macos-15
+        if: github.actor != 'dependabot[bot]'
+        env:
+            ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                target: [aarch64-apple-darwin, x86_64-apple-darwin]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Rust
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: ${{ matrix.target }}
+                  shared-key: origa-macos-check-v1
+                  save-if: ${{ github.ref == 'refs/heads/master' }}
+
+            - name: Check tauri app + aswebauth plugin
+              run: |
+                  cargo check --locked -p origa-app -p tauri-plugin-aswebauth \
+                    --target ${{ matrix.target }}
+
+            - name: Clippy tauri app + aswebauth plugin
+              run: |
+                  cargo clippy --locked -p origa-app -p tauri-plugin-aswebauth \
+                    --target ${{ matrix.target }} --all-targets -- -D warnings
+
     lint:
         name: Lint
         permissions:
@@ -531,7 +570,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri]
+        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check]
         if: always()
         runs-on: ubuntu-latest
         steps:
