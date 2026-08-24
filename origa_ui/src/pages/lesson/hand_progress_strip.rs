@@ -20,6 +20,10 @@ pub fn HandProgressStrip(
                 (0..total)
                     .map(|index| {
                         let filled = progress.get(index).copied().unwrap_or(0);
+                        if filled == u8::MAX {
+                            // Карта выведена из руки: ячейка схлопывается.
+                            return view! { <div class="w-0 h-full" /> }.into_any();
+                        }
                         let percent = (filled.min(3)) as f64 / 3.0 * 100.0;
                         view! {
                             <div class="w-6 h-2 border border-[var(--border-dark)] bg-[var(--bg-paper)] overflow-hidden">
@@ -29,6 +33,7 @@ pub fn HandProgressStrip(
                                 ></div>
                             </div>
                         }
+                            .into_any()
                     })
                     .collect_view()
             }}

@@ -73,10 +73,11 @@ pub fn AcquaintanceView() -> impl IntoView {
             let subphase = hand.subphase();
             hand.presentation_order()
                 .iter()
-                .map(|id| {
-                    hand.entry(*id)
-                        .map(|e| e.progress_in(subphase))
-                        .unwrap_or(0)
+                .map(|id| match hand.entry(*id) {
+                    // Выведенная («Уже знаю») карта схлопывает ячейку.
+                    Some(e) if e.is_retired() => u8::MAX,
+                    Some(e) => e.progress_in(subphase),
+                    None => 0,
                 })
                 .collect()
         })
@@ -348,15 +349,36 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
         });
     });
 
-    let mark_known_and_advance = Callback::new(move |card_id: Ulid| {
-        ctx.state.update(|state| {
-            state.confirm_known = false;
-            state.skipped_ids.insert(card_id);
-            if state.advance_presentation() {
-                state.stage = AcquaintanceStage::Training;
+    let mark_known_and_advance = {
+        let ctx = ctx.clone();
+        Callback::new(move |card_id: Ulid| {
+            let mut complete_now = false;
+            ctx.state.update(|state| {
+                state.confirm_known = false;
+                state.skipped_ids.insert(card_id);
+                // Карта выбывает из руки: критерий считается выполненным,
+                // тренировка и подфазы её больше не ждут (спека §Тренировка).
+                if let Some(hand) = state.hand.as_mut() {
+                    hand.retire_card(card_id);
+                }
+                if state.advance_presentation() {
+                    // Активных карт не осталось — рука закрывается без тренировки:
+                    // сценарий спеки «все карты отмечены известными».
+                    complete_now = !state.hand.as_ref().is_some_and(|hand| {
+                        hand.presentation_order()
+                            .iter()
+                            .any(|id| hand.entry(*id).is_some_and(|e| !e.is_retired()))
+                    });
+                    if !complete_now {
+                        state.stage = AcquaintanceStage::Training;
+                    }
+                }
+            });
+            if complete_now {
+                ctx.complete_hand_and_show_summary();
             }
-        });
-    });
+        })
+    };
 
     let repo_stored = StoredValue::new(ctx.repository.clone());
     // Защита от двойного клика «Да, знаю» на время асинхронной записи.
@@ -389,13 +411,19 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
         })
     };
 
-    let on_confirm_open = Callback::new(move |_: ()| {
-        ctx.state.update(|state| state.confirm_known = true);
-    });
+    let on_confirm_open = {
+        let ctx = ctx.clone();
+        Callback::new(move |_: ()| {
+            ctx.state.update(|state| state.confirm_known = true);
+        })
+    };
 
-    let on_cancel = Callback::new(move |_: ()| {
-        ctx.state.update(|state| state.confirm_known = false);
-    });
+    let on_cancel = {
+        let ctx = ctx.clone();
+        Callback::new(move |_: ()| {
+            ctx.state.update(|state| state.confirm_known = false);
+        })
+    };
 
     view! {
         <div

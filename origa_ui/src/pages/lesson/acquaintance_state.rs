@@ -1,6 +1,7 @@
 use crate::repository::HybridUserRepository;
-use leptos::prelude::*;
+use leptos::{prelude::*, task::spawn_local};
 use origa::domain::{AcquaintanceHand, NativeLanguage};
+use origa::use_cases::CompleteAcquaintanceHandUseCase;
 use std::collections::HashSet;
 use ulid::Ulid;
 
@@ -99,6 +100,34 @@ pub struct AcquaintanceContext {
     pub slides: RwSignal<Vec<AcquaintanceSlideData>>,
     pub known_kanji: RwSignal<HashSet<char>>,
     pub native_language: RwSignal<NativeLanguage>,
+}
+
+impl AcquaintanceContext {
+    /// Завершение руки: сидирование первого ревью назавтра + списание лимита
+    /// одной операцией (S2), затем итоговый экран. Вызывается и из конца
+    /// тренировки (`HandCompleted`), и из показа, когда выведены все карты.
+    pub fn complete_hand_and_show_summary(&self) {
+        self.state
+            .update(|state| state.stage = AcquaintanceStage::Summary);
+        let ids = self.state.with(|state| {
+            state
+                .hand
+                .as_ref()
+                .map(|h| h.presentation_order())
+                .unwrap_or_default()
+        });
+        let repo = self.repository.clone();
+        spawn_local(async move {
+            // Сидирование выполняет CompleteAcquaintanceHandUseCase (S2):
+            // первый ревью назавтра всем картам руки + лимит одной операцией.
+            if let Err(e) = CompleteAcquaintanceHandUseCase::new(&repo)
+                .execute(ids)
+                .await
+            {
+                tracing::error!("Acquaintance hand completion failed: {e}");
+            }
+        });
+    }
 }
 
 #[cfg(test)]

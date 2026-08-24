@@ -14,6 +14,9 @@ pub struct AcquaintanceEntry {
     pub(super) card_type: CardType,
     pub(super) forward_successes: u8,
     pub(super) reverse_successes: u8,
+    /// Карта выведена из руки («Уже знаю» в показе): критерий считается
+    /// выполненным, ответы заморожены, подфазная логика её не ждёт.
+    pub(super) retired: bool,
 }
 
 impl AcquaintanceEntry {
@@ -23,6 +26,14 @@ impl AcquaintanceEntry {
 
     pub fn card_type(&self) -> CardType {
         self.card_type
+    }
+
+    pub fn is_retired(&self) -> bool {
+        self.retired
+    }
+
+    pub(super) fn retire(&mut self) {
+        self.retired = true;
     }
 
     /// Видимый прогресс карты: счётчик текущей подфазы для слов, единый
@@ -35,7 +46,11 @@ impl AcquaintanceEntry {
     }
 
     /// Закрыла ли карта свой критерий полностью (для слов — в обеих подфазах).
+    /// Выведенные карты считаются закрытыми всегда.
     pub fn criterion_met(&self, subphase: Option<AcquaintanceSubphase>) -> bool {
+        if self.retired {
+            return true;
+        }
         self.progress_in(subphase) >= CRITERION_SUCCESSSES
             && (!self.is_word() || self.reverse_successes >= CRITERION_SUCCESSSES)
     }

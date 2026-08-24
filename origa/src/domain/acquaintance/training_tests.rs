@@ -118,3 +118,73 @@ fn word_closed_in_forward_is_frozen_while_neighbors_unclosed() {
         3
     );
 }
+
+#[test]
+fn retired_card_freezes_answers() {
+    // Arrange: слово выведено из руки («Уже знаю»)
+    let [word] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![(word, CardType::Vocabulary, 0, 0)],
+        Some(AcquaintanceSubphase::Forward),
+    );
+    assert!(hand.retire_card(word));
+
+    // Act / Assert: ответы заморожены независимо от исхода
+    assert_eq!(
+        hand.record_answer(word, true).unwrap(),
+        AnswerOutcome::ProgressFrozen
+    );
+    assert_eq!(
+        hand.record_answer(word, false).unwrap(),
+        AnswerOutcome::ProgressFrozen
+    );
+}
+
+#[test]
+fn retired_word_does_not_block_subphase_advance() {
+    // Arrange: два слова, второе выведено с незакрытым forward
+    let [a, b] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![
+            (a, CardType::Vocabulary, 2, 0),
+            (b, CardType::Vocabulary, 0, 0),
+        ],
+        Some(AcquaintanceSubphase::Forward),
+    );
+    assert!(hand.retire_card(b));
+
+    // Act: третий успех `a` закрывает forward — подфаза меняется, хотя `b`
+    // свой критерий не выполнял никогда
+    let outcome = hand.record_answer(a, true).unwrap();
+
+    // Assert
+    assert_eq!(outcome, AnswerOutcome::SubphaseAdvanced);
+}
+
+#[test]
+fn retired_card_does_not_block_hand_completion() {
+    // Arrange: слову `a` остался один reverse-успех; `b` выведена до
+    // каких-либо успехов
+    let [a, b] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![
+            (a, CardType::Vocabulary, 3, 2),
+            (b, CardType::Vocabulary, 0, 0),
+        ],
+        Some(AcquaintanceSubphase::Reverse),
+    );
+    assert!(hand.retire_card(b));
+
+    // Act: успех `a` закрывает её критерий — все entries закрыты (`b`
+    // выведена и считается закрытой автоматически)
+    let outcome = hand.record_answer(a, true).unwrap();
+
+    // Assert
+    assert_eq!(outcome, AnswerOutcome::HandCompleted);
+}
+
+#[test]
+fn retire_unknown_card_returns_false() {
+    let mut hand = AcquaintanceHand::new_test(vec![(Ulid::new(), CardType::Kanji, 0, 0)], None);
+    assert!(!hand.retire_card(Ulid::new()));
+}

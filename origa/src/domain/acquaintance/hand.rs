@@ -65,6 +65,7 @@ impl AcquaintanceHand {
                     card_type,
                     forward_successes: 0,
                     reverse_successes: 0,
+                    retired: false,
                 })
                 .collect(),
             subphase: has_words.then_some(AcquaintanceSubphase::Forward),
@@ -84,6 +85,7 @@ impl AcquaintanceHand {
                     card_type,
                     forward_successes: forward,
                     reverse_successes: reverse,
+                    retired: false,
                 })
                 .collect(),
             subphase,
@@ -131,9 +133,11 @@ impl AcquaintanceHand {
             .ok_or(OrigaError::CardNotFound { card_id })?;
 
         let subphase = self.subphase;
-        if self.entries[entry_index].progress_in(subphase) >= CRITERION_SUCCESSSES {
-            // Закрывшие критерий продолжают отвечаться с замороженным
-            // прогрессом — и на успех, и на провал.
+        if self.entries[entry_index].is_retired()
+            || self.entries[entry_index].progress_in(subphase) >= CRITERION_SUCCESSSES
+        {
+            // Закрывшие критерий (и выведенные из руки) продолжают
+            // отвечаться с замороженным прогрессом — и на успех, и на провал.
             return Ok(AnswerOutcome::ProgressFrozen);
         }
         if !remembered {
@@ -144,11 +148,13 @@ impl AcquaintanceHand {
 
         if let Some(AcquaintanceSubphase::Forward) = self.subphase {
             let answered_is_word = self.entries[entry_index].is_word();
+            // Выведенные слова считаются закрывшими forward-критерий:
+            // подфаза не ждёт карт, выбывших «Уже знаю».
             let all_words_closed_forward = self
                 .entries
                 .iter()
                 .filter(|entry| entry.is_word())
-                .all(|word| word.forward_successes >= CRITERION_SUCCESSSES);
+                .all(|word| word.retired || word.forward_successes >= CRITERION_SUCCESSSES);
             if answered_is_word && all_words_closed_forward {
                 self.subphase = Some(AcquaintanceSubphase::Reverse);
                 return Ok(AnswerOutcome::SubphaseAdvanced);
@@ -166,5 +172,22 @@ impl AcquaintanceHand {
         Ok(AnswerOutcome::Counted {
             progress: self.entries[entry_index].progress_in(subphase),
         })
+    }
+
+    /// Выводит карту из руки («Уже знаю» в показе): критерий считается
+    /// выполненным, ответы замораживаются, подфазная логика её не ждёт.
+    /// Возвращает `true`, если карта была в руке.
+    pub fn retire_card(&mut self, card_id: Ulid) -> bool {
+        match self
+            .entries
+            .iter_mut()
+            .find(|entry| entry.card_id == card_id)
+        {
+            Some(entry) => {
+                entry.retire();
+                true
+            },
+            None => false,
+        }
     }
 }
