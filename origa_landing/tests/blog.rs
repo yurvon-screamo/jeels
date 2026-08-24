@@ -21,12 +21,12 @@ mod common;
 /// Canonical list of every published blog slug. Slugs with `en`/`ru` entries
 /// only (the 2026-08 cluster) are covered by the same tests as full-coverage
 /// slugs except where noted: hreflang expectations differ (see
-/// `PARTIAL_COVERAGE_SLUGS`) and script-consistency checks skip EN-fallback
-/// renders. Locale-specific variants live in `content/blog/<locale>/<slug>.md`.
-/// The const is shared by every script-consistency test and the
-/// parameterized JSON-LD/hreflang tests so that adding a new article is a
-/// one-line edit (append here + register in `ARTICLES`) instead of a
-/// five-file sweep.
+/// `article_hreflang_lists_exactly_its_translations`) and script-consistency
+/// checks skip EN-fallback renders. Locale-specific variants live in
+/// `content/blog/<locale>/<slug>.md`. The const is shared by every
+/// script-consistency test and the parameterized JSON-LD/hreflang tests so
+/// that adding a new article is a one-line edit (append here + register in
+/// `ARTICLES`) instead of a five-file sweep.
 const ALL_SLUGS: &[&str] = &[
     "anki-alternative-japanese",
     "best-japanese-learning-app",
@@ -35,17 +35,6 @@ const ALL_SLUGS: &[&str] = &[
     "best-japanese-learning-app-offline",
     "japanese-ai-tutor",
     "yaponskiy-s-nulya",
-    "learn-hiragana-katakana",
-    "jlpt-n5-preparation",
-    "japanese-textbooks-beginners",
-    "how-many-kanji-to-learn",
-    "learn-japanese-from-anime",
-];
-
-/// Slugs published in EN + RU only (no KO/VI translations yet). Their pages
-/// advertise a 3-entry hreflang set {en, ru, x-default} instead of the full
-/// 5-entry set, and `/ko|vi/blog/<slug>` serves the EN article as a fallback.
-const PARTIAL_COVERAGE_SLUGS: &[&str] = &[
     "learn-hiragana-katakana",
     "jlpt-n5-preparation",
     "japanese-textbooks-beginners",
