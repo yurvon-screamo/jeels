@@ -21,7 +21,7 @@ use std::rc::Rc;
 use block2::RcBlock;
 use objc2::rc::{Retained, autoreleasepool};
 use objc2::runtime::{NSObject, ProtocolObject};
-use objc2::{MainThreadOnly, define_class, msg_send};
+use objc2::{AnyThread, DefinedClass, MainThreadOnly, define_class, msg_send};
 use objc2_app_kit::NSWindow;
 use objc2_authentication_services::{
     ASWebAuthenticationPresentationContextProviding, ASWebAuthenticationSession,
@@ -50,7 +50,8 @@ define_class!(
 
     // SAFETY: The method signature matches the generated protocol declaration.
     unsafe impl ASWebAuthenticationPresentationContextProviding for AuthAnchorProvider {
-        #[unsafe(method(presentationAnchorForWebAuthenticationSession:))]
+        // Retained-returning protocol methods are registered via `method_id`.
+        #[unsafe(method_id(presentationAnchorForWebAuthenticationSession:))]
         unsafe fn presentation_anchor(
             &self,
             _session: &ASWebAuthenticationSession,
@@ -147,6 +148,14 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     });
 
     let session = unsafe {
+        // SAFETY: The completion handler is a valid block pointer.
+        //
+        // `initWithURL:callbackURLScheme:completionHandler:` is deprecated in
+        // favour of the `ASWebAuthenticationSessionCallback` variant, but the
+        // replacement requires pre-building a callback object and changes the
+        // interception model; the deprecated initializer remains fully
+        // functional for custom-scheme flows.
+        #[allow(deprecated)]
         ASWebAuthenticationSession::initWithURL_callbackURLScheme_completionHandler(
             ASWebAuthenticationSession::alloc(),
             &ns_url,
