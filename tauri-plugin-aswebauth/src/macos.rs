@@ -19,7 +19,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use block2::RcBlock;
-use objc2::rc::Retained;
+use objc2::rc::{Retained, autoreleasepool};
 use objc2::runtime::{NSObject, ProtocolObject};
 use objc2::{MainThreadOnly, define_class, msg_send};
 use objc2_app_kit::NSWindow;
@@ -27,7 +27,7 @@ use objc2_authentication_services::{
     ASWebAuthenticationPresentationContextProviding, ASWebAuthenticationSession,
     ASWebAuthenticationSessionErrorCode,
 };
-use objc2_foundation::{MainThreadMarker, NSError, NSString, NSURL, autoreleasepool};
+use objc2_foundation::{MainThreadMarker, NSError, NSObjectProtocol, NSString, NSURL};
 use tauri::Manager;
 
 use crate::commands::AuthResult;
