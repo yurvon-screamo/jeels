@@ -167,12 +167,16 @@ foreach ($pair in @(
     }
     $manifest = $manifest.Replace($pair[0], $pair[1])
 }
-$manifest = $manifest.Replace('Version="0.0.0.0"', "Version=`"$MsixVersion`"")
-if ($manifest -notmatch ('Version="' + [regex]::Escape($MsixVersion) + '"')) {
+# Scope the rewrite to the Identity element: a blanket .Replace would also
+# hit the explanatory XML comment (and any future second Version attribute).
+$identityPattern = '(<Identity\b[^>]*?\bVersion=")0\.0\.0\.0(")'
+$patched = [regex]::Replace($manifest, $identityPattern, ('${1}' + $MsixVersion + '${2}'))
+if ($patched -eq $manifest) {
     # Silent no-op here would ship a 0.0.0.0 package that Partner Center
     # rejects with a misleading version error — fail loudly instead.
     throw "Version placeholder replacement failed — template drift in Package.appxmanifest."
 }
+$manifest = $patched
 Set-Content -Path $ManifestPath -Value $manifest -Encoding UTF8
 
 # --- 5. Ephemeral self-signed certificate ------------------------------------

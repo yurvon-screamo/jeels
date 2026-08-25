@@ -1,7 +1,9 @@
 name: Build Windows Store MSIX
 
 # Reusable builder for the Microsoft Store MSIX package (ADR-042). Called
-# from tauri.yml on stable tags and from ci.yml for PR smoke builds.
+# from tauri.yml ONLY: on stable tags, plus workflow_dispatch runs with
+# force_store_msix=true (smoke builds — their 0.0.0.<run> packages must
+# never be submitted to Partner Center).
 #
 # The package is signed with an EPHEMERAL self-signed certificate generated
 # inside the job; the .pfx travels with the artifact so the package can be
