@@ -81,7 +81,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Select latest Xcode with iOS 26 SDK
               shell: bash
@@ -204,7 +204,7 @@ jobs:
                   ls -la "$IPA_PATH"
 
             - name: Upload .ipa artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: ios-build
                   path: ${{ steps.ipa.outputs.path }}
@@ -276,7 +276,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Select latest Xcode with macOS SDK
               shell: bash
@@ -551,7 +551,7 @@ jobs:
                   ls -la "$PKG_PATH"
 
             - name: Upload .pkg artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: macos-pkg-build
                   path: ${{ steps.pkg.outputs.path }}

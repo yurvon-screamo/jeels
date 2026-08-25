@@ -38,7 +38,7 @@ jobs:
             commit_short: ${{ steps.version.outputs.commit_short }}
             build_date: ${{ steps.version.outputs.build_date }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   fetch-depth: 0
                   filter: blob:none
@@ -67,7 +67,7 @@ jobs:
             SENTRY_ENVIRONMENT: ${{ needs.version.outputs.version_type == 'stable' && 'production' || needs.version.outputs.version_type == 'prerelease' && 'staging' || 'development' }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Update version in config files
               uses: ./.github/actions/update-version
@@ -105,7 +105,7 @@ jobs:
                   ORIGA_CDN_REGION: ${{ vars.ORIGA_CDN_REGION }}
 
             - name: Upload frontend artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: frontend-dist
                   path: origa_ui/dist/
@@ -244,7 +244,7 @@ jobs:
                   cat latest.json
 
             - name: Upload latest.json artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: latest-json
                   path: latest.json

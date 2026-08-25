@@ -33,7 +33,7 @@ jobs:
             commit_short: ${{ steps.version.outputs.commit_short }}
             build_date: ${{ steps.version.outputs.build_date }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   fetch-depth: 0
                   filter: blob:none
@@ -58,7 +58,7 @@ jobs:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Setup Rust
               uses: ./.github/actions/setup-rust
@@ -94,7 +94,7 @@ jobs:
             TRAILBASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -146,7 +146,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Download CDN data
               uses: ./.github/actions/download-cdn
@@ -155,7 +155,7 @@ jobs:
                   cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: cdn-data
                   path: cdn/
@@ -174,7 +174,7 @@ jobs:
             TRAILBASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -226,7 +226,7 @@ jobs:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -273,7 +273,7 @@ jobs:
             TRAILBASE_URL: http://localhost:4000
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -312,7 +312,7 @@ jobs:
                   TRAILBASE_URL: http://localhost:4000
 
             - name: Upload WASM artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: wasm-dist
                   path: origa_ui/dist/
@@ -341,7 +341,7 @@ jobs:
             CI: "true"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Download WASM artifact
               uses: actions/download-artifact@v8
@@ -440,7 +440,7 @@ jobs:
 
             - name: Upload blob report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: blob-report-${{ matrix.group }}
                   path: end2end/blob-report/
@@ -455,7 +455,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Install Node.js dependencies
               working-directory: end2end
@@ -498,7 +498,7 @@ jobs:
 
             - name: Upload merged Playwright report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: playwright-report-merged
                   path: end2end/playwright-report/
@@ -532,13 +532,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Build landing image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./origa_landing/Dockerfile
@@ -555,13 +555,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Build UI image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./origa_ui/Dockerfile
