@@ -181,7 +181,7 @@ jobs:
                   fi
 
             - name: Upload Windows artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: windows-build
                   path: |
@@ -286,7 +286,7 @@ jobs:
                   fi
 
             - name: Upload Linux artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: linux-build
                   path: |
@@ -450,7 +450,7 @@ jobs:
                   cp "$src" "origa.apk"
 
             - name: Upload Android APK
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: android-apk
                   path: |
@@ -522,7 +522,7 @@ jobs:
             - name: Upload Android AAB
               if: steps.rename-aab.outcome == 'success'
               continue-on-error: true
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               env:
                   VERSION: ${{ inputs.version }}
               with:

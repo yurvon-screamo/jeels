@@ -82,7 +82,7 @@ jobs:
               run: ./scripts/build-msix.ps1 -Version '${{ inputs.version }}'
 
             - name: Upload MSIX artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: windows-msix
                   path: |

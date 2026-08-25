@@ -204,7 +204,7 @@ jobs:
                   ls -la "$IPA_PATH"
 
             - name: Upload .ipa artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: ios-build
                   path: ${{ steps.ipa.outputs.path }}
@@ -551,7 +551,7 @@ jobs:
                   ls -la "$PKG_PATH"
 
             - name: Upload .pkg artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: macos-pkg-build
                   path: ${{ steps.pkg.outputs.path }}

@@ -155,7 +155,7 @@ jobs:
                   cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: cdn-data
                   path: cdn/
@@ -312,7 +312,7 @@ jobs:
                   TRAILBASE_URL: http://localhost:4000
 
             - name: Upload WASM artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: wasm-dist
                   path: origa_ui/dist/
@@ -440,7 +440,7 @@ jobs:
 
             - name: Upload blob report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: blob-report-${{ matrix.group }}
                   path: end2end/blob-report/
@@ -498,7 +498,7 @@ jobs:
 
             - name: Upload merged Playwright report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: playwright-report-merged
                   path: end2end/playwright-report/
@@ -535,10 +535,10 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Build landing image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./origa_landing/Dockerfile
@@ -558,10 +558,10 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Build UI image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./origa_ui/Dockerfile
