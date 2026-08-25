@@ -81,7 +81,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Select latest Xcode with iOS 26 SDK
               shell: bash
@@ -276,7 +276,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Select latest Xcode with macOS SDK
               shell: bash
