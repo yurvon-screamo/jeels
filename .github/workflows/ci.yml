@@ -525,24 +525,6 @@ jobs:
             android-key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
             android-key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
 
-    # TEMPORARY (PR smoke): exercises the MSIX pipeline on every PR push so
-    # the first package is built and uploaded before this lands on master.
-    # REMOVED in a follow-up commit of the same PR once verified — release
-    # builds go exclusively through tauri.yml's build-windows-store job.
-    # pull_request-only: must not double-build MSIX on stable tags, and it
-    # is part of the CI Gate while it exists.
-    store-msix-pr-test:
-        name: TEMP Store MSIX PR smoke
-        if: github.event_name == 'pull_request'
-        needs: [version, e2e-build]
-        uses: ./.github/workflows/_build-windows-store.yml
-        with:
-            version: ${{ needs.version.outputs.version }}
-            version_type: development
-            commit_sha: ${{ needs.version.outputs.commit_sha }}
-            build_date: ${{ needs.version.outputs.build_date }}
-            wasm_artifact_name: wasm-dist
-
     docker-build-landing:
         name: Docker Build (landing)
         permissions:
@@ -594,7 +576,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check, store-msix-pr-test]
+        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check]
         if: always()
         runs-on: ubuntu-latest
         steps:
@@ -617,6 +599,5 @@ jobs:
                   check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
                   check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
                   check "build-tauri" "${{ needs.build-tauri.result }}" "success"
-                  check "store-msix-pr-test" "${{ needs.store-msix-pr-test.result }}" "success" "skipped"
 
             - run: echo "All checks passed"
