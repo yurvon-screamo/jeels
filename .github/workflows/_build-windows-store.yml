@@ -1,0 +1,92 @@
+name: Build Windows Store MSIX
+
+# Reusable builder for the Microsoft Store MSIX package (ADR-042). Called
+# from tauri.yml ONLY: on stable tags, plus workflow_dispatch runs with
+# force_store_msix=true (smoke builds — their 0.0.0.<run> packages must
+# never be submitted to Partner Center).
+#
+# The package is signed with an EPHEMERAL self-signed certificate generated
+# inside the job; the .pfx travels with the artifact so the package can be
+# installed locally after trusting the cert. This is submittable as-is: the
+# Store re-signs MSIX packages with a Microsoft certificate at publication.
+on:
+    workflow_call:
+        inputs:
+            version:
+                type: string
+                required: true
+            version_type:
+                type: string
+                required: true
+            commit_sha:
+                type: string
+                required: true
+            build_date:
+                type: string
+                required: true
+            wasm_artifact_name:
+                type: string
+                required: true
+
+permissions:
+    contents: read
+
+jobs:
+    build-windows-store:
+        name: Build Windows Store MSIX
+        runs-on: windows-latest
+        permissions:
+            contents: read
+        env:
+            ORIGA_VERSION: ${{ inputs.version }}
+            ORIGA_COMMIT: ${{ inputs.commit_sha }}
+            ORIGA_BUILD_DATE: ${{ inputs.build_date }}
+            # Sentry (ADR-036): same mapping contract as the other builders.
+            SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+            SENTRY_ENVIRONMENT: ${{ inputs.version_type == 'stable' && 'production' || inputs.version_type == 'prerelease' && 'staging' || 'development' }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download WASM artifact
+              uses: actions/download-artifact@v8
+              with:
+                  name: ${{ inputs.wasm_artifact_name }}
+                  path: origa_ui/dist/
+
+            - name: Update version in config files
+              uses: ./.github/actions/update-version
+              with:
+                  version: ${{ inputs.version }}
+
+            - name: Setup Rust with caching
+              uses: ./.github/actions/setup-rust
+              with:
+                  shared-key: origa-win-store-v1
+                  # Branch-scoped cache: this workflow only runs on tag refs
+                  # and PR merge-refs, neither of which persists into the
+                  # master cache scope — store builds stay cold-by-design
+                  # (accepted residual, ADR-042). The key still isolates the
+                  # flavor from other windows caches.
+                  save-if: ${{ github.ref == 'refs/heads/master' }}
+
+            - name: Install Tauri CLI (npm)
+              working-directory: tauri
+              run: npm install
+
+            - name: Build and pack MSIX
+              shell: pwsh
+              working-directory: tauri
+              # ORIGA_APP_STORE=1 is set inside the script before the build;
+              # the updater machinery is compiled out per Store policy 10.2.5.
+              run: ./scripts/build-msix.ps1 -Version '${{ inputs.version }}'
+
+            - name: Upload MSIX artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: windows-msix
+                  path: |
+                      target/msix/*.msix
+                      target/msix/*.pfx
+                      target/msix/*.password.txt
+                  retention-days: 7

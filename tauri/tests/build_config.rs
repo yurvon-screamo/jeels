@@ -443,3 +443,55 @@ fn extract_sentry_ingest_host_rejects_missing_slash() {
 fn extract_sentry_ingest_host_rejects_empty() {
     assert_eq!(extract_sentry_ingest_host(""), None);
 }
+
+/// Regression guard: the Windows/Linux self-update machinery (updater +
+/// process plugins, `PendingUpdate` state, `check_for_update` /
+/// `install_update` IPC commands) must be compiled out of app-store builds
+/// via `not(app_store)` — Microsoft Store policy 10.2.5 forbids apps from
+/// updating themselves outside the Store, and a registered-but-unused
+/// command is exactly the kind of thing certification review flags.
+///
+/// The gate must appear at five sites in `tauri/src/lib.rs`: the
+/// `mod updater_commands` declaration, its `use` import, the plugin/state
+/// registration block, and each of the two `generate_handler!` entries.
+/// Single-instance deliberately stays UNGATED (plain platform cfg): under
+/// MSIX the OS delivers `origa://` protocol activations to an already-
+/// running instance through it. This drift guard fails if someone un-gates
+/// the updater or accidentally gates away single-instance.
+#[test]
+fn lib_rs_compiles_update_machinery_out_of_store_builds() {
+    let lib_rs = include_str!("../src/lib.rs");
+
+    let gated = lib_rs.matches(NOT_APP_STORE_GATE).count();
+    assert!(
+        gated >= 5,
+        "lib.rs must gate updater machinery with `{NOT_APP_STORE_GATE}` at \
+         5 sites (mod decl, use import, plugin block, 2 handler entries), \
+         found {gated}. Store policy 10.2.5 requires the self-update path to \
+         be compiled out of app-store builds."
+    );
+
+    // Single-instance stays available in store builds: deep-link protocol
+    // activation depends on it (see ADR-042). Positional check — find the
+    // registration call and inspect the cfg attribute immediately above it,
+    // so the guard survives indentation/reflow churn.
+    let anchor = lib_rs
+        .find("builder = builder.plugin(tauri_plugin_single_instance::init")
+        .expect("single-instance registration missing from lib.rs");
+    let window_start = lib_rs[..anchor]
+        .rfind("#[cfg(")
+        .expect("cfg attribute above single-instance registration missing");
+    let nearest_cfg = &lib_rs[window_start..anchor];
+    assert!(
+        !nearest_cfg.contains("not(app_store)"),
+        "single-instance registration must NOT be gated on not(app_store) — \
+         MSIX deep-link protocol activation needs it in store builds. \
+         Got: {nearest_cfg}"
+    );
+    assert!(
+        nearest_cfg.contains(r#"any(windows, target_os = "linux")"#),
+        "single-instance must stay Windows/Linux-gated. Got: {nearest_cfg}"
+    );
+}
+
+const NOT_APP_STORE_GATE: &str = "#[cfg(all(any(windows, target_os = \"linux\"), not(app_store)))]";

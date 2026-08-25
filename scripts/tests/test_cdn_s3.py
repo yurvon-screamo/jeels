@@ -105,7 +105,7 @@ def test_multipart_threshold_forces_multipart_under_cli_default():
 
 
 def test_transfer_config_is_cached_per_chunk_size():
-    # ADR-041: the ~58MB installer uploads with 8MB parts; the cache must be
+    # Legacy ADR-041 lesson (58MB installer, 8MB parts): the cache must
     # keyed by chunk_size or a large-file upload would silently reuse the
     # 16KB config (3.5k sequential PUTs instead of 7).
     _cdn_s3._transfer_configs.clear()
@@ -134,7 +134,7 @@ def test_transfer_config_is_cached_per_chunk_size():
         # Override lookup is case-insensitive — real extensions vary in case.
         ("UPPER.WOFF2", "font/woff2"),
         # The Windows installer must never depend on a runner image's
-        # mimetypes registry (ADR-041).
+        # mimetypes registry.
         ("Origa_x64-setup.exe", "application/octet-stream"),
     ],
 )
@@ -363,7 +363,7 @@ def test_sync_directory_uses_normalized_prefix_key(tmp_path, monkeypatch):
 
 # ---------------------------------------------------------------------------
 # Credential-source contract: env credentials override the local profile
-# (ADR-041) — applies to every script built on this transport.
+# — applies to every script built on this transport.
 # ---------------------------------------------------------------------------
 
 
@@ -412,7 +412,7 @@ def test_local_profile_used_when_no_env_credentials(monkeypatch, _fresh_client):
 
 
 # ---------------------------------------------------------------------------
-# upload_file — chunk_size / checksum_algorithm (ADR-041 release uploads)
+# upload_file — chunk_size / checksum_algorithm options
 # ---------------------------------------------------------------------------
 
 
@@ -425,7 +425,7 @@ def test_upload_file_passes_chunk_size_config_and_checksum(tmp_path, monkeypatch
     chunk = 8 * 1024 * 1024
     upload_file(
         local,
-        "releases/1.2.3/Origa_x64-setup.exe",
+        "content/grammar/n4.json",
         "public, max-age=300, must-revalidate",
         dry_run=False,
         chunk_size=chunk,
@@ -460,7 +460,7 @@ def test_upload_file_retries_once_without_checksum_on_store_rejection(
 
     upload_file(
         local,
-        "releases/latest/Origa_x64-setup.exe",
+        "content/grammar/n5.json",
         "no-cache",
         dry_run=False,
         checksum_algorithm="SHA256",
@@ -488,7 +488,7 @@ def test_upload_file_catches_boto3_flavored_upload_error(tmp_path, monkeypatch, 
 
     upload_file(
         local,
-        "releases/latest/Origa_x64-setup.exe",
+        "content/grammar/n5.json",
         "no-cache",
         dry_run=False,
         checksum_algorithm="SHA256",
@@ -513,10 +513,10 @@ def test_upload_file_boto3_flavor_without_checksum_fails_with_key(
     monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: _FakeUploadClient(err))
 
     with pytest.raises(SystemExit) as exc:
-        upload_file(local, "releases/latest/Origa_x64-setup.exe", "no-cache", dry_run=False)
+        upload_file(local, "content/grammar/n5.json", "no-cache", dry_run=False)
 
     assert exc.value.code == 1
-    assert "releases/latest/Origa_x64-setup.exe" in capsys.readouterr().err
+    assert "content/grammar/n5.json" in capsys.readouterr().err
 
 
 class _FlakyUploadClient:
@@ -572,7 +572,7 @@ def test_stat_object_returns_metadata_and_checksum_mode(monkeypatch):
     )
     monkeypatch.setattr(_cdn_s3, "_s3_upload_client", lambda: fake)
 
-    metadata = _cdn_s3.stat_object("releases/latest/Origa_x64-setup.exe")
+    metadata = _cdn_s3.stat_object("content/grammar/n5.json")
 
     assert metadata == _cdn_s3.ObjectMetadata(
         cache_control="no-cache",
@@ -581,7 +581,7 @@ def test_stat_object_returns_metadata_and_checksum_mode(monkeypatch):
     )
 
     checksum_meta = _cdn_s3.stat_object(
-        "releases/latest/Origa_x64-setup.exe", with_checksum=True
+        "content/grammar/n5.json", with_checksum=True
     )
     assert checksum_meta is not None
     assert checksum_meta.checksum_sha256 == "AbCd+/=="

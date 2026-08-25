@@ -128,10 +128,15 @@ jobs:
 
             - name: Verify App Store cfg compiles
               # The ORIGA_APP_STORE env var triggers build.rs to emit
-              # cargo:rustc-cfg=app_store, gating out updater /
-              # single-instance / devtools. Without this check, regressions
-              # in the gated code path surface only at tag-push on
-              # macos-15 (~30 min, blocks release).
+              # cargo:rustc-cfg=app_store, gating out the auto-updater and
+              # process-runner plugins plus their IPC commands (single-instance
+              # STAYS — deep-link protocol activation needs it). Note:
+              # devtools are NOT affected by this env var — disabling them
+              # requires the app-store cargo feature, which tauri-cli does
+              # not propagate; both store packaging paths (macOS, MSIX)
+              # currently ship with devtools enabled (see ADR-042). Without
+              # this check, regressions in the gated code path surface only
+              # at tag-push on macos-15 (~30 min, blocks release).
               run: ORIGA_APP_STORE=1 cargo check -p origa-app
 
     cdn-download:

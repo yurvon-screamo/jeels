@@ -10,6 +10,10 @@ on:
                 description: "Force Apple builds (consumes ~30 min of macOS runner per target)"
                 type: boolean
                 default: false
+            force_store_msix:
+                description: "Force Microsoft Store MSIX build (smoke-testing outside stable tags)"
+                type: boolean
+                default: false
 
 concurrency:
     group: tauri-${{ github.ref }}
@@ -127,6 +131,32 @@ jobs:
             android-keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
             android-key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
             android-key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+
+    build-windows-store:
+        name: Build Windows Store MSIX
+        # Isolation doctrine (mirrors upload-rustore): this job is
+        # intentionally ABSENT from release.needs — a transient MSIX build
+        # failure MUST NOT block the GitHub Release. Do NOT add
+        # build-windows-store to release.needs — that regresses isolation.
+        # Stable tags only: the Store is a stable channel, and MSIX versions
+        # must be strictly increasing per product (see ADR-042). Smoke-test
+        # builds of other refs go through force_store_msix (workflow_dispatch)
+        # and produce 0.0.0.<run_number> versions that must never be submitted.
+        if: >-
+            always() &&
+            needs.build-frontend.result == 'success' &&
+            ((startsWith(github.ref, 'refs/tags/v') &&
+              needs.version.outputs.version_type == 'stable') ||
+             inputs.force_store_msix == true) &&
+            github.actor != 'dependabot[bot]'
+        needs: [version, build-frontend]
+        uses: ./.github/workflows/_build-windows-store.yml
+        with:
+            version: ${{ needs.version.outputs.version }}
+            version_type: ${{ needs.version.outputs.version_type }}
+            commit_sha: ${{ needs.version.outputs.commit_sha }}
+            build_date: ${{ needs.version.outputs.build_date }}
+            wasm_artifact_name: frontend-dist
 
     build-apple:
         name: Build Apple (iOS + macOS)
@@ -329,32 +359,3 @@ jobs:
         secrets:
             rustore-key-id: ${{ secrets.RUSTORE_KEY_ID }}
             rustore-private-key: ${{ secrets.RUSTORE_PRIVATE_KEY }}
-
-    upload-release-cdn:
-        name: Upload installer to CDN (MS Store direct link)
-        # Stable-only: mirrors the stable Windows installer (ADR-025 alias)
-        # to the CDN releases/ prefix so Microsoft Store gets a DIRECT link
-        # (GitHub Releases 302-redirect and are rejected by the store).
-        # See ADR-041 and .github/workflows/_upload-release-cdn.yml.
-        #
-        # Intentionally NOT a dependency of `release` — same isolation
-        # rationale as upload-rustore above: a transient CDN/S3 failure
-        # MUST NOT block the GitHub Release. RC builds stay GitHub-only.
-        # Do NOT add upload-release-cdn to release.needs — that regresses
-        # isolation.
-        # Stable-only: only v*.*.* stable tags upload; the branch-validation
-        # escape hatch (workflow_dispatch + fake version) used to prove this
-        # pipeline end-to-end was temporary and removed before merge.
-        if: >
-            always() &&
-            needs.build-tauri.result == 'success' &&
-            startsWith(github.ref, 'refs/tags/v') &&
-            needs.version.outputs.version_type == 'stable'
-        needs: [version, build-tauri]
-        uses: ./.github/workflows/_upload-release-cdn.yml
-        with:
-            version: ${{ needs.version.outputs.version }}
-            version_type: ${{ needs.version.outputs.version_type }}
-        secrets:
-            cdn-access-key-id: ${{ secrets.ORIGA_CDN_S3_ACCESS_KEY_ID }}
-            cdn-secret-access-key: ${{ secrets.ORIGA_CDN_S3_SECRET_ACCESS_KEY }}
