@@ -1,10 +1,16 @@
 use super::acquaintance_keyboard::{
     AcquaintanceKeyboardActions, create_acquaintance_keyboard_handler,
 };
-use super::acquaintance_state::{AcquaintanceContext, AcquaintanceSlideData};
+use super::acquaintance_state::{
+    AcquaintanceContext, AcquaintanceSlideData, should_autoplay_word_audio,
+};
+use super::grammar_example::grammar_example_front;
 use super::keyboard_handler::is_typing_target;
 use crate::i18n::*;
-use crate::ui_components::{Button, ButtonVariant, FuriganaText, is_speech_supported, speak_word};
+use crate::ui_components::{
+    Button, ButtonVariant, FuriganaText, MarkdownText, MarkdownVariant, ReadingGroup,
+    is_speech_supported, speak_word,
+};
 use leptos::prelude::*;
 use leptos_use::use_event_listener;
 use origa::domain::{AcquaintanceSubphase, AnswerOutcome};
@@ -327,10 +333,14 @@ fn speak_if_supported(word: &str) {
 }
 
 /// Фронт тренировки: японская сторона (Forward) или перевод (Reverse,
-/// только слова); несловесные карты показывают единственный фронт.
+/// только слова). Кандзи показывают только знак — значение является
+/// ответом; грамматика — японскую строку примера без перевода (смысл
+/// тоже ответ, спека §Тренировка).
 #[component]
 fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -> impl IntoView {
     let known_kanji = ctx.known_kanji;
+    let is_muted =
+        use_context::<super::lesson_state::LessonContext>().map(|lesson_ctx| lesson_ctx.is_muted);
     view! {
         <div class="text-center py-10" data-testid="acquaintance-training-front">
             {move || {
@@ -353,6 +363,14 @@ fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) ->
                             }
                                 .into_any()
                         } else {
+                            // Автозвук вопроса слова — как в обычном уроке.
+                            let muted = is_muted
+                                .as_ref()
+                                .map(|signal| signal.get_untracked())
+                                .unwrap_or(false);
+                            if should_autoplay_word_audio(muted, is_speech_supported()) {
+                                speak_word(&word, 1.0);
+                            }
                             view! {
                                 <p class="font-serif text-5xl text-[var(--fg-black)] break-words">
                                     <FuriganaText text=word known_kanji=known_kanji.get_untracked() />
@@ -361,16 +379,23 @@ fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) ->
                                 .into_any()
                         }
                     },
-                    AcquaintanceSlideData::Kanji { kanji, name, .. } => view! {
+                    // Только знак: значение и чтения — ответ.
+                    AcquaintanceSlideData::Kanji { kanji, .. } => view! {
                         <p class="font-serif text-6xl text-[var(--fg-black)]">{kanji}</p>
-                        <p class="font-mono text-sm text-[var(--fg-muted)] pt-2">{name}</p>
                     }
                         .into_any(),
-                    AcquaintanceSlideData::Grammar { title, short_description, .. } => view! {
-                        <h2 class="font-serif text-3xl text-[var(--fg-black)]">{title}</h2>
-                        <p class="font-mono text-sm pt-2">{short_description}</p>
-                    }
-                        .into_any(),
+                    AcquaintanceSlideData::Grammar { title, examples, .. } => {
+                        // Пустые examples — фронт вырождается в заголовок
+                        // конструкции («знак» правила, не смысл).
+                        let front =
+                            grammar_example_front(&examples).unwrap_or_else(|| title.clone());
+                        view! {
+                            <p class="font-serif text-3xl text-[var(--fg-black)] leading-relaxed">
+                                {front}
+                            </p>
+                        }
+                            .into_any()
+                    },
                 }
             }}
         </div>
@@ -378,10 +403,12 @@ fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) ->
 }
 
 /// Ответ тренировки: противоположная фронту сторона. Для слов Reverse —
-/// слово с фуриганой и повтор аудио (спека §8.2).
+/// слово с фуриганой и повтор аудио (спека §8.2); кандзи раскрывают
+/// значения и частотные чтения; грамматика — смысл с полным примером.
 #[component]
 fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -> impl IntoView {
     let known_kanji = ctx.known_kanji;
+    let i18n = use_i18n();
     view! {
         <div class="text-center space-y-3" data-testid="acquaintance-training-answer">
             {move || {
@@ -412,16 +439,66 @@ fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -
                                 .into_any()
                         }
                     },
-                    AcquaintanceSlideData::Kanji { kanji, name, .. } => view! {
-                        <p class="font-serif text-5xl text-[var(--fg-black)]">{kanji}</p>
-                        <p class="font-mono text-sm text-[var(--fg-muted)]">{name}</p>
-                    }
-                        .into_any(),
-                    AcquaintanceSlideData::Grammar { title, short_description, .. } => view! {
-                        <h2 class="font-serif text-2xl text-[var(--fg-black)]">{title}</h2>
-                        <p class="font-mono text-sm">{short_description}</p>
-                    }
-                        .into_any(),
+                    AcquaintanceSlideData::Kanji {
+                        kanji,
+                        name,
+                        on_readings,
+                        kun_readings,
+                        ..
+                    } => {
+                        let has_on = on_readings.is_some();
+                        let has_kun = kun_readings.is_some();
+                        let on = StoredValue::new(on_readings);
+                        let kun = StoredValue::new(kun_readings);
+                        view! {
+                            <p class="font-serif text-5xl text-[var(--fg-black)]">{kanji}</p>
+                            <p class="font-mono text-sm text-[var(--fg-muted)]">{name}</p>
+                            <div class="pt-2 space-y-2">
+                                {has_on.then(|| {
+                                    view! {
+                                        <ReadingGroup
+                                            label=Signal::derive(move || {
+                                                i18n.get_keys().lesson().on_yomi().inner().to_string()
+                                            })
+                                            readings=on
+                                        />
+                                    }
+                                })}
+                                {has_kun.then(|| {
+                                    view! {
+                                        <ReadingGroup
+                                            label=Signal::derive(move || {
+                                                i18n.get_keys().lesson().kun_yomi().inner().to_string()
+                                            })
+                                            readings=kun
+                                        />
+                                    }
+                                })}
+                            </div>
+                        }
+                            .into_any()
+                    },
+                    AcquaintanceSlideData::Grammar {
+                        title,
+                        short_description,
+                        examples,
+                        ..
+                    } => {
+                        let has_example = grammar_example_front(&examples).is_some();
+                        let examples_stored = StoredValue::new(examples);
+                        view! {
+                            <h2 class="font-serif text-2xl text-[var(--fg-black)]">{title}</h2>
+                            <p class="font-mono text-sm">{short_description}</p>
+                            <Show when=move || has_example>
+                                <MarkdownText
+                                    content=Signal::derive(move || examples_stored.get_value())
+                                    known_kanji=known_kanji.get_untracked()
+                                    variant=Signal::derive(|| MarkdownVariant::Compact)
+                                />
+                            </Show>
+                        }
+                            .into_any()
+                    },
                 }
             }}
         </div>
