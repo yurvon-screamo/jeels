@@ -4,7 +4,7 @@ use super::acquaintance_keyboard::{
 use super::acquaintance_state::{
     AcquaintanceContext, AcquaintanceSlideData, should_autoplay_word_audio,
 };
-use super::grammar_example::grammar_example_front;
+use super::grammar_example::{first_example_markdown, grammar_example_front};
 use super::keyboard_handler::is_typing_target;
 use crate::i18n::*;
 use crate::ui_components::{
@@ -332,6 +332,32 @@ fn speak_if_supported(word: &str) {
     }
 }
 
+/// Forward-фронт слова в тренировке: автозвук вопроса через Effect —
+/// тот же механизм, что в показе (WordSlide) и карточках урока
+/// (lesson_card.rs). Никаких побочных эффектов в рендер-замыкании.
+#[component]
+fn WordTrainingFront(
+    word: String,
+    known_kanji: std::collections::HashSet<char>,
+    is_muted: Option<RwSignal<bool>>,
+) -> impl IntoView {
+    let word_stored = StoredValue::new(word.clone());
+    Effect::new(move |_| {
+        let muted = is_muted
+            .as_ref()
+            .map(|signal| signal.get_untracked())
+            .unwrap_or(false);
+        if should_autoplay_word_audio(muted, is_speech_supported()) {
+            speak_word(&word_stored.get_value(), 1.0);
+        }
+    });
+    view! {
+        <p class="font-serif text-5xl text-[var(--fg-black)] break-words">
+            <FuriganaText text=word known_kanji />
+        </p>
+    }
+}
+
 /// Фронт тренировки: японская сторона (Forward) или перевод (Reverse,
 /// только слова). Кандзи показывают только знак — значение является
 /// ответом; грамматика — японскую строку примера без перевода (смысл
@@ -363,18 +389,12 @@ fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) ->
                             }
                                 .into_any()
                         } else {
-                            // Автозвук вопроса слова — как в обычном уроке.
-                            let muted = is_muted
-                                .as_ref()
-                                .map(|signal| signal.get_untracked())
-                                .unwrap_or(false);
-                            if should_autoplay_word_audio(muted, is_speech_supported()) {
-                                speak_word(&word, 1.0);
-                            }
                             view! {
-                                <p class="font-serif text-5xl text-[var(--fg-black)] break-words">
-                                    <FuriganaText text=word known_kanji=known_kanji.get_untracked() />
-                                </p>
+                                <WordTrainingFront
+                                    word=word
+                                    known_kanji=known_kanji.get_untracked()
+                                    is_muted=is_muted
+                                />
                             }
                                 .into_any()
                         }
@@ -484,12 +504,20 @@ fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -
                         examples,
                         ..
                     } => {
-                        let has_example = grammar_example_front(&examples).is_some();
-                        let examples_stored = StoredValue::new(examples);
+                        // Фронт — JP-пример; при пустых examples фронт был
+                        // заголовком конструкции, и ответ не дублирует его.
+                        let example = first_example_markdown(&examples);
+                        let front_was_title = example.is_none();
+                        let examples_stored = StoredValue::new(example.unwrap_or_default());
+                        let title_stored = StoredValue::new(title);
                         view! {
-                            <h2 class="font-serif text-2xl text-[var(--fg-black)]">{title}</h2>
+                            <Show when=move || !front_was_title>
+                                <h2 class="font-serif text-2xl text-[var(--fg-black)]">
+                                    {title_stored.get_value()}
+                                </h2>
+                            </Show>
                             <p class="font-mono text-sm">{short_description}</p>
-                            <Show when=move || has_example>
+                            <Show when=move || !front_was_title>
                                 <MarkdownText
                                     content=Signal::derive(move || examples_stored.get_value())
                                     known_kanji=known_kanji.get_untracked()

@@ -172,14 +172,16 @@ impl AcquaintanceHand {
         let Some(AcquaintanceSubphase::Forward) = self.subphase else {
             return false;
         };
-        let mut active_words = self
+        let active_words: Vec<&AcquaintanceEntry> = self
             .entries
             .iter()
-            .filter(|entry| entry.is_word() && !entry.is_retired());
-        let all_closed = active_words.clone().all(|word| {
-            word.progress_in(Some(AcquaintanceSubphase::Forward)) >= CRITERION_SUCCESSSES
-        });
-        if all_closed && active_words.next().is_some() {
+            .filter(|entry| entry.is_word() && !entry.is_retired())
+            .collect();
+        let all_closed_forward = !active_words.is_empty()
+            && active_words.iter().all(|word| {
+                word.progress_in(Some(AcquaintanceSubphase::Forward)) >= CRITERION_SUCCESSSES
+            });
+        if all_closed_forward {
             self.subphase = Some(AcquaintanceSubphase::Reverse);
             return true;
         }

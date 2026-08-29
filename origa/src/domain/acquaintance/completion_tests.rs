@@ -117,8 +117,8 @@ fn hand_without_words_never_advances_and_completes_on_criteria() {
         ],
         None,
     );
-    // Act / Assert: первый ответ считается, второй закрывает руку,
-    // SubphaseAdvanced не возникает никогда
+    // Act / Assert: первый ответ считается, второй закрывает руку;
+    // смены направления не возникает — в руках без слов подфаз нет
     assert_eq!(
         hand.record_answer(kanji, true).unwrap(),
         AnswerOutcome::Counted { progress: 3 }

@@ -23,6 +23,15 @@ pub fn grammar_example_front(examples_markdown: &str) -> Option<String> {
         .map(str::to_string)
 }
 
+/// Первый пример целиком — code-fence с японской строкой и переводом.
+/// Блок ответа тренировки грамматики; `None` при пустых/битых examples.
+pub fn first_example_markdown(examples_markdown: &str) -> Option<String> {
+    let start = examples_markdown.find("```")?;
+    let after = &examples_markdown[start..];
+    let closing = after[3..].find("```")? + 3;
+    Some(after[..closing + 3].to_string())
+}
+
 #[cfg(test)]
 mod grammar_example_front_tests {
     use super::*;
@@ -67,7 +76,25 @@ mod grammar_example_front_tests {
     #[case::empty(String::new())]
     #[case::no_fence("просто текст без разметки")]
     #[case::unclosed_fence("```\n訳があります")]
+    #[test]
     fn returns_none_when_no_complete_example(#[case] examples: String) {
         assert_eq!(grammar_example_front(&examples), None);
+        assert_eq!(first_example_markdown(&examples), None);
+    }
+
+    #[test]
+    fn first_example_markdown_returns_single_closed_fence() {
+        // Arrange: два примера — в ответе только первый, целиком
+        let examples =
+            "```\n私は学生です。\nI am a student.\n```\n\n```\n猫がいます。\nThere is a cat.\n```";
+
+        // Act
+        let block = first_example_markdown(examples);
+
+        // Assert
+        assert_eq!(
+            block.as_deref(),
+            Some("```\n私は学生です。\nI am a student.\n```")
+        );
     }
 }

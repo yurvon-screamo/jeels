@@ -654,10 +654,6 @@ input[type="submit"],
     pointer-events: none;
 }
 
-
-
-
-
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -2710,6 +2706,7 @@ rt {
    - Loading: anima-skeleton-paper, anima-spinner-square
    - Japanese: anima-kanji-reveal, anima-furigana-show
    - Layout: anima-stagger, anima-page-fade, anima-slide-up
+   - Special: anima-pulse-subtle, anima-focus-ring
 
    Accessibility: prefers-reduced-motion отключает все анимации
    ============================================
@@ -2876,10 +2873,6 @@ rt {
 }
 
 /* === 3. ГЛУБИНА И СЛОИ === */
-
-/* Stamp-эффект (для важных меток) */
-
-
 
 
 /* === 4. ФОКУС И ВНИМАНИЕ === */
