@@ -19,10 +19,13 @@ fn last_forward_success_advances_subphase_and_resets_visible_progress() {
         ],
         Some(AcquaintanceSubphase::Forward),
     );
-    // Act: последний успех Forward
-    let outcome = hand.record_answer(b, true).unwrap();
+    // Act: последний успех Forward + смена направления на границе витка
+    assert_eq!(
+        hand.record_answer(b, true).unwrap(),
+        AnswerOutcome::Counted { progress: 3 }
+    );
+    assert!(hand.advance_subphase_if_words_done());
     // Assert: подфаза сменилась, видимый прогресс слов обнулился
-    assert_eq!(outcome, AnswerOutcome::SubphaseAdvanced);
     assert_eq!(hand.subphase(), Some(AcquaintanceSubphase::Reverse));
     for id in [a, b] {
         assert_eq!(
@@ -64,11 +67,12 @@ fn nonword_accumulates_progress_across_subphase_advance() {
         Some(AcquaintanceSubphase::Forward),
     );
 
-    // Act: слово закрывает Forward за всех
+    // Act: слово закрывает Forward за всех; смена направления — на границе
     assert_eq!(
         hand.record_answer(word, true).unwrap(),
-        AnswerOutcome::SubphaseAdvanced
+        AnswerOutcome::Counted { progress: 3 }
     );
+    assert!(hand.advance_subphase_if_words_done());
 
     // Act / Assert: успехи по кандзи в Reverse продолжают тот же счётчик
     // и завершают его критерий; дальше — заморозка

@@ -249,6 +249,31 @@ fn record_on_hand(ctx: &AcquaintanceContext, card_id: Ulid, remembered: bool) ->
     outcome
 }
 
+/// Граница витка тренировки: что делать после очередного ответа.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RotationBoundary {
+    /// Круг не закончен — порядок стабилен, направление не меняется.
+    MidRotation,
+    /// Последняя карта круга отвечена: направление могло смениться
+    /// (только здесь), порядок следующего круга перемешивается.
+    RotationEnded { subphase_advanced: bool },
+}
+
+/// Чистая логика границы круга: смена направления слов и перемешивание
+/// происходят ровно на границе — ошибка юзера порядок не трогает
+/// (docs/acquaintance-mode.md, правило «Тренировка»).
+pub fn rotation_boundary(
+    rotation_index: usize,
+    active_len: usize,
+    hand: &mut origa::domain::AcquaintanceHand,
+) -> RotationBoundary {
+    if active_len == 0 || rotation_index % active_len != 0 {
+        return RotationBoundary::MidRotation;
+    }
+    let subphase_advanced = hand.advance_subphase_if_words_done();
+    RotationBoundary::RotationEnded { subphase_advanced }
+}
+
 fn finish_answer(
     ctx: &AcquaintanceContext,
     showing_answer: &RwSignal<bool>,
@@ -263,17 +288,18 @@ fn finish_answer(
         return;
     }
 
-    // Смена подфазы — порядок витка перемешивается заново (спека §Тренировка).
-    if matches!(outcome, AnswerOutcome::SubphaseAdvanced) {
-        training_order.set(shuffled_order(training_order.get_untracked()));
-        rotation_index.set(0);
-        return;
-    }
-
     rotation_index.set(rotation_index.get_untracked() + 1);
-    // Новый виток — новый шафл.
-    let len = training_order.get_untracked().len();
-    if len > 0 && rotation_index.get_untracked() % len == 0 {
+    let mut boundary = RotationBoundary::MidRotation;
+    ctx.state.update(|state| {
+        if let Some(hand) = state.hand.as_mut() {
+            boundary = rotation_boundary(
+                rotation_index.get_untracked(),
+                training_order.get_untracked().len(),
+                hand,
+            );
+        }
+    });
+    if matches!(boundary, RotationBoundary::RotationEnded { .. }) {
         training_order.set(shuffled_order(training_order.get_untracked()));
     }
 }
@@ -385,5 +411,142 @@ fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -
                 }
             }}
         </div>
+    }
+}
+
+#[cfg(test)]
+mod rotation_tests {
+    use super::*;
+    use origa::domain::CardType;
+
+    /// Полный цикл двух слов: три круга Forward → смена направления на
+    /// границе → три круга Reverse → HandCompleted. Смена направления
+    /// происходит ТОЛЬКО на границе круга — в середине порядок стабилен.
+    #[test]
+    fn full_cycle_advances_subphase_only_at_rotation_boundaries() {
+        // Arrange: рука из двух слов, порядок круга [a, b]
+        let [a, b] = (0..2)
+            .map(|_| Ulid::new())
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
+        let mut hand = origa::domain::AcquaintanceHand::new(vec![
+            (a, CardType::Vocabulary),
+            (b, CardType::Vocabulary),
+        ])
+        .unwrap();
+
+        // Act / Assert: Forward — три полных круга по 2 ответа
+        for rotation in 0..3 {
+            assert_eq!(
+                hand.record_answer(a, true).unwrap(),
+                AnswerOutcome::Counted {
+                    progress: rotation + 1
+                }
+            );
+            // середина круга: границы нет, направление стабильно
+            assert_eq!(
+                rotation_boundary(1, 2, &mut hand),
+                RotationBoundary::MidRotation
+            );
+            assert_eq!(
+                hand.record_answer(b, true).unwrap(),
+                AnswerOutcome::Counted {
+                    progress: rotation + 1
+                }
+            );
+            let boundary = rotation_boundary(2, 2, &mut hand);
+            if rotation < 2 {
+                assert_eq!(
+                    boundary,
+                    RotationBoundary::RotationEnded {
+                        subphase_advanced: false
+                    },
+                    "Forward ещё не закрыт всеми словами"
+                );
+            } else {
+                assert_eq!(
+                    boundary,
+                    RotationBoundary::RotationEnded {
+                        subphase_advanced: true
+                    },
+                    "последний круг Forward закрывает направление"
+                );
+            }
+        }
+
+        // Reverse: два полных круга + последний ответ закрывает руку
+        assert_eq!(
+            hand.subphase(),
+            Some(origa::domain::AcquaintanceSubphase::Reverse)
+        );
+        for rotation in 0..3 {
+            let a_outcome = hand.record_answer(a, true).unwrap();
+            assert_eq!(
+                rotation_boundary(1, 2, &mut hand),
+                RotationBoundary::MidRotation
+            );
+            let b_outcome = hand.record_answer(b, true).unwrap();
+            let boundary = rotation_boundary(2, 2, &mut hand);
+            assert_eq!(
+                boundary,
+                RotationBoundary::RotationEnded {
+                    subphase_advanced: false
+                },
+                "в Reverse смены направления не существует"
+            );
+            if rotation < 2 {
+                assert_eq!(
+                    a_outcome,
+                    AnswerOutcome::Counted {
+                        progress: rotation + 1
+                    }
+                );
+                assert_eq!(
+                    b_outcome,
+                    AnswerOutcome::Counted {
+                        progress: rotation + 1
+                    }
+                );
+            } else {
+                assert_eq!(
+                    b_outcome,
+                    AnswerOutcome::HandCompleted,
+                    "третий reverse-успех последнего слова закрывает руку"
+                );
+            }
+        }
+    }
+
+    /// Ошибка не влияет на порядок: провал в середине круга не двигает
+    /// границу и не сбрасывает прогресс.
+    #[test]
+    fn failed_answer_mid_rotation_keeps_boundary_and_progress() {
+        // Arrange
+        let [a, b] = (0..2)
+            .map(|_| Ulid::new())
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
+        let mut hand = origa::domain::AcquaintanceHand::new(vec![
+            (a, CardType::Vocabulary),
+            (b, CardType::Vocabulary),
+        ])
+        .unwrap();
+
+        // Act: успех, затем провал — оба в середине круга
+        hand.record_answer(a, true).unwrap();
+        let outcome = hand.record_answer(b, false).unwrap();
+
+        // Assert: Failed без прогресса, граница не достигнута
+        assert_eq!(outcome, AnswerOutcome::Failed);
+        assert_eq!(
+            rotation_boundary(1, 2, &mut hand),
+            RotationBoundary::MidRotation
+        );
+        assert_eq!(
+            hand.subphase(),
+            Some(origa::domain::AcquaintanceSubphase::Forward)
+        );
     }
 }

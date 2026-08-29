@@ -117,10 +117,12 @@ impl AcquaintanceHand {
 
     /// Обрабатывает ответ юзера по карте текущего витка.
     ///
-    /// Успех продвигает видимый счётчик карты и при необходимости
-    /// переключает подфазу или закрывает руку; провал и ответы по картам,
+    /// Успех продвигает видимый счётчик карты; провал и ответы по картам,
     /// закрывшим критерий текущей подфазы (или общий — для несловесных),
-    /// прогресс не меняют.
+    /// прогресс не меняют. Смена направления слов — не побочный эффект
+    /// ответа: она происходит на границе витка через
+    /// [`Self::advance_subphase_if_words_done`], чтобы порядок круга был
+    /// стабильным до его конца.
     pub fn record_answer(
         &mut self,
         card_id: Ulid,
@@ -146,21 +148,6 @@ impl AcquaintanceHand {
 
         self.entries[entry_index].record_success(subphase);
 
-        if let Some(AcquaintanceSubphase::Forward) = self.subphase {
-            let answered_is_word = self.entries[entry_index].is_word();
-            // Выведенные слова считаются закрывшими forward-критерий:
-            // подфаза не ждёт карт, выбывших «Уже знаю».
-            let all_words_closed_forward = self
-                .entries
-                .iter()
-                .filter(|entry| entry.is_word())
-                .all(|word| word.retired || word.forward_successes >= CRITERION_SUCCESSSES);
-            if answered_is_word && all_words_closed_forward {
-                self.subphase = Some(AcquaintanceSubphase::Reverse);
-                return Ok(AnswerOutcome::SubphaseAdvanced);
-            }
-        }
-
         if self
             .entries
             .iter()
@@ -172,6 +159,31 @@ impl AcquaintanceHand {
         Ok(AnswerOutcome::Counted {
             progress: self.entries[entry_index].progress_in(subphase),
         })
+    }
+
+    /// Смена направления слов на границе витка: переключает подфазу, если
+    /// в руке есть активные (не выведенные) слова и каждое из них закрыло
+    /// критерий Forward. Третьего направления нет, поэтому в Reverse (и в
+    /// руках без слов) всегда `false`.
+    ///
+    /// Вызывает вызывающий (UI) ровно один раз — после последней карты
+    /// витка, вместе с перемешиванием порядка следующего витка.
+    pub fn advance_subphase_if_words_done(&mut self) -> bool {
+        let Some(AcquaintanceSubphase::Forward) = self.subphase else {
+            return false;
+        };
+        let mut active_words = self
+            .entries
+            .iter()
+            .filter(|entry| entry.is_word() && !entry.is_retired());
+        let all_closed = active_words.clone().all(|word| {
+            word.progress_in(Some(AcquaintanceSubphase::Forward)) >= CRITERION_SUCCESSSES
+        });
+        if all_closed && active_words.next().is_some() {
+            self.subphase = Some(AcquaintanceSubphase::Reverse);
+            return true;
+        }
+        false
     }
 
     /// Выводит карту из руки («Уже знаю» в показе): критерий считается
