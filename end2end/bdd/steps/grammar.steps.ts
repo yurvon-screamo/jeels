@@ -108,8 +108,7 @@ Then('грамматическая карточка отображается в 
 
 Then('отображается более одной грамматической карточки', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
-    const count = await grammarPage.getCardCount();
-    expect(count).toBeGreaterThan(1);
+    await grammarPage.expectMoreThanOneCard();
 });
 
 Then('на странице грамматики отображается пустое состояние', async ({ page }) => {

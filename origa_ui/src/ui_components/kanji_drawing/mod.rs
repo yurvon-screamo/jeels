@@ -182,25 +182,27 @@ pub fn KanjiDrawingPractice(
                     }
                 }}
             </div>
-            <div class="kanji-drawing-canvas-wrapper">
-                <canvas
-                    node_ref={canvas_ref}
-                    width={CANVAS_SIZE}
-                    height={CANVAS_SIZE}
-                    data-testid=test_id_canvas
-                    class=move || {
-                        if is_completed.get() {
-                            "kanji-drawing-canvas pointer-events-none"
-                        } else {
-                            "kanji-drawing-canvas"
-                        }
+            // The canvas is a direct child of the container: the old
+            // wrapper div existed only as the positioning context for a
+            // decorative ::after shadow that never rendered (see
+            // .kanji-drawing-canvas in input.css).
+            <canvas
+                node_ref={canvas_ref}
+                width={CANVAS_SIZE}
+                height={CANVAS_SIZE}
+                data-testid=test_id_canvas
+                class=move || {
+                    if is_completed.get() {
+                        "kanji-drawing-canvas pointer-events-none"
+                    } else {
+                        "kanji-drawing-canvas"
                     }
-                    on:pointerdown={handle_pointer_down}
-                    on:pointermove={handle_pointer_move}
-                    on:pointerup={handle_pointer_up}
-                    on:pointerleave={handle_pointer_leave}
-                />
-            </div>
+                }
+                on:pointerdown={handle_pointer_down}
+                on:pointermove={handle_pointer_move}
+                on:pointerup={handle_pointer_up}
+                on:pointerleave={handle_pointer_leave}
+            />
         </div>
     }
 }

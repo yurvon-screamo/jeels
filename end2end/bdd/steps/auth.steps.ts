@@ -91,6 +91,11 @@ Then('отображается кнопка Google', async ({ page }) => {
     await expect(loginPage.googleButton).toBeVisible({ timeout: 10_000 });
 });
 
+Then('отображается кнопка Apple', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await expect(loginPage.appleButton).toBeVisible({ timeout: 10_000 });
+});
+
 Then('отображается кнопка Yandex', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await expect(loginPage.yandexButton).toBeVisible({ timeout: 10_000 });

@@ -203,9 +203,45 @@ pub fn ImportSetPreviewModal(
     let show_group_headers = Memo::new(move |_| should_render_group_headers(&set_ids.get()));
 
     view! {
+        // The footer renders in every drawer state — error, loading and
+        // empty included — unlike the old in-body sticky bar which existed
+        // only in the loaded state. Cancel stays reachable from any state;
+        // Import stays disabled until words are selected, which requires a
+        // loaded preview.
         <Drawer
             is_open=is_open
             title=Signal::derive(move || drawer_title.get())
+            footer=std::sync::Arc::new(move || {
+                view! {
+                    <div class="flex gap-2 justify-between">
+                        <Button
+                            variant=ButtonVariant::Ghost
+                            on_click=handlers.on_cancel
+                            test_id="sets-drawer-cancel-btn"
+                        >
+                            {t!(i18n, common.cancel)}
+                        </Button>
+                        <Button
+                            variant=ButtonVariant::Olive
+                            disabled=Signal::derive(move || {
+                                selected_words.get().is_empty()
+                                    || is_importing.get()
+                            })
+                            on_click=Callback::new(move |_| handlers.on_import.run(()))
+                            test_id="sets-drawer-import-btn"
+                        >
+                            {move || {
+                                if is_importing.get() {
+                                    t!(i18n, sets.importing).into_any()
+                                } else {
+                                    t!(i18n, sets.import_button).into_any()
+                                }
+                            }}
+                        </Button>
+                    </div>
+                }
+                .into_any()
+            })
             test_id="sets-import-drawer"
         >
             <div class="flex flex-col h-full">
@@ -324,32 +360,6 @@ pub fn ImportSetPreviewModal(
                                     />
                                 </div>
                             </Show>
-                            <div class="sticky bottom-0 mt-4 pt-4 pb-2 border-t bg-[var(--bg-paper)] flex gap-2 justify-between">
-                                <Button
-                                    variant=ButtonVariant::Ghost
-                                    on_click=handlers.on_cancel
-                                    test_id="sets-drawer-cancel-btn"
-                                >
-                                    {t!(i18n, common.cancel)}
-                                </Button>
-                                <Button
-                                    variant=ButtonVariant::Olive
-                                    disabled=Signal::derive(move || {
-                                        selected_words.get().is_empty()
-                                            || is_importing.get()
-                                    })
-                                    on_click=Callback::new(move |_| handlers.on_import.run(()))
-                                    test_id="sets-drawer-import-btn"
-                                >
-                                    {move || {
-                                        if is_importing.get() {
-                                            t!(i18n, sets.importing).into_any()
-                                        } else {
-                                            t!(i18n, sets.import_button).into_any()
-                                        }
-                                    }}
-                                </Button>
-                            </div>
                         }.into_any()
                     }
                 }}
