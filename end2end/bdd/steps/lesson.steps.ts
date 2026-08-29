@@ -154,16 +154,18 @@ When('пользователь устанавливает размер экра�
 
 Then('содержимое урока занимает полную высоту', async ({ page }) => {
     const lessonPage = new LessonPage(page);
+    await expect(lessonPage.lessonPage).toBeVisible({ timeout: 15_000 });
+    await expect(lessonPage.lessonLoading).toBeHidden({ timeout: 30_000 });
     // Для нового юзера урок — это рука знакомства: слайд + панель действий.
     const hand = page.getByTestId("acquaintance-view");
-    if (await hand.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    if (await hand.isVisible({ timeout: 15_000 }).catch(() => false)) {
         const handHeight = await hand.evaluate(
             (el) => (el as HTMLElement).clientHeight,
         );
         expect(handHeight).toBeGreaterThan(500);
         return;
     }
-    await expect(lessonPage.lessonContent).toBeVisible();
+    await expect(lessonPage.lessonContent).toBeVisible({ timeout: 15_000 });
     const height = await lessonPage.lessonContent.evaluate((el) => (el as HTMLElement).clientHeight);
     expect(height).toBeGreaterThan(700);
 });

@@ -28,21 +28,24 @@ export async function runAcquaintancePresentation(page: Page): Promise<void> {
 	}
 }
 
-/// Проходит руку знакомства целиком (показ → тренировка до критерия),
-/// если она показана. Возвращает true, когда рука была.
+/// Завершает руку знакомства, если она показана: на каждом слайде показа
+/// нажимает «Уже знаю» (спека: рука исчезает без тренировки и траты
+/// лимита). Быстрый путь для BDD-сценариев — полный тренировочный флоу
+/// покрывает acquaintance_flow.spec. Возвращает true, когда рука была.
 export async function completeAcquaintanceHandIfPresent(
 	page: Page,
 ): Promise<boolean> {
 	const view = page.getByTestId("acquaintance-view");
-	if (!(await view.isVisible({ timeout: 10_000 }).catch(() => false))) {
+	if (!(await view.isVisible({ timeout: 15_000 }).catch(() => false))) {
 		return false;
 	}
-	await runAcquaintancePresentation(page);
-	for (let i = 0; i < 100; i++) {
-		const reveal = page.getByTestId("acquaintance-reveal-btn");
-		if (!(await reveal.isVisible().catch(() => false))) break;
-		await reveal.click();
-		await page.getByTestId("acquaintance-rating-remember").click();
+	for (let i = 0; i < 20; i++) {
+		const know = page.getByTestId("acquaintance-know-btn");
+		if (!(await know.isVisible().catch(() => false))) break;
+		await know.click();
+		await page.getByTestId("acquaintance-know-confirm-confirm").click();
+		// Модалка закрывается с анимацией; после неё — следующий слайд.
+		await page.waitForTimeout(350);
 	}
 	await expect(view).not.toBeVisible({ timeout: 15_000 });
 	return true;
