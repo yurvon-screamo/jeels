@@ -174,7 +174,20 @@ pub fn LessonContent() -> impl IntoView {
 
             let jlpt_content = crate::loaders::get_jlpt_content();
 
-            let (hand_order, hand_user_snapshot) = {
+            // Рука знакомства — только нормальный урок: спец-режим практики
+            // грамматики строится по конкретному правилу и новые карты
+            // не вводит.
+            #[cfg(feature = "grammar_practice_lesson_mode")]
+            let is_gated_practice_mode = matches!(
+                resolved_mode.get_value(),
+                LessonMode::GrammarPractice { .. }
+            );
+            #[cfg(not(feature = "grammar_practice_lesson_mode"))]
+            let is_gated_practice_mode = false;
+
+            let (hand_order, hand_user_snapshot) = if is_gated_practice_mode {
+                (Vec::new(), None)
+            } else {
                 let select_hand = SelectAcquaintanceHandUseCase::new(&repo);
                 match select_hand.execute(jlpt_content).await {
                     Ok(Some(ids)) if !ids.is_empty() => match repo.get_current_user().await {

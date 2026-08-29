@@ -12,6 +12,42 @@ export const MAX_LESSON_ITERATIONS = 50;
 // LessonPage re-exports this as CARD_ACTION_TIMEOUT for its methods.
 export const ACTION_TIMEOUT = 10_000;
 
+/// Рука знакомства: проходит показ кнопкой «Дальше» до тренировки.
+export async function runAcquaintancePresentation(page: Page): Promise<void> {
+	const nextBtn = page.getByTestId("acquaintance-next-btn");
+	for (let i = 0; i < 20; i++) {
+		if (!(await nextBtn.isVisible().catch(() => false))) break;
+		await nextBtn.click();
+		if (
+			await page
+				.getByTestId("acquaintance-training")
+				.isVisible()
+				.catch(() => false)
+		)
+			break;
+	}
+}
+
+/// Проходит руку знакомства целиком (показ → тренировка до критерия),
+/// если она показана. Возвращает true, когда рука была.
+export async function completeAcquaintanceHandIfPresent(
+	page: Page,
+): Promise<boolean> {
+	const view = page.getByTestId("acquaintance-view");
+	if (!(await view.isVisible({ timeout: 10_000 }).catch(() => false))) {
+		return false;
+	}
+	await runAcquaintancePresentation(page);
+	for (let i = 0; i < 100; i++) {
+		const reveal = page.getByTestId("acquaintance-reveal-btn");
+		if (!(await reveal.isVisible().catch(() => false))) break;
+		await reveal.click();
+		await page.getByTestId("acquaintance-rating-remember").click();
+	}
+	await expect(view).not.toBeVisible({ timeout: 15_000 });
+	return true;
+}
+
 export async function setupLessonWithCards(page: Page): Promise<LessonPage> {
     await skipOnboarding(page);
 

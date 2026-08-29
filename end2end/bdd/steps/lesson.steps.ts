@@ -1,7 +1,11 @@
 import { expect } from "@playwright/test";
 import { When, Then } from "../fixtures";
 import { HomePage, LessonPage, WordsPage } from "../../pages";
-import { completeLessonFlexible } from "../../helpers/lesson";
+import {
+	completeAcquaintanceHandIfPresent,
+	completeLessonFlexible,
+	runAcquaintancePresentation,
+} from "../../helpers/lesson";
 
 When('пользователь добавил слово из текста {string}', async ({ page }, text: string) => {
     const wordsPage = new WordsPage(page);
@@ -24,9 +28,52 @@ When('пользователь начинает урок', async ({ page }) => {
 Then('отображается страница урока с карточкой', async ({ page }) => {
     const lessonPage = new LessonPage(page);
     await expect(lessonPage.lessonPage).toBeVisible({ timeout: 15_000 });
+    // Новый юзер начинает урок с руки знакомства — её слайд и есть карточка.
+    const handVisible = await page
+        .getByTestId("acquaintance-view")
+        .isVisible({ timeout: 10_000 })
+        .catch(() => false);
+    if (handVisible) return;
     await expect(lessonPage.lessonError).not.toBeVisible({ timeout: 15_000 });
     await expect(lessonPage.lessonLoading).toBeHidden({ timeout: 30_000 });
     await expect(lessonPage.lessonContent).toBeVisible({ timeout: 15_000 });
+});
+
+When('пользователь проходит руку знакомства', async ({ page }) => {
+    const handSeen = await completeAcquaintanceHandIfPresent(page);
+    expect(handSeen, "рука знакомства должна быть показана").toBe(true);
+});
+
+When('пользователь проходит показ руки знакомства', async ({ page }) => {
+    const view = page.getByTestId("acquaintance-view");
+    await expect(view).toBeVisible({ timeout: 15_000 });
+    await runAcquaintancePresentation(page);
+});
+
+When('нажимает кнопку показа ответа тренировки', async ({ page }) => {
+    await page.getByTestId("acquaintance-reveal-btn").click();
+});
+
+Then('отображаются кнопки оценки тренировки', async ({ page }) => {
+    await expect(
+        page.getByTestId("acquaintance-rating-dont-know"),
+    ).toBeVisible();
+    await expect(page.getByTestId("acquaintance-rating-remember")).toBeVisible();
+});
+
+Then('отображается рука знакомства с карточкой', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-view")).toBeVisible({
+        timeout: 15_000,
+    });
+    await expect(page.getByTestId("acquaintance-phase-tag")).toContainText(
+        /PRESENTATION|ПОКАЗ/i,
+    );
+});
+
+Then('отображается полоса прогресса руки', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-strip")).toBeVisible({
+        timeout: 15_000,
+    });
 });
 
 When('оценивает каждую карточку как Good', async ({ page }) => {
@@ -107,6 +154,15 @@ When('пользователь устанавливает размер экра�
 
 Then('содержимое урока занимает полную высоту', async ({ page }) => {
     const lessonPage = new LessonPage(page);
+    // Для нового юзера урок — это рука знакомства: слайд + панель действий.
+    const hand = page.getByTestId("acquaintance-view");
+    if (await hand.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        const handHeight = await hand.evaluate(
+            (el) => (el as HTMLElement).clientHeight,
+        );
+        expect(handHeight).toBeGreaterThan(500);
+        return;
+    }
     await expect(lessonPage.lessonContent).toBeVisible();
     const height = await lessonPage.lessonContent.evaluate((el) => (el as HTMLElement).clientHeight);
     expect(height).toBeGreaterThan(700);
