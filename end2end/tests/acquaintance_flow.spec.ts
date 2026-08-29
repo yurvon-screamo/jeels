@@ -21,7 +21,7 @@ test.describe("Acquaintance mode", () => {
 		// изменении этот файл нужно синхронизировать.
 	});
 
-	test("happy path: показ → тренировка → итог → ревью", async () => {
+	test("happy path: показ → тренировка → ревью", async () => {
 		await page.goto("/lesson");
 
 		// Префаза показа видима вместо карточек урока.
@@ -52,15 +52,14 @@ test.describe("Acquaintance mode", () => {
 			await page.getByTestId("acquaintance-rating-remember").click();
 		}
 
-		// Итоговый экран руки.
-		const summary = page.getByTestId("acquaintance-summary");
-		await expect(summary).toBeVisible({ timeout: 15_000 });
-
-		// «К ревью» возвращает обычный урок.
-		await page.getByTestId("acquaintance-to-reviews-btn").click();
-		await expect(page.getByTestId("lesson-content")).toBeVisible({
-			timeout: 15_000,
-		});
+		// Итогового экрана нет: закрытая рука сразу открывает обычный урок.
+		// У свежего тестового юзера должных карт нет — это штатный empty-state
+		// урока; когда ревью есть, открываются карточки урока.
+		const lesson = page
+			.getByTestId("lesson-content")
+			.or(page.getByTestId("lesson-empty-state"));
+		await expect(lesson).toBeVisible({ timeout: 15_000 });
+		await expect(view).not.toBeVisible();
 	});
 
 	test("«Уже знаю» во время показа пропускает карту", async () => {

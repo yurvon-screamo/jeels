@@ -33,7 +33,7 @@ pub fn resolve_key_action(
             (true, "2") => Some(AcquaintanceKeyAction::RateRemember),
             _ => None,
         },
-        AcquaintanceStage::Summary | AcquaintanceStage::Inactive => None,
+        AcquaintanceStage::Inactive => None,
     }
 }
 
@@ -139,12 +139,8 @@ mod tests {
     }
 
     #[test]
-    fn summary_and_inactive_ignore_all_keys() {
+    fn inactive_ignores_all_keys() {
         for key in [" ", "1", "2"] {
-            assert_eq!(
-                resolve_key_action(AcquaintanceStage::Summary, false, key),
-                None
-            );
             assert_eq!(
                 resolve_key_action(AcquaintanceStage::Inactive, false, key),
                 None

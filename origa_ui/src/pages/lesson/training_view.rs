@@ -304,7 +304,7 @@ fn finish_answer(
     showing_answer.set(false);
 
     if matches!(outcome, AnswerOutcome::HandCompleted) {
-        ctx.complete_hand_and_show_summary();
+        ctx.complete_hand();
         return;
     }
 

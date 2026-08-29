@@ -70,6 +70,9 @@ pub fn LessonContent() -> impl IntoView {
     let is_completed = RwSignal::new(false);
     let error_message = RwSignal::new(None::<String>);
     let empty_diagnosis = RwSignal::new(None::<LessonEmptyDiagnosis>);
+    // Диагноз пустого ревью при активной руке: показывается, когда рука
+    // закроется и обычный урок остаётся пустым.
+    let pending_empty_diagnosis = RwSignal::new(None::<LessonEmptyDiagnosis>);
     let reload_trigger = RwSignal::new(0u32);
     let is_muted = RwSignal::new(false);
     let is_syncing_cards = RwSignal::new(false);
@@ -117,6 +120,19 @@ pub fn LessonContent() -> impl IntoView {
             .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
     };
 
+    // Закрытие руки открывает обычный урок; если он пуст — отложенный
+    // диагноз пустого ревью показывается штатным empty-state'ом урока.
+    {
+        let pending = pending_empty_diagnosis;
+        let diagnosis = empty_diagnosis;
+        Effect::new(move |_| {
+            if !acq_hand_active() && pending.get_untracked().is_some() {
+                diagnosis.set(pending.get_untracked());
+                pending.set(None);
+            }
+        });
+    }
+
     let repo_for_user_data = repository.clone();
     Effect::new(move |_| {
         let repo = repo_for_user_data.clone();
@@ -153,6 +169,7 @@ pub fn LessonContent() -> impl IntoView {
             is_loading.set(true);
             error_message.set(None);
             empty_diagnosis.set(None);
+            pending_empty_diagnosis.set(None);
             acq_state_signal.update(|state| *state = Default::default());
 
             let jlpt_content = crate::loaders::get_jlpt_content();
@@ -338,7 +355,13 @@ pub fn LessonContent() -> impl IntoView {
                             if is_disposed.is_disposed() {
                                 return;
                             }
-                            empty_diagnosis.set(diagnosis);
+                            if acq_hand_active() {
+                                // Рука активна: пустое ревью не прячут её —
+                                // диагноз откладывается до закрытия руки.
+                                pending_empty_diagnosis.set(diagnosis);
+                            } else {
+                                empty_diagnosis.set(diagnosis);
+                            }
                         }
                     } else {
                         lesson_state.set(LessonState {
@@ -516,7 +539,6 @@ pub fn LessonContent() -> impl IntoView {
             && !is_loading.get()
             && !is_completed.get()
             && error_message.get().is_none()
-            && empty_diagnosis.get().is_none()
     };
 
     let show_lesson_content = move || {

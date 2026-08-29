@@ -71,7 +71,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                     None => base,
                 }
             },
-            AcquaintanceStage::Summary | AcquaintanceStage::Inactive => String::new(),
+            AcquaintanceStage::Inactive => String::new(),
         }
     });
 
@@ -162,7 +162,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                     .count();
                 format!("{}: {}/{}", keys.strip_training().inner(), closed, total)
             },
-            AcquaintanceStage::Summary | AcquaintanceStage::Inactive => String::new(),
+            AcquaintanceStage::Inactive => String::new(),
         }
     });
 
@@ -203,29 +203,6 @@ pub fn AcquaintanceView() -> impl IntoView {
                 ctx.state.get().stage == AcquaintanceStage::Training
             }>
                 <TrainingBody ctx=ctx_stored.get_value() />
-            </Show>
-            <Show when=move || {
-                let ctx = ctx_stored.get_value();
-                ctx.state.get().stage == AcquaintanceStage::Summary
-            }>
-                <div data-testid="acquaintance-summary" class="text-center py-10 space-y-6">
-                    <div class="stamp inline-block">
-                        {t!(i18n, acquaintance.summary_stamp)}
-                    </div>
-                    <div>
-                        <Button
-                            variant=Signal::derive(|| ButtonVariant::Filled)
-                            on_click=Callback::new(move |_| {
-                                ctx_stored.get_value().state.update(|state| {
-                                    state.stage = AcquaintanceStage::Inactive;
-                                });
-                            })
-                            test_id=Signal::derive(|| "acquaintance-to-reviews-btn".to_string())
-                        >
-                            {t!(i18n, acquaintance.to_reviews)}
-                        </Button>
-                    </div>
-                </div>
             </Show>
         </div>
     }
@@ -513,7 +490,7 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                 }
             });
             if complete_now {
-                ctx.complete_hand_and_show_summary();
+                ctx.complete_hand();
             }
         })
     };

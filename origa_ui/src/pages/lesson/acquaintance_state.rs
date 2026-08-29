@@ -9,16 +9,15 @@ use super::kanji_card_details::RadicalDisplay;
 use crate::ui_components::ReadingItem;
 
 /// Стадии руки знакомства на странице урока (docs/acquaintance-mode.md):
-/// показ → тренировка → итог → обычное ревью. `Inactive` — руки нет
-/// (пул пуст / лимит исчерпан / рука уже передана в ревью).
+/// показ → тренировка → обычное ревью. `Inactive` — руки нет
+/// (пул пуст / лимит исчерпан / рука передана в ревью). Итогового экрана
+/// нет: закрытая рука сразу открывает ревью урока.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AcquaintanceStage {
     #[default]
     Inactive,
     Presentation,
-    /// Срез S5 заменил заглушку полноценной тренировкой.
     Training,
-    Summary,
 }
 
 /// UI-состояние руки: доменная машина (`AcquaintanceHand`) хранит правила,
@@ -112,11 +111,12 @@ pub struct AcquaintanceContext {
 
 impl AcquaintanceContext {
     /// Завершение руки: сидирование первого ревью назавтра + списание лимита
-    /// одной операцией (S2), затем итоговый экран. Вызывается и из конца
-    /// тренировки (`HandCompleted`), и из показа, когда выведены все карты.
-    pub fn complete_hand_and_show_summary(&self) {
+    /// одной операцией (S2), затем сразу ревью урока — без итогового
+    /// экрана. Вызывается из конца тренировки (`HandCompleted`) и из
+    /// показа, когда выведены все карты.
+    pub fn complete_hand(&self) {
         self.state
-            .update(|state| state.stage = AcquaintanceStage::Summary);
+            .update(|state| state.stage = AcquaintanceStage::Inactive);
         let ids = self.state.with(|state| {
             state
                 .hand

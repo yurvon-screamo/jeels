@@ -1265,8 +1265,29 @@ mod acquaintance_training {
     }
 
     #[wasm_bindgen_test]
-    async fn summary_screen_shows_stamp_and_to_reviews_button() {
-        let ctx = acq_context(AcquaintanceStage::Summary);
+    async fn completed_hand_opens_reviews_immediately() {
+        // Итогового экрана нет: закрытие руки сразу возвращает ревью урока.
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![(
+                    card_id,
+                    origa::domain::CardType::Kanji,
+                )])
+                .unwrap(),
+            )
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Kanji {
+            card_id,
+            kanji: "明".to_string(),
+            name: "свет".to_string(),
+            radicals: None,
+            example_words: None,
+            on_readings: None,
+            kun_readings: None,
+        }]);
+
         let wrapper = create_wrapper();
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
@@ -1275,19 +1296,39 @@ mod acquaintance_training {
         });
         tick().await;
 
-        assert!(
+        // Три «помню» закрывают критерий кандзи — HandCompleted.
+        for _ in 0..3 {
             wrapper
-                .query_selector("[data-testid=\"acquaintance-summary\"]")
+                .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
                 .unwrap()
-                .is_some(),
-            "итоговый экран отрендерен"
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-rating-remember\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+        }
+
+        // Рука ушла: стадия Inactive, тренировка больше не рендерится
+        // (в приложении гейт страницы дополнительно прячет всю префазу).
+        assert_eq!(
+            ctx.state.get_untracked().stage,
+            AcquaintanceStage::Inactive,
+            "закрытая рука сразу открывает ревью урока"
         );
         assert!(
             wrapper
-                .query_selector("[data-testid=\"acquaintance-to-reviews-btn\"]")
+                .query_selector("[data-testid=\"acquaintance-training\"]")
                 .unwrap()
-                .is_some(),
-            "кнопка «К ревью» на месте"
+                .is_none(),
+            "тренировка исчезает после закрытия руки"
         );
     }
 }
