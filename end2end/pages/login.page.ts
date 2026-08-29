@@ -22,6 +22,7 @@ export class LoginPage extends BasePage {
     readonly spinner: Locator;
 
     // OAuth
+    readonly appleButton: Locator;
     readonly googleButton: Locator;
     readonly yandexButton: Locator;
 
@@ -50,6 +51,7 @@ export class LoginPage extends BasePage {
         this.spinner = this.submitButton.getByTestId("btn-spinner");
 
         // OAuth
+        this.appleButton = page.getByTestId("oauth-apple");
         this.googleButton = page.getByTestId("oauth-google");
         this.yandexButton = page.getByTestId("oauth-yandex");
     }
