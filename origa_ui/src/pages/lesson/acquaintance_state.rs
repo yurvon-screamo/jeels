@@ -30,6 +30,15 @@ pub struct AcquaintanceState {
     pub slide_index: usize,
     pub confirm_known: bool,
     pub skipped_ids: HashSet<Ulid>,
+    /// Текущая карта тренировки: шапка читает её для тега типа карты.
+    pub current_card_id: Option<Ulid>,
+}
+
+/// Автозвук слова (механизм урока, lesson_card.rs): звучит, когда TTS
+/// доступен и звук урока не выключен. Единый предикат для показа и
+/// Forward-фронта тренировки — гарды не дублируются.
+pub fn should_autoplay_word_audio(is_muted: bool, speech_supported: bool) -> bool {
+    speech_supported && !is_muted
 }
 
 impl AcquaintanceState {
@@ -131,6 +140,27 @@ impl AcquaintanceContext {
 }
 
 #[cfg(test)]
+mod should_autoplay_word_audio_tests {
+    use super::*;
+
+    #[rstest::rstest]
+    #[case::muted(true, true, false)]
+    #[case::no_tts(false, false, false)]
+    #[case::muted_and_no_tts(true, false, false)]
+    #[case::ready(false, true, true)]
+    fn autoplay_requires_tts_and_unmuted_lesson(
+        #[case] is_muted: bool,
+        #[case] speech_supported: bool,
+        #[case] expected: bool,
+    ) {
+        assert_eq!(
+            should_autoplay_word_audio(is_muted, speech_supported),
+            expected
+        );
+    }
+}
+
+#[cfg(test)]
 mod advance_presentation_tests {
     use super::*;
     use origa::domain::CardType;
@@ -147,6 +177,7 @@ mod advance_presentation_tests {
             slide_index: 0,
             confirm_known: false,
             skipped_ids: HashSet::new(),
+            current_card_id: None,
         }
     }
 
@@ -177,6 +208,7 @@ mod advance_presentation_tests {
             slide_index: 0,
             confirm_known: false,
             skipped_ids: HashSet::from([b]),
+            current_card_id: None,
         };
 
         // Act / Assert: первый advance перепрыгивает b и показывает c

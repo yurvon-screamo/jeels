@@ -105,7 +105,7 @@ pub use font_face::inject_font_faces;
 pub use fsrs_metrics::FsrsMetrics;
 pub use furigana::FuriganaText;
 pub use input::Input;
-pub use kanji_animation::{KanjiViewMode, KanjiWritingSection};
+pub use kanji_animation::{KanjiAnimation, KanjiViewMode, KanjiWritingSection};
 pub use kanji_drawing::KanjiDrawingPractice;
 pub use language_toggle::NativeLanguageToggle;
 pub use layout::{CardLayout, CardLayoutSize, PageLayout, PageLayoutVariant};

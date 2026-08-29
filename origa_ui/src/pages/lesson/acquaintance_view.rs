@@ -1,12 +1,16 @@
 use super::acquaintance_keyboard::{AcquaintanceKeyAction, resolve_key_action};
-use super::acquaintance_state::{AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage};
+use super::acquaintance_state::{
+    AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, should_autoplay_word_audio,
+};
+use super::card_type::CardType as UiCardType;
 use super::hand_progress_strip::HandProgressStrip;
 use super::kanji_card_details::{KanjiCardDetails, RadicalDisplay};
 use super::keyboard_handler::is_typing_target;
 use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
-    Button, ButtonVariant, FuriganaText, MarkdownText, MarkdownVariant, ReadingItem, Tag,
+    AudioButtons, Button, ButtonVariant, FuriganaText, KanjiAnimation, MarkdownText,
+    MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -15,6 +19,17 @@ use origa::domain::{AcquaintanceSubphase, NativeLanguage};
 use origa::use_cases::MarkCardAsKnownUseCase;
 use std::collections::HashSet;
 use ulid::Ulid;
+
+/// Маппинг доменного типа карты на UI-тип с лейблом и цветом тега
+/// (как в онбординге — CardType::label + tag_variant).
+fn ui_card_type(card_type: origa::domain::CardType) -> UiCardType {
+    match card_type {
+        origa::domain::CardType::Vocabulary => UiCardType::Vocabulary,
+        origa::domain::CardType::Kanji => UiCardType::Kanji,
+        origa::domain::CardType::Grammar => UiCardType::Grammar,
+        origa::domain::CardType::Phrase => UiCardType::Phrase,
+    }
+}
 
 /// Префаза руки знакомства на странице урока. Покрывает фазу показа (S4);
 /// тренировка (S5) и итоговый экран (S6) подключаются следующими срезами.
@@ -65,6 +80,25 @@ pub fn AcquaintanceView() -> impl IntoView {
         ctx.state
             .with(|state| state.hand.as_ref().map(|h| h.len()).unwrap_or(0))
     });
+
+    // Тип текущей карты: в показе — слайд по индексу, в тренировке —
+    // карта, выставленная TrainingBody. Шапка показывает его вторым тегом.
+    let current_card_type = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        let state = ctx.state.get();
+        let card_id = match state.stage {
+            AcquaintanceStage::Presentation => ctx
+                .slides
+                .get()
+                .get(state.slide_index)
+                .map(|slide| slide.card_id()),
+            _ => state.current_card_id,
+        }?;
+        let hand = state.hand?;
+        hand.entry(card_id).map(|entry| entry.card_type())
+    });
+
+    let card_type_tag = Signal::derive(move || current_card_type.get().map(ui_card_type));
     // Прогресс полосы: видимый счётчик каждой карты в текущей подфазе
     // (в показе все нули, в тренировке — из доменной машины).
     let progress = Signal::derive(move || {
@@ -89,9 +123,26 @@ pub fn AcquaintanceView() -> impl IntoView {
     view! {
         <div data-testid="acquaintance-view" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
             <div class="flex items-center justify-between gap-3 mb-2">
-                <Tag test_id=Signal::derive(|| "acquaintance-phase-tag".to_string())>
-                    {move || phase_label.get()}
-                </Tag>
+                <div class="flex items-center gap-2">
+                    <Tag test_id=Signal::derive(|| "acquaintance-phase-tag".to_string())>
+                        {move || phase_label.get()}
+                    </Tag>
+                    <Show when=move || card_type_tag.get().is_some()>
+                        <Tag
+                            variant=Signal::derive(move || {
+                                card_type_tag.get().map(|t| t.tag_variant()).unwrap_or_default()
+                            })
+                            test_id=Signal::derive(|| "acquaintance-card-type-tag".to_string())
+                        >
+                            {move || {
+                                card_type_tag
+                                    .get()
+                                    .map(|t| t.label(&i18n))
+                                    .unwrap_or_default()
+                            }}
+                        </Tag>
+                    </Show>
+                </div>
                 <HandProgressStrip total progress />
             </div>
 
@@ -224,11 +275,31 @@ fn WordSlide(
     let word_stored = StoredValue::new(word.clone());
     let pos_stored = StoredValue::new(pos_label.clone());
     let translations_stored = StoredValue::new(translations.clone());
+
+    // Автозвук слова при показе слайда — тот же механизм, что у карточек
+    // слов обычного урока (lesson_card.rs): TTS доступен и не выключен.
+    let is_muted =
+        use_context::<super::lesson_state::LessonContext>().map(|lesson_ctx| lesson_ctx.is_muted);
+    Effect::new(move |_| {
+        let muted = is_muted
+            .as_ref()
+            .map(|signal| signal.get_untracked())
+            .unwrap_or(false);
+        if should_autoplay_word_audio(muted, is_speech_supported()) {
+            speak_word(&word_stored.get_value(), 1.0);
+        }
+    });
+
     view! {
         <div class="text-center space-y-4" data-testid="acquaintance-word-slide">
             <p class="font-serif text-5xl leading-tight text-[var(--fg-black)] break-words">
                 <FuriganaText text=word_stored.get_value() known_kanji=known_kanji.get_untracked() />
             </p>
+            <AudioButtons
+                text=word_stored.get_value()
+                audio_path=None
+                test_id=Signal::derive(|| "acquaintance-word-audio".to_string())
+            />
             <Show when=move || pos_label.is_some()>
                 <Tag test_id=Signal::derive(|| "acquaintance-word-pos".to_string())>
                     {move || pos_stored.get_value().clone().unwrap_or_default()}
@@ -267,6 +338,15 @@ fn KanjiSlide(
 ) -> impl IntoView {
     view! {
         <div class="text-center" data-testid="acquaintance-kanji-slide">
+            // Сам знак крупно с анимацией черт (спека §8.2) — чтения и
+            // значения ниже через существующий компонент деталей.
+            <div class="flex justify-center">
+                <KanjiAnimation
+                    kanji=kanji.clone()
+                    fallback=None
+                    test_id=Signal::derive(|| "acquaintance-kanji-animation".to_string())
+                />
+            </div>
             <KanjiCardDetails
                 kanji
                 name
@@ -301,6 +381,8 @@ fn GrammarSlide(
     let kk = known_kanji.get_untracked();
     let kk_for_how_to = kk.clone();
     let kk_for_examples = kk.clone();
+    let kk_for_explanation = kk.clone();
+    let kk_for_nuances = kk.clone();
     view! {
         <div class="space-y-4" data-testid="acquaintance-grammar-slide">
             <h2 class="font-serif text-3xl text-[var(--fg-black)]">
@@ -324,14 +406,22 @@ fn GrammarSlide(
                 />
             </Show>
             <Show when=move || !stored_explanation.get_value().is_empty()>
-                <p class="font-mono text-sm text-[var(--fg-muted)] whitespace-pre-line">
-                    {stored_explanation.get_value()}
-                </p>
+                <div data-testid="acquaintance-grammar-explanation">
+                    <MarkdownText
+                        content=Signal::derive(move || stored_explanation.get_value())
+                        known_kanji=kk_for_explanation.clone()
+                        variant=Signal::derive(|| MarkdownVariant::Default)
+                    />
+                </div>
             </Show>
             <Show when=move || !stored_nuances.get_value().is_empty()>
-                <p class="font-mono text-sm text-[var(--fg-muted)] whitespace-pre-line">
-                    {stored_nuances.get_value()}
-                </p>
+                <div data-testid="acquaintance-grammar-nuances">
+                    <MarkdownText
+                        content=Signal::derive(move || stored_nuances.get_value())
+                        known_kanji=kk_for_nuances.clone()
+                        variant=Signal::derive(|| MarkdownVariant::Default)
+                    />
+                </div>
             </Show>
         </div>
     }

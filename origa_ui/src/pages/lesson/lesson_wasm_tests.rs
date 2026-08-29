@@ -1221,13 +1221,19 @@ mod acquaintance_training {
                 .is_none()
         );
 
-        // Раскрытие по кнопке.
+        // Раскрытие по кнопке. Хинт Space читаем до клика: после раскрытия
+        // кнопка скрывается вместе с фронтом.
         let reveal = wrapper
             .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
             .unwrap()
             .unwrap()
             .dyn_into::<web_sys::HtmlElement>()
             .unwrap();
+        let reveal_text = reveal.text_content().unwrap();
+        assert!(
+            reveal_text.contains("Space") || reveal_text.contains("Пробел"),
+            "хинт Space на раскрытии, got: {reveal_text}"
+        );
         reveal.click();
         tick().await;
 
@@ -1256,17 +1262,6 @@ mod acquaintance_training {
             .text_content()
             .unwrap();
         assert!(dont_know_text.contains("[1]"), "хинт [1] на «Не помню»");
-
-        let reveal_text = wrapper
-            .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
-            .unwrap()
-            .unwrap()
-            .text_content()
-            .unwrap();
-        assert!(
-            reveal_text.contains("Space") || reveal_text.contains("Пробел"),
-            "хинт Space на раскрытии"
-        );
     }
 
     #[wasm_bindgen_test]
@@ -1293,6 +1288,225 @@ mod acquaintance_training {
                 .unwrap()
                 .is_some(),
             "кнопка «К ревью» на месте"
+        );
+    }
+}
+
+mod acquaintance_presentation {
+    use super::*;
+    use crate::pages::lesson::acquaintance_state::{
+        AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
+    };
+    use crate::pages::lesson::acquaintance_view::AcquaintanceView;
+    use crate::ui_components::ReadingItem;
+    use ulid::Ulid;
+
+    fn acq_context(stage: AcquaintanceStage) -> AcquaintanceContext {
+        let state = RwSignal::new(AcquaintanceState::default());
+        state.update(|s| s.stage = stage);
+        AcquaintanceContext {
+            repository: crate::repository::HybridUserRepository::new(),
+            state,
+            slides: RwSignal::new(Vec::new()),
+            known_kanji: RwSignal::new(HashSet::new()),
+            native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
+        }
+    }
+
+    fn hand_of(
+        card_id: Ulid,
+        card_type: origa::domain::CardType,
+    ) -> origa::domain::AcquaintanceHand {
+        origa::domain::AcquaintanceHand::new(vec![(card_id, card_type)]).unwrap()
+    }
+
+    #[wasm_bindgen_test]
+    async fn kanji_slide_shows_character_with_animation_and_details() {
+        // Arrange
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state
+            .update(|state| state.hand = Some(hand_of(card_id, origa::domain::CardType::Kanji)));
+        ctx.slides.set(vec![AcquaintanceSlideData::Kanji {
+            card_id,
+            kanji: "明".to_string(),
+            name: "свет".to_string(),
+            radicals: None,
+            example_words: None,
+            on_readings: Some(vec![ReadingItem {
+                reading: "みょう".to_string(),
+                freq: 100,
+                is_rare: false,
+            }]),
+            kun_readings: None,
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: сам знак с анимацией черт — не только чтения и значения
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-kanji-animation\"]")
+                .unwrap()
+                .is_some(),
+            "знак кандзи отрендерен на слайде"
+        );
+        let html = wrapper.inner_html();
+        assert!(html.contains("みょう"), "чтения остаются на слайде");
+        assert!(html.contains("свет"), "значение остаётся на слайде");
+    }
+
+    #[wasm_bindgen_test]
+    async fn card_type_tag_follows_current_slide_type() {
+        // Arrange: два слайда — слово, затем кандзи
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let word_id = Ulid::new();
+        let kanji_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![
+                    (word_id, origa::domain::CardType::Vocabulary),
+                    (kanji_id, origa::domain::CardType::Kanji),
+                ])
+                .unwrap(),
+            );
+        });
+        ctx.slides.set(vec![
+            AcquaintanceSlideData::Vocabulary {
+                card_id: word_id,
+                word: "ねこ".to_string(),
+                pos_label: None,
+                translations: vec!["кошка".to_string()],
+            },
+            AcquaintanceSlideData::Kanji {
+                card_id: kanji_id,
+                kanji: "明".to_string(),
+                name: "свет".to_string(),
+                radicals: None,
+                example_words: None,
+                on_readings: None,
+                kun_readings: None,
+            },
+        ]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: тег типа показывает тип текущего слайда
+        let tag = || {
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-card-type-tag\"]")
+                .unwrap()
+                .unwrap()
+                .text_content()
+                .unwrap()
+        };
+        let word_tag = tag();
+        assert!(
+            word_tag.contains("Слово") || word_tag.contains("Word"),
+            "тег типа первого слайда — слово, got: {word_tag}"
+        );
+
+        ctx.state.update(|state| state.slide_index = 1);
+        tick().await;
+        let kanji_tag = tag();
+        assert!(
+            kanji_tag.contains("Кандзи") || kanji_tag.contains("Kanji"),
+            "тег типа второго слайда — кандзи, got: {kanji_tag}"
+        );
+    }
+
+    #[wasm_bindgen_test]
+    async fn grammar_slide_renders_explanation_and_nuances_as_markdown() {
+        // Arrange: explanation и nuances с markdown-разметкой
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state
+            .update(|state| state.hand = Some(hand_of(card_id, origa::domain::CardType::Grammar)));
+        ctx.slides.set(vec![AcquaintanceSlideData::Grammar {
+            card_id,
+            title: "ぜひ".to_string(),
+            short_description: "наречие".to_string(),
+            how_to_form: String::new(),
+            examples: String::new(),
+            explanation: "**сильное** желание".to_string(),
+            nuances: "> ⚠️ **Важно:** нюанс".to_string(),
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: markdown рендерится, сырая разметка не показывается
+        for test_id in [
+            "acquaintance-grammar-explanation",
+            "acquaintance-grammar-nuances",
+        ] {
+            let block = wrapper
+                .query_selector(&format!("[data-testid=\"{test_id}\"]"))
+                .unwrap()
+                .unwrap_or_else(|| panic!("{test_id} блок отрендерен"));
+            let html = block.inner_html();
+            assert!(
+                html.contains("<strong>"),
+                "{test_id}: жирный текст отрендерен, got: {html}"
+            );
+            assert!(
+                !html.contains("**"),
+                "{test_id}: сырая markdown-разметка скрыта, got: {html}"
+            );
+        }
+    }
+
+    #[wasm_bindgen_test]
+    async fn word_slide_offers_audio_repeat_button() {
+        // Arrange
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(hand_of(card_id, origa::domain::CardType::Vocabulary))
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "ねこ".to_string(),
+            pos_label: None,
+            translations: vec!["кошка".to_string()],
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: повтор прослушивания доступен по нажатию
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-word-audio\"]")
+                .unwrap()
+                .is_some(),
+            "кнопка повтора аудио на слайде слова"
         );
     }
 }
