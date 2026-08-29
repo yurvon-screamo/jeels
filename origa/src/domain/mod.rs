@@ -39,7 +39,7 @@ pub use jlpt_progress::{
     CategoryCounts, CategoryProgress, JlptProgress, LevelProgressDetail, ProgressUpdate,
 };
 pub use knowledge::NewCardPolicy;
-pub(crate) use knowledge::jlpt_sort_key;
+pub(crate) use knowledge::distribute_new_cards;
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,
     GrammarRuleCard, KanjiCard, KnowledgeSet, LessonCard, LessonCardView, LessonData,

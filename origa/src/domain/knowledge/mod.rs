@@ -23,7 +23,7 @@ pub use lesson::{
     MultiQuizResult, QuizCard, QuizMode, QuizOption, YesNoCard,
 };
 pub use lesson_builder::NewCardPolicy;
-pub(crate) use lesson_builder::jlpt_sort_key;
+pub(crate) use lesson_builder::distribute_new_cards;
 pub use phrase::PhraseCard;
 pub use stats_tracker::StatsTracker;
 pub use vocabulary::VocabularyCard;

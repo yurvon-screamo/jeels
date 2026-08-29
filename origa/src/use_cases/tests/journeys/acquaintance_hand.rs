@@ -2,7 +2,8 @@
 //! прерывание, «Уже знаю» и учёт дневного лимита.
 
 use crate::domain::{
-    DailyBudget, JlptContent, NativeLanguage, NewCardPolicy, OrigaError, RateMode, Rating, User,
+    Card, DailyBudget, JlptContent, NativeLanguage, NewCardPolicy, OrigaError, RateMode, Rating,
+    User,
 };
 use crate::traits::UserRepository;
 use crate::use_cases::tests::fixtures::{InMemoryUserRepository, create_test_vocab_card};
@@ -23,6 +24,44 @@ fn user_with_new_vocab_cards(count: usize) -> User {
         user.create_card(card).unwrap();
     }
     user
+}
+
+fn user_with_new_cards(vocab: usize, kanji: usize, grammar: usize) -> User {
+    let mut user = User::new(
+        "test@example.com".to_string(),
+        NativeLanguage::Russian,
+        None,
+    );
+    for index in 0..vocab {
+        let card = create_test_vocab_card(&format!("テスト{index}"));
+        user.create_card(card).unwrap();
+    }
+    for code in 0x4e00..0x4e00 + kanji as u32 {
+        let card = Card::Kanji(crate::domain::KanjiCard::new_test(
+            char::from_u32(code).unwrap().to_string(),
+        ));
+        user.create_card(card).unwrap();
+    }
+    for _ in 0..grammar {
+        user.create_card(Card::Grammar(crate::domain::GrammarRuleCard::new_test()))
+            .unwrap();
+    }
+    user
+}
+
+/// Состав руки по типам: (слова, кандзи, грамматика).
+async fn hand_type_counts(repo: &InMemoryUserRepository, hand: &[Ulid]) -> (usize, usize, usize) {
+    let user = repo.get_current_user().await.unwrap().unwrap();
+    let mut counts = (0usize, 0usize, 0usize);
+    for card_id in hand {
+        match user.knowledge_set().get_card(*card_id).unwrap().card() {
+            Card::Vocabulary(_) => counts.0 += 1,
+            Card::Kanji(_) => counts.1 += 1,
+            Card::Grammar(_) => counts.2 += 1,
+            Card::Phrase(_) => {},
+        }
+    }
+    counts
 }
 
 #[tokio::test]
@@ -74,6 +113,57 @@ async fn select_caps_hand_size_at_max_and_daily_limit() {
         7,
         "20 кандидатов при лимите 9 дают руку ровно из HAND_MAX_SIZE карт"
     );
+}
+
+#[tokio::test]
+async fn select_balanced_pool_splits_hand_by_card_type_weights() {
+    // Arrange: запас карт каждого типа — доли CARD_TYPE_WEIGHTS (V:K:G ≈ 8:1:1)
+    let repo = InMemoryUserRepository::with_user(user_with_new_cards(20, 5, 5));
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act
+    let hand = select.execute(&jlpt_content).await.unwrap().unwrap();
+
+    // Assert: рука 7 карт = 5 слов + 1 кандзи + 1 грамматика, а не верхушка
+    // пула одного типа (регресс: рука из одних грамматик)
+    assert_eq!(hand.len(), 7);
+    assert_eq!(hand_type_counts(&repo, &hand).await, (5, 1, 1));
+}
+
+#[tokio::test]
+async fn select_exhausted_vocab_takes_all_words_and_fills_rest() {
+    // Arrange: слов меньше доли веса — fallback добирает остаток другими типами
+    let repo = InMemoryUserRepository::with_user(user_with_new_cards(2, 10, 10));
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act
+    let hand = select.execute(&jlpt_content).await.unwrap().unwrap();
+
+    // Assert: все доступные слова в руке, рука заполнена до максимума
+    let (vocab, kanji, grammar) = hand_type_counts(&repo, &hand).await;
+    assert_eq!(vocab, 2, "каждое доступное новое слово попадает в руку");
+    assert_eq!(hand.len(), 7);
+    assert_eq!(kanji + grammar, 5);
+}
+
+#[tokio::test]
+async fn select_pool_without_words_fills_hand_with_kanji_and_grammar() {
+    // Arrange: пул без слов — веса ренормализуются на кандзи и грамматику
+    let repo = InMemoryUserRepository::with_user(user_with_new_cards(0, 10, 10));
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act
+    let hand = select.execute(&jlpt_content).await.unwrap().unwrap();
+
+    // Assert: рука заполнена только кандзи и грамматикой (точный сплит
+    // K:G недетерминирован — random tie-break равных дробных частей)
+    let (vocab, kanji, grammar) = hand_type_counts(&repo, &hand).await;
+    assert_eq!(vocab, 0);
+    assert_eq!(hand.len(), 7);
+    assert_eq!(kanji + grammar, 7);
 }
 
 #[tokio::test]

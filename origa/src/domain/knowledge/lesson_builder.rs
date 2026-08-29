@@ -1334,7 +1334,7 @@ type GroupedNewCards<'a> =
 /// via `compute_type_slots`. Output order: Vocabulary as spine, then Kanji,
 /// then Grammar (matches the historical lesson layout — `interleave_core_by_type`
 /// reshuffles it later anyway).
-fn distribute_new_cards<'a, R: rand::Rng>(
+pub(crate) fn distribute_new_cards<'a, R: rand::Rng>(
     new_cards: Vec<(&'a Ulid, &'a StudyCard)>,
     jlpt_content: &JlptContent,
     allowed: usize,

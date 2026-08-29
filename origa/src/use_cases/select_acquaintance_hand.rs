@@ -1,4 +1,4 @@
-use crate::domain::{Card, CardType, HAND_MAX_SIZE, JlptContent, OrigaError};
+use crate::domain::{Card, CardType, HAND_MAX_SIZE, JlptContent, OrigaError, StudyCard};
 use crate::traits::UserRepository;
 use std::collections::HashSet;
 use tracing::{debug, info};
@@ -14,8 +14,10 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
         Self { repository }
     }
 
-    /// Выбирает руку знакомства из верхушки пула новых карт в порядке
-    /// JLPT-приоритета (N5 первым), размер min(лимит дня, пул,
+    /// Выбирает руку знакомства из пула новых карт: JLPT-приоритет
+    /// (N5 первым) и пропорция типов по `CARD_TYPE_WEIGHTS` — тот же
+    /// контракт, что у исторического впрыска новых карт в урок
+    /// (`distribute_new_cards`). Размер min(лимит дня, пул,
     /// `HAND_MAX_SIZE`).
     ///
     /// Чистая функция от состояния knowledge_set и остатка дневного лимита:
@@ -40,27 +42,31 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
 
         let hand_size = daily_remaining.min(HAND_MAX_SIZE);
 
-        // Кандидаты: новые карты, кроме фраз. Приоритет — JLPT-уровень
-        // из контента (N5=5 .. N1=1), неизвестный уровень — в конце пула.
-        let mut candidates: Vec<(u8, Ulid, CardType)> = user
+        // Кандидаты: новые карты, кроме фраз (фразы живут собственными
+        // пайплайнами anchored/tail и знакомство не проходят).
+        let new_cards: Vec<(&Ulid, &StudyCard)> = user
             .knowledge_set()
             .study_cards()
-            .values()
-            .filter(|study_card| {
+            .iter()
+            .filter(|(_, study_card)| {
                 study_card.memory().is_new() && !matches!(study_card.card(), Card::Phrase(_))
             })
-            .map(|study_card| {
-                let card_type = CardType::from(study_card.card());
-                let priority = crate::domain::jlpt_sort_key(study_card.card(), jlpt_content);
-                (priority, *study_card.card_id(), card_type)
-            })
             .collect();
-        if candidates.is_empty() {
+        if new_cards.is_empty() {
             return Ok(None);
         }
-        candidates.sort_by(|left, right| right.0.cmp(&left.0).then(left.1.cmp(&right.1)));
-        candidates.truncate(hand_size);
 
+        let mut rng = rand::rng();
+        let selected =
+            crate::domain::distribute_new_cards(new_cards, jlpt_content, hand_size, &mut rng);
+        if selected.is_empty() {
+            return Ok(None);
+        }
+
+        let candidates: Vec<(Ulid, CardType)> = selected
+            .iter()
+            .map(|(card_id, study_card)| (**card_id, CardType::from(study_card.card())))
+            .collect();
         let ordered = group_presentation_order(user.knowledge_set(), &candidates);
         info!(
             user_id = %user.id(),
@@ -81,7 +87,7 @@ fn budget_new_cards_per_day(user: &crate::domain::User) -> usize {
 /// остальные карты — в естественном (приоритетном) порядке.
 fn group_presentation_order(
     knowledge_set: &crate::domain::KnowledgeSet,
-    candidates: &[(u8, Ulid, CardType)],
+    candidates: &[(Ulid, CardType)],
 ) -> Vec<Ulid> {
     let kanji_chars_of = |card_id: Ulid| -> Option<Vec<char>> {
         match knowledge_set.get_card(card_id)?.card() {
@@ -93,7 +99,7 @@ fn group_presentation_order(
     let mut result: Vec<Ulid> = Vec::with_capacity(candidates.len());
     let mut consumed: HashSet<Ulid> = HashSet::new();
 
-    for (_priority, card_id, card_type) in candidates {
+    for (card_id, card_type) in candidates {
         if *card_type != CardType::Kanji || !consumed.insert(*card_id) {
             continue;
         }
@@ -102,7 +108,7 @@ fn group_presentation_order(
         let Some(kanji_chars) = kanji_chars_of(*card_id) else {
             continue;
         };
-        for (word_priority, word_id, word_type) in candidates {
+        for (word_id, word_type) in candidates {
             if *word_type != CardType::Vocabulary || consumed.contains(word_id) {
                 continue;
             }
@@ -112,15 +118,13 @@ fn group_presentation_order(
             if word_text.chars().any(|ch| kanji_chars.contains(&ch)) {
                 // Компаньон идёт сразу за своим кандзи; приоритет слова
                 // внутри руки не важен — группировка по знаку главнее.
-                let _ = word_priority;
                 result.push(*word_id);
                 consumed.insert(*word_id);
             }
         }
     }
 
-    for (_priority, card_id, card_type) in candidates {
-        let _ = card_type;
+    for (card_id, _card_type) in candidates {
         if consumed.insert(*card_id) {
             result.push(*card_id);
         }
@@ -140,7 +144,7 @@ mod group_presentation_order_tests {
     use super::*;
     use crate::domain::{KnowledgeSet, NativeLanguage, Question, User};
 
-    fn setup(cards: Vec<Card>) -> (KnowledgeSet, Vec<(u8, Ulid, CardType)>) {
+    fn setup(cards: Vec<Card>) -> (KnowledgeSet, Vec<(Ulid, CardType)>) {
         let mut user = User::new(
             "test@example.com".to_string(),
             NativeLanguage::Russian,
@@ -149,7 +153,7 @@ mod group_presentation_order_tests {
         let mut candidates = Vec::new();
         for card in cards {
             let study_card = user.create_card(card).unwrap();
-            candidates.push((0, *study_card.card_id(), CardType::from(study_card.card())));
+            candidates.push((*study_card.card_id(), CardType::from(study_card.card())));
         }
         let knowledge_set = user.knowledge_set().clone();
         (knowledge_set, candidates)
@@ -183,7 +187,7 @@ mod group_presentation_order_tests {
             .iter()
             .map(|id| word_text_of(&knowledge_set, *id))
             .collect();
-        assert_eq!(order[0], /* 明 */ candidates[0].1);
+        assert_eq!(order[0], /* 明 */ candidates[0].0);
         assert_eq!(texts[1].as_deref(), Some("明日"));
         assert_eq!(texts[2].as_deref(), Some("明るい"));
         assert_eq!(texts[3].as_deref(), Some("車"));
