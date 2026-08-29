@@ -225,15 +225,17 @@
     "phase_training": "ACQUAINTANCE · TRAINING",
     "already_know": "Already know",
     "confirm_known": "Mark as known?",
+    "confirm_known_message": "The card goes straight to review, without training",
     "yes_i_know": "Yes, I know",
-    "cancel": "No",
     "training_placeholder": "Training phase is coming in the next slice",
     "summary_stamp": "HAND CLOSED",
     "to_reviews": "To reviews",
     "dont_remember": "Don't remember",
     "remember": "Remember",
     "dir_forward": "JP → RU",
-    "dir_reverse": "RU → JP"
+    "dir_reverse": "RU → JP",
+    "strip_presentation": "Slide",
+    "strip_training": "Cards closed"
   },
   "lesson": {
     "loading": "Preparing cards for the lesson...",

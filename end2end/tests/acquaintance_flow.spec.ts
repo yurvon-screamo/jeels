@@ -76,15 +76,17 @@ test.describe("Acquaintance mode", () => {
 		}
 		await knowBtn.click();
 
-		// Inline-подтверждение появляется и живёт на текущем слайде.
-		const panel = page.getByTestId("acquaintance-know-confirm-panel");
-		await expect(panel).toBeVisible();
-		await page.getByTestId("acquaintance-know-confirm").click();
-		await expect(panel).not.toBeVisible();
+		// Подтверждение — общий паттерн модалки.
+		const modal = page.getByTestId("acquaintance-know-confirm");
+		await expect(modal).toBeVisible();
 
-		// Отмена закрывает панель без побочных действий.
+		// Отмена закрывает модалку без побочных действий.
+		await page.getByTestId("acquaintance-know-confirm-cancel").click();
+		await expect(modal).not.toBeVisible();
+
+		// Подтверждение выбывает карту из руки.
 		await knowBtn.click();
-		await page.getByTestId("acquaintance-know-cancel").click();
-		await expect(panel).not.toBeVisible();
+		await page.getByTestId("acquaintance-know-confirm-confirm").click();
+		await expect(modal).not.toBeVisible();
 	});
 });

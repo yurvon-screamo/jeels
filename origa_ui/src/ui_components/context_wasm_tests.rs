@@ -16,9 +16,9 @@ use crate::test_support::{
     mount_with_stores, shared_cell, test_user,
 };
 use crate::ui_components::{
-    BottomTabBar, CardActionBar, CollapsibleDescription, ConnectivityBanner, DeleteConfirmModal,
-    Dropdown, DropdownItem, NativeLanguageToggle, SelectedCount, Sidebar, Toast, ToastContainer,
-    ToastData, ToastType, TranslatorText, UpdateDrawer,
+    BottomTabBar, CardActionBar, CollapsibleDescription, ConfirmModal, ConnectivityBanner,
+    DeleteConfirmModal, Dropdown, DropdownItem, NativeLanguageToggle, SelectedCount, Sidebar,
+    Toast, ToastContainer, ToastData, ToastType, TranslatorText, UpdateDrawer,
 };
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -912,5 +912,106 @@ async fn loading_stage_item_error_state_shows_message() {
     assert!(
         text.contains("network down"),
         "the error message must render; got: {text}"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn confirm_modal_renders_texts_and_dispatches_callbacks() {
+    // Arrange
+    let (set_confirm, get_confirm) = shared_cell::<RwSignal<bool>>();
+    let (set_close, get_close) = shared_cell::<RwSignal<bool>>();
+    let wrapper = create_wrapper();
+    mount_with_i18n(&wrapper, move || {
+        let is_open = RwSignal::new(true);
+        let confirm_flag = RwSignal::new(false);
+        set_confirm.set(Some(confirm_flag));
+        let close_flag = RwSignal::new(false);
+        set_close.set(Some(close_flag));
+        view! {
+            <ConfirmModal
+                test_id="cm1"
+                is_open=is_open
+                title="Отметить известной?".to_string()
+                message="Карта сразу войдёт в ревью".to_string()
+                confirm_label="Да, знаю".to_string()
+                on_confirm=Callback::new(move |_| confirm_flag.set(true))
+                on_close=Callback::new(move |_| close_flag.set(true))
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    // Act / Assert: тексты и кнопки общего паттерна подтверждения
+    let modal = wrapper
+        .query_selector("[data-testid=\"cm1\"]")
+        .unwrap()
+        .unwrap();
+    let text = modal.text_content().unwrap();
+    assert!(text.contains("Отметить известной?"), "title: {text}");
+    assert!(
+        text.contains("Карта сразу войдёт в ревью"),
+        "message: {text}"
+    );
+    assert!(text.contains("Да, знаю"), "confirm label: {text}");
+
+    wrapper
+        .query_selector("[data-testid=\"cm1-confirm\"]")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::HtmlElement>()
+        .unwrap()
+        .click();
+    tick().await;
+    assert!(
+        get_confirm.get().expect("captured").get(),
+        "confirm dispatches"
+    );
+
+    wrapper
+        .query_selector("[data-testid=\"cm1-cancel\"]")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::HtmlElement>()
+        .unwrap()
+        .click();
+    tick().await;
+    assert!(
+        get_close.get().expect("captured").get(),
+        "cancel dispatches on_close"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn confirm_modal_busy_disables_buttons_and_shows_spinner() {
+    let wrapper = create_wrapper();
+    mount_with_i18n(&wrapper, || {
+        view! {
+            <ConfirmModal
+                test_id="cm2"
+                is_open=RwSignal::new(true)
+                is_busy=Signal::from(true)
+                title="t".to_string()
+                message="m".to_string()
+                confirm_label="ok".to_string()
+                on_confirm=Callback::new(|()| {})
+                on_close=Callback::new(|()| {})
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let confirm = wrapper
+        .query_selector("[data-testid=\"cm2-confirm\"]")
+        .unwrap()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlButtonElement>();
+    assert!(confirm.disabled(), "confirm disabled while busy");
+    assert!(
+        wrapper
+            .query_selector("[data-testid=\"cm2\"] .spinner")
+            .is_ok_and(|s| s.is_some()),
+        "busy state shows a spinner"
     );
 }

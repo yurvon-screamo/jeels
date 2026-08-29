@@ -207,7 +207,6 @@ pub fn LessonContent() -> impl IntoView {
                             state.hand = Some(hand);
                             state.slide_index = 0;
                             state.skipped_ids.clear();
-                            state.confirm_known = false;
                         });
                         acq_slides_signal.set(slides);
                     }

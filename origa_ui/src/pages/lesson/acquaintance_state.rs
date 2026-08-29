@@ -28,7 +28,6 @@ pub struct AcquaintanceState {
     pub stage: AcquaintanceStage,
     pub hand: Option<AcquaintanceHand>,
     pub slide_index: usize,
-    pub confirm_known: bool,
     pub skipped_ids: HashSet<Ulid>,
     /// Текущая карта тренировки: шапка читает её для тега типа карты.
     pub current_card_id: Option<Ulid>,
@@ -175,7 +174,6 @@ mod advance_presentation_tests {
             stage: AcquaintanceStage::Presentation,
             hand: Some(hand),
             slide_index: 0,
-            confirm_known: false,
             skipped_ids: HashSet::new(),
             current_card_id: None,
         }
@@ -206,7 +204,6 @@ mod advance_presentation_tests {
             stage: AcquaintanceStage::Presentation,
             hand: Some(hand),
             slide_index: 0,
-            confirm_known: false,
             skipped_ids: HashSet::from([b]),
             current_card_id: None,
         };

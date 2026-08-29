@@ -3843,14 +3843,14 @@ rt {
     height: 16px;
 }
 
-/* Delete confirm modal */
-.delete-confirm-modal {
+/* Confirm modal (shared confirm pattern; DeleteConfirmModal wraps it) */
+.confirm-modal {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.delete-confirm-actions {
+.confirm-modal-actions {
     display: flex;
     gap: 8px;
     justify-content: flex-end;

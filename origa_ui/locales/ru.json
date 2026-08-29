@@ -225,15 +225,17 @@
     "phase_training": "ЗНАКОМСТВО · ТРЕНИРОВКА",
     "already_know": "Уже знаю",
     "confirm_known": "Отметить известной?",
+    "confirm_known_message": "Карта сразу войдёт в ревью, без тренировки",
     "yes_i_know": "Да, знаю",
-    "cancel": "Нет",
     "training_placeholder": "Фаза тренировки — следующий срез",
     "summary_stamp": "РУКА ЗАКРЫТА",
     "to_reviews": "К ревью",
     "dont_remember": "Не помню",
     "remember": "Помню",
     "dir_forward": "ЯП → РУС",
-    "dir_reverse": "РУС → ЯП"
+    "dir_reverse": "РУС → ЯП",
+    "strip_presentation": "Слайд",
+    "strip_training": "Карт закрыто"
   },
   "lesson": {
     "loading": "Подготовка карточек для урока...",

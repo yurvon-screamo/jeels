@@ -3,13 +3,13 @@ use super::acquaintance_state::{
     AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, should_autoplay_word_audio,
 };
 use super::card_type::CardType as UiCardType;
-use super::hand_progress_strip::HandProgressStrip;
+use super::hand_progress_strip::{HandProgressStrip, presentation_fill};
 use super::kanji_card_details::{KanjiCardDetails, RadicalDisplay};
 use super::keyboard_handler::is_typing_target;
 use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
-    AudioButtons, Button, ButtonVariant, FuriganaText, KanjiAnimation, MarkdownText,
+    AudioButtons, Button, ButtonVariant, ConfirmModal, FuriganaText, KanjiAnimation, MarkdownText,
     MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word,
 };
 use leptos::prelude::*;
@@ -99,25 +99,71 @@ pub fn AcquaintanceView() -> impl IntoView {
     });
 
     let card_type_tag = Signal::derive(move || current_card_type.get().map(ui_card_type));
-    // Прогресс полосы: видимый счётчик каждой карты в текущей подфазе
-    // (в показе все нули, в тренировке — из доменной машины).
+    // Прогресс полосы — единственный индикатор во время знакомства:
+    // в показе ячейки заполняются по пройденным слайдам, в тренировке —
+    // успешными ответами каждой карты в текущей подфазе.
     let progress = Signal::derive(move || {
         let ctx = ctx_stored.get_value();
-        ctx.state.with(|state| {
-            let Some(hand) = state.hand.as_ref() else {
-                return Vec::new();
-            };
-            let subphase = hand.subphase();
-            hand.presentation_order()
-                .iter()
-                .map(|id| match hand.entry(*id) {
+        let state = ctx.state.get();
+        let Some(hand) = state.hand.as_ref() else {
+            return Vec::new();
+        };
+        let subphase = hand.subphase();
+        if state.stage == AcquaintanceStage::Presentation {
+            return presentation_fill(hand.len(), state.slide_index)
+                .into_iter()
+                .zip(hand.presentation_order().iter())
+                .map(|(fill, card_id)| {
                     // Выведенная («Уже знаю») карта схлопывает ячейку.
-                    Some(e) if e.is_retired() => u8::MAX,
-                    Some(e) => e.progress_in(subphase),
-                    None => 0,
+                    if hand.entry(*card_id).is_some_and(|entry| entry.is_retired()) {
+                        u8::MAX
+                    } else {
+                        fill
+                    }
                 })
-                .collect()
-        })
+                .collect();
+        }
+        hand.presentation_order()
+            .iter()
+            .map(|card_id| match hand.entry(*card_id) {
+                Some(entry) if entry.is_retired() => u8::MAX,
+                Some(entry) => entry.progress_in(subphase),
+                None => 0,
+            })
+            .collect()
+    });
+
+    // Текстовое дублирование полосы (спека §8.4): позиция показа или число
+    // карт, закрывших критерий.
+    let strip_label = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        let state = ctx.state.get();
+        let Some(hand) = state.hand.as_ref() else {
+            return String::new();
+        };
+        let total = hand.len();
+        let keys = i18n.get_keys().acquaintance();
+        match state.stage {
+            AcquaintanceStage::Presentation => format!(
+                "{} {}/{}",
+                keys.strip_presentation().inner(),
+                (state.slide_index + 1).min(total.max(1)),
+                total
+            ),
+            AcquaintanceStage::Training => {
+                let subphase = hand.subphase();
+                let closed = hand
+                    .presentation_order()
+                    .iter()
+                    .filter(|card_id| {
+                        hand.entry(**card_id)
+                            .is_some_and(|entry| entry.criterion_met(subphase))
+                    })
+                    .count();
+                format!("{}: {}/{}", keys.strip_training().inner(), closed, total)
+            },
+            AcquaintanceStage::Summary | AcquaintanceStage::Inactive => String::new(),
+        }
     });
 
     view! {
@@ -143,7 +189,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                         </Tag>
                     </Show>
                 </div>
-                <HandProgressStrip total progress />
+                <HandProgressStrip total progress label=strip_label />
             </div>
 
             <Show when=move || {
@@ -427,15 +473,15 @@ fn GrammarSlide(
     }
 }
 
-/// Action bar фазы показа: слева «Уже знаю» (Ghost → inline-confirm),
-/// справа «Дальше». Подтверждение живёт только на текущем слайде.
+/// Action bar фазы показа: слева «Уже знаю» (Ghost → общий ConfirmModal),
+/// справа «Дальше».
 #[component]
 fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
     let i18n = use_i18n();
+    let confirm_open = RwSignal::new(false);
 
     let advance = Callback::new(move |_: ()| {
         ctx.state.update(|state| {
-            state.confirm_known = false;
             if state.advance_presentation() {
                 state.stage = AcquaintanceStage::Training;
             }
@@ -447,7 +493,6 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
         Callback::new(move |card_id: Ulid| {
             let mut complete_now = false;
             ctx.state.update(|state| {
-                state.confirm_known = false;
                 state.skipped_ids.insert(card_id);
                 // Карта выбывает из руки: критерий считается выполненным,
                 // тренировка и подфазы её больше не ждут (спека §Тренировка).
@@ -501,6 +546,7 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                 mark_known_and_advance.run(card_id);
                 known_in_flight.set(false);
             });
+            confirm_open.set(false);
         })
     };
 
@@ -517,75 +563,56 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
         }
     });
 
-    let on_confirm_open = {
-        let ctx = ctx.clone();
-        Callback::new(move |_: ()| {
-            ctx.state.update(|state| state.confirm_known = true);
-        })
-    };
-
-    let on_cancel = {
-        let ctx = ctx.clone();
-        Callback::new(move |_: ()| {
-            ctx.state.update(|state| state.confirm_known = false);
-        })
-    };
-
     view! {
         <div
             class="mt-4 flex items-center justify-between gap-3"
             data-testid="acquaintance-action-bar"
         >
-            <Show
-                when=move || ctx.state.get().confirm_known
-                fallback=move || {
-                    view! {
-                        <Button
-                            variant=Signal::derive(|| ButtonVariant::Ghost)
-                            on_click=Callback::new(move |_| on_confirm_open.run(()))
-                            test_id=Signal::derive(|| "acquaintance-know-btn".to_string())
-                        >
-                            {t!(i18n, acquaintance.already_know)}
-                        </Button>
-                    }
-                }
+            <Button
+                variant=Signal::derive(|| ButtonVariant::Ghost)
+                on_click=Callback::new(move |_| confirm_open.set(true))
+                test_id=Signal::derive(|| "acquaintance-know-btn".to_string())
             >
-                <div
-                    class="flex items-center gap-2 border border-[var(--border-dark)] px-3 py-2"
-                    data-testid="acquaintance-know-confirm-panel"
-                >
-                    <span class="font-mono text-xs uppercase tracking-widest">
-                        {t!(i18n, acquaintance.confirm_known)}
-                    </span>
-                    <Button
-                        variant=Signal::derive(|| ButtonVariant::Olive)
-                        on_click=Callback::new(move |_| on_yes_know.run(()))
-                        test_id=Signal::derive(|| "acquaintance-know-confirm".to_string())
-                    >
-                        {t!(i18n, acquaintance.yes_i_know)}
-                    </Button>
-                    <Button
-                        variant=Signal::derive(|| ButtonVariant::Default)
-                        on_click=Callback::new(move |_| on_cancel.run(()))
-                        test_id=Signal::derive(|| "acquaintance-know-cancel".to_string())
-                    >
-                        {t!(i18n, acquaintance.cancel)}
-                    </Button>
-                </div>
-            </Show>
+                {t!(i18n, acquaintance.already_know)}
+            </Button>
 
-            <Show when=move || !ctx.state.get().confirm_known fallback=move || ()>
-                <Button
-                    variant=Signal::derive(|| ButtonVariant::Filled)
-                    on_click=Callback::new(move |_| advance.run(()))
-                    test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
-                >
-                    <span>{t!(i18n, lesson.next)}</span>
-                    <span class="kbd-hint text-[var(--fg-light)]">
-                        {t!(i18n, lesson.space_key)}
-                    </span>
-                </Button>
-            </Show>
+            <Button
+                variant=Signal::derive(|| ButtonVariant::Filled)
+                on_click=Callback::new(move |_| advance.run(()))
+                test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
+            >
+                <span>{t!(i18n, lesson.next)}</span>
+                <span class="kbd-hint text-[var(--fg-light)]">
+                    {t!(i18n, lesson.space_key)}
+                </span>
+            </Button>
         </div>
+
+        <ConfirmModal
+            test_id=Signal::derive(|| "acquaintance-know-confirm".to_string())
+            is_open=confirm_open
+            is_busy=known_in_flight.into()
+            title=Signal::derive(move || {
+                i18n
+                    .get_keys()
+                    .acquaintance()
+                    .confirm_known()
+                    .inner()
+                    .to_string()
+            })
+            message=Signal::derive(move || {
+                i18n
+                    .get_keys()
+                    .acquaintance()
+                    .confirm_known_message()
+                    .inner()
+                    .to_string()
+            })
+            confirm_label=Signal::derive(move || {
+                i18n.get_keys().acquaintance().yes_i_know().inner().to_string()
+            })
+            on_confirm=on_yes_know
+            on_close=Callback::new(move |_| confirm_open.set(false))
+        />
     }
 }
