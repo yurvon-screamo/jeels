@@ -811,6 +811,91 @@ async fn yesno_card_view_correct_answer_still_shows_the_answer() {
     );
 }
 
+// The "Correct answer: Да/Нет" line must appear only as feedback on a miss.
+// Locale note: `mount_with_i18n` provides the context without an explicit
+// locale, so the default from build.rs (`Config::new("en")`) applies —
+// assert against the en string (locales/en.json "correct_answer").
+#[wasm_bindgen_test]
+async fn yesno_card_view_correct_hides_correct_answer_line() {
+    let wrapper = create_wrapper();
+    mount_with_i18n(&wrapper, || {
+        view! {
+            <YesNoCardView
+                yesno_card=yesno_fixture(true)
+                show_result=Signal::from(true)
+                selected_answer=Some(true)
+                on_answer=Callback::new(|_: bool| {})
+                on_dont_know=Callback::new(|()| {})
+                dont_know_selected=Signal::from(false)
+                native_language=origa::domain::NativeLanguage::Russian
+                known_kanji=Signal::derive(|| HashSet::new())
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let page = wrapper.text_content().unwrap_or_default();
+    assert!(
+        !page.contains("Correct answer"),
+        "a correct answer must show only the verdict; got: {page}"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn yesno_card_view_incorrect_shows_correct_answer_line() {
+    let wrapper = create_wrapper();
+    mount_with_i18n(&wrapper, || {
+        view! {
+            <YesNoCardView
+                yesno_card=yesno_fixture(true)
+                show_result=Signal::from(true)
+                selected_answer=Some(false)
+                on_answer=Callback::new(|_: bool| {})
+                on_dont_know=Callback::new(|()| {})
+                dont_know_selected=Signal::from(false)
+                native_language=origa::domain::NativeLanguage::Russian
+                known_kanji=Signal::derive(|| HashSet::new())
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let page = wrapper.text_content().unwrap_or_default();
+    assert!(
+        page.contains("Correct answer"),
+        "an incorrect answer must reveal the correct Да/Нет; got: {page}"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn yesno_card_view_dont_know_shows_correct_answer_line() {
+    let wrapper = create_wrapper();
+    mount_with_i18n(&wrapper, || {
+        view! {
+            <YesNoCardView
+                yesno_card=yesno_fixture(true)
+                show_result=Signal::from(true)
+                selected_answer=None
+                on_answer=Callback::new(|_: bool| {})
+                on_dont_know=Callback::new(|()| {})
+                dont_know_selected=Signal::from(true)
+                native_language=origa::domain::NativeLanguage::Russian
+                known_kanji=Signal::derive(|| HashSet::new())
+            />
+        }
+        .into_any()
+    });
+    tick().await;
+
+    let page = wrapper.text_content().unwrap_or_default();
+    assert!(
+        page.contains("Correct answer"),
+        "a don't-know answer must reveal the correct Да/Нет; got: {page}"
+    );
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // LessonCompleteScreen (needs LessonContext + repository context)
 // ═══════════════════════════════════════════════════════════════════════
