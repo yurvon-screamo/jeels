@@ -798,6 +798,19 @@ input[type="submit"],
     overscroll-behavior: contain;
 }
 
+/* Pinned action bar (optional Drawer `footer` slot). Sibling of
+   .drawer-body, so it spans the full card width (no scrollbar gutter)
+   and needs no own background — scrolling content never passes under it.
+   Spacing contract lives here, structurally: margin-top guarantees the
+   gap between the last body element and the rule regardless of the
+   body content's trailing padding. */
+.drawer-footer {
+    flex-shrink: 0;
+    margin-top: 16px;
+    padding: 16px 0 8px;
+    border-top: 1px solid var(--border-dark);
+}
+
 /* ------------------------ */
 
 .dropdown {
@@ -2336,6 +2349,22 @@ rt {
     text-wrap: balance;
 }
 
+/* Consent screen content for the first-run resource download (Guideline
+   4.2.3(ii)): centered column with title, body copy and the Download button. */
+.resource-download-consent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 32rem;
+    padding: 0 1.5rem;
+}
+
+/* Progress bar inside the loading overlay — constrained width so the thin
+   track stays legible against the full-screen overlay. */
+.loading-overlay-progress {
+    width: min(320px, 80vw);
+}
+
 .btn-loading {
     position: relative;
     pointer-events: none;
@@ -2594,22 +2623,14 @@ rt {
 }
 
 /* === Canvas стили в стиле проекта === */
-.kanji-drawing-canvas-wrapper {
-    position: relative;
-}
-
-.kanji-drawing-canvas-wrapper::after {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    border: 1px solid var(--border-dark);
-    z-index: -1;
-    background: var(--bg-aged);
-    pointer-events: none;
-}
-
+/* No border: the canvas sits inside a bordered card both in the lesson
+   (writing card) and on the kanji page (section cards), and its own rule
+   collided with the card border. The 320px drawing buffer now maps 1:1
+   to the CSS box (border-box previously shrank it by the border width).
+   The former canvas-wrapper ::after (a decorative offset shadow) never
+   rendered: `inset: 4px; z-index: -1` hid it entirely under the opaque
+   canvas, so both the rule and its wrapper class were removed. */
 .kanji-drawing-canvas {
-    border: 1px solid var(--border-dark);
     background: var(--bg-paper);
     touch-action: none;
     cursor: crosshair;

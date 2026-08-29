@@ -213,7 +213,7 @@ pub fn learning_resource_schema(locale: Locale) -> String {
     .to_string()
 }
 
-pub fn faq_schema(locale: Locale, qas: &[(&'static str, &'static str)]) -> String {
+pub fn faq_schema(locale: Locale, qas: &[(&str, &str)]) -> String {
     let entities: Vec<_> = qas
         .iter()
         .map(|(question, answer)| {

@@ -101,17 +101,22 @@ In most cases a working set is one memorization app plus one or two specialized 
 
 ## FAQ
 
-**Is Origa's spaced repetition the same as Anki's?**
+### Is Origa's spaced repetition the same as Anki's?
+
 Yes, both use FSRS. For the details, see [the Anki article](/blog/anki-alternative-japanese).
 
-**Can I keep my Anki decks?**
+### Can I keep my Anki decks?
+
 Yes. Origa imports `.anki2`, `.anki21`, and `.anki21b` — decks and review history transfer. See [the Anki article](/blog/anki-alternative-japanese) for the migration details.
 
-**Is Origa free?**
+### Is Origa free?
+
 Yes, the app is currently free across all platforms.
 
-**Does it work offline?**
+### Does it work offline?
+
 Yes. For what "offline" covers in each app category, see [the offline article](/blog/best-japanese-learning-app-offline).
 
-**What if I only study on iPhone?**
+### What if I only study on iPhone?
+
 Not yet. Origa runs on Windows, Linux, macOS, Android, and the web. iOS is planned — if iPhone is your only device, wait for the iOS release or stay on Anki.

@@ -2,7 +2,11 @@
 
 ## Status
 
-**Accepted** (2026-08-22).
+**Superseded by [ADR-042](ADR-042-msix-microsoft-store.md)** (2026-08-25) —
+the Store submission moved from a linked EXE to an MSIX package; the CDN
+mirror, its workflow and its tests were removed.
+
+Originally **Accepted** (2026-08-22).
 
 ## Date
 

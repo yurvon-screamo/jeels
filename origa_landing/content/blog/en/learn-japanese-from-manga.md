@@ -44,7 +44,7 @@ The dream workflow is: read manga, see unknown word, learn it. The reality has f
 
 ## What a realistic workflow looks like
 
-A workflow that actually works has three stages, repeated per session:
+Manga mining assumes you know the kana and have at least an N5-size vocabulary — if that isn't you yet, start with [the zero-to-start plan](/blog/yaponskiy-s-nulya). A workflow that actually works has three stages, repeated per session:
 
 1. **Read.** Pick one chapter, not the whole volume. Read for the story first. Mark unknown words but don't stop to learn them mid-read — that breaks flow.
 2. **Mine.** After the chapter, go back to the 5–15 words you marked. Add each to an SRS with the sentence it appeared in, the reading, and (ideally) the panel image.
@@ -95,17 +95,22 @@ If neither happens after a month of consistent mining, the problem is almost alw
 
 ## FAQ
 
-**Do I need to know kanji before reading manga?**
+### Do I need to know kanji before reading manga?
+
 No. Start with furigana-heavy manga (shōnen/shōjo) at N5-N4 reading level. You'll learn kanji in context faster than from a list. The catch is that you need an SRS to retain what you read — otherwise you'll forget the kanji within a week.
 
-**Can I learn Japanese only from manga?**
+### Can I learn Japanese only from manga?
+
 No. Manga gives you reading and listening (if you read along with the drama CD or anime), but it's weak on output, grammar drilling, and JLPT-specific test format. Pair it with a grammar reference and an SRS. Or build the SRS into the same app — that's the Origa pitch.
 
-**What's the single best manga to start with?**
+### What's the single best manga to start with?
+
 *Yotsuba&!* (よつばと!). Everyday vocabulary, gentle grammar, full furigana, short chapters. If you find it too easy after volume two, move on. Don't optimise the choice — start.
 
-**Is OCR accurate enough on manga?**
+### Is OCR accurate enough on manga?
+
 For standard printed manga: yes, ~90%+ on typical panels. For stylized hand-lettered or sfx-heavy panels: less reliable. Always expect to correct one word in ten by hand.
 
-**Does Origa replace a manga reader?**
+### Does Origa replace a manga reader?
+
 No. Origa is the SRS that sits next to whatever reader you use. Scan from the reader, mine into Origa, review in Origa. If that's the half you need, [download Origa](/download).

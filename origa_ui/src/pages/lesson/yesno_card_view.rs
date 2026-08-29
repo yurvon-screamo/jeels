@@ -229,6 +229,12 @@ pub fn YesNoCardView(
         }
     };
 
+    // The "Correct answer: Да/Нет" line is feedback for a miss: on a correct
+    // answer it only repeats the verdict the learner already knows. Hidden
+    // when Correct, shown for Incorrect and Don't Know.
+    let show_correct_answer_line =
+        move || show_result.get() && !matches!(yesno_result(), YesNoResult::Correct);
+
     view! {
         <div class="flex flex-col">
             <LessonCardTagsQuiz
@@ -328,17 +334,19 @@ pub fn YesNoCardView(
                 <Show when=move || show_result.get()>
                     <QuizResultDisplay quiz_result=QuizResult::from(yesno_result()) />
 
-                    // Show the correct answer (Да/Нет) on every result —
-                    // as a confirmation when correct and as feedback when
-                    // not, same pattern as the single-quiz card.
-                    <div class="mt-2 text-center">
-                        <Text size=TextSize::Small variant=TypographyVariant::Muted>
-                            {t!(i18n, lesson.correct_answer)}
-                            <span class="font-semibold">
-                                {correct_answer_text}
-                            </span>
-                        </Text>
-                    </div>
+                    // The correct answer (Да/Нет) is feedback for a miss:
+                    // shown only when the learner did not answer correctly,
+                    // same pattern as the single-quiz card.
+                    <Show when=show_correct_answer_line>
+                        <div class="mt-2 text-center">
+                            <Text size=TextSize::Small variant=TypographyVariant::Muted>
+                                {t!(i18n, lesson.correct_answer)}
+                                <span class="font-semibold">
+                                    {correct_answer_text}
+                                </span>
+                            </Text>
+                        </div>
+                    </Show>
                 </Show>
 
                 // The yes/no verdict alone is not the answer the learner

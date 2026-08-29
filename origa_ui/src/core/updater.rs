@@ -36,6 +36,27 @@ struct ProgressState {
 
 const PROGRESS_EVENT: &str = "origa-update-progress";
 
+/// Returns `true` when the desktop binary is an app-store distribution
+/// (Microsoft Store MSIX / Mac App Store): the self-update machinery is
+/// compiled out there and this UI must not offer update checks
+/// (Store policy 10.2.5 / Guideline 2.4.5(vii)).
+///
+/// Always `false` outside the Tauri WebView — the browser build has no
+/// store identity and no update UI either.
+pub async fn is_store_build() -> bool {
+    if !is_tauri() {
+        return false;
+    }
+
+    match invoke_with_args("is_store_build", &JsValue::UNDEFINED).await {
+        Ok(result) => result.as_bool().unwrap_or(false),
+        Err(e) => {
+            tracing::warn!("updater: is_store_build invoke failed: {e}");
+            false
+        },
+    }
+}
+
 /// Checks the Tauri updater endpoint for a newer release.
 ///
 /// Returns `None` outside the Tauri WebView (browser build) or when no update

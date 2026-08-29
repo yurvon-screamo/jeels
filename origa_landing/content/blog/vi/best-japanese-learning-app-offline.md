@@ -115,7 +115,7 @@ Không có tính năng nào trong luồng bình thường của Origa đòi hỏ
 
 ## Chọn thế nào
 
-Nếu nhu cầu ngoại tuyến của bạn là "ôn bộ bài Anki hiện có dưới tàu điện ngầm" — AnkiMobile (iOS) hoặc AnkiDroid (Android) là câu trả lời rẻ nhất, được kiểm chứng nhất.
+Nếu nhu cầu ngoại tuyến của bạn là "ôn bộ bài Anki hiện có dưới tàu điện ngầm" — AnkiMobile (iOS) hoặc AnkiDroid (Android) là câu trả lời rẻ nhất, được kiểm chứng nhất ([khi nào nên ở lại với Anki](/vi/blog/anki-alternative-japanese)).
 
 Nếu nhu cầu ngoại tuyến của bạn là "tôi đang du lịch một tháng với kết nối kém và muốn tiếp tục thêm từ vựng từ manga và sách giáo khoa tôi gặp" — bạn cần một ứng dụng nơi OCR và tạo nội dung hoạt động ngoại tuyến, không chỉ ôn. Origa được dựng chính xác cho trường hợp sử dụng đó.
 
@@ -123,17 +123,22 @@ Nếu bạn thực sự không cần ngoại tuyến — nếu bạn học ở n
 
 ## Câu hỏi thường gặp
 
-**Origa có hoạt động hoàn toàn ngoại tuyến không?**
+### Origa có hoạt động hoàn toàn ngoại tuyến không?
+
 Có. OCR, STT, SRS, từ điển, và furigana đều chạy trên thiết bị. Bạn có thể học đầu cuối mà không cần internet sau khi cài đặt ban đầu.
 
-**Tại sao tôi muốn OCR ngoại tuyến?**
+### Tại sao tôi muốn OCR ngoại tuyến?
+
 Hai lý do: riêng tư (ảnh của bạn không rời thiết bị) và du lịch (bạn có thể quét manga trên máy bay). Nếu cả hai đều không quan trọng, OCR đám mây đôi khi chính xác hơn.
 
-**Đánh đổi cho ngoại tuyến là gì?**
+### Đánh đổi cho ngoại tuyến là gì?
+
 Kích thước ứng dụng (hàng trăm MB cho mô hình AI), sử dụng pin khi OCR cường độ cao, và độ chính xác hơi thấp hơn các dịch vụ đám mây tốt nhất trên văn bản cách điệu.
 
-**Tôi có thể đồng bộ Origa giữa các thiết bị không?**
+### Tôi có thể đồng bộ Origa giữa các thiết bị không?
+
 Có, tùy chọn. Đồng bộ cần internet; mọi thứ khác hoạt động không cần.
 
-**Anki có tốt hơn Origa cho ngoại tuyến không?**
+### Anki có tốt hơn Origa cho ngoại tuyến không?
+
 Anki tốt hơn nếu nhu cầu ngoại tuyến của bạn là ôn thuần túy một bộ bài hiện có — nó nhẹ hơn và được kiểm chứng hơn. Origa tốt hơn nếu bạn cần tạo thẻ mới ngoại tuyến từ ảnh, âm thanh, hoặc văn bản. Chúng được tối ưu cho các phần khác nhau của quy trình.

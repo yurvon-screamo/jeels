@@ -388,6 +388,8 @@
     "token_exchange_error": "Token exchange error: {}",
     "google_login": "Sign in with Google",
     "yandex_login": "Sign in with Yandex",
+    "apple_login": "Sign in with Apple",
+    "oauth_session_error": "Could not open the sign-in window: {}",
     "unsupported_callback": "Unsupported callback URL format",
     "login_failed": "Invalid email or password"
   },
@@ -425,6 +427,7 @@
       "cancel": "Cancel",
       "drop_zone": "Drag an image, paste from clipboard, or click to select",
       "file_types": "PNG, JPEG, WebP (max 10 MB)",
+      "model_download_notice": "First use downloads the on-device OCR models (~150 MB). The data is cached for reuse.",
       "recognition_failed": "Failed to recognize",
       "enter_manually": "Enter text manually",
       "not_image": "Select an image (PNG, JPEG, or WebP)",
@@ -453,6 +456,7 @@
     "audio": {
       "drop_zone": "Click or drag to upload audio",
       "file_type": "WAV (max 50 MB)",
+      "model_download_notice": "First use downloads the speech-recognition model (~150 MB). The data is cached for reuse.",
       "processing": "Processing audio...",
       "cancel": "Cancel",
       "transcription_failed": "Transcription failed",
@@ -627,6 +631,11 @@
     "update_now": "Update now",
     "loading_fetching_progress": "Loading dictionaries and study materials • {} of {}",
     "loading_finalizing_progress": "Preparing study materials • {} of {}",
+    "resource_download": {
+      "title": "Download study materials",
+      "body": "Origa downloads Japanese dictionaries and study materials (~230 MB) to your device. This happens once; the data is cached locally for offline use.",
+      "start": "Download"
+    },
     "selected_count": "Selected: {}",
     "selected_count_with_label": "Selected: {} {}",
     "seconds_short": "~{} sec",

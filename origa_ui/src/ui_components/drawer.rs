@@ -9,6 +9,12 @@ pub fn Drawer(
     #[prop(optional)] on_close: Option<Callback<leptos::ev::MouseEvent>>,
     #[prop(optional, into)] title: Signal<String>,
     #[prop(optional)] action_button: Option<ChildrenFn>,
+    /// Pinned action bar rendered OUTSIDE the scrollable body (a sibling of
+    /// `.drawer-body`, inside `.drawer-content`). Use for Cancel/Submit rows
+    /// that must stay reachable while long content scrolls — the footer needs
+    /// no background of its own because it never overlaps scrolling content.
+    #[prop(optional)]
+    footer: Option<ChildrenFn>,
     #[prop(optional, into)] test_id: Signal<String>,
     children: ChildrenFn,
 ) -> impl IntoView {
@@ -77,6 +83,7 @@ pub fn Drawer(
 
     let children = StoredValue::new(children);
     let action_button = StoredValue::new(action_button);
+    let footer = StoredValue::new(footer);
 
     view! {
         <Show when=move || is_open.get()>
@@ -112,6 +119,22 @@ pub fn Drawer(
                     <div class="drawer-body">
                         {move || children.with_value(|c| c())}
                     </div>
+
+                    {/* Footer: pinned outside the scroll area. The wrapper
+                        div exists only when the footer prop is provided,
+                        so drawers without a footer render unchanged. */}
+                    {move || {
+                        footer.with_value(|f| {
+                            f.as_ref().map(|c| {
+                                view! {
+                                    <div class="drawer-footer">
+                                        {c()}
+                                    </div>
+                                }
+                                .into_any()
+                            })
+                        })
+                    }}
                 </div>
             </>
         </Show>

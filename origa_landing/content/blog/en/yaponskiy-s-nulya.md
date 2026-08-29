@@ -62,7 +62,7 @@ Kanji is the scariest part for a European learner. 2136 jōyō (common-use) char
 
 ### Stage 4. Transition to N4 and immersion (6–12 months)
 
-At this stage you can already read simple content. The main risk is getting stuck in textbook-to-textbook mode. To keep growing, you need living language: anime with subtitles, manga with furigana, simple articles, learner podcasts.
+At this stage you can already read simple content. The main risk is getting stuck in textbook-to-textbook mode. To keep growing, you need living language: anime with subtitles, manga with furigana, simple articles, learner podcasts ([how manga reading works at this stage](/blog/learn-japanese-from-manga)).
 
 - Build a habit: 15–30 minutes a day with content slightly above your level (the i+1 approach).
 - Every unfamiliar word you meet is a candidate for review. Without a system, these words evaporate within a week.
@@ -111,17 +111,22 @@ The main principle: **regularity beats intensity.** 30 minutes every day for a y
 
 ## FAQ
 
-**Can I learn Japanese from zero for free?**
+### Can I learn Japanese from zero for free?
+
 Yes. Anki is free on desktop, Tae Kim's Guide is freely available, and there are plenty of resources on YouTube. Origa is also free. Subscription services (WaniKani, Bunpro) are typically paid, but they aren't mandatory.
 
-**How many kanji do I need to read manga?**
+### How many kanji do I need to read manga?
+
 For manga with full furigana (shōnen/shōjo) — 100–300, which is N5-N4. For manga without furigana, you need around 1000+, which is N3 and above.
 
-**Do I need a tutor?**
+### Do I need a tutor?
+
 At N5-N4 level, no — self-study works. At N3 and above, a tutor is desirable for fixing speech and checking writing. If your goal is to pass the JLPT, a tutor helps with the exam format.
 
-**What should I read at the very start?**
+### What should I read at the very start?
+
 *Yotsuba&!* (よつばと!) — the canonical recommendation: everyday vocabulary, simple grammar, full furigana. If it feels too hard, it's too early — come back after a couple of months with a textbook.
 
-**Should I learn the kana before starting Origa?**
+### Should I learn the kana before starting Origa?
+
 Not strictly required, but recommended. Origa can train hiragana and katakana via flashcards, but that's not the main use case — it's built for a learner who is already moving through grammar and vocabulary.

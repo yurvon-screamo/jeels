@@ -33,7 +33,7 @@ jobs:
             commit_short: ${{ steps.version.outputs.commit_short }}
             build_date: ${{ steps.version.outputs.build_date }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   fetch-depth: 0
                   filter: blob:none
@@ -41,6 +41,46 @@ jobs:
             - name: Calculate version
               id: version
               uses: ./.github/actions/version
+
+    # Compile gate for macOS-only native code (tauri-plugin-aswebauth,
+    # device-ai commands): the workspace clippy job runs on Linux and never
+    # sees `cfg(target_os = "macos")` code, so without this check such code
+    # would first compile on a release tag. Apple-silicon only — Intel Macs
+    # are legacy. Public repo — macos runners are free; check/clippy (no
+    # bundling) keeps the job in minutes.
+    macos-check:
+        name: Check (aarch64 macOS)
+        permissions:
+            contents: read
+        runs-on: macos-15
+        if: github.actor != 'dependabot[bot]'
+        env:
+            ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup Rust
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: aarch64-apple-darwin
+                  shared-key: origa-macos-check-v1
+                  save-if: ${{ github.ref == 'refs/heads/master' }}
+
+            - name: Check tauri app + aswebauth plugin
+              run: |
+                  cargo check --locked -p origa-app -p tauri-plugin-aswebauth \
+                    --target aarch64-apple-darwin
+
+            - name: Clippy tauri app + aswebauth plugin
+              run: |
+                  cargo clippy --locked -p origa-app -p tauri-plugin-aswebauth \
+                    --target aarch64-apple-darwin --all-targets -- -D warnings
+
+            - name: Test tauri-plugin-aswebauth (darwin)
+              run: |
+                  cargo test --locked -p tauri-plugin-aswebauth \
+                    --target aarch64-apple-darwin
 
     lint:
         name: Lint
@@ -54,7 +94,7 @@ jobs:
             TRAILBASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -88,10 +128,15 @@ jobs:
 
             - name: Verify App Store cfg compiles
               # The ORIGA_APP_STORE env var triggers build.rs to emit
-              # cargo:rustc-cfg=app_store, gating out updater /
-              # single-instance / devtools. Without this check, regressions
-              # in the gated code path surface only at tag-push on
-              # macos-15 (~30 min, blocks release).
+              # cargo:rustc-cfg=app_store, gating out the auto-updater and
+              # process-runner plugins plus their IPC commands (single-instance
+              # STAYS — deep-link protocol activation needs it). Note:
+              # devtools are NOT affected by this env var — disabling them
+              # requires the app-store cargo feature, which tauri-cli does
+              # not propagate; both store packaging paths (macOS, MSIX)
+              # currently ship with devtools enabled (see ADR-042). Without
+              # this check, regressions in the gated code path surface only
+              # at tag-push on macos-15 (~30 min, blocks release).
               run: ORIGA_APP_STORE=1 cargo check -p origa-app
 
     cdn-download:
@@ -101,7 +146,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Download CDN data
               uses: ./.github/actions/download-cdn
@@ -110,7 +155,7 @@ jobs:
                   cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: cdn-data
                   path: cdn/
@@ -129,7 +174,7 @@ jobs:
             TRAILBASE_URL: "https://${{ vars.ORIGA_APP_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -181,7 +226,7 @@ jobs:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -228,7 +273,7 @@ jobs:
             TRAILBASE_URL: http://localhost:4000
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Cache APT packages
               uses: awalsh128/cache-apt-pkgs-action@v1.6.1
@@ -267,7 +312,7 @@ jobs:
                   TRAILBASE_URL: http://localhost:4000
 
             - name: Upload WASM artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: wasm-dist
                   path: origa_ui/dist/
@@ -296,7 +341,7 @@ jobs:
             CI: "true"
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Download WASM artifact
               uses: actions/download-artifact@v8
@@ -395,7 +440,7 @@ jobs:
 
             - name: Upload blob report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: blob-report-${{ matrix.group }}
                   path: end2end/blob-report/
@@ -410,7 +455,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Install Node.js dependencies
               working-directory: end2end
@@ -453,7 +498,7 @@ jobs:
 
             - name: Upload merged Playwright report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: playwright-report-merged
                   path: end2end/playwright-report/
@@ -487,13 +532,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Build landing image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./origa_landing/Dockerfile
@@ -510,13 +555,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Build UI image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./origa_ui/Dockerfile
@@ -531,7 +576,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri]
+        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check]
         if: always()
         runs-on: ubuntu-latest
         steps:

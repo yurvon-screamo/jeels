@@ -81,7 +81,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Select latest Xcode with iOS 26 SDK
               shell: bash
@@ -204,7 +204,7 @@ jobs:
                   ls -la "$IPA_PATH"
 
             - name: Upload .ipa artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: ios-build
                   path: ${{ steps.ipa.outputs.path }}
@@ -276,7 +276,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             - name: Select latest Xcode with macOS SDK
               shell: bash
@@ -438,7 +438,6 @@ jobs:
                   codesign -d --entitlements - "$APP_PATH" 2>&1 | tee /tmp/entitlements.txt
                   for KEY in com.apple.security.app-sandbox \
                              com.apple.security.network.client \
-                             com.apple.security.device.camera \
                              com.apple.security.device.microphone \
                              com.apple.security.files.user-selected.read-write; do
                     if ! grep -q "$KEY" /tmp/entitlements.txt; then
@@ -446,7 +445,7 @@ jobs:
                       exit 1
                     fi
                   done
-                  echo "✅ All 5 entitlements present"
+                  echo "✅ All 4 entitlements present"
                   rm -f /tmp/entitlements.txt
 
             - name: Embed provisioning profile & re-sign
@@ -552,7 +551,7 @@ jobs:
                   ls -la "$PKG_PATH"
 
             - name: Upload .pkg artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: macos-pkg-build
                   path: ${{ steps.pkg.outputs.path }}

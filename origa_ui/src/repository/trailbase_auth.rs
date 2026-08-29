@@ -22,6 +22,7 @@ impl JwtClaims {
 pub enum OAuthProvider {
     Google,
     Yandex,
+    Apple,
 }
 
 impl OAuthProvider {
@@ -29,6 +30,9 @@ impl OAuthProvider {
         match self {
             OAuthProvider::Google => "google",
             OAuthProvider::Yandex => "yandex",
+            // TrailBase provider id; configured with the SIWA Services ID
+            // `net.uwuwu.origa.web` (see ADR-033 §SIWA secrets).
+            OAuthProvider::Apple => "apple",
         }
     }
 }
@@ -183,6 +187,9 @@ mod tests {
     fn oauth_provider_as_str_returns_correct_values() {
         assert_eq!(OAuthProvider::Google.as_str(), "google");
         assert_eq!(OAuthProvider::Yandex.as_str(), "yandex");
+        // Must match the TrailBase provider id configured with the SIWA
+        // Services ID (ADR-033) — a mismatch would 404 the login redirect.
+        assert_eq!(OAuthProvider::Apple.as_str(), "apple");
     }
 
     #[test]

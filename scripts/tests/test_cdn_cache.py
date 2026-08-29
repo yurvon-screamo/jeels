@@ -48,17 +48,12 @@ def test_manifest_is_no_cache():
     assert cache_control_for("manifest.json") == NO_CACHE
 
 
-def test_ms_store_latest_installer_alias_is_no_cache():
-    # ADR-041: releases/latest/ is the direct link handed to Microsoft
-    # Store; it must never be edge-cached across a release cutover.
-    assert cache_control_for("releases/latest/Origa_x64-setup.exe") == NO_CACHE
-
-
-def test_versioned_installer_archive_is_release_updated():
-    # NOT immutable: re-running a tag overwrites the key with different
-    # installer bytes (NSIS builds are not reproducible); immutable would
-    # poison the edge for a year (PR #182 lesson). 5-min must-revalidate
-    # self-heals the overwrite.
+def test_unknown_installer_path_falls_back_to_release_updated():
+    # The MS Store releases/ mirror (ADR-041) was removed in ADR-042: the
+    # Store now hosts the MSIX itself, so no installer keys are uploaded.
+    # Any unknown path — including legacy installer-shaped ones — falls
+    # through to the conservative release-updated default (5-min 304
+    # revalidation self-heals overwrites; the PR #182 lesson).
     assert (
         cache_control_for("releases/1.2.3/Origa_x64-setup.exe") == RELEASE_UPDATED
     )

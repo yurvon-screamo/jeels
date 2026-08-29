@@ -101,17 +101,22 @@ Trong hầu hết trường hợp, một bộ làm việc là một ứng dụng
 
 ## FAQ
 
-**Lặp lại ngắt quãng của Origa có giống Anki không?**
+### Lặp lại ngắt quãng của Origa có giống Anki không?
+
 Có, cả hai đều dùng FSRS. Origa không phát minh ra nó và không tuyên bố khác. Điểm khác biệt là những gì bao quanh bộ lập lịch: tạo thẻ, furigana, theo dõi hán tự, ngữ pháp — chứ không phải bản thân thuật toán.
 
-**Tôi có thể giữ bộ bài Anki không?**
+### Tôi có thể giữ bộ bài Anki không?
+
 Có. Origa nhập `.anki2`, `.anki21` và `.anki21b` — bộ bài và lịch sử ôn tập được chuyển.
 
-**Origa có miễn phí không?**
+### Origa có miễn phí không?
+
 Có, hiện ứng dụng miễn phí trên mọi nền tảng.
 
-**Có hoạt động ngoại tuyến không?**
+### Có hoạt động ngoại tuyến không?
+
 Có. Các mô hình OCR và nhận dạng giọng nói chạy cục bộ, do đó tạo thẻ và ôn tập không cần internet.
 
-**Nếu tôi chỉ học trên iPhone thì sao?**
+### Nếu tôi chỉ học trên iPhone thì sao?
+
 Chưa. Origa chạy trên Windows, Linux, macOS, Android và web. iOS đã lên kế hoạch — nếu iPhone là thiết bị duy nhất, hãy đợi bản phát hành iOS hoặc ở lại Anki.

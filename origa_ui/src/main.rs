@@ -1,3 +1,11 @@
+// Deeply nested Leptos view types push rustc's layout-query depth past the
+// default limit of 128 when this bin monomorphises the whole `<App/>` tree
+// ("queries overflow the depth limit!" during full codegen only — check-mode
+// passes). Mirrors the lib crate's attribute; safe since dev-profile
+// debuginfo was capped (see root Cargo.toml) so oversized artifacts no
+// longer kill link.exe.
+#![recursion_limit = "512"]
+
 use leptos::prelude::*;
 use leptos_meta::MetaTags;
 use leptos_router::components::Router;

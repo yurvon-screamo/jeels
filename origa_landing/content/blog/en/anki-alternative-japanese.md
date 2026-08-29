@@ -105,21 +105,26 @@ Use Anki if you value control, study multiple subjects, or have already invested
 
 Consider Origa if your friction is specifically Japanese card creation, you want furigana and kanji linkage handled for you, you study through a language other than English, or you're tired of stitching grammar onto a vocabulary tool. Import your Anki deck first — if the workflow clicks, keep it; if not, you're back where you started. ([Download Origa](/download).)
 
-The useful version of "best Anki alternative" is "the one that removes *your* friction." Figure out which step of your current routine eats the most time, and pick the tool that removes that step without dropping the scheduler quality.
+The useful version of "best Anki alternative" is "the one that removes *your* friction." Figure out which step of your current routine eats the most time, and pick the tool that removes that step without dropping the scheduler quality. For a category-by-category selection guide, see [the Japanese learning app overview](/blog/best-japanese-learning-app).
 
 ## FAQ
 
-**Is Origa's spaced repetition the same as Anki's?**
+### Is Origa's spaced repetition the same as Anki's?
+
 Both use FSRS. Origa didn't invent it and doesn't claim to. The difference is what surrounds the scheduler — card creation, furigana, kanji tracking, grammar — not the algorithm itself.
 
-**Can I keep my Anki decks?**
+### Can I keep my Anki decks?
+
 Yes. Origa imports `.anki2`, `.anki21`, and `.anki21b` formats, so existing decks and review history transfer over.
 
-**Is Origa free?**
+### Is Origa free?
+
 Yes, it's currently free to use across all platforms.
 
-**Does Origa work offline?**
+### Does Origa work offline?
+
 Yes. The OCR and speech-to-text models run locally, so card creation and review work without an internet connection.
 
-**What if I only study on iPhone?**
+### What if I only study on iPhone?
+
 Not yet. Origa runs on Windows, Linux, macOS, Android, and web. iOS is planned but not available today — if iPhone is your only device, wait for the iOS release or stay on Anki.

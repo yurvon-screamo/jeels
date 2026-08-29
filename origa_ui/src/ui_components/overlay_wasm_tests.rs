@@ -137,6 +137,100 @@ async fn drawer_close_button_sets_closed() {
     );
 }
 
+// The footer slot replaces the old in-scroll sticky bar (which painted a
+// "white rectangle" behind the buttons and left an 8px scrollbar-gutter
+// gap on its right). The footer must live OUTSIDE the scrollable body and
+// carry no background of its own.
+#[wasm_bindgen_test]
+async fn drawer_footer_slot_renders_outside_scroll_body() {
+    let wrapper = create_wrapper();
+    let (set_open, get_open) = shared_cell::<RwSignal<bool>>();
+    mount_to_wrapper(&wrapper, move || {
+        let is_open = RwSignal::new(true);
+        set_open.set(Some(is_open));
+        view! {
+            <Drawer
+                is_open=is_open
+                title=Signal::derive(|| "T".to_string())
+                footer=std::sync::Arc::new(move || {
+                    view! { <button data-testid="dr-footer-act">"Do it"</button> }
+                        .into_any()
+                })
+                test_id="drf"
+            >
+                "b"
+            </Drawer>
+        }
+        .into_any()
+    });
+    let is_open = get_open.get().expect("captured");
+    tick().await;
+
+    let footer = wrapper
+        .query_selector(".drawer-footer")
+        .unwrap()
+        .expect("footer slot must render .drawer-footer");
+    assert!(
+        footer.text_content().unwrap().contains("Do it"),
+        "footer slot must render its children"
+    );
+    // The footer is a sibling of .drawer-body (outside the scroll area),
+    // not a child of it.
+    let in_body = footer
+        .closest(".drawer-body")
+        .expect("closest() must not throw");
+    assert!(
+        in_body.is_none(),
+        "footer must not live inside the scrollable body"
+    );
+    // No own background: the old sticky bar carried bg-[var(--bg-paper)].
+    let bg = footer
+        .dyn_ref::<web_sys::HtmlElement>()
+        .expect("footer is an element");
+    let style = web_sys::window()
+        .expect("window")
+        .get_computed_style(bg)
+        .expect("getComputedStyle call")
+        .expect("computed style available");
+    let background = style
+        .get_property_value("background-color")
+        .unwrap_or_default();
+    assert!(
+        background == "rgba(0, 0, 0, 0)",
+        "footer must have no background (got {background})"
+    );
+
+    is_open.set(false);
+    tick().await;
+}
+
+// Drawers without the footer prop must render exactly as before — no
+// empty .drawer-footer wrapper (and no border-top rule) for them.
+#[wasm_bindgen_test]
+async fn drawer_without_footer_renders_no_footer() {
+    let wrapper = create_wrapper();
+    let (set_open, get_open) = shared_cell::<RwSignal<bool>>();
+    mount_to_wrapper(&wrapper, move || {
+        let is_open = RwSignal::new(true);
+        set_open.set(Some(is_open));
+        view! {
+            <Drawer is_open=is_open title=Signal::derive(|| "T".to_string()) test_id="dr-nf">"b"</Drawer>
+        }
+        .into_any()
+    });
+    let is_open = get_open.get().expect("captured");
+    tick().await;
+
+    let footer = wrapper.query_selector(".drawer-footer");
+    assert!(
+        footer.is_ok_and(|f| f.is_none()),
+        "no footer prop — no .drawer-footer element"
+    );
+
+    is_open.set(false);
+    tick().await;
+}
+
 #[wasm_bindgen_test]
 async fn drawer_reactive_open_mounts_content() {
     let wrapper = create_wrapper();

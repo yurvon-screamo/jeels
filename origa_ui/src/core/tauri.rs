@@ -35,6 +35,20 @@ pub fn is_ios() -> bool {
     })
 }
 
+/// Returns `true` on Apple platforms (iOS or macOS).
+///
+/// macOS detection: `navigator.platform` returns "MacIntel" on Intel Macs and
+/// on Apple-silicon browsers that report desktop platform; iPads requesting
+/// desktop sites also say "MacIntel", which `is_ios()` disambiguates first.
+pub fn is_apple() -> bool {
+    is_ios()
+        || window().is_some_and(|w| {
+            w.navigator()
+                .platform()
+                .is_ok_and(|platform| platform.contains("Mac"))
+        })
+}
+
 /// Returns the `window.__TAURI__` object if available.
 pub fn tauri_object() -> Option<Object> {
     window()

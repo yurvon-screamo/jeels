@@ -161,6 +161,18 @@ export class GrammarPage extends BasePage {
         return this.page.getByTestId("grammar-card-item").count();
     }
 
+    /**
+     * Cards render asynchronously after the add-drawer closes (fetch +
+     * WASM re-render): an instant count() races it and can read 0. Wait
+     * for the first card, then assert there is more than one.
+     */
+    async expectMoreThanOneCard(): Promise<void> {
+        await expect(
+            this.page.getByTestId("grammar-card-item").first(),
+        ).toBeVisible({ timeout: 30_000 });
+        expect(await this.getCardCount()).toBeGreaterThan(1);
+    }
+
     async deleteCardByIndex(index: number): Promise<void> {
         await this.clickCardActionBtn(index, "grammar-card-item-delete-btn");
         await expect(this.deleteModal).toBeVisible({ timeout: 5000 });

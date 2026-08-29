@@ -306,14 +306,14 @@ _transfer_configs: dict[int, "TransferConfig"] = {}
 def _s3_upload_client() -> BaseClient:
     """Return the shared boto3 S3 client used by every upload path.
 
-    Credential-source contract (ADR-041): explicit environment credentials
+    Credential-source contract: explicit environment credentials
     (``AWS_ACCESS_KEY_ID`` set) take precedence over the local ``[origa]``
-    profile for ALL scripts built on this transport — ``deploy_cdn.py`` and
-    ``upload_release_artifacts.py`` alike. CI exports scoped keys through the
-    environment; operator machines keep the profile in ~/.aws/credentials and
-    export nothing, so each side gets the credentials it owns. Exporting env
-    credentials on an operator machine deliberately overrides the profile —
-    useful for testing, but be aware the deploy then runs as that principal.
+    profile for ALL scripts built on this transport (``deploy_cdn.py``).
+    CI exports scoped keys through the environment; operator machines keep
+    the profile in ~/.aws/credentials and export nothing, so each side gets
+    the credentials it owns. Exporting env credentials on an operator machine
+    deliberately overrides the profile — useful for testing, but be aware the
+    deploy then runs as that principal.
 
     boto3 stays imported lazily so refresh_cache_control.py — which only uses
     the aws-CLI helpers and never uploads — does not require boto3 to be

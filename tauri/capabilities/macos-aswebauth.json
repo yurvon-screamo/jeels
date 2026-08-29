@@ -1,0 +1,10 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "macos-aswebauth",
+	"description": "ASWebAuthenticationSession for OAuth sign-in on macOS (App Review Guideline 4.8 / Guideline 4). Windows and Linux are excluded — the plugin command stubs out there.",
+	"platforms": ["macOS"],
+	"windows": ["main"],
+	"permissions": [
+		"aswebauth:allow-start-auth"
+	]
+}
