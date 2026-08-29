@@ -12,19 +12,29 @@ export const MAX_LESSON_ITERATIONS = 50;
 // LessonPage re-exports this as CARD_ACTION_TIMEOUT for its methods.
 export const ACTION_TIMEOUT = 10_000;
 
+/// Ожидает появления руки (locator.isVisible не ждёт — только waitFor).
+async function awaitHandVisible(page: Page, timeout = 30_000): Promise<boolean> {
+	return page
+		.getByTestId("acquaintance-view")
+		.waitFor({ state: "visible", timeout })
+		.then(() => true)
+		.catch(() => false);
+}
+
 /// Рука знакомства: проходит показ кнопкой «Дальше» до тренировки.
+/// Каждый клик ограничен по времени: WASM ре-рендеры гоняются с кликом,
+/// и неограниченный click зависает на DETACHED-элементе (см. ACTION_TIMEOUT).
 export async function runAcquaintancePresentation(page: Page): Promise<void> {
+	await awaitHandVisible(page);
 	const nextBtn = page.getByTestId("acquaintance-next-btn");
 	for (let i = 0; i < 20; i++) {
-		if (!(await nextBtn.isVisible().catch(() => false))) break;
-		await nextBtn.click();
-		if (
-			await page
-				.getByTestId("acquaintance-training")
-				.isVisible()
-				.catch(() => false)
-		)
-			break;
+		await nextBtn.click({ timeout: 3_000 }).catch(() => null);
+		const trainingVisible = await page
+			.getByTestId("acquaintance-training")
+			.waitFor({ state: "visible", timeout: 1_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (trainingVisible) break;
 	}
 }
 
@@ -35,15 +45,21 @@ export async function runAcquaintancePresentation(page: Page): Promise<void> {
 export async function completeAcquaintanceHandIfPresent(
 	page: Page,
 ): Promise<boolean> {
+	const handSeen = await awaitHandVisible(page, 30_000);
+	if (!handSeen) return false;
 	const view = page.getByTestId("acquaintance-view");
-	if (!(await view.isVisible({ timeout: 15_000 }).catch(() => false))) {
-		return false;
-	}
 	for (let i = 0; i < 20; i++) {
 		const know = page.getByTestId("acquaintance-know-btn");
-		if (!(await know.isVisible().catch(() => false))) break;
-		await know.click();
-		await page.getByTestId("acquaintance-know-confirm-confirm").click();
+		const knowVisible = await know
+			.waitFor({ state: "visible", timeout: 1_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (!knowVisible) break;
+		await know.click({ timeout: 3_000 }).catch(() => null);
+		await page
+			.getByTestId("acquaintance-know-confirm-confirm")
+			.click({ timeout: 3_000 })
+			.catch(() => null);
 		// Модалка закрывается с анимацией; после неё — следующий слайд.
 		await page.waitForTimeout(350);
 	}

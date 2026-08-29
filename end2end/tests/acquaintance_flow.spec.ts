@@ -31,13 +31,19 @@ test.describe("Acquaintance mode", () => {
 		const phaseTag = page.getByTestId("acquaintance-phase-tag");
 		await expect(phaseTag).toContainText(/PRESENTATION|ПОКАЗ/i);
 
-		// Показ: проходим слайды кнопкой «Дальше» до конца руки.
+		// Показ: проходим слайды кнопкой «Дальше» до конца руки. Клики
+		// ограничены по времени: WASM ре-рендеры гоняются с кликом
+		// (helpers/lesson.ts, ACTION_TIMEOUT).
 		const nextBtn = page.getByTestId("acquaintance-next-btn");
 		for (let i = 0; i < 20; i++) {
-			if (!(await nextBtn.isVisible().catch(() => false))) break;
-			await nextBtn.click();
+			await nextBtn.click({ timeout: 3_000 }).catch(() => null);
 			// Тренировка начинается после исчерпания показа.
-			if (await page.getByTestId("acquaintance-training").isVisible()) break;
+			const trainingVisible = await page
+				.getByTestId("acquaintance-training")
+				.waitFor({ state: "visible", timeout: 1_000 })
+				.then(() => true)
+				.catch(() => false);
+			if (trainingVisible) break;
 		}
 
 		// Тренировка: ротация до критерия каждой карты.
@@ -47,9 +53,16 @@ test.describe("Acquaintance mode", () => {
 		const maxAnswers = 100;
 		for (let i = 0; i < maxAnswers; i++) {
 			const reveal = page.getByTestId("acquaintance-reveal-btn");
-			if (!(await reveal.isVisible().catch(() => false))) break;
-			await reveal.click();
-			await page.getByTestId("acquaintance-rating-remember").click();
+			const revealVisible = await reveal
+				.waitFor({ state: "visible", timeout: 1_000 })
+				.then(() => true)
+				.catch(() => false);
+			if (!revealVisible) break;
+			await reveal.click({ timeout: 3_000 }).catch(() => null);
+			await page
+				.getByTestId("acquaintance-rating-remember")
+				.click({ timeout: 3_000 })
+				.catch(() => null);
 		}
 
 		// Итогового экрана нет: закрытая рука сразу открывает обычный урок.
@@ -64,28 +77,31 @@ test.describe("Acquaintance mode", () => {
 
 	test("«Уже знаю» во время показа пропускает карту", async () => {
 		await page.goto("/lesson");
-		await expect(page.getByTestId("acquaintance-view")).toBeVisible({
-			timeout: 30_000,
-		});
+		const view = page.getByTestId("acquaintance-view");
+		await expect(view).toBeVisible({ timeout: 30_000 });
 
 		const knowBtn = page.getByTestId("acquaintance-know-btn");
-		if (!(await knowBtn.isVisible().catch(() => false))) {
+		const knowVisible = await knowBtn
+			.waitFor({ state: "visible", timeout: 5_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (!knowVisible) {
 			test.skip(true, "рука не сформирована — пропускать нечего");
 			return;
 		}
-		await knowBtn.click();
+		await knowBtn.click({ timeout: 3_000 });
 
 		// Подтверждение — общий паттерн модалки.
 		const modal = page.getByTestId("acquaintance-know-confirm");
 		await expect(modal).toBeVisible();
 
 		// Отмена закрывает модалку без побочных действий.
-		await page.getByTestId("acquaintance-know-confirm-cancel").click();
+		await page.getByTestId("acquaintance-know-confirm-cancel").click({ timeout: 3_000 });
 		await expect(modal).not.toBeVisible();
 
 		// Подтверждение выбывает карту из руки.
-		await knowBtn.click();
-		await page.getByTestId("acquaintance-know-confirm-confirm").click();
+		await knowBtn.click({ timeout: 3_000 });
+		await page.getByTestId("acquaintance-know-confirm-confirm").click({ timeout: 3_000 });
 		await expect(modal).not.toBeVisible();
 	});
 });

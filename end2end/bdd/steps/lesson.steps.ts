@@ -31,7 +31,8 @@ Then('отображается страница урока с карточкой
     // Новый юзер начинает урок с руки знакомства — её слайд и есть карточка.
     const handVisible = await page
         .getByTestId("acquaintance-view")
-        .isVisible({ timeout: 10_000 })
+        .waitFor({ state: "visible", timeout: 15_000 })
+        .then(() => true)
         .catch(() => false);
     if (handVisible) return;
     await expect(lessonPage.lessonError).not.toBeVisible({ timeout: 15_000 });
@@ -157,8 +158,13 @@ Then('содержимое урока занимает полную высоту
     await expect(lessonPage.lessonPage).toBeVisible({ timeout: 15_000 });
     await expect(lessonPage.lessonLoading).toBeHidden({ timeout: 30_000 });
     // Для нового юзера урок — это рука знакомства: слайд + панель действий.
-    const hand = page.getByTestId("acquaintance-view");
-    if (await hand.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    const handVisible = await page
+        .getByTestId("acquaintance-view")
+        .waitFor({ state: "visible", timeout: 15_000 })
+        .then(() => true)
+        .catch(() => false);
+    if (handVisible) {
+        const hand = page.getByTestId("acquaintance-view");
         const handHeight = await hand.evaluate(
             (el) => (el as HTMLElement).clientHeight,
         );
