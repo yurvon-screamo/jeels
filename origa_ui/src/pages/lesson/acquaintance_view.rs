@@ -12,7 +12,7 @@ use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
     Button, ButtonVariant, ConfirmModal, FuriganaText, KanjiAnimation, MarkdownText,
-    MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word,
+    MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word, speak_word_immediate,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
@@ -269,6 +269,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                     </Show>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                    <HandProgressStrip total progress label=strip_label />
                     <Show when=move || audio_visible.get()>
                         <button
                             data-testid="acquaintance-audio-btn"
@@ -278,7 +279,6 @@ pub fn AcquaintanceView() -> impl IntoView {
                             <Icon icon=icondata::LuPlay width="16" height="16" />
                         </button>
                     </Show>
-                    <HandProgressStrip total progress label=strip_label />
                 </div>
             </div>
             </Show>
@@ -287,37 +287,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                 let ctx = ctx_stored.get_value();
                 ctx.state.get().stage == AcquaintanceStage::Completed
             }>
-                <div
-                    data-testid="acquaintance-completed"
-                    class="min-h-[60vh] flex flex-col items-center justify-center text-center gap-4 py-10"
-                >
-                    <div class="font-serif text-4xl text-[var(--fg-black)] leading-snug">
-                        {move || {
-                            i18n.get_keys().acquaintance().completed_title().inner().to_string()
-                        }}
-                    </div>
-                    <p class="font-mono text-sm text-[var(--fg-muted)] max-w-md leading-relaxed">
-                        {move || {
-                            i18n
-                                .get_keys()
-                                .acquaintance()
-                                .completed_subtitle()
-                                .inner()
-                                .to_string()
-                        }}
-                    </p>
-                    <Button
-                        variant=Signal::derive(|| ButtonVariant::Filled)
-                        on_click=Callback::new(move |_| {
-                            ctx_stored.get_value().state.update(|state| {
-                                state.stage = AcquaintanceStage::Inactive;
-                            });
-                        })
-                        test_id=Signal::derive(|| "acquaintance-to-reviews-btn".to_string())
-                    >
-                        {move || i18n.get_keys().acquaintance().to_reviews().inner().to_string()}
-                    </Button>
-                </div>
+                <TransitionScreen ctx=ctx_stored.get_value() />
             </Show>
 
             <Show when=move || {
@@ -332,6 +302,66 @@ pub fn AcquaintanceView() -> impl IntoView {
             }>
                 <TrainingBody ctx=ctx_stored.get_value() />
             </Show>
+        </div>
+    }
+}
+
+/// Переходный экран «Знакомство завершено → к повторению»: одно понятное
+/// действие между тренировкой и ревью. Space — тот же хендл, что кнопка
+/// (спека §8.3), с kbd-хинтом на кнопке.
+#[component]
+fn TransitionScreen(ctx: AcquaintanceContext) -> impl IntoView {
+    let i18n = use_i18n();
+    let ctx_stored = StoredValue::new(ctx);
+
+    let continue_to_reviews = Callback::new(move |_: ()| {
+        ctx_stored.get_value().state.update(|state| {
+            state.stage = AcquaintanceStage::Inactive;
+        });
+    });
+
+    // Space = «К повторению» (тот же хендл, что у кнопки).
+    let kb_ctx = StoredValue::new(ctx_stored.get_value());
+    let kb_continue = continue_to_reviews;
+    let _ = use_event_listener(document(), leptos::ev::keydown, move |ev| {
+        if is_typing_target(ev.target().as_ref()) {
+            return;
+        }
+        let stage = kb_ctx.get_value().state.get_untracked().stage;
+        if stage == AcquaintanceStage::Completed && ev.key() == " " {
+            ev.prevent_default();
+            kb_continue.run(());
+        }
+    });
+
+    view! {
+        <div
+            data-testid="acquaintance-completed"
+            class="min-h-[60vh] flex flex-col items-center justify-center text-center gap-4 py-10"
+        >
+            <div class="font-serif text-4xl text-[var(--fg-black)] leading-snug">
+                {move || i18n.get_keys().acquaintance().completed_title().inner().to_string()}
+            </div>
+            <p class="font-mono text-sm text-[var(--fg-muted)] max-w-md leading-relaxed">
+                {move || {
+                    i18n
+                        .get_keys()
+                        .acquaintance()
+                        .completed_subtitle()
+                        .inner()
+                        .to_string()
+                }}
+            </p>
+            <Button
+                variant=Signal::derive(|| ButtonVariant::Filled)
+                on_click=Callback::new(move |_| continue_to_reviews.run(()))
+                test_id=Signal::derive(|| "acquaintance-to-reviews-btn".to_string())
+            >
+                <span>{move || i18n.get_keys().acquaintance().to_reviews().inner().to_string()}</span>
+                <span class="kbd-hint text-[var(--fg-light)]">
+                    {t!(i18n, lesson.space_key)}
+                </span>
+            </Button>
         </div>
     }
 }
@@ -445,7 +475,7 @@ fn WordSlide(
             .map(|signal| signal.get_untracked())
             .unwrap_or(false);
         if should_autoplay_word_audio(muted, is_speech_supported()) {
-            speak_word(&word_stored.get_value(), 1.0);
+            speak_word_immediate(&word_stored.get_value(), 1.0);
         }
     });
 
@@ -665,7 +695,7 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                     .unwrap_or_default();
                 let jlpt_content = crate::loaders::get_jlpt_content();
                 let replacement = match TakeAcquaintanceReplacementUseCase::new(&repo)
-                    .execute(&jlpt_content, &exclude)
+                    .execute(jlpt_content, &exclude)
                     .await
                 {
                     Ok(replacement) => replacement,

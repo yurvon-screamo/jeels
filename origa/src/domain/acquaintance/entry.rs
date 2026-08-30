@@ -67,4 +67,23 @@ impl AcquaintanceEntry {
             _ => self.forward_successes += 1,
         }
     }
+
+    /// «Не помню»: набор критерия текущей подфазы начинается заново —
+    /// шкала карты в полосе честно уходит в ноль (I-итерация: баг был в
+    /// отображении бара, сброс прогресса — правильная логика тренировки).
+    pub(super) fn reset_progress(&mut self, subphase: Option<AcquaintanceSubphase>) {
+        match subphase {
+            Some(AcquaintanceSubphase::Reverse) if self.is_word() => {
+                self.reverse_successes = 0;
+            },
+            Some(AcquaintanceSubphase::Forward) if self.is_word() => {
+                self.forward_successes = 0;
+            },
+            // Несловесные карты (и руки без подфаз): общий критерий.
+            _ => {
+                self.forward_successes = 0;
+                self.reverse_successes = 0;
+            },
+        }
+    }
 }

@@ -9,7 +9,7 @@ use super::keyboard_handler::is_typing_target;
 use crate::i18n::*;
 use crate::ui_components::{
     Button, ButtonVariant, FuriganaText, MarkdownText, MarkdownVariant, ReadingGroup,
-    is_speech_supported, speak_word,
+    is_speech_supported, speak_word, speak_word_immediate,
 };
 use leptos::prelude::*;
 use leptos_use::use_event_listener;
@@ -423,7 +423,7 @@ fn WordTrainingFront(
             .map(|signal| signal.get_untracked())
             .unwrap_or(false);
         if should_autoplay_word_audio(muted, is_speech_supported()) {
-            speak_word(&word_stored.get_value(), 1.0);
+            speak_word_immediate(&word_stored.get_value(), 1.0);
         }
     });
     view! {

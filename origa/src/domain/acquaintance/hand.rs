@@ -143,6 +143,7 @@ impl AcquaintanceHand {
             return Ok(AnswerOutcome::ProgressFrozen);
         }
         if !remembered {
+            self.entries[entry_index].reset_progress(subphase);
             return Ok(AnswerOutcome::Failed);
         }
 

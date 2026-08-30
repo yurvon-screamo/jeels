@@ -42,25 +42,56 @@ fn success_counts_forward_progress_until_criterion() {
 }
 
 #[test]
-fn failed_answer_returns_failed_without_progress_change() {
+fn failed_answer_resets_progress_in_current_subphase() {
+    // Arrange: слово набрало 2/3 forward и 1/3 reverse
+    let [word] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![(word, CardType::Vocabulary, 2, 1)],
+        Some(AcquaintanceSubphase::Reverse),
+    );
+
+    // Act: ошибка в Reverse
+    let outcome = hand.record_answer(word, false).unwrap();
+
+    // Assert: исход Failed, reverse-прогресс сброшен в ноль (шкала
+    // в полосе честно уходит в 0), forward не тронут.
+    assert!(matches!(outcome, AnswerOutcome::Failed));
+    assert_eq!(
+        hand.entry(word)
+            .unwrap()
+            .progress_in(Some(AcquaintanceSubphase::Reverse)),
+        0,
+        "ошибка сбрасывает прогресс текущей подфазы"
+    );
+    assert_eq!(
+        hand.entry(word)
+            .unwrap()
+            .progress_in(Some(AcquaintanceSubphase::Forward)),
+        2,
+        "прогресс другой подфазы не трогается"
+    );
+}
+
+#[test]
+fn failed_answer_in_forward_resets_forward_progress() {
     // Arrange
     let [word] = ids();
     let mut hand = AcquaintanceHand::new_test(
-        vec![(word, CardType::Vocabulary, 1, 0)],
+        vec![(word, CardType::Vocabulary, 2, 0)],
         Some(AcquaintanceSubphase::Forward),
     );
 
     // Act
     let outcome = hand.record_answer(word, false).unwrap();
 
-    // Assert
-    assert_eq!(outcome, AnswerOutcome::Failed);
+    // Assert: набор forward-критерия начинается заново.
+    assert!(matches!(outcome, AnswerOutcome::Failed));
     assert_eq!(
         hand.entry(word)
             .unwrap()
             .progress_in(Some(AcquaintanceSubphase::Forward)),
-        1,
-        "провал не меняет счётчик"
+        0,
+        "ошибка в Forward сбрасывает forward-прогресс"
     );
 }
 

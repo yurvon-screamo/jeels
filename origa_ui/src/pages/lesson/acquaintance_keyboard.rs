@@ -33,7 +33,8 @@ pub fn resolve_key_action(
             (true, "2") => Some(AcquaintanceKeyAction::RateRemember),
             _ => None,
         },
-        AcquaintanceStage::Completed | AcquaintanceStage::Inactive => None,
+        AcquaintanceStage::Completed => (key == " ").then_some(AcquaintanceKeyAction::Advance),
+        AcquaintanceStage::Inactive => None,
     }
 }
 
