@@ -13,7 +13,7 @@ export const MAX_LESSON_ITERATIONS = 50;
 export const ACTION_TIMEOUT = 10_000;
 
 /// Ожидает появления руки (locator.isVisible не ждёт — только waitFor).
-async function awaitHandVisible(page: Page, timeout = 30_000): Promise<boolean> {
+export async function awaitHandVisible(page: Page, timeout = 30_000): Promise<boolean> {
 	return page
 		.getByTestId("acquaintance-view")
 		.waitFor({ state: "visible", timeout })

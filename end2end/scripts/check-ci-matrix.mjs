@@ -40,6 +40,17 @@ const PW_CLI = path.join("node_modules", "@playwright", "test", "cli.js");
 const violations = [];
 const fail = (message) => violations.push(message);
 
+// Known @fixme scenarios (review follow-up: a fixme without a reminder
+// mechanism silently rots). Adding a new @fixme requires an explicit entry
+// here; removing a fixme requires removing its entry — the guard fails
+// loudly either way. Keep entries coupled to their tracking issues.
+const KNOWN_FIXME = new Set([
+    // App bug: completed hand state lost across a full reload (both
+    // completion paths). See issue #462.
+    "lesson_empty_state.feature|Дневной лимит новых карточек достигнут",
+    "lesson_empty_state.feature|Информация о ближайшем повторении после изучения всех карточек",
+]);
+
 // ---------------------------------------------------------------------------
 // 1. Fresh bddgen output (guards against stale .features-gen)
 // ---------------------------------------------------------------------------
@@ -74,9 +85,17 @@ const featureFiles = (await readdir(FEATURES_DIR))
     .sort();
 
 const expected = new Set();
+const actualFixme = new Set();
 for (const name of featureFiles) {
     const text = await readFile(path.join(FEATURES_DIR, name), "utf8");
+    // Tag lines carry over to the following scenario; @fixme marks it.
+    let pendingTags = "";
     for (const line of text.split("\n")) {
+        const tags = line.match(/^\s*(@\S+(?:\s+@\S+)*)\s*$/);
+        if (tags) {
+            pendingTags = tags[1];
+            continue;
+        }
         // Russian Gherkin: «Сценарий:». Scenario Outlines («Структура
         // сценария:») are NOT supported by this guard: playwright-bdd
         // titles outline examples differently, which would surface as
@@ -89,7 +108,11 @@ for (const name of featureFiles) {
             continue;
         }
         const match = line.match(/^\s*Сценарий:\s*(.+?)\s*$/);
-        if (match) expected.add(`${name}|${match[1]}`);
+        if (match) {
+            expected.add(`${name}|${match[1]}`);
+            if (pendingTags.includes("@fixme")) actualFixme.add(`${name}|${match[1]}`);
+            pendingTags = "";
+        }
     }
 }
 if (expected.size === 0) fail(`no scenarios found in ${FEATURES_DIR}`);
@@ -219,6 +242,14 @@ for (const [key, owners] of matchedBy) {
 for (const key of expected) {
     if (!matchedBy.has(key)) fail(`DEAD scenario — no CI group runs "${key}"`);
 }
+
+// Known-fixme inventory: exact match with the tagged set.
+for (const key of actualFixme)
+    if (!KNOWN_FIXME.has(key))
+        fail(`new @fixme "${key}" — track it in an issue and add to KNOWN_FIXME in this script`);
+for (const key of KNOWN_FIXME)
+    if (!actualFixme.has(key))
+        fail(`KNOWN_FIXME entry "${key}" is no longer tagged @fixme — remove the entry`);
 
 // Report
 const width = Math.max(...groupSizes.map(([name]) => name.length), 5);

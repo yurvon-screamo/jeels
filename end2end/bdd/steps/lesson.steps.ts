@@ -4,14 +4,13 @@ import { HomePage, LessonPage, WordsPage } from "../../pages";
 import {
 	answerTrainingForgot,
 	answerTrainingRemember,
+	awaitHandVisible,
 	completeAcquaintanceHandIfPresent,
 	completeLessonFlexible,
 	completeTrainingUntilCriterion,
 	runAcquaintancePresentation,
 } from "../../helpers/lesson";
-
-// TrailBase record-writes for the user row (same contract as sync.steps).
-const RECORD_WRITE_METHODS = new Set(["POST", "PUT", "PATCH"]);
+import { waitForUserRecordWrite } from "../../helpers/syncwait";
 
 When('пользователь добавил слово из текста {string}', async ({ page }, text: string) => {
     const wordsPage = new WordsPage(page);
@@ -172,19 +171,15 @@ When('оценивает каждую карточку как Good', async ({ pa
     // честно (показ → тренировка до критерия → переходный экран), после
     // чего добиваем классический урок рейтингом Good. Ревью карт руки
     // назначены на завтра — сразу после перехода урок обычно пуст.
-    const hand = page.getByTestId("acquaintance-view");
-    if (await hand.isVisible().catch(() => false)) {
+    // Bounded wait (не мгновенный снапшот): рука может смонтироваться
+    // позже проверки — иначе шаг молча ушёл бы в классическую ветку.
+    if (await awaitHandVisible(page, 5_000)) {
         // Регистрируем ожидание ДО тренировки (как в sync.steps): сейв
         // закрытия руки (сидирование первого ревью + списание лимита)
         // летит на сервер из spawn_local в момент HandCompleted. Следующий
         // шаг шагает с полной перезагрузкой — сейв обязан landed раньше,
         // иначе рука переформируется из устаревшего состояния.
-        const handSave = page.waitForResponse(
-            (resp) =>
-                /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
-                RECORD_WRITE_METHODS.has(resp.request().method()),
-            { timeout: 20_000 },
-        );
+        const handSave = waitForUserRecordWrite(page, 20_000);
         await runAcquaintancePresentation(page);
         await completeTrainingUntilCriterion(page);
         const save = await handSave;
