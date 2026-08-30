@@ -277,14 +277,19 @@ When('пользователь отмечает текущую карту рук
 Then('рука не уменьшается и показывается новая карта', async ({ page, acqKnownCard }) => {
     const slide = page.getByTestId("acquaintance-slide");
     await slide.waitFor({ state: "visible", timeout: 15_000 });
+    // Замена асинхронна (mark-known → пул → слайды): ждём, пока слот
+    // займёт новая карта — рендер мог не успеть за скрытием модалки.
+    const current = await expect
+        .poll(async () => (await slide.getAttribute("data-card-id")) ?? "", {
+            timeout: 15_000,
+            intervals: [100, 200, 400],
+        })
+        .not.toBe(acqKnownCard ?? "");
     const aria = await page
         .getByTestId("acquaintance-strip")
         .getAttribute("aria-label");
     expect(aria, `рука не уменьшилась, aria: ${aria}`).toContain("1/");
     expect(Number((aria ?? "0/0").split("/")[1]), "размер руки сохранён").toBeGreaterThanOrEqual(7);
-    const current = (await slide.getAttribute("data-card-id")) ?? "";
-    expect(current, "слот занимает новая карта").not.toBe(acqKnownCard.value);
-    expect(current, "новая карта реально показана").not.toBe("");
 });
 
 Then('отображается экран перехода к повторению', async ({ page }) => {
