@@ -339,7 +339,7 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
                 <LoadingOverlay
                     message=loading_msg
                     progress
-                    test_id=Signal::derive(|| "app-loading-overlay".to_string())
+                    test_id="app-loading-overlay"
                 />
             }
             .into_any()

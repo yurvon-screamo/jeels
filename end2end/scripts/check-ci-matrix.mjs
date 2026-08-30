@@ -77,8 +77,18 @@ const expected = new Set();
 for (const name of featureFiles) {
     const text = await readFile(path.join(FEATURES_DIR, name), "utf8");
     for (const line of text.split("\n")) {
-        // Russian Gherkin: «Сценарий:», «Структура сценария:» (outlines).
-        const match = line.match(/^\s*(?:Сценарий|Структура сценария):\s*(.+?)\s*$/);
+        // Russian Gherkin: «Сценарий:». Scenario Outlines («Структура
+        // сценария:») are NOT supported by this guard: playwright-bdd
+        // titles outline examples differently, which would surface as
+        // false unknown/DEAD. Fail loudly instead of lying silently.
+        if (/^\s*Структура сценария:/.test(line)) {
+            fail(
+                `${name} uses a Scenario Outline — extend the guard inventory ` +
+                    `before adding outlines (example titling differs)`,
+            );
+            continue;
+        }
+        const match = line.match(/^\s*Сценарий:\s*(.+?)\s*$/);
         if (match) expected.add(`${name}|${match[1]}`);
     }
 }
@@ -103,9 +113,23 @@ const caseLabels = caseBlock
 if (caseLabels.length === 0)
     fail('could not parse `case "${{ matrix.group }}"` arms from ci.yml (unexpected format)');
 
-const patterns = caseBlock
-    ? [...caseBlock[1].matchAll(/--grep "([^"]+)"/g)].map((m) => m[1])
+// Per-arm extraction (not two parallel arrays): a grep is attributed to
+// the arm block it lives in, so two greps in one arm and none in another
+// produce an explicit "arm without grep" violation instead of silently
+// shifting the group mapping.
+const armBlocks = caseBlock
+    ? caseBlock[1].split(/^\s*([\w-]+)\)\s*$/m).slice(1)
     : [];
+const groupPatterns = new Map();
+for (let i = 0; i + 1 < armBlocks.length; i += 2) {
+    const label = armBlocks[i];
+    const greps = [...armBlocks[i + 1].matchAll(/--grep "([^"]+)"/g)].map((m) => m[1]);
+    if (greps.length !== 1) {
+        fail(`case arm "${label}" must carry exactly one --grep, found ${greps.length}`);
+        continue;
+    }
+    groupPatterns.set(label, greps[0]);
+}
 
 // Structural validation: every arm must bind to a declared group and own a grep.
 const labelSet = new Set(caseLabels);
@@ -114,14 +138,7 @@ for (const group of matrixGroups)
 for (const label of caseLabels)
     if (!matrixGroups.includes(label))
         fail(`case arm "${label}" is not a declared matrix group in ci.yml`);
-if (patterns.length !== caseLabels.length)
-    fail(
-        `every case arm must carry exactly one --grep: ` +
-            `${caseLabels.length} arms vs ${patterns.length} greps`,
-    );
 
-const groupPatterns = new Map();
-caseLabels.forEach((label, index) => groupPatterns.set(label, patterns[index]));
 for (const [label, pattern] of groupPatterns) {
     try {
         new RegExp(pattern);
@@ -154,7 +171,16 @@ function listScenarioKeys(pattern) {
         fail(`playwright --list produced no JSON for pattern: ${pattern}`);
         return new Set();
     }
-    const data = JSON.parse(result.stdout.slice(jsonMatch.index));
+    let data;
+    try {
+        data = JSON.parse(result.stdout.slice(jsonMatch.index));
+    } catch (error) {
+        fail(
+            `playwright --list produced unparseable JSON for pattern "${pattern}": ` +
+                error.message,
+        );
+        return new Set();
+    }
     const keys = new Set();
     for (const top of data.suites ?? []) {
         const featureFile = path

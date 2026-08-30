@@ -272,14 +272,20 @@ Then('отображается содержимое урока или пусто
 });
 
 // Отмена подтверждения «Уже знаю»: модалка закрывается без побочных
-// действий — карта не выбывает из руки и не заменяется.
-When('пользователь отменяет подтверждение «Уже знаю»', async ({ page, acqKnownCard }) => {
+// действий — карта не выбывает из руки и не заменяется. Видимость
+// модалки ассертится отдельным Then (When = action, Then = assertion).
+When('пользователь нажимает «Уже знаю» в показе', async ({ page, acqKnownCard }) => {
     const slide = page.getByTestId("acquaintance-slide");
     await slide.waitFor({ state: "visible", timeout: 15_000 });
     acqKnownCard.value = (await slide.getAttribute("data-card-id")) ?? null;
     await page.getByTestId("acquaintance-know-btn").click({ timeout: 5_000 });
-    const modal = page.getByTestId("acquaintance-know-confirm");
-    await expect(modal).toBeVisible();
+});
+
+Then('отображается подтверждение «Уже знаю»', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-know-confirm")).toBeVisible();
+});
+
+When('пользователь отменяет подтверждение «Уже знаю»', async ({ page }) => {
     await page.getByTestId("acquaintance-know-confirm-cancel").click({ timeout: 5_000 });
 });
 
@@ -303,6 +309,15 @@ Then('модалка закрыта и карта остаётся в руке',
 
 When('нажимает клавишу Пробел', async ({ page }) => {
     await page.keyboard.press(" ");
+});
+
+// --- Клавиатура в тренировке: Пробел до раскрытия = «Показать ответ»
+// (acquaintance_keyboard.rs: Training + Space → Reveal). ---
+
+Then('отображается ответ тренировки', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-training-answer")).toBeVisible({
+        timeout: 5_000,
+    });
 });
 
 Then('последняя карта круга не открывает следующий', async ({ acqTrainingLog }) => {
