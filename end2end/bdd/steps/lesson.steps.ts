@@ -52,9 +52,23 @@ When('пользователь проходит показ руки знаком
 });
 
 When('нажимает кнопку показа ответа тренировки', async ({ page }) => {
-    await page
-        .getByTestId("acquaintance-reveal-btn")
-        .click({ timeout: 5_000 });
+    const reveal = page.getByTestId("acquaintance-reveal-btn");
+    const ready = await reveal
+        .waitFor({ state: "visible", timeout: 20_000 })
+        .then(() => true)
+        .catch(() => false);
+    if (!ready) {
+        const trainingCount = await page
+            .getByTestId("acquaintance-training")
+            .count();
+        const answerCount = await page
+            .getByTestId("acquaintance-training-answer")
+            .count();
+        throw new Error(
+            `reveal-btn not shown in 20s: training=${trainingCount}, answer=${answerCount}`,
+        );
+    }
+    await reveal.click({ timeout: 5_000 });
 });
 
 Then('отображаются кнопки оценки тренировки', async ({ page }) => {

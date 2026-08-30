@@ -36,6 +36,11 @@ export async function runAcquaintancePresentation(page: Page): Promise<void> {
 			.catch(() => false);
 		if (trainingVisible) break;
 	}
+	// Показ пройден — тренировка обязана открыться (bounded-клик мог
+	// проиграть гонку ре-рендеру; здесь это видно сразу, а не в шаге ниже).
+	await expect(page.getByTestId("acquaintance-training")).toBeVisible({
+		timeout: 15_000,
+	});
 }
 
 /// Завершает руку знакомства, если она показана: на каждом слайде показа
