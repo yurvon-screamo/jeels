@@ -103,7 +103,10 @@ fn build_rotation_order(ctx: &AcquaintanceContext) -> Vec<Ulid> {
 pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
     let i18n = use_i18n();
     let ctx_stored = StoredValue::new(ctx);
-    let showing_answer = RwSignal::new(false);
+    // Раскрытие ответа живёт в контексте: шапке он нужен для видимости
+    // кнопки озвучки (JP-сторона скрыта на Reverse-фронте).
+    let showing_answer = ctx_stored.get_value().showing_answer;
+    showing_answer.set(false);
     let rotation_index = RwSignal::new(0usize);
     let training_order = RwSignal::new(build_rotation_order(&ctx_stored.get_value()));
 

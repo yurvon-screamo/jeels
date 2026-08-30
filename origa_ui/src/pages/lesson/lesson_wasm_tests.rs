@@ -1180,6 +1180,7 @@ mod acquaintance_training {
             known_kanji: RwSignal::new(HashSet::new()),
             native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
             current_card: RwSignal::new(None),
+            showing_answer: RwSignal::new(false),
         }
     }
 
@@ -1250,6 +1251,65 @@ mod acquaintance_training {
                 .query_selector("[data-testid=\"acquaintance-training-answer\"]")
                 .unwrap()
                 .is_some()
+        );
+    }
+
+    #[wasm_bindgen_test]
+    async fn training_reverse_front_hides_audio_button_until_answer() {
+        // Arrange: рука из слова, переведённая в Reverse доменными вызовами
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        let mut hand = origa::domain::AcquaintanceHand::new(vec![(
+            card_id,
+            origa::domain::CardType::Vocabulary,
+        )])
+        .unwrap();
+        for _ in 0..3 {
+            hand.record_answer(card_id, true).unwrap();
+        }
+        assert!(hand.advance_subphase_if_words_done());
+        ctx.state.update(|state| state.hand = Some(hand));
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "読む".to_string(),
+            pos_label: None,
+            translations: vec!["читать".to_string()],
+        }]);
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Фронт Reverse показывает перевод — JP скрыта, кнопки нет.
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
+                .unwrap()
+                .is_none(),
+            "Reverse-фронт: кнопка озвучки скрыта (не подсказывает ответ)"
+        );
+
+        // Act: раскрыть ответ — японская сторона на экране.
+        wrapper
+            .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap()
+            .click();
+        tick().await;
+
+        // Assert
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
+                .unwrap()
+                .is_some(),
+            "Reverse-ответ: японская сторона видна — кнопка доступна"
         );
     }
 
@@ -1423,6 +1483,7 @@ mod acquaintance_training_fronts {
             known_kanji: RwSignal::new(HashSet::new()),
             native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
             current_card: RwSignal::new(None),
+            showing_answer: RwSignal::new(false),
         }
     }
 
@@ -1693,6 +1754,7 @@ mod acquaintance_presentation {
             known_kanji: RwSignal::new(HashSet::new()),
             native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
             current_card: RwSignal::new(None),
+            showing_answer: RwSignal::new(false),
         }
     }
 
@@ -1738,6 +1800,88 @@ mod acquaintance_presentation {
                 .unwrap()
                 .is_some(),
             "наведение/тап на кандзи открывает превью"
+        );
+    }
+
+    #[wasm_bindgen_test]
+    async fn header_shows_audio_button_and_pos_tag_for_word_slide() {
+        // Arrange: слайд слова с частью речи
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(hand_of(card_id, origa::domain::CardType::Vocabulary))
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "読む".to_string(),
+            pos_label: Some("Глагол".to_string()),
+            translations: vec!["читать".to_string()],
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: кнопка озвучки в шапке (рядом с полосой) и POS-тег
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
+                .unwrap()
+                .is_some(),
+            "кнопка озвучки слова в шапке"
+        );
+        let pos_tag = wrapper
+            .query_selector("[data-testid=\"acquaintance-pos-tag\"]")
+            .unwrap()
+            .unwrap();
+        assert!(pos_tag.text_content().unwrap().contains("Глагол"));
+        // Кнопка из тела слайда ушла
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-word-audio\"]")
+                .unwrap()
+                .is_none(),
+            "AudioButtons больше не в теле слайда"
+        );
+    }
+
+    #[wasm_bindgen_test]
+    async fn header_audio_button_hidden_on_kanji_slide() {
+        // Arrange
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state
+            .update(|state| state.hand = Some(hand_of(card_id, origa::domain::CardType::Kanji)));
+        ctx.slides.set(vec![AcquaintanceSlideData::Kanji {
+            card_id,
+            kanji: "明".to_string(),
+            name: "свет".to_string(),
+            radicals: None,
+            example_words: None,
+            on_readings: None,
+            kun_readings: None,
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: несловесная карта — озвучивать нечего
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
+                .unwrap()
+                .is_none()
         );
     }
 
@@ -1895,39 +2039,5 @@ mod acquaintance_presentation {
                 "{test_id}: сырая markdown-разметка скрыта, got: {html}"
             );
         }
-    }
-
-    #[wasm_bindgen_test]
-    async fn word_slide_offers_audio_repeat_button() {
-        // Arrange
-        let ctx = acq_context(AcquaintanceStage::Presentation);
-        let card_id = Ulid::new();
-        ctx.state.update(|state| {
-            state.hand = Some(hand_of(card_id, origa::domain::CardType::Vocabulary))
-        });
-        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
-            card_id,
-            word: "ねこ".to_string(),
-            pos_label: None,
-            translations: vec!["кошка".to_string()],
-        }]);
-
-        // Act
-        let wrapper = create_wrapper();
-        let c2 = ctx.clone();
-        mount_with_i18n(&wrapper, move || {
-            provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
-        });
-        tick().await;
-
-        // Assert: повтор прослушивания доступен по нажатию
-        assert!(
-            wrapper
-                .query_selector("[data-testid=\"acquaintance-word-audio\"]")
-                .unwrap()
-                .is_some(),
-            "кнопка повтора аудио на слайде слова"
-        );
     }
 }

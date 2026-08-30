@@ -109,6 +109,7 @@ pub fn LessonContent() -> impl IntoView {
             known_kanji,
             native_language,
             current_card: RwSignal::new(None),
+            showing_answer: RwSignal::new(false),
         });
     }
 

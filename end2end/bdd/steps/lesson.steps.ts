@@ -72,11 +72,15 @@ Then('каждый круг тренировки показывает кажду
 });
 
 Then('направление тренировки всё ещё яп→рус', async ({ page }) => {
-    await expect(page.getByTestId("acquaintance-phase-tag")).toContainText(/ЯП\s*→\s*РУС/);
+    await expect(page.getByTestId("acquaintance-direction-tag")).toContainText(
+        /ЯП\s*→\s*РУС/,
+    );
 });
 
 Then('направление тренировки меняется на рус→яп', async ({ page }) => {
-    await expect(page.getByTestId("acquaintance-phase-tag")).toContainText(/РУС\s*→\s*ЯП/);
+    await expect(page.getByTestId("acquaintance-direction-tag")).toContainText(
+        /РУС\s*→\s*ЯП/,
+    );
 });
 
 Then('фронт тренировки показывает перевод', async ({ page }) => {

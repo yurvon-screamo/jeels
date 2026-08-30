@@ -1,6 +1,7 @@
 use super::acquaintance_keyboard::{AcquaintanceKeyAction, resolve_key_action};
 use super::acquaintance_state::{
-    AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, should_autoplay_word_audio,
+    AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, audio_button_visible,
+    should_autoplay_word_audio,
 };
 use super::card_type::CardType as UiCardType;
 use super::hand_progress_strip::{HandProgressStrip, presentation_fill};
@@ -9,11 +10,12 @@ use super::keyboard_handler::is_typing_target;
 use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
-    AudioButtons, Button, ButtonVariant, ConfirmModal, FuriganaText, KanjiAnimation, MarkdownText,
+    Button, ButtonVariant, ConfirmModal, FuriganaText, KanjiAnimation, MarkdownText,
     MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
+use leptos_icons::Icon;
 use leptos_use::use_event_listener;
 use origa::domain::{AcquaintanceSubphase, NativeLanguage};
 use origa::use_cases::MarkCardAsKnownUseCase;
@@ -49,29 +51,43 @@ pub fn AcquaintanceView() -> impl IntoView {
                 .phase_presentation()
                 .inner()
                 .to_string(),
-            AcquaintanceStage::Training => {
-                let base = i18n
-                    .get_keys()
-                    .acquaintance()
-                    .phase_training()
-                    .inner()
-                    .to_string();
-                match ctx
-                    .state
-                    .with(|state| state.hand.as_ref().and_then(|h| h.subphase()))
-                {
-                    Some(AcquaintanceSubphase::Forward) => format!(
-                        "{base} · {}",
-                        i18n.get_keys().acquaintance().dir_forward().inner()
-                    ),
-                    Some(AcquaintanceSubphase::Reverse) => format!(
-                        "{base} · {}",
-                        i18n.get_keys().acquaintance().dir_reverse().inner()
-                    ),
-                    None => base,
-                }
-            },
+            AcquaintanceStage::Training => i18n
+                .get_keys()
+                .acquaintance()
+                .phase_training()
+                .inner()
+                .to_string(),
             AcquaintanceStage::Inactive => String::new(),
+        }
+    });
+
+    // Направление тренировки слов — отдельным компактным тегом: единый
+    // длинный тег «фаза · направление» не влезал на мобильных и растягивал
+    // строку по вертикали.
+    let direction_label = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        if ctx.state.with(|state| state.stage) != AcquaintanceStage::Training {
+            return None;
+        }
+        match ctx
+            .state
+            .with(|state| state.hand.as_ref().and_then(|h| h.subphase()))
+        {
+            Some(AcquaintanceSubphase::Forward) => Some(
+                i18n.get_keys()
+                    .acquaintance()
+                    .dir_forward()
+                    .inner()
+                    .to_string(),
+            ),
+            Some(AcquaintanceSubphase::Reverse) => Some(
+                i18n.get_keys()
+                    .acquaintance()
+                    .dir_reverse()
+                    .inner()
+                    .to_string(),
+            ),
+            None => None,
         }
     });
 
@@ -100,6 +116,52 @@ pub fn AcquaintanceView() -> impl IntoView {
     });
 
     let card_type_tag = Signal::derive(move || current_card_type.get().map(ui_card_type));
+
+    // Японское слово текущей карты и его часть речи — для кнопки озвучки
+    // и POS-тега в шапке.
+    let current_slide = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        let state = ctx.state.get();
+        match state.stage {
+            AcquaintanceStage::Presentation => ctx.slides.get().get(state.slide_index).cloned(),
+            _ => ctx.current_card.get().and_then(|card_id| {
+                ctx.slides
+                    .get()
+                    .iter()
+                    .find(|s| s.card_id() == card_id)
+                    .cloned()
+            }),
+        }
+    });
+    let current_word = Signal::derive(move || {
+        current_slide
+            .get()
+            .and_then(|slide| slide.word().map(str::to_string))
+    });
+    let pos_tag_label = Signal::derive(move || {
+        current_slide
+            .get()
+            .and_then(|slide| slide.pos_label().map(str::to_string))
+    });
+
+    // Кнопка озвучки: видна, когда японская сторона слова на экране
+    // (Reverse-фронт прячет её — кнопка не подсказывает ответ).
+    let audio_visible = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        let state = ctx.state.get();
+        audio_button_visible(
+            state.stage,
+            state.hand.as_ref().and_then(|hand| hand.subphase()),
+            ctx.showing_answer.get(),
+            current_word.get().is_some(),
+        )
+    });
+    let speak_current_word = Callback::new(move |_: ()| {
+        if let Some(word) = current_word.get() {
+            speak_word(&word, 1.0);
+        }
+    });
+
     // Прогресс полосы — единственный индикатор во время знакомства:
     // в показе ячейки заполняются по пройденным слайдам, в тренировке —
     // успешными ответами каждой карты в текущей подфазе.
@@ -169,11 +231,31 @@ pub fn AcquaintanceView() -> impl IntoView {
 
     view! {
         <div data-testid="acquaintance-view" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
-            <div class="flex items-center justify-between gap-3 mb-2">
+            <div class="flex flex-col gap-1 mb-2 sm:flex-row sm:items-center sm:justify-between">
+                // Полоса — первой строкой (мобильные теги переносятся
+                // ниже, а не растягивают строку по вертикали), рядом —
+                // кнопка озвучки текущего слова.
                 <div class="flex items-center gap-2">
+                    <HandProgressStrip total progress label=strip_label />
+                    <Show when=move || audio_visible.get()>
+                        <button
+                            data-testid="acquaintance-audio-btn"
+                            class="text-[var(--fg-muted)] hover:text-[var(--fg-black)] transition-colors cursor-pointer shrink-0"
+                            on:click=move |_| speak_current_word.run(())
+                        >
+                            <Icon icon=icondata::LuVolume2 width="16" height="16" />
+                        </button>
+                    </Show>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap min-w-0">
                     <Tag test_id=Signal::derive(|| "acquaintance-phase-tag".to_string())>
                         {move || phase_label.get()}
                     </Tag>
+                    <Show when=move || direction_label.get().is_some()>
+                        <Tag test_id=Signal::derive(|| "acquaintance-direction-tag".to_string())>
+                            {move || direction_label.get().unwrap_or_default()}
+                        </Tag>
+                    </Show>
                     <Show when=move || card_type_tag.get().is_some()>
                         <Tag
                             variant=Signal::derive(move || {
@@ -189,8 +271,12 @@ pub fn AcquaintanceView() -> impl IntoView {
                             }}
                         </Tag>
                     </Show>
+                    <Show when=move || pos_tag_label.get().is_some()>
+                        <Tag test_id=Signal::derive(|| "acquaintance-pos-tag".to_string())>
+                            {move || pos_tag_label.get().unwrap_or_default()}
+                        </Tag>
+                    </Show>
                 </div>
-                <HandProgressStrip total progress label=strip_label />
             </div>
 
             <Show when=move || {
@@ -231,7 +317,6 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
             } => view! {
                 <WordSlide
                     word=word.clone()
-                    pos_label=pos_label.clone()
                     translations=translations.clone()
                     known_kanji=ctx.known_kanji
                     native_language=ctx.native_language.get_untracked()
@@ -293,13 +378,11 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
 #[component]
 fn WordSlide(
     word: String,
-    pos_label: Option<String>,
     translations: Vec<String>,
     known_kanji: RwSignal<HashSet<char>>,
     native_language: NativeLanguage,
 ) -> impl IntoView {
     let word_stored = StoredValue::new(word.clone());
-    let pos_stored = StoredValue::new(pos_label.clone());
     let translations_stored = StoredValue::new(translations.clone());
 
     // Автозвук слова при показе слайда — тот же механизм, что у карточек
@@ -326,16 +409,6 @@ fn WordSlide(
                     with_kanji_tooltip=true
                 />
             </p>
-            <AudioButtons
-                text=word_stored.get_value()
-                audio_path=None
-                test_id=Signal::derive(|| "acquaintance-word-audio".to_string())
-            />
-            <Show when=move || pos_label.is_some()>
-                <Tag test_id=Signal::derive(|| "acquaintance-word-pos".to_string())>
-                    {move || pos_stored.get_value().clone().unwrap_or_default()}
-                </Tag>
-            </Show>
             <ul class="space-y-1 pt-2">
                 {move || {
                     translations_stored

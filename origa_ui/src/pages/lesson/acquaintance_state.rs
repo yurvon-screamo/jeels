@@ -1,6 +1,6 @@
 use crate::repository::HybridUserRepository;
 use leptos::{prelude::*, task::spawn_local};
-use origa::domain::{AcquaintanceHand, NativeLanguage};
+use origa::domain::{AcquaintanceHand, AcquaintanceSubphase, NativeLanguage};
 use origa::use_cases::CompleteAcquaintanceHandUseCase;
 use std::collections::HashSet;
 use ulid::Ulid;
@@ -35,6 +35,28 @@ pub struct AcquaintanceState {
 /// Forward-фронта тренировки — гарды не дублируются.
 pub fn should_autoplay_word_audio(is_muted: bool, speech_supported: bool) -> bool {
     speech_supported && !is_muted
+}
+
+/// Видимость кнопки озвучки в шапке руки: кнопка озвучивает японскую
+/// сторону слова — она доступна, только когда JP на экране. Reverse-фронт
+/// показывает перевод (JP скрыта) — кнопка спрятана, чтобы не подсказывать
+/// ответ голосом. Несловесные карты озвучивать нечем.
+pub fn audio_button_visible(
+    stage: AcquaintanceStage,
+    subphase: Option<AcquaintanceSubphase>,
+    showing_answer: bool,
+    is_word: bool,
+) -> bool {
+    if !is_word {
+        return false;
+    }
+    match stage {
+        AcquaintanceStage::Presentation => true,
+        AcquaintanceStage::Training => {
+            subphase != Some(AcquaintanceSubphase::Reverse) || showing_answer
+        },
+        AcquaintanceStage::Inactive => false,
+    }
 }
 
 impl AcquaintanceState {
@@ -95,6 +117,23 @@ impl AcquaintanceSlideData {
             | Self::Grammar { card_id, .. } => *card_id,
         }
     }
+
+    /// Японское слово слайда (для озвучки из шапки); несловесные карты —
+    /// `None`.
+    pub fn word(&self) -> Option<&str> {
+        match self {
+            Self::Vocabulary { word, .. } => Some(word),
+            _ => None,
+        }
+    }
+
+    /// Часть речи слайда слова — тег в шапке.
+    pub fn pos_label(&self) -> Option<&str> {
+        match self {
+            Self::Vocabulary { pos_label, .. } => pos_label.as_deref(),
+            _ => None,
+        }
+    }
 }
 
 /// Контекст префазы урока.
@@ -109,6 +148,11 @@ pub struct AcquaintanceContext {
     /// тега типа карты, а запись при монтаже TrainingBody не перезапускает
     /// родительские Show (state.update зацикливала бы их перемонтирование).
     pub current_card: RwSignal<Option<Ulid>>,
+    /// Раскрыт ли ответ тренировки — шапке нужен для видимости кнопки
+    /// озвучки (Reverse-фронт прячет JP-сторону). Отдельный сигнал по той
+    /// же причине: локальный сигнал TrainingBody умер бы при любом
+    /// пересоздании, а запись из кликов безопасна.
+    pub showing_answer: RwSignal<bool>,
 }
 
 impl AcquaintanceContext {
@@ -137,6 +181,43 @@ impl AcquaintanceContext {
                 tracing::error!("Acquaintance hand completion failed: {e}");
             }
         });
+    }
+}
+
+#[cfg(test)]
+mod audio_button_visible_tests {
+    use super::*;
+
+    const WORD: bool = true;
+
+    #[rstest::rstest]
+    #[case::presentation(true, None, false)]
+    #[case::presentation_answer_shown(true, None, true)]
+    #[case::forward_front(true, Some(AcquaintanceSubphase::Forward), false)]
+    #[case::forward_answer(true, Some(AcquaintanceSubphase::Forward), true)]
+    #[case::reverse_front_hidden(false, Some(AcquaintanceSubphase::Reverse), false)]
+    #[case::reverse_answer(true, Some(AcquaintanceSubphase::Reverse), true)]
+    fn training_visibility_depends_on_jp_side(
+        #[case] expected: bool,
+        #[case] subphase: Option<AcquaintanceSubphase>,
+        #[case] showing_answer: bool,
+    ) {
+        assert_eq!(
+            audio_button_visible(AcquaintanceStage::Training, subphase, showing_answer, WORD),
+            expected
+        );
+    }
+
+    #[rstest::rstest]
+    #[case::presentation_word(AcquaintanceStage::Presentation, true, true)]
+    #[case::presentation_non_word(AcquaintanceStage::Presentation, false, false)]
+    #[case::inactive_word(AcquaintanceStage::Inactive, true, false)]
+    fn non_training_stages(
+        #[case] stage: AcquaintanceStage,
+        #[case] is_word: bool,
+        #[case] expected: bool,
+    ) {
+        assert_eq!(audio_button_visible(stage, None, false, is_word), expected);
     }
 }
 
