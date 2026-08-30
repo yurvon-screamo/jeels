@@ -82,7 +82,8 @@ pub fn AcquaintanceView() -> impl IntoView {
     });
 
     // Тип текущей карты: в показе — слайд по индексу, в тренировке —
-    // карта, выставленная TrainingBody. Шапка показывает его вторым тегом.
+    // карта из отдельного сигнала контекста. Шапка показывает его вторым
+    // тегом.
     let current_card_type = Signal::derive(move || {
         let ctx = ctx_stored.get_value();
         let state = ctx.state.get();
@@ -92,7 +93,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                 .get()
                 .get(state.slide_index)
                 .map(|slide| slide.card_id()),
-            _ => state.current_card_id,
+            _ => ctx.current_card.get(),
         }?;
         let hand = state.hand?;
         hand.entry(card_id).map(|entry| entry.card_type())

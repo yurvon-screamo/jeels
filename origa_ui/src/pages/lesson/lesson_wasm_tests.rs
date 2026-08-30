@@ -1179,6 +1179,7 @@ mod acquaintance_training {
             slides: RwSignal::new(Vec::new()),
             known_kanji: RwSignal::new(HashSet::new()),
             native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
+            current_card: RwSignal::new(None),
         }
     }
 
@@ -1351,6 +1352,7 @@ mod acquaintance_training_fronts {
             slides: RwSignal::new(Vec::new()),
             known_kanji: RwSignal::new(HashSet::new()),
             native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
+            current_card: RwSignal::new(None),
         }
     }
 
@@ -1620,6 +1622,7 @@ mod acquaintance_presentation {
             slides: RwSignal::new(Vec::new()),
             known_kanji: RwSignal::new(HashSet::new()),
             native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
+            current_card: RwSignal::new(None),
         }
     }
 

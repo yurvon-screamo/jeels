@@ -51,9 +51,10 @@ fn do_rate(
         outcome,
     );
     // Шапке нужен тип новой текущей карты (тег типа).
-    let next_card = current_id.get_untracked();
-    let state = ctx_stored.get_value().state;
-    state.update(|s| s.current_card_id = (!next_card.is_nil()).then_some(next_card));
+    ctx_stored
+        .get_value()
+        .current_card
+        .set(current_id.get_untracked().non_nil());
 }
 
 /// Fisher–Yates поверх xorshift64; источник энтропии — случайные биты
@@ -112,15 +113,12 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
         order[rotation_index.get() % order.len()]
     });
 
-    // Текущая карта тренировки: шапка читает её для тега типа карты.
-    // Обновляется в явных точках смены карты (старт тренировки и переход
-    // к следующей после оценки) — без Effect, чтобы не дёргать реактивность
-    // во время монтажа.
-    let state_for_current = ctx_stored.get_value().state;
-    let first_card = current_id.get_untracked();
-    if !first_card.is_nil() {
-        state_for_current.update(|state| state.current_card_id = Some(first_card));
-    }
+    // Текущая карта тренировки для тега типа в шапке: отдельный сигнал,
+    // запись при монтаже не перезапускает родительские Show.
+    ctx_stored
+        .get_value()
+        .current_card
+        .set(current_id.get_untracked().non_nil());
 
     // Клавиатура: те же хендлы, что у кнопок (спека §8.3).
     let handle_keydown = {

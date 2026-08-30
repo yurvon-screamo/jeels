@@ -28,8 +28,6 @@ pub struct AcquaintanceState {
     pub hand: Option<AcquaintanceHand>,
     pub slide_index: usize,
     pub skipped_ids: HashSet<Ulid>,
-    /// Текущая карта тренировки: шапка читает её для тега типа карты.
-    pub current_card_id: Option<Ulid>,
 }
 
 /// Автозвук слова (механизм урока, lesson_card.rs): звучит, когда TTS
@@ -107,6 +105,10 @@ pub struct AcquaintanceContext {
     pub slides: RwSignal<Vec<AcquaintanceSlideData>>,
     pub known_kanji: RwSignal<HashSet<char>>,
     pub native_language: RwSignal<NativeLanguage>,
+    /// Текущая карта тренировки — отдельный сигнал: шапка читает его для
+    /// тега типа карты, а запись при монтаже TrainingBody не перезапускает
+    /// родительские Show (state.update зацикливала бы их перемонтирование).
+    pub current_card: RwSignal<Option<Ulid>>,
 }
 
 impl AcquaintanceContext {
@@ -175,7 +177,6 @@ mod advance_presentation_tests {
             hand: Some(hand),
             slide_index: 0,
             skipped_ids: HashSet::new(),
-            current_card_id: None,
         }
     }
 
@@ -205,7 +206,6 @@ mod advance_presentation_tests {
             hand: Some(hand),
             slide_index: 0,
             skipped_ids: HashSet::from([b]),
-            current_card_id: None,
         };
 
         // Act / Assert: первый advance перепрыгивает b и показывает c

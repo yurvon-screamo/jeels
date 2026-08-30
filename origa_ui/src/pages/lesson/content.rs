@@ -108,6 +108,7 @@ pub fn LessonContent() -> impl IntoView {
             slides: acquaintance_slides,
             known_kanji,
             native_language,
+            current_card: RwSignal::new(None),
         });
     }
 
