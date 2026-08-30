@@ -81,6 +81,69 @@ When('нажимает кнопку входа', async ({ page }) => {
     await loginPage.submit();
 });
 
+// --- Миграция login_ui.spec.ts: спиннер/блокировка при входе ---
+
+// Прямая навигация на /login (как в исходном спеке): после logout-вайпа
+// приложение остаётся на «/», где форма входа живёт внутри ProtectedRoute
+// и размонтируется глобальным syncing-оверлеем — спиннер-ассерт обязан
+// проверяться на выделенном маршруте /login.
+When('пользователь открывает страницу входа напрямую', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.expectLoginFormVisible();
+});
+
+// Валидные креды текущего тестового пользователя (рандомные e2e-<ts>-<rand>@…):
+// литеральные {string}-шаги выше годятся только для негативного логина.
+When('пользователь вводит свой email', async ({ page, testUser }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.expandPasswordForm();
+    await loginPage.fillEmail(testUser.email);
+});
+
+When('пользователь вводит свой пароль', async ({ page, testUser }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.fillPassword(testUser.password);
+});
+
+// Ручной гейт запроса входа: сервер «завис» — тест сам решает, когда
+// отпустить. Фиксированный sleep здесь был бы флаком по определению.
+When('запрос входа удерживается сервером', async ({ page, loginGateRelease }) => {
+    let releaseRequest!: () => void;
+    const gate = new Promise<void>((resolve) => {
+        releaseRequest = resolve;
+    });
+    await page.route("**/api/auth/v1/login", async (route) => {
+        await gate;
+        await route.continue();
+    });
+    loginGateRelease.release = () => Promise.resolve(releaseRequest());
+});
+
+When('запрос входа отпущен сервером', async ({ loginGateRelease }) => {
+    if (!loginGateRelease.release) {
+        throw new Error("login request is not held — call the hold step first");
+    }
+    await loginGateRelease.release();
+});
+
+Then('кнопка входа заблокирована со спиннером', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.expectSubmittingState();
+});
+
+Then('вход завершается переходом в приложение', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.expectLoginSuccess(["/home", "/onboarding"], 30_000);
+});
+
+// --- Миграция login_ui.spec.ts: разделитель шапки ---
+
+Then('отображается разделитель между шапкой и секцией пароля', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await expect(loginPage.headerDivider).toBeVisible();
+});
+
 Then('отображается сообщение об ошибке', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await expect(loginPage.errorAlert).toBeVisible({ timeout: 10_000 });

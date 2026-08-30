@@ -67,6 +67,11 @@ export class LoginPage extends BasePage {
      * expands; no-op when already expanded.
      */
     async expandPasswordForm(): Promise<void> {
+        // Idempotent per the contract above: when the inner form is already
+        // open the toggle is unmounted (conditional render), so re-asserting
+        // it would false-fail — return instead.
+        const emailVisible = await this.emailInput.isVisible().catch(() => false);
+        if (emailVisible) return;
         // The email/password form is collapsed behind the "Sign in with
         // password" toggle by default (mobile viewport fit). Wait for the
         // toggle to actually be ready, then click — guards against the race
