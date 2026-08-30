@@ -1447,12 +1447,41 @@ mod acquaintance_training {
             tick().await;
         }
 
-        // Рука ушла: стадия Inactive, тренировка больше не рендерится
-        // (в приложении гейт страницы дополнительно прячет всю префазу).
+        // Переходный экран: закрытая рука сначала объясняет, что дальше.
+        assert_eq!(
+            ctx.state.get_untracked().stage,
+            AcquaintanceStage::Completed
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-completed\"]")
+                .unwrap()
+                .is_some(),
+            "переходный экран отрендерен"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-to-reviews-btn\"]")
+                .unwrap()
+                .is_some(),
+            "кнопка «К повторению» на месте"
+        );
+
+        // Act: продолжить к повторению.
+        wrapper
+            .query_selector("[data-testid=\"acquaintance-to-reviews-btn\"]")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap()
+            .click();
+        tick().await;
+
+        // Assert: префаза ушла, ревью открывается.
         assert_eq!(
             ctx.state.get_untracked().stage,
             AcquaintanceStage::Inactive,
-            "закрытая рука сразу открывает ревью урока"
+            "кнопка переводит к ревью урока"
         );
         assert!(
             wrapper

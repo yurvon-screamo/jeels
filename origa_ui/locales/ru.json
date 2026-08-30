@@ -232,7 +232,10 @@
     "dir_forward": "ЯП → РУС",
     "dir_reverse": "РУС → ЯП",
     "strip_presentation": "Слайд",
-    "strip_training": "Карт закрыто"
+    "strip_training": "Карт закрыто",
+    "completed_title": "Знакомство завершено",
+    "completed_subtitle": "Новые карты встретят первое повторение — продолжаем урок",
+    "to_reviews": "К повторению"
   },
   "lesson": {
     "loading": "Подготовка карточек для урока...",

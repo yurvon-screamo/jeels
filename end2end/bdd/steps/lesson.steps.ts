@@ -286,3 +286,28 @@ Then('рука не уменьшается и показывается нова�
     expect(current, "слот занимает новая карта").not.toBe(acqKnownCard.value);
     expect(current, "новая карта реально показана").not.toBe("");
 });
+
+Then('отображается экран перехода к повторению', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-completed")).toBeVisible({
+        timeout: 15_000,
+    });
+    await expect(page.getByTestId("acquaintance-to-reviews-btn")).toBeVisible();
+});
+
+When('пользователь продолжает к повторению', async ({ page }) => {
+    await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
+});
+
+Then('последняя карта круга не открывает следующий', async ({ acqTrainingLog }) => {
+    const all = [...acqTrainingLog];
+    const cards = Array.from(new Set(all));
+    const size = cards.length;
+    expect(size).toBeGreaterThan(1);
+    // Стыки кругов: последняя позиция круга N и первая круга N+1.
+    for (let seam = size; seam + 1 < all.length; seam += size) {
+        expect(
+            all[seam] !== all[seam + 1],
+            `стык после позиции ${seam + 1}: карта не должна идти дважды подряд`,
+        ).toBe(true);
+    }
+});

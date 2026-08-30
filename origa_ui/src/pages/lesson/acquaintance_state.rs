@@ -9,15 +9,17 @@ use super::kanji_card_details::RadicalDisplay;
 use crate::ui_components::ReadingItem;
 
 /// Стадии руки знакомства на странице урока (docs/acquaintance-mode.md):
-/// показ → тренировка → обычное ревью. `Inactive` — руки нет
-/// (пул пуст / лимит исчерпан / рука передана в ревью). Итогового экрана
-/// нет: закрытая рука сразу открывает ревью урока.
+/// показ → тренировка → переходный экран → обычное ревью. `Inactive` —
+/// руки нет (пул пуст / лимит исчерпан / юзер продолжил к ревью).
+/// `Completed` — тренировка закрыта: одноэкранный переход «теперь к
+/// повторению» (H-итерация: без него смена контекста непонятна юзеру).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AcquaintanceStage {
     #[default]
     Inactive,
     Presentation,
     Training,
+    Completed,
 }
 
 /// UI-состояние руки: доменная машина (`AcquaintanceHand`) хранит правила,
@@ -55,7 +57,7 @@ pub fn audio_button_visible(
         AcquaintanceStage::Training => {
             subphase != Some(AcquaintanceSubphase::Reverse) || showing_answer
         },
-        AcquaintanceStage::Inactive => false,
+        AcquaintanceStage::Completed | AcquaintanceStage::Inactive => false,
     }
 }
 
@@ -162,7 +164,7 @@ impl AcquaintanceContext {
     /// показа, когда выведены все карты.
     pub fn complete_hand(&self) {
         self.state
-            .update(|state| state.stage = AcquaintanceStage::Inactive);
+            .update(|state| state.stage = AcquaintanceStage::Completed);
         let ids = self.state.with(|state| {
             state
                 .hand
@@ -212,6 +214,7 @@ mod audio_button_visible_tests {
     #[case::presentation_word(AcquaintanceStage::Presentation, true, true)]
     #[case::presentation_non_word(AcquaintanceStage::Presentation, false, false)]
     #[case::inactive_word(AcquaintanceStage::Inactive, true, false)]
+    #[case::completed_word(AcquaintanceStage::Completed, true, false)]
     fn non_training_stages(
         #[case] stage: AcquaintanceStage,
         #[case] is_word: bool,

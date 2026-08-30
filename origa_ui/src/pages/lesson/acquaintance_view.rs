@@ -59,7 +59,7 @@ pub fn AcquaintanceView() -> impl IntoView {
                 .phase_training()
                 .inner()
                 .to_string(),
-            AcquaintanceStage::Inactive => String::new(),
+            AcquaintanceStage::Completed | AcquaintanceStage::Inactive => String::new(),
         }
     });
 
@@ -227,28 +227,17 @@ pub fn AcquaintanceView() -> impl IntoView {
                     .count();
                 format!("{}: {}/{}", keys.strip_training().inner(), closed, total)
             },
-            AcquaintanceStage::Inactive => String::new(),
+            AcquaintanceStage::Completed | AcquaintanceStage::Inactive => String::new(),
         }
     });
 
     view! {
         <div data-testid="acquaintance-view" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
-            <div class="flex flex-col gap-1 mb-2 sm:flex-row sm:items-center sm:justify-between">
-                // Полоса — первой строкой (мобильные теги переносятся
-                // ниже, а не растягивают строку по вертикали), рядом —
-                // кнопка озвучки текущего слова.
-                <div class="flex items-center gap-2">
-                    <HandProgressStrip total progress label=strip_label />
-                    <Show when=move || audio_visible.get()>
-                        <button
-                            data-testid="acquaintance-audio-btn"
-                            class="text-[var(--fg-muted)] hover:text-[var(--fg-black)] transition-colors cursor-pointer shrink-0"
-                            on:click=move |_| speak_current_word.run(())
-                        >
-                            <Icon icon=icondata::LuVolume2 width="16" height="16" />
-                        </button>
-                    </Show>
-                </div>
+            <Show when=move || {
+                let ctx = ctx_stored.get_value();
+                ctx.state.get().stage != AcquaintanceStage::Completed
+            }>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div class="flex items-center gap-2 flex-wrap min-w-0">
                     <Tag test_id=Signal::derive(|| "acquaintance-phase-tag".to_string())>
                         {move || phase_label.get()}
@@ -279,7 +268,57 @@ pub fn AcquaintanceView() -> impl IntoView {
                         </Tag>
                     </Show>
                 </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <Show when=move || audio_visible.get()>
+                        <button
+                            data-testid="acquaintance-audio-btn"
+                            class="text-[var(--fg-muted)] hover:text-[var(--fg-black)] transition-colors cursor-pointer"
+                            on:click=move |_| speak_current_word.run(())
+                        >
+                            <Icon icon=icondata::LuPlay width="16" height="16" />
+                        </button>
+                    </Show>
+                    <HandProgressStrip total progress label=strip_label />
+                </div>
             </div>
+            </Show>
+
+            <Show when=move || {
+                let ctx = ctx_stored.get_value();
+                ctx.state.get().stage == AcquaintanceStage::Completed
+            }>
+                <div
+                    data-testid="acquaintance-completed"
+                    class="min-h-[60vh] flex flex-col items-center justify-center text-center gap-4 py-10"
+                >
+                    <div class="font-serif text-4xl text-[var(--fg-black)] leading-snug">
+                        {move || {
+                            i18n.get_keys().acquaintance().completed_title().inner().to_string()
+                        }}
+                    </div>
+                    <p class="font-mono text-sm text-[var(--fg-muted)] max-w-md leading-relaxed">
+                        {move || {
+                            i18n
+                                .get_keys()
+                                .acquaintance()
+                                .completed_subtitle()
+                                .inner()
+                                .to_string()
+                        }}
+                    </p>
+                    <Button
+                        variant=Signal::derive(|| ButtonVariant::Filled)
+                        on_click=Callback::new(move |_| {
+                            ctx_stored.get_value().state.update(|state| {
+                                state.stage = AcquaintanceStage::Inactive;
+                            });
+                        })
+                        test_id=Signal::derive(|| "acquaintance-to-reviews-btn".to_string())
+                    >
+                        {move || i18n.get_keys().acquaintance().to_reviews().inner().to_string()}
+                    </Button>
+                </div>
+            </Show>
 
             <Show when=move || {
                 let ctx = ctx_stored.get_value();
@@ -312,10 +351,7 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
         };
         match slide {
             AcquaintanceSlideData::Vocabulary {
-                word,
-                pos_label,
-                translations,
-                ..
+                word, translations, ..
             } => view! {
                 <WordSlide
                     word=word.clone()

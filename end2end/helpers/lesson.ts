@@ -99,7 +99,11 @@ export async function completeAcquaintanceHandIfPresent(
 		// Модалка закрывается с анимацией; после неё — следующий слайд.
 		await page.waitForTimeout(350);
 	}
-	await expect(view).not.toBeVisible({ timeout: 15_000 });
+	// Хелпер завершает ПОКАЗОМ переходного экрана «теперь к повторению» —
+	// дальше сценарии сами ассертят его и жмут кнопку (или возвращаются).
+	await expect(page.getByTestId("acquaintance-completed")).toBeVisible({
+		timeout: 15_000,
+	});
 	return true;
 }
 

@@ -232,7 +232,10 @@
     "dir_forward": "JP → RU",
     "dir_reverse": "RU → JP",
     "strip_presentation": "Slide",
-    "strip_training": "Cards closed"
+    "strip_training": "Cards closed",
+    "completed_title": "Acquaintance complete",
+    "completed_subtitle": "The new cards meet their first review — back to the lesson",
+    "to_reviews": "To reviews"
   },
   "lesson": {
     "loading": "Preparing cards for the lesson...",

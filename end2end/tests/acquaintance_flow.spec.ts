@@ -65,7 +65,11 @@ test.describe("Acquaintance mode", () => {
 				.catch(() => null);
 		}
 
-		// Итогового экрана нет: закрытая рука сразу открывает обычный урок.
+		// Переходный экран объясняет смену контекста, кнопка ведёт к ревью.
+		const toReviews = page.getByTestId("acquaintance-to-reviews-btn");
+		await expect(toReviews).toBeVisible({ timeout: 15_000 });
+		await toReviews.click({ timeout: 5_000 });
+
 		// У свежего тестового юзера должных карт нет — это штатный empty-state
 		// урока; когда ревью есть, открываются карточки урока.
 		const lesson = page

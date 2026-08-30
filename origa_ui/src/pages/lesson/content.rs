@@ -78,7 +78,12 @@ pub fn LessonContent() -> impl IntoView {
     let is_muted = RwSignal::new(false);
     let is_syncing_cards = RwSignal::new(false);
     let known_kanji = RwSignal::new(HashSet::<char>::new());
-    let native_language = RwSignal::new(crate::i18n::locale_to_native_language(&i18n.get_locale()));
+    // get_locale_untracked: инициализация один раз при монтировании,
+    // подписка не нужна (локаль меняется перезагрузкой) — иначе
+    // console-warning о доступе вне реактивного контекста.
+    let native_language = RwSignal::new(crate::i18n::locale_to_native_language(
+        &i18n.get_locale_untracked(),
+    ));
     let core_count_signal = RwSignal::new(0usize);
 
     let is_disposed = StoredValue::new(());
