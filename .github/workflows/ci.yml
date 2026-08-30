@@ -525,6 +525,35 @@ jobs:
             android-key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
             android-key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
 
+    build-macos:
+        name: Build Tauri (macOS)
+        needs: [version, e2e-build]
+        # macOS build in regular CI, mirroring build-tauri (windows/linux/
+        # android): the universal .app/.pkg bundle path — Xcode selection,
+        # cert import, tauri build, productbuild — is exercised on every
+        # push, so workflow-level breakage (like the import-codesign-certs
+        # post-step exit 50) surfaces in CI instead of on a release tag.
+        # iOS is skipped (skip_ios) — it stays a release-time target to
+        # bound macOS runner minutes; App Store upload is gated by
+        # version_type inside the reusable workflow.
+        uses: ./.github/workflows/_build-tauri-apple.yml
+        with:
+            version: ${{ needs.version.outputs.version }}
+            version_base: ${{ needs.version.outputs.version_base }}
+            version_type: ${{ needs.version.outputs.version_type }}
+            commit_sha: ${{ needs.version.outputs.commit_sha }}
+            build_date: ${{ needs.version.outputs.build_date }}
+            wasm_artifact_name: wasm-dist
+            skip_ios: true
+        secrets:
+            apple-api-issuer: ${{ secrets.APPLE_API_ISSUER }}
+            apple-api-key: ${{ secrets.APPLE_API_KEY }}
+            apple-api-key-content: ${{ secrets.APPLE_API_KEY_CONTENT }}
+            apple-team-id: ${{ secrets.APPLE_TEAM_ID }}
+            apple-mac-app-cert-p12: ${{ secrets.APPLE_MAC_APP_CERT_P12 }}
+            apple-mac-installer-cert-p12: ${{ secrets.APPLE_MAC_INSTALLER_CERT_P12 }}
+            apple-mac-cert-password: ${{ secrets.APPLE_MAC_CERT_PASSWORD }}
+
     docker-build-landing:
         name: Docker Build (landing)
         permissions:
@@ -576,7 +605,7 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, macos-check]
+        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, build-macos, macos-check]
         if: always()
         runs-on: ubuntu-latest
         steps:
@@ -599,5 +628,6 @@ jobs:
                   check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
                   check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
                   check "build-tauri" "${{ needs.build-tauri.result }}" "success"
+                  check "build-macos" "${{ needs.build-macos.result }}" "success" "skipped"
 
             - run: echo "All checks passed"

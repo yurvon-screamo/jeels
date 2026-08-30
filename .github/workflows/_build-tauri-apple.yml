@@ -28,6 +28,12 @@ on:
             skip_apple:
                 type: boolean
                 default: false
+            # Skip the iOS build only (macOS still builds). ci.yml runs
+            # macOS-only to keep macOS runner minutes bounded on every
+            # push; iOS stays a release-time target (tauri.yml).
+            skip_ios:
+                type: boolean
+                default: false
         secrets:
             apple-api-issuer:
                 required: false
@@ -63,7 +69,7 @@ env:
 jobs:
     build-ios:
         name: Build iOS
-        if: github.actor != 'dependabot[bot]' && inputs.skip_apple != true
+        if: github.actor != 'dependabot[bot]' && inputs.skip_apple != true && inputs.skip_ios != true
         runs-on: macos-15
         permissions:
             contents: read
@@ -301,15 +307,37 @@ jobs:
                   name: ${{ inputs.wasm_artifact_name }}
                   path: origa_ui/dist/
 
-            - name: Import Mac App cert + create keychain
+            - name: Create build keychain
+              env:
+                  APPLE_MAC_CERT_PASSWORD: ${{ secrets.apple-mac-cert-password }}
+              run: |
+                  # The final "Cleanup API key and keychain" step deletes
+                  # build.keychain itself. import-codesign-certs@v7 ALSO
+                  # deletes the keychain in its post-step whenever it was
+                  # the creator (create-keychain: true) — so a v7-created
+                  # keychain is deleted twice, and the action's post-step
+                  # then fails with SecKeychainDelete exit 50, marking the
+                  # whole job red (build artifacts are fine). Creating the
+                  # keychain here and importing with create-keychain: false
+                  # keeps BOTH v7 post-steps inert; the explicit cleanup
+                  # step stays the single owner of keychain disposal.
+                  security create-keychain -p "$APPLE_MAC_CERT_PASSWORD" build.keychain
+                  security set-keychain-settings -lut 21600 build.keychain
+                  security unlock-keychain -p "$APPLE_MAC_CERT_PASSWORD" build.keychain
+                  security list-keychains -d user -s build.keychain login.keychain
+
+            - name: Import Mac App cert
               uses: apple-actions/import-codesign-certs@v7
               with:
                   p12-file-base64: ${{ secrets.apple-mac-app-cert-p12 }}
                   p12-password: ${{ secrets.apple-mac-cert-password }}
                   keychain: build
-                  # Use the same password for both keychain and .p12 to
-                  # simplify the second action call below (which must
-                  # unlock the existing keychain).
+                  # The keychain was created by the "Create build keychain"
+                  # step above — never let the action create (and then
+                  # post-delete) it. See that step for the exit-50 story.
+                  create-keychain: false
+                  # Same password for keychain and .p12 — the second action
+                  # call below reuses this keychain.
                   keychain-password: ${{ secrets.apple-mac-cert-password }}
 
             - name: Import Mac Installer cert (reuse keychain)
@@ -559,6 +587,10 @@ jobs:
 
             - name: Upload to App Store Connect
               id: upload
+              # Release-time only (tag pushes: stable/prerelease). CI-run
+              # macOS builds (version_type: alpha) must never touch App
+              # Store Connect — no duplicate versions, no ITMS conflicts.
+              if: inputs.version_type == 'stable' || inputs.version_type == 'prerelease'
               timeout-minutes: 15
               env:
                   APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
@@ -599,6 +631,9 @@ jobs:
                   if [ "${{ steps.upload.outcome }}" = "success" ]; then
                     echo "status=success" >> "$GITHUB_OUTPUT"
                     echo "✅ macOS build uploaded to App Store Connect"
+                  elif [ "${{ steps.upload.outcome }}" = "skipped" ]; then
+                    echo "status=skipped" >> "$GITHUB_OUTPUT"
+                    echo "ℹ️ App Store upload skipped (non-release run)"
                   else
                     echo "status=failure" >> "$GITHUB_OUTPUT"
                     echo "::warning::xcrun altool upload failed. Download the macos-pkg-build artifact and upload manually via Transporter.app"
