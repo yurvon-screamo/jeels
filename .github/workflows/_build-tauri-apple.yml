@@ -587,10 +587,15 @@ jobs:
 
             - name: Upload to App Store Connect
               id: upload
-              # Release-time only (tag pushes: stable/prerelease). CI-run
-              # macOS builds (version_type: alpha) must never touch App
-              # Store Connect — no duplicate versions, no ITMS conflicts.
-              if: inputs.version_type == 'stable' || inputs.version_type == 'prerelease'
+              # Stable-only. macOS prerelease tags share the version_base
+              # (e.g. v0.7.0-rc1 and v0.7.0-rc2 both bundle CFBundleVersion
+              # 0.7.0), so a second upload is always rejected by App Store
+              # Connect with -19232 "bundle version must be higher" — this
+              # is exactly what broke v0.6.5 and v0.7.0-rc2. RC builds ship
+              # via the GitHub Release assets (.pkg is uploaded there);
+              # App Store Connect gets exactly one build per version, from
+              # the stable tag. CI/dispatch builds (alpha) never upload.
+              if: inputs.version_type == 'stable'
               timeout-minutes: 15
               env:
                   APPLE_API_ISSUER: ${{ secrets.apple-api-issuer }}
