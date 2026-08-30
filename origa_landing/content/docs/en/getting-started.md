@@ -5,7 +5,7 @@ locale: en
 meta_title: "Getting Started with Origa — Japanese Learning App"
 meta_description: "Install Origa, sign in, choose your pace and level, import vocabulary, and complete your first lesson. Works offline after first setup."
 target_keywords: ["japanese learning app getting started", "how to use origa", "japanese learning app setup", "origa first lesson", "japanese app onboarding"]
-lastmod: 2026-07-23
+lastmod: 2026-08-30
 status: ready
 ---
 
@@ -50,9 +50,11 @@ At the end of the setup, Origa loads the dictionaries, kanji, grammar, and phras
 
 When setup is done, the home screen shows your current JLPT progress and what is due today. Start a lesson from there.
 
-A lesson is a sequence of cards. You see a question, reveal the answer, and rate whether you knew it. Origa uses a two-button rating — "Don't know" or "Know". Based on your answer, the spaced-repetition scheduler decides when to show the card again.
+A lesson is a sequence of cards. You see a question, reveal the answer, and rate whether you knew it. Based on your answer, the spaced-repetition scheduler decides when to show the card again.
 
-Cards come in several shapes: recognition (Japanese to your language), recall (your language to Japanese), listening, writing, kanji reading, and grammar. Origa picks the mix based on what you have learned and what is due for review.
+If there are new cards for today, the lesson starts with the acquaintance stage: you browse the new group (a word with furigana and translation, kanji, grammar) and then run a short training round on it. The stage ends with a "To reviews" screen, after which the regular part of the lesson begins. Details are in [how lessons work](/docs/lesson).
+
+The regular part uses a two-button rating — "Don't know" or "Know" (in acquaintance training it is "Remember" / "Don't remember"). Cards come in several shapes: recognition (Japanese to your language), recall (your language to Japanese), listening, writing, kanji reading, and grammar. Origa picks the mix based on what you have learned and what is due for review.
 
 When the lesson ends, your progress syncs to the server. From here you can start another lesson or return to the dashboard.
 

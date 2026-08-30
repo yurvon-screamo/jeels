@@ -1,10 +1,16 @@
+mod acquaintance_keyboard;
+mod acquaintance_slides;
+mod acquaintance_state;
+mod acquaintance_view;
 mod answer_display;
 pub mod card_type;
 pub(crate) mod complete_screen;
 mod content;
 mod empty_state_view;
 mod grammar_details_expand;
+mod grammar_example;
 mod grammar_info_badge;
+mod hand_progress_strip;
 mod header;
 mod kanji_card_details;
 mod keyboard_handler;
@@ -36,6 +42,7 @@ mod quiz_result;
 pub(crate) mod quiz_result_display;
 mod rating_buttons;
 mod rating_buttons_view;
+mod training_view;
 mod writing_card;
 mod yesno_card_view;
 

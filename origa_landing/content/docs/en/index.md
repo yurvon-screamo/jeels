@@ -5,7 +5,7 @@ locale: en
 meta_title: "Origa Documentation — How It Works and How to Use It"
 meta_description: "Guides on how Origa works: getting started, lessons, vocabulary, kanji, grammar, phrases, capture, and current limitations."
 target_keywords: ["origa documentation", "origa help", "origa guide", "how origa works", "japanese learning app docs"]
-lastmod: 2026-07-23
+lastmod: 2026-08-30
 status: ready
 ---
 
@@ -23,7 +23,7 @@ If you are new, start here. The guide covers install, sign-in, onboarding, your 
 
 ## By feature
 
-- **[Lessons](/docs/lesson)** — what is in a lesson, card types, the two-button rating, and how spaced repetition schedules your reviews.
+- **[Lessons](/docs/lesson)** — what is in a lesson, the acquaintance stage for new cards, card types, rating, and how spaced repetition schedules your reviews.
 - **[How Origa decides what to show you](/docs/fsrs)** — the forgetting curve, FSRS, paces and daily limits: why cards run out and why that is normal.
 - **[Vocabulary](/docs/vocabulary)** — built-in dictionaries, audio pronunciation, four ways to add cards, and pre-built word sets.
 - **[Kanji](/docs/kanji)** — automatic furigana that hides as you learn, writing practice with stroke order, and JLPT-mapped kanji.

@@ -1,3 +1,4 @@
+use super::acquaintance_state::{AcquaintanceContext, AcquaintanceStage};
 use super::lesson_progress::LessonProgress;
 use super::lesson_state::LessonContext;
 use crate::i18n::use_i18n;
@@ -13,6 +14,21 @@ pub fn LessonHeader() -> impl IntoView {
     let is_muted = lesson_ctx.is_muted;
     let lesson_state = lesson_ctx.lesson_state;
     let core_count = lesson_ctx.core_count;
+
+    // Во время руки знакомства полоса руки — единственный индикатор
+    // прогресса: счётчик ревью-карт стоит на нуле и только путает.
+    let hand_active = use_context::<AcquaintanceContext>().map(|acq| {
+        Signal::derive(move || {
+            acq.state
+                .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
+        })
+    });
+    let show_lesson_progress = move || {
+        hand_active
+            .as_ref()
+            .map(|signal| !signal.get())
+            .unwrap_or(true)
+    };
 
     let toggle_mute = move || {
         is_muted.update(|m| *m = !*m);
@@ -36,7 +52,20 @@ pub fn LessonHeader() -> impl IntoView {
             </button>
 
             <div class="flex-1 min-w-0">
-                <LessonProgress current=current total=total core_count=core_count_signal />
+                <Show
+                    when=show_lesson_progress
+                    fallback=move || {
+                        view! {
+                            <div
+                                class="h-6"
+                                data-testid="lesson-progress-placeholder"
+                                aria-hidden="true"
+                            ></div>
+                        }
+                    }
+                >
+                    <LessonProgress current=current total=total core_count=core_count_signal />
+                </Show>
             </div>
 
             <button

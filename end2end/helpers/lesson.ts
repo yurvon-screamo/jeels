@@ -12,6 +12,112 @@ export const MAX_LESSON_ITERATIONS = 50;
 // LessonPage re-exports this as CARD_ACTION_TIMEOUT for its methods.
 export const ACTION_TIMEOUT = 10_000;
 
+/// Ожидает появления руки (locator.isVisible не ждёт — только waitFor).
+async function awaitHandVisible(page: Page, timeout = 30_000): Promise<boolean> {
+	return page
+		.getByTestId("acquaintance-view")
+		.waitFor({ state: "visible", timeout })
+		.then(() => true)
+		.catch(() => false);
+}
+
+/// Рука знакомства: проходит показ кнопкой «Дальше» до тренировки.
+/// Каждый клик ограничен по времени: WASM ре-рендеры гоняются с кликом,
+/// и неограниченный click зависает на DETACHED-элементе (см. ACTION_TIMEOUT).
+export async function runAcquaintancePresentation(page: Page): Promise<void> {
+	await awaitHandVisible(page);
+	const nextBtn = page.getByTestId("acquaintance-next-btn");
+	for (let i = 0; i < 20; i++) {
+		await nextBtn.click({ timeout: 3_000 }).catch(() => null);
+		const trainingVisible = await page
+			.getByTestId("acquaintance-training")
+			.waitFor({ state: "visible", timeout: 1_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (trainingVisible) break;
+	}
+	// Показ пройден — тренировка обязана открыться (bounded-клик мог
+	// проиграть гонку ре-рендеру; здесь это видно сразу, а не в шаге ниже).
+	await expect(page.getByTestId("acquaintance-training")).toBeVisible({
+		timeout: 15_000,
+	});
+}
+
+/// Один ответ тренировки: жмёт «Показать» → кнопку рейтинга `button`,
+/// пока ответ не запишется. Признак записи — панель ответа скрылась
+/// (ре-рендер после do_rate смонтировал фронт следующей карты): если
+/// клик проиграл гонку WASM ре-рендеру, панель остаётся видимой и
+/// попытка повторяется.
+async function answerTrainingRating(page: Page, button: string): Promise<boolean> {
+	const answer = page.getByTestId("acquaintance-training-answer");
+	for (let attempt = 0; attempt < 8; attempt++) {
+		const answerVisible = await answer
+			.waitFor({ state: "visible", timeout: 700 })
+			.then(() => true)
+			.catch(() => false);
+		if (!answerVisible) {
+			await page
+				.getByTestId("acquaintance-reveal-btn")
+				.click({ timeout: 1500 })
+				.catch(() => null);
+			continue;
+		}
+		await page
+			.getByTestId(button)
+			.click({ timeout: 1500 })
+			.catch(() => null);
+		const hidden = await answer
+			.waitFor({ state: "hidden", timeout: 2500 })
+			.then(() => true)
+			.catch(() => false);
+		if (hidden) return true;
+	}
+	return false;
+}
+
+/// Один ответ тренировки «Помню» (см. `answerTrainingRating`).
+export async function answerTrainingRemember(page: Page): Promise<boolean> {
+	return answerTrainingRating(page, "acquaintance-rating-remember");
+}
+
+/// Один ответ тренировки «Не помню» (см. `answerTrainingRating`).
+export async function answerTrainingForgot(page: Page): Promise<boolean> {
+	return answerTrainingRating(page, "acquaintance-rating-dont-know");
+}
+
+/// Завершает руку знакомства, если она показана: на каждом слайде показа
+/// нажимает «Уже знаю» (спека: рука исчезает без тренировки и траты
+/// лимита). Быстрый путь для BDD-сценариев — полный тренировочный флоу
+/// покрывает acquaintance_flow.spec. Возвращает true, когда рука была.
+export async function completeAcquaintanceHandIfPresent(
+	page: Page,
+): Promise<boolean> {
+	const handSeen = await awaitHandVisible(page, 30_000);
+	if (!handSeen) return false;
+	const view = page.getByTestId("acquaintance-view");
+	for (let i = 0; i < 20; i++) {
+		const know = page.getByTestId("acquaintance-know-btn");
+		const knowVisible = await know
+			.waitFor({ state: "visible", timeout: 1_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (!knowVisible) break;
+		await know.click({ timeout: 3_000 }).catch(() => null);
+		await page
+			.getByTestId("acquaintance-know-confirm-confirm")
+			.click({ timeout: 3_000 })
+			.catch(() => null);
+		// Модалка закрывается с анимацией; после неё — следующий слайд.
+		await page.waitForTimeout(350);
+	}
+	// Хелпер завершает ПОКАЗОМ переходного экрана «теперь к повторению» —
+	// дальше сценарии сами ассертят его и жмут кнопку (или возвращаются).
+	await expect(page.getByTestId("acquaintance-completed")).toBeVisible({
+		timeout: 15_000,
+	});
+	return true;
+}
+
 export async function setupLessonWithCards(page: Page): Promise<LessonPage> {
     await skipOnboarding(page);
 

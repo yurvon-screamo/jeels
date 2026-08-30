@@ -61,6 +61,20 @@ impl StatsTracker {
         );
     }
 
+    /// Закрытие руки знакомства: списывает дневной лимит за `count` карт
+    /// одной операцией, без рейтингового пути.
+    pub fn register_acquaintance_completions(
+        &mut self,
+        study_cards: &HashMap<Ulid, StudyCard>,
+        count: usize,
+    ) {
+        super::stats_updater::register_new_cards_without_rating(
+            study_cards,
+            &mut self.lesson_history,
+            count,
+        );
+    }
+
     pub fn recalculate(&mut self, study_cards: &HashMap<Ulid, StudyCard>) {
         super::stats_updater::recalculate_daily_stats(study_cards, &mut self.lesson_history);
     }

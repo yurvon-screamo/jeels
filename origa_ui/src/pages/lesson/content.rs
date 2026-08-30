@@ -1,3 +1,8 @@
+use super::acquaintance_slides::build_acquaintance_slides;
+use super::acquaintance_state::{
+    AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
+};
+use super::acquaintance_view::AcquaintanceView;
 use super::complete_screen::LessonCompleteScreen;
 use super::empty_state_view::LessonEmptyState;
 use super::header::LessonHeader;
@@ -12,6 +17,7 @@ use leptos::prelude::*;
 use leptos::task::spawn_local;
 use origa::domain::{Card, LessonEmptyDiagnosis, diagnose_empty_lesson};
 use origa::traits::UserRepository;
+use origa::use_cases::SelectAcquaintanceHandUseCase;
 use origa::use_cases::SelectCardsToLessonUseCase;
 use origa::use_cases::{classify_orphaned_phrases, delete_phrase_cards_by_phrase_ids};
 use std::collections::HashSet;
@@ -65,11 +71,19 @@ pub fn LessonContent() -> impl IntoView {
     let is_completed = RwSignal::new(false);
     let error_message = RwSignal::new(None::<String>);
     let empty_diagnosis = RwSignal::new(None::<LessonEmptyDiagnosis>);
+    // Диагноз пустого ревью при активной руке: показывается, когда рука
+    // закроется и обычный урок остаётся пустым.
+    let pending_empty_diagnosis = RwSignal::new(None::<LessonEmptyDiagnosis>);
     let reload_trigger = RwSignal::new(0u32);
     let is_muted = RwSignal::new(false);
     let is_syncing_cards = RwSignal::new(false);
     let known_kanji = RwSignal::new(HashSet::<char>::new());
-    let native_language = RwSignal::new(crate::i18n::locale_to_native_language(&i18n.get_locale()));
+    // get_locale_untracked: инициализация один раз при монтировании,
+    // подписка не нужна (локаль меняется перезагрузкой) — иначе
+    // console-warning о доступе вне реактивного контекста.
+    let native_language = RwSignal::new(crate::i18n::locale_to_native_language(
+        &i18n.get_locale_untracked(),
+    ));
     let core_count_signal = RwSignal::new(0usize);
 
     let is_disposed = StoredValue::new(());
@@ -90,6 +104,42 @@ pub fn LessonContent() -> impl IntoView {
         core_count: core_count_signal,
     };
     provide_context(lesson_ctx);
+
+    {
+        let acquaintance_state = RwSignal::new(AcquaintanceState::default());
+        let acquaintance_slides = RwSignal::new(Vec::<AcquaintanceSlideData>::new());
+        provide_context(AcquaintanceContext {
+            repository: repository.clone(),
+            state: acquaintance_state,
+            slides: acquaintance_slides,
+            known_kanji,
+            native_language,
+            current_card: RwSignal::new(None),
+            showing_answer: RwSignal::new(false),
+        });
+    }
+
+    // Активна ли сейчас префаза руки — производное от стадии в домене.
+    let acq_ctx = use_context::<AcquaintanceContext>().expect("acquaintance context not provided");
+    let acq_state_signal = acq_ctx.state;
+    let acq_slides_signal = acq_ctx.slides;
+    let acq_hand_active = move || {
+        acq_state_signal
+            .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
+    };
+
+    // Закрытие руки открывает обычный урок; если он пуст — отложенный
+    // диагноз пустого ревью показывается штатным empty-state'ом урока.
+    {
+        let pending = pending_empty_diagnosis;
+        let diagnosis = empty_diagnosis;
+        Effect::new(move |_| {
+            if !acq_hand_active() && pending.get_untracked().is_some() {
+                diagnosis.set(pending.get_untracked());
+                pending.set(None);
+            }
+        });
+    }
 
     let repo_for_user_data = repository.clone();
     Effect::new(move |_| {
@@ -127,10 +177,83 @@ pub fn LessonContent() -> impl IntoView {
             is_loading.set(true);
             error_message.set(None);
             empty_diagnosis.set(None);
+            pending_empty_diagnosis.set(None);
+            acq_state_signal.update(|state| *state = Default::default());
+
+            let jlpt_content = crate::loaders::get_jlpt_content();
+
+            // Рука знакомства — только нормальный урок: спец-режим практики
+            // грамматики строится по конкретному правилу и новые карты
+            // не вводит.
+            #[cfg(feature = "grammar_practice_lesson_mode")]
+            let is_gated_practice_mode = matches!(
+                resolved_mode.get_value(),
+                LessonMode::GrammarPractice { .. }
+            );
+            #[cfg(not(feature = "grammar_practice_lesson_mode"))]
+            let is_gated_practice_mode = false;
+
+            let (hand_order, hand_user_snapshot) = if is_gated_practice_mode {
+                (Vec::new(), None)
+            } else {
+                let select_hand = SelectAcquaintanceHandUseCase::new(&repo);
+                match select_hand.execute(jlpt_content).await {
+                    Ok(Some(ids)) if !ids.is_empty() => match repo.get_current_user().await {
+                        Ok(Some(user)) => (ids, Some(user)),
+                        other => {
+                            tracing::error!(
+                                "Acquaintance hand skipped: user unavailable ({other:?})"
+                            );
+                            (Vec::new(), None)
+                        },
+                    },
+                    // Легитимная пустота: пул исчерпан или лимит дня.
+                    Ok(_) => {
+                        tracing::debug!("Acquaintance hand: pool empty or limit exhausted");
+                        (Vec::new(), None)
+                    },
+                    Err(e) => {
+                        tracing::error!("Acquaintance hand selection failed: {e}");
+                        (Vec::new(), None)
+                    },
+                }
+            };
+
+            if !hand_order.is_empty() {
+                if let Some(user) = &hand_user_snapshot {
+                    let pairs: Vec<(Ulid, origa::domain::CardType)> = hand_order
+                        .iter()
+                        .filter_map(|card_id| {
+                            user.knowledge_set().get_card(*card_id).map(|study_card| {
+                                (*card_id, origa::domain::CardType::from(study_card.card()))
+                            })
+                        })
+                        .collect();
+                    let built_hand = origa::domain::AcquaintanceHand::new(pairs);
+                    if let Err(e) = &built_hand {
+                        tracing::error!("Acquaintance hand build failed: {e}");
+                    }
+                    if let Ok(hand) = built_hand {
+                        let slides = build_acquaintance_slides(
+                            user,
+                            &hand.presentation_order(),
+                            native_language.get_untracked(),
+                            &i18n,
+                        );
+                        acq_state_signal.update(|state| {
+                            state.stage = AcquaintanceStage::Presentation;
+                            state.hand = Some(hand);
+                            state.slide_index = 0;
+                            state.skipped_ids.clear();
+                        });
+                        acq_slides_signal.set(slides);
+                    }
+                }
+            }
 
             let use_case = SelectCardsToLessonUseCase::new(&repo);
-            let jlpt_content = crate::loaders::get_jlpt_content();
-            let cards_result = use_case.execute(jlpt_content).await;
+            let new_card_policy = origa::domain::NewCardPolicy::Exclude;
+            let cards_result = use_case.execute(new_card_policy, jlpt_content).await;
 
             if is_disposed.is_disposed() {
                 return;
@@ -253,7 +376,13 @@ pub fn LessonContent() -> impl IntoView {
                             if is_disposed.is_disposed() {
                                 return;
                             }
-                            empty_diagnosis.set(diagnosis);
+                            if acq_hand_active() {
+                                // Рука активна: пустое ревью не прячут её —
+                                // диагноз откладывается до закрытия руки.
+                                pending_empty_diagnosis.set(diagnosis);
+                            } else {
+                                empty_diagnosis.set(diagnosis);
+                            }
                         }
                     } else {
                         lesson_state.set(LessonState {
@@ -291,6 +420,26 @@ pub fn LessonContent() -> impl IntoView {
         });
     });
 
+    // Мемоизированный гейт: Memo<bool> не уведомляет подписчиков при
+    // true→true, поэтому Show не пересоздаёт AcquaintanceView на каждом
+    // ответе тренировки (record_answer обновляет state, а с ним и условия).
+    // Пересоздание сбрасывало локальные rotation_index/showing_answer
+    // тренировки — порядок «хаотился» и смена стороны была недостижима.
+    let show_acquaintance = Memo::new(move |_| {
+        acq_hand_active()
+            && !is_loading.get()
+            && !is_completed.get()
+            && error_message.get().is_none()
+    });
+
+    let show_lesson_content = move || {
+        !acq_hand_active()
+            && !is_loading.get()
+            && !is_completed.get()
+            && error_message.get().is_none()
+            && empty_diagnosis.get().is_none()
+    };
+
     view! {
         <LessonHeader />
 
@@ -320,10 +469,11 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        <Show when=move || !is_loading.get() && !is_completed.get() && error_message.get().is_none() && empty_diagnosis.get().is_none()>
-            // No nested scroll container here — the whole page scrolls.
-            // A separate scroll layer over the lesson zone used to fight the
-            // page scroll on mobile (jitter + snap-back) and was removed.
+        <Show when=move || show_acquaintance.get()>
+            <AcquaintanceView />
+        </Show>
+
+        <Show when=show_lesson_content>
             <div data-testid="lesson-content" class="relative px-0.5 sm:px-1 py-1 sm:py-2">
                 <Show when=move || is_syncing_cards.get()>
                     <div data-testid="lesson-sync-indicator" class="absolute top-0 right-0 flex items-center gap-1 text-sm text-muted-foreground p-2">
@@ -335,41 +485,5 @@ pub fn LessonContent() -> impl IntoView {
                 <LessonCardContainer />
             </div>
         </Show>
-    }
-}
-
-#[cfg(all(test, feature = "grammar_practice_lesson_mode"))]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse_query_returns_grammar_practice_for_valid_input() {
-        let id = Ulid::new();
-        let query = format!("mode=grammar_practice&grammar_id={id}");
-        let parsed = parse_grammar_practice_query(&query);
-        match parsed {
-            Some(LessonMode::GrammarPractice { grammar_rule_id }) => {
-                assert_eq!(grammar_rule_id, id);
-            },
-            other => panic!("expected GrammarPractice, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn parse_query_returns_none_for_normal_mode() {
-        assert!(parse_grammar_practice_query("mode=normal").is_none());
-        assert!(parse_grammar_practice_query("").is_none());
-    }
-
-    #[test]
-    fn parse_query_returns_none_for_invalid_ulid() {
-        assert!(
-            parse_grammar_practice_query("mode=grammar_practice&grammar_id=not-a-ulid").is_none()
-        );
-    }
-
-    #[test]
-    fn parse_query_returns_none_when_grammar_id_missing() {
-        assert!(parse_grammar_practice_query("mode=grammar_practice").is_none());
     }
 }

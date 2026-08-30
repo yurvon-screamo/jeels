@@ -220,6 +220,23 @@
       "set_plural": "{count} sets"
     }
   },
+  "acquaintance": {
+    "phase_presentation": "ACQUAINTANCE · PRESENTATION",
+    "phase_training": "ACQUAINTANCE · TRAINING",
+    "already_know": "Already know",
+    "confirm_known": "Mark as known?",
+    "confirm_known_message": "The card goes straight to review, without training",
+    "yes_i_know": "Yes, I know",
+    "dont_remember": "Don't remember",
+    "remember": "Remember",
+    "dir_forward": "JP → RU",
+    "dir_reverse": "RU → JP",
+    "strip_presentation": "Slide",
+    "strip_training": "Cards closed",
+    "completed_title": "Acquaintance complete",
+    "completed_subtitle": "The new cards meet their first review — back to the lesson",
+    "to_reviews": "To reviews"
+  },
   "lesson": {
     "loading": "Preparing cards for the lesson...",
     "syncing": "Syncing...",

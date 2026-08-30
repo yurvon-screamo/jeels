@@ -317,6 +317,18 @@ impl User {
         self.knowledge_set.mark_card_as_known(card_id)
     }
 
+    /// Закрытие руки знакомства: сидирование первого ревью назавтра всем
+    /// ещё новым картам руки + списание дневного лимита одной операцией
+    /// (docs/acquaintance-mode.md §9.2).
+    pub fn complete_acquaintance_hand(
+        &mut self,
+        card_ids: &[Ulid],
+        first_due: DateTime<Utc>,
+    ) -> Result<(), OrigaError> {
+        self.knowledge_set
+            .complete_acquaintance_hand(card_ids, first_due)
+    }
+
     pub fn delete_card(&mut self, card_id: Ulid) -> Result<(), OrigaError> {
         self.knowledge_set.delete_card(card_id)
     }

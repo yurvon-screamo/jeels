@@ -74,6 +74,12 @@ impl StudyCard {
         self.memory_history.apply_review(memory_state, rating);
     }
 
+    /// Создаёт начальное состояние памяти без семантики ревью
+    /// (режим знакомства, docs/acquaintance-mode.md §3).
+    pub(crate) fn seed_first_review(&mut self, memory_state: MemoryState) {
+        self.memory_history.seed(memory_state);
+    }
+
     pub fn toggle_favorite(&mut self) {
         self.is_favorite = !self.is_favorite;
         self.favorite_changed_at = Some(Utc::now());

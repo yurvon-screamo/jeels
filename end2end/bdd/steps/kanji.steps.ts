@@ -107,6 +107,9 @@ Then('чтения кандзи отображаются отдельными т
     // of the CSS class — class selectors are brittle in CI minified builds.
     const onTags = onGroup.locator("[data-rare]");
     const kunTags = kunGroup.locator("[data-rare]");
+    // Tags mount after the kanji dictionary loads — wait web-first instead
+    // of an instant count() that races the dictionary load.
+    await expect(onTags.or(kunTags).first()).toBeVisible({ timeout: 15_000 });
     const onCount = await onTags.count();
     const kunCount = await kunTags.count();
     expect(onCount + kunCount).toBeGreaterThan(0);
@@ -143,15 +146,22 @@ Then('редкие чтения кандзи отображаются пригл
     // for tachys determinism). Scoped to the kanji-detail hero to avoid
     // matching lesson cards.
     //
+    // Reading tags mount only after the kanji dictionary loads, so the
+    // step first waits for ANY tag (web-first): an instant count() raced
+    // the dictionary load and misreported "ReadingGroup is broken" on
+    // slow cold loads.
+    //
     // Back-compat: when kanji.json lacks reading_frequencies (pre-deploy),
     // NO reading is rare → data-rare="true" never appears → this step
     // would fail. Detect that case and skip with an informative message
     // rather than blocking the PR on data-not-yet-deployed.
     const detail = page.getByTestId("kanji-detail");
     const rareTags = detail.locator('[data-rare="true"]');
+    const normalTags = detail.locator('[data-rare="false"]');
+    await expect(rareTags.or(normalTags).first()).toBeVisible({ timeout: 15_000 });
     const rareCount = await rareTags.count();
     if (rareCount === 0) {
-        const total = await detail.locator('[data-rare="false"]').count();
+        const total = await normalTags.count();
         if (total === 0) {
             throw new Error(
                 "No reading tags rendered at all — ReadingGroup is broken",

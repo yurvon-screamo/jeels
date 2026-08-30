@@ -164,6 +164,30 @@ Total: **7 secrets** for full Apple pipeline:
   `APPLE_MAC_INSTALLER_CERT_P12` (base64 of "Mac Installer
   Distribution" `.p12`), `APPLE_MAC_CERT_PASSWORD` — macOS signing
 
+#### Sign in with Apple (web-flow) secrets
+
+Two additional secrets hold the SIWA key used to generate the OAuth
+client_secret JWT for the TrailBase `apple` provider. They are NOT the
+App Store Connect API key (`APPLE_API_KEY_CONTENT`) — that one is for
+build uploads; this one signs Apple auth requests.
+
+- `ORIGA_APPLE_WEB_SIGN_IN` — raw `.p8` content of the
+  **Sign in with Apple** key (Apple Developer Portal → Keys,
+  Key ID `UPC3J3Z666`). Downloaded once; keep a copy in a password
+  manager, never commit.
+- `ORIGA_APPLE_WEB_SIGN_IN_KEY_ID` — the same key's 10-char Key ID.
+
+Related identifiers (not secrets, live in the Apple portal):
+
+- Services ID / OAuth Client Id: `net.uwuwu.origa.web`
+- Return URL: `https://app.origa.uwuwu.net/api/auth/v1/oauth/apple/callback`
+- Web domain: `app.origa.uwuwu.net`
+
+The client_secret itself is an ES256-signed JWT (header `kid` = Key
+ID, payload `iss` = Team ID, `sub` = Services ID,
+`aud` = appleid.apple.com), max validity 180 days. Regenerate with
+`gen_apple_secret.py` and update the TrailBase config every ~6 months.
+
 ### 7. No `--requirements` codesign workaround
 
 Earlier iterations of this ADR documented a manual `codesign --force

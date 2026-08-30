@@ -14,6 +14,52 @@ pub(crate) const MAX_LESSON_SIZE: usize = 22;
 /// Приоритет карточек без определённого JLPT уровня — ниже всех известных уровней (N1=1)
 const UNKNOWN_JLPT_PRIORITY: u8 = 0;
 
+/// Политика включения незнакомых карт в урок (docs/acquaintance-mode.md §9.3,
+/// срез S3): режим знакомства требует, чтобы незнакомые карты не попадали в
+/// ревью ни через один путь — впрыск, избранное, padding или companions.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NewCardPolicy {
+    /// Историческое поведение: новые карты впрыскиваются в урок.
+    Inject,
+    /// Режим знакомства: незнакомые карты исключены из урока полностью.
+    Exclude,
+}
+
+/// Должна ли карта быть исключена из урока по политике. Фразы освобождены:
+/// они живут по собственным пайплайнам anchored/tail.
+pub(crate) fn excluded_by_new_card_policy(
+    card_type: CardType,
+    is_new: bool,
+    policy: NewCardPolicy,
+) -> bool {
+    policy == NewCardPolicy::Exclude && is_new && card_type != CardType::Phrase
+}
+
+#[cfg(test)]
+mod policy_predicate_tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case(CardType::Vocabulary, true, NewCardPolicy::Exclude, true)]
+    #[case(CardType::Kanji, true, NewCardPolicy::Exclude, true)]
+    #[case(CardType::Grammar, true, NewCardPolicy::Exclude, true)]
+    #[case(CardType::Phrase, true, NewCardPolicy::Exclude, false)]
+    #[case(CardType::Vocabulary, true, NewCardPolicy::Inject, false)]
+    #[case(CardType::Vocabulary, false, NewCardPolicy::Exclude, false)]
+    fn exclusion_follows_policy_type_and_novelty(
+        #[case] card_type: CardType,
+        #[case] is_new: bool,
+        #[case] policy: NewCardPolicy,
+        #[case] expected: bool,
+    ) {
+        assert_eq!(
+            excluded_by_new_card_policy(card_type, is_new, policy),
+            expected
+        );
+    }
+}
+
 /// Per-lesson cap on no-anchor (formerly "tail") phrases — phrases whose
 /// tokens are all known but none of which anchor to a lesson vocab word. They
 /// are MIXED INTO the lesson (no dedicated end zone, see PR #203). This slot
@@ -61,13 +107,17 @@ pub(crate) fn build_lesson_core(
     daily_new_limit: usize,
     jlpt_content: &JlptContent,
     native_language: NativeLanguage,
+    policy: NewCardPolicy,
 ) -> (LessonData, HashSet<Ulid>) {
     let mut all_cards = knowledge_set.study_cards().iter().collect::<Vec<_>>();
     all_cards.sort_by_key(|(_, card)| card.memory().next_review_date());
 
     let favorite_cards: Vec<_> = all_cards
         .iter()
-        .filter(|(_, card)| card.is_favorite())
+        .filter(|(_, card)| {
+            card.is_favorite()
+                && !excluded_by_new_card_policy(card.card().into(), card.memory().is_new(), policy)
+        })
         .copied()
         .collect();
 
@@ -75,15 +125,17 @@ pub(crate) fn build_lesson_core(
 
     let mut selected_cards = collect_core_high_difficulty(&all_cards, &favorite_ids);
     let mut rng = rand::rng();
-    collect_core_new_cards(
-        &all_cards,
-        &mut selected_cards,
-        &favorite_ids,
-        knowledge_set.new_cards_studied_today(),
-        daily_new_limit,
-        jlpt_content,
-        &mut rng,
-    );
+    if policy == NewCardPolicy::Inject {
+        collect_core_new_cards(
+            &all_cards,
+            &mut selected_cards,
+            &favorite_ids,
+            knowledge_set.new_cards_studied_today(),
+            daily_new_limit,
+            jlpt_content,
+            &mut rng,
+        );
+    }
     fill_core_due_known(&all_cards, &mut selected_cards, &favorite_ids);
 
     let all_selected_ids = build_selected_ids(&selected_cards, &favorite_cards);
@@ -1129,6 +1181,15 @@ fn resolve_jlpt_level(card: &Card, jlpt_content: &JlptContent) -> Option<Japanes
     jlpt_content.find_level(&card.content_key(), CardType::from(card))
 }
 
+/// Единая политика сортировочного приоритета новых карт: номер JLPT-уровня
+/// (N5=5 .. N1=1); карты без известного уровня — в самом конце пула.
+/// Используется и билдером урока, и выбором руки знакомства (CN3).
+pub(crate) fn jlpt_sort_key(card: &Card, jlpt_content: &JlptContent) -> u8 {
+    resolve_jlpt_level(card, jlpt_content)
+        .map(|level| level.as_number())
+        .unwrap_or(UNKNOWN_JLPT_PRIORITY)
+}
+
 /// Distributes `allowed` slots across card types proportionally to
 /// `CARD_TYPE_WEIGHTS`, treating the weights as **percentages** (not as a
 /// round-robin pattern). Uses the largest-remainder method with a
@@ -1273,7 +1334,7 @@ type GroupedNewCards<'a> =
 /// via `compute_type_slots`. Output order: Vocabulary as spine, then Kanji,
 /// then Grammar (matches the historical lesson layout — `interleave_core_by_type`
 /// reshuffles it later anyway).
-fn distribute_new_cards<'a, R: rand::Rng>(
+pub(crate) fn distribute_new_cards<'a, R: rand::Rng>(
     new_cards: Vec<(&'a Ulid, &'a StudyCard)>,
     jlpt_content: &JlptContent,
     allowed: usize,
@@ -1293,9 +1354,7 @@ fn distribute_new_cards<'a, R: rand::Rng>(
     // Reverse: N5(5) → highest priority → first key in BTreeMap.
     let mut groups: GroupedNewCards = BTreeMap::new();
     for card in new_cards {
-        let priority = resolve_jlpt_level(card.1.card(), jlpt_content)
-            .map(|l| l.as_number())
-            .unwrap_or(UNKNOWN_JLPT_PRIORITY);
+        let priority = jlpt_sort_key(card.1.card(), jlpt_content);
         groups
             .entry(Reverse(priority))
             .or_default()
@@ -3971,5 +4030,42 @@ mod tests {
             "Medium=9 must include exactly 1 distinct grammar card, got {}",
             grammar_card_ids.len()
         );
+    }
+}
+
+/// Удаляет из собранного урока незнакомые карты (Exclude): companions могут
+/// притаскивать новые слова; фразы освобождены. core_count ужимается по
+/// числу выброшенных карт в core-регионе.
+pub(crate) fn drop_new_cards(
+    data: LessonData,
+    knowledge_set: &KnowledgeSet,
+    policy: NewCardPolicy,
+) -> LessonData {
+    let core_count = data.core_count;
+    let mut cards = Vec::with_capacity(data.cards.len());
+    let mut dropped_in_core = 0usize;
+    for (index, (id, lesson_card)) in data.cards.into_iter().enumerate() {
+        // Единый источник фактов о карте — StudyCard из knowledge_set.
+        let excluded = knowledge_set
+            .get_card(id)
+            .map(|study_card| {
+                excluded_by_new_card_policy(
+                    CardType::from(study_card.card()),
+                    study_card.memory().is_new(),
+                    policy,
+                )
+            })
+            .unwrap_or(false);
+        if excluded {
+            if index < core_count {
+                dropped_in_core += 1;
+            }
+            continue;
+        }
+        cards.push((id, lesson_card));
+    }
+    LessonData {
+        cards,
+        core_count: core_count.saturating_sub(dropped_in_core),
     }
 }

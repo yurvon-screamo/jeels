@@ -1,7 +1,6 @@
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
-import { GrammarPage, HomePage, LessonPage, WordsPage } from "../../pages";
-import { rateCardUntilDone } from "../../helpers/lesson";
+import { GrammarPage, WordsPage } from "../../pages";
 
 Given('у пользователя есть добавленная грамматическая карточка', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
@@ -45,17 +44,17 @@ Given('у пользователя есть слово для практики �
     await expect(wordsPage.wordsGrid).toBeVisible({ timeout: 10_000 });
 
     // Practice session filters vocabulary by is_known_card || is_in_progress,
-    // which excludes fresh "new" cards. Rate the card via a one-shot lesson so
-    // it crosses into in_progress and shows up in quiz generation.
-    const homePage = new HomePage(page);
-    await homePage.goto();
-    await homePage.startLesson();
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.lessonPage).toBeVisible({ timeout: 15_000 });
-    await expect(lessonPage.lessonLoading).toBeHidden({ timeout: 30_000 });
-    await expect(lessonPage.lessonContent).toBeVisible({ timeout: 15_000 });
-    await rateCardUntilDone(lessonPage, "good");
-    await expect(lessonPage.completeScreen).toBeVisible({ timeout: 15_000 });
+    // which excludes fresh "new" cards. Since new cards now enter SRS only
+    // through the acquaintance hand (first review tomorrow), the fastest
+    // deterministic path is mark-as-known right on the words page — no
+    // lesson pass can promote a new card on the same day anymore.
+    const yomuCard = page
+        .getByTestId("words-card-item")
+        .filter({ hasText: "читать" })
+        .first();
+    await expect(yomuCard).toBeVisible({ timeout: 10_000 });
+    await yomuCard.getByTestId("words-card-item-mark-known-btn").click();
+    await page.waitForTimeout(300);
 });
 
 When('пользователь открывает страницу грамматики', async ({ page }) => {

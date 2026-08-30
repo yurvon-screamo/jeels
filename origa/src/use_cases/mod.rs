@@ -1,4 +1,5 @@
 mod analyze_text_for_cards;
+mod complete_acquaintance_hand;
 mod complete_onboarding_scoring;
 mod create_cards_from_analysis;
 mod create_grammar_card;
@@ -16,7 +17,9 @@ mod migrate_vocabulary_part_of_speech;
 mod rate_card;
 mod rate_card_with_side_effects;
 mod seed_ready_phrases;
+mod select_acquaintance_hand;
 mod select_cards_to_lesson;
+mod take_acquaintance_replacement;
 mod toggle_favorite;
 mod transcribe_audio;
 mod update_user_profile;
@@ -27,6 +30,7 @@ mod tests;
 pub use tests::fixtures::{init_phrase_index_from_cdn, init_real_dictionaries};
 
 pub use analyze_text_for_cards::{AnalyzeTextForCardsUseCase, AnalyzeTextResult, AnalyzedWord};
+pub use complete_acquaintance_hand::CompleteAcquaintanceHandUseCase;
 pub use complete_onboarding_scoring::CompleteOnboardingScoringUseCase;
 pub use create_cards_from_analysis::{
     CreateCardsFromAnalysisResult, CreateCardsFromAnalysisUseCase, WordToCreate,
@@ -53,7 +57,9 @@ pub use rate_card_with_side_effects::RateCardWithSideEffectsUseCase;
 pub use seed_ready_phrases::SeedReadyPhrasesUseCase;
 pub use seed_ready_phrases::collect_known_grammar_rules;
 pub use seed_ready_phrases::{classify_orphaned_phrases, delete_phrase_cards_by_phrase_ids};
+pub use select_acquaintance_hand::SelectAcquaintanceHandUseCase;
 pub use select_cards_to_lesson::SelectCardsToLessonUseCase;
+pub use take_acquaintance_replacement::TakeAcquaintanceReplacementUseCase;
 pub use toggle_favorite::ToggleFavoriteUseCase;
 pub use transcribe_audio::TranscribeAudioUseCase;
 pub use update_user_profile::UpdateUserProfileUseCase;

@@ -1,3 +1,4 @@
+mod acquaintance_hand;
 mod analyze_text;
 mod card_lifecycle;
 mod complete_onboarding_scoring;

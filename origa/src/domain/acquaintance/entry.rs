@@ -1,0 +1,89 @@
+//! Карта внутри руки и её прогресс.
+
+use crate::domain::CardType;
+use ulid::Ulid;
+
+use super::hand::CRITERION_SUCCESSSES;
+use super::phase::AcquaintanceSubphase;
+
+/// Карта внутри руки. Слова ведут два счётчика (по подфазам), несловесные
+/// карты — один (`forward_successes`), действующий во всех витках.
+#[derive(Debug, Clone)]
+pub struct AcquaintanceEntry {
+    pub(super) card_id: Ulid,
+    pub(super) card_type: CardType,
+    pub(super) forward_successes: u8,
+    pub(super) reverse_successes: u8,
+    /// Карта выведена из руки («Уже знаю» в показе): критерий считается
+    /// выполненным, ответы заморожены, подфазная логика её не ждёт.
+    pub(super) retired: bool,
+}
+
+impl AcquaintanceEntry {
+    pub fn card_id(&self) -> Ulid {
+        self.card_id
+    }
+
+    pub fn card_type(&self) -> CardType {
+        self.card_type
+    }
+
+    pub fn is_retired(&self) -> bool {
+        self.retired
+    }
+
+    pub(super) fn retire(&mut self) {
+        self.retired = true;
+    }
+
+    /// Видимый прогресс карты: счётчик текущей подфазы для слов, единый
+    /// счётчик для несловесных карт.
+    pub fn progress_in(&self, subphase: Option<AcquaintanceSubphase>) -> u8 {
+        match subphase {
+            Some(AcquaintanceSubphase::Reverse) if self.is_word() => self.reverse_successes,
+            _ => self.forward_successes,
+        }
+    }
+
+    /// Закрыла ли карта свой критерий полностью (для слов — в обеих подфазах).
+    /// Выведенные карты считаются закрытыми всегда.
+    pub fn criterion_met(&self, subphase: Option<AcquaintanceSubphase>) -> bool {
+        if self.retired {
+            return true;
+        }
+        self.progress_in(subphase) >= CRITERION_SUCCESSSES
+            && (!self.is_word() || self.reverse_successes >= CRITERION_SUCCESSSES)
+    }
+
+    pub(super) fn is_word(&self) -> bool {
+        self.card_type == CardType::Vocabulary
+    }
+
+    pub(super) fn record_success(&mut self, subphase: Option<AcquaintanceSubphase>) {
+        match subphase {
+            Some(AcquaintanceSubphase::Reverse) if self.is_word() => {
+                self.reverse_successes += 1;
+            },
+            _ => self.forward_successes += 1,
+        }
+    }
+
+    /// «Не помню»: набор критерия текущей подфазы начинается заново —
+    /// шкала карты в полосе честно уходит в ноль (I-итерация: баг был в
+    /// отображении бара, сброс прогресса — правильная логика тренировки).
+    pub(super) fn reset_progress(&mut self, subphase: Option<AcquaintanceSubphase>) {
+        match subphase {
+            Some(AcquaintanceSubphase::Reverse) if self.is_word() => {
+                self.reverse_successes = 0;
+            },
+            Some(AcquaintanceSubphase::Forward) if self.is_word() => {
+                self.forward_successes = 0;
+            },
+            // Несловесные карты (и руки без подфаз): общий критерий.
+            _ => {
+                self.forward_successes = 0;
+                self.reverse_successes = 0;
+            },
+        }
+    }
+}

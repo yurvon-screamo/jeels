@@ -22,7 +22,15 @@ import { setupTestUser, uiLogin, type TestUserContext } from "../helpers/auth";
  *
  * Step definitions import { Given, When, Then } from this file.
  */
-export const test = base.extend<{ testUser: TestUserContext }, object>({
+export const test = base.extend<
+    {
+        testUser: TestUserContext;
+        acqTrainingLog: string[];
+        acqKnownCard: { value: string | null };
+        acqTargetCard: { value: string | null };
+    },
+    object
+>({
     testUser: [
         // Empty destructuring `{}` = "this fixture depends on no other
         // fixtures". Playwright requires the (context, use) signature; an
@@ -47,6 +55,29 @@ export const test = base.extend<{ testUser: TestUserContext }, object>({
             }
         },
         { scope: "test", timeout: 180_000 },
+    ],
+    // Training rotation log: each answer appends the front's data-card-id so
+    // Then-steps can assert rotation invariants (per-round card sets,
+    // direction switch timing) across separate When-steps.
+    acqTrainingLog: [
+        async ({}, use) => {
+            await use([] as string[]);
+        },
+        { scope: "test" },
+    ],
+    // Card remembered before a mark-as-known action (replacement asserts).
+    acqKnownCard: [
+        async ({}, use) => {
+            await use({ value: null as string | null });
+        },
+        { scope: "test" },
+    ],
+    // Target card of a selective-answers training step (reopen asserts).
+    acqTargetCard: [
+        async ({}, use) => {
+            await use({ value: null as string | null });
+        },
+        { scope: "test" },
     ],
 });
 
