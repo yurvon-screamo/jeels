@@ -164,7 +164,11 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
             data-testid="acquaintance-training"
             data-card-id=move || {
                 let id = current_id.get();
-                (!id.is_nil()).then(|| id.to_string()).unwrap_or_default()
+                if id.is_nil() {
+                    String::new()
+                } else {
+                    id.to_string()
+                }
             }
         >
             <div class="flex-1 py-6">
