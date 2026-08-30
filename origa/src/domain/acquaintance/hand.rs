@@ -230,7 +230,7 @@ impl AcquaintanceHand {
             .entries
             .iter()
             .position(|entry| entry.card_id == retired_id)
-            .ok_or_else(|| OrigaError::CardNotFound {
+            .ok_or(OrigaError::CardNotFound {
                 card_id: retired_id,
             })?;
         self.entries[index] = AcquaintanceEntry {
