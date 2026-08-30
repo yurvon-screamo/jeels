@@ -156,3 +156,111 @@ fn unknown_card_id_returns_card_not_found() {
     // Assert
     assert!(matches!(result, Err(OrigaError::CardNotFound { .. })));
 }
+
+#[test]
+fn offer_replacement_puts_new_card_in_retired_slot() {
+    // Arrange: слово выведено, порядок [word(retired), kanji, grammar]
+    let [word, kanji, grammar] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![
+            (word, CardType::Vocabulary, 0, 0),
+            (kanji, CardType::Kanji, 1, 0),
+            (grammar, CardType::Grammar, 2, 0),
+        ],
+        Some(AcquaintanceSubphase::Forward),
+    );
+    assert!(hand.retire_card(word));
+    let new_word = Ulid::new();
+
+    // Act
+    assert!(
+        hand.offer_replacement(word, new_word, CardType::Vocabulary)
+            .is_ok()
+    );
+
+    // Assert: новая карта занимает слот выбывшей, размер руки сохраняется
+    let order = hand.presentation_order();
+    assert_eq!(order[0], new_word, "замена на месте выбывшей");
+    assert_eq!(order.len(), 3, "рука не уменьшается и не растёт");
+    assert_eq!(hand.len(), 3);
+    assert_eq!(
+        hand.entry(new_word).map(|e| e.card_type()),
+        Some(CardType::Vocabulary)
+    );
+}
+
+#[test]
+fn offer_replacement_new_card_trains_from_zero() {
+    // Arrange
+    let [word, new_word] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![(word, CardType::Vocabulary, 3, 2)],
+        Some(AcquaintanceSubphase::Forward),
+    );
+    assert!(hand.retire_card(word));
+
+    // Act
+    hand.offer_replacement(word, new_word, CardType::Vocabulary)
+        .unwrap();
+
+    // Assert: прогресс замены с нуля, ответы считаются
+    assert_eq!(
+        hand.record_answer(new_word, true).unwrap(),
+        AnswerOutcome::Counted { progress: 1 }
+    );
+    // Рука не завершена, пока замена не закрыла критерии
+    assert!(!hand.entry(new_word).unwrap().criterion_met(None));
+}
+
+#[test]
+fn offer_replacement_unknown_retired_or_duplicate_new_errors() {
+    // Arrange
+    let [word, other] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![(word, CardType::Vocabulary, 0, 0)],
+        Some(AcquaintanceSubphase::Forward),
+    );
+    assert!(hand.retire_card(word));
+
+    // Act / Assert: замена неизвестной карты
+    assert!(
+        hand.offer_replacement(Ulid::new(), other, CardType::Vocabulary)
+            .is_err()
+    );
+    // Дубликат новой карты (уже в руке)
+    assert!(
+        hand.offer_replacement(word, other, CardType::Vocabulary)
+            .is_ok()
+    );
+    assert!(
+        hand.offer_replacement(word, other, CardType::Vocabulary)
+            .is_err()
+    );
+    // Фразы в руке быть не может
+    let mut phrase_hand =
+        AcquaintanceHand::new_test(vec![(word, CardType::Vocabulary, 0, 0)], None);
+    assert!(phrase_hand.retire_card(word));
+    assert!(
+        phrase_hand
+            .offer_replacement(word, Ulid::new(), CardType::Phrase)
+            .is_err()
+    );
+}
+
+#[test]
+fn offer_replacement_active_retired_still_completes_via_criterion() {
+    // Замена не ломает завершение: рука закрывается, когда замена закрыла
+    // критерий (retired-записи больше нет — двойника в entries нет).
+    let [word, new_word] = ids();
+    let mut hand = AcquaintanceHand::new_test(vec![(word, CardType::Kanji, 3, 0)], None);
+    assert!(hand.retire_card(word));
+    hand.offer_replacement(word, new_word, CardType::Kanji)
+        .unwrap();
+    for _ in 0..2 {
+        hand.record_answer(new_word, true).unwrap();
+    }
+    assert!(matches!(
+        hand.record_answer(new_word, true).unwrap(),
+        AnswerOutcome::HandCompleted
+    ));
+}

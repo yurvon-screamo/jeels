@@ -259,3 +259,30 @@ Then('содержимое урока занимает полную высоту
     const height = await lessonPage.lessonContent.evaluate((el) => (el as HTMLElement).clientHeight);
     expect(height).toBeGreaterThan(700);
 });
+
+When('пользователь отмечает текущую карту руки известной', async ({ page, acqKnownCard }) => {
+    const slide = page.getByTestId("acquaintance-slide");
+    await slide.waitFor({ state: "visible", timeout: 15_000 });
+    acqKnownCard.value = (await slide.getAttribute("data-card-id")) ?? null;
+    await page.getByTestId("acquaintance-know-btn").click({ timeout: 5_000 });
+    await page
+        .getByTestId("acquaintance-know-confirm-confirm")
+        .click({ timeout: 5_000 });
+    await page
+        .getByTestId("acquaintance-know-confirm")
+        .waitFor({ state: "hidden", timeout: 15_000 })
+        .catch(() => null);
+});
+
+Then('рука не уменьшается и показывается новая карта', async ({ page, acqKnownCard }) => {
+    const slide = page.getByTestId("acquaintance-slide");
+    await slide.waitFor({ state: "visible", timeout: 15_000 });
+    const aria = await page
+        .getByTestId("acquaintance-strip")
+        .getAttribute("aria-label");
+    expect(aria, `рука не уменьшилась, aria: ${aria}`).toContain("1/");
+    expect(Number((aria ?? "0/0").split("/")[1]), "размер руки сохранён").toBeGreaterThanOrEqual(7);
+    const current = (await slide.getAttribute("data-card-id")) ?? "";
+    expect(current, "слот занимает новая карта").not.toBe(acqKnownCard.value);
+    expect(current, "новая карта реально показана").not.toBe("");
+});

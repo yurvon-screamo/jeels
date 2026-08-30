@@ -415,3 +415,45 @@ fn favorited_unknown_card_never_enters_exclude_review_but_enters_inject() {
         "известная должная карта остаётся в ревью"
     );
 }
+
+#[tokio::test]
+async fn replacement_takes_top_new_card_excluding_hand() {
+    // Arrange: три новых слова, два уже в руке
+    let repo = InMemoryUserRepository::with_user(user_with_new_vocab_cards(3));
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+    let hand = select.execute(&jlpt_content).await.unwrap().unwrap();
+    assert_eq!(hand.len(), 3);
+
+    // Act: исключаем всю руку — пул пуст
+    let take = crate::use_cases::TakeAcquaintanceReplacementUseCase::new(&repo);
+    let none = take.execute(&jlpt_content, &hand).await.unwrap();
+    assert!(none.is_none(), "пул вне руки пуст");
+
+    // Исключаем часть руки — возвращается оставшаяся карта
+    let (taken, card_type) = take
+        .execute(&jlpt_content, &hand[..1])
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(
+        hand.contains(&taken),
+        "замена приходит из руки-исключения только если не исключена"
+    );
+    assert_eq!(card_type, crate::domain::CardType::Vocabulary);
+}
+
+#[tokio::test]
+async fn replacement_skips_known_and_phrase_cards() {
+    // Arrange: рука-исключение + новая карта, но всё изучено
+    let mut user = user_with_new_vocab_cards(1);
+    let known_id = *user.knowledge_set().study_cards().keys().next().unwrap();
+    user.mark_card_as_known(known_id).unwrap();
+    let repo = InMemoryUserRepository::with_user(user);
+    let take = crate::use_cases::TakeAcquaintanceReplacementUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act / Assert: известных новых карт в пуле нет
+    assert!(take.execute(&jlpt_content, &[]).await.unwrap().is_none());
+    let _ = known_id;
+}

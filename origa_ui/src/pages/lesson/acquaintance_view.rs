@@ -1,4 +1,5 @@
 use super::acquaintance_keyboard::{AcquaintanceKeyAction, resolve_key_action};
+use super::acquaintance_slides::build_acquaintance_slides;
 use super::acquaintance_state::{
     AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, audio_button_visible,
     should_autoplay_word_audio,
@@ -18,7 +19,8 @@ use leptos::task::spawn_local;
 use leptos_icons::Icon;
 use leptos_use::use_event_listener;
 use origa::domain::{AcquaintanceSubphase, NativeLanguage};
-use origa::use_cases::MarkCardAsKnownUseCase;
+use origa::traits::UserRepository;
+use origa::use_cases::{MarkCardAsKnownUseCase, TakeAcquaintanceReplacementUseCase};
 use std::collections::HashSet;
 use ulid::Ulid;
 
@@ -368,7 +370,19 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
     };
 
     view! {
-        <div class="min-h-[60vh] flex flex-col" data-testid="acquaintance-slide">
+        <div
+            class="min-h-[60vh] flex flex-col"
+            data-testid="acquaintance-slide"
+            data-card-id=move || {
+                let ctx = ctx_stored.get_value();
+                let state = ctx.state.get();
+                ctx.slides
+                    .get()
+                    .get(state.slide_index)
+                    .map(|slide| slide.card_id().to_string())
+                    .unwrap_or_default()
+            }
+        >
             <div class="flex-1 py-6">{render_slide}</div>
             <ActionBar ctx=ctx_stored.get_value() />
         </div>
@@ -580,6 +594,8 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
     // Защита от двойного клика «Да, знаю» на время асинхронной записи.
     let known_in_flight = RwSignal::new(false);
     let on_yes_know = {
+        let ctx_for_replace = ctx.clone();
+        let i18n_for_replace = i18n;
         Callback::new(move |_: ()| {
             if known_in_flight.get_untracked() {
                 return;
@@ -601,7 +617,64 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                 if let Err(e) = MarkCardAsKnownUseCase::new(&repo).execute(card_id).await {
                     tracing::error!("Mark-as-known failed for {card_id}: {e}");
                 }
-                mark_known_and_advance.run(card_id);
+
+                // Замена: слот выбывшей карты занимает новая карта из пула —
+                // рука не уменьшается (docs/acquaintance-mode.md, «Уже знаю»).
+                let exclude: Vec<Ulid> = ctx_for_replace
+                    .state
+                    .get_untracked()
+                    .hand
+                    .as_ref()
+                    .map(|hand| hand.presentation_order())
+                    .unwrap_or_default();
+                let jlpt_content = crate::loaders::get_jlpt_content();
+                let replacement = TakeAcquaintanceReplacementUseCase::new(&repo)
+                    .execute(&jlpt_content, &exclude)
+                    .await
+                    .ok()
+                    .flatten();
+
+                let Some((new_id, new_type)) = replacement else {
+                    // Пул пуст: прежнее поведение — карта выбывает, рука
+                    // уменьшается.
+                    mark_known_and_advance.run(card_id);
+                    known_in_flight.set(false);
+                    return;
+                };
+
+                let replaced = ctx_for_replace
+                    .state
+                    .try_update(|state| {
+                        state
+                            .hand
+                            .as_mut()
+                            .map(|hand| hand.offer_replacement(card_id, new_id, new_type).is_ok())
+                            .unwrap_or(false)
+                    })
+                    .unwrap_or(false);
+                if !replaced {
+                    mark_known_and_advance.run(card_id);
+                    known_in_flight.set(false);
+                    return;
+                }
+
+                // Слайд новой карты — на месте выбывшей: юзер остаётся на
+                // позиции и знакомится с новой картой сразу.
+                if let Ok(Some(user)) = repo.get_current_user().await {
+                    let order = ctx_for_replace
+                        .state
+                        .get_untracked()
+                        .hand
+                        .map(|hand| hand.presentation_order())
+                        .unwrap_or_default();
+                    let slides = build_acquaintance_slides(
+                        &user,
+                        &order,
+                        ctx_for_replace.native_language.get_untracked(),
+                        &i18n_for_replace,
+                    );
+                    ctx_for_replace.slides.set(slides);
+                }
                 known_in_flight.set(false);
             });
             confirm_open.set(false);

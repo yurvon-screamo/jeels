@@ -204,4 +204,42 @@ impl AcquaintanceHand {
             None => false,
         }
     }
+
+    /// Замена выведенной карты новой из пула («Уже знаю» в показе):
+    /// retired-запись удаляется, новая встаёт на её индекс — размер руки
+    /// сохраняется (полоса не тает), порядок показа подменяется на месте,
+    /// а завершение руки честно ждёт критерия новой карты. Без замены
+    /// (пул пуст) вызывающий просто оставляет карту retired.
+    pub fn offer_replacement(
+        &mut self,
+        retired_id: Ulid,
+        new_id: Ulid,
+        card_type: CardType,
+    ) -> Result<(), OrigaError> {
+        if card_type == CardType::Phrase {
+            return Err(OrigaError::InvalidAcquaintanceHand {
+                reason: format!("phrase card {new_id} does not participate in acquaintance mode"),
+            });
+        }
+        if self.entries.iter().any(|entry| entry.card_id == new_id) {
+            return Err(OrigaError::InvalidAcquaintanceHand {
+                reason: format!("replacement card {new_id} is already in the hand"),
+            });
+        }
+        let index = self
+            .entries
+            .iter()
+            .position(|entry| entry.card_id == retired_id)
+            .ok_or_else(|| OrigaError::CardNotFound {
+                card_id: retired_id,
+            })?;
+        self.entries[index] = AcquaintanceEntry {
+            card_id: new_id,
+            card_type,
+            forward_successes: 0,
+            reverse_successes: 0,
+            retired: false,
+        };
+        Ok(())
+    }
 }

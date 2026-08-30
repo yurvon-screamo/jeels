@@ -1,4 +1,5 @@
 mod acquaintance_keyboard;
+mod acquaintance_slides;
 mod acquaintance_state;
 mod acquaintance_view;
 mod answer_display;

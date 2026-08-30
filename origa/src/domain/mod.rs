@@ -39,7 +39,6 @@ pub use jlpt_progress::{
     CategoryCounts, CategoryProgress, JlptProgress, LevelProgressDetail, ProgressUpdate,
 };
 pub use knowledge::NewCardPolicy;
-pub(crate) use knowledge::distribute_new_cards;
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,
     GrammarRuleCard, KanjiCard, KnowledgeSet, LessonCard, LessonCardView, LessonData,
@@ -47,6 +46,7 @@ pub use knowledge::{
     QuizOption, StudyCard, VocabularyCard, YesNoCard, diagnose_empty_lesson,
     estimate_completion_date,
 };
+pub(crate) use knowledge::{distribute_new_cards, jlpt_sort_key};
 
 /// Re-exported so the UI can stay layering-clean: presentation code reaches
 /// the rare-reading threshold through the domain, not by reaching into the

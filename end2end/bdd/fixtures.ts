@@ -23,7 +23,11 @@ import { setupTestUser, uiLogin, type TestUserContext } from "../helpers/auth";
  * Step definitions import { Given, When, Then } from this file.
  */
 export const test = base.extend<
-    { testUser: TestUserContext; acqTrainingLog: string[] },
+    {
+        testUser: TestUserContext;
+        acqTrainingLog: string[];
+        acqKnownCard: { value: string | null };
+    },
     object
 >({
     testUser: [
@@ -57,6 +61,13 @@ export const test = base.extend<
     acqTrainingLog: [
         async ({}, use) => {
             await use([] as string[]);
+        },
+        { scope: "test" },
+    ],
+    // Card remembered before a mark-as-known action (replacement asserts).
+    acqKnownCard: [
+        async ({}, use) => {
+            await use({ value: null as string | null });
         },
         { scope: "test" },
     ],
