@@ -13,7 +13,8 @@
         "test:ui": "playwright test --ui",
         "test:headed": "playwright test --headed",
         "test:debug": "playwright test --debug",
-        "report": "playwright show-report --host 0.0.0.0 --port 9323"
+        "report": "playwright show-report --host 0.0.0.0 --port 9323",
+        "guard:matrix": "node scripts/check-ci-matrix.mjs"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
