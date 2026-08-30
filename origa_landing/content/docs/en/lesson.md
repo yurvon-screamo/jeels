@@ -3,7 +3,7 @@ title: "How Lessons Work in Origa"
 slug: /docs/lesson
 locale: en
 meta_title: "How Lessons Work in Origa — Reviews, Cards, Scheduling"
-meta_description: "The structure of an Origa lesson: the acquaintance stage for new cards (presentation and training), card types, rating, and how spaced repetition schedules reviews."
+meta_description: "The structure of an Origa lesson: the acquaintance stage for new cards (presentation and training), card types, rating, and review scheduling."
 target_keywords: ["origa lesson", "how to learn new japanese words", "spaced repetition japanese", "fsrs japanese", "japanese review system", "japanese flashcards review"]
 lastmod: 2026-08-30
 status: ready
@@ -33,15 +33,15 @@ A new card does not appear in the lesson mixed in with reviews. It first goes th
 
 The day's new cards are gathered into a small group. You go through them one by one: a word with furigana, translation, and audio; a kanji with meanings and readings; grammar with examples. Nothing to recall yet. Hovering a kanji inside a word opens a brief description of the character.
 
-Each card has two actions: **Next** (space) and **Already know**. "Already know" marks the card as known — it goes straight into regular reviews, and its slot in the group is taken by the next card from the queue. The daily quota of new cards is not spent.
+Each card has two actions: **Next** (space) and **Already know**. "Already know" marks the card as known — it goes straight into regular reviews, and its slot in the group is taken by the next card from the queue; if the queue is empty, the group simply gets smaller. The daily quota of new cards is not spent.
 
 ### Training
 
-Once every card has been shown, the group moves to a short training round. Cards come up in circles: you see one side, reveal the answer, and rate — **Remember** or **Don't remember**.
+Once every card has been shown, the group moves to a short training round. The cards cycle through the group: you see one side, reveal the answer, and rate — **Remember** or **Don't remember**.
 
-Words are trained in both directions: first "Japanese → your language", and once the word answers confidently — "your language → Japanese". "Don't remember" resets that card's progress: the streak of correct answers starts over. Kanji and grammar train until recall is stable.
+Words are trained in both directions: first "Japanese → your language", and once you recall it confidently — "your language → Japanese". "Don't remember" resets that card's progress: the streak of correct answers starts over. Kanji and grammar train until recall is stable.
 
-The strip in the header shows how many cards of the group are closed. When all are closed, a "Acquaintance complete" screen appears — the "To reviews" button returns you to the regular part of the lesson.
+The strip in the header shows how many cards of the group are closed. When all are closed, the "Acquaintance complete" screen appears — the "To reviews" button returns you to the regular part of the lesson.
 
 Training writes nothing to the schedule: FSRS starts counting intervals when a card first arrives at a regular review.
 
