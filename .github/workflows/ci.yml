@@ -97,7 +97,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Cache APT packages
-              uses: awalsh128/cache-apt-pkgs-action@v1.6.1
+              uses: awalsh128/cache-apt-pkgs-action@v1.6.3
               with:
                   packages:
                       libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -177,7 +177,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Cache APT packages
-              uses: awalsh128/cache-apt-pkgs-action@v1.6.1
+              uses: awalsh128/cache-apt-pkgs-action@v1.6.3
               with:
                   packages:
                       libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -229,7 +229,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Cache APT packages
-              uses: awalsh128/cache-apt-pkgs-action@v1.6.1
+              uses: awalsh128/cache-apt-pkgs-action@v1.6.3
               with:
                   packages:
                       libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -276,7 +276,7 @@ jobs:
               uses: actions/checkout@v7
 
             - name: Cache APT packages
-              uses: awalsh128/cache-apt-pkgs-action@v1.6.1
+              uses: awalsh128/cache-apt-pkgs-action@v1.6.3
               with:
                   packages:
                       libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
