@@ -52,7 +52,9 @@ When('пользователь проходит показ руки знаком
 });
 
 When('нажимает кнопку показа ответа тренировки', async ({ page }) => {
-    await page.getByTestId("acquaintance-reveal-btn").click();
+    await page
+        .getByTestId("acquaintance-reveal-btn")
+        .click({ timeout: 5_000 });
 });
 
 Then('отображаются кнопки оценки тренировки', async ({ page }) => {
