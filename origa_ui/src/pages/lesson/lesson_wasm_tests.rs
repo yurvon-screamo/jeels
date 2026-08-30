@@ -1184,6 +1184,76 @@ mod acquaintance_training {
     }
 
     #[wasm_bindgen_test]
+    async fn training_answer_keeps_the_question_visible() {
+        // Arrange: тренировка одного слова
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![(
+                    card_id,
+                    origa::domain::CardType::Vocabulary,
+                )])
+                .unwrap(),
+            )
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "私".to_string(),
+            pos_label: None,
+            translations: vec!["я".to_string()],
+        }]);
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <TrainingBody ctx=c2.clone() /> }.into_any()
+        });
+        tick().await;
+
+        // До раскрытия: фронт есть, ответа нет.
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-front\"]")
+                .unwrap()
+                .is_some()
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-answer\"]")
+                .unwrap()
+                .is_none()
+        );
+
+        // Act: раскрыть ответ
+        wrapper
+            .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap()
+            .click();
+        tick().await;
+
+        // Assert: вопрос остаётся видимым сверху, ответ — под ним
+        // (паттерн обычного урока: вопрос уменьшенный, divider, ответ).
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-front\"]")
+                .unwrap()
+                .is_some(),
+            "фронт остаётся на стороне ответа"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-answer\"]")
+                .unwrap()
+                .is_some()
+        );
+    }
+
+    #[wasm_bindgen_test]
     async fn training_reveals_answer_and_rating_buttons_with_hints() {
         let ctx = acq_context(AcquaintanceStage::Training);
         let card_id = Ulid::new();
@@ -1631,6 +1701,44 @@ mod acquaintance_presentation {
         card_type: origa::domain::CardType,
     ) -> origa::domain::AcquaintanceHand {
         origa::domain::AcquaintanceHand::new(vec![(card_id, card_type)]).unwrap()
+    }
+
+    #[wasm_bindgen_test]
+    async fn word_slide_renders_kanji_tooltip() {
+        // Arrange: мини-кандзи-словарь (тултип берёт описания из него)
+        origa::dictionary::kanji::init_kanji(origa::dictionary::kanji::KanjiData {
+            kanji_json: r#"{"kanji":[{"kanji":"私","jlpt":"N5","used_in":100,"description_ru":["я, личное местоимение"],"description_en":[],"radicals":["禾"],"popular_words":[],"on_readings":["シ"],"kun_readings":["わた"]}]}"#.to_string(),
+        })
+        .expect("mini kanji dict");
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(hand_of(card_id, origa::domain::CardType::Vocabulary))
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "私".to_string(),
+            pos_label: None,
+            translations: vec!["я".to_string()],
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <AcquaintanceView /> }.into_any()
+        });
+        tick().await;
+
+        // Assert: кандзи в слове интерактивен — превью как в обычном уроке
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-word-slide\"] .kanji-char-hover")
+                .unwrap()
+                .is_some(),
+            "наведение/тап на кандзи открывает превью"
+        );
     }
 
     #[wasm_bindgen_test]

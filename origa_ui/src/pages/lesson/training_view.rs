@@ -13,7 +13,7 @@ use crate::ui_components::{
 };
 use leptos::prelude::*;
 use leptos_use::use_event_listener;
-use origa::domain::{AcquaintanceSubphase, AnswerOutcome};
+use origa::domain::{AcquaintanceSubphase, AnswerOutcome, NativeLanguage};
 use ulid::Ulid;
 
 /// Раскрытие ответа: и кнопка, и Space ведут себя одинаково.
@@ -172,11 +172,36 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                     let reverse = ctx_stored.get_value().state.with(|state| {
                         state.hand.as_ref().and_then(|h| h.subphase())
                     }) == Some(AcquaintanceSubphase::Reverse);
-                    if showing_answer.get() {
-                        view! { <TrainingAnswerSlide ctx=ctx_stored.get_value() card_id=card_id reverse /> }.into_any()
-                    } else {
-                        view! { <TrainingFrontSlide ctx=ctx_stored.get_value() card_id=card_id reverse /> }.into_any()
+                    // Вопрос остаётся на стороне ответа — уменьшенным и
+                    // приглушённым сверху, под ним divider и ответ
+                    // (паттерн обычного урока, lesson_card_answer).
+                    view! {
+                        <div
+                            class=move || if showing_answer.get() {
+                                "pt-1 pb-2 opacity-60 scale-90 origin-top"
+                            } else {
+                                ""
+                            }
+                        >
+                            <TrainingFrontSlide
+                                ctx=ctx_stored.get_value()
+                                card_id=card_id
+                                reverse=reverse
+                            />
+                        </div>
+                        <Show when=move || showing_answer.get() fallback=move || ()>
+                            <div
+                                class="border-t border-[var(--border-light)] my-2"
+                                data-testid="acquaintance-answer-divider"
+                            ></div>
+                            <TrainingAnswerSlide
+                                ctx=ctx_stored.get_value()
+                                card_id=card_id
+                                reverse=reverse
+                            />
+                        </Show>
                     }
+                    .into_any()
                 }}
             </div>
             <Show when=move || !showing_answer.get() fallback=move || ()>
@@ -347,6 +372,7 @@ fn WordTrainingFront(
     word: String,
     known_kanji: std::collections::HashSet<char>,
     is_muted: Option<RwSignal<bool>>,
+    native_language: NativeLanguage,
 ) -> impl IntoView {
     let word_stored = StoredValue::new(word.clone());
     Effect::new(move |_| {
@@ -360,7 +386,12 @@ fn WordTrainingFront(
     });
     view! {
         <p class="font-serif text-5xl text-[var(--fg-black)] break-words">
-            <FuriganaText text=word known_kanji />
+            <FuriganaText
+                text=word
+                known_kanji
+                native_language=native_language
+                with_kanji_tooltip=true
+            />
         </p>
     }
 }
@@ -401,6 +432,7 @@ fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) ->
                                     word=word
                                     known_kanji=known_kanji.get_untracked()
                                     is_muted=is_muted
+                                    native_language=ctx.native_language.get_untracked()
                                 />
                             }
                                 .into_any()
@@ -453,7 +485,12 @@ fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -
                         if reverse {
                             view! {
                                 <p class="font-serif text-5xl text-[var(--fg-black)] break-words">
-                                    <FuriganaText text=word known_kanji=known_kanji.get_untracked() />
+                                    <FuriganaText
+                                        text=word
+                                        known_kanji=known_kanji.get_untracked()
+                                        native_language=ctx.native_language.get_untracked()
+                                        with_kanji_tooltip=true
+                                    />
                                 </p>
                             }
                                 .into_any()

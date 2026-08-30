@@ -234,6 +234,7 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
                     pos_label=pos_label.clone()
                     translations=translations.clone()
                     known_kanji=ctx.known_kanji
+                    native_language=ctx.native_language.get_untracked()
                 />
             }
             .into_any(),
@@ -295,6 +296,7 @@ fn WordSlide(
     pos_label: Option<String>,
     translations: Vec<String>,
     known_kanji: RwSignal<HashSet<char>>,
+    native_language: NativeLanguage,
 ) -> impl IntoView {
     let word_stored = StoredValue::new(word.clone());
     let pos_stored = StoredValue::new(pos_label.clone());
@@ -317,7 +319,12 @@ fn WordSlide(
     view! {
         <div class="text-center space-y-4" data-testid="acquaintance-word-slide">
             <p class="font-serif text-5xl leading-tight text-[var(--fg-black)] break-words">
-                <FuriganaText text=word_stored.get_value() known_kanji=known_kanji.get_untracked() />
+                <FuriganaText
+                    text=word_stored.get_value()
+                    known_kanji=known_kanji.get_untracked()
+                    native_language=native_language
+                    with_kanji_tooltip=true
+                />
             </p>
             <AudioButtons
                 text=word_stored.get_value()
