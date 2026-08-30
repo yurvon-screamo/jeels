@@ -43,6 +43,37 @@ export async function runAcquaintancePresentation(page: Page): Promise<void> {
 	});
 }
 
+/// Один ответ тренировки «Помню»: жмёт «Показать» → «Помню», пока ответ
+/// не запишется. Признак записи — панель ответа скрылась (ре-рендер после
+/// do_rate смонтировал фронт следующей карты): если клик проиграл гонку
+/// WASM ре-рендеру, панель остаётся видимой и попытка повторяется.
+export async function answerTrainingRemember(page: Page): Promise<boolean> {
+	const answer = page.getByTestId("acquaintance-training-answer");
+	for (let attempt = 0; attempt < 8; attempt++) {
+		const answerVisible = await answer
+			.waitFor({ state: "visible", timeout: 700 })
+			.then(() => true)
+			.catch(() => false);
+		if (!answerVisible) {
+			await page
+				.getByTestId("acquaintance-reveal-btn")
+				.click({ timeout: 1500 })
+				.catch(() => null);
+			continue;
+		}
+		await page
+			.getByTestId("acquaintance-rating-remember")
+			.click({ timeout: 1500 })
+			.catch(() => null);
+		const hidden = await answer
+			.waitFor({ state: "hidden", timeout: 2500 })
+			.then(() => true)
+			.catch(() => false);
+		if (hidden) return true;
+	}
+	return false;
+}
+
 /// Завершает руку знакомства, если она показана: на каждом слайде показа
 /// нажимает «Уже знаю» (спека: рука исчезает без тренировки и траты
 /// лимита). Быстрый путь для BDD-сценариев — полный тренировочный флоу

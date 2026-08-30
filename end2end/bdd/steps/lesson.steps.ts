@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import { When, Then } from "../fixtures";
 import { HomePage, LessonPage, WordsPage } from "../../pages";
 import {
+	answerTrainingRemember,
 	completeAcquaintanceHandIfPresent,
 	completeLessonFlexible,
 	runAcquaintancePresentation,
@@ -23,6 +24,69 @@ When('пользователь начинает урок', async ({ page }) => {
     const homePage = new HomePage(page);
     await homePage.goto();
     await homePage.startLesson();
+});
+
+When('пользователь добавил все слова из текста {string}', async ({ page }, text: string) => {
+    const wordsPage = new WordsPage(page);
+    await wordsPage.goto();
+    await wordsPage.expectWordsVisible();
+    await wordsPage.openAddModal();
+    await wordsPage.enterText(text);
+    await wordsPage.analyzeText();
+    // analyze_text() pre-selects every token — add them all as-is.
+    await wordsPage.addSelectedWords();
+    await expect(wordsPage.wordsGrid).toBeVisible({ timeout: 10_000 });
+});
+
+When('пользователь отвечает в тренировке «Помню» {int} раз подряд', async ({ page, acqTrainingLog }, times: number) => {
+    const training = page.getByTestId("acquaintance-training");
+    await training.waitFor({ state: "visible", timeout: 10_000 });
+    for (let i = 0; i < times; i++) {
+        // Карта читается ДО ответа по свежему DOM (прошлый ответ подтверждён
+        // ростом data-rotation-index внутри хелпера).
+        acqTrainingLog.push((await training.getAttribute("data-card-id")) ?? "");
+        const recorded = await answerTrainingRemember(page);
+        expect(recorded, `ответ №${i + 1} не записался`).toBe(true);
+    }
+});
+
+Then('каждый круг тренировки показывает каждую карту ровно один раз', async ({ acqTrainingLog }) => {
+    const all = [...acqTrainingLog];
+    const cards = Array.from(new Set(all));
+    expect(cards.length, `в тренировке должно быть несколько карт, лог: ${all.join(",")}`).toBeGreaterThan(1);
+    const fullRounds = Math.floor(all.length / cards.length);
+    expect(fullRounds, `лог должен содержать хотя бы один полный круг, лог: ${all.join(",")}`).toBeGreaterThan(0);
+    // Полные окна: множество карт каждого круга == множество всех карт,
+    // без повторов внутри круга (независимо от перемешивания между кругами).
+    for (let round = 0; round < fullRounds; round++) {
+        const window = all.slice(round * cards.length, (round + 1) * cards.length);
+        expect(
+            new Set(window).size,
+            `круг ${round + 1} не должен повторять карты, лог: ${all.join(",")}`,
+        ).toBe(cards.length);
+        expect(
+            cards.every((c) => window.includes(c)),
+            `круг ${round + 1} должен показать каждую карту, лог: ${all.join(",")}`,
+        ).toBe(true);
+    }
+});
+
+Then('направление тренировки всё ещё яп→рус', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-phase-tag")).toContainText(/ЯП\s*→\s*РУС/);
+});
+
+Then('направление тренировки меняется на рус→яп', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-phase-tag")).toContainText(/РУС\s*→\s*ЯП/);
+});
+
+Then('фронт тренировки показывает перевод', async ({ page }) => {
+    const front = page.getByTestId("acquaintance-training-front");
+    await front.waitFor({ state: "visible", timeout: 10_000 });
+    const text = (await front.textContent()) ?? "";
+    expect(
+        text,
+        "фронт рус→яп показывает перевод — без японских символов",
+    ).not.toMatch(/[\u3040-\u30ff\u4e00-\u9faf]/);
 });
 
 Then('отображается страница урока с карточкой', async ({ page }) => {

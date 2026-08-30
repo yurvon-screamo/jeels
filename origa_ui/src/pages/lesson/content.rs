@@ -548,12 +548,17 @@ pub fn LessonContent() -> impl IntoView {
             .collect()
     }
 
-    let show_acquaintance = move || {
+    // Мемоизированный гейт: Memo<bool> не уведомляет подписчиков при
+    // true→true, поэтому Show не пересоздаёт AcquaintanceView на каждом
+    // ответе тренировки (record_answer обновляет state, а с ним и условия).
+    // Пересоздание сбрасывало локальные rotation_index/showing_answer
+    // тренировки — порядок «хаотился» и смена стороны была недостижима.
+    let show_acquaintance = Memo::new(move |_| {
         acq_hand_active()
             && !is_loading.get()
             && !is_completed.get()
             && error_message.get().is_none()
-    };
+    });
 
     let show_lesson_content = move || {
         !acq_hand_active()
@@ -561,13 +566,6 @@ pub fn LessonContent() -> impl IntoView {
             && !is_completed.get()
             && error_message.get().is_none()
             && empty_diagnosis.get().is_none()
-    };
-    let render_acquaintance_slot = move || {
-        if show_acquaintance() {
-            Some(view! { <AcquaintanceView /> }.into_any())
-        } else {
-            None
-        }
     };
 
     view! {
@@ -599,9 +597,9 @@ pub fn LessonContent() -> impl IntoView {
             />
         </Show>
 
-        {move || {
-            render_acquaintance_slot().unwrap_or_else(|| ().into_any())
-        }}
+        <Show when=move || show_acquaintance.get()>
+            <AcquaintanceView />
+        </Show>
 
         <Show when=show_lesson_content>
             <div data-testid="lesson-content" class="relative px-0.5 sm:px-1 py-1 sm:py-2">

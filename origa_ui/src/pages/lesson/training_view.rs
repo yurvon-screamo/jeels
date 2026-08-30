@@ -78,7 +78,9 @@ fn shuffled_order(mut cards: Vec<Ulid>) -> Vec<Ulid> {
 /// Витковый порядок тренировки: presentation_order минус выведенные карты,
 /// перемешанный на каждый виток и каждую смену подфазы.
 fn build_rotation_order(ctx: &AcquaintanceContext) -> Vec<Ulid> {
-    ctx.state.with(|state| {
+    // with_untracked: чтение при создании компонента вне реактивного
+    // контекста не должно подписываться (и не плодит console-warning).
+    ctx.state.with_untracked(|state| {
         let Some(hand) = state.hand.as_ref() else {
             return Vec::new();
         };
@@ -154,7 +156,14 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
     });
 
     view! {
-        <div class="min-h-[60vh] flex flex-col" data-testid="acquaintance-training">
+        <div
+            class="min-h-[60vh] flex flex-col"
+            data-testid="acquaintance-training"
+            data-card-id=move || {
+                let id = current_id.get();
+                (!id.is_nil()).then(|| id.to_string()).unwrap_or_default()
+            }
+        >
             <div class="flex-1 py-6">
                 {move || {
                     let Some(card_id) = current_id.get().non_nil() else {
