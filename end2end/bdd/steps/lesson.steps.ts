@@ -10,6 +10,9 @@ import {
 	runAcquaintancePresentation,
 } from "../../helpers/lesson";
 
+// TrailBase record-writes for the user row (same contract as sync.steps).
+const RECORD_WRITE_METHODS = new Set(["POST", "PUT", "PATCH"]);
+
 When('пользователь добавил слово из текста {string}', async ({ page }, text: string) => {
     const wordsPage = new WordsPage(page);
     await wordsPage.goto();
@@ -165,7 +168,32 @@ Then('отображается полоса прогресса руки', async 
 
 When('оценивает каждую карточку как Good', async ({ page }) => {
     const lessonPage = new LessonPage(page);
-    await completeLessonFlexible(lessonPage, page);
+    // Новые карты идут через руку знакомства (acquaintance): проходим её
+    // честно (показ → тренировка до критерия → переходный экран), после
+    // чего добиваем классический урок рейтингом Good. Ревью карт руки
+    // назначены на завтра — сразу после перехода урок обычно пуст.
+    const hand = page.getByTestId("acquaintance-view");
+    if (await hand.isVisible().catch(() => false)) {
+        // Регистрируем ожидание ДО тренировки (как в sync.steps): сейв
+        // закрытия руки (сидирование первого ревью + списание лимита)
+        // летит на сервер из spawn_local в момент HandCompleted. Следующий
+        // шаг шагает с полной перезагрузкой — сейв обязан landed раньше,
+        // иначе рука переформируется из устаревшего состояния.
+        const handSave = page.waitForResponse(
+            (resp) =>
+                /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
+                RECORD_WRITE_METHODS.has(resp.request().method()),
+            { timeout: 20_000 },
+        );
+        await runAcquaintancePresentation(page);
+        await completeTrainingUntilCriterion(page);
+        const save = await handSave;
+        expect(save.ok(), `hand close save failed: ${save.status()}`).toBe(true);
+        await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
+    }
+    if (await lessonPage.lessonContent.isVisible().catch(() => false)) {
+        await completeLessonFlexible(lessonPage, page);
+    }
 });
 
 When('нажимает кнопку возврата с урока', async ({ page }) => {
