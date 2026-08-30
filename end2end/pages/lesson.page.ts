@@ -34,7 +34,6 @@ export class LessonPage extends BasePage {
     readonly showAnswerBtn: Locator;
     readonly ratingAgain: Locator;
     readonly ratingGood: Locator;
-    readonly progressText: Locator;
 
     // Quiz
     readonly quizOptions: readonly [Locator, Locator, Locator, Locator];
@@ -51,9 +50,6 @@ export class LessonPage extends BasePage {
     // Lesson completion
     readonly completeScreen: Locator;
     readonly completeBackBtn: Locator;
-    readonly completeStats: Locator;
-    readonly nextLessonBtn: Locator;
-    readonly homeBtn: Locator;
 
     // Sync indicator
     readonly syncIndicator: Locator;
@@ -94,7 +90,6 @@ export class LessonPage extends BasePage {
         this.showAnswerBtn = page.getByTestId("lesson-show-answer-btn");
         this.ratingAgain = page.getByTestId("lesson-rating-btn-again");
         this.ratingGood = page.getByTestId("lesson-rating-btn-good");
-        this.progressText = page.getByTestId("lesson-progress-text");
 
         // Quiz
         this.quizOptions = [
@@ -114,9 +109,6 @@ export class LessonPage extends BasePage {
         // Lesson completion
         this.completeScreen = page.getByTestId("lesson-complete-screen");
         this.completeBackBtn = page.getByTestId("lesson-complete-back-btn");
-        this.completeStats = page.getByTestId("lesson-complete-stats");
-        this.nextLessonBtn = page.getByTestId("lesson-next-btn");
-        this.homeBtn = page.getByTestId("lesson-home-btn");
 
         // Sync indicator
         this.syncIndicator = page.getByTestId("lesson-sync-indicator");
@@ -211,21 +203,8 @@ export class LessonPage extends BasePage {
         await this.ratingMap[rating].click({ timeout: LessonPage.CARD_ACTION_TIMEOUT });
     }
 
-    async getProgressText(): Promise<string> {
-        const text = await this.progressText.textContent();
-        return text ?? "";
-    }
-
     async waitForComplete(): Promise<void> {
         await expect(this.completeScreen).toBeVisible({ timeout: 30_000 });
-    }
-
-    async clickNextLesson(): Promise<void> {
-        await this.nextLessonBtn.click();
-    }
-
-    async clickHome(): Promise<void> {
-        await this.homeBtn.click();
     }
 
     async expectMuteIcon(): Promise<void> {

@@ -168,30 +168,9 @@ When('оценивает каждую карточку как Good', async ({ pa
     await completeLessonFlexible(lessonPage, page);
 });
 
-Then('отображается экран завершения урока', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.completeScreen).toBeVisible({ timeout: 15_000 });
-});
-
-When('нажимает кнопку показа ответа', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await lessonPage.showAnswer();
-});
-
-Then('отображаются кнопки оценки', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.ratingAgain).toBeVisible();
-    await expect(lessonPage.ratingGood).toBeVisible();
-});
-
 When('нажимает кнопку возврата с урока', async ({ page }) => {
     const lessonPage = new LessonPage(page);
     await lessonPage.clickBack();
-});
-
-Then('отображается текст прогресса урока', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.progressText).toBeVisible();
 });
 
 When('нажимает кнопку звука', async ({ page }) => {
@@ -202,37 +181,6 @@ When('нажимает кнопку звука', async ({ page }) => {
 Then('звук переключён', async ({ page }) => {
     const lessonPage = new LessonPage(page);
     await expect(lessonPage.muteButton).toHaveAttribute("data-muted", "true");
-});
-
-Then('отображается статистика завершения', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.completeStats).toBeVisible();
-});
-
-When('нажимает кнопку возврата на главную с завершения', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await lessonPage.clickHome();
-});
-
-When('нажимает кнопку следующего урока', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await lessonPage.clickNextLesson();
-    await lessonPage.lessonLoading.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
-    await lessonPage.lessonLoading.waitFor({ state: "hidden", timeout: 30_000 }).catch(() => {});
-});
-
-Then('начинается новый урок или пустое состояние', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    // Gherkin names two outcomes (fresh lesson / diagnosed empty state);
-    // the impl silently also accepts `lessonError` as a third outcome.
-    // That allowance is deliberate anti-flakiness: the next lesson's card
-    // load races with the WASM sync layer and may surface a transient
-    // load error instead of content. The error path is NOT the behaviour
-    // under test here, so it is tolerated rather than asserted.
-    const hasContent = await lessonPage.lessonContent.isVisible({ timeout: 5_000 }).catch(() => false);
-    const hasEmpty = await lessonPage.lessonEmptyState.isVisible({ timeout: 5_000 }).catch(() => false);
-    const hasError = await lessonPage.lessonError.isVisible({ timeout: 5_000 }).catch(() => false);
-    expect(hasContent || hasEmpty || hasError).toBe(true);
 });
 
 When('пользователь устанавливает размер экрана планшета', async ({ page }) => {
