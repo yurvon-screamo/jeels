@@ -6,6 +6,7 @@ import {
 	answerTrainingRemember,
 	completeAcquaintanceHandIfPresent,
 	completeLessonFlexible,
+	completeTrainingUntilCriterion,
 	runAcquaintancePresentation,
 } from "../../helpers/lesson";
 
@@ -302,6 +303,51 @@ Then('отображается экран перехода к повторени
 
 When('пользователь продолжает к повторению', async ({ page }) => {
     await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
+});
+
+// --- Полный круг руки (миграция acquaintance_flow.spec.ts, S7) ---
+
+// Тренировка до полного критерия — contrast с fast-path «Уже знаю»
+// из шага «проходит руку знакомства»: честная ротация каждой карты.
+When('пользователь отвечает в тренировке до полного критерия', async ({ page }) => {
+    await completeTrainingUntilCriterion(page);
+});
+
+// После перехода к повторению у свежего юзера ревью-карт нет —
+// открывается обычный урок либо его штатное пустое состояние.
+Then('отображается содержимое урока или пустое состояние урока', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(
+        lessonPage.lessonContent.or(lessonPage.lessonEmptyState),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("acquaintance-view")).not.toBeVisible();
+});
+
+// Отмена подтверждения «Уже знаю»: модалка закрывается без побочных
+// действий — карта не выбывает из руки и не заменяется.
+When('пользователь отменяет подтверждение «Уже знаю»', async ({ page, acqKnownCard }) => {
+    const slide = page.getByTestId("acquaintance-slide");
+    await slide.waitFor({ state: "visible", timeout: 15_000 });
+    acqKnownCard.value = (await slide.getAttribute("data-card-id")) ?? null;
+    await page.getByTestId("acquaintance-know-btn").click({ timeout: 5_000 });
+    const modal = page.getByTestId("acquaintance-know-confirm");
+    await expect(modal).toBeVisible();
+    await page.getByTestId("acquaintance-know-confirm-cancel").click({ timeout: 5_000 });
+});
+
+Then('модалка закрыта и карта остаётся в руке', async ({ page, acqKnownCard }) => {
+    await expect(page.getByTestId("acquaintance-know-confirm")).not.toBeVisible();
+    const slide = page.getByTestId("acquaintance-slide");
+    await expect(slide).toBeVisible();
+    // Усиление сверх исходного спека: отменённое «Уже знаю» не должно
+    // даже менять слот слайда — это та же карта, что была до клика.
+    await expect
+        .poll(async () => (await slide.getAttribute("data-card-id")) ?? "", {
+            timeout: 5_000,
+            intervals: [100, 200, 400],
+        })
+        .toBe(acqKnownCard.value ?? "");
+    await expect(page.getByTestId("acquaintance-view")).toBeVisible();
 });
 
 Then('последняя карта круга не открывает следующий', async ({ acqTrainingLog }) => {

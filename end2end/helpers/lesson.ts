@@ -85,10 +85,38 @@ export async function answerTrainingForgot(page: Page): Promise<boolean> {
 	return answerTrainingRating(page, "acquaintance-rating-dont-know");
 }
 
+/// Полный тренировочный круг руки: отвечает «Помню» на каждую карту,
+/// пока критерий не закроет тренировку и не появится переходный экран
+/// «теперь к повторению». Замена happy-path из удалённого
+/// acquaintance_flow.spec.ts: без fast-path «Уже знаю» — честная ротация
+/// reveal→rating, как это делает пользователь (фрагменты круга проверяют
+/// «Порядок круга» и «Смена стороны», но не полный проход).
+export async function completeTrainingUntilCriterion(
+	page: Page,
+	maxAnswers = 100,
+): Promise<void> {
+	const completed = page.getByTestId("acquaintance-completed");
+	for (let i = 0; i < maxAnswers; i++) {
+		if (await completed.isVisible().catch(() => false)) break;
+		const reveal = page.getByTestId("acquaintance-reveal-btn");
+		const revealVisible = await reveal
+			.waitFor({ state: "visible", timeout: 1_000 })
+			.then(() => true)
+			.catch(() => false);
+		// Критерий закрыт — reveal исчез, дальше только переходный экран.
+		if (!revealVisible) break;
+		await answerTrainingRemember(page);
+	}
+	// Тренировка обязана закончиться экраном перехода (bounded-клики могли
+	// проиграть гонку ре-рендеру — здесь это видно сразу).
+	await expect(completed).toBeVisible({ timeout: 15_000 });
+}
+
 /// Завершает руку знакомства, если она показана: на каждом слайде показа
 /// нажимает «Уже знаю» (спека: рука исчезает без тренировки и траты
 /// лимита). Быстрый путь для BDD-сценариев — полный тренировочный флоу
-/// покрывает acquaintance_flow.spec. Возвращает true, когда рука была.
+/// покрывает сценарий «Полный круг руки: показ, тренировка до критерия,
+/// переход к ревью» в lesson.feature. Возвращает true, когда рука была.
 export async function completeAcquaintanceHandIfPresent(
 	page: Page,
 ): Promise<boolean> {
