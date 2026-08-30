@@ -628,11 +628,18 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                     .map(|hand| hand.presentation_order())
                     .unwrap_or_default();
                 let jlpt_content = crate::loaders::get_jlpt_content();
-                let replacement = TakeAcquaintanceReplacementUseCase::new(&repo)
+                let replacement = match TakeAcquaintanceReplacementUseCase::new(&repo)
                     .execute(&jlpt_content, &exclude)
                     .await
-                    .ok()
-                    .flatten();
+                {
+                    Ok(replacement) => replacement,
+                    // Деградация до «пула пуст» обязана оставлять след:
+                    // иначе прод-инцидент «замена не работает» недиагностируем.
+                    Err(e) => {
+                        tracing::error!("Acquaintance replacement lookup failed: {e}");
+                        None
+                    },
+                };
 
                 let Some((new_id, new_type)) = replacement else {
                     // Пул пуст: прежнее поведение — карта выбывает, рука
@@ -642,16 +649,24 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                     return;
                 };
 
-                let replaced = ctx_for_replace
-                    .state
-                    .try_update(|state| {
-                        state
-                            .hand
-                            .as_mut()
-                            .map(|hand| hand.offer_replacement(card_id, new_id, new_type).is_ok())
-                            .unwrap_or(false)
-                    })
-                    .unwrap_or(false);
+                // update() (не try_update): Memo-гейт шапки уже защищает от
+                // перемонтирования, а подписчики (полоса/теги) получают
+                // уведомление о замене честно.
+                ctx_for_replace.state.update(|state| {
+                    let outcome = state
+                        .hand
+                        .as_mut()
+                        .map(|hand| hand.offer_replacement(card_id, new_id, new_type));
+                    if let Some(Err(e)) = outcome {
+                        tracing::error!("Acquaintance replacement rejected: {e}");
+                    }
+                });
+                let replaced = ctx_for_replace.state.with_untracked(|state| {
+                    state
+                        .hand
+                        .as_ref()
+                        .is_some_and(|hand| hand.entry(new_id).is_some())
+                });
                 if !replaced {
                     mark_known_and_advance.run(card_id);
                     known_in_flight.set(false);

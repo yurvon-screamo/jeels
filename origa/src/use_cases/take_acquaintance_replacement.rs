@@ -45,6 +45,9 @@ impl<'a, R: UserRepository> TakeAcquaintanceReplacementUseCase<'a, R> {
                 let priority = crate::domain::jlpt_sort_key(study_card.card(), jlpt_content);
                 (priority, *card_id, card_type)
             })
+            // Семантика «верхушки» как у SelectAcquaintanceHandUseCase:
+            // максимальный JLPT-приоритет, при равном — меньший Ulid
+            // (right.1.cmp(&left.1) отдаёт победу меньшему left.1).
             .max_by(|left, right| left.0.cmp(&right.0).then(right.1.cmp(&left.1)));
 
         match candidate {

@@ -227,15 +227,6 @@ fn offer_replacement_unknown_retired_or_duplicate_new_errors() {
         hand.offer_replacement(Ulid::new(), other, CardType::Vocabulary)
             .is_err()
     );
-    // Дубликат новой карты (уже в руке)
-    assert!(
-        hand.offer_replacement(word, other, CardType::Vocabulary)
-            .is_ok()
-    );
-    assert!(
-        hand.offer_replacement(word, other, CardType::Vocabulary)
-            .is_err()
-    );
     // Фразы в руке быть не может
     let mut phrase_hand =
         AcquaintanceHand::new_test(vec![(word, CardType::Vocabulary, 0, 0)], None);
@@ -263,4 +254,26 @@ fn offer_replacement_active_retired_still_completes_via_criterion() {
         hand.record_answer(new_word, true).unwrap(),
         AnswerOutcome::HandCompleted
     ));
+}
+
+#[test]
+fn offer_replacement_same_new_card_twice_rejected() {
+    // Arrange: первая замена прошла
+    let [word, new_word] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![(word, CardType::Vocabulary, 0, 0)],
+        Some(AcquaintanceSubphase::Forward),
+    );
+    assert!(hand.retire_card(word));
+    assert!(
+        hand.offer_replacement(word, new_word, CardType::Vocabulary)
+            .is_ok()
+    );
+
+    // Act / Assert: повторная замена той же новой картой — дубликат
+    // (retired-записи в руке больше нет).
+    assert!(
+        hand.offer_replacement(word, new_word, CardType::Vocabulary)
+            .is_err()
+    );
 }
