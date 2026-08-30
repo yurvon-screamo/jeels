@@ -111,6 +111,7 @@ export async function uiLogin(
 			if (attempt === maxRetries) {
 				throw new Error(
 					`Login failed after ${maxRetries} attempts for user ${email}: ${e}`,
+					{ cause: e },
 				);
 			}
 			// brief cooldown before the retry — WASM may still be loading

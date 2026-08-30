@@ -10,6 +10,8 @@ export class LoginPage extends BasePage {
     readonly loginForm: Locator;
     readonly emailInput: Locator;
     readonly passwordInput: Locator;
+    readonly subtitle: Locator;
+    readonly englishToggle: Locator;
     readonly passwordToggle: Locator;
     readonly passwordFormToggle: Locator;
     readonly submitButton: Locator;
@@ -32,6 +34,15 @@ export class LoginPage extends BasePage {
         // Page structure
         this.loginPage = page.getByTestId("login-page");
         this.loginCard = page.getByTestId("login-card");
+
+        // i18n: the header subtitle renders login.subtitle localized
+        // (RU «ИЗУЧАЙТЕ ЯПОНСКИЙ ЯЗЫК» / EN «Study Japanese»); the EN/RU
+        // toggle is scoped to the login card so it never collides with the
+        // profile page toggle of the same testid.
+        this.subtitle = page.getByTestId("login-subtitle");
+        this.englishToggle = page
+            .getByTestId("login-lang-toggle")
+            .getByTestId("lang-toggle-en");
 
         // Form
         this.loginForm = page.getByTestId("login-form");

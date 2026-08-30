@@ -5,16 +5,14 @@ Playwright E2E tests for Origa. TypeScript + `@playwright/test`.
 ## npm Scripts
 
 ```bash
-npm test                     # All tests (headless)
+npm test                     # All tests (headless; pretest runs bddgen)
 npm run test:ui              # Playwright UI mode
 npm run test:headed          # Visible browser
 npm run test:debug           # Debug mode
-npm run test:chrome          # Chromium only
-npm run test:chrome:headed   # Chromium, visible browser
-npm run test:chrome:ui       # Chromium, Playwright UI
 npm run report               # HTML report (0.0.0.0:9323)
 npm run bdd:gen              # Generate Playwright tests from .feature files
 npm run test:bdd             # bddgen + run BDD project only
+npm run guard:matrix         # Verify the CI e2e matrix covers every scenario
 npm run typecheck            # TypeScript type check (tsc --noEmit)
 ```
 
@@ -27,10 +25,13 @@ end2end/
 ├── global-setup.ts                        # Starts TrailBase, sets admin password
 ├── global-teardown.ts                     # Kills TrailBase process
 ├── playwright.config.ts                   # Playwright config + webServer definitions
+├── bdd/features/                          # Russian Gherkin .feature files
+├── bdd/steps/                             # Step definitions (reuse Page Objects)
+├── bdd/fixtures.ts                        # BDD test base: testUser/page fixtures
 ├── pages/ {base,login,...}.page.ts → index.ts
-├── tests/                                 # *.spec.ts
-├── fixtures/                              # Auth, onboarding, test data
-└── helpers/                               # Navigation, auth, HTTP, cleanup
+├── fixtures/                              # admin tokens, test data
+├── helpers/                               # Navigation, auth, HTTP, cleanup, paths
+└── scripts/check-ci-matrix.mjs            # CI matrix guard
 ```
 
 ## Local Infrastructure
@@ -94,8 +95,11 @@ Complex multi-step user journeys can be described in Russian Gherkin `.feature` 
 
 ### When to use Gherkin vs native Playwright
 
-- **Gherkin**: multi-step flows spanning multiple pages (onboarding, lesson lifecycle, sync). The `.feature` file is a separable spec that can be reviewed before implementation.
-- **Native Playwright** (`.spec.ts`): single-page tests, DOM/CSS assertions, technical checks. Keep using `testWithFreshUser` + Page Objects.
+**Everything lives in Gherkin.** Native `.spec.ts` files were decommissioned
+(the last three were migrated in the #445 cleanup): multi-step journeys,
+single-page DOM checks and technical regressions are all `.feature` scenarios.
+Technical mechanisms that don't read well as Gherkin (route gates, request
+aborts, bounded click loops) live in `helpers/` and are invoked from steps.
 
 ### Pipeline
 
@@ -111,7 +115,7 @@ Complex multi-step user journeys can be described in Russian Gherkin `.feature` 
 - `.feature` language: Russian (`# language: ru`). Keywords: `Функция`, `Сценарий`, `Допустим` (Given), `Когда` (When), `Тогда` (Then), `И` (And).
 - Domain terms in steps must match [`origa/docs/glossary.md`](../origa/docs/glossary.md).
 - Step definitions reuse Page Objects from `pages/`. Do not use raw selectors in steps.
-- The BDD fixture (`bdd/fixtures.ts`) provides the same authenticated `page` as `testWithFreshUser`.
+- The BDD fixture (`bdd/fixtures.ts`) provides an authenticated `page` bound to the per-test `testUser` account (fresh e2e user, auto-cleanup).
 - **When = action, Then = assertion.** Don't hide assertions in When steps. The `.feature` reader sees what's verified in the Then line.
 - **Migration fidelity.** When converting `.spec.ts` → `.feature`, ALL original assertions must be preserved. Self-check against source.
 - **Dead step detection.** After removing a step from `.feature`, grep for unconsumed definitions in `bdd/steps/`. `bddgen`/ESLint do NOT catch orphans.

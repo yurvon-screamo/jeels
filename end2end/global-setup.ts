@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { end2endRoot } from "./helpers/paths";
 import type { FullConfig } from "@playwright/test";
 import { fetchWithTimeout } from "./helpers/http";
 import { cleanupOrphanedAccountsWithToken } from "./helpers/cleanup";
@@ -43,19 +44,6 @@ async function waitForTrailBase(
     return false;
 }
 
-async function isTrailBaseRunning(): Promise<boolean> {
-    try {
-        const response = await fetchWithTimeout(
-            `${getTrailBaseUrl()}/api/healthcheck`,
-            {},
-            3000,
-        );
-        return response.ok;
-    } catch {
-        return false;
-    }
-}
-
 async function getAdminToken(): Promise<{ token: string; csrfToken: string }> {
     const adminEmail = process.env.ORIGA_ADMIN_EMAIL || "admin@localhost";
     const adminPassword = process.env.ORIGA_ADMIN_PASSWORD;
@@ -98,7 +86,7 @@ function setAdminPassword(): void {
         execSync(
             `trail user change-password ${process.env.ORIGA_ADMIN_EMAIL || "admin@localhost"} ${process.env.ORIGA_ADMIN_PASSWORD}`,
             {
-                cwd: `${__dirname}/trailbase-fixture`,
+                cwd: `${end2endRoot}/trailbase-fixture`,
                 stdio: "pipe",
                 timeout: 10000,
             },
@@ -132,7 +120,7 @@ async function startTrailBase(): Promise<void> {
     const args = ["run", "--dev", "--address", `127.0.0.1:${TRAILBASE_PORT}`];
 
     const proc = spawn("trail", args, {
-        cwd: `${__dirname}/trailbase-fixture`,
+        cwd: `${end2endRoot}/trailbase-fixture`,
         stdio: ["ignore", "pipe", "pipe"],
         detached: true,
     });
@@ -153,7 +141,7 @@ async function startTrailBase(): Promise<void> {
     proc.unref();
 
     // Save PID for cleanup in teardown
-    fs.writeFileSync(path.join(__dirname, ".trailbase.pid"), String(proc.pid));
+    fs.writeFileSync(path.join(end2endRoot, ".trailbase.pid"), String(proc.pid));
 
     console.log("[global-setup] Waiting for TrailBase to be ready...");
     const ready = await waitForTrailBase();

@@ -1,14 +1,12 @@
-import type { FullConfig } from "@playwright/test";
 import * as fs from "fs";
+import { end2endRoot } from "./helpers/paths";
 import * as path from "path";
 
-export default async function globalTeardown(
-    _config: FullConfig,
-): Promise<void> {
+export default async function globalTeardown(): Promise<void> {
     console.log("[global-teardown] Starting teardown...");
 
     // Kill TrailBase process
-    const pidFile = path.join(__dirname, ".trailbase.pid");
+    const pidFile = path.join(end2endRoot, ".trailbase.pid");
     if (fs.existsSync(pidFile)) {
         const pid = parseInt(fs.readFileSync(pidFile, "utf-8").trim(), 10);
         if (!isNaN(pid)) {

@@ -22,7 +22,10 @@ export abstract class BasePage {
 				state: "visible",
 				timeout: 10000,
 			});
-		} catch {}
+		} catch {
+			// Best-effort readiness probe: the page may legitimately have
+			// no matching controls yet — callers assert specifics after.
+		}
 	}
 
 	async waitForElement(locator: Locator, timeout = 5000): Promise<void> {

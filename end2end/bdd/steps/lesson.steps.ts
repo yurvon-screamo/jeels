@@ -281,7 +281,7 @@ Then('рука не уменьшается и показывается нова�
     await slide.waitFor({ state: "visible", timeout: 15_000 });
     // Замена асинхронна (mark-known → пул → слайды): ждём, пока слот
     // займёт новая карта — рендер мог не успеть за скрытием модалки.
-    const current = await expect
+    await expect
         .poll(async () => (await slide.getAttribute("data-card-id")) ?? "", {
             timeout: 15_000,
             intervals: [100, 200, 400],
@@ -348,6 +348,13 @@ Then('модалка закрыта и карта остаётся в руке',
         })
         .toBe(acqKnownCard.value ?? "");
     await expect(page.getByTestId("acquaintance-view")).toBeVisible();
+});
+
+// --- Клавиатура: Пробел на экране перехода продолжает к повторению
+// (тот же хендл, что у кнопки — acquaintance_view.rs §8.3) ---
+
+When('нажимает клавишу Пробел', async ({ page }) => {
+    await page.keyboard.press(" ");
 });
 
 Then('последняя карта круга не открывает следующий', async ({ acqTrainingLog }) => {

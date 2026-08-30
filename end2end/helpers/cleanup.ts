@@ -1,5 +1,4 @@
 import {
-    getAdminToken,
     listAllTestUsers,
     deleteTestUserWithRetry,
 } from "../fixtures/admin";
@@ -49,50 +48,6 @@ export async function cleanupOrphanedAccountsWithToken(
     await cleanupOrphanedUserRecords(prefix, token, csrfToken);
 }
 
-export async function cleanupOrphanedAccounts(prefix: string): Promise<void> {
-    const adminAuth = await getAdminToken();
-    const orphanedUsers = await listAllTestUsers(
-        adminAuth.token,
-        adminAuth.csrfToken,
-    );
-
-    if (orphanedUsers.length === 0) {
-        console.log(`[${prefix}] ✓ No orphaned accounts found`);
-    } else {
-        console.log(
-            `[${prefix}] Found ${orphanedUsers.length} orphaned accounts, deleting...`,
-        );
-
-        let succeeded = 0;
-        let failed = 0;
-
-        for (let i = 0; i < orphanedUsers.length; i += CLEANUP_BATCH_SIZE) {
-            const batch = orphanedUsers.slice(i, i + CLEANUP_BATCH_SIZE);
-            const results = await Promise.allSettled(
-                batch.map((user) =>
-                    deleteTestUserWithRetry(
-                        adminAuth.token,
-                        adminAuth.csrfToken,
-                        user.id,
-                        user.email,
-                    ),
-                ),
-            );
-            succeeded += results.filter((r) => r.status === "fulfilled").length;
-            failed += results.filter((r) => r.status === "rejected").length;
-        }
-
-        console.log(
-            `[${prefix}] ✓ Cleanup complete: ${succeeded} deleted, ${failed} failed`,
-        );
-    }
-
-    await cleanupOrphanedUserRecords(
-        prefix,
-        adminAuth.token,
-        adminAuth.csrfToken,
-    );
-}
 
 async function cleanupOrphanedUserRecords(
     prefix: string,

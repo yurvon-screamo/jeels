@@ -149,6 +149,16 @@ Then('отображается сообщение об ошибке', async ({ p
     await expect(loginPage.errorAlert).toBeVisible({ timeout: 10_000 });
 });
 
+// --- Негативный логин (возврат удалённого сценария; шаги выше — его
+// --- осиротевшая обвязка из #445, оживают здесь) ---
+
+// --- Клавиатура: Enter в поле пароля отправляет форму ---
+
+When('нажимает клавишу Enter в поле пароля', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.passwordInput.press("Enter");
+});
+
 Then('отображается кнопка Google', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await expect(loginPage.googleButton).toBeVisible({ timeout: 10_000 });

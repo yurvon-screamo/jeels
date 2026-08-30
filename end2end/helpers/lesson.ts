@@ -122,7 +122,6 @@ export async function completeAcquaintanceHandIfPresent(
 ): Promise<boolean> {
 	const handSeen = await awaitHandVisible(page, 30_000);
 	if (!handSeen) return false;
-	const view = page.getByTestId("acquaintance-view");
 	for (let i = 0; i < 20; i++) {
 		const know = page.getByTestId("acquaintance-know-btn");
 		const knowVisible = await know

@@ -69,11 +69,6 @@ Then('кнопки импорта и отмены полностью видны 
     await setsPage.expectDrawerActionsInViewport();
 });
 
-Then('набор отображается как импортированный', async ({ page }) => {
-    const setsPage = new SetsPage(page);
-    expect(await setsPage.getImportedCardCount()).toBeGreaterThan(0);
-});
-
 Then('ни один набор не импортирован', async ({ page }) => {
     const setsPage = new SetsPage(page);
     expect(await setsPage.getImportedCardCount()).toBe(0);

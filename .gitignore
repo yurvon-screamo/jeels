@@ -16,6 +16,7 @@ test-results/
 playwright-report/
 playwright/.cache/
 .blob-report/
+end2end/blob-report/
 .trace/
 end2end/.trailbase.pid
 end2end/.cdn.pid
