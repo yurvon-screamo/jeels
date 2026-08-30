@@ -43,11 +43,12 @@ export async function runAcquaintancePresentation(page: Page): Promise<void> {
 	});
 }
 
-/// Один ответ тренировки «Помню»: жмёт «Показать» → «Помню», пока ответ
-/// не запишется. Признак записи — панель ответа скрылась (ре-рендер после
-/// do_rate смонтировал фронт следующей карты): если клик проиграл гонку
-/// WASM ре-рендеру, панель остаётся видимой и попытка повторяется.
-export async function answerTrainingRemember(page: Page): Promise<boolean> {
+/// Один ответ тренировки: жмёт «Показать» → кнопку рейтинга `button`,
+/// пока ответ не запишется. Признак записи — панель ответа скрылась
+/// (ре-рендер после do_rate смонтировал фронт следующей карты): если
+/// клик проиграл гонку WASM ре-рендеру, панель остаётся видимой и
+/// попытка повторяется.
+async function answerTrainingRating(page: Page, button: string): Promise<boolean> {
 	const answer = page.getByTestId("acquaintance-training-answer");
 	for (let attempt = 0; attempt < 8; attempt++) {
 		const answerVisible = await answer
@@ -62,7 +63,7 @@ export async function answerTrainingRemember(page: Page): Promise<boolean> {
 			continue;
 		}
 		await page
-			.getByTestId("acquaintance-rating-remember")
+			.getByTestId(button)
 			.click({ timeout: 1500 })
 			.catch(() => null);
 		const hidden = await answer
@@ -72,6 +73,16 @@ export async function answerTrainingRemember(page: Page): Promise<boolean> {
 		if (hidden) return true;
 	}
 	return false;
+}
+
+/// Один ответ тренировки «Помню» (см. `answerTrainingRating`).
+export async function answerTrainingRemember(page: Page): Promise<boolean> {
+	return answerTrainingRating(page, "acquaintance-rating-remember");
+}
+
+/// Один ответ тренировки «Не помню» (см. `answerTrainingRating`).
+export async function answerTrainingForgot(page: Page): Promise<boolean> {
+	return answerTrainingRating(page, "acquaintance-rating-dont-know");
 }
 
 /// Завершает руку знакомства, если она показана: на каждом слайде показа

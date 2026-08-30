@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import { When, Then } from "../fixtures";
 import { HomePage, LessonPage, WordsPage } from "../../pages";
 import {
+	answerTrainingForgot,
 	answerTrainingRemember,
 	completeAcquaintanceHandIfPresent,
 	completeLessonFlexible,
@@ -315,4 +316,77 @@ Then('последняя карта круга не открывает след�
             `стык после позиции ${seam + 1}: карта не должна идти дважды подряд`,
         ).toBe(true);
     }
+});
+
+When(
+    'пользователь отвечает в тренировке «Помню» только по первой карте до закрытия',
+    async ({ page, acqTargetCard }) => {
+        const training = page.getByTestId("acquaintance-training");
+        await training.waitFor({ state: "visible", timeout: 10_000 });
+        acqTargetCard.value = (await training.getAttribute("data-card-id")) ?? null;
+        // На целевой карте — «Помню», на остальных — «Не помню»: соседи
+        // не должны закрыть Forward, иначе смена подфазы сбросит шкалы и
+        // полоса потеряет закрытую карту ещё до ассерта.
+        for (let i = 0; i < 40; i++) {
+            const current = (await training.getAttribute("data-card-id")) ?? "";
+            const recorded =
+                current === acqTargetCard.value
+                    ? await answerTrainingRemember(page)
+                    : await answerTrainingForgot(page);
+            expect(recorded, `ответ №${i + 1} не записался`).toBe(true);
+            const closed = Number(
+                (await page
+                    .getByTestId("acquaintance-strip")
+                    .getAttribute("aria-valuenow")) ?? "0",
+            );
+            if (closed >= 1) return;
+        }
+        throw new Error("первая карта не закрыла критерий за 40 ответов");
+    },
+);
+
+Then('полоса руки показывает одну закрытую карту', async ({ page }) => {
+    // aria-valuenow считает ячейки с заполнением текущей подфазы >= 3 —
+    // ровно условие заморозки/переоткрытия карты.
+    await expect
+        .poll(
+            async () =>
+                Number(
+                    (await page
+                        .getByTestId("acquaintance-strip")
+                        .getAttribute("aria-valuenow")) ?? "-1",
+                ),
+            { timeout: 15_000, intervals: [100, 200, 400] },
+        )
+        .toBe(1);
+});
+
+When(
+    'пользователь отвечает в тренировке «Не помню» по закрытой карте',
+    async ({ page, acqTargetCard }) => {
+        const training = page.getByTestId("acquaintance-training");
+        // Отвечаем «Не помню», пока круг не доходит до закрытой карты:
+        // у остальных карт шкалы уже в нуле, ответ их не меняет.
+        for (let i = 0; i < 20; i++) {
+            const current = (await training.getAttribute("data-card-id")) ?? "";
+            const recorded = await answerTrainingForgot(page);
+            expect(recorded, `ответ №${i + 1} не записался`).toBe(true);
+            if (current === acqTargetCard.value) return;
+        }
+        throw new Error("закрытая карта не встретилась в круге за 20 ответов");
+    },
+);
+
+Then('полоса руки не показывает закрытых карт', async ({ page }) => {
+    await expect
+        .poll(
+            async () =>
+                Number(
+                    (await page
+                        .getByTestId("acquaintance-strip")
+                        .getAttribute("aria-valuenow")) ?? "-1",
+                ),
+            { timeout: 15_000, intervals: [100, 200, 400] },
+        )
+        .toBe(0);
 });

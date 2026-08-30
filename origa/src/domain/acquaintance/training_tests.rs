@@ -109,7 +109,7 @@ fn success_beyond_criterion_is_frozen() {
 }
 
 #[test]
-fn failed_answer_on_closed_card_is_frozen() {
+fn failed_answer_on_fully_closed_word_resets_current_subphase() {
     // Arrange: слово закрыло обе подфазы
     let [word] = ids();
     let mut hand = AcquaintanceHand::new_test(
@@ -120,8 +120,78 @@ fn failed_answer_on_closed_card_is_frozen() {
     // Act
     let outcome = hand.record_answer(word, false).unwrap();
 
-    // Assert: провал не «размораживает» и не регрессирует карту
-    assert_eq!(outcome, AnswerOutcome::ProgressFrozen);
+    // Assert: «Не помню» переоткрывает даже закрывшую критерий карту —
+    // шкала текущей подфазы уходит в ноль, закрытая ранее подфаза
+    // не регрессирует
+    assert!(matches!(outcome, AnswerOutcome::Failed));
+    assert_eq!(
+        hand.entry(word)
+            .unwrap()
+            .progress_in(Some(AcquaintanceSubphase::Reverse)),
+        0,
+        "провал закрывшей критерий карты сбрасывает шкалу текущей подфазы"
+    );
+    assert_eq!(
+        hand.entry(word)
+            .unwrap()
+            .progress_in(Some(AcquaintanceSubphase::Forward)),
+        3,
+        "закрытая предыдущая подфаза не регрессирует"
+    );
+}
+
+#[test]
+fn failed_answer_on_word_closed_in_forward_reopens_it() {
+    // Arrange: А закрыла forward-критерий, соседняя Б — ещё нет
+    let [a, b] = ids();
+    let mut hand = AcquaintanceHand::new_test(
+        vec![
+            (a, CardType::Vocabulary, 3, 0),
+            (b, CardType::Vocabulary, 1, 0),
+        ],
+        Some(AcquaintanceSubphase::Forward),
+    );
+
+    // Act: «Не помню» по закрывшей критерий карте
+    let outcome = hand.record_answer(a, false).unwrap();
+
+    // Assert: карта переоткрыта — набор критерия подфазы начинается
+    // заново, соседка не затронута (баг-репорт: сброс не срабатывал
+    // для достигших порога карт)
+    assert!(matches!(outcome, AnswerOutcome::Failed));
+    assert_eq!(
+        hand.entry(a)
+            .unwrap()
+            .progress_in(Some(AcquaintanceSubphase::Forward)),
+        0,
+        "шкала закрывшей критерий карты сброшена в ноль"
+    );
+    assert_eq!(
+        hand.entry(b)
+            .unwrap()
+            .progress_in(Some(AcquaintanceSubphase::Forward)),
+        1,
+        "провал по одной карте не трогает соседей"
+    );
+}
+
+#[test]
+fn failed_answer_on_nonword_closed_card_resets_shared_criterion() {
+    // Arrange: кандзи закрыл общий критерий (рука без подфаз)
+    let [kanji] = ids();
+    let mut hand = AcquaintanceHand::new_test(vec![(kanji, CardType::Kanji, 3, 0)], None);
+
+    // Act
+    let outcome = hand.record_answer(kanji, false).unwrap();
+
+    // Assert: единый счётчик несловесной карты обнулён — карта
+    // переоткрыта, рука снова ждёт её критерия
+    assert!(matches!(outcome, AnswerOutcome::Failed));
+    assert_eq!(
+        hand.entry(kanji).unwrap().progress_in(None),
+        0,
+        "общий критерий несловесной карты сбрасывается целиком"
+    );
 }
 
 #[test]

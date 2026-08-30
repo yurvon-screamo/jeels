@@ -27,6 +27,7 @@ export const test = base.extend<
         testUser: TestUserContext;
         acqTrainingLog: string[];
         acqKnownCard: { value: string | null };
+        acqTargetCard: { value: string | null };
     },
     object
 >({
@@ -66,6 +67,13 @@ export const test = base.extend<
     ],
     // Card remembered before a mark-as-known action (replacement asserts).
     acqKnownCard: [
+        async ({}, use) => {
+            await use({ value: null as string | null });
+        },
+        { scope: "test" },
+    ],
+    // Target card of a selective-answers training step (reopen asserts).
+    acqTargetCard: [
         async ({}, use) => {
             await use({ value: null as string | null });
         },
