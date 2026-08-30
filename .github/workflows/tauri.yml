@@ -286,12 +286,17 @@ jobs:
                   # (frontend-dist WASM, *.sig signatures already embedded into
                   # latest.json) are excluded so the release stays small.
                   # cp -f (not -n): every tag is a fresh release, no accumulation.
+                  # macOS ships a productbuild .pkg (signed with the Mac
+                  # Installer cert) — there is no .dmg target in this repo;
+                  # the stale '*.dmg' pattern never matched. With App Store
+                  # upload now stable-only (PR #459), GitHub Release is the
+                  # only macOS channel for prereleases.
                   find artifacts -type f \( \
                       -name '*-setup.exe' -o \
                       -name '*.msi' -o \
                       -name '*.AppImage' -o \
                       -name '*.deb' -o \
-                      -name '*.dmg' -o \
+                      -name '*.pkg' -o \
                       -name '*.apk' -o \
                       -name '*.aab' -o \
                       -name 'latest.json' \
