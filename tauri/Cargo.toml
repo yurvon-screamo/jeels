@@ -93,6 +93,6 @@ tauri-plugin-aswebauth.workspace = true
 # obtain JNIEnv from the JavaVM. ndk-context provides the JavaVM/Activity
 # pointers (initialized by tao before main()).
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.21"
+jni = "0.22"
 rustls-platform-verifier = "0.6"
 ndk-context = "0.1"
