@@ -183,15 +183,24 @@ fn make_card_due(user: &mut User, card_id: Ulid) {
     study_card.apply_review(due_memory, Rating::Good);
 }
 
-/// Долги вперёд: пока в деке есть просроченные ревью-карты, рука
-/// знакомства не собирается — новые карты не добавляют нагрузку к
-/// долговому ревью (docs/acquaintance-mode.md, правило «Долги вперёд»).
+/// Долги вперёд с коротким хвостом: due-очередь, поверх которой
+/// помещается полная рука, НЕ откладывает знакомство — рука кладётся
+/// поверх хвоста (историческое поведение впрыска новых карт):
+/// due + HAND_MAX_SIZE ≤ MAX_LESSON_SIZE.
 #[tokio::test]
-async fn select_skips_hand_while_due_cards_are_pending() {
-    // Arrange: новые слова + одна карта с просроченным ревью
-    let mut user = user_with_new_vocab_cards(3);
-    let due_id = *user.knowledge_set().study_cards().keys().next().unwrap();
-    make_card_due(&mut user, due_id);
+async fn select_takes_hand_when_due_tail_fits_lesson_capacity() {
+    // Arrange: 8 due-долгов (8 + 7 ≤ 22) + новые слова
+    let mut user = user_with_new_vocab_cards(11);
+    let due_ids: Vec<Ulid> = user
+        .knowledge_set()
+        .study_cards()
+        .keys()
+        .copied()
+        .take(8)
+        .collect();
+    for id in due_ids {
+        make_card_due(&mut user, id);
+    }
     let repo = InMemoryUserRepository::with_user(user);
     let select = SelectAcquaintanceHandUseCase::new(&repo);
     let jlpt_content = crate::domain::JlptContent::new();
@@ -199,12 +208,45 @@ async fn select_skips_hand_while_due_cards_are_pending() {
     // Act
     let hand = select.execute(&jlpt_content).await.unwrap();
 
-    // Assert: рука не собирается — сначала юзер проходит due-долги
-    assert!(hand.is_none(), "due-долги откладывают знакомство");
+    // Assert: короткий хвост — рука собирается из новых карт
+    let hand = hand.expect("короткий due-хвост не блокирует руку");
+    assert!(!hand.is_empty());
+}
+
+/// Глубокая due-очередь откладывает руку: due-долгов столько, что
+/// полная рука поверх них не влезает в урок — юзер разбирает долги
+/// чистым ревью, знакомство вернётся после очистки очереди.
+#[tokio::test]
+async fn select_defers_hand_when_due_queue_is_deep() {
+    // Arrange: due-долгов больше, чем (MAX_LESSON_SIZE - HAND_MAX_SIZE)
+    let deep = crate::domain::MAX_LESSON_SIZE - crate::domain::HAND_MAX_SIZE + 1;
+    let mut user = user_with_new_vocab_cards(deep + 3);
+    let due_ids: Vec<Ulid> = user
+        .knowledge_set()
+        .study_cards()
+        .keys()
+        .copied()
+        .take(deep)
+        .collect();
+    for id in due_ids {
+        make_card_due(&mut user, id);
+    }
+    let repo = InMemoryUserRepository::with_user(user);
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act
+    let hand = select.execute(&jlpt_content).await.unwrap();
+
+    // Assert: глубокая очередь — рука отложена
+    assert!(
+        hand.is_none(),
+        "глубокая due-очередь откладывает знакомство"
+    );
 }
 
 /// Просроченная фраза — не долг для знакомства: фразы живут собственными
-/// пайплайнами и не должны навсегда блокировать руку.
+/// пайплайнами и не должны блокировать руку.
 #[tokio::test]
 async fn select_keeps_hand_when_only_due_phrases_are_pending() {
     // Arrange: новые слова + просроченная фраза

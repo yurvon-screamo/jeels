@@ -42,8 +42,8 @@ pub use knowledge::NewCardPolicy;
 pub use knowledge::{
     Card, CardType, DailyHistoryItem, ExampleKanjiWord, GrammarInfo, GrammarQuizCard,
     GrammarRuleCard, KanjiCard, KnowledgeSet, LessonCard, LessonCardView, LessonData,
-    LessonEmptyDiagnosis, LessonViewGenerator, MultiQuizResult, PhraseCard, QuizCard, QuizMode,
-    QuizOption, StudyCard, VocabularyCard, YesNoCard, diagnose_empty_lesson,
+    LessonEmptyDiagnosis, LessonViewGenerator, MAX_LESSON_SIZE, MultiQuizResult, PhraseCard,
+    QuizCard, QuizMode, QuizOption, StudyCard, VocabularyCard, YesNoCard, diagnose_empty_lesson,
     estimate_completion_date,
 };
 pub(crate) use knowledge::{distribute_new_cards, jlpt_sort_key};

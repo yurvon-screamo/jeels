@@ -1,4 +1,6 @@
-use crate::domain::{Card, CardType, HAND_MAX_SIZE, JlptContent, OrigaError, StudyCard};
+use crate::domain::{
+    Card, CardType, HAND_MAX_SIZE, JlptContent, MAX_LESSON_SIZE, OrigaError, StudyCard,
+};
 use crate::traits::UserRepository;
 use std::collections::HashSet;
 use tracing::{debug, info};
@@ -20,10 +22,12 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
     /// (`distribute_new_cards`). Размер min(лимит дня, пул,
     /// `HAND_MAX_SIZE`).
     ///
-    /// Долги вперёд: пока в деке есть просроченные ревью-карты (не
-    /// фразы), рука не собирается — новые карты не добавляют нагрузку
-    /// к долговому ревью. Знакомство возвращается, когда due-очередь
-    /// пуста (холодный старт новых дней — частный случай).
+    /// Долги вперёд с коротким хвостом: due-очередь, поверх которой
+    /// помещается полная рука (`due_debts + HAND_MAX_SIZE <=
+    /// MAX_LESSON_SIZE`), знакомство не откладывает — рука кладётся
+    /// поверх хвоста (историческое поведение впрыска). Глубокая очередь
+    /// (полная рука не влезает) — рука откладывается до очистки долга.
+    /// Фразы и «уже знаю» долгом не считаются.
     ///
     /// Чистая функция от состояния knowledge_set и остатка дневного лимита:
     /// никакое состояние руки не персистится, прерванная рука естественно
@@ -45,15 +49,17 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
             return Ok(None);
         }
 
-        if user
+        let due_debts = user
             .knowledge_set()
             .study_cards()
             .iter()
-            .any(|(_, study_card)| is_due_debt(study_card))
-        {
+            .filter(|(_, study_card)| is_due_debt(study_card))
+            .count();
+        if due_debt_capacity_exceeded(due_debts) {
             debug!(
                 user_id = %user.id(),
-                "due reviews pending — acquaintance hand deferred"
+                due_debts,
+                "due queue too deep for a hand on top — acquaintance deferred"
             );
             return Ok(None);
         }
@@ -109,6 +115,13 @@ fn is_due_debt(study_card: &StudyCard) -> bool {
         && !study_card.memory().is_new()
         && !study_card.memory().is_known_card()
         && study_card.memory().is_due()
+}
+
+/// Влезает ли полная рука поверх due-хвоста в один урок. Короткий
+/// хвост (`due_debts + HAND_MAX_SIZE <= MAX_LESSON_SIZE`) руку не
+/// откладывает; глубокая очередь — откладывает до очистки долга.
+fn due_debt_capacity_exceeded(due_debts: usize) -> bool {
+    due_debts.saturating_add(HAND_MAX_SIZE) > MAX_LESSON_SIZE
 }
 
 #[cfg(test)]
@@ -174,6 +187,21 @@ mod is_due_debt_tests {
         );
         known.apply_review(memory, crate::domain::Rating::Easy);
         assert!(!is_due_debt(&known));
+    }
+
+    #[test]
+    fn short_due_tail_fits_hand_capacity() {
+        // MAX_LESSON_SIZE - HAND_MAX_SIZE долгов: полная рука ещё влезает
+        let tail = MAX_LESSON_SIZE - HAND_MAX_SIZE;
+        assert!(!due_debt_capacity_exceeded(tail));
+        assert!(!due_debt_capacity_exceeded(0));
+    }
+
+    #[test]
+    fn deep_due_queue_exceeds_hand_capacity() {
+        // Одним долгом больше — рука поверх хвоста не помещается
+        let deep = MAX_LESSON_SIZE - HAND_MAX_SIZE + 1;
+        assert!(due_debt_capacity_exceeded(deep));
     }
 }
 

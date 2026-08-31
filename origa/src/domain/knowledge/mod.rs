@@ -22,7 +22,7 @@ pub use lesson::{
     GrammarInfo, GrammarQuizCard, LessonCard, LessonCardView, LessonData, LessonViewGenerator,
     MultiQuizResult, QuizCard, QuizMode, QuizOption, YesNoCard,
 };
-pub use lesson_builder::NewCardPolicy;
+pub use lesson_builder::{MAX_LESSON_SIZE, NewCardPolicy};
 pub(crate) use lesson_builder::{distribute_new_cards, jlpt_sort_key};
 pub use phrase::PhraseCard;
 pub use stats_tracker::StatsTracker;
