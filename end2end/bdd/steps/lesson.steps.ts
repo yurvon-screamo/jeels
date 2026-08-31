@@ -10,7 +10,6 @@ import {
 	completeTrainingUntilCriterion,
 	runAcquaintancePresentation,
 } from "../../helpers/lesson";
-import { waitForUserRecordWrite } from "../../helpers/syncwait";
 
 When('пользователь добавил слово из текста {string}', async ({ page }, text: string) => {
     const wordsPage = new WordsPage(page);
@@ -174,16 +173,12 @@ When('оценивает каждую карточку как Good', async ({ pa
     // Bounded wait (не мгновенный снапшот): рука может смонтироваться
     // позже проверки — иначе шаг молча ушёл бы в классическую ветку.
     if (await awaitHandVisible(page, 5_000)) {
-        // Регистрируем ожидание ДО тренировки (как в sync.steps): сейв
-        // закрытия руки (сидирование первого ревью + списание лимита)
-        // летит на сервер из spawn_local в момент HandCompleted. Следующий
-        // шаг шагает с полной перезагрузкой — сейв обязан landed раньше,
-        // иначе рука переформируется из устаревшего состояния.
-        const handSave = waitForUserRecordWrite(page, 20_000);
         await runAcquaintancePresentation(page);
         await completeTrainingUntilCriterion(page);
-        const save = await handSave;
-        expect(save.ok(), `hand close save failed: ${save.status()}`).toBe(true);
+        // Completed-экран монтируется ПОСЛЕ завершения персистенции руки
+        // (фикс #462: сейв до stage=Completed) — кнопка «К повторению»
+        // существует только у зафиксированного состояния, полная
+        // перезагрузка следующим шагом уже не может обогнать запись.
         await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
     }
     if (await lessonPage.lessonContent.isVisible().catch(() => false)) {

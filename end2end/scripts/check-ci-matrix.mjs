@@ -44,12 +44,7 @@ const fail = (message) => violations.push(message);
 // mechanism silently rots). Adding a new @fixme requires an explicit entry
 // here; removing a fixme requires removing its entry — the guard fails
 // loudly either way. Keep entries coupled to their tracking issues.
-const KNOWN_FIXME = new Set([
-    // App bug: completed hand state lost across a full reload (both
-    // completion paths). See issue #462.
-    "lesson_empty_state.feature|Дневной лимит новых карточек достигнут",
-    "lesson_empty_state.feature|Информация о ближайшем повторении после изучения всех карточек",
-]);
+const KNOWN_FIXME = new Set([]);
 
 // ---------------------------------------------------------------------------
 // 1. Fresh bddgen output (guards against stale .features-gen)
