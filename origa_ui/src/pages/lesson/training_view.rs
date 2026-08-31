@@ -119,6 +119,44 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
         order[rotation_index.get() % order.len()]
     });
 
+    // Автозвук Forward-фронта — один на СМЕНУ карты: Memo по card_id
+    // молчит при перезапусках рендер-замыкания с той же картой (запись
+    // ответа, пересборка slides), звучит только новой карте. Reverse
+    // озвучивается при раскрытии ответа (speak_reverse_answer).
+    let is_muted =
+        use_context::<super::lesson_state::LessonContext>().map(|lesson_ctx| lesson_ctx.is_muted);
+    let autoplay_ctx = ctx_stored;
+    Effect::new(move |_| {
+        let card_id = current_id.get();
+        if card_id.is_nil() {
+            return;
+        }
+        let ctx = autoplay_ctx.get_value();
+        let forward = ctx
+            .state
+            .with_untracked(|state| state.hand.as_ref().and_then(|h| h.subphase()))
+            == Some(AcquaintanceSubphase::Forward);
+        if !forward {
+            return;
+        }
+        let muted = is_muted
+            .as_ref()
+            .map(|signal| signal.get_untracked())
+            .unwrap_or(false);
+        if !should_autoplay_word_audio(muted, is_speech_supported()) {
+            return;
+        }
+        let word = ctx
+            .slides
+            .get_untracked()
+            .iter()
+            .find(|slide| slide.card_id() == card_id)
+            .and_then(|slide| slide.word().map(str::to_string));
+        if let Some(word) = word {
+            speak_word_immediate(&word, 1.0);
+        }
+    });
+
     // Текущая карта тренировки для тега типа в шапке: отдельный сигнал,
     // запись при монтаже не перезапускает родительские Show.
     ctx_stored
@@ -161,7 +199,7 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
 
     view! {
         <div
-            class="min-h-[60vh] flex flex-col"
+            class="flex flex-col grow"
             data-testid="acquaintance-training"
             data-card-id=move || {
                 let id = current_id.get();
@@ -172,7 +210,7 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                 }
             }
         >
-            <div class="flex-1 py-6">
+            <div class="flex-1 py-2 sm:py-3">
                 {move || {
                     let Some(card_id) = current_id.get().non_nil() else {
                         return ().into_any();
@@ -411,26 +449,15 @@ fn speak_if_supported(word: &str) {
     }
 }
 
-/// Forward-фронт слова в тренировке: автозвук вопроса через Effect —
-/// тот же механизм, что в показе (WordSlide) и карточках урока
-/// (lesson_card.rs). Никаких побочных эффектов в рендер-замыкании.
+/// Forward-фронт слова в тренировке: чистый рендер — автозвук живёт в
+/// `TrainingBody` одним Effect'ом по Memo текущей карты (дедуп: один
+/// звук на смену карты, а не на каждое перемонтирование фронта).
 #[component]
 fn WordTrainingFront(
     word: String,
     known_kanji: std::collections::HashSet<char>,
-    is_muted: Option<RwSignal<bool>>,
     native_language: NativeLanguage,
 ) -> impl IntoView {
-    let word_stored = StoredValue::new(word.clone());
-    Effect::new(move |_| {
-        let muted = is_muted
-            .as_ref()
-            .map(|signal| signal.get_untracked())
-            .unwrap_or(false);
-        if should_autoplay_word_audio(muted, is_speech_supported()) {
-            speak_word_immediate(&word_stored.get_value(), 1.0);
-        }
-    });
     view! {
         <p class="font-serif text-5xl text-[var(--fg-black)] break-words">
             <FuriganaText
@@ -450,10 +477,18 @@ fn WordTrainingFront(
 #[component]
 fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -> impl IntoView {
     let known_kanji = ctx.known_kanji;
-    let is_muted =
-        use_context::<super::lesson_state::LessonContext>().map(|lesson_ctx| lesson_ctx.is_muted);
+    // Отступы фронта зависят от фазы: пока юзер думает — воздух вокруг
+    // вопроса; после раскрытия ответа вопрос сжимается в шапку ответа
+    // (баг-репорт: огромные отступы съедали место на стороне ответа).
+    let front_class = move || {
+        if ctx.showing_answer.get() {
+            "text-center py-1"
+        } else {
+            "text-center pt-8 pb-12 sm:pt-10 sm:pb-16"
+        }
+    };
     view! {
-        <div class="text-center py-10" data-testid="acquaintance-training-front">
+        <div class=front_class data-testid="acquaintance-training-front">
             {move || {
                 let Some(slide) = ctx
                     .slides
@@ -478,7 +513,6 @@ fn TrainingFrontSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) ->
                                 <WordTrainingFront
                                     word=word
                                     known_kanji=known_kanji.get_untracked()
-                                    is_muted=is_muted
                                     native_language=ctx.native_language.get_untracked()
                                 />
                             }

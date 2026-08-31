@@ -20,6 +20,11 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
     /// (`distribute_new_cards`). Размер min(лимит дня, пул,
     /// `HAND_MAX_SIZE`).
     ///
+    /// Долги вперёд: пока в деке есть просроченные ревью-карты (не
+    /// фразы), рука не собирается — новые карты не добавляют нагрузку
+    /// к долговому ревью. Знакомство возвращается, когда due-очередь
+    /// пуста (холодный старт новых дней — частный случай).
+    ///
     /// Чистая функция от состояния knowledge_set и остатка дневного лимита:
     /// никакое состояние руки не персистится, прерванная рука естественно
     /// возвращается верхушкой пула.
@@ -37,6 +42,19 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
             .saturating_sub(user.knowledge_set().new_cards_studied_today());
         if daily_remaining == 0 {
             debug!(user_id = %user.id(), "daily new-card limit exhausted");
+            return Ok(None);
+        }
+
+        if user
+            .knowledge_set()
+            .study_cards()
+            .iter()
+            .any(|(_, study_card)| is_due_debt(study_card))
+        {
+            debug!(
+                user_id = %user.id(),
+                "due reviews pending — acquaintance hand deferred"
+            );
             return Ok(None);
         }
 
@@ -80,6 +98,83 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
 fn budget_new_cards_per_day(user: &crate::domain::User) -> usize {
     use crate::domain::DailyBudget;
     DailyBudget::from_load(*user.daily_load()).new_cards_per_day()
+}
+
+/// Долг перед знакомством: просроченное ревью НЕ-фразы. Новые карты
+/// долгом не считаются (они и есть кандидаты руки), фразы живут
+/// собственными пайплайнами, а известные («Уже знаю», стабильность
+/// выше порога) — осознанно просрочены и нагрузкой обучения не являются.
+fn is_due_debt(study_card: &StudyCard) -> bool {
+    !matches!(study_card.card(), Card::Phrase(_))
+        && !study_card.memory().is_new()
+        && !study_card.memory().is_known_card()
+        && study_card.memory().is_due()
+}
+
+#[cfg(test)]
+mod is_due_debt_tests {
+    use super::*;
+    use crate::domain::MemoryState;
+    use chrono::{Duration, Utc};
+
+    fn study_card_with(card: Card, next_review: chrono::DateTime<Utc>) -> StudyCard {
+        let mut study_card = StudyCard::new(card);
+        let memory = MemoryState::new(
+            crate::domain::Stability::new(10.0).unwrap(),
+            crate::domain::Difficulty::new(5.0).unwrap(),
+            next_review,
+        );
+        study_card.apply_review(memory, crate::domain::Rating::Good);
+        study_card
+    }
+
+    fn vocab_card() -> Card {
+        Card::Vocabulary(crate::domain::VocabularyCard::new(
+            crate::domain::Question::new("テスト".to_string()).unwrap(),
+        ))
+    }
+
+    #[test]
+    fn overdue_review_card_is_a_due_debt() {
+        let card = study_card_with(vocab_card(), Utc::now() - Duration::hours(1));
+        assert!(is_due_debt(&card));
+    }
+
+    #[test]
+    fn future_review_card_is_not_a_due_debt() {
+        // Сидированная закрытой рукой карта: ревью завтра
+        let card = study_card_with(vocab_card(), Utc::now() + Duration::days(1));
+        assert!(!is_due_debt(&card));
+    }
+
+    #[test]
+    fn new_card_is_not_a_due_debt() {
+        let card = StudyCard::new(vocab_card());
+        assert!(!is_due_debt(&card));
+    }
+
+    #[test]
+    fn overdue_phrase_is_not_a_due_debt() {
+        let card = study_card_with(
+            Card::Phrase(crate::domain::PhraseCard::new(Ulid::new())),
+            Utc::now() - Duration::hours(1),
+        );
+        assert!(!is_due_debt(&card));
+    }
+
+    #[test]
+    fn overdue_known_card_is_not_a_due_debt() {
+        // «Уже знаю»: стабильность выше порога известности — карта
+        // осознанно просрочена, знакомство из-за неё не откладывается
+        let mut known = study_card_with(vocab_card(), Utc::now() - Duration::hours(1));
+        let memory = MemoryState::new(
+            crate::domain::Stability::new(22.0).unwrap(),
+            crate::domain::Difficulty::new(3.0).unwrap(),
+            Utc::now() - Duration::hours(1),
+        );
+        known.apply_review(memory, crate::domain::Rating::Easy);
+        assert!(!is_due_debt(&known));
+    }
 }
 
 /// Порядок показа (docs/acquaintance-mode.md, правило «Порядок показа»):

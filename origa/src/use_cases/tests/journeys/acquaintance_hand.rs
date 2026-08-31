@@ -166,6 +166,66 @@ async fn select_pool_without_words_fills_hand_with_kanji_and_grammar() {
     assert_eq!(kanji + grammar, 7);
 }
 
+/// Превращает карту в просроченное ревью: стабильность/сложность любая
+/// валидная, дата следующего показа — вчера (паттерн seed_known из
+/// lesson_builder-тестов).
+fn make_card_due(user: &mut User, card_id: Ulid) {
+    let due_memory = crate::domain::MemoryState::new(
+        crate::domain::Stability::new(10.0).unwrap(),
+        crate::domain::Difficulty::new(5.0).unwrap(),
+        Utc::now() - Duration::days(1),
+    );
+    let study_card = user
+        .knowledge_set_mut()
+        .study_cards_mut_for_test()
+        .get_mut(&card_id)
+        .unwrap();
+    study_card.apply_review(due_memory, Rating::Good);
+}
+
+/// Долги вперёд: пока в деке есть просроченные ревью-карты, рука
+/// знакомства не собирается — новые карты не добавляют нагрузку к
+/// долговому ревью (docs/acquaintance-mode.md, правило «Долги вперёд»).
+#[tokio::test]
+async fn select_skips_hand_while_due_cards_are_pending() {
+    // Arrange: новые слова + одна карта с просроченным ревью
+    let mut user = user_with_new_vocab_cards(3);
+    let due_id = *user.knowledge_set().study_cards().keys().next().unwrap();
+    make_card_due(&mut user, due_id);
+    let repo = InMemoryUserRepository::with_user(user);
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act
+    let hand = select.execute(&jlpt_content).await.unwrap();
+
+    // Assert: рука не собирается — сначала юзер проходит due-долги
+    assert!(hand.is_none(), "due-долги откладывают знакомство");
+}
+
+/// Просроченная фраза — не долг для знакомства: фразы живут собственными
+/// пайплайнами и не должны навсегда блокировать руку.
+#[tokio::test]
+async fn select_keeps_hand_when_only_due_phrases_are_pending() {
+    // Arrange: новые слова + просроченная фраза
+    let mut user = user_with_new_vocab_cards(3);
+    let phrase_card_id = *user
+        .create_card(Card::Phrase(crate::domain::PhraseCard::new(Ulid::new())))
+        .unwrap()
+        .card_id();
+    make_card_due(&mut user, phrase_card_id);
+    let repo = InMemoryUserRepository::with_user(user);
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act
+    let hand = select.execute(&jlpt_content).await.unwrap();
+
+    // Assert: фраза не блокирует — рука собирается из новых слов
+    let hand = hand.expect("due-фраза не блокирует руку знакомства");
+    assert!(!hand.is_empty());
+}
+
 #[tokio::test]
 async fn completed_hand_seeds_first_review_for_tomorrow_and_spends_limit_once() {
     // Arrange: 5 новых слов → рука ровно из 5 карт
