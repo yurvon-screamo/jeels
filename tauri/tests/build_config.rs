@@ -494,4 +494,42 @@ fn lib_rs_compiles_update_machinery_out_of_store_builds() {
     );
 }
 
+/// Regression guard: `check_for_update` must gate the endpoint check behind
+/// `tauri::is_dev()` BEFORE the `.updater()` call. Without the gate,
+/// `cargo tauri dev` builds (version behind the latest release) show the
+/// update banner and can overwrite the dev binary with a released bundle.
+///
+/// `is_dev()` is compile-time (`!cfg!(feature = "custom-protocol")`): in
+/// `cargo test` builds `custom-protocol` is never enabled, so `is_dev()` is
+/// always `true` here and the production branch (endpoint check runs) cannot
+/// be covered by a behavioural test — this structural guard is the ceiling.
+/// Positional check (gate before the network call) so the guard survives
+/// indentation/reflow churn and is not satisfied by a stray `is_dev()`
+/// mention elsewhere in the file.
+#[test]
+fn check_for_update_gates_endpoint_check_behind_is_dev() {
+    let updater_commands = include_str!("../src/updater_commands.rs");
+
+    let body_start = updater_commands
+        .find("pub async fn check_for_update")
+        .expect("check_for_update missing from updater_commands.rs");
+    let body_end = updater_commands[body_start..]
+        .find("pub async fn install_update")
+        .map(|offset| body_start + offset)
+        .unwrap_or(updater_commands.len());
+
+    let body = &updater_commands[body_start..body_end];
+    let gate_pos = body
+        .find("tauri::is_dev()")
+        .expect("check_for_update must gate on tauri::is_dev()");
+    let endpoint_call_pos = body
+        .find(".updater()")
+        .expect("check_for_update must call app.updater()");
+
+    assert!(
+        gate_pos < endpoint_call_pos,
+        "tauri::is_dev() gate must run BEFORE the .updater() endpoint check"
+    );
+}
+
 const NOT_APP_STORE_GATE: &str = "#[cfg(all(any(windows, target_os = \"linux\"), not(app_store)))]";

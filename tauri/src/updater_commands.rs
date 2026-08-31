@@ -64,12 +64,23 @@ const PROGRESS_EVENT: &str = "origa-update-progress";
 /// Returns `Ok(None)` when the current build is already up to date. When an
 /// update exists, its metadata is returned AND the `Update` object is stashed
 /// in `PendingUpdate` so `install_update` can consume it without re-checking.
+///
+/// Dev builds skip the check entirely: their version is always behind the
+/// latest release, so the updater banner would offer to overwrite the dev
+/// binary with a released bundle. `tauri::is_dev()` is a compile-time signal
+/// (`!cfg!(feature = "custom-protocol")`, enabled only by `cargo tauri
+/// build`) — any binary not built through the Tauri CLI counts as dev.
 #[tauri::command]
 #[cfg(any(windows, target_os = "linux"))]
 pub async fn check_for_update(
     app: AppHandle,
     pending: State<'_, PendingUpdate>,
 ) -> Result<Option<UpdateMetadata>, String> {
+    if tauri::is_dev() {
+        tracing::debug!("updater: skipping check in dev build");
+        return Ok(None);
+    }
+
     let update = app
         .updater()
         .map_err(|e| e.to_string())?
