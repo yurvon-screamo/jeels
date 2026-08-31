@@ -9,7 +9,10 @@ use super::{Card, CardType, KnowledgeSet, StudyCard};
 use crate::domain::{JapaneseLevel, JlptContent, NativeLanguage};
 
 const MIN_LESSON_SIZE: usize = 15;
-pub(crate) const MAX_LESSON_SIZE: usize = 22;
+/// Максимум карт одного урока. Публична: размер урока — доменное
+/// правило, его читает и отбор руки знакомства (влезает ли рука
+/// поверх due-хвоста).
+pub const MAX_LESSON_SIZE: usize = 22;
 
 /// Приоритет карточек без определённого JLPT уровня — ниже всех известных уровней (N1=1)
 const UNKNOWN_JLPT_PRIORITY: u8 = 0;

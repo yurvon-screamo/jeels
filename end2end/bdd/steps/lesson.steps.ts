@@ -158,6 +158,14 @@ Then('отображается рука знакомства с карточко
     );
 });
 
+Then('полоса руки находится в хедере урока', async ({ page }) => {
+    // Полоса занимает слот LessonProgress в общем хедере (header.rs):
+    // прогресс не съедает полезную высоту карточки знакомства.
+    const header = page.getByTestId("lesson-header");
+    await expect(header).toBeVisible({ timeout: 15_000 });
+    await expect(header.getByTestId("acquaintance-strip")).toBeVisible();
+});
+
 Then('отображается полоса прогресса руки', async ({ page }) => {
     await expect(page.getByTestId("acquaintance-strip")).toBeVisible({
         timeout: 15_000,

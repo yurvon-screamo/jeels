@@ -1,4 +1,6 @@
-use crate::domain::{Card, CardType, HAND_MAX_SIZE, JlptContent, OrigaError, StudyCard};
+use crate::domain::{
+    Card, CardType, HAND_MAX_SIZE, JlptContent, MAX_LESSON_SIZE, OrigaError, StudyCard,
+};
 use crate::traits::UserRepository;
 use std::collections::HashSet;
 use tracing::{debug, info};
@@ -20,6 +22,13 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
     /// (`distribute_new_cards`). Размер min(лимит дня, пул,
     /// `HAND_MAX_SIZE`).
     ///
+    /// Долги вперёд с коротким хвостом: due-очередь, поверх которой
+    /// помещается полная рука (`due_debts + HAND_MAX_SIZE <=
+    /// MAX_LESSON_SIZE`), знакомство не откладывает — рука кладётся
+    /// поверх хвоста (историческое поведение впрыска). Глубокая очередь
+    /// (полная рука не влезает) — рука откладывается до очистки долга.
+    /// Фразы и «уже знаю» долгом не считаются.
+    ///
     /// Чистая функция от состояния knowledge_set и остатка дневного лимита:
     /// никакое состояние руки не персистится, прерванная рука естественно
     /// возвращается верхушкой пула.
@@ -37,6 +46,21 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
             .saturating_sub(user.knowledge_set().new_cards_studied_today());
         if daily_remaining == 0 {
             debug!(user_id = %user.id(), "daily new-card limit exhausted");
+            return Ok(None);
+        }
+
+        let due_debts = user
+            .knowledge_set()
+            .study_cards()
+            .iter()
+            .filter(|(_, study_card)| is_due_debt(study_card))
+            .count();
+        if due_debt_capacity_exceeded(due_debts) {
+            debug!(
+                user_id = %user.id(),
+                due_debts,
+                "due queue too deep for a hand on top — acquaintance deferred"
+            );
             return Ok(None);
         }
 
@@ -80,6 +104,105 @@ impl<'a, R: UserRepository> SelectAcquaintanceHandUseCase<'a, R> {
 fn budget_new_cards_per_day(user: &crate::domain::User) -> usize {
     use crate::domain::DailyBudget;
     DailyBudget::from_load(*user.daily_load()).new_cards_per_day()
+}
+
+/// Долг перед знакомством: просроченное ревью НЕ-фразы. Новые карты
+/// долгом не считаются (они и есть кандидаты руки), фразы живут
+/// собственными пайплайнами, а известные («Уже знаю», стабильность
+/// выше порога) — осознанно просрочены и нагрузкой обучения не являются.
+fn is_due_debt(study_card: &StudyCard) -> bool {
+    !matches!(study_card.card(), Card::Phrase(_))
+        && !study_card.memory().is_new()
+        && !study_card.memory().is_known_card()
+        && study_card.memory().is_due()
+}
+
+/// Влезает ли полная рука поверх due-хвоста в один урок. Короткий
+/// хвост (`due_debts + HAND_MAX_SIZE <= MAX_LESSON_SIZE`) руку не
+/// откладывает; глубокая очередь — откладывает до очистки долга.
+fn due_debt_capacity_exceeded(due_debts: usize) -> bool {
+    due_debts.saturating_add(HAND_MAX_SIZE) > MAX_LESSON_SIZE
+}
+
+#[cfg(test)]
+mod is_due_debt_tests {
+    use super::*;
+    use crate::domain::MemoryState;
+    use chrono::{Duration, Utc};
+
+    fn study_card_with(card: Card, next_review: chrono::DateTime<Utc>) -> StudyCard {
+        let mut study_card = StudyCard::new(card);
+        let memory = MemoryState::new(
+            crate::domain::Stability::new(10.0).unwrap(),
+            crate::domain::Difficulty::new(5.0).unwrap(),
+            next_review,
+        );
+        study_card.apply_review(memory, crate::domain::Rating::Good);
+        study_card
+    }
+
+    fn vocab_card() -> Card {
+        Card::Vocabulary(crate::domain::VocabularyCard::new(
+            crate::domain::Question::new("テスト".to_string()).unwrap(),
+        ))
+    }
+
+    #[test]
+    fn overdue_review_card_is_a_due_debt() {
+        let card = study_card_with(vocab_card(), Utc::now() - Duration::hours(1));
+        assert!(is_due_debt(&card));
+    }
+
+    #[test]
+    fn future_review_card_is_not_a_due_debt() {
+        // Сидированная закрытой рукой карта: ревью завтра
+        let card = study_card_with(vocab_card(), Utc::now() + Duration::days(1));
+        assert!(!is_due_debt(&card));
+    }
+
+    #[test]
+    fn new_card_is_not_a_due_debt() {
+        let card = StudyCard::new(vocab_card());
+        assert!(!is_due_debt(&card));
+    }
+
+    #[test]
+    fn overdue_phrase_is_not_a_due_debt() {
+        let card = study_card_with(
+            Card::Phrase(crate::domain::PhraseCard::new(Ulid::new())),
+            Utc::now() - Duration::hours(1),
+        );
+        assert!(!is_due_debt(&card));
+    }
+
+    #[test]
+    fn overdue_known_card_is_not_a_due_debt() {
+        // «Уже знаю»: стабильность выше порога известности — карта
+        // осознанно просрочена, знакомство из-за неё не откладывается
+        let mut known = study_card_with(vocab_card(), Utc::now() - Duration::hours(1));
+        let memory = MemoryState::new(
+            crate::domain::Stability::new(22.0).unwrap(),
+            crate::domain::Difficulty::new(3.0).unwrap(),
+            Utc::now() - Duration::hours(1),
+        );
+        known.apply_review(memory, crate::domain::Rating::Easy);
+        assert!(!is_due_debt(&known));
+    }
+
+    #[test]
+    fn short_due_tail_fits_hand_capacity() {
+        // MAX_LESSON_SIZE - HAND_MAX_SIZE долгов: полная рука ещё влезает
+        let tail = MAX_LESSON_SIZE - HAND_MAX_SIZE;
+        assert!(!due_debt_capacity_exceeded(tail));
+        assert!(!due_debt_capacity_exceeded(0));
+    }
+
+    #[test]
+    fn deep_due_queue_exceeds_hand_capacity() {
+        // Одним долгом больше — рука поверх хвоста не помещается
+        let deep = MAX_LESSON_SIZE - HAND_MAX_SIZE + 1;
+        assert!(due_debt_capacity_exceeded(deep));
+    }
 }
 
 /// Порядок показа (docs/acquaintance-mode.md, правило «Порядок показа»):

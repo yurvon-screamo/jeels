@@ -1165,6 +1165,7 @@ mod acquaintance_training {
     use crate::pages::lesson::acquaintance_state::{
         AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
     };
+    use crate::pages::lesson::acquaintance_view::AcquaintanceHeaderStrip;
     use crate::pages::lesson::acquaintance_view::AcquaintanceView;
     use crate::pages::lesson::training_view::TrainingBody;
     use ulid::Ulid;
@@ -1280,7 +1281,7 @@ mod acquaintance_training {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -1423,7 +1424,7 @@ mod acquaintance_training {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -1783,6 +1784,7 @@ mod acquaintance_presentation {
     use crate::pages::lesson::acquaintance_state::{
         AcquaintanceContext, AcquaintanceSlideData, AcquaintanceStage, AcquaintanceState,
     };
+    use crate::pages::lesson::acquaintance_view::AcquaintanceHeaderStrip;
     use crate::pages::lesson::acquaintance_view::AcquaintanceView;
     use crate::ui_components::ReadingItem;
     use ulid::Ulid;
@@ -1832,7 +1834,7 @@ mod acquaintance_presentation {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -1866,7 +1868,7 @@ mod acquaintance_presentation {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -1915,7 +1917,7 @@ mod acquaintance_presentation {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -1954,7 +1956,7 @@ mod acquaintance_presentation {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -2009,7 +2011,7 @@ mod acquaintance_presentation {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
@@ -2059,7 +2061,7 @@ mod acquaintance_presentation {
         let c2 = ctx.clone();
         mount_with_i18n(&wrapper, move || {
             provide_context(c2.clone());
-            view! { <AcquaintanceView /> }.into_any()
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
         });
         tick().await;
 
