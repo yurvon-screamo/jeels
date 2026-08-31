@@ -113,7 +113,9 @@ RUN --mount=type=cache,target=/root/.cargo/registry,sharing=locked \
     trunk build --release --dist dist
 
 # Runtime: TrailBase + SPA static files
-FROM trailbase/trailbase:0.33.5
+# TEMP: test image carrying the Apple `response_mode=form_post` fix
+# (trailbaseio/trailbase#282) until an upstream release ships it. Based on v0.33.5.
+FROM ghcr.io/yurvon-screamo/trailbase:apple-formpost
 
 USER root
 WORKDIR /app
