@@ -123,7 +123,7 @@ export async function completeTrainingUntilCriterion(
 /// нажимает «Уже знаю» (спека: рука исчезает без тренировки и траты
 /// лимита). Быстрый путь для BDD-сценариев — полный тренировочный флоу
 /// покрывает сценарий «Полный круг руки: показ, тренировка до критерия,
-/// переход к ревью» в lesson.feature. Возвращает true, когда рука была.
+/// завершение урока» в lesson.feature. Возвращает true, когда рука была.
 export async function completeAcquaintanceHandIfPresent(
 	page: Page,
 ): Promise<boolean> {
@@ -144,11 +144,13 @@ export async function completeAcquaintanceHandIfPresent(
 		// Модалка закрывается с анимацией; после неё — следующий слайд.
 		await page.waitForTimeout(350);
 	}
-	// Хелпер завершает ПОКАЗОМ переходного экрана «теперь к повторению» —
-	// дальше сценарии сами ассертят его и жмут кнопку (или возвращаются).
-	await expect(page.getByTestId("acquaintance-completed")).toBeVisible({
-		timeout: 15_000,
-	});
+	// Хелпер завершает закрытием руки: дальше либо переходный экран
+	// «теперь к повторению» (ревью не пусто), либо экран завершения урока
+	// (ревью пусто — рука закрывает урок сразу). Какой именно — сценарии
+	// ассертят сами и жмут свои кнопки (или возвращаются).
+	const completed = page.getByTestId("acquaintance-completed");
+	const lessonComplete = page.getByTestId("lesson-complete-screen");
+	await expect(completed.or(lessonComplete)).toBeVisible({ timeout: 15_000 });
 	return true;
 }
 
