@@ -1506,6 +1506,96 @@ mod acquaintance_training {
             "тренировка исчезает после закрытия руки"
         );
     }
+
+    #[wasm_bindgen_test]
+    async fn completed_hand_counts_its_cards_in_lesson_review_count() {
+        // Юзер-репорт: урок из одной руки показывал «Пройдено: 0» —
+        // карты руки должны входить в счётчик экрана завершения.
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![(
+                    card_id,
+                    origa::domain::CardType::Kanji,
+                )])
+                .unwrap(),
+            )
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Kanji {
+            card_id,
+            kanji: "明".to_string(),
+            name: "свет".to_string(),
+            radicals: None,
+            example_words: None,
+            on_readings: None,
+            kun_readings: None,
+        }]);
+
+        // Контекст урока с наблюдаемым lesson_state: complete_hand
+        // начисляет карты руки в review_count.
+        let lesson_state = RwSignal::new(crate::pages::lesson::LessonState::default());
+        let lesson_ctx = crate::pages::lesson::LessonContext {
+            repository: crate::repository::HybridUserRepository::new(),
+            lesson_state,
+            is_completed: RwSignal::new(false),
+            reload_trigger: RwSignal::new(0),
+            is_muted: RwSignal::new(false),
+            known_kanji: RwSignal::new(HashSet::new()),
+            native_language: RwSignal::new(origa::domain::NativeLanguage::Russian),
+            core_count: RwSignal::new(0),
+        };
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(lesson_ctx);
+            provide_context(c2.clone());
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
+        });
+        tick().await;
+
+        // Три «помню» закрывают критерий кандзи — рука завершается.
+        for _ in 0..3 {
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-rating-remember\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+        }
+
+        // Персистенция — IDB-макротаск: ждём Completed реальными тиками.
+        let mut persisted = false;
+        for _ in 0..100 {
+            if ctx.state.get_untracked().stage == AcquaintanceStage::Completed {
+                persisted = true;
+                break;
+            }
+            tick().await;
+            gloo_timers::future::TimeoutFuture::new(10).await;
+        }
+        assert!(
+            persisted,
+            "stage never reached Completed: hand-close IDB write did not settle"
+        );
+
+        assert_eq!(
+            lesson_state.get_untracked().review_count,
+            1,
+            "карта руки начислена в «Пройдено» урока"
+        );
+    }
 }
 
 mod acquaintance_training_fronts {
