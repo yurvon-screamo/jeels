@@ -105,6 +105,8 @@ Then('запись на сервере содержит обновлённый k
 // state wipe. Also asserts the response is 2xx, so a CHECK-constraint (or any
 // other server-side invariant) regression surfaces here, not as a silent 500.
 //
+// Shared persistence-wait contract lives in helpers/syncwait.ts (the
+// matcher scope note below still applies to every caller).
 // Method set: TrailBase records API uses POST to create a row and PATCH to
 // update one (see trailbase_records.rs: `create` → POST, `update` → PATCH).
 // PUT is included defensively in case the wire contract evolves; GET/OPTIONS
@@ -119,7 +121,7 @@ Then('запись на сервере содержит обновлённый k
 // by reading the record id from the response of an earlier create, or by
 // inspecting the request body) so a debounced save from another mutation
 // can't satisfy the wait first.
-const RECORD_WRITE_METHODS = new Set(["POST", "PUT", "PATCH"]);
+import { waitForUserRecordWrite } from "../../helpers/syncwait";
 
 When('отмечает первую карточку избранной и дожидается сохранения', async ({ page }) => {
     const favBtn = page.locator('[data-testid*="card-item"]').first()
@@ -128,12 +130,7 @@ When('отмечает первую карточку избранной и до�
     // Register the wait BEFORE the click so the listener is in place when
     // spawn_local fires the network request; otherwise a fast save can slip
     // past the waitForResponse window.
-    const saveResponse = page.waitForResponse(
-        (resp) =>
-            /\/api\/records\/v1\/(user|domain_user)(\/|$)/.test(resp.url()) &&
-            RECORD_WRITE_METHODS.has(resp.request().method()),
-        { timeout: 15_000 },
-    );
+    const saveResponse = waitForUserRecordWrite(page);
 
     await favBtn.click();
     await expect(favBtn.locator('svg path[fill="currentColor"]')).toBeVisible({

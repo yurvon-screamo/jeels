@@ -1,8 +1,10 @@
 import { config } from "dotenv";
 import { resolve } from "path";
 
+import { end2endRoot } from "./helpers/paths";
+
 // Override system env vars with local .env values
-const { parsed } = config({ path: resolve(__dirname, ".env"), override: true });
+config({ path: resolve(end2endRoot, ".env"), override: true });
 
 export function getTrailBaseUrl(): string {
     const url = process.env.TRAILBASE_URL;

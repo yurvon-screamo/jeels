@@ -4,8 +4,10 @@ import { HomePage, LessonPage, WordsPage } from "../../pages";
 import {
 	answerTrainingForgot,
 	answerTrainingRemember,
+	awaitHandVisible,
 	completeAcquaintanceHandIfPresent,
 	completeLessonFlexible,
+	completeTrainingUntilCriterion,
 	runAcquaintancePresentation,
 } from "../../helpers/lesson";
 
@@ -164,33 +166,29 @@ Then('отображается полоса прогресса руки', async 
 
 When('оценивает каждую карточку как Good', async ({ page }) => {
     const lessonPage = new LessonPage(page);
-    await completeLessonFlexible(lessonPage, page);
-});
-
-Then('отображается экран завершения урока', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.completeScreen).toBeVisible({ timeout: 15_000 });
-});
-
-When('нажимает кнопку показа ответа', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await lessonPage.showAnswer();
-});
-
-Then('отображаются кнопки оценки', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.ratingAgain).toBeVisible();
-    await expect(lessonPage.ratingGood).toBeVisible();
+    // Новые карты идут через руку знакомства (acquaintance): проходим её
+    // честно (показ → тренировка до критерия → переходный экран), после
+    // чего добиваем классический урок рейтингом Good. Ревью карт руки
+    // назначены на завтра — сразу после перехода урок обычно пуст.
+    // Bounded wait (не мгновенный снапшот): рука может смонтироваться
+    // позже проверки — иначе шаг молча ушёл бы в классическую ветку.
+    if (await awaitHandVisible(page, 5_000)) {
+        await runAcquaintancePresentation(page);
+        await completeTrainingUntilCriterion(page);
+        // Completed-экран монтируется ПОСЛЕ завершения персистенции руки
+        // (фикс #462: сейв до stage=Completed) — кнопка «К повторению»
+        // существует только у зафиксированного состояния, полная
+        // перезагрузка следующим шагом уже не может обогнать запись.
+        await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
+    }
+    if (await lessonPage.lessonContent.isVisible().catch(() => false)) {
+        await completeLessonFlexible(lessonPage, page);
+    }
 });
 
 When('нажимает кнопку возврата с урока', async ({ page }) => {
     const lessonPage = new LessonPage(page);
     await lessonPage.clickBack();
-});
-
-Then('отображается текст прогресса урока', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.progressText).toBeVisible();
 });
 
 When('нажимает кнопку звука', async ({ page }) => {
@@ -201,37 +199,6 @@ When('нажимает кнопку звука', async ({ page }) => {
 Then('звук переключён', async ({ page }) => {
     const lessonPage = new LessonPage(page);
     await expect(lessonPage.muteButton).toHaveAttribute("data-muted", "true");
-});
-
-Then('отображается статистика завершения', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await expect(lessonPage.completeStats).toBeVisible();
-});
-
-When('нажимает кнопку возврата на главную с завершения', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await lessonPage.clickHome();
-});
-
-When('нажимает кнопку следующего урока', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    await lessonPage.clickNextLesson();
-    await lessonPage.lessonLoading.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
-    await lessonPage.lessonLoading.waitFor({ state: "hidden", timeout: 30_000 }).catch(() => {});
-});
-
-Then('начинается новый урок или пустое состояние', async ({ page }) => {
-    const lessonPage = new LessonPage(page);
-    // Gherkin names two outcomes (fresh lesson / diagnosed empty state);
-    // the impl silently also accepts `lessonError` as a third outcome.
-    // That allowance is deliberate anti-flakiness: the next lesson's card
-    // load races with the WASM sync layer and may surface a transient
-    // load error instead of content. The error path is NOT the behaviour
-    // under test here, so it is tolerated rather than asserted.
-    const hasContent = await lessonPage.lessonContent.isVisible({ timeout: 5_000 }).catch(() => false);
-    const hasEmpty = await lessonPage.lessonEmptyState.isVisible({ timeout: 5_000 }).catch(() => false);
-    const hasError = await lessonPage.lessonError.isVisible({ timeout: 5_000 }).catch(() => false);
-    expect(hasContent || hasEmpty || hasError).toBe(true);
 });
 
 When('пользователь устанавливает размер экрана планшета', async ({ page }) => {
@@ -280,7 +247,7 @@ Then('рука не уменьшается и показывается нова�
     await slide.waitFor({ state: "visible", timeout: 15_000 });
     // Замена асинхронна (mark-known → пул → слайды): ждём, пока слот
     // займёт новая карта — рендер мог не успеть за скрытием модалки.
-    const current = await expect
+    await expect
         .poll(async () => (await slide.getAttribute("data-card-id")) ?? "", {
             timeout: 15_000,
             intervals: [100, 200, 400],
@@ -302,6 +269,73 @@ Then('отображается экран перехода к повторени
 
 When('пользователь продолжает к повторению', async ({ page }) => {
     await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
+});
+
+// --- Полный круг руки (миграция acquaintance_flow.spec.ts, S7) ---
+
+// Тренировка до полного критерия — contrast с fast-path «Уже знаю»
+// из шага «проходит руку знакомства»: честная ротация каждой карты.
+When('пользователь отвечает в тренировке до полного критерия', async ({ page }) => {
+    await completeTrainingUntilCriterion(page);
+});
+
+// После перехода к повторению у свежего юзера ревью-карт нет —
+// открывается обычный урок либо его штатное пустое состояние.
+Then('отображается содержимое урока или пустое состояние урока', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(
+        lessonPage.lessonContent.or(lessonPage.lessonEmptyState),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("acquaintance-view")).not.toBeVisible();
+});
+
+// Отмена подтверждения «Уже знаю»: модалка закрывается без побочных
+// действий — карта не выбывает из руки и не заменяется. Видимость
+// модалки ассертится отдельным Then (When = action, Then = assertion).
+When('пользователь нажимает «Уже знаю» в показе', async ({ page, acqKnownCard }) => {
+    const slide = page.getByTestId("acquaintance-slide");
+    await slide.waitFor({ state: "visible", timeout: 15_000 });
+    acqKnownCard.value = (await slide.getAttribute("data-card-id")) ?? null;
+    await page.getByTestId("acquaintance-know-btn").click({ timeout: 5_000 });
+});
+
+Then('отображается подтверждение «Уже знаю»', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-know-confirm")).toBeVisible();
+});
+
+When('пользователь отменяет подтверждение «Уже знаю»', async ({ page }) => {
+    await page.getByTestId("acquaintance-know-confirm-cancel").click({ timeout: 5_000 });
+});
+
+Then('модалка закрыта и карта остаётся в руке', async ({ page, acqKnownCard }) => {
+    await expect(page.getByTestId("acquaintance-know-confirm")).not.toBeVisible();
+    const slide = page.getByTestId("acquaintance-slide");
+    await expect(slide).toBeVisible();
+    // Усиление сверх исходного спека: отменённое «Уже знаю» не должно
+    // даже менять слот слайда — это та же карта, что была до клика.
+    await expect
+        .poll(async () => (await slide.getAttribute("data-card-id")) ?? "", {
+            timeout: 5_000,
+            intervals: [100, 200, 400],
+        })
+        .toBe(acqKnownCard.value ?? "");
+    await expect(page.getByTestId("acquaintance-view")).toBeVisible();
+});
+
+// --- Клавиатура: Пробел на экране перехода продолжает к повторению
+// (тот же хендл, что у кнопки — acquaintance_view.rs §8.3) ---
+
+When('нажимает клавишу Пробел', async ({ page }) => {
+    await page.keyboard.press(" ");
+});
+
+// --- Клавиатура в тренировке: Пробел до раскрытия = «Показать ответ»
+// (acquaintance_keyboard.rs: Training + Space → Reveal). ---
+
+Then('отображается ответ тренировки', async ({ page }) => {
+    await expect(page.getByTestId("acquaintance-training-answer")).toBeVisible({
+        timeout: 5_000,
+    });
 });
 
 Then('последняя карта круга не открывает следующий', async ({ acqTrainingLog }) => {

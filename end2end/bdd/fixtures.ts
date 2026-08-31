@@ -28,6 +28,7 @@ export const test = base.extend<
         acqTrainingLog: string[];
         acqKnownCard: { value: string | null };
         acqTargetCard: { value: string | null };
+        loginGateRelease: { release: (() => Promise<void>) | null };
     },
     object
 >({
@@ -76,6 +77,16 @@ export const test = base.extend<
     acqTargetCard: [
         async ({}, use) => {
             await use({ value: null as string | null });
+        },
+        { scope: "test" },
+    ],
+    // Release callback of the held login request (spinner test): the
+    // "held" When-step stores it here, the "released" step calls it —
+    // manual gate instead of a fixed sleep, so the in-flight assert
+    // cannot flake on timing.
+    loginGateRelease: [
+        async ({}, use) => {
+            await use({ release: null });
         },
         { scope: "test" },
     ],

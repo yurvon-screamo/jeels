@@ -173,11 +173,6 @@ When('нажимает хлебные крошки', async ({ page }) => {
     await page.waitForURL(/\/grammar$/, { timeout: 10_000 });
 });
 
-Then('отображается кнопа отметки как известное', async ({ page }) => {
-    const card = page.getByTestId("grammar-card-item").first();
-    await expect(card.getByTestId("grammar-card-item-mark-known-btn")).toBeVisible();
-});
-
 Given('у пользователя есть много грамматических карточек', async ({ page }) => {
     const grammarPage = new GrammarPage(page);
     await grammarPage.goto();

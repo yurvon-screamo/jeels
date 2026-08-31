@@ -76,7 +76,7 @@ export class HomePage extends BasePage {
     // Today Overview
     this.todayOverview = page.getByTestId("home-today-overview");
     this.todayTotalCount = this.todayOverview.locator(
-      ".font-serif.text-\[48px\]",
+      ".font-serif.text-[48px]",
     );
 
     // Activity Chart

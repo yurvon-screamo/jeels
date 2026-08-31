@@ -336,7 +336,11 @@ pub fn ProtectedRoute(children: ChildrenFn) -> impl IntoView {
                 Some((completed, LOADING_RESOURCES_TOTAL as u32))
             });
             view! {
-                <LoadingOverlay message=loading_msg progress />
+                <LoadingOverlay
+                    message=loading_msg
+                    progress
+                    test_id="app-loading-overlay"
+                />
             }
             .into_any()
         } else if is_authenticated.get() {

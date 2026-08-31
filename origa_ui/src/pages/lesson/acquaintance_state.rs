@@ -162,9 +162,14 @@ impl AcquaintanceContext {
     /// одной операцией (S2), затем сразу ревью урока — без итогового
     /// экрана. Вызывается из конца тренировки (`HandCompleted`) и из
     /// показа, когда выведены все карты.
+    ///
+    /// Персистенция выполняется ДО перевода стадии в `Completed`: кнопка
+    /// «К повторению» и её Space-хендлер существуют только после того, как
+    /// запись закоммитилась, поэтому навигация или перезагрузка страницы
+    /// физически не могут обогнать сейв (баг #462: сидирование терялось,
+    /// когда тест/пользователь перезагружал страницу сразу после
+    /// завершения руки — fire-and-forget `spawn_local` не успевал).
     pub fn complete_hand(&self) {
-        self.state
-            .update(|state| state.stage = AcquaintanceStage::Completed);
         let ids = self.state.with(|state| {
             state
                 .hand
@@ -173,6 +178,7 @@ impl AcquaintanceContext {
                 .unwrap_or_default()
         });
         let repo = self.repository.clone();
+        let state = self.state;
         spawn_local(async move {
             // Сидирование выполняет CompleteAcquaintanceHandUseCase (S2):
             // первый ревью назавтра всем картам руки + лимит одной операцией.
@@ -180,8 +186,12 @@ impl AcquaintanceContext {
                 .execute(ids)
                 .await
             {
+                // Локальная запись (IndexedDB) падает крайне редко; застрять
+                // на тренировке хуже, чем потерять сидирование — завершаем
+                // и при ошибке, деградация видна в логах.
                 tracing::error!("Acquaintance hand completion failed: {e}");
             }
+            state.update(|state| state.stage = AcquaintanceStage::Completed);
         });
     }
 }

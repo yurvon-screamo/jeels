@@ -318,11 +318,42 @@ jobs:
                   path: origa_ui/dist/
                   retention-days: 1
 
+    # Fails fast when a BDD scenario is silently excluded from the matrix
+    # (dead) or runs in several groups (duplicated). Born from a real hole:
+    # the old `Фразы$` grep anchor excluded the whole phrases.feature while
+    # CI stayed green. Patterns below are anchored by generated spec FILE
+    # NAMES (`features/<name>.feature.spec.js` in the Playwright title path),
+    # which is collision-proof — unlike feature-title substrings
+    # ("Фразы" also matches "Фразы после онбординга").
+    # Enforced by end2end/scripts/check-ci-matrix.mjs; keep the scenario
+    # inventory and the matrix in sync through it, not by hand.
+    e2e-matrix-guard:
+        name: E2E Matrix Guard
+        permissions:
+            contents: read
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: "20"
+
+            - name: Install Node.js dependencies
+              working-directory: end2end
+              run: npm ci
+
+            - name: Verify every BDD scenario runs in CI exactly once
+              working-directory: end2end
+              run: node scripts/check-ci-matrix.mjs
+
     e2e:
         name: E2E ${{ matrix.group }}
         permissions:
             contents: read
-        needs: e2e-build
+        needs: [e2e-build, e2e-matrix-guard]
         runs-on: ubuntu-24.04
         strategy:
             fail-fast: false
@@ -417,24 +448,24 @@ jobs:
               run: |
                   case "${{ matrix.group }}" in
                     core)
-                      npx playwright test --project=bdd --retries=0 \
-                        --grep "Дымовой тест|Сохранение сессии|Навигация|Главная страница"
+                      npx playwright test --project=bdd --retries=1 \
+                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en)\.feature\.spec\.js"
                       ;;
                     words)
-                      npx playwright test --project=bdd --retries=0 \
-                        --grep "Управление словами|Управление наборами слов|Фразы$"
+                      npx playwright test --project=bdd --retries=1 \
+                        --grep "features/(words|sets|phrases)\.feature\.spec\.js"
                       ;;
                     grammar-kanji)
-                      npx playwright test --project=bdd --retries=0 \
-                        --grep "Управление грамматикой|Управление кандзи"
+                      npx playwright test --project=bdd --retries=1 \
+                        --grep "features/(grammar|kanji)\.feature\.spec\.js"
                       ;;
                     profile-sync)
-                      npx playwright test --project=bdd --retries=0 \
-                        --grep "Профиль пользователя|Синхронизация данных|Аутентификация"
+                      npx playwright test --project=bdd --retries=1 \
+                        --grep "features/(profile|sync|auth)\.feature\.spec\.js"
                       ;;
                     onboarding-lesson)
-                      npx playwright test --project=bdd --retries=0 \
-                        --grep "Прохождение онбординга|Оценивание карточек при онбординге|Прохождение урока|Фразы после онбординга"
+                      npx playwright test --project=bdd --retries=1 \
+                        --grep "features/(onboarding|onboarding_scoring|lesson|lesson_empty_state|phrases_onboarding)\.feature\.spec\.js"
                       ;;
                   esac
 

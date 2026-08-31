@@ -1448,9 +1448,23 @@ mod acquaintance_training {
         }
 
         // Переходный экран: закрытая рука сначала объясняет, что дальше.
-        assert_eq!(
-            ctx.state.get_untracked().stage,
-            AcquaintanceStage::Completed
+        // Stage=Completed выставляется ПОСЛЕ завершения персистенции руки
+        // (фикс #462: сейв до Completed). Персистенция — IDB-макротаск,
+        // поэтому кроме tick (микротаски) ждём реальные 10мс таймером,
+        // иначе event loop не дойдёт до коммита транзакции.
+        let mut persisted = false;
+        for _ in 0..100 {
+            if ctx.state.get_untracked().stage == AcquaintanceStage::Completed {
+                persisted = true;
+                break;
+            }
+            tick().await;
+            gloo_timers::future::TimeoutFuture::new(10).await;
+        }
+        assert!(
+            persisted,
+            "persistence poll exhausted (~1s): stage never reached Completed — \
+             the hand-close IDB write did not settle"
         );
         assert!(
             wrapper

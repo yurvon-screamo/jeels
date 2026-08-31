@@ -9,7 +9,9 @@ const bddTestDir = defineBddConfig({
 });
 
 export default defineConfig({
-    testDir: "./tests",
+    // No root testDir: native *.spec.ts tests were decommissioned — all
+    // scenarios live in Gherkin now; the bdd project owns its testDir via
+    // defineBddConfig.
     timeout: 60000,
     expect: {
         timeout: 10000,
@@ -43,12 +45,6 @@ export default defineConfig({
         },
     },
     projects: [
-        {
-            name: "chromium",
-            use: {
-                ...devices["Desktop Chrome"],
-            },
-        },
         {
             name: "bdd",
             testDir: bddTestDir,

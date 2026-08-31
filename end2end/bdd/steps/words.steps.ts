@@ -1,4 +1,5 @@
 import path from "path";
+import { end2endRoot } from "../../helpers/paths";
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
 import { WordsPage } from "../../pages";
@@ -107,16 +108,6 @@ When('пользователь отмечает первое слово как �
     await wordsPage.markCardAsKnownByIndex(0);
 });
 
-When('пользователь нажимает кнопку избранного первого слова', async ({ page }) => {
-    const wordsPage = new WordsPage(page);
-    await wordsPage.toggleFavoriteByIndex(0);
-});
-
-Then('первое слово отмечено как избранное', async ({ page }) => {
-    const wordsPage = new WordsPage(page);
-    expect(await wordsPage.isFavorited(0)).toBe(true);
-});
-
 When('открывает модальное окно добавления слов', async ({ page }) => {
     const wordsPage = new WordsPage(page);
     await wordsPage.openAddModal();
@@ -165,7 +156,7 @@ Then('отображается ошибка импорта Anki', async ({ page 
 
 When('загружает валидный Anki файл', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadAnkiFile(path.resolve(__dirname, "../../fixtures/sample.apkg"));
+    await wordsPage.uploadAnkiFile(path.resolve(end2endRoot, "fixtures/sample.apkg"));
 
     // Anki import is a multi-stage flow inside one user action:
     //   1. .apkg upload → field-mapping stage
@@ -190,7 +181,7 @@ When('переключает на вкладку изображения', async 
 
 When('загружает изображение для распознавания', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadImageFile(path.resolve(__dirname, "../../../origa/src/ocr/ocr_example.jpg"));
+    await wordsPage.uploadImageFile(path.resolve(end2endRoot, "../origa/src/ocr/ocr_example.jpg"));
     // OCR pulls ML models on first run (~50 MB), then recognizes text and
     // auto-analyzes it. The "Найдено" marker indicates analysis is complete.
     await wordsPage.drawer.getByText(/Найдено/).waitFor({ state: "visible", timeout: 600_000 });
@@ -206,7 +197,7 @@ When('переключает на вкладку аудио', async ({ page }) =
 
 When('загружает аудио для транскрипции', async ({ page }) => {
     const wordsPage = new WordsPage(page);
-    await wordsPage.uploadAudioFile(path.resolve(__dirname, "../../fixtures/standard_sample1.wav"));
+    await wordsPage.uploadAudioFile(path.resolve(end2endRoot, "fixtures/standard_sample1.wav"));
     // Whisper model is pulled on first run (~75 MB), then audio is transcribed
     // and the resulting text is auto-analyzed.
     await wordsPage.drawer.getByText(/Найдено/).waitFor({ state: "visible", timeout: 600_000 });
