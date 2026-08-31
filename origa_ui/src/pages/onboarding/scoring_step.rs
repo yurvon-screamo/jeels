@@ -44,6 +44,13 @@ pub fn ScoringStep(
 
     let i18n_for_load = i18n;
     Effect::new(move |_| {
+        // Read the locale synchronously in the Effect body so the access is
+        // tracked: inside `spawn_local` after an `.await` it would be
+        // untracked (Leptos "outside a reactive tracking context" warning)
+        // and a locale change (e.g. the auth session syncing the user's
+        // language) would never re-run this loader — the scoring queue would
+        // keep labels in the stale language.
+        let locale = i18n_for_load.get_locale();
         let repo = repo_for_load.clone();
         spawn_local(async move {
             let Ok(Some(user)) = repo.get_current_user().await else {
@@ -54,9 +61,9 @@ pub fn ScoringStep(
                 return;
             }
 
-            let lang = crate::i18n::locale_to_native_language(&i18n_for_load.get_locale());
+            let lang = crate::i18n::locale_to_native_language(&locale);
             let mut scoring_cards =
-                build_scoring_cards(user.knowledge_set().study_cards(), &lang, i18n_for_load);
+                build_scoring_cards(user.knowledge_set().study_cards(), &lang, locale);
 
             // Drop cards the user already answered "don't know" to in a prior
             // session — these are persisted per-click so the scoring step

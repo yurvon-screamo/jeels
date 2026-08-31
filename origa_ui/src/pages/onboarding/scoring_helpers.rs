@@ -36,10 +36,9 @@ fn format_kanji_readings(card: &origa::domain::KanjiCard, locale: Locale) -> Opt
 pub(super) fn extract_card_data(
     study_card: &StudyCard,
     lang: &NativeLanguage,
-    i18n: I18nContext<Locale>,
+    locale: Locale,
 ) -> ScoringCard {
     let card_id = *study_card.card_id();
-    let locale = i18n.get_locale();
     let no_translation = || td_string!(locale, common.no_translation).to_string();
     match study_card.card() {
         DomainCard::Vocabulary(v) => ScoringCard {
@@ -95,12 +94,12 @@ pub(super) fn extract_card_data(
 pub(super) fn build_scoring_cards(
     study_cards: &std::collections::HashMap<Ulid, StudyCard>,
     lang: &NativeLanguage,
-    i18n: I18nContext<Locale>,
+    locale: Locale,
 ) -> Vec<ScoringCard> {
     let mut cards: Vec<ScoringCard> = study_cards
         .values()
         .filter(|sc| sc.memory().is_new())
-        .map(|sc| extract_card_data(sc, lang, i18n))
+        .map(|sc| extract_card_data(sc, lang, locale))
         .collect();
     cards.sort_by(|a, b| {
         a.card_type
