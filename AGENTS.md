@@ -145,6 +145,14 @@ CI: lint + test + e2e + docker build (2 images: landing + ui).
 CD: 2 Docker images (GHCR) + Railway deploy (2 services).
 Targets: Windows x86_64, Linux x86_64, macOS aarch64. Релиз при push `master` + tag `v*.*.*`.
 
+**Path-based job filtering** (`ci.yml`, PR-only): джоба `changes` (dorny/paths-filter, SHA-pinned) превращает изменённые компоненты в per-job флаги `run_*`; джобы скипаются через `if: needs.changes.outputs.run_<job> == 'true'`. Компоненты: `core` (origa/**, Cargo.*, build_defaults.rs, .cargo/**, .dockerignore, .taurignore, lint-конфиги), `wasm` (origa_ui), `landing`, `tauri` (+tauri-plugin-aswebauth), `e2e` (end2end), `utils`, `ci` (.github → полный прогон). Релизные теги и workflow_dispatch форсируют полный прогон. Docs/scripts-only PR скипает весь CI.
+
+Инварианты (нарушение = silent skip / дырявый gate, доктрина в шапке ci.yml):
+
+1. Gate: `skipped` легален ТОЛЬКО при `run_* == false` (path-skip); skip при `run=true` (каскадный отказ upstream) роняет CI Gate — единственный required check, fail-closed под auto-merge. `if: always()` на `check` не удалять.
+2. Условие джобы ⊆ объединение условий её фильтруемых needs (иначе skipped-dependency молча скипает джобу).
+3. Новая джоба: добавить `run_*` output в `changes`, `if`, строку в `check.needs` + `gate()`-ассерт.
+
 ## Границы
 
 ### ✅ ВСЕГДА

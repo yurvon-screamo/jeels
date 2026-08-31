@@ -19,7 +19,150 @@ permissions:
     contents: read
     actions: write
 
+# Path-based job filtering
+# ========================
+# The `changes` job detects which components a PR touches (via
+# dorny/paths-filter, SHA-pinned) and turns them into per-job `run_*`
+# flags. Filtered jobs skip themselves with
+# `if: needs.changes.outputs.run_<job> == 'true'`.
+# Non-PR events (release tags, workflow_dispatch) force every run_* to
+# true — the release pipeline is always a full run. Exception:
+# run_macos_check carries the dependabot actor clause and can be false
+# on non-PR events too.
+#
+# Invariants — violate these and CI silently rots:
+# 1. CI Gate: a `skipped` result is legal ONLY when the job's run_* flag
+#    is false (path-filter skip). A skip with run_*=true means an
+#    upstream dependency failed/was cancelled and MUST fail the gate.
+#    This is what keeps the single required check fail-closed under
+#    auto-merge. Do NOT remove `if: always()` from the check job.
+# 2. A filtered job's run_* condition must be a subset of the union of
+#    its filtered needs' conditions — otherwise a skipped dependency
+#    silently skips the job even when its own flag is true.
+# 3. `changes` and `version` are never path-filtered: the gate asserts
+#    them success-only (a failed detection run must turn the PR red,
+#    not green).
+# 4. e2e-report has no run flag of its own: it follows e2e's RESULT
+#    (`!= 'skipped'`) and is asserted in the gate through run_e2e.
+#
+# Adding a job: add a run_* output to `changes`, wire the job's if, add
+# the job to check.needs AND a gate() assertion line.
+
 jobs:
+    changes:
+        name: Detect changes
+        permissions:
+            contents: read
+            pull-requests: read
+        runs-on: ubuntu-latest
+        outputs:
+            run_lint: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.landing == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.utils == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_macos_check: >-
+              ${{ (github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.ci == 'true') &&
+              github.actor != 'dependabot[bot]' }}
+            run_cdn_download: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.e2e == 'true' ||
+              steps.components.outputs.utils == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_test: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.utils == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_wasm_test: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_e2e_build: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.e2e == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_e2e_matrix_guard: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.e2e == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_e2e: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.e2e == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_build_tauri: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_build_macos: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_docker_landing: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.landing == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+            run_docker_ui: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.wasm == 'true' ||
+              steps.components.outputs.ci == 'true' }}
+        steps:
+            # PR-only: on tags/dispatch the step is skipped, its outputs
+            # stay empty, and the `github.event_name != 'pull_request'`
+            # prefix in every run_* forces a full run.
+            - name: Detect changed components
+              id: components
+              if: github.event_name == 'pull_request'
+              uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+              with:
+                  filters: |
+                      core:
+                          - origa/**
+                          - Cargo.toml
+                          - Cargo.lock
+                          - build_defaults.rs
+                          - .cargo/**
+                          - .dockerignore
+                          - .taurignore
+                          - .rustfmt.toml
+                          - clippy.toml
+                      wasm:
+                          - origa_ui/**
+                      landing:
+                          - origa_landing/**
+                      tauri:
+                          - tauri/**
+                          - tauri-plugin-aswebauth/**
+                      e2e:
+                          - end2end/**
+                      utils:
+                          - utils/**
+                      ci:
+                          - .github/**
+
     version:
         name: Version
         permissions:
@@ -52,8 +195,9 @@ jobs:
         name: Check (aarch64 macOS)
         permissions:
             contents: read
+        needs: [changes]
+        if: needs.changes.outputs.run_macos_check == 'true'
         runs-on: macos-15
-        if: github.actor != 'dependabot[bot]'
         env:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
         steps:
@@ -86,6 +230,8 @@ jobs:
         name: Lint
         permissions:
             contents: read
+        needs: [changes]
+        if: needs.changes.outputs.run_lint == 'true'
         runs-on: ubuntu-24.04
         env:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
@@ -143,6 +289,8 @@ jobs:
         name: Download CDN
         permissions:
             contents: read
+        needs: [changes]
+        if: needs.changes.outputs.run_cdn_download == 'true'
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
@@ -165,7 +313,8 @@ jobs:
         name: Test
         permissions:
             contents: read
-        needs: cdn-download
+        needs: [changes, cdn-download]
+        if: needs.changes.outputs.run_test == 'true'
         runs-on: ubuntu-24.04
         env:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
@@ -220,7 +369,8 @@ jobs:
         name: WASM Component Tests
         permissions:
             contents: read
-        needs: cdn-download
+        needs: [changes, cdn-download]
+        if: needs.changes.outputs.run_wasm_test == 'true'
         runs-on: ubuntu-24.04
         env:
             ORIGA_CDN_BASE_URL: "https://${{ vars.ORIGA_CDN_URI_PREFIX }}.${{ vars.ORIGA_BASE_URI }}"
@@ -266,7 +416,8 @@ jobs:
         name: E2E Build
         permissions:
             contents: read
-        needs: cdn-download
+        needs: [changes, cdn-download]
+        if: needs.changes.outputs.run_e2e_build == 'true'
         runs-on: ubuntu-24.04
         env:
             ORIGA_CDN_BASE_URL: http://localhost:8080
@@ -331,6 +482,8 @@ jobs:
         name: E2E Matrix Guard
         permissions:
             contents: read
+        needs: [changes]
+        if: needs.changes.outputs.run_e2e_matrix_guard == 'true'
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
@@ -353,7 +506,8 @@ jobs:
         name: E2E ${{ matrix.group }}
         permissions:
             contents: read
-        needs: [e2e-build, e2e-matrix-guard]
+        needs: [changes, e2e-build, e2e-matrix-guard]
+        if: needs.changes.outputs.run_e2e == 'true'
         runs-on: ubuntu-24.04
         strategy:
             fail-fast: false
@@ -482,7 +636,10 @@ jobs:
         permissions:
             contents: read
         needs: [e2e]
-        if: always() && needs.e2e.result != 'cancelled'
+        # Follows e2e's RESULT (no run flag of its own): merges reports
+        # whenever e2e actually ran (success or failure); skipped along
+        # with a path-skipped e2e. Asserted in the gate via run_e2e.
+        if: ${{ !cancelled() && needs.e2e.result != 'skipped' }}
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout repository
@@ -537,7 +694,8 @@ jobs:
 
     build-tauri:
         name: Build Tauri
-        needs: [version, e2e-build]
+        needs: [changes, version, e2e-build]
+        if: needs.changes.outputs.run_build_tauri == 'true'
         uses: ./.github/workflows/_build-tauri.yml
         with:
             version: ${{ needs.version.outputs.version }}
@@ -558,7 +716,6 @@ jobs:
 
     build-macos:
         name: Build Tauri (macOS)
-        needs: [version, e2e-build]
         # macOS build in regular CI, mirroring build-tauri (windows/linux/
         # android): the universal .app/.pkg bundle path — Xcode selection,
         # cert import, tauri build, productbuild — is exercised on every
@@ -567,6 +724,8 @@ jobs:
         # iOS is skipped (skip_ios) — it stays a release-time target to
         # bound macOS runner minutes; App Store upload is gated by
         # version_type inside the reusable workflow.
+        needs: [changes, version, e2e-build]
+        if: needs.changes.outputs.run_build_macos == 'true'
         uses: ./.github/workflows/_build-tauri-apple.yml
         with:
             version: ${{ needs.version.outputs.version }}
@@ -589,6 +748,8 @@ jobs:
         name: Docker Build (landing)
         permissions:
             contents: read
+        needs: [changes]
+        if: needs.changes.outputs.run_docker_landing == 'true'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -612,6 +773,8 @@ jobs:
         name: Docker Build (ui)
         permissions:
             contents: read
+        needs: [changes]
+        if: needs.changes.outputs.run_docker_ui == 'true'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -636,29 +799,66 @@ jobs:
         name: CI Gate
         permissions:
             contents: read
-        needs: [lint, test, e2e, e2e-report, docker-build-landing, docker-build-ui, build-tauri, build-macos, macos-check]
+        # Single required check. `if: always()` is load-bearing: without
+        # it a skipped dependency (path-filtered PR) would skip the gate
+        # itself and the PR could never go green. Do not remove.
+        needs:
+            [
+                version,
+                changes,
+                lint,
+                macos-check,
+                cdn-download,
+                test,
+                wasm-test,
+                e2e-build,
+                e2e-matrix-guard,
+                e2e,
+                e2e-report,
+                build-tauri,
+                build-macos,
+                docker-build-landing,
+                docker-build-ui,
+            ]
         if: always()
         runs-on: ubuntu-latest
         steps:
             - name: Verify all jobs passed
               run: |
-                  check() {
-                    local job="$1" result="$2"
-                    shift 2
-                    for allowed in "$@"; do
-                      [[ "$result" == "$allowed" ]] && return 0
-                    done
-                    echo "::error::$job failed with result: $result"
+                  # Fail-closed gate. For every filtered job a `skipped`
+                  # result is legal ONLY when its run_* flag is false
+                  # (path-filter skip). A skip with run_*=true means an
+                  # upstream dependency failed or was cancelled — that
+                  # must fail the gate. `changes` and `version` are
+                  # never path-filtered, so for them skipped/failure are
+                  # always red. e2e-report follows e2e's result and is
+                  # asserted through run_e2e.
+                  gate() {
+                    local job="$1" result="$2" run="$3"
+                    if [[ "$result" == "success" ]]; then
+                      return 0
+                    fi
+                    if [[ "$result" == "skipped" && "$run" == "false" ]]; then
+                      return 0
+                    fi
+                    echo "::error::$job failed with result: $result (run flag: $run)"
                     return 1
                   }
 
-                  check "lint" "${{ needs.lint.result }}" "success"
-                  check "test" "${{ needs.test.result }}" "success"
-                  check "e2e" "${{ needs.e2e.result }}" "success"
-                  check "e2e-report" "${{ needs.e2e-report.result }}" "success" "skipped"
-                  check "docker-build-landing" "${{ needs.docker-build-landing.result }}" "success"
-                  check "docker-build-ui" "${{ needs.docker-build-ui.result }}" "success"
-                  check "build-tauri" "${{ needs.build-tauri.result }}" "success"
-                  check "build-macos" "${{ needs.build-macos.result }}" "success" "skipped"
+                  gate "version" "${{ needs.version.result }}" "true"
+                  gate "changes" "${{ needs.changes.result }}" "true"
+                  gate "lint" "${{ needs.lint.result }}" "${{ needs.changes.outputs.run_lint }}"
+                  gate "macos-check" "${{ needs.macos-check.result }}" "${{ needs.changes.outputs.run_macos_check }}"
+                  gate "cdn-download" "${{ needs.cdn-download.result }}" "${{ needs.changes.outputs.run_cdn_download }}"
+                  gate "test" "${{ needs.test.result }}" "${{ needs.changes.outputs.run_test }}"
+                  gate "wasm-test" "${{ needs.wasm-test.result }}" "${{ needs.changes.outputs.run_wasm_test }}"
+                  gate "e2e-build" "${{ needs.e2e-build.result }}" "${{ needs.changes.outputs.run_e2e_build }}"
+                  gate "e2e-matrix-guard" "${{ needs.e2e-matrix-guard.result }}" "${{ needs.changes.outputs.run_e2e_matrix_guard }}"
+                  gate "e2e" "${{ needs.e2e.result }}" "${{ needs.changes.outputs.run_e2e }}"
+                  gate "e2e-report" "${{ needs.e2e-report.result }}" "${{ needs.changes.outputs.run_e2e }}"
+                  gate "build-tauri" "${{ needs.build-tauri.result }}" "${{ needs.changes.outputs.run_build_tauri }}"
+                  gate "build-macos" "${{ needs.build-macos.result }}" "${{ needs.changes.outputs.run_build_macos }}"
+                  gate "docker-build-landing" "${{ needs.docker-build-landing.result }}" "${{ needs.changes.outputs.run_docker_landing }}"
+                  gate "docker-build-ui" "${{ needs.docker-build-ui.result }}" "${{ needs.changes.outputs.run_docker_ui }}"
 
             - run: echo "All checks passed"
