@@ -86,37 +86,44 @@ export async function answerTrainingForgot(page: Page): Promise<boolean> {
 }
 
 /// Полный тренировочный круг руки: отвечает «Помню» на каждую карту,
-/// пока критерий не закроет тренировку и не появится переходный экран
-/// «теперь к повторению». Замена happy-path из удалённого
-/// acquaintance_flow.spec.ts: без fast-path «Уже знаю» — честная ротация
-/// reveal→rating, как это делает пользователь (фрагменты круга проверяют
-/// «Порядок круга» и «Смена стороны», но не полный проход).
+/// пока критерий не закроет тренировку. Концовка зависит от ревью:
+/// непустое — переходный экран «теперь к повторению»
+/// (acquaintance-completed), пустое — рука закрывает урок сразу
+/// экраном завершения (lesson-complete-screen, без двух слайдов подряд).
+/// Замена happy-path из удалённого acquaintance_flow.spec.ts: без
+/// fast-path «Уже знаю» — честная ротация reveal→rating, как это делает
+/// пользователь (фрагменты круга проверяют «Порядок круга» и «Смена
+/// стороны», но не полный проход).
 export async function completeTrainingUntilCriterion(
 	page: Page,
 	maxAnswers = 100,
 ): Promise<void> {
 	const completed = page.getByTestId("acquaintance-completed");
+	const lessonComplete = page.getByTestId("lesson-complete-screen");
 	for (let i = 0; i < maxAnswers; i++) {
 		if (await completed.isVisible().catch(() => false)) break;
+		if (await lessonComplete.isVisible().catch(() => false)) break;
 		const reveal = page.getByTestId("acquaintance-reveal-btn");
 		const revealVisible = await reveal
 			.waitFor({ state: "visible", timeout: 1_000 })
 			.then(() => true)
 			.catch(() => false);
-		// Критерий закрыт — reveal исчез, дальше только переходный экран.
+		// Критерий закрыт — reveal исчез: дальше один из двух финальных
+		// экранов (переход к ревью либо завершение урока).
 		if (!revealVisible) break;
 		await answerTrainingRemember(page);
 	}
-	// Тренировка обязана закончиться экраном перехода (bounded-клики могли
-	// проиграть гонку ре-рендеру — здесь это видно сразу).
-	await expect(completed).toBeVisible({ timeout: 15_000 });
+	// Тренировка обязана закончиться одним из финальных экранов
+	// (bounded-клики могли проиграть гонку ре-рендеру — здесь это видно
+	// сразу).
+	await expect(completed.or(lessonComplete)).toBeVisible({ timeout: 15_000 });
 }
 
 /// Завершает руку знакомства, если она показана: на каждом слайде показа
 /// нажимает «Уже знаю» (спека: рука исчезает без тренировки и траты
 /// лимита). Быстрый путь для BDD-сценариев — полный тренировочный флоу
 /// покрывает сценарий «Полный круг руки: показ, тренировка до критерия,
-/// переход к ревью» в lesson.feature. Возвращает true, когда рука была.
+/// завершение урока» в lesson.feature. Возвращает true, когда рука была.
 export async function completeAcquaintanceHandIfPresent(
 	page: Page,
 ): Promise<boolean> {
@@ -137,11 +144,13 @@ export async function completeAcquaintanceHandIfPresent(
 		// Модалка закрывается с анимацией; после неё — следующий слайд.
 		await page.waitForTimeout(350);
 	}
-	// Хелпер завершает ПОКАЗОМ переходного экрана «теперь к повторению» —
-	// дальше сценарии сами ассертят его и жмут кнопку (или возвращаются).
-	await expect(page.getByTestId("acquaintance-completed")).toBeVisible({
-		timeout: 15_000,
-	});
+	// Хелпер завершает закрытием руки: дальше либо переходный экран
+	// «теперь к повторению» (ревью не пусто), либо экран завершения урока
+	// (ревью пусто — рука закрывает урок сразу). Какой именно — сценарии
+	// ассертят сами и жмут свои кнопки (или возвращаются).
+	const completed = page.getByTestId("acquaintance-completed");
+	const lessonComplete = page.getByTestId("lesson-complete-screen");
+	await expect(completed.or(lessonComplete)).toBeVisible({ timeout: 15_000 });
 	return true;
 }
 

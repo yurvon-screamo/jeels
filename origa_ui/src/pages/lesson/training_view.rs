@@ -585,7 +585,6 @@ fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -
                         }
                     },
                     AcquaintanceSlideData::Kanji {
-                        kanji,
                         name,
                         on_readings,
                         kun_readings,
@@ -595,10 +594,13 @@ fn TrainingAnswerSlide(ctx: AcquaintanceContext, card_id: Ulid, reverse: bool) -
                         let has_kun = kun_readings.is_some();
                         let on = StoredValue::new(on_readings);
                         let kun = StoredValue::new(kun_readings);
+                        // Знак уже смотрит на юзера сжатым вопросом над
+                        // divider — ответ его не повторяет (баг-репорт о
+                        // дубле): главным текстом идёт значение, под ним
+                        // частотные чтения по центральной оси карточки.
                         view! {
-                            <p class="font-serif text-5xl text-[var(--fg-black)]">{kanji}</p>
-                            <p class="font-mono text-sm text-[var(--fg-muted)]">{name}</p>
-                            <div class="pt-2 space-y-2">
+                            <p class="font-serif text-3xl text-[var(--fg-black)]">{name}</p>
+                            <div class="answer-readings pt-2 space-y-2">
                                 {has_on.then(|| {
                                     view! {
                                         <ReadingGroup

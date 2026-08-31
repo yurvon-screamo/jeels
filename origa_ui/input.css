@@ -3610,6 +3610,19 @@ rt {
     font-size: var(--text-body);
 }
 
+/* Acquaintance training answer: the card body is centered, so reading
+   groups sit on the card's centerline instead of hugging the left edge
+   like on the kanji-detail page (user report: centered kanji/meaning,
+   left-aligned readings). Scoped to the answer wrapper — the detail
+   page keeps its two-column left alignment. */
+.answer-readings .reading-group {
+    justify-content: center;
+}
+
+.answer-readings .reading-main {
+    flex: 0 1 auto;
+}
+
 /* Rare reading: visually de-emphasised (transparent bg, muted fg) but still
    WCAG-AA readable (fg-muted #6b665a on surface ≈ 4.8:1). The light border
    keeps the token legible against bg-paper where the rare readings cluster. */

@@ -128,12 +128,25 @@ pub fn LessonContent() -> impl IntoView {
             .with(|state| state.stage != AcquaintanceStage::Inactive && state.hand.is_some())
     };
 
-    // Закрытие руки открывает обычный урок; если он пуст — отложенный
-    // диагноз пустого ревью показывается штатным empty-state'ом урока.
+    // Закрытие руки открывает обычный урок. Если ревью пусто, юзер
+    // раньше получал два бесполезных слайда подряд — переходный экран
+    // руки, затем полу-пустой empty-state урока (юзер-репорт): теперь
+    // закрытие руки при пустом ревью завершает урок сразу — экран
+    // завершения с «Следующий урок» / «На главную».
     {
         let pending = pending_empty_diagnosis;
         let diagnosis = empty_diagnosis;
+        let completed = is_completed;
         Effect::new(move |_| {
+            let stage_completed =
+                acq_state_signal.with(|state| state.stage == AcquaintanceStage::Completed);
+            if stage_completed && pending.get_untracked().is_some() {
+                pending.set(None);
+                completed.set(true);
+                return;
+            }
+            // Fallback: рука ушла в Inactive с живым отложенным
+            // диагнозом (прерывание) — штатный empty-state урока.
             if !acq_hand_active() && pending.get_untracked().is_some() {
                 diagnosis.set(pending.get_untracked());
                 pending.set(None);

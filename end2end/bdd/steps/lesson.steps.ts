@@ -187,7 +187,12 @@ When('оценивает каждую карточку как Good', async ({ pa
         // (фикс #462: сейв до stage=Completed) — кнопка «К повторению»
         // существует только у зафиксированного состояния, полная
         // перезагрузка следующим шагом уже не может обогнать запись.
-        await page.getByTestId("acquaintance-to-reviews-btn").click({ timeout: 5_000 });
+        // При пустом ревью переходного экрана нет: рука закрывает урок
+        // сразу экраном завершения — кнопки «К повторению» тоже нет.
+        const toReviews = page.getByTestId("acquaintance-to-reviews-btn");
+        if (await toReviews.isVisible().catch(() => false)) {
+            await toReviews.click({ timeout: 5_000 });
+        }
     }
     if (await lessonPage.lessonContent.isVisible().catch(() => false)) {
         await completeLessonFlexible(lessonPage, page);
@@ -273,6 +278,13 @@ Then('отображается экран перехода к повторени
         timeout: 15_000,
     });
     await expect(page.getByTestId("acquaintance-to-reviews-btn")).toBeVisible();
+});
+
+// Пустое ревью после руки: урок завершается сразу экраном завершения
+// («Следующий урок» / «На главную»), без переходного экрана руки.
+Then('отображается экран завершения урока', async ({ page }) => {
+    const lessonPage = new LessonPage(page);
+    await expect(lessonPage.completeScreen).toBeVisible({ timeout: 15_000 });
 });
 
 When('пользователь продолжает к повторению', async ({ page }) => {

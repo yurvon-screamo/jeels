@@ -191,24 +191,31 @@ pub fn AcquaintanceView() -> impl IntoView {
             // Бумажная подложка — та же, что у карточек обычного урока
             // (LESSON_CARD_CLASS + card-shadow): рассинхрон стилей знакомства
             // и урока устранён, показ и тренировка выглядят одним продуктом.
-            <Card
-                class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string())
-                shadow=Signal::derive(|| true)
-                test_id=Signal::derive(|| "acquaintance-card-root".to_string())
-            >
-                <Show when=move || {
-                    let ctx = ctx_stored.get_value();
-                    ctx.state.get().stage == AcquaintanceStage::Presentation
-                }>
-                    <PresentationBody ctx=ctx_stored.get_value() />
-                </Show>
-                <Show when=move || {
-                    let ctx = ctx_stored.get_value();
-                    ctx.state.get().stage == AcquaintanceStage::Training
-                }>
-                    <TrainingBody ctx=ctx_stored.get_value() />
-                </Show>
-            </Card>
+            // На Completed не монтируется: карточек тел нет, иначе снизу
+            // остается пустая подложка (баг-репорт о двух подложках).
+            <Show when=move || {
+                let ctx = ctx_stored.get_value();
+                ctx.state.get().stage != AcquaintanceStage::Completed
+            }>
+                <Card
+                    class=Signal::derive(|| super::LESSON_CARD_CLASS.to_string())
+                    shadow=Signal::derive(|| true)
+                    test_id=Signal::derive(|| "acquaintance-card-root".to_string())
+                >
+                    <Show when=move || {
+                        let ctx = ctx_stored.get_value();
+                        ctx.state.get().stage == AcquaintanceStage::Presentation
+                    }>
+                        <PresentationBody ctx=ctx_stored.get_value() />
+                    </Show>
+                    <Show when=move || {
+                        let ctx = ctx_stored.get_value();
+                        ctx.state.get().stage == AcquaintanceStage::Training
+                    }>
+                        <TrainingBody ctx=ctx_stored.get_value() />
+                    </Show>
+                </Card>
+            </Show>
         </div>
     }
 }

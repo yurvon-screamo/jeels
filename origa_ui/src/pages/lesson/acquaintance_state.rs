@@ -177,6 +177,15 @@ impl AcquaintanceContext {
                 .map(|h| h.presentation_order())
                 .unwrap_or_default()
         });
+        // Карты руки входят в «Пройдено» урока: экран завершения
+        // показывает руку + ревью, а не 0 после урока из одной руки
+        // (юзер-репорт). В wasm-тестах AcquaintanceView монтируется
+        // без LessonContext — начисление просто пропускается.
+        if let Some(lesson_ctx) = use_context::<super::lesson_state::LessonContext>() {
+            lesson_ctx
+                .lesson_state
+                .update(|state| state.review_count += ids.len());
+        }
         let repo = self.repository.clone();
         let state = self.state;
         spawn_local(async move {
