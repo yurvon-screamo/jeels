@@ -1534,7 +1534,8 @@ mod acquaintance_training {
 
         // Контекст урока с наблюдаемым lesson_state: complete_hand
         // начисляет карты руки в review_count.
-        let lesson_state = RwSignal::new(crate::pages::lesson::LessonState::default());
+        use crate::pages::lesson::lesson_state::LessonState;
+        let lesson_state = RwSignal::new(LessonState::default());
         let lesson_ctx = crate::pages::lesson::LessonContext {
             repository: crate::repository::HybridUserRepository::new(),
             lesson_state,
