@@ -12,6 +12,7 @@ use crate::loaders::recalculate_user_jlpt_progress;
 use crate::repository::{HybridUserRepository, set_last_sync_time};
 use crate::store::ConnectivityStore;
 use crate::ui_components::{ToastContainer, ToastData};
+use crate::utils::display_name::display_name_for;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use origa::domain::JlptProgress;
@@ -63,7 +64,7 @@ pub fn HomeContent(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
                         return;
                     }
                     recalculate_user_jlpt_progress(&mut user);
-                    user_name.set(user.username().to_string());
+                    user_name.set(display_name_for(user.username(), user.email()));
 
                     let ks = user.knowledge_set();
                     jlpt_progress.set(user.jlpt_progress().clone());

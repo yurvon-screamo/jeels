@@ -8,6 +8,7 @@ pub fn Input(
     #[prop(optional, into)] placeholder: Signal<String>,
     #[prop(optional, into)] disabled: Signal<bool>,
     #[prop(optional, into)] rows: Signal<Option<usize>>,
+    #[prop(optional, into)] maxlength: Signal<Option<usize>>,
     #[prop(optional, into)] class: Signal<String>,
     #[prop(optional, into)] input_type: Signal<String>,
     #[prop(optional, into)] autocomplete: Signal<String>,
@@ -33,6 +34,7 @@ pub fn Input(
         let val = name.get();
         if val.is_empty() { None } else { Some(val) }
     };
+    let maxlength_val = move || maxlength.get();
     let test_id_val = move || {
         let val = test_id.get();
         if val.is_empty() { None } else { Some(val) }
@@ -64,6 +66,7 @@ pub fn Input(
                     autocomplete=autocomplete
                     id=id_val
                     name=name_val
+                    maxlength=maxlength_val
                     data-testid=test_id_val
                     rows=r
                     bind:value=value
@@ -89,6 +92,7 @@ pub fn Input(
                     autocomplete=autocomplete
                     id=id_val
                     name=name_val
+                    maxlength=maxlength_val
                     data-testid=test_id_val
                     bind:value=value
                     on:change=move |ev| {

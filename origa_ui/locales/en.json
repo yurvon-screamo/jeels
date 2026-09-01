@@ -26,7 +26,8 @@
     "tooltip_known": "Already in dictionary",
     "tooltip_new": "New word",
     "language_aria_label": "Select language",
-    "more_details": "More details"
+    "more_details": "More details",
+    "username_placeholder": "How should we call you?"
   },
   "app": {
     "logging_in": "Logging in..."

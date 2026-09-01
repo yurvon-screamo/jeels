@@ -62,4 +62,4 @@ pub use select_cards_to_lesson::SelectCardsToLessonUseCase;
 pub use take_acquaintance_replacement::TakeAcquaintanceReplacementUseCase;
 pub use toggle_favorite::ToggleFavoriteUseCase;
 pub use transcribe_audio::TranscribeAudioUseCase;
-pub use update_user_profile::UpdateUserProfileUseCase;
+pub use update_user_profile::{USERNAME_MAX_CHARS, UpdateUserProfileUseCase};
