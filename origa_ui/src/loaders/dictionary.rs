@@ -10,7 +10,7 @@ use origa::traits::CdnProvider;
 
 /// The eight raw lindera dictionary files (deflate-compressed on the CDN,
 /// inflated on device). lindera walks the trie in place, so no pre-built
-/// rkyv blob is needed anymore — the raw files ARE the cache.
+/// rkyv blob is needed — the raw files ARE the cache.
 /// Ordered so the largest file (dict.words, 28 MB deflated → 223 MB raw)
 /// inflates FIRST, while every other file is still compressed: peak heap
 /// stays at ~dict.words-raw + everything-compressed instead of the reverse.

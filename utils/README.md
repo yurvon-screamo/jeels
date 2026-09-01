@@ -231,8 +231,9 @@ utils find-missing --help
 
 ## Dictionary Requirements
 
-The tokenizer commands require the SudachiDict dictionary (lindera 5 format,
-built by `scripts/build_sudachidict.py`). The CLI resolves it in the
+The tokenizer commands require the SudachiDict dictionary (lindera dictionary
+format, built by `scripts/build_sudachidict.py`; readable by the lindera 6.x
+runtime). The CLI resolves it in the
 following locations:
 
 1. the directory passed via `--dictionary-dir` (if it exists)
