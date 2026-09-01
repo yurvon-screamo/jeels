@@ -27,7 +27,7 @@
     "tooltip_new": "Новое слово",
     "language_aria_label": "Выберите язык",
     "more_details": "Подробнее",
-    "username_placeholder": "Как вас называть?"
+    "username_placeholder": "Как вас зовут?"
   },
   "app": {
     "logging_in": "Вход..."
