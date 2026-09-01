@@ -49,8 +49,14 @@ impl<'a, R: UserRepository> MigrateKanjiCompanionsUseCase<'a, R> {
             "Starting kanji companion migration"
         );
 
+        // Bulk bracket: the migration loops below create/delete a companion
+        // card per kanji on every cold start; per-card full scans made that
+        // quadratic for N2-scale users. The steady-state early return below
+        // happens after the bracket closes, so nothing mutates afterwards.
+        user.begin_bulk_import();
         let total_deleted = Self::delete_removed_companions(&mut user, &removed_set);
         let total_created = Self::create_missing_companions(&mut user, &kanji_chars);
+        user.end_bulk_import();
 
         // Skip persistence in steady state: after the first run every
         // subsequent cold start finds nothing to delete or create and

@@ -79,6 +79,11 @@ pub struct KnowledgeSet {
     deleted_companion_words: HashSet<String>,
     #[serde(flatten)]
     stats: StatsTracker,
+    // Transient bulk-import dedup index (see `begin_bulk_import`): never
+    // serialized, rebuilt from `study_cards` when a bulk import starts, and
+    // always `None` outside an import batch.
+    #[serde(skip)]
+    import_dedup_index: Option<HashSet<(CardType, String)>>,
 }
 
 fn deserialize_study_cards<'de, D>(deserializer: D) -> Result<HashMap<Ulid, StudyCard>, D::Error>
@@ -129,10 +134,16 @@ impl KnowledgeSet {
             deleted_cards: HashSet::new(),
             deleted_companion_words: HashSet::new(),
             stats: StatsTracker::new(),
+            import_dedup_index: None,
         }
     }
 
     pub fn merge(&mut self, new_values: &KnowledgeSet) {
+        // Merge is a sync path, never a bulk import: drop any active dedup
+        // index so `create_card` falls back to the linear uniqueness scan
+        // (merge itself validates uniqueness per card below).
+        self.import_dedup_index = None;
+
         for deleted_id in &new_values.deleted_cards {
             self.study_cards.remove(deleted_id);
             self.deleted_cards.insert(*deleted_id);
@@ -203,20 +214,21 @@ impl KnowledgeSet {
                 .insert(vocab.word().text().to_string());
         }
         self.deleted_cards.insert(card_id);
-        self.recalculate_daily_stats();
+        if let Some(index) = &mut self.import_dedup_index {
+            index.remove(&Self::import_dedup_key(removed.card()));
+        } else {
+            self.recalculate_daily_stats();
+        }
         Ok(())
     }
 
-    pub fn deleted_cards(&self) -> &HashSet<Ulid> {
-        &self.deleted_cards
-    }
-
-    #[cfg(test)]
-    pub fn deleted_companion_words_for_test(&self) -> &HashSet<String> {
-        &self.deleted_companion_words
-    }
-
     pub fn update_card_content(&mut self, card_id: Ulid, new_card: Card) -> Result<(), OrigaError> {
+        // Content replacement can break the bulk index invariant (one card ↔
+        // one key: a `new_card` whose key is already owned by another card
+        // would alias keys). Drop the index so subsequent `create_card` calls
+        // degrade to the linear uniqueness scan — semantics preserved, and
+        // the invariant cannot be violated. (Mirrors the `merge` policy.)
+        self.import_dedup_index = None;
         let study_card = self
             .study_cards
             .get_mut(&card_id)
@@ -228,8 +240,19 @@ impl KnowledgeSet {
     pub fn create_card(&mut self, card: Card) -> Result<StudyCard, OrigaError> {
         let study_card = StudyCard::new(card);
         let card_id = *study_card.card_id();
+        let dedup_key = Self::import_dedup_key(study_card.card());
 
-        self.validate_unique_card(study_card.card())?;
+        // Bulk-import mode checks uniqueness against the dedup index (O(1));
+        // outside it, the linear scan keeps the single-card path as-is.
+        if let Some(index) = &self.import_dedup_index {
+            if index.contains(&dedup_key) {
+                return Err(OrigaError::DuplicateCard {
+                    question: study_card.card().content_key(),
+                });
+            }
+        } else {
+            self.validate_unique_card(study_card.card())?;
+        }
 
         if self
             .study_cards
@@ -250,8 +273,53 @@ impl KnowledgeSet {
             self.deleted_companion_words.remove(vocab.word().text());
         }
 
-        self.recalculate_daily_stats();
+        if let Some(index) = &mut self.import_dedup_index {
+            index.insert(dedup_key);
+        } else {
+            self.recalculate_daily_stats();
+        }
         Ok(study_card)
+    }
+
+    /// Uniqueness identity of a card: card type + content key. Cross-type
+    /// collisions are legitimate (a vocabulary word and a kanji may share the
+    /// same surface text), so the type discriminates the key.
+    fn import_dedup_key(card: &Card) -> (CardType, String) {
+        (CardType::from(card), card.content_key())
+    }
+
+    /// Enters bulk-import mode: builds a dedup index over the current cards
+    /// so `create_card` uniqueness checks are O(1) instead of a full scan,
+    /// and daily-stats recalculation is deferred. Onboarding/Anki imports
+    /// create thousands of cards; per-card full scans made those imports
+    /// quadratic (the "N2 onboarding import is unusably slow" bug).
+    pub(crate) fn begin_bulk_import(&mut self) {
+        self.import_dedup_index = Some(
+            self.study_cards
+                .values()
+                .map(|sc| Self::import_dedup_key(sc.card()))
+                .collect(),
+        );
+    }
+
+    /// Leaves bulk-import mode: drops the dedup index and recalculates the
+    /// daily stats once for the whole batch. The recalc is a pure function
+    /// of the final card set plus the day's preserved counters, so it lands
+    /// on the same today-item the per-card recalcs would have (the only
+    /// divergence is a batch spanning UTC midnight, where the per-card path
+    /// would additionally snapshot the previous day).
+    pub(crate) fn end_bulk_import(&mut self) {
+        self.import_dedup_index = None;
+        self.recalculate_daily_stats();
+    }
+
+    pub fn deleted_cards(&self) -> &HashSet<Ulid> {
+        &self.deleted_cards
+    }
+
+    #[cfg(test)]
+    pub fn deleted_companion_words_for_test(&self) -> &HashSet<String> {
+        &self.deleted_companion_words
     }
 
     fn build_cards_by_type(&self) -> HashMap<CardType, Vec<Card>> {

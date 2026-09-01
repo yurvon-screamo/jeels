@@ -55,30 +55,18 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
         let mut created_kanji_chars: HashSet<String> = HashSet::new();
         let mut grammar_levels: HashSet<JapaneseLevel> = HashSet::new();
 
-        for (set_id, set) in sets {
-            debug!(set_id = %set_id, words_count = set.words().len(), "Processing set");
+        // Thousands of cards are created below; the bulk bracket keeps each
+        // create O(1) (index-backed uniqueness + deferred stats recalc) —
+        // per-card full scans made N2-scale imports quadratic.
+        user.begin_bulk_import();
 
-            let set_level = *set.level();
-            // Grammar is keyed by JLPT level, so any set contributes its own
-            // level — previously gated to "Jlpt"-prefixed ids only, which left
-            // Minna / Irodori / Duolingo without grammar.
-            grammar_levels.insert(set_level);
-
-            let words_result = VocabularyCard::from_text(&set.words().join(" "), &native_language);
-
-            result.skipped_no_translation += words_result.skipped_no_translation.len();
-
-            for vocab_card in words_result.cards {
-                if self
-                    .create_vocabulary_card(&mut user, vocab_card, &mut result.skipped_duplicates)
-                    .is_ok()
-                {
-                    result.created_vocabulary += 1;
-                }
-            }
-
-            result.imported_set_ids.push(set_id);
-        }
+        self.import_vocabulary_from_sets(
+            &mut user,
+            sets,
+            &native_language,
+            &mut result,
+            &mut grammar_levels,
+        );
 
         // Pull in every level at or below the target so a user picking N3 also
         // gets N5/N4/N2/... grammar rules and kanji they should already know,
@@ -89,9 +77,76 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
             }
         }
 
+        self.import_grammar_for_levels(&mut user, &grammar_levels, &mut result);
+        self.import_kanji_up_to_level(
+            &mut user,
+            target_level,
+            &mut result,
+            &mut created_kanji_chars,
+        );
+
+        user.end_bulk_import();
+
+        user.mark_sets_as_imported(set_ids);
+        self.repository.save_sync(&user).await?;
+
+        info!(
+            user_id = %user.id(),
+            vocabulary = result.created_vocabulary,
+            kanji = result.created_kanji,
+            grammar = result.created_grammar,
+            duplicates = result.skipped_duplicates,
+            "Onboarding sets import completed"
+        );
+
+        Ok(result)
+    }
+
+    /// Creates vocabulary cards from every set's words; each set also
+    /// contributes its own level to `grammar_levels`.
+    fn import_vocabulary_from_sets(
+        &self,
+        user: &mut crate::domain::User,
+        sets: Vec<(String, WellKnownSet)>,
+        native_language: &crate::domain::NativeLanguage,
+        result: &mut ImportOnboardingResult,
+        grammar_levels: &mut HashSet<JapaneseLevel>,
+    ) {
+        for (set_id, set) in sets {
+            debug!(set_id = %set_id, words_count = set.words().len(), "Processing set");
+
+            let set_level = *set.level();
+            // Grammar is keyed by JLPT level, so any set contributes its own
+            // level — previously gated to "Jlpt"-prefixed ids only, which left
+            // Minna / Irodori / Duolingo without grammar.
+            grammar_levels.insert(set_level);
+
+            let words_result = VocabularyCard::from_text(&set.words().join(" "), native_language);
+
+            result.skipped_no_translation += words_result.skipped_no_translation.len();
+
+            for vocab_card in words_result.cards {
+                if self
+                    .create_vocabulary_card(user, vocab_card, &mut result.skipped_duplicates)
+                    .is_ok()
+                {
+                    result.created_vocabulary += 1;
+                }
+            }
+
+            result.imported_set_ids.push(set_id);
+        }
+    }
+
+    fn import_grammar_for_levels(
+        &self,
+        user: &mut crate::domain::User,
+        grammar_levels: &HashSet<JapaneseLevel>,
+        result: &mut ImportOnboardingResult,
+    ) {
         debug!(levels = ?grammar_levels, "Importing grammar rules for onboarding levels");
 
-        for level in &grammar_levels {
+        for level in grammar_levels {
             let grammar_rules = get_rules_by_level(level);
             for rule in grammar_rules {
                 if let Ok(grammar_card) = GrammarRuleCard::new(*rule.rule_id()) {
@@ -110,13 +165,21 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
                 }
             }
         }
+    }
 
-        // Import kanji directly from the kanji dictionary for every level ≤
-        // target — symmetric with grammar above. Previously kanji were
-        // extracted FROM vocabulary words, which produced wrong results: a
-        // word at N4 might contain an N3 kanji, so the user got kanji they
-        // never asked for. Kanji→vocab companion cards are still created for
-        // each kanji (create_companion_vocab_cards).
+    /// Imports kanji directly from the kanji dictionary for every level ≤
+    /// target — symmetric with grammar. Previously kanji were extracted FROM
+    /// vocabulary words, which produced wrong results: a word at N4 might
+    /// contain an N3 kanji, so the user got kanji they never asked for.
+    /// Kanji→vocab companion cards are still created for each kanji
+    /// (`create_companion_vocab_cards`).
+    fn import_kanji_up_to_level(
+        &self,
+        user: &mut crate::domain::User,
+        target_level: JapaneseLevel,
+        result: &mut ImportOnboardingResult,
+        created_kanji_chars: &mut HashSet<String>,
+    ) {
         debug!(target_level = ?target_level, "Importing kanji from dictionary");
         for level in JapaneseLevel::ALL {
             if level > target_level {
@@ -127,29 +190,12 @@ impl<'a, R: UserRepository, C: CdnProvider> ImportOnboardingSetsUseCase<'a, R, C
                 if created_kanji_chars.contains(&kanji_char) {
                     continue;
                 }
-                if self
-                    .create_kanji_card(&mut user, &kanji_char, &mut result)
-                    .is_ok()
-                {
+                if self.create_kanji_card(user, &kanji_char, result).is_ok() {
                     result.created_kanji += 1;
                     created_kanji_chars.insert(kanji_char);
                 }
             }
         }
-
-        user.mark_sets_as_imported(set_ids);
-        self.repository.save_sync(&user).await?;
-
-        info!(
-            user_id = %user.id(),
-            vocabulary = result.created_vocabulary,
-            kanji = result.created_kanji,
-            grammar = result.created_grammar,
-            duplicates = result.skipped_duplicates,
-            "Onboarding sets import completed"
-        );
-
-        Ok(result)
     }
 
     async fn load_sets_via_cdn(

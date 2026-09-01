@@ -6,6 +6,7 @@ mod create_cards_from_analysis;
 mod create_vocabulary_card;
 mod grammar;
 mod import_anki_pack;
+mod import_onboarding_n2_scale;
 mod import_onboarding_target_level;
 mod import_preview;
 mod jlpt_progress_journey;

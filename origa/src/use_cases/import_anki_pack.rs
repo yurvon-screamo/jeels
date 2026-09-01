@@ -121,6 +121,12 @@ impl<'a, R: UserRepository> ImportAnkiPackUseCase<'a, R> {
         let mut total_created = 0;
         let mut skipped = Vec::new();
 
+        // Bulk bracket: an Anki pack can contain thousands of cards; the
+        // index-backed uniqueness check + deferred stats recalc keep the
+        // import linear (an early `return Err` below discards the unsaved
+        // local user, so the unclosed bracket has no effect).
+        user.begin_bulk_import();
+
         for anki_card in cards {
             let question = anki_card.word.clone();
             let result = VocabularyCard::from_text(&question, user.native_language());
@@ -141,6 +147,8 @@ impl<'a, R: UserRepository> ImportAnkiPackUseCase<'a, R> {
                 skipped.push(s.clone());
             }
         }
+
+        user.end_bulk_import();
 
         self.repository.save_sync(&user).await?;
 
