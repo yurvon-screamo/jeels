@@ -92,7 +92,8 @@ fn handle_i18n() {
 fn handle_lindera_dictionary() {
     // The tokenizer dictionary ships as pre-built deflate files in
     // cdn/dictionaries/sudachidict-20260723/ (SudachiDict compiled with the
-    // lindera 5.x builder — see docs/src/sudachidict.md in the lindera repo).
+    // lindera 5.x builder; the lindera 6.x runtime reads the same format —
+    // see docs/src/sudachidict.md in the lindera repo).
     // Nothing to build at compile time; verify the files exist so a broken
     // checkout fails fast.
     //

@@ -15,6 +15,14 @@ updates:
     rebase-strategy: "auto"
     commit-message:
       prefix: "cargo"
+    groups:
+      # lindera and lindera-dictionary are versioned in lockstep (lindera
+      # re-exports lindera-dictionary types), so they must always be bumped
+      # together in a single PR — separate bumps leave two incompatible
+      # versions in the dependency graph and break the build.
+      lindera:
+        patterns:
+          - "lindera*"
 
   - package-ecosystem: "npm"
     directory: "/end2end"

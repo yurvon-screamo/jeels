@@ -241,7 +241,8 @@ async fn invalidate_stale_entries(cache: &web_sys::Cache, stale_paths: &[String]
     }
 }
 
-/// Invalidate the raw dictionary-file cache (lindera 5.x era) so the next
+/// Invalidate the raw dictionary-file cache (introduced when the app switched
+/// to raw lindera dictionary files) so the next
 /// load fetches fresh files from the CDN.
 #[cfg(target_arch = "wasm32")]
 async fn invalidate_dictionary_files() -> Result<(), OrigaError> {
