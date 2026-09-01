@@ -1,3 +1,4 @@
+use crate::dictionary::grammar::{CommonMistake, NuanceNote};
 use crate::domain::OrigaError;
 use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
@@ -42,6 +43,13 @@ pub enum CardAnswer {
         description: Option<String>,
     },
     Text(String),
+    /// Structured grammar nuances (schema v2): wrong/correct pairs plus
+    /// free-form notes. Rich surfaces render the structure natively;
+    /// inherently-text surfaces use `text_projection`.
+    GrammarNuances {
+        common_mistakes: Vec<CommonMistake>,
+        notes: Vec<NuanceNote>,
+    },
 }
 
 impl CardAnswer {
@@ -88,17 +96,54 @@ impl CardAnswer {
         })
     }
 
+    pub fn grammar_nuances(
+        common_mistakes: Vec<CommonMistake>,
+        notes: Vec<NuanceNote>,
+    ) -> Result<Self, OrigaError> {
+        if common_mistakes.is_empty() && notes.is_empty() {
+            return Err(OrigaError::InvalidAnswer {
+                reason: "Grammar nuances answer must have at least one mistake or note".to_string(),
+            });
+        }
+        Ok(CardAnswer::GrammarNuances {
+            common_mistakes,
+            notes,
+        })
+    }
+
+    /// Compact single-string projection for surfaces that are text by
+    /// nature (quiz options, search, stats). Emoji-free by contract —
+    /// rendering markers belong to the UI layer.
+    pub fn text_projection(&self) -> String {
+        match self {
+            CardAnswer::Vocabulary { translations, .. } => translations.join(", "),
+            CardAnswer::Text(s) => s.clone(),
+            CardAnswer::GrammarNuances {
+                common_mistakes,
+                notes,
+            } => {
+                let mut parts: Vec<String> = common_mistakes
+                    .iter()
+                    .map(|m| format!("{} → {}", m.wrong(), m.correct()))
+                    .collect();
+                parts.extend(notes.iter().map(|n| n.text().to_string()));
+                parts.join("; ")
+            },
+        }
+    }
+
     pub fn translations(&self) -> &[String] {
         match self {
             CardAnswer::Vocabulary { translations, .. } => translations,
             CardAnswer::Text(s) => std::slice::from_ref(s),
+            CardAnswer::GrammarNuances { .. } => &[],
         }
     }
 
     pub fn description(&self) -> Option<&str> {
         match self {
             CardAnswer::Vocabulary { description, .. } => description.as_deref(),
-            CardAnswer::Text(_) => None,
+            CardAnswer::Text(_) | CardAnswer::GrammarNuances { .. } => None,
         }
     }
 
@@ -727,6 +772,66 @@ mod tests {
     fn native_language_into_i32(#[case] lang: NativeLanguage, #[case] expected: i32) {
         let result: i32 = lang.into();
         assert_eq!(result, expected);
+    }
+}
+
+#[cfg(test)]
+#[cfg(test)]
+#[cfg(test)]
+mod tests_grammar_nuances_answer {
+    use super::*;
+    use crate::dictionary::grammar::{CommonMistake, NuanceNote, NuanceTag};
+
+    fn mistake(wrong: &str, correct: &str) -> CommonMistake {
+        CommonMistake::for_test(wrong, correct)
+    }
+
+    #[test]
+    fn grammar_nuances_with_items_is_accepted() {
+        // Arrange
+        let mistakes = vec![mistake("友達を傘を貸してくれた", "友達が傘を貸してくれた")];
+        let notes = vec![NuanceNote::for_test(NuanceTag::Register, "spoken register")];
+
+        // Act
+        let answer = CardAnswer::grammar_nuances(mistakes, notes);
+
+        // Assert
+        assert!(answer.is_ok());
+    }
+
+    #[test]
+    fn grammar_nuances_without_any_items_is_rejected() {
+        // Arrange / Act
+        let answer = CardAnswer::grammar_nuances(Vec::new(), Vec::new());
+
+        // Assert
+        assert!(answer.is_err());
+    }
+
+    #[test]
+    fn text_projection_renders_mistake_pair_and_note_without_emoji() {
+        // Arrange
+        let mistakes = vec![mistake(" を使う", " がを使う")];
+        let notes = vec![NuanceNote::for_test(NuanceTag::Variation, "casual: だ")];
+        let answer = CardAnswer::grammar_nuances(mistakes, notes).expect("valid answer");
+
+        // Act
+        let projection = answer.text_projection();
+
+        // Assert
+        assert_eq!(projection, " を使う →  がを使う; casual: だ");
+        assert!(!projection.chars().any(|c| c > '\u{2600}' && c < '\u{27C0}'));
+    }
+
+    #[test]
+    fn translations_is_empty_for_grammar_nuances() {
+        // Arrange
+        let answer =
+            CardAnswer::grammar_nuances(vec![mistake("a", "b")], Vec::new()).expect("valid answer");
+
+        // Act + Assert
+        assert!(answer.translations().is_empty());
+        assert!(!answer.is_vocabulary());
     }
 }
 

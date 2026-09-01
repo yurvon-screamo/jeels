@@ -1,7 +1,7 @@
 //! Regression tests for grammar rules that were fixed during the N3+N2 work.
 //!
 //! Each test verifies that a specific ``rule_id`` (loaded from
-//! ``cdn/grammar/grammar.json``) produces the correct Japanese form for the
+//! ``cdn/grammar/grammar_v2.json``) produces the correct Japanese form for the
 //! test verbs. These tests are NOT ``#[ignore]`` — they run as part of the
 //! normal suite so a future contributor who breaks a format_map chain sees
 //! the regression immediately.
@@ -37,13 +37,13 @@ fn cdn_grammar_path() -> PathBuf {
         .expect("workspace root is parent of the origa crate manifest")
         .join("cdn")
         .join("grammar")
-        .join("grammar.json")
+        .join("grammar_v2.json")
 }
 
 /// Try once to load the grammar store. Returns ``true`` when the store is
 /// available and loaded (either by this call or a prior one), ``false`` when
-/// the gitignored ``cdn/grammar/grammar.json`` is absent so the caller can
-/// skip gracefully. A malformed store still panics — a corrupt grammar.json
+/// the gitignored ``cdn/grammar/grammar_v2.json`` is absent so the caller can
+/// skip gracefully. A malformed store still panics — a corrupt grammar_v2.json
 /// is a real error, not a missing-environment condition.
 fn ensure_grammar_loaded() -> bool {
     GRAMMAR_INIT.call_once(|| {
@@ -56,7 +56,7 @@ fn ensure_grammar_loaded() -> bool {
         let grammar_json = std::fs::read_to_string(&path).unwrap_or_else(|err| {
             panic!(
                 "cannot read grammar store at {}: {} — check file permissions \
-                 or restore cdn/grammar/grammar.json via scripts/deploy_cdn.py",
+                 or restore cdn/grammar/grammar_v2.json via scripts/deploy_cdn.py",
                 path.display(),
                 err
             )
@@ -77,14 +77,15 @@ fn assert_rule_formats(rule_id_str: &str, pos: PartOfSpeech, cases: &[(&str, &st
     if !ensure_grammar_loaded() {
         eprintln!(
             "skip grammar regression check for {rule_id_str}: \
-             cdn/grammar/grammar.json absent (cdn/ is gitignored; \
+             cdn/grammar/grammar_v2.json absent (cdn/ is gitignored; \
              restore via scripts/deploy_cdn.py)"
         );
         return;
     }
     let rule_id = Ulid::from_string(rule_id_str).expect("rule_id must be a valid ULID");
-    let rule = get_rule_by_id(&rule_id)
-        .unwrap_or_else(|| panic!("rule {rule_id_str} not found in grammar.json — stale fixture?"));
+    let rule = get_rule_by_id(&rule_id).unwrap_or_else(|| {
+        panic!("rule {rule_id_str} not found in grammar_v2.json — stale fixture?")
+    });
     for (verb, expected) in cases {
         let result = rule
             .format(verb, &pos)

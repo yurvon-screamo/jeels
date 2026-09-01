@@ -15,10 +15,7 @@ use super::super::types::{
 use super::QUIZ_OPTIONS_COUNT;
 
 fn answer_display_text(answer: &CardAnswer) -> String {
-    match answer {
-        CardAnswer::Vocabulary { translations, .. } => translations.join(", "),
-        CardAnswer::Text(s) => s.clone(),
-    }
+    answer.text_projection()
 }
 
 pub(crate) fn generate_quiz(

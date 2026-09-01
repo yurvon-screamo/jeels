@@ -163,7 +163,7 @@ fn init_grammar_rules() {
         }
 
         let cdn_dir = get_cdn_dir();
-        let grammar_path = cdn_dir.join("grammar").join("grammar.json");
+        let grammar_path = cdn_dir.join("grammar").join("grammar_v2.json");
 
         let grammar_json = match std::fs::read_to_string(&grammar_path) {
             Ok(content) => content,

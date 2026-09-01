@@ -148,7 +148,7 @@ pub async fn load_grammar() -> Result<(), OrigaError> {
     tracing::info!("📖 Loading grammar...");
 
     let cdn = cdn_provider();
-    let json = cdn.fetch_text("grammar/grammar.json").await?;
+    let json = cdn.fetch_text("grammar/grammar_v2.json").await?;
     let data = GrammarData { grammar_json: json };
 
     yield_to_browser().await;

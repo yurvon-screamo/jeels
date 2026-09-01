@@ -6,6 +6,9 @@ use super::super::shared::{
 use super::grammar_detail_hero_card::GrammarDetailHeroCard;
 use super::grammar_detail_mobile::GrammarMobileOverview;
 use super::grammar_practice_session::GrammarPracticeSession;
+use super::grammar_warnings::GrammarWarnings;
+use super::nuances_section::NuancesSection;
+use super::related_pattern_list::RelatedPatternList;
 use crate::i18n::use_i18n;
 use crate::repository::HybridUserRepository;
 use crate::ui_components::{
@@ -298,6 +301,11 @@ pub fn GrammarDetail() -> impl IntoView {
                     let explanation = Memo::new(move |_| {
                         grammar_rule.map(|r| r.content(&native_lang.get()).explanation().to_string())
                     });
+                    let warnings = Memo::new(move |_| {
+                        grammar_rule
+                            .map(|r| r.content(&native_lang.get()).warnings().to_vec())
+                            .unwrap_or_default()
+                    });
                     let how_to_form = Memo::new(move |_| {
                         grammar_rule.map(|r| r.content(&native_lang.get()).how_to_form().to_string())
                     });
@@ -305,15 +313,15 @@ pub fn GrammarDetail() -> impl IntoView {
                         grammar_rule.map(|r| r.content(&native_lang.get()).examples().to_string())
                     });
                     let nuances = Memo::new(move |_| {
-                        grammar_rule.map(|r| r.content(&native_lang.get()).nuances().to_string())
+                        grammar_rule.map(|r| r.content(&native_lang.get()).nuances().clone())
                     });
                     let pro_tip = Memo::new(move |_| {
                         grammar_rule.map(|r| r.content(&native_lang.get()).pro_tip().to_string())
                     });
                     let related_patterns = Memo::new(move |_| {
-                        grammar_rule.and_then(|r| {
-                            r.content(&native_lang.get()).related_patterns().map(|s| s.to_string())
-                        })
+                        grammar_rule
+                            .map(|r| r.content(&native_lang.get()).related_patterns().to_vec())
+                            .unwrap_or_default()
                     });
                     let title_stored: StoredValue<String> = StoredValue::new(title_text.clone());
                     let known_kanji_stored: StoredValue<HashSet<char>> =
@@ -384,6 +392,13 @@ pub fn GrammarDetail() -> impl IntoView {
                                             content=Signal::derive(move || explanation.get().unwrap_or_default())
                                             known_kanji=known_kanji_stored.get_value()
                                         />
+                                        <Show when=move || !warnings.get().is_empty()>
+                                            <GrammarWarnings
+                                                warnings=warnings.get()
+                                                known_kanji=known_kanji_stored.get_value()
+                                                test_id=Signal::derive(|| "grammar-detail-warnings".to_string())
+                                            />
+                                        </Show>
                                     </div>
                                 </Show>
 
@@ -409,13 +424,20 @@ pub fn GrammarDetail() -> impl IntoView {
                                     </div>
                                 </Show>
 
-                                <Show when=move || nuances.get().is_some_and(|s| !s.is_empty())>
+                                <Show when=move || nuances.get().is_some_and(|n| !n.is_empty())>
                                     <div class="grammar-detail-section-card">
                                         <div class="grammar-detail-section-title">{nuances_title}</div>
-                                        <MarkdownText
-                                            content=Signal::derive(move || nuances.get().unwrap_or_default())
-                                            known_kanji=known_kanji_stored.get_value()
-                                        />
+                                        {move || {
+                                            let nuances = nuances.get()?;
+                                            Some(view! {
+                                                <NuancesSection
+                                                    common_mistakes=nuances.common_mistakes().to_vec()
+                                                    notes=nuances.notes().to_vec()
+                                                    known_kanji=known_kanji_stored.get_value()
+                                                    test_id=Signal::derive(|| "grammar-detail-nuances".to_string())
+                                                />
+                                            }.into_any())
+                                        }}
                                     </div>
                                 </Show>
 
@@ -429,12 +451,15 @@ pub fn GrammarDetail() -> impl IntoView {
                                     </div>
                                 </Show>
 
-                                <Show when=move || related_patterns.get().is_some_and(|s| !s.is_empty())>
+                                <Show when=move || !related_patterns.get().is_empty()>
                                     <div class="grammar-detail-section-card">
                                         <div class="grammar-detail-section-title">{related_title}</div>
-                                        <MarkdownText
-                                            content=Signal::derive(move || related_patterns.get().unwrap_or_default())
+                                        <RelatedPatternList
+                                            related=related_patterns.get()
+                                            native_language=native_lang.get()
+                                            current_user=current_user.get()
                                             known_kanji=known_kanji_stored.get_value()
+                                            test_id=Signal::derive(|| "grammar-detail-related".to_string())
                                         />
                                     </div>
                                 </Show>
@@ -521,6 +546,9 @@ pub fn GrammarDetail() -> impl IntoView {
                                     nuances=nuances
                                     pro_tip=pro_tip
                                     related_patterns=related_patterns
+                                    warnings=warnings
+                                    native_language=native_lang.get()
+                                    current_user=current_user.get()
                                     explanation_title=explanation_title
                                     how_to_form_title=how_to_form_title
                                     examples_title=examples_title

@@ -259,7 +259,7 @@ fn collect_i_adjective_variants(formatted: &str, variants: &mut Vec<String>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dictionary::grammar::{FormatAction, GrammarRule, GrammarRuleContent};
+    use crate::dictionary::grammar::{FormatAction, GrammarRule, GrammarRuleContent, Nuances};
     use crate::domain::{JapaneseLevel, NativeLanguage, PartOfSpeech};
     use std::collections::HashMap;
 
@@ -277,9 +277,9 @@ mod tests {
                     "Explanation".to_string(),
                     "How to form".to_string(),
                     "Examples".to_string(),
-                    "Nuances".to_string(),
+                    Nuances::default(),
                     "Pro tip".to_string(),
-                    None,
+                    Vec::new(),
                 ),
             )]),
             Some(format_map),
@@ -1057,9 +1057,9 @@ mod tests {
                     "Test".to_string(),
                     "Test".to_string(),
                     "Test".to_string(),
+                    Nuances::default(),
                     "Test".to_string(),
-                    "Test".to_string(),
-                    None,
+                    Vec::new(),
                 ),
             )]),
             Some(format_map),
@@ -1078,9 +1078,9 @@ mod tests {
                     "Test".to_string(),
                     "Test".to_string(),
                     "Test".to_string(),
+                    Nuances::default(),
                     "Test".to_string(),
-                    "Test".to_string(),
-                    None,
+                    Vec::new(),
                 ),
             )]),
             None,

@@ -96,7 +96,7 @@ pub fn compute_studied_today(
                         Some(CardAnswer::Vocabulary { translations, .. }) => {
                             Some(translations.join(", "))
                         },
-                        Some(CardAnswer::Text(s)) => Some(s),
+                        Some(other) => Some(other.text_projection()),
                         None => None,
                     };
                     (None, short_desc)

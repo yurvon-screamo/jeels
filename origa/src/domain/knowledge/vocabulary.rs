@@ -183,10 +183,7 @@ impl VocabularyCard {
     }
 
     pub fn revert(&self, lang: &NativeLanguage) -> Result<Self, OrigaError> {
-        let meaning_text = match self.answer(lang)? {
-            CardAnswer::Vocabulary { translations, .. } => translations.join(", "),
-            CardAnswer::Text(s) => s,
-        };
+        let meaning_text = self.answer(lang)?.text_projection();
         Ok(Self {
             word: Question::new(meaning_text)?,
             reverse_side: Some(self.word.clone()),

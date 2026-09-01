@@ -149,7 +149,7 @@ fn try_load_grammar_dictionary() -> bool {
         return true;
     }
 
-    let grammar_path = cdn_path(&["grammar", "grammar.json"]);
+    let grammar_path = cdn_path(&["grammar", "grammar_v2.json"]);
     let grammar_json = match std::fs::read_to_string(&grammar_path) {
         Ok(body) => body,
         Err(_) => return false,

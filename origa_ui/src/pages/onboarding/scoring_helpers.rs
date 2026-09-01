@@ -46,7 +46,7 @@ pub(super) fn extract_card_data(
             question: v.word().text().to_string(),
             answer: match v.answer(lang).ok() {
                 Some(CardAnswer::Vocabulary { translations, .. }) => translations.join(", "),
-                Some(CardAnswer::Text(s)) => s,
+                Some(other) => other.text_projection(),
                 None => no_translation(),
             },
             readings: None,
@@ -57,7 +57,7 @@ pub(super) fn extract_card_data(
             question: k.kanji().text().to_string(),
             answer: match k.description(lang).ok() {
                 Some(CardAnswer::Vocabulary { translations, .. }) => translations.join(", "),
-                Some(CardAnswer::Text(s)) => s,
+                Some(other) => other.text_projection(),
                 None => no_translation(),
             },
             readings: format_kanji_readings(k, locale),
@@ -72,7 +72,7 @@ pub(super) fn extract_card_data(
                 .unwrap_or_default(),
             answer: match g.description(lang).ok() {
                 Some(CardAnswer::Vocabulary { translations, .. }) => translations.join(", "),
-                Some(CardAnswer::Text(s)) => s,
+                Some(other) => other.text_projection(),
                 None => no_translation(),
             },
             readings: None,

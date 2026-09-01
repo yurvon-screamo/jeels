@@ -4902,6 +4902,128 @@ rt {
     border-top: 1px solid var(--border-light);
 }
 
+/* Structured grammar nuances (schema v2): wrong → correct pairs + notes.
+   The data layer carries no presentation markers; visual grammar lives
+   here. No radius, no blur shadows — hard offset shadows only. */
+.grammar-nuances {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.grammar-nuance-mistake {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.grammar-nuance-wrong {
+    color: var(--fg-muted);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.grammar-nuance-arrow {
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label-sm, 11px);
+}
+
+.grammar-nuance-correct {
+    color: var(--fg-black);
+}
+
+.grammar-nuance-mistake-note {
+    margin-top: -6px;
+    padding-left: 2px;
+    color: var(--fg-muted);
+    font-size: 0.9em;
+    border-left: 2px solid var(--border-light);
+    padding-left: 10px;
+}
+
+.grammar-nuance-notes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.grammar-nuance-note-item {
+    color: var(--fg-muted);
+    padding-left: 14px;
+    position: relative;
+}
+
+.grammar-nuance-note-item::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--border-dark);
+}
+
+/* Warnings lifted out of the explanation markdown (schema v2). */
+.grammar-warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.grammar-warning {
+    border-left: 3px solid var(--border-dark);
+    background: var(--bg-aged);
+    padding: 12px 14px;
+}
+
+/* Related patterns resolved by rule_id (schema v2). */
+.grammar-related {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.grammar-related-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.grammar-related-chip-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    border: 1px solid var(--border-dark);
+    padding: 6px 10px;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-paper);
+}
+
+.grammar-related-chip-link:hover {
+    background: var(--bg-aged);
+}
+
+.grammar-related-chip-title {
+    color: var(--fg-black);
+}
+
+.grammar-related-chip-level {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-sm, 11px);
+    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+}
+
+.grammar-related-chip-note {
+    font-size: 0.85em;
+    color: var(--fg-muted);
+    max-width: 280px;
+}
+
 .grammar-detail-mobile {
     display: none;
 }

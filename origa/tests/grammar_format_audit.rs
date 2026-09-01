@@ -2,7 +2,7 @@
 //!
 //! Run: `cargo test -p origa --test grammar_format_audit -- --nocapture --ignored`
 //!
-//! Loads cdn/grammar/grammar.json, applies every format_map chain to 7 test
+//! Loads cdn/grammar/grammar_v2.json, applies every format_map chain to 7 test
 //! verbs spanning all verb groups, and dumps TSV results to stderr.
 
 use std::path::PathBuf;
@@ -42,9 +42,9 @@ fn ensure_grammar_loaded() {
     if is_grammar_loaded() {
         return;
     }
-    let grammar_path = cdn_dir().join("grammar").join("grammar.json");
+    let grammar_path = cdn_dir().join("grammar").join("grammar_v2.json");
     let grammar_json =
-        std::fs::read_to_string(&grammar_path).expect("grammar.json must be readable");
+        std::fs::read_to_string(&grammar_path).expect("grammar_v2.json must be readable");
     init_grammar(GrammarData { grammar_json }).expect("init_grammar must succeed");
 }
 

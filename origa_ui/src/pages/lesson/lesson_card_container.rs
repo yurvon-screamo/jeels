@@ -256,6 +256,7 @@ pub fn LessonCardContainer() -> impl IntoView {
                                     Some(CardAnswer::Text(s)) => {
                                         Some(crate::utils::text_format::split_sentences_to_markdown(&s))
                                     },
+                                    Some(CardAnswer::GrammarNuances { .. }) => None,
                                     None => Some(String::new()),
                                 }
                             };
