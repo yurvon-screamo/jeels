@@ -35,6 +35,7 @@ VERSIONED_FILES: list[str] = [
     "dictionary/kanji.json",
     "dictionary/radicals.json",
     "grammar/grammar.json",
+    "grammar/grammar_v2.json",
     "dictionaries/JmdictFurigana.txt",
     # SudachiDict (lindera 5.x, current clients)
     "dictionaries/sudachidict-20260723/char_def.bin",
