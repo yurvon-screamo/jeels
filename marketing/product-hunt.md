@@ -68,9 +68,9 @@ Education
 
 ### Existing
 
-- `.media/en.hero.png` — main dashboard
-- `.media/en.all_in_one.png` — overview of features
-- `.media/en.learn.png` — learning interface
+- `origa_landing/public/images/en.hero.png` — main dashboard
+- `origa_landing/public/images/en.all_in_one.png` — overview of features
+- `origa_landing/public/images/en.learn.png` — learning interface
 
 ### Still needed
 

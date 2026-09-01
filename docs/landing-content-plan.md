@@ -390,9 +390,11 @@ Legal text pages. Minimal styling. No complex layout.
 
 ## 13. Visual Assets — Final Inventory
 
-All assets located in `.media/` directory.
+Landing images live in `origa_landing/public/images/` and are deployed with the site.
+The repo-wide media map (app screenshots, store assets, brand art) lives in `.media/README.md`.
+Landing images are NOT duplicated in `.media/`.
 
-### Existing (app screenshots + marketing collages)
+### Page images
 
 | File | Usage | Page |
 | --- | --- | --- |
@@ -402,17 +404,18 @@ All assets located in `.media/` directory.
 | `ru.all_in_one.png` | Dashboard/overview showcase | /features (RU) |
 | `en.learn.png` | Learning interface showcase | /features, Listening section (EN) |
 | `ru.learn.png` | Learning interface showcase | /features, Listening section (RU) |
+| `content.png` | Content sources showcase | /integrations (hero image, EN/RU) |
 
-### New (generated for landing)
+### Meta and feature images
 
 | File | Usage | Page | Size |
 | --- | --- | --- | --- |
-| `en.og.png` | Social sharing preview (og:image) | All EN pages (meta) | 1200×630 |
-| `ru.og.png` | Social sharing preview (og:image) | All RU pages (meta) | 1200×630 |
-| `en.kanji.png` | Kanji feature screenshot | /features, Kanji section (EN) | ~800×600 |
-| `ru.kanji.png` | Kanji feature screenshot | /features, Kanji section (RU) | ~800×600 |
-| `en.grammar.png` | Grammar feature screenshot | /features, Grammar section (EN) | ~800×600 |
-| `ru.grammar.png` | Grammar feature screenshot | /features, Grammar section (RU) | ~800×600 |
+| `en.og.png` | Social sharing preview (og:image) | All EN pages (meta) | 1729×910 |
+| `ru.og.png` | Social sharing preview (og:image) | All RU pages (meta) | 1729×910 |
+| `en.kanji.png` | Kanji feature screenshot | /features, Kanji section (EN) | 1448×1086 |
+| `ru.kanji.png` | Kanji feature screenshot | /features, Kanji section (RU) | 1448×1086 |
+| `en.grammar.png` | Grammar feature screenshot | /features, Grammar section (EN) | 1448×1086 |
+| `ru.grammar.png` | Grammar feature screenshot | /features, Grammar section (RU) | 1448×1086 |
 
 ### Asset → Page Mapping
 
@@ -420,14 +423,16 @@ All assets located in `.media/` directory.
 /                → en.hero.png / ru.hero.png (hero), en.og.png / ru.og.png (meta)
 /features        → en.all_in_one.png (overview), en.kanji.png (kanji section),
                    en.grammar.png (grammar section), en.learn.png (listening section)
+/integrations    → content.png (content sources showcase)
 /compare         → no images (text table)
 /download        → no images (platform icons via CSS/SVG)
 /privacy         → no images
 /terms           → no images
 ```
 
-### Static assets to copy to origa_landing/public/
+### Static assets in origa_landing/public/ (already in place)
 
-- `favicon.png` → from `origa_ui/public/logo-32.png` or `.media/` avatar
+- `favicon.png` → copy of `origa_ui/public/logo-32.png`
+- `apple-touch-icon.png`, `favicon.ico`, `browserconfig.xml` → site icons
 - `og-image.png` → alias for `en.og.png` (default fallback)
-- `robots.txt` → static file
+- `robots.txt`, `sitemap.xml` → crawler files
