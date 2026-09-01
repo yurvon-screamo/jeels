@@ -64,7 +64,7 @@ ALLOWED_NON_JIS = set(
     "<>=+*#`|_\\/~%^&$@!?\"'()[]{}.,;:- "  # ASCII printable (markdown)
     " "
     "（）《》「」『』・，、。：；！？＜＞＝＋＊"
-) | set(chr(c) for c in range(0x21, 0x7F))
+) | {chr(c) for c in range(0x21, 0x7F)}
 
 
 def is_jis_or_allowed(char: str) -> bool:
