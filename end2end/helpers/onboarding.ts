@@ -13,6 +13,15 @@ export async function waitForScoringReady(page: Page, timeout = 30_000): Promise
     ]);
 }
 
+export interface CompleteOnboardingOptions {
+    /**
+     * Display name typed into the intro step's name input before moving on.
+     * The value commits via the intro-save callback when the user leaves the
+     * intro step (the Next button in onboarding/mod.rs).
+     */
+    displayName?: string;
+}
+
 /**
  * Completes onboarding from login through import, stops at scoring step.
  * Navigates: Intro → Load → JLPT (N4) → Apps → Progress → Summary → Import → Scoring
@@ -22,7 +31,10 @@ export async function waitForScoringReady(page: Page, timeout = 30_000): Promise
  * NOTE: Extracted from onboarding.spec.ts. The local copy in the spec file
  * was removed; both spec and BDD steps import from here.
  */
-export async function completeOnboardingToScoring(page: Page): Promise<boolean> {
+export async function completeOnboardingToScoring(
+    page: Page,
+    options: CompleteOnboardingOptions = {},
+): Promise<boolean> {
     await page.goto("/");
 
     try {
@@ -38,6 +50,12 @@ export async function completeOnboardingToScoring(page: Page): Promise<boolean> 
     }
 
     await expect(page.getByTestId("onboarding-spinner")).not.toBeVisible({ timeout: 10_000 });
+
+    // Intro: optionally type a display name before leaving the step (the
+    // name commits via the intro-save callback once the step is left).
+    if (options.displayName !== undefined) {
+        await page.getByTestId("intro-step-name-input").fill(options.displayName);
+    }
 
     // Intro → Load
     await page.getByTestId("onboarding-next").click();

@@ -1,8 +1,15 @@
 import { expect } from "@playwright/test";
-import { Given, When, Then } from "../fixtures";
-import { OnboardingPage } from "../../pages";
+import { After, Given, When, Then } from "../fixtures";
+import { HomePage, OnboardingPage, ProfilePage } from "../../pages";
 import { completeOnboardingToScoring } from "../../helpers/onboarding";
 import { skipOnboarding } from "../../helpers/navigation";
+import {
+    generateRelayEmail,
+    setupTestUser,
+    uiLogin,
+    wipeClientAuthState,
+    type TestUserContext,
+} from "../../helpers/auth";
 
 // Module-scoped snapshot of the question text captured by the "Не знаю" step
 // so the "card not shown again" assertion can verify it differs from the
@@ -10,9 +17,56 @@ import { skipOnboarding } from "../../helpers/navigation";
 // runs scenarios sequentially within a file.
 let lastDontKnowQuestion: string | null = null;
 
+// Relay-Apple identities created by the relay-onboarding Given step. The BDD
+// `page` fixture logs in the DEFAULT testUser before any step runs, so the
+// relay scenario switches identity mid-test; these accounts belong to no
+// fixture. NOTE: this After hook runs after EVERY BDD scenario of the
+// project (playwright-bdd registers hooks globally) — for non-relay
+// scenarios it is a no-op over the empty list. The e2e- email prefix also
+// makes the orphan sweeper catch any leaks; this is just prompt hygiene.
+const relayTestUsers: TestUserContext[] = [];
+
+After(async () => {
+    while (relayTestUsers.length > 0) {
+        const user = relayTestUsers.pop();
+        if (!user) break;
+        await user.cleanup().catch(() => {});
+    }
+});
+
 Given('новый пользователь дошёл до шага оценивания карточек', async ({ page }) => {
     const reached = await completeOnboardingToScoring(page);
     expect(reached).toBeTruthy();
+});
+
+Given(
+    'новый пользователь с релей-почтой Apple дошёл до шага оценивания карточек, введя ник {string}',
+    async ({ page }, displayName: string) => {
+        // Reproduces the Apple "Hide My Email" onboarding: the relay address
+        // seeds an EMPTY display name, so the name shown across the UI after
+        // onboarding is exactly what the user typed on the intro step.
+        await wipeClientAuthState(page);
+        const relayUser = await setupTestUser({ email: generateRelayEmail() });
+        relayTestUsers.push(relayUser);
+        await uiLogin(page, relayUser.email, relayUser.password);
+        const reached = await completeOnboardingToScoring(page, { displayName });
+        expect(reached).toBeTruthy();
+    },
+);
+
+Then('в приветствии на главной странице отображается ник {string}', async ({ page }, name: string) => {
+    const home = new HomePage(page);
+    await expect(home.welcomeCard).toContainText(name);
+});
+
+Then('поле ника в профиле заполнено {string}', async ({ page }, name: string) => {
+    const profile = new ProfilePage(page);
+    await expect(profile.usernameInput).toHaveValue(name);
+});
+
+Then('хлебные крошки профиля отображают {string}', async ({ page }, name: string) => {
+    const profile = new ProfilePage(page);
+    await expect(profile.breadcrumbsCurrent).toContainText(name);
 });
 
 Then('отображается вопрос карточки', async ({ page }) => {

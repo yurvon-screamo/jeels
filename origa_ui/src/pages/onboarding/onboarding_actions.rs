@@ -3,7 +3,6 @@ use crate::repository::cdn_provider;
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use leptos_router::NavigateOptions;
-use origa::domain::User;
 use origa::traits::UserRepository;
 use origa::use_cases::{
     CompleteOnboardingScoringUseCase, ImportOnboardingSetsUseCase, USERNAME_MAX_CHARS,
@@ -99,7 +98,6 @@ where
 pub(super) fn create_on_start_import_callback(
     repository: crate::repository::HybridUserRepository,
     state: RwSignal<OnboardingState>,
-    current_user: RwSignal<Option<User>>,
     is_importing: RwSignal<bool>,
     disposed: StoredValue<()>,
 ) -> Callback<()> {
@@ -118,8 +116,13 @@ pub(super) fn create_on_start_import_callback(
                 return;
             }
 
-            let Some(mut user) = current_user.get() else {
-                tracing::error!("User not loaded");
+            // Read the CURRENT profile, not the page-load snapshot: the
+            // intro-step name save (and other onboarding writes) land after
+            // this page loaded, and the import below persists the FULL
+            // record — replaying a stale snapshot would roll those writes
+            // back (the lost-display-name bug).
+            let Ok(Some(mut user)) = repo.get_current_user().await else {
+                tracing::error!("Onboarding import: get_current_user failed or no user record");
                 is_importing.set(false);
                 return;
             };

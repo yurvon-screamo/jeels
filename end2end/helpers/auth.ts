@@ -7,10 +7,59 @@ import {
 
 export const DEFAULT_TEST_PASSWORD = "e2e-test-password-123";
 
-export function generateUniqueEmail(): string {
+/**
+ * Unique mailbox part shared by all test-account generators. Keeping one
+ * source matters: the `e2e-` prefix is a load-bearing contract with the
+ * orphan sweeper (`DELETE FROM user WHERE email LIKE 'e2e-%'`), so every
+ * generated address must start with it.
+ */
+function uniqueMailbox(): string {
 	const timestamp = Date.now();
 	const random = Math.random().toString(36).substring(2, 8);
-	return `e2e-${timestamp}-${random}@origa.local`;
+	return `e2e-${timestamp}-${random}`;
+}
+
+export function generateUniqueEmail(): string {
+	return `${uniqueMailbox()}@origa.local`;
+}
+
+/**
+ * Apple "Hide My Email" relay address for a test account. The relay domain
+ * makes the app seed an EMPTY display name (see `utils/display_name.rs`),
+ * reproducing the Apple-account onboarding flow.
+ */
+export function generateRelayEmail(): string {
+	return `${uniqueMailbox()}@privaterelay.appleid.com`;
+}
+
+/**
+ * Wipes ALL client-side auth state (cookies, localStorage, sessionStorage,
+ * IndexedDB, cache storage) so the app falls back to the public /login
+ * route on the next load. Leptos rehydrates the session from these stores,
+ * so clearing cookies alone is not enough.
+ */
+export async function wipeClientAuthState(page: Page): Promise<void> {
+	await page.context().clearCookies();
+	await page.goto("/");
+	await page.evaluate(async () => {
+		try {
+			window.localStorage.clear();
+			window.sessionStorage.clear();
+			if (window.indexedDB && indexedDB.databases) {
+				const dbs = await indexedDB.databases();
+				for (const db of dbs) {
+					if (db.name) indexedDB.deleteDatabase(db.name);
+				}
+			}
+			if (window.caches) {
+				const keys = await caches.keys();
+				for (const k of keys) await caches.delete(k);
+			}
+		} catch {
+			// ignore — some browsers block storage access in cross-origin iframes
+		}
+	});
+	await page.reload();
 }
 
 export interface TestUserContext {

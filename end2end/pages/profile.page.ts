@@ -24,6 +24,10 @@ export class ProfilePage extends BasePage {
 	readonly confirmDeleteBtn: Locator;
 	readonly cancelDeleteBtn: Locator;
 
+	// Personal data card: editable display name + breadcrumbs header
+	readonly usernameInput: Locator;
+	readonly breadcrumbsCurrent: Locator;
+
 	constructor(page: Page) {
 		super(page);
 
@@ -48,6 +52,9 @@ export class ProfilePage extends BasePage {
 
 		this.confirmDeleteBtn = page.getByTestId("profile-confirm-delete-btn");
 		this.cancelDeleteBtn = page.getByTestId("profile-cancel-delete-btn");
+
+		this.usernameInput = page.getByTestId("profile-username-input");
+		this.breadcrumbsCurrent = page.getByTestId("profile-breadcrumbs-current");
 	}
 
 	async goto(): Promise<void> {
