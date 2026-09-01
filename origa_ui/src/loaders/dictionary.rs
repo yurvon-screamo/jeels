@@ -9,7 +9,7 @@ use crate::utils::{now_ms, yield_to_browser};
 use origa::traits::CdnProvider;
 
 /// The eight raw lindera dictionary files (deflate-compressed on the CDN,
-/// inflated on device). lindera 5.x walks the trie in place, so no pre-built
+/// inflated on device). lindera walks the trie in place, so no pre-built
 /// rkyv blob is needed anymore — the raw files ARE the cache.
 /// Ordered so the largest file (dict.words, 28 MB deflated → 223 MB raw)
 /// inflates FIRST, while every other file is still compressed: peak heap
@@ -35,7 +35,7 @@ pub fn dict_path(file: &str) -> String {
 /// Load the SudachiDict tokenizer dictionary.
 ///
 /// Unified path for cache-hit and cache-miss: fetch eight deflate-compressed
-/// files (from Cache API or CDN), inflate, hand the raw bytes to lindera 5.x
+/// files (from Cache API or CDN), inflate, hand the raw bytes to the lindera
 /// loaders. Peak WASM heap is bounded by compressed+inflated bytes coexisting
 /// during inflate (~420 MB on first load, ~350 MB steady state).
 pub async fn load_dictionary() -> Result<(), OrigaError> {

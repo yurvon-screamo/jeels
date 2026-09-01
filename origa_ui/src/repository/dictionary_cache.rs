@@ -2,7 +2,8 @@ use origa::domain::OrigaError;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
-/// Cache name for the raw (deflated) dictionary files (lindera 5.x era).
+/// Cache name for the raw (deflated) dictionary files (introduced when the
+/// app switched to raw lindera dictionary files instead of an rkyv blob).
 pub const DICTIONARY_FILES_CACHE_NAME: &str = "origa-dictionary-files-v1";
 
 /// Cache key prefix for each deflated dictionary file.
