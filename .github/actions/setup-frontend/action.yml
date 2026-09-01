@@ -1,16 +1,11 @@
 name: "Setup Frontend"
-description: "Install cargo-binstall, trunk, tauri-cli and cache UniDic dictionary"
+description: "Install cargo-binstall, trunk, tauri-cli"
 
 inputs:
     tools:
         description: "Space-separated list of tools to install via cargo-binstall"
         required: false
         default: "trunk tauri-cli"
-
-outputs:
-    unidic-cache-hit:
-        description: "Whether UniDic dictionary cache was hit"
-        value: ${{ steps.unidic-cache.outputs.cache-hit }}
 
 runs:
     using: "composite"
@@ -43,11 +38,3 @@ runs:
               path: ~/.cache/trunk
               key: trunk-tools-v2
 
-        - name: Cache UniDic dictionary
-          id: unidic-cache
-          uses: actions/cache@v4
-          with:
-              path: origa_ui/public/dictionaries/unidic
-              key: unidic-dict-v1-${{ hashFiles('origa_ui/build.rs') }}
-              restore-keys: |
-                  unidic-dict-v1-

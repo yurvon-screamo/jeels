@@ -235,8 +235,9 @@ The tokenizer commands require the SudachiDict dictionary (lindera 5 format,
 built by `scripts/build_sudachidict.py`). The CLI resolves it in the
 following locations:
 
-1. `cdn/dictionaries/sudachidict-20260723/` (versioned, preferred)
-2. `cdn/dictionaries/` (flat legacy layout)
+1. the directory passed via `--dictionary-dir` (if it exists)
+2. `cdn/dictionaries/sudachidict-20260723/` (versioned)
+3. `target/cdn-cache/` (downloaded CDN copy)
 
 The dictionary files include:
 

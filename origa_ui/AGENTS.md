@@ -110,9 +110,12 @@ Routes defined in `routes.rs`: `/` (home), `/login`, `/onboarding`, `/profile`,
 
 ## Build System
 
-`build.rs` handles at compile time: i18n compilation, Lindera dictionary (UniDic),
-well-known set metadata, and env vars (`ORIGA_CDN_BASE_URL` required, plus optional
+`build.rs` handles at compile time: i18n compilation, well-known set
+metadata, and env vars (`ORIGA_CDN_BASE_URL` required, plus optional
 `ORIGA_CDN_REGION`, `ORIGA_VERSION`, `ORIGA_COMMIT`, `ORIGA_BUILD_DATE`, `ORIGA_PUBLIC_BASE_URL`).
+The tokenizer dictionary is not built here — `build.rs` only verifies the
+pre-built SudachiDict files exist in `cdn/dictionaries/` (fail fast on a
+broken checkout; `cdn/` is gitignored).
 
 ### `recursion_limit` (bin crate) — RESOLVED, keep the guardrails
 

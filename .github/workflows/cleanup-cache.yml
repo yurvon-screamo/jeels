@@ -83,7 +83,7 @@ jobs:
 
             # Delete master caches older than 14 days (except critical)
             if [[ "$ref" == "refs/heads/master" && "$days_old" -gt 14 ]]; then
-              if ! echo "$key" | grep -qE '(cdn-data|unidic-dict|cache-apt-pkgs|playwright-chromium|xwin|trunk-tools|trailbase|gradle|ndk)'; then
+              if ! echo "$key" | grep -qE '(cdn-data|cache-apt-pkgs|playwright-chromium|xwin|trunk-tools|trailbase|gradle|ndk)'; then
                 echo "DELETE (master stale ${days_old}d): $key"
                 gh cache delete "$id" || echo "WARNING: failed to delete cache $id ($key)"
                 continue

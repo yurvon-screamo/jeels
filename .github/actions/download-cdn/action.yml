@@ -5,7 +5,7 @@ inputs:
   cache-key:
     description: "Cache key prefix"
     required: false
-    default: "cdn-data-v12"
+    default: "cdn-data-v13"
   cdn-base-url:
     description: "CDN base URL for downloading files"
     required: true

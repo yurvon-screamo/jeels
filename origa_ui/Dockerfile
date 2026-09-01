@@ -96,7 +96,6 @@ COPY build_defaults.rs ./
 RUN --mount=type=cache,target=/sccache,sharing=locked \
     --mount=type=cache,target=/root/.cargo/registry,sharing=locked \
     --mount=type=cache,target=/app/target,sharing=locked \
-    rm -rf origa_ui/public/dictionaries/unidic && \
     rm -rf /app/target/wasm32-unknown-unknown/release/.fingerprint/origa* && \
     rm -rf /app/target/wasm32-unknown-unknown/release/deps/origa* && \
     rm -rf /app/target/wasm32-unknown-unknown/release/deps/liboriga* && \

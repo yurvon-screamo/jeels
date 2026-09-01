@@ -43,7 +43,7 @@ Native vs WASM via `cfg(target_arch = "wasm32")`. Each module has `*.rs` (native
 ## Key Dependencies
 
 - **rs-fsrs** — spaced repetition algorithm
-- **lindera** + UniDic — Japanese tokenization
+- **lindera** + SudachiDict — Japanese tokenization
 - **ort** — ONNX Runtime (OCR + STT inference)
 - **rkyv** — zero-copy dictionary deserialization
 - **rusqlite** — SQLite for Anki import (native only)
