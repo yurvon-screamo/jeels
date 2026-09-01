@@ -141,7 +141,7 @@ runs:
         declare -A MIN_SIZES
         MIN_SIZES["well_known_set/well_known_sets_meta.json"]=100000
         MIN_SIZES["well_known_set/well_known_types_meta.json"]=100
-        MIN_SIZES["dictionaries/metadata.json"]=100
+        MIN_SIZES["dictionaries/sudachidict-20260723/metadata.json"]=100
         MIN_SIZES["manifest.json"]=100
         MIN_SIZES["dictionaries/JmdictFurigana.txt"]=1000
         MIN_SIZES["phrases/phrase_index.json"]=100
