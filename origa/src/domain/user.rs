@@ -337,6 +337,21 @@ impl User {
         self.knowledge_set.create_card(card)
     }
 
+    /// Opens the bulk-import bracket for imports that create thousands of
+    /// cards (onboarding sets, Anki packs): until
+    /// [`User::end_bulk_import`], uniqueness checks are index-backed and
+    /// daily-stats recalculation is deferred, keeping the import linear
+    /// instead of quadratic.
+    pub(crate) fn begin_bulk_import(&mut self) {
+        self.knowledge_set.begin_bulk_import();
+    }
+
+    /// Closes the bulk-import bracket opened by [`User::begin_bulk_import`]:
+    /// recalculates the daily stats once for the whole batch.
+    pub(crate) fn end_bulk_import(&mut self) {
+        self.knowledge_set.end_bulk_import();
+    }
+
     pub fn update_card_content(&mut self, card_id: Ulid, new_card: Card) -> Result<(), OrigaError> {
         self.knowledge_set.update_card_content(card_id, new_card)
     }

@@ -1668,3 +1668,258 @@ mod deleted_companion_words {
         );
     }
 }
+
+// --- Bulk-import mode (begin_bulk_import / end_bulk_import) ---
+
+#[test]
+fn bulk_import_creates_same_daily_stats_as_one_by_one_creation() {
+    // Arrange
+    let mut one_by_one = KnowledgeSet::new();
+    let mut bulk = KnowledgeSet::new();
+    let words: Vec<Card> = (0..30)
+        .map(|i| create_vocab_card(&format!("word_{i}")))
+        .collect();
+    for card in &words {
+        one_by_one.create_card(card.clone()).unwrap();
+    }
+
+    // Act
+    bulk.begin_bulk_import();
+    for card in &words {
+        bulk.create_card(card.clone()).unwrap();
+    }
+    bulk.end_bulk_import();
+
+    // Assert — deferred recalculation must land on exactly the history
+    // item the per-card recalcs would have produced.
+    assert_eq!(bulk.study_cards().len(), one_by_one.study_cards().len());
+    assert_eq!(
+        bulk.lesson_history().len(),
+        one_by_one.lesson_history().len()
+    );
+    let (individual, batched) = (&one_by_one.lesson_history()[0], &bulk.lesson_history()[0]);
+    assert_eq!(batched.total_words(), individual.total_words());
+    assert_eq!(batched.new_words(), individual.new_words());
+    assert_eq!(batched.known_words(), individual.known_words());
+    assert_eq!(batched.in_progress_words(), individual.in_progress_words());
+    assert_eq!(
+        batched.high_difficulty_words(),
+        individual.high_difficulty_words()
+    );
+    assert_eq!(batched.avg_stability(), individual.avg_stability());
+    assert_eq!(batched.avg_difficulty(), individual.avg_difficulty());
+}
+
+#[test]
+fn bulk_import_after_same_day_reviews_preserves_counters_and_ratings() {
+    // Arrange — both sets start with one already-reviewed card, so the
+    // today-item carries preserved counters and recomputed ratings before
+    // the batch runs (the realistic shape: an import into an active day).
+    let set_with_reviewed_base_card = || {
+        let mut knowledge_set = KnowledgeSet::new();
+        let base = knowledge_set
+            .create_card(create_vocab_card("base"))
+            .unwrap();
+        knowledge_set
+            .rate_card(*base.card_id(), Rating::Good, RateMode::StandardLesson)
+            .unwrap();
+        knowledge_set
+    };
+    let mut one_by_one = set_with_reviewed_base_card();
+    let mut bulk = set_with_reviewed_base_card();
+    let words: Vec<Card> = (0..10)
+        .map(|i| create_vocab_card(&format!("extra_{i}")))
+        .collect();
+    for card in &words {
+        one_by_one.create_card(card.clone()).unwrap();
+    }
+
+    // Act
+    bulk.begin_bulk_import();
+    for card in &words {
+        bulk.create_card(card.clone()).unwrap();
+    }
+    bulk.end_bulk_import();
+
+    // Assert — preserved day counters and rating aggregates must match
+    // the per-card path exactly.
+    let (individual, batched) = (&one_by_one.lesson_history()[0], &bulk.lesson_history()[0]);
+    assert_eq!(
+        batched.new_cards_studied_today(),
+        individual.new_cards_studied_today()
+    );
+    assert_eq!(
+        batched.phrase_cards_studied_today(),
+        individual.phrase_cards_studied_today()
+    );
+    assert_eq!(batched.positive_ratings(), individual.positive_ratings());
+    assert_eq!(batched.negative_ratings(), individual.negative_ratings());
+    assert_eq!(batched.total_ratings(), individual.total_ratings());
+    assert_eq!(batched.total_words(), individual.total_words());
+}
+
+#[test]
+fn bulk_import_rejects_duplicate_created_within_batch() {
+    // Arrange
+    let mut knowledge_set = KnowledgeSet::new();
+    knowledge_set.begin_bulk_import();
+    knowledge_set.create_card(create_vocab_card("猫")).unwrap();
+
+    // Act
+    let duplicate = knowledge_set.create_card(create_vocab_card("猫"));
+
+    // Assert
+    assert!(
+        matches!(duplicate, Err(OrigaError::DuplicateCard { .. })),
+        "a word created earlier in the same batch must be rejected"
+    );
+    knowledge_set.end_bulk_import();
+    assert_eq!(knowledge_set.study_cards().len(), 1);
+}
+
+#[test]
+fn bulk_import_rejects_duplicate_of_card_created_before_batch() {
+    // Arrange
+    let mut knowledge_set = KnowledgeSet::new();
+    knowledge_set.create_card(create_vocab_card("猫")).unwrap();
+    knowledge_set.begin_bulk_import();
+
+    // Act
+    let duplicate = knowledge_set.create_card(create_vocab_card("猫"));
+
+    // Assert
+    assert!(
+        matches!(duplicate, Err(OrigaError::DuplicateCard { .. })),
+        "the dedup index must include cards created before the batch"
+    );
+}
+
+#[test]
+fn bulk_import_allows_same_text_for_vocabulary_and_kanji_cards() {
+    // Arrange — "日" as a vocabulary word and as a kanji are distinct
+    // cards; the dedup key must not collapse them into one.
+    let mut knowledge_set = KnowledgeSet::new();
+    knowledge_set.begin_bulk_import();
+
+    // Act
+    knowledge_set.create_card(create_vocab_card("日")).unwrap();
+    knowledge_set
+        .create_card(Card::Kanji(KanjiCard::new_test("日".to_string())))
+        .unwrap();
+    knowledge_set.end_bulk_import();
+
+    // Assert
+    assert_eq!(knowledge_set.study_cards().len(), 2);
+}
+
+#[test]
+fn bulk_import_delete_then_recreate_same_word_succeeds() {
+    // Arrange
+    let mut knowledge_set = KnowledgeSet::new();
+    knowledge_set.begin_bulk_import();
+    let created = knowledge_set.create_card(create_vocab_card("猫")).unwrap();
+    knowledge_set.delete_card(*created.card_id()).unwrap();
+
+    // Act
+    let recreated = knowledge_set.create_card(create_vocab_card("猫"));
+
+    // Assert — deleting inside the batch must evict the word from the
+    // dedup index so it can be re-created.
+    assert!(
+        recreated.is_ok(),
+        "recreating a deleted word inside the batch must succeed"
+    );
+    knowledge_set.end_bulk_import();
+    assert_eq!(knowledge_set.study_cards().len(), 1);
+}
+
+#[test]
+fn bulk_import_delete_defers_stats_recalc_to_end_of_batch() {
+    // Arrange — identical sets; the same delete runs outside vs inside a
+    // bulk batch.
+    let set_with_two_cards = || {
+        let mut knowledge_set = KnowledgeSet::new();
+        let doomed = knowledge_set
+            .create_card(create_vocab_card("doomed"))
+            .unwrap();
+        knowledge_set
+            .create_card(create_vocab_card("keeper"))
+            .unwrap();
+        (knowledge_set, doomed)
+    };
+    let (mut one_by_one, doomed_individual) = set_with_two_cards();
+    let (mut batch, doomed_batched) = set_with_two_cards();
+
+    // Act
+    one_by_one
+        .delete_card(*doomed_individual.card_id())
+        .unwrap();
+
+    batch.begin_bulk_import();
+    batch.delete_card(*doomed_batched.card_id()).unwrap();
+    batch.end_bulk_import();
+
+    // Assert — the deferred recalc must reflect the deletion: the batched
+    // path cannot leave a stale (undeleted) word count behind.
+    let (individual, batched) = (&one_by_one.lesson_history()[0], &batch.lesson_history()[0]);
+    assert_eq!(individual.total_words(), 1);
+    assert_eq!(batched.total_words(), individual.total_words());
+    assert_eq!(batched.new_words(), individual.new_words());
+}
+
+#[test]
+fn bulk_import_content_update_drops_index_but_still_rejects_duplicates() {
+    // Arrange
+    let mut knowledge_set = KnowledgeSet::new();
+    knowledge_set.begin_bulk_import();
+    let target = knowledge_set.create_card(create_vocab_card("old")).unwrap();
+    knowledge_set
+        .create_card(create_vocab_card("other"))
+        .unwrap();
+
+    // Act — content replacement drops the bulk index (degradation policy,
+    // mirrors merge).
+    knowledge_set
+        .update_card_content(*target.card_id(), create_vocab_card("renamed"))
+        .unwrap();
+    let duplicate_other = knowledge_set.create_card(create_vocab_card("other"));
+    let duplicate_renamed = knowledge_set.create_card(create_vocab_card("renamed"));
+
+    // Assert — the linear fallback must keep rejecting duplicates after the
+    // index is dropped.
+    assert!(
+        matches!(duplicate_other, Err(OrigaError::DuplicateCard { .. })),
+        "duplicate of an untouched card must still be rejected"
+    );
+    assert!(
+        matches!(duplicate_renamed, Err(OrigaError::DuplicateCard { .. })),
+        "duplicate of the updated card must still be rejected"
+    );
+    assert_eq!(knowledge_set.study_cards().len(), 2);
+}
+
+#[test]
+fn bulk_import_merge_drops_index_but_still_rejects_duplicates() {
+    // Arrange
+    let mut knowledge_set = KnowledgeSet::new();
+    knowledge_set.begin_bulk_import();
+    knowledge_set
+        .create_card(create_vocab_card("base"))
+        .unwrap();
+
+    let mut remote = KnowledgeSet::new();
+    remote
+        .create_card(create_vocab_card("remote_word"))
+        .unwrap();
+
+    // Act — merge drops the bulk index (degradation policy).
+    knowledge_set.merge(&remote);
+    let duplicate = knowledge_set.create_card(create_vocab_card("remote_word"));
+
+    // Assert — the linear fallback must reject a duplicate of the card the
+    // merge just inserted.
+    assert!(
+        matches!(duplicate, Err(OrigaError::DuplicateCard { .. })),
+        "duplicate of a merged-in card must still be rejected"
+    );
+}
