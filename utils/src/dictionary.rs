@@ -75,22 +75,14 @@ fn find_dictionary_directory() -> Result<PathBuf, OrigaError> {
         dict_dir.pop();
     }
 
-    // Prefer the versioned SudachiDict directory; fall back to the legacy
-    // flat layout (old checkouts / cached CDN downloads).
-    let versioned = dict_dir
+    let dict_dir = dict_dir
         .join("cdn")
         .join("dictionaries")
-        .join("sudachidict-20260723");
-    if versioned.exists() {
-        return Ok(versioned);
-    }
-
-    dict_dir = dict_dir.join("cdn").join("dictionaries");
+        .join(origa::domain::SUDACHIDICT_DIR);
 
     if dict_dir.exists() {
         return Ok(dict_dir);
     }
-
     let cache = cache_dir();
     if cache.exists() {
         tracing::info!("using cached CDN dictionary from {}", cache.display());

@@ -231,26 +231,7 @@ mod tests {
             .unwrap()
             .join("cdn")
             .join("dictionaries");
-        // Prefer the versioned SudachiDict directory (see deploy_cdn.py);
-        // fall back to a stale build-script output.
-        let dict_dir = if let Ok(out_dir) = env::var("OUT_DIR") {
-            let out_dict = PathBuf::from(out_dir).join("lindera-unidic");
-            let versioned = base.join("sudachidict-20260723");
-            if versioned.join("dict.trie").exists() {
-                versioned
-            } else if out_dict.exists() {
-                out_dict
-            } else {
-                base
-            }
-        } else {
-            let versioned = base.join("sudachidict-20260723");
-            if versioned.join("dict.trie").exists() {
-                versioned
-            } else {
-                base
-            }
-        };
+        let dict_dir = base.join(crate::domain::SUDACHIDICT_DIR);
 
         let read_file = |name: &str| fs::read(dict_dir.join(name)).unwrap();
 

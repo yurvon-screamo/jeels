@@ -61,7 +61,7 @@ pub use score_content::ScoreContentResult;
 pub use srs::RateMode;
 pub use stats::{RatingRatio, TodayOverview, compute_rating_ratio, compute_today_overview};
 pub use tokenizer::{
-    DictionaryData, PartOfSpeech, TokenInfo, TokenTranslation, init_dictionary,
+    DictionaryData, PartOfSpeech, SUDACHIDICT_DIR, TokenInfo, TokenTranslation, init_dictionary,
     is_dictionary_loaded, lookup_tokens_translations, tokenize_text,
 };
 pub use user::{ONBOARDING_COMPLETED_KEY, ONBOARDING_SKIPPED_KEY, User, WordKnowledge};

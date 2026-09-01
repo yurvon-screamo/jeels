@@ -340,13 +340,6 @@ jobs:
                   shared-key: origa-ci-v2
                   save-if: false
 
-            - name: Cache UniDic dictionary
-              uses: actions/cache@v6
-              with:
-                  path: origa_ui/public/dictionaries/unidic
-                  key: unidic-dict-v1-${{ hashFiles('origa_ui/build.rs') }}
-                  restore-keys: unidic-dict-v1-
-
             - name: Download CDN artifact
               uses: actions/download-artifact@v8
               with:
@@ -392,13 +385,6 @@ jobs:
                   targets: wasm32-unknown-unknown
                   shared-key: origa-ci-v2
                   save-if: false
-
-            - name: Cache UniDic dictionary
-              uses: actions/cache@v6
-              with:
-                  path: origa_ui/public/dictionaries/unidic
-                  key: unidic-dict-v1-${{ hashFiles('origa_ui/build.rs') }}
-                  restore-keys: unidic-dict-v1-
 
             - name: Download CDN artifact
               uses: actions/download-artifact@v8

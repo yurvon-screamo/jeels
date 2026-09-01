@@ -5,6 +5,7 @@ use origa::dictionary::phrase::index_version;
 use origa::domain::OrigaError;
 use origa::traits::CdnProvider;
 
+use crate::loaders::dictionary::dict_path;
 use crate::repository::cdn_provider;
 
 const BUNDLE_DOWNLOADED_KEY: &str = "/__origa_bundle_downloaded__";
@@ -28,15 +29,15 @@ pub fn get_base_bundle_resources() -> Vec<String> {
     let mut resources: Vec<String> = Vec::new();
 
     resources.extend([
-        "dictionaries/sudachidict-20260723/char_def.bin".to_string(),
-        "dictionaries/sudachidict-20260723/matrix.mtx".to_string(),
-        "dictionaries/sudachidict-20260723/dict.trie".to_string(),
-        "dictionaries/sudachidict-20260723/dict.valsidx".to_string(),
-        "dictionaries/sudachidict-20260723/dict.vals".to_string(),
-        "dictionaries/sudachidict-20260723/unk.bin".to_string(),
-        "dictionaries/sudachidict-20260723/dict.wordsidx".to_string(),
-        "dictionaries/sudachidict-20260723/dict.words".to_string(),
-        "dictionaries/sudachidict-20260723/metadata.json".to_string(),
+        dict_path("char_def.bin"),
+        dict_path("matrix.mtx"),
+        dict_path("dict.trie"),
+        dict_path("dict.valsidx"),
+        dict_path("dict.vals"),
+        dict_path("unk.bin"),
+        dict_path("dict.wordsidx"),
+        dict_path("dict.words"),
+        dict_path("metadata.json"),
         "dictionaries/JmdictFurigana.txt".to_string(),
     ]);
 

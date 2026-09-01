@@ -26,10 +26,7 @@ use leptos_router::hooks::use_location;
 use leptos_router::path;
 use origa::domain::{OrigaError, User};
 use origa::traits::UserRepository;
-use origa::use_cases::{
-    MigrateKanjiCompanionsUseCase, MigrateVocabularyLemmasUseCase,
-    MigrateVocabularyPartOfSpeechUseCase, SeedReadyPhrasesUseCase,
-};
+use origa::use_cases::{MigrateKanjiCompanionsUseCase, SeedReadyPhrasesUseCase};
 
 use crate::repository::HybridUserRepository;
 
@@ -70,7 +67,7 @@ pub fn start_dictionary_loading(
         // The iOS WKWebView process has a ~1.5 GB jetsam limit. Loading all
         // resources simultaneously via futures::join! caused ~27 concurrent
         // HTTP requests and ~144 MB of response bodies in the JS heap at once,
-        // plus UniDic deflate-decompression (~61 MB → ~200 MB) and JSON parsing
+        // plus dictionary deflate-decompression and JSON parsing
         // — pushing peak memory past the limit and killing the process with an
         // OOM jetsam kill (not a Rust panic the hook can catch).
         //
@@ -80,11 +77,11 @@ pub fn start_dictionary_loading(
         // and the intermediate Vec/String buffers are dropped.
         //
         // Sizes (CDN, compressed):
-        //   Stage 1 — dictionary:  ~61 MB (→ ~200 MB decompressed)
+        //   Stage 1 — dictionary: largest single inflate
         //   Stage 2 — vocab+phrases+furigana+pitch: ~91 MB text
         //   Stage 3 — kanji+grammar+radicals: ~4 MB text
 
-        // Stage 1: UniDic dictionary — solo, dominates memory usage.
+        // Stage 1: tokenizer dictionary — solo, dominates memory usage.
         if let Err(e) = load_dictionary().await {
             tracing::error!("Failed to load dictionary: {e}");
         }
@@ -154,18 +151,6 @@ pub fn start_dictionary_loading(
         let migrate_kanji = MigrateKanjiCompanionsUseCase::new(&repository);
         if let Err(e) = migrate_kanji.execute().await {
             tracing::warn!("Failed to migrate kanji companions: {e}");
-        }
-
-        let migrate_vocab_pos = MigrateVocabularyPartOfSpeechUseCase::new(&repository);
-        if let Err(e) = migrate_vocab_pos.execute().await {
-            tracing::warn!("Failed to migrate vocabulary part of speech: {e}");
-        }
-
-        // SudachiDict lemma migration: 信ずる → 信じる, 現われる → 現れる …
-        // Runs BEFORE phrase seeding so the fresh tokens match the index.
-        let migrate_vocab_lemmas = MigrateVocabularyLemmasUseCase::new(&repository);
-        if let Err(e) = migrate_vocab_lemmas.execute().await {
-            tracing::warn!("Failed to migrate vocabulary lemmas: {e}");
         }
 
         // Phase E: auto per-card pre-cache (background, only when online)

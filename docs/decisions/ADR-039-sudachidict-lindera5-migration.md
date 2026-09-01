@@ -54,3 +54,25 @@
   файл разворачивается первым, буфер преаллоцирован).
 - Стартовый кеш словаря в Cache API: 75 МБ вместо 213 МБ.
 - Поддержка двух раскладок словаря на CDN до удаления legacy.
+
+## Post-migration cleanup (issue #409)
+
+После вымирания клиентов на pre-SudachiDict сборках (Sentry: ноль событий
+с релизов ≤0.6.4 после 2026-08-30; первый стабильный SudachiDict-релиз —
+v0.6.5) временные слои удаляются cleanup-PR'ом по issue #409:
+
+- legacy-файлы UniDic исключены из деплоя и CDN-манифеста (JmdictFurigana.txt
+  остаётся — используется); само S3-удаление объектов выполняется отдельным
+  runbook'ом после мержа (бэкап по SHA256 remote-манифеста, deploy_cdn.py,
+  refresh_cache_control.py --dry-run); flat-layout fallback убран из utils
+  и тестовых фикстур;
+- имя каталога `sudachidict-20260723` вынесено в
+  `origa::domain::tokenizer::SUDACHIDICT_DIR` (зеркала: origa_ui/build.rs,
+  scripts/deploy_cdn.py);
+- `MigrateVocabularyLemmasUseCase` и `MigrateVocabularyPartOfSpeechUseCase`
+  ретайрены вместе с `VocabularyCard::with_word()/with_pos()` — карточки
+  создаются уже с POS, а `pos=None` легально живёт с ленивой ретокенизацией;
+- пустой `origa/build.rs` удалён вместе с мёртвыми `[build-dependencies]`;
+- вычищены мёртвые UniDic-кэши CI (cache-степы, keep-правило, gitignore,
+  Dockerfile) и починена проверка словаря в `origa_ui/build.rs`, которая
+  после миграции смотрела в flat-раскладку без lindera 5 файлов.

@@ -1,4 +1,6 @@
-use origa::domain::{DictionaryData, OrigaError, init_dictionary, is_dictionary_loaded};
+use origa::domain::{
+    DictionaryData, OrigaError, SUDACHIDICT_DIR, init_dictionary, is_dictionary_loaded,
+};
 
 use crate::repository::{
     cdn_provider, get_cached_dictionary_files, save_dictionary_files_to_cache,
@@ -24,11 +26,11 @@ const DICTIONARY_FILES: &[&str] = &[
 ];
 const METADATA_FILE: &str = "metadata.json";
 
-/// Versioned dictionary path: old clients keep fetching the UniDic files
-/// from `dictionaries/` (byte-identical to what they already have), new
-/// clients fetch SudachiDict from here. Removing the legacy files is a
-/// separate release, once old-client traffic fades.
-const DICT_PATH_PREFIX: &str = "dictionaries/sudachidict-20260723/";
+/// Full CDN path of a file inside the versioned SudachiDict directory
+/// (e.g. `dict.words` → `dictionaries/sudachidict-20260723/dict.words`).
+pub fn dict_path(file: &str) -> String {
+    format!("dictionaries/{SUDACHIDICT_DIR}/{file}")
+}
 
 /// Load the SudachiDict tokenizer dictionary.
 ///
@@ -69,11 +71,8 @@ pub async fn load_dictionary() -> Result<(), OrigaError> {
 /// Fetch all dictionary files (deflated) from the CDN in parallel.
 async fn fetch_deflated_files() -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
     let provider = cdn_provider();
-    let mut names: Vec<String> = DICTIONARY_FILES
-        .iter()
-        .map(|n| format!("{DICT_PATH_PREFIX}{n}"))
-        .collect();
-    names.push(format!("{DICT_PATH_PREFIX}{METADATA_FILE}"));
+    let mut names: Vec<String> = DICTIONARY_FILES.iter().map(|n| dict_path(n)).collect();
+    names.push(dict_path(METADATA_FILE));
 
     let mut results: Vec<(String, Vec<u8>)> = Vec::with_capacity(names.len());
     // Sequential fetch keeps peak memory at one file at a time.
