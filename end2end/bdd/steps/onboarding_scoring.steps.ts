@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { After, Given, When, Then } from "../fixtures";
-import { OnboardingPage } from "../../pages";
+import { HomePage, OnboardingPage, ProfilePage } from "../../pages";
 import { completeOnboardingToScoring } from "../../helpers/onboarding";
 import { skipOnboarding } from "../../helpers/navigation";
 import {
@@ -20,8 +20,10 @@ let lastDontKnowQuestion: string | null = null;
 // Relay-Apple identities created by the relay-onboarding Given step. The BDD
 // `page` fixture logs in the DEFAULT testUser before any step runs, so the
 // relay scenario switches identity mid-test; these accounts belong to no
-// fixture and are cleaned up in the After hook (the e2e- prefix also makes
-// the orphan sweeper catch them, this is just prompt hygiene).
+// fixture. NOTE: this After hook runs after EVERY BDD scenario of the
+// project (playwright-bdd registers hooks globally) — for non-relay
+// scenarios it is a no-op over the empty list. The e2e- email prefix also
+// makes the orphan sweeper catch any leaks; this is just prompt hygiene.
 const relayTestUsers: TestUserContext[] = [];
 
 After(async () => {
@@ -53,15 +55,18 @@ Given(
 );
 
 Then('в приветствии на главной странице отображается ник {string}', async ({ page }, name: string) => {
-    await expect(page.getByTestId("home-welcome")).toContainText(name);
+    const home = new HomePage(page);
+    await expect(home.welcomeCard).toContainText(name);
 });
 
 Then('поле ника в профиле заполнено {string}', async ({ page }, name: string) => {
-    await expect(page.getByTestId("profile-username-input")).toHaveValue(name);
+    const profile = new ProfilePage(page);
+    await expect(profile.usernameInput).toHaveValue(name);
 });
 
 Then('хлебные крошки профиля отображают {string}', async ({ page }, name: string) => {
-    await expect(page.getByTestId("profile-breadcrumbs-current")).toContainText(name);
+    const profile = new ProfilePage(page);
+    await expect(profile.breadcrumbsCurrent).toContainText(name);
 });
 
 Then('отображается вопрос карточки', async ({ page }) => {

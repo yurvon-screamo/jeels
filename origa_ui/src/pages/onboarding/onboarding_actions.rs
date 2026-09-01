@@ -122,7 +122,7 @@ pub(super) fn create_on_start_import_callback(
             // record — replaying a stale snapshot would roll those writes
             // back (the lost-display-name bug).
             let Ok(Some(mut user)) = repo.get_current_user().await else {
-                tracing::error!("User not loaded");
+                tracing::error!("Onboarding import: get_current_user failed or no user record");
                 is_importing.set(false);
                 return;
             };

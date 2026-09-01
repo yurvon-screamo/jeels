@@ -14,11 +14,12 @@ export async function waitForScoringReady(page: Page, timeout = 30_000): Promise
 }
 
 export interface CompleteOnboardingOptions {
-	/**
-	 * Display name typed into the intro step's name input before moving on
-	 * (the input commits its value when the user leaves the step).
-	 */
-	displayName?: string;
+    /**
+     * Display name typed into the intro step's name input before moving on.
+     * The value commits via the intro-save callback when the user leaves the
+     * intro step (the Next button in onboarding/mod.rs).
+     */
+    displayName?: string;
 }
 
 /**
@@ -31,8 +32,8 @@ export interface CompleteOnboardingOptions {
  * was removed; both spec and BDD steps import from here.
  */
 export async function completeOnboardingToScoring(
-	page: Page,
-	options: CompleteOnboardingOptions = {},
+    page: Page,
+    options: CompleteOnboardingOptions = {},
 ): Promise<boolean> {
     await page.goto("/");
 
@@ -51,7 +52,7 @@ export async function completeOnboardingToScoring(
     await expect(page.getByTestId("onboarding-spinner")).not.toBeVisible({ timeout: 10_000 });
 
     // Intro: optionally type a display name before leaving the step (the
-    // name commits via the intro-save callback when Next is clicked).
+    // name commits via the intro-save callback once the step is left).
     if (options.displayName !== undefined) {
         await page.getByTestId("intro-step-name-input").fill(options.displayName);
     }

@@ -7,22 +7,29 @@ import {
 
 export const DEFAULT_TEST_PASSWORD = "e2e-test-password-123";
 
-export function generateUniqueEmail(): string {
+/**
+ * Unique mailbox part shared by all test-account generators. Keeping one
+ * source matters: the `e2e-` prefix is a load-bearing contract with the
+ * orphan sweeper (`DELETE FROM user WHERE email LIKE 'e2e-%'`), so every
+ * generated address must start with it.
+ */
+function uniqueMailbox(): string {
 	const timestamp = Date.now();
 	const random = Math.random().toString(36).substring(2, 8);
-	return `e2e-${timestamp}-${random}@origa.local`;
+	return `e2e-${timestamp}-${random}`;
+}
+
+export function generateUniqueEmail(): string {
+	return `${uniqueMailbox()}@origa.local`;
 }
 
 /**
- * Apple "Hide My Email" relay address for a test account. Same `e2e-` prefix
- * as regular test users so the orphan sweeper catches any leaks; the relay
- * domain makes the app seed an EMPTY display name (see
- * `utils/display_name.rs`), reproducing the Apple-account onboarding flow.
+ * Apple "Hide My Email" relay address for a test account. The relay domain
+ * makes the app seed an EMPTY display name (see `utils/display_name.rs`),
+ * reproducing the Apple-account onboarding flow.
  */
 export function generateRelayEmail(): string {
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	return `e2e-${timestamp}-${random}@privaterelay.appleid.com`;
+	return `${uniqueMailbox()}@privaterelay.appleid.com`;
 }
 
 /**

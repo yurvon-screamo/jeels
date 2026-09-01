@@ -23,6 +23,7 @@ const AUTOSAVE_STATUS_DISPLAY_MS: u32 = 1500;
 #[component]
 pub fn ProfileContent() -> impl IntoView {
     let auth_store = use_context::<AuthStore>().expect("AuthStore not provided");
+    let disposed = StoredValue::new(());
 
     // This page renders the AuthStore snapshot, which was taken at login.
     // Onboarding (intro name save, set imports) and other pages write the
@@ -32,7 +33,11 @@ pub fn ProfileContent() -> impl IntoView {
     // A refresh failure is non-fatal: the page falls back to the snapshot.
     let auth_store_for_refresh = auth_store.clone();
     spawn_local(async move {
-        if let Err(e) = auth_store_for_refresh.refresh_user().await {
+        let result = auth_store_for_refresh.refresh_user().await;
+        if disposed.is_disposed() {
+            return;
+        }
+        if let Err(e) = result {
             tracing::warn!("Profile: failed to refresh user on mount: {:?}", e);
         }
     });
@@ -107,7 +112,6 @@ pub fn ProfileContent() -> impl IntoView {
     let save_status: RwSignal<AutoSaveStatus> = RwSignal::new(AutoSaveStatus::Idle);
     let is_logging_out = RwSignal::new(false);
     let is_deleting = RwSignal::new(false);
-    let disposed = StoredValue::new(());
     let is_saving = RwSignal::new(false);
     let needs_resave = RwSignal::new(false);
 
