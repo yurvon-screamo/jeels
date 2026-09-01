@@ -3,6 +3,7 @@ use crate::repository::{
     TrailBaseClient, get_session, set_session_async, take_pkce_verifier_async, uuid_to_ulid,
 };
 use crate::store::auth_store::AuthStore;
+use crate::utils::display_name::default_username_for_email;
 use chrono::Utc;
 use origa::domain::{DailyLoad, JlptProgress, KnowledgeSet, User};
 use origa::traits::UserRepository;
@@ -107,7 +108,7 @@ pub(super) fn create_new_user_from_session(
         return Err("Invalid TrailBase session id: please log in again".to_string());
     }
 
-    let username = email.split('@').next().unwrap_or(email).to_string();
+    let username = default_username_for_email(email);
 
     let native_language = locale_to_native_language(&i18n.get_locale_untracked());
 

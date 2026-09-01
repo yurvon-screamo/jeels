@@ -1,3 +1,4 @@
+pub mod display_name;
 mod drag_drop;
 mod fetch;
 pub mod file;

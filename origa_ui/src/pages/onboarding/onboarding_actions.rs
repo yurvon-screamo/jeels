@@ -5,9 +5,55 @@ use leptos::task::spawn_local;
 use leptos_router::NavigateOptions;
 use origa::domain::User;
 use origa::traits::UserRepository;
-use origa::use_cases::{CompleteOnboardingScoringUseCase, ImportOnboardingSetsUseCase};
+use origa::use_cases::{
+    CompleteOnboardingScoringUseCase, ImportOnboardingSetsUseCase, USERNAME_MAX_CHARS,
+};
 
 use super::onboarding_state::OnboardingState;
+
+/// Persists the display name entered on the intro step when the user moves on.
+///
+/// Fire-and-forget by design: the name is optional personalization, so a save
+/// failure is logged and the user still proceeds (the profile page can fix the
+/// name later). An empty input skips the save; an unchanged name skips the
+/// write (one read still goes out to compare against the current profile).
+///
+/// Reads-modifies-writes the *current* profile rather than replaying a
+/// snapshot captured at page load: the user can flip the language on this very
+/// step, and a stale `native_language`/`daily_load` would silently roll the
+/// choice back on the full-record save.
+pub(super) fn create_save_intro_username_callback(
+    repository: crate::repository::HybridUserRepository,
+    username: RwSignal<String>,
+) -> Callback<()> {
+    Callback::new(move |_: ()| {
+        let name: String = username
+            .get_untracked()
+            .trim()
+            .chars()
+            .take(USERNAME_MAX_CHARS)
+            .collect();
+        if name.is_empty() {
+            return;
+        }
+
+        let repo = repository.clone();
+        spawn_local(async move {
+            let Ok(Some(mut user)) = repo.get_current_user().await else {
+                tracing::error!("Onboarding intro: get_current_user error");
+                return;
+            };
+            if name == user.username() {
+                return;
+            }
+
+            user.set_username(name);
+            if let Err(e) = repo.save_sync(&user).await {
+                tracing::error!("Failed to save username on onboarding intro: {:?}", e);
+            }
+        });
+    })
+}
 
 pub(super) fn create_on_skip_callback<N>(
     repository: crate::repository::HybridUserRepository,

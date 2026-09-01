@@ -1,6 +1,6 @@
 use crate::i18n::*;
 use crate::pages::shared::DailyLoadSelector;
-use crate::ui_components::NativeLanguageToggle;
+use crate::ui_components::{Input, NativeLanguageToggle};
 use leptos::prelude::*;
 use origa::domain::{DailyLoad, NativeLanguage};
 
@@ -9,9 +9,11 @@ use super::content::AutoSaveStatus;
 #[component]
 pub fn PersonalDataCard(
     #[prop(optional, into)] test_id: Signal<String>,
+    username: RwSignal<String>,
     selected_language: RwSignal<NativeLanguage>,
     selected_daily_load: RwSignal<DailyLoad>,
     save_status: Signal<AutoSaveStatus>,
+    on_username_change: Callback<()>,
     on_language_change: Callback<NativeLanguage>,
     on_daily_load_change: Callback<DailyLoad>,
     on_retry: Callback<()>,
@@ -21,10 +23,33 @@ pub fn PersonalDataCard(
         let val = test_id.get();
         if val.is_empty() { None } else { Some(val) }
     };
+    let i18n_for_placeholder = i18n;
+    let username_placeholder = Signal::derive(move || {
+        let locale = i18n_for_placeholder.get_locale();
+        td_string!(locale, common.username_placeholder).to_string()
+    });
+    let on_username_input_change = Callback::new(move |_ev: leptos::ev::Event| {
+        on_username_change.run(());
+    });
 
     view! {
         <div data-testid=test_id_val class="p-6">
             <div class="flex flex-col gap-4">
+                <div class="profile-section">
+                    <label class="label-muted block" for="profile-username-input">
+                        {t!(i18n, profile.username)}
+                    </label>
+                    <Input
+                        value=username
+                        placeholder=username_placeholder
+                        id=Signal::derive(|| "profile-username-input".to_string())
+                        name=Signal::derive(|| "display_name".to_string())
+                        maxlength=Signal::derive(|| Some(origa::use_cases::USERNAME_MAX_CHARS))
+                        class=Signal::derive(|| "w-full".to_string())
+                        on_change=on_username_input_change
+                        test_id=Signal::derive(|| "profile-username-input".to_string())
+                    />
+                </div>
                 <div class="profile-section-row">
                     <div class="label-muted">{t!(i18n, profile.interface_language)}</div>
                     <NativeLanguageToggle

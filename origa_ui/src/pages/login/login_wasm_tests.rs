@@ -287,11 +287,13 @@ async fn personal_data_card_idle_status_renders_controls() {
     mount_with_i18n(&wrapper, || {
         view! {
             <crate::pages::profile::personal_data_card::PersonalDataCard
+                username=RwSignal::new("ivan.petrov".to_string())
                 selected_language=RwSignal::new(origa::domain::NativeLanguage::Russian)
                 selected_daily_load=RwSignal::new(origa::domain::DailyLoad::Medium)
                 save_status=Signal::from(
                     crate::pages::profile::content::AutoSaveStatus::Idle
                 )
+                on_username_change=Callback::new(|_| ())
                 on_language_change=Callback::new(|_| ())
                 on_daily_load_change=Callback::new(|_| ())
                 on_retry=Callback::new(|_| ())
@@ -312,5 +314,16 @@ async fn personal_data_card_idle_status_renders_controls() {
             .unwrap()
             .is_some(),
         "the native-language toggle must be embedded"
+    );
+    // The display-name editor renders, prefilled with the current username
+    let name_input = card
+        .query_selector("[data-testid=\"profile-username-input\"]")
+        .unwrap()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlInputElement>();
+    assert_eq!(
+        name_input.value(),
+        "ivan.petrov",
+        "the name input must be prefilled with the stored username"
     );
 }

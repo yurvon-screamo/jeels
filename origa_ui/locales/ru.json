@@ -26,7 +26,8 @@
     "tooltip_known": "Уже в словаре",
     "tooltip_new": "Новое слово",
     "language_aria_label": "Выберите язык",
-    "more_details": "Подробнее"
+    "more_details": "Подробнее",
+    "username_placeholder": "Как вас называть?"
   },
   "app": {
     "logging_in": "Вход..."

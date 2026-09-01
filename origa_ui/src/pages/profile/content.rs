@@ -2,6 +2,7 @@ use super::{DangerZoneCard, PasswordCard, PersonalDataCard, SettingsCard, legal_
 use crate::i18n::{native_language_to_locale, t, use_i18n};
 use crate::store::AuthStore;
 use crate::ui_components::{Card, OfflineBundleCard};
+use crate::utils::display_name::{display_name_for, editable_username_for};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use leptos_router::hooks::use_navigate;
@@ -23,10 +24,22 @@ const AUTOSAVE_STATUS_DISPLAY_MS: u32 = 1500;
 pub fn ProfileContent() -> impl IntoView {
     let auth_store = use_context::<AuthStore>().expect("AuthStore not provided");
 
+    // Initial value of the editable input: empty for Apple relay profiles
+    // that have no meaningful name yet (placeholder question shows instead).
+    let stored_username = Memo::new(move |_| {
+        auth_store.user.with(|u: &Option<User>| {
+            u.as_ref()
+                .map(|u| editable_username_for(u.username(), u.email()))
+                .unwrap_or_default()
+        })
+    });
+
+    // Displayed name: email when the username is empty, so the breadcrumbs
+    // never render a blank or an opaque relay local part on its own.
     let user_name = Memo::new(move |_| {
         auth_store.user.with(|u: &Option<User>| {
             u.as_ref()
-                .map(|u| u.username().to_string())
+                .map(|u| display_name_for(u.username(), u.email()))
                 .unwrap_or_default()
         })
     });
@@ -69,6 +82,15 @@ pub fn ProfileContent() -> impl IntoView {
         selected_daily_load.set(daily_load.get());
     });
 
+    let selected_username = RwSignal::new(stored_username.get_untracked());
+
+    // Re-sync the input after a remote refresh (autosave round-trip). Typing
+    // between the save and the refresh may be clobbered — same trade-off the
+    // language and daily-load selectors already accept.
+    Effect::new(move |_| {
+        selected_username.set(stored_username.get());
+    });
+
     let save_status: RwSignal<AutoSaveStatus> = RwSignal::new(AutoSaveStatus::Idle);
     let is_logging_out = RwSignal::new(false);
     let is_deleting = RwSignal::new(false);
@@ -93,9 +115,18 @@ pub fn ProfileContent() -> impl IntoView {
             loop {
                 let language = selected_language.get_untracked();
                 let daily_load_val = selected_daily_load.get_untracked();
+                // NOTE: the name input's editable value is always what gets
+                // persisted — including the empty string. For a legacy relay
+                // profile (stored garbage name, blank input) a language or
+                // daily-load change therefore also normalizes the stored name
+                // to empty; the display fallback (email) makes that
+                // invisible and it is the intended end state.
+                let username_val = selected_username.get_untracked();
 
                 let use_case = UpdateUserProfileUseCase::new(&repository);
-                let result = use_case.execute(language, daily_load_val, None).await;
+                let result = use_case
+                    .execute(language, daily_load_val, None, Some(&username_val))
+                    .await;
 
                 if disposed.is_disposed() {
                     return;
@@ -147,6 +178,18 @@ pub fn ProfileContent() -> impl IntoView {
         })
     };
 
+    // The Input fires `change` on blur/Enter, so this commits the typed name
+    // once — not per keystroke. Skipping the trigger when the value is
+    // unchanged avoids a redundant network save on a plain focus pass.
+    let on_username_change = {
+        let trigger = trigger_save;
+        Callback::new(move |(): ()| {
+            if selected_username.get_untracked().trim() != stored_username.get_untracked().trim() {
+                trigger.run(());
+            }
+        })
+    };
+
     let on_retry = trigger_save;
 
     let navigate = use_navigate();
@@ -195,9 +238,11 @@ pub fn ProfileContent() -> impl IntoView {
                 <div class="profile-col">
                     <Card shadow=Signal::derive(|| true)>
                         <PersonalDataCard
+                            username={selected_username}
                             selected_language={selected_language}
                             selected_daily_load={selected_daily_load}
                             save_status={Signal::derive(move || save_status.get())}
+                            on_username_change={on_username_change}
                             on_language_change={on_language_change}
                             on_daily_load_change={on_daily_load_change}
                             on_retry={on_retry}

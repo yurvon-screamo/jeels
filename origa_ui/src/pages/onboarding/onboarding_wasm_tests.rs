@@ -25,7 +25,8 @@ async fn intro_step_renders_title_subtitle_and_language_bar() {
     let wrapper = create_wrapper();
     mount_with_i18n(&wrapper, || {
         let lang = RwSignal::new(origa::domain::NativeLanguage::Russian);
-        view! { <IntroStep selected_language=lang test_id="is1" /> }.into_any()
+        let username = RwSignal::new(String::new());
+        view! { <IntroStep selected_language=lang username=username test_id="is1" /> }.into_any()
     });
     tick().await;
 
@@ -66,7 +67,8 @@ async fn intro_step_language_toggle_switches_signal() {
     mount_with_i18n(&wrapper, move || {
         let lang = RwSignal::new(origa::domain::NativeLanguage::Russian);
         set_lang.set(Some(lang));
-        view! { <IntroStep selected_language=lang test_id="is2" /> }.into_any()
+        let username = RwSignal::new(String::new());
+        view! { <IntroStep selected_language=lang username=username test_id="is2" /> }.into_any()
     });
     let lang = get_lang.get().expect("captured");
     tick().await;
@@ -83,6 +85,49 @@ async fn intro_step_language_toggle_switches_signal() {
         lang.get(),
         origa::domain::NativeLanguage::English,
         "the embedded toggle must drive the signal"
+    );
+}
+
+#[wasm_bindgen_test]
+async fn intro_step_name_input_prefilled_from_profile_username() {
+    let wrapper = create_wrapper();
+    let (set_username, get_username) = shared_cell::<RwSignal<String>>();
+    mount_with_i18n(&wrapper, move || {
+        let username = RwSignal::new("ivan.petrov".to_string());
+        set_username.set(Some(username));
+        let lang = RwSignal::new(origa::domain::NativeLanguage::Russian);
+        view! { <IntroStep selected_language=lang username=username test_id="is3" /> }.into_any()
+    });
+    tick().await;
+
+    let input = wrapper
+        .query_selector("[data-testid=\"intro-step-name-input\"]")
+        .unwrap()
+        .unwrap()
+        .unchecked_into::<web_sys::HtmlInputElement>();
+    assert_eq!(
+        input.value(),
+        "ivan.petrov",
+        "the name input must be prefilled with the stored username"
+    );
+    assert!(
+        wrapper
+            .query_selector("[data-testid=\"intro-step-name-label\"]")
+            .unwrap()
+            .is_some(),
+        "the name label must render"
+    );
+
+    // Typing into the input must drive the shared signal that the intro
+    // step's Next button commits.
+    input.set_value("");
+    input
+        .dispatch_event(&web_sys::Event::new("input").unwrap())
+        .unwrap();
+    let username = get_username.get().expect("captured");
+    assert!(
+        username.get_untracked().is_empty(),
+        "clearing the input must clear the signal value"
     );
 }
 

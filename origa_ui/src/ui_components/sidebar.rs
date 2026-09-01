@@ -3,6 +3,7 @@ use crate::store::auth_store::AuthStore;
 use crate::ui_components::avatar::AvatarSize;
 use crate::ui_components::nav_config::NavRoute;
 use crate::ui_components::{Avatar, Logo, LogoSize, derive_test_id};
+use crate::utils::display_name::display_name_for;
 use leptos::prelude::*;
 use leptos_icons::Icon;
 use leptos_router::components::A;
@@ -34,7 +35,10 @@ pub fn Sidebar(
         current_user
             .with(|u| {
                 u.as_ref()
-                    .and_then(|u| u.username().chars().next())
+                    // Empty/untouched relay names must not render a blank
+                    // avatar: fall back to the account email's initial.
+                    .map(|u| display_name_for(u.username(), u.email()))
+                    .and_then(|name| name.chars().next())
                     .map(|c| c.to_uppercase().to_string())
             })
             .unwrap_or_default()

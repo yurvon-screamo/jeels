@@ -25,6 +25,7 @@ use crate::ui_components::{
     Button, ButtonVariant, CardLayout, CardLayoutSize, Modal, PageLayout, PageLayoutVariant,
     Spinner, Stepper, StepperStep, Text, TextSize, TypographyVariant,
 };
+use crate::utils::display_name::editable_username_for;
 use apps_step::AppsStep;
 use intro_step::IntroStep;
 use jlpt_step::JlptStep;
@@ -34,6 +35,7 @@ use leptos_router::hooks::use_navigate;
 use load_step::LoadStep;
 use onboarding_actions::{
     create_on_finish_callback, create_on_skip_callback, create_on_start_import_callback,
+    create_save_intro_username_callback,
 };
 use onboarding_state::{OnboardingState, OnboardingStep};
 use origa::domain::NativeLanguage;
@@ -69,6 +71,10 @@ pub fn Onboarding() -> impl IntoView {
 
     let state = RwSignal::new(OnboardingState::new());
     let current_user: RwSignal<Option<User>> = RwSignal::new(None);
+    // Display name typed on the intro step; prefilled from the profile once
+    // the user loads. Stays empty for Apple relay emails (no usable default)
+    // — the input's placeholder asks the question instead.
+    let intro_username: RwSignal<String> = RwSignal::new(String::new());
     let sets_loaded = RwSignal::new(false);
     let is_loading = RwSignal::new(true);
     let is_importing = RwSignal::new(false);
@@ -125,7 +131,7 @@ pub fn Onboarding() -> impl IntoView {
                 let use_case = UpdateUserProfileUseCase::new(&repo);
                 let daily_load = *user.daily_load();
                 let telegram_id = user.telegram_user_id().copied();
-                if let Err(e) = use_case.execute(lang, daily_load, telegram_id).await {
+                if let Err(e) = use_case.execute(lang, daily_load, telegram_id, None).await {
                     tracing::error!("Failed to save language on onboarding: {:?}", e);
                 }
             }
@@ -200,6 +206,7 @@ pub fn Onboarding() -> impl IntoView {
                     if disposed.is_disposed() {
                         return;
                     }
+                    intro_username.set(editable_username_for(user.username(), user.email()));
                     current_user.set(Some(user.clone()));
                     if user.is_onboarding_completed() {
                         nav("/home", Default::default());
@@ -245,7 +252,15 @@ pub fn Onboarding() -> impl IntoView {
         });
     });
 
+    let save_intro_username =
+        create_save_intro_username_callback(repository.clone(), intro_username);
+
     let on_next = Callback::new(move |_: ()| {
+        // Leaving the intro step commits the display name (fire-and-forget:
+        // the name is optional, failures are logged inside the callback).
+        if matches!(state.get_untracked().current_step, OnboardingStep::Intro) {
+            save_intro_username.run(());
+        }
         state.update(|s| {
             s.go_to_next_step();
         });
@@ -289,7 +304,7 @@ pub fn Onboarding() -> impl IntoView {
 
                         <div class="onboarding-content mt-8">
                             <Show when=move || matches!(state.get().current_step, OnboardingStep::Intro)>
-                                <IntroStep selected_language=selected_language test_id=Signal::derive(|| "onboarding-intro-step".to_string()) />
+                                <IntroStep selected_language=selected_language username=intro_username test_id=Signal::derive(|| "onboarding-intro-step".to_string()) />
                             </Show>
 
                             <Show when=move || matches!(state.get().current_step, OnboardingStep::Load)>
