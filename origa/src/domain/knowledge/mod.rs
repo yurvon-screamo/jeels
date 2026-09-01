@@ -13,6 +13,7 @@ mod stats_updater;
 mod tests;
 pub mod vocabulary;
 
+use card::ImportDedupKey;
 pub use card::{Card, CardType, StudyCard};
 pub use daily_history::{DailyHistoryItem, estimate_completion_date};
 pub use empty_diagnosis::{LessonEmptyDiagnosis, diagnose_empty_lesson};
@@ -83,8 +84,12 @@ pub struct KnowledgeSet {
     // serialized, rebuilt from `study_cards` when a bulk import starts, and
     // always `None` outside an import batch.
     #[serde(skip)]
-    import_dedup_index: Option<HashSet<(CardType, String)>>,
+    import_dedup_index: Option<ImportDedupIndex>,
 }
+
+/// Dedup index maintained while a bulk import is active: one
+/// [`ImportDedupKey`] per existing card.
+type ImportDedupIndex = HashSet<ImportDedupKey>;
 
 fn deserialize_study_cards<'de, D>(deserializer: D) -> Result<HashMap<Ulid, StudyCard>, D::Error>
 where
@@ -215,7 +220,7 @@ impl KnowledgeSet {
         }
         self.deleted_cards.insert(card_id);
         if let Some(index) = &mut self.import_dedup_index {
-            index.remove(&Self::import_dedup_key(removed.card()));
+            index.remove(&ImportDedupKey::new(removed.card()));
         } else {
             self.recalculate_daily_stats();
         }
@@ -240,7 +245,7 @@ impl KnowledgeSet {
     pub fn create_card(&mut self, card: Card) -> Result<StudyCard, OrigaError> {
         let study_card = StudyCard::new(card);
         let card_id = *study_card.card_id();
-        let dedup_key = Self::import_dedup_key(study_card.card());
+        let dedup_key = ImportDedupKey::new(study_card.card());
 
         // Bulk-import mode checks uniqueness against the dedup index (O(1));
         // outside it, the linear scan keeps the single-card path as-is.
@@ -281,23 +286,17 @@ impl KnowledgeSet {
         Ok(study_card)
     }
 
-    /// Uniqueness identity of a card: card type + content key. Cross-type
-    /// collisions are legitimate (a vocabulary word and a kanji may share the
-    /// same surface text), so the type discriminates the key.
-    fn import_dedup_key(card: &Card) -> (CardType, String) {
-        (CardType::from(card), card.content_key())
-    }
-
     /// Enters bulk-import mode: builds a dedup index over the current cards
-    /// so `create_card` uniqueness checks are O(1) instead of a full scan,
-    /// and daily-stats recalculation is deferred. Onboarding/Anki imports
-    /// create thousands of cards; per-card full scans made those imports
-    /// quadratic (the "N2 onboarding import is unusably slow" bug).
+    /// (one [`ImportDedupKey`] per card) so `create_card` uniqueness checks
+    /// are O(1) instead of a full scan, and daily-stats recalculation is
+    /// deferred. Onboarding/Anki imports create thousands of cards; per-card
+    /// full scans made those imports quadratic (the "N2 onboarding import is
+    /// unusably slow" bug).
     pub(crate) fn begin_bulk_import(&mut self) {
         self.import_dedup_index = Some(
             self.study_cards
                 .values()
-                .map(|sc| Self::import_dedup_key(sc.card()))
+                .map(|sc| ImportDedupKey::new(sc.card()))
                 .collect(),
         );
     }

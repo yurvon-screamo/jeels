@@ -206,6 +206,25 @@ pub enum CardType {
     Phrase,
 }
 
+/// Uniqueness identity of a card for bulk-import deduplication: card type
+/// plus content key. A vocabulary word and a kanji may share the same
+/// surface text (「日」), so the type discriminates otherwise-equal keys —
+/// mirroring the same-type-only semantics of the linear uniqueness scan.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ImportDedupKey {
+    card_type: CardType,
+    content: String,
+}
+
+impl ImportDedupKey {
+    pub fn new(card: &Card) -> Self {
+        Self {
+            card_type: CardType::from(card),
+            content: card.content_key(),
+        }
+    }
+}
+
 impl From<&Card> for CardType {
     fn from(card: &Card) -> Self {
         match card {
