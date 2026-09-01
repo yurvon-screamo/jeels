@@ -59,10 +59,10 @@ EMOJI_RE = re.compile(
 
 # Characters outside JIS X 0213 that legitimately appear in grammar content.
 ALLOWED_NON_JIS = set(
-    "～〜…‥ー―‐－☺"  # tildes, ellipsis, dashes (some map, kept defensively)
+    "～〜…‥ー―‐－—–☺"  # tildes, ellipsis, dashes (em/en included: house style)
     "→←↔↑↓⇒⇔"          # arrows used in explanations
     "<>=+*#`|_\\/~%^&$@!?\"'()[]{}.,;:- "  # ASCII printable (markdown)
-    " "                     # nbsp
+    " "
     "（）《》「」『』・，、。：；！？＜＞＝＋＊"
 ) | set(chr(c) for c in range(0x21, 0x7F))
 
@@ -234,8 +234,12 @@ def lint_text_fields(c: dict, loc: str, report: Report) -> None:
             report.warn(loc, f"unusual chars in {field!r}: {''.join(bad_chars)}")
 
     examples = c.get("examples")
-    if isinstance(examples, str) and examples.strip() and not examples.lstrip().startswith("```"):
-        report.warn(loc, "examples does not start with a code fence")
+    if isinstance(examples, str) and examples.strip():
+        # A leading bold group label ("**Hearsay:**") before the first fence
+        # is a legitimate structure for combined rules.
+        stripped_examples = re.sub(r"^(\*\*[^*]+\*\*\s*\n?)+", "", examples.lstrip())
+        if not stripped_examples.startswith("```"):
+            report.warn(loc, "examples does not start with a code fence")
     how_to_form = c.get("how_to_form")
     if (
         isinstance(how_to_form, str)
