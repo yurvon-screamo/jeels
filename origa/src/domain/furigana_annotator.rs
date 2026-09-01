@@ -214,13 +214,7 @@ mod tests {
             .unwrap()
             .join("cdn")
             .join("dictionaries");
-        // Prefer the versioned SudachiDict directory (see deploy_cdn.py).
-        let versioned = base.join("sudachidict-20260723");
-        let dict_dir = if versioned.join("dict.trie").exists() {
-            versioned
-        } else {
-            base
-        };
+        let dict_dir = base.join(crate::domain::SUDACHIDICT_DIR);
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);

@@ -8,6 +8,12 @@ pub use translation::{TokenTranslation, lookup_tokens_translations};
 
 use crate::domain::{JapaneseChar, OrigaError, hiragana_to_katakana};
 
+/// Name of the versioned SudachiDict directory on the CDN and in a local
+/// `cdn/dictionaries/` checkout. Bump together with the copy in
+/// `origa_ui/build.rs` and the `VERSIONED_FILES` paths in
+/// `scripts/deploy_cdn.py` when the dictionary version changes.
+pub const SUDACHIDICT_DIR: &str = "sudachidict-20260723";
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TokenInfo {
     orthographic_base_form: String,
@@ -445,7 +451,7 @@ mod tests {
             .unwrap()
             .join("cdn")
             .join("dictionaries")
-            .join("sudachidict-20260723");
+            .join(SUDACHIDICT_DIR);
 
         let decompress = |data: Vec<u8>| -> Vec<u8> {
             let mut decoder = DeflateDecoder::new(&data[..]);

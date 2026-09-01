@@ -91,14 +91,21 @@ fn handle_i18n() {
 
 fn handle_lindera_dictionary() {
     // The tokenizer dictionary ships as pre-built deflate files in
-    // cdn/dictionaries/ (SudachiDict compiled with the lindera 5.x builder —
-    // see docs/src/sudachidict.md in the lindera repo). Nothing to build at
-    // compile time; verify the files exist so a broken checkout fails fast.
+    // cdn/dictionaries/sudachidict-20260723/ (SudachiDict compiled with the
+    // lindera 5.x builder — see docs/src/sudachidict.md in the lindera repo).
+    // Nothing to build at compile time; verify the files exist so a broken
+    // checkout fails fast.
+    //
+    // The directory name mirrors `origa::domain::tokenizer::SUDACHIDICT_DIR`
+    // (a build script cannot import from the crate itself) and the paths in
+    // scripts/deploy_cdn.py — bump all three together.
+    const SUDACHIDICT_DIR: &str = "sudachidict-20260723";
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let public_dict_dir = Path::new(&manifest_dir)
         .join("..")
         .join("cdn")
-        .join("dictionaries");
+        .join("dictionaries")
+        .join(SUDACHIDICT_DIR);
 
     let required = [
         "char_def.bin",

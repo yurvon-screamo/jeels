@@ -43,7 +43,7 @@ pub struct AuthStore {
     pub is_radicals_loaded: RwSignal<bool>,
     pub is_phrases_loaded: RwSignal<bool>,
     pub is_pitch_audio_loaded: RwSignal<bool>,
-    /// Dictionary tokenizer (UniDic) loaded
+    /// Dictionary tokenizer (SudachiDict) loaded
     pub is_dictionary_loaded: RwSignal<bool>,
     pub is_furigana_loaded: RwSignal<bool>,
     pub is_jlpt_content_loaded: RwSignal<bool>,

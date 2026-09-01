@@ -1,11 +1,4 @@
 dictionaries/JmdictFurigana.txt
-dictionaries/char_def.bin
-dictionaries/dict.da
-dictionaries/dict.vals
-dictionaries/dict.words
-dictionaries/dict.wordsidx
-dictionaries/matrix.mtx
-dictionaries/metadata.json
 dictionaries/sudachidict-20260723/char_def.bin
 dictionaries/sudachidict-20260723/dict.trie
 dictionaries/sudachidict-20260723/dict.vals
@@ -15,7 +8,6 @@ dictionaries/sudachidict-20260723/dict.wordsidx
 dictionaries/sudachidict-20260723/matrix.mtx
 dictionaries/sudachidict-20260723/metadata.json
 dictionaries/sudachidict-20260723/unk.bin
-dictionaries/unk.bin
 dictionary/chunk_01.json
 dictionary/chunk_02.json
 dictionary/chunk_03.json
