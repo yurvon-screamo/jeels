@@ -22,9 +22,9 @@ pub fn NuancesSection(
     view! {
         <div class="grammar-nuances" data-testid=move || test_id.get()>
             <For
-                each=move || common_mistakes_stored.get_value()
-                key=|mistake: &CommonMistake| format!("{}->{}", mistake.wrong(), mistake.correct())
-                children=move |mistake| {
+                each=move || common_mistakes_stored.get_value().into_iter().enumerate()
+                key=|(index, _): &(usize, CommonMistake)| *index
+                children=move |(_index, mistake)| {
                     let note = StoredValue::new(
                         mistake.note().map(|n| n.to_string()).unwrap_or_default(),
                     );
@@ -58,9 +58,9 @@ pub fn NuancesSection(
             <Show when=move || !notes_stored.get_value().is_empty()>
                 <ul class="grammar-nuance-notes">
                     <For
-                        each=move || notes_stored.get_value()
-                        key=|note: &NuanceNote| note.text().to_string()
-                        children=move |note| {
+                        each=move || notes_stored.get_value().into_iter().enumerate()
+                        key=|(index, _): &(usize, NuanceNote)| *index
+                        children=move |(_index, note)| {
                             view! {
                                 <li class="grammar-nuance-note-item">
                                     <FuriganaText

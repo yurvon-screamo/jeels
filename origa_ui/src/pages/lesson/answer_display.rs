@@ -32,13 +32,12 @@ pub fn extract_card_answer(
             description: None,
             text: s,
         },
-        Ok(CardAnswer::GrammarNuances { .. }) => CardAnswerData {
+        // Structured nuances reach text-only lesson surfaces through the
+        // compact projection (the rich detail pages render the structure).
+        Ok(answer @ CardAnswer::GrammarNuances { .. }) => CardAnswerData {
             translations: None,
             description: None,
-            text: card
-                .answer(native_language)
-                .map(|answer| answer.text_projection())
-                .unwrap_or_default(),
+            text: answer.text_projection(),
         },
         Err(e) => {
             warn!(

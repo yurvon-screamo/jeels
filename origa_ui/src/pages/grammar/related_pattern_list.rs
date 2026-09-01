@@ -25,9 +25,9 @@ pub fn RelatedPatternList(
     view! {
         <div class="grammar-related" data-testid=move || test_id.get()>
             <For
-                each=move || related.clone()
-                key=|pattern: &RelatedPattern| pattern.rule_id().to_string()
-                children=move |pattern| {
+                each=move || related.clone().into_iter().enumerate()
+                key=|(index, _): &(usize, RelatedPattern)| *index
+                children=move |(_index, pattern)| {
                     let Some(rule) = get_rule_by_id(pattern.rule_id()) else {
                         tracing::warn!(
                             rule_id = %pattern.rule_id(),

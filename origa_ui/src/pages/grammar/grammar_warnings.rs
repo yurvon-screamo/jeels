@@ -18,9 +18,9 @@ pub fn GrammarWarnings(
     view! {
         <div class="grammar-warnings" data-testid=move || test_id.get()>
             <For
-                each=move || warnings.clone()
-                key=|warning: &String| warning.clone()
-                children=move |warning| {
+                each=move || warnings.clone().into_iter().enumerate()
+                key=|(index, _): &(usize, String)| *index
+                children=move |(_index, warning)| {
                     view! {
                         <div class="grammar-warning">
                             <MarkdownText

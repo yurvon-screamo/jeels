@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import mimetypes
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -61,7 +62,13 @@ def s3_uri(key: str) -> str:
 
 
 def run_aws_raw(args: list[str]) -> subprocess.CompletedProcess[str]:
-    cmd = ["pwsh", "-Command", "aws", *args]
+    # On the operator's Windows box the aws CLI is reached through
+    # ``pwsh -Command``. On Linux/CI there is no pwsh wrapper — invoke the
+    # aws CLI directly (no PowerShell argv reparsing to worry about).
+    if shutil.which("pwsh"):
+        cmd = ["pwsh", "-Command", "aws", *args]
+    else:
+        cmd = ["aws", *args]
     try:
         return subprocess.run(
             cmd,
