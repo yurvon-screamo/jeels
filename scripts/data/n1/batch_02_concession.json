@@ -1,0 +1,480 @@
+{
+  "rules": [
+    {
+      "level": "N1",
+      "keywords": [["いかんせん"]],
+      "content": {
+        "English": {
+          "title": "いかんせん",
+          "short_description": "Be that as it may — written regret",
+          "explanation": "A sentence-initial adverb conceding an unfortunate fact before the main point: 「いかんせん、予算が足りない」 — regrettably, the budget falls short. It sighs where 残念ながら states.",
+          "how_to_form": "| Position | Form | Example |\n|----------|------|---------|\n| Sentence start | いかんせん、+ clause | いかんせん、人手が足りない |",
+          "examples": "```\nいかんせん、この夏は暑すぎて集中できない。\nBe that as it may, this summer is too hot to concentrate.\n```\n\n```\n企画は良い。いかんせん、資金がない。\nThe plan is good. Alas, there is no funding.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it in casual speech", "correct": "Written and formal register; say 残念ながら in conversation", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Almost always pairs with a negative or constraining main clause."}]
+          },
+          "pro_tip": "Read いかんせん as unfortunately, however — the commas around it in a sentence mark the sigh."
+        },
+        "Russian": {
+          "title": "いかんせん",
+          "short_description": "Увы, однако — книжное сожаление",
+          "explanation": "Наречие в начале предложения, признающее неутешительный факт перед главной мыслью: 「いかんせん、予算が足りない» — увы, бюджет недостаточен. Там, где 残念ながら констатирует, いかんせん вздыхает.",
+          "how_to_form": "| Позиция | Форма | Пример |\n|----------|------|---------|\n| Начало предложения | いかんせん、+ часть | いかんせん、人手が足りない |",
+          "examples": "```\nいかんせん、この夏は暑すぎて集中できない。\nУвы, этим летом слишком жарко, чтобы сосредоточиться.\n```\n\n```\n企画は良い。いかんせん、資金がない。\nПлан хорош. Увы, денег нет.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Употреблять в разговоре", "correct": "Книжный регистр; в беседе — 残念ながら", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Почти всегда идёт с негативной или ограничивающей главной частью."}]
+          },
+          "pro_tip": "Читайте いかんせん как «к сожалению, однако»: запятые вокруг него отмечают вздох."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["いかんによらず", "いかんを問わず", "いかんにかかわらず"]],
+      "content": {
+        "English": {
+          "title": "～（の）いかんによらず",
+          "short_description": "Regardless of how A is (formal)",
+          "explanation": "The formal way to say regardless of in documents and announcements: 「理由のいかんによらず、返品は受け付けません」. Covers the set variants ～いかんを問わず and ～いかんにかかわらず.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + の | N + のいかんによらず | 理由のいかんによらず |\n| Noun directly | N + いかんによらず | 理由いかんによらず |",
+          "examples": "```\n天候のいかんによらず、大会は予定通り行います。\nRegardless of the weather, the tournament proceeds as scheduled.\n```\n\n```\n理由のいかんを問わず、一度開封した商品は返品できません。\nWhatever the reason, opened goods cannot be returned.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it with verbs (行くのいかんによらず)", "correct": "Attach to nouns only; for verbs use ～かどうかにかかわらず", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "いかん = classical 如何; the trio によらず／を問わず／にかかわらず is interchangeable here."}]
+          },
+          "pro_tip": "If you see いかん in a notice, expect bureaucratic firmness: no exceptions follow."
+        },
+        "Russian": {
+          "title": "～（の）いかんによらず",
+          "short_description": "Независимо от того, каков A (формально)",
+          "explanation": "Формальный способ сказать «независимо от» в документах и объявлениях: 「理由のいかんによらず、返品は受け付けません». Покрывает варианты ～いかんを問わず и ～いかんにかかわらず.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + の | N + のいかんによらず | 理由のいかんによらず |\n| Сущ. напрямую | N + いかんによらず | 理由いかんによらず |",
+          "examples": "```\n天候のいかんによらず、大会は予定通り行います。\nНезависимо от погоды турнир пройдёт по плану.\n```\n\n```\n理由のいかんを問わず、一度開封した商品は返品できません。\nКакова бы ни была причина, вскрытый товар возврату не подлежит.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "С глаголами (行くのいかんによらず)", "correct": "Только существительные; для глаголов — ～かどうかにかかわらず", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "いかん — классическое 如何; тройка によらず／を問わず／にかかわらず здесь взаимозаменяема."}]
+          },
+          "pro_tip": "Увидели いかん в объявлении — ждите бюрократической твёрдости: дальше следуют исключения из правил."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["のいかんだ"]],
+      "content": {
+        "English": {
+          "title": "～のいかんだ",
+          "short_description": "It all depends on A",
+          "explanation": "States that an outcome hinges entirely on a factor: 「勝敗は準備のいかんだ」 — victory depends entirely on preparation. Often as ～いかんで／～いかんでは for depending on.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + の | N + のいかんだ | 準備のいかんだ |\n| Depending on | N + のいかんで | 出席者のいかんで |",
+          "examples": "```\n成功するかどうかは君の努力のいかんだ。\nWhether you succeed depends entirely on your effort.\n```\n\n```\n出場できるかどうかは、審査のいかんでは変わってくる。\nWhether we can enter varies depending on the review.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": " Mixing with ～によって違う in the same clause", "correct": "One hinge per sentence: AのいかんでBが決まる", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "のいかんによっては = depending on the case, it might… (suggests a special branch)."}]
+          },
+          "pro_tip": "いかんだ is the drum-roll of formal Japanese: everything before it is the deciding factor."
+        },
+        "Russian": {
+          "title": "～のいかんだ",
+          "short_description": "Всё зависит от A",
+          "explanation": "Утверждает, что итог полностью держится на одном факторе: 「勝敗は準備のいかんだ» — победа целиком зависит от подготовки. Варианты ～いかんで／～いかんでは означают «в зависимости от».",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + の | N + のいかんだ | 準備のいかんだ |\n| В зависимости от | N + のいかんで | 出席者のいかんで |",
+          "examples": "```\n成功するかどうかは君の努力のいかんだ。\nПреуспеешь или нет — всецело зависит от твоих усилий.\n```\n\n```\n出場できるかどうかは、審査のいかんでは変わってくる。\nСможем ли мы участвовать, меняется в зависимости от итогов проверки.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Смешивать с ～によって違う в одном предложении", "correct": "Одна «ось» на предложение: AのいかんでBが決まる", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "のいかんによっては = «в зависимости от случая, может и…» (намекает на особую ветку)."}]
+          },
+          "pro_tip": "いかんだ — барабанная дробь формального японского: всё, что до него, и есть решающий фактор."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["によらず"]],
+      "content": {
+        "English": {
+          "title": "～によらず",
+          "short_description": "Regardless of A (by category)",
+          "explanation": "Attaches to nouns naming a dimension — age, gender, region — and voids it: 「年齢によらず参加できる」. Lighter and more modern than いかんによらず, common in public notices.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (dimension) | N + によらず | 年齢によらず |\n| Fixed: いかなる～によらず | いかなる理由によらず | いかなる理由によらず |",
+          "examples": "```\n性別や国籍によらず、誰でも応募できます。\nRegardless of gender or nationality, anyone can apply.\n```\n\n```\n季節によらず、この店は行列が絶えない。\nRegardless of the season, the queue at this shop never ends.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "によらず with verb phrases", "correct": "Nouns only; verbs take ～かどうかにかかわらず", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Frequently preceded by いかなる for emphatic no-exceptions tone."}]
+          },
+          "pro_tip": "Think of a rule posted at a door: the sign ignores categories — によらず is that ignoring."
+        },
+        "Russian": {
+          "title": "～によらず",
+          "short_description": "Независимо от A (по признаку)",
+          "explanation": "Присоединяется к существительным-измерениям — возраст, пол, регион — и обнуляет их: 「年齢によらず参加できる». Легче и современнее, чем いかんによらず; типично для объявлений.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (признак) | N + によらず | 年齢によらず |\n| Устойчивое: いかなる～ | いかなる理由によらず | いかなる理由によらず |",
+          "examples": "```\n性別や国籍によらず、誰でも応募できます。\nНезависимо от пола и гражданства подать заявку может каждый.\n```\n\n```\n季節によらず、この店は行列が絶えない。\nВне зависимости от сезона очередь в эту лавку не кончается.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "によらず с глагольными оборотами", "correct": "Только существительные; глаголы — ～かどうかにかかわらず", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Часто усиливается いどんなる — «ни при каких»."}]
+          },
+          "pro_tip": "Представьте табличку на двери, которой безразличны категории: によらず — это самое безразличие."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["はどうであれ"]],
+      "content": {
+        "English": {
+          "title": "～はどうであれ",
+          "short_description": "Whatever the state of A",
+          "explanation": "Set aside a factor entirely: 「結果はどうであれ、悔いはない」 — whatever the result, no regrets. Formed from である + あれ, it brackets a noun's condition as irrelevant.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + は | N + はどうであれ | 結果はどうであれ |\n| い-adjective | A + かろうと | 難しかろうと |",
+          "examples": "```\n理由はどうであれ、嘘をついたことは変わらない。\nWhatever the reason, the fact you lied does not change.\n```\n\n```\n天候はどうであれ、遠足は決行です。\nWhatever the weather, the excursion goes ahead.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Past-tense clauses after it", "correct": "The bracketed noun stays bare: 理由はどうであれ", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "はともかく sets a topic aside temporarily; はどうであれ sets its condition aside for good."}]
+          },
+          "pro_tip": "The pattern literally asks how might it be? — and refuses to wait for the answer."
+        },
+        "Russian": {
+          "title": "～はどうであれ",
+          "short_description": "Каково бы ни было A",
+          "explanation": "Полностью выносит фактор за скобки: 「結果はどうであれ、悔いはない» — каков бы ни был результат, сожалений нет. Образовано из である + あれ и объявляет состояние существительного нерелевантным.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + は | N + はどうであれ | 結果はどうであれ |\n| и-прилагательное | A + かろうと | 難しかろうと |",
+          "examples": "```\n理由はどうであれ、嘘をついたことは変わらない。\nКакова бы ни была причина, факт лжи не меняется.\n```\n\n```\n天候はどうであれ、遠足は決行です。\nКакая бы ни была погода, прогулка состоится.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Прошедшее время внутри оборота", "correct": "Существительное остаётся «голым»: 理由はどうであれ", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "はともかく откладывает тему временно; はどうであれ выносит её состояние за скобки окончательно."}]
+          },
+          "pro_tip": "Дословно оборот спрашивает «каким оно может быть?» — и не ждёт ответа."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["であったとしても"]],
+      "content": {
+        "English": {
+          "title": "～であったとしても",
+          "short_description": "Even if it were (past assumption)",
+          "explanation": "Concedes a past hypothetical: 「それが本当であったとしても、今更何も変わらない」 — even if that were true, nothing changes now. More speculative and formal than ～でも.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / な-adj | N + であったとしても | 事実であったとしても |\n| Verb (past) | Vた + としても | 行ったとしても |",
+          "examples": "```\n彼の話が全て真実であったとしても、信じる者はいないだろう。\nEven if his story were entirely true, no one would believe it.\n```\n\n```\n仮に私の提案が受け入れられたとしても、実施は来年になる。\nEven if my proposal were accepted, implementation would come next year.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "であったとしても with present facts", "correct": "It frames past or remote hypotheticals; for present ones であるとしても fits", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Combines である + とする (suppose) + ても (even) — a stack of formality."}]
+          },
+          "pro_tip": "Start with 仮に (suppose) to signal the hypothetical before the pattern lands."
+        },
+        "Russian": {
+          "title": "～であったとしても",
+          "short_description": "Даже если бы это было так",
+          "explanation": "Признаёт прошедшее предположение: 「それが本当であったとしても、今更何も変わらない» — даже если бы это было правдой, сейчас уже ничего не изменит. Спекулятивнее и формальнее, чем ～でも.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / な-прил. | N + であったとしても | 事実であったとしても |\n| Глагол (прош.) | Vた + としても | 行ったとしても |",
+          "examples": "```\n彼の話が全て真実であったとしても、信じる者はいないだろう。\nДаже если бы его рассказ был полностью правдив, ему бы никто не поверил.\n```\n\n```\n仮に私の提案が受け入れられたとしても、実施は来年になる。\nДаже если бы моё предложение приняли, реализация была бы только в следующем году.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "であったとしても с настоящими фактами", "correct": "Оборот о прошедших/отвлечённых гипотезах; для настоящих — であるとしても", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Стек формальности: である + とする («предположим») + ても («даже»)."}]
+          },
+          "pro_tip": "Начните с 仮に («предположим») — и гипотетичность обозначена до самой конструкции."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["としたところで"]],
+      "content": {
+        "English": {
+          "title": "～としたところで",
+          "short_description": "Even if A — the outcome stands",
+          "explanation": "Concedes that even granting someone's position or a hypothetical, the conclusion is unchanged: 「彼が謝ったとしたところで、信頼は戻らない」. Slightly argumentative — it pushes back against a proposed scenario.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Verb (plain) | Vる/Vた + としたところで | 謝ったとしたところで |\n| Noun | N + だ + としたところで | 事実だとしたところで |",
+          "examples": "```\n君が反対したとしたところで、方針は変わらないだろう。\nEven if you had objected, the policy would not change.\n```\n\n```\n今から急いだとしたところで、電車には間に合わない。\nEven hurrying now, you will not make the train.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it for open future possibilities", "correct": "It forecloses the possibility — the outcome is already judged impossible to change", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Common in editorials and debate; たとえ～ても is the neutral cousin."}]
+          },
+          "pro_tip": "The pattern closes a door: grant the premise, slam the conclusion."
+        },
+        "Russian": {
+          "title": "～としたところで",
+          "short_description": "Даже если A — итог неизменен",
+          "explanation": "Признаёт: даже приняв чужую позицию или гипотезу, вывод не меняется: 「彼が謝ったとしたところで、信頼は戻らない». Полемично — конструкция спорит с предложенным сценарием.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Глагол (простая ф.) | Vる/Vた + としたところで | 謝ったとしたところで |\n| Существительное | N + だ + としたところで | 事実だとしたところで |",
+          "examples": "```\n君が反対したとしたところで、方針は変わらないだろう。\nДаже если бы ты возразил, курс бы не изменился.\n```\n\n```\n今から急いだとしたところで、電車には間に合わない。\nДаже если сейчас спешить, на поезд уже не успеть.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Использовать для открытых будущих возможностей", "correct": "Конструкция закрывает возможность: итог уже признан неизменным", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Типична для редакционных статей и дебатов; нейтральный родич — たとえ～ても."}]
+          },
+          "pro_tip": "Конструкция закрывает дверь: примите посылку — и захлопните вывод."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ならいざ知らず", "はいざ知らず"]],
+      "content": {
+        "English": {
+          "title": "～ならいざ知らず",
+          "short_description": "A perhaps, but B certainly not",
+          "explanation": "Grants one case a pass while rejecting another: 「夏ならいざ知らず、冬にキャンプは無理だ」 — summer, maybe; winter camping, no. はいざ知らず marks the topic that gets the pass.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + ならいざ知らず / N + はいざ知らず | 夏ならいざ知らず |\n| Verb (plain) | Vる + ならいざ知らず | 子供がやるならいざ知らず |",
+          "examples": "```\n平日ならいざ知らず、休日にまで残業したくない。\nWeekdays, maybe — but I do not want overtime on days off too.\n```\n\n```\n素人はいざ知らず、プロがこんなミスをするとは思えない。\nAn amateur, perhaps — but a pro making this mistake? Hard to believe.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it to approve the first item", "correct": "The first item is only tentatively excused; the real point is rejecting the second", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Literary; the spoken counterpart is ～ならまだしも."}]
+          },
+          "pro_tip": "The pattern is a half-shrug at A before the firm refusal of B."
+        },
+        "Russian": {
+          "title": "～ならいざ知らず",
+          "short_description": "A — может быть, но B — точно нет",
+          "explanation": "Даёт одному случаю условное «прощение» и отвергает другой: 「夏ならいざ知らず、冬にキャンプは無理だ» — летом ладно, но зимний поход — нет. Вариант はいざ知らず отмечает «прощённую» тему.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + ならいざ知らず / N + はいざ知らず | 夏ならいざ知らず |\n| Глагол (простая ф.) | Vる + ならいざ知らず | 子供がやるならいざ知らず |",
+          "examples": "```\n平日ならいざ知らず、休日にまで残業したくない。\nБудни — куда ни шло, но переработки в выходные мне не нужны.\n```\n\n```\n素人はいざ知らず、プロがこんなミスをするとは思えない。\nЛюбитель — допустим, но чтобы профи ошибся так — не верится.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Считать, что оборот одобряет первый случай", "correct": "Первый случай лишь условно извинён; суть — отказ второму", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Книжный оборот; разговорный аналог — ～ならまだしも."}]
+          },
+          "pro_tip": "Полупожатие плечами в адрес A перед твёрдым отказом B."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ならまだしも"]],
+      "content": {
+        "English": {
+          "title": "～ならまだしも",
+          "short_description": "If it were A, fine — but B is worse",
+          "explanation": "Everyday sibling of ならいざ知らず: 「一度ならまだしも、三度も忘れたのか」. Concedes that case A would be tolerable, then holds up B as beyond the pale.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / plain form | A + ならまだしも | 一度ならまだしも |\n| い-adjective | A + いならまだしも | 高いならまだしも |",
+          "examples": "```\n冗談ならまだしも、本気で言っているのか。\nIf it were a joke, fine — are you serious?\n```\n\n```\n雨ならまだしも、台風直撃とは運が悪い。\nRain would be one thing — a direct typhoon hit is rotten luck.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "ならまだしも followed by an easier case", "correct": "The second case must be clearly harder or worse than the first", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Conversational but polished; strong in complaints and rebuttals."}]
+          },
+          "pro_tip": "The pattern grades two cases: passable A, unacceptable B — order them by severity."
+        },
+        "Russian": {
+          "title": "～ならまだしも",
+          "short_description": "A — куда ни шло, но B хуже",
+          "explanation": "Разговорный брат ならいざ知らず: 「一度ならまだしも、三度も忘れたのか». Признаёт случай A терпимым, а B выставляет за пределы допустимого.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / простая форма | A + ならまだしも | 一度ならまだしも |\n| и-прилагательное | A + いならまだしも | 高いならまだしも |",
+          "examples": "```\n冗談ならまだしも、本気で言っているのか。\nЕсли бы это была шутка — ладно. Ты серьёзно?\n```\n\n```\n雨ならまだしも、台風直撃とは運が悪い。\nДождь — ещё куда ни шло, но прямой удар тайфуна — скверная удача.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Ставить после оборота более лёгкий случай", "correct": "Второй случай должен быть заметно тяжелее первого", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Разговорно, но аккуратно; сильно в жалобах и возражениях."}]
+          },
+          "pro_tip": "Конструкция ранжирует два случая: сносный A и неприемлемый B — расставляйте по тяжести."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["こととて"]],
+      "content": {
+        "English": {
+          "title": "～こととて",
+          "short_description": "Given that A (excusing reason)",
+          "explanation": "An old-fashioned because for excusing: 「初めてのこととて、大目に見てください」 — it being a first time, please overlook it. Softens a fault by naming its cause.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + の | N + のこととて | 新入生のこととて |\n| Plain clause | Vる/Aい + こととて | 知らないこととて |",
+          "examples": "```\n田舎のこととて、こんな服は売っていません。\nThis being the countryside, such clothes are not sold here.\n```\n\n```\n初めてのこととて、ご不便をおかけしました。\nIt being our first time, we caused you inconvenience.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it for neutral causes (rain because clouds)", "correct": "こととて excuses a fault or explains a shortcoming, always with apology flavor", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Fixed to apology and service contexts; ～もので／～から are the everyday reasons."}]
+          },
+          "pro_tip": "If you are bowing while explaining, こととて fits the posture."
+        },
+        "Russian": {
+          "title": "～こととて",
+          "short_description": "Уж коль скоро A (оправдание)",
+          "explanation": "Старомодное «потому что» для оправданий: 「初めてのこととて、大目に見てください» — поскольку это в первый раз, взгляните снисходительно. Смягчает промах, называя его причину.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + の | N + のこととて | 新入生のこととて |\n| Простая форма | Vる/Aい + こととて | 知らないこととて |",
+          "examples": "```\n田舎のこととて、こんな服は売っていません。\nПровинция у нас — такой одежды здесь не продают.\n```\n\n```\n初めてのこととて、ご不便をおかけしました。\nВ первый раз за нами — приносим извинения за неудобства.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Нейтральные причины (дождь, потому что тучи)", "correct": "こととて оправдывает промах, всегда с извинительной окраской", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Закреплено за извинениями и сервисом; повседневные причины — ～もので／～から."}]
+          },
+          "pro_tip": "Если вы кланяетесь, объясняя причину, — こととて подходит к позе."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["こともあろうに"]],
+      "content": {
+        "English": {
+          "title": "こともあろうに",
+          "short_description": "Of all things / times — reproach",
+          "explanation": "Blasts the bad timing or bad choice of something: 「こともあろうに、試験の前日に風邪をひくとは」 — of all nights, catching a cold the night before the exam. Pure exasperation at the selection.",
+          "how_to_form": "| Position | Form | Example |\n|----------|------|---------|\n| Before noun | こともあろうに + N | こともあろうに今日 |\n| Standalone clause | こともあろうに、…とは | こともあろうに、忘れたのか |",
+          "examples": "```\nこともあろうに、人の多い場所で喧嘩を始めるなんて。\nOf all places, starting a fight in a crowded one.\n```\n\n```\n時もことあろうに、社長の前でそんなミスを。\nOf all moments, such a mistake right in front of the president.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it for genuinely neutral timing", "correct": "The pattern always carries reproach — the timing or choice is bad", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "時もことあろうに (of all times) and 人もあろうに (of all people) are common tailored versions."}]
+          },
+          "pro_tip": "English has the exact twin: of all… — use that reflex to place こともあろうに."
+        },
+        "Russian": {
+          "title": "こともあろうに",
+          "short_description": "И надо же было — упрёк",
+          "explanation": "Возмущается скверным выбором момента или предмета: 「こともあろうに、試験の前日に風邪をひくとは» — надо же было простудиться накануне экзамена. Чистое раздражение от «выбора».",
+          "how_to_form": "| Позиция | Форма | Пример |\n|----------|------|---------|\n| Перед сущ. | こともあろうに + N | こともあろうに今日 |\n| Отдельная часть | こともあろうに、…とは | こともあろうに、忘れたのか |",
+          "examples": "```\nこともあろうに、人の多い場所で喧嘩を始めるなんて。\nМало ли мест — драться в людном!\n```\n\n```\n時もことあろうに、社長の前でそんなミスを。\nМало ли моментов — ошибиться прямо перед президентом компании.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Нейтральный выбор времени", "correct": "Оборот всегда с упрёком — момент или выбор плох", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Частые вариации: 時もことあろうに («мало ли времён») и 人もあろうに («мало ли людей»)."}]
+          },
+          "pro_tip": "Русская калька «мало ли…» совпадает с оборотом один в один — пользуйтесь этим рефлексом."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["あろうことか"]],
+      "content": {
+        "English": {
+          "title": "あろうことか",
+          "short_description": "Incredibly / to make matters worse",
+          "explanation": "Heads a scandalous fact the speaker can hardly believe: 「あろうことか、担当者が客の財布を盗んだ」 — unbelievably, the clerk stole a customer's wallet. Stronger disbelief than こともあろうに.",
+          "how_to_form": "| Position | Form | Example |\n|----------|------|---------|\n| Sentence start | あろうことか、+ scandal | あろうことか、提出日を忘れた |",
+          "examples": "```\nあろうことか、彼は会議中にいびきをかき始めた。\nIncredibly, he began snoring in the middle of the meeting.\n```\n\n```\nあろうことか、優勝候補が初戦で敗れた。\nBelieve it or not, the favorite lost in the first round.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Attaching it to positive surprises", "correct": "あろうことか marks disgraceful or outrageous facts, not happy ones", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Written and spoken journalism; pairs naturally with とは endings."}]
+          },
+          "pro_tip": "If the fact would make the listener gasp, あろうことか is the right gasp."
+        },
+        "Russian": {
+          "title": "あろうことか",
+          "short_description": "Представьте себе / что ещё хуже",
+          "explanation": "Возглавляет скандальный факт, в который говорящему трудно поверить: 「あろうことか、担当者が客の財布を盗んだ» — представьте себе, продавец украл кошелёк клиента. Сильнее недоверие, чем у こともあろうに.",
+          "how_to_form": "| Позиция | Форма | Пример |\n|----------|------|---------|\n| Начало предложения | あろうことか、+ скандал | あろうことか、提出日を忘れた |",
+          "examples": "```\nあろうことか、彼は会議中にいびきをかき始めた。\nПредставьте себе — он начал храпеть посреди совещания.\n```\n\n```\nあろうことか、優勝候補が初戦で敗れた。\nХотите верьте — фаворит проиграл в первом же круге.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Приставлять к приятным сюрпризам", "correct": "あろうことか — о позорных и возмутительных фактах, не о радостных", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Журналистика, устная и письменная; естественно сочетается с финальным とは."}]
+          },
+          "pro_tip": "Если факт заставил бы слушателя ахнуть — あろうことか и есть этот ах."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["いやしくも"]],
+      "content": {
+        "English": {
+          "title": "いやしくも",
+          "short_description": "If you are A at all — act like it",
+          "explanation": "Challenges someone to live up to a title: 「いやしくも教師たる者、そんな言葉を使ってはいけない」 — if you are a teacher at all, never use such words. Moral imperatives follow.",
+          "how_to_form": "| Position | Form | Example |\n|----------|------|---------|\n| Before role noun | いやしくも + N + たる者 | いやしくも医者たる者 |\n| Standalone | いやしくも、…べきだ | いやしくも約束は守るべきだ |",
+          "examples": "```\nいやしくもプロである以上、納期は守るべきだ。\nBeing a professional at all, you should keep deadlines.\n```\n\n```\nいやしくも学生たる者、遅刻は恥と思え。\nIf you are a student at all, treat lateness as a shame.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "いやしくも with objects or animals", "correct": "It addresses people holding a role or duty", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Stiff and sermonizing; you will hear it from teachers and in period dramas."}]
+          },
+          "pro_tip": "The word raises a finger before the sermon — if you picture a lecture, you have used it right."
+        },
+        "Russian": {
+          "title": "いやしくも",
+          "short_description": "Раз уж ты A — веди себя соответственно",
+          "explanation": "Призывает соответствовать званию: 「いやしくも教師たる者、そんな言葉を使ってはいけない» — раз уж ты учитель, такими словами пользоваться нельзя. Следует моральный императив.",
+          "how_to_form": "| Позиция | Форма | Пример |\n|----------|------|---------|\n| Перед названием роли | いやしくも + N + たる者 | いやしくも医者たる者 |\n| Автономно | いやしくも、…べきだ | いやしくも約束は守るべきだ |",
+          "examples": "```\nいやしくもプロである以上、納期は守るべきだ。\nРаз уж ты профи — сроки соблюдать обязан.\n```\n\n```\nいやしくも学生たる者、遅刻は恥と思え。\nРаз ты студент — считай опоздание позором.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "いやしくも с предметами или животными", "correct": "Оборот обращён к людям с ролью или долгом", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Напыщенно-проповеднически; слышно от учителей и в исторических драмах."}]
+          },
+          "pro_tip": "Слово поднимает палец перед проповедью: представьте лекцию — и оборот употреблён верно."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["あしからず"]],
+      "content": {
+        "English": {
+          "title": "あしからず",
+          "short_description": "Please take no offense (refusal)",
+          "explanation": "A set closing phrase softening a refusal or departure: 「今日は失礼します。あしからず」 — I must leave today; please do not take it amiss. Old-fashioned letter and party language.",
+          "how_to_form": "| Position | Form | Example |\n|----------|------|---------|\n| Sentence end | …。あしからず | 帰らせていただく。あしからず |",
+          "examples": "```\n体調が優れないので、お先に失礼します。あしからず。\nI am not feeling well, so I will leave first — please understand.\n```\n\n```\n今週は都合が悪いので欠席します。あしからず。\nThis week does not suit me, so I will be absent — take no offense.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "あしからず after granting a request", "correct": "It exclusively accompanies refusals, declines and departures", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Literary politeness; in modern mail, ご容赦ください plays the same role."}]
+          },
+          "pro_tip": "Think of あしからず as the bow that accompanies a no."
+        },
+        "Russian": {
+          "title": "あしからず",
+          "short_description": "Не в обиду (при отказе)",
+          "explanation": "Устойчивая завершающая фраза, смягчающая отказ или уход: 「今日は失礼します。あしからず» — сегодня я вынужден уйти, не сочтите за обиду. Старомодная эпистолярная и светская формула.",
+          "how_to_form": "| Позиция | Форма | Пример |\n|----------|------|---------|\n| Конец предложения | …。あしからず | 帰らせていただく。あしからず |",
+          "examples": "```\n体調が優れないので、お先に失礼します。あしからず。\nПлохо себя чувствую, поэтому уйду раньше — поймите правильно.\n```\n\n```\n今週は都合が悪いので欠席します。あしからず。\nНа этой неделе не получается, буду отсутствовать — не в обиду.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "あしからず после исполнения просьбы", "correct": "Только с отказами, отклонениями и уходами", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Книжная вежливость; в современной переписке ту же роль играет ご容赦ください."}]
+          },
+          "pro_tip": "Считайте あしからず поклоном, которым сопровождают «нет»."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,684 @@
+{
+  "rules": [
+    {
+      "level": "N1",
+      "keywords": [["とあって"]],
+      "content": {
+        "English": {
+          "title": "～とあって",
+          "short_description": "What with A being the case",
+          "explanation": "Plain form + とあって explains a situation by a special circumstance: 「連休とあって、行楽地は混雑した」 — with the holiday string, resorts were packed. The reason is a noteworthy one-off state.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / plain form | N + とあって | 休日とあって |\n| な-adj | Na + な + とあって | 静かなとあって |",
+          "examples": "```\n入場無料とあって、行列ができた。\nWith free admission, a queue formed.\n```\n\n```\n人気歌手のコンサートとあって、チケットは瞬殺だった。\nA popular singer's concert — tickets sold out instantly.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Permanent general reasons", "correct": "The cause is a temporary special state, not an everyday fact", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Journalistic narration; ～ので／から in speech."}]
+          },
+          "pro_tip": "The pattern sets a spotlight condition — crowds and queues love it."
+        },
+        "Russian": {
+          "title": "～とあって",
+          "short_description": "В связи с особым положением A",
+          "explanation": "Простая форма + とあって объясняет ситуацию особым обстоятельством: 「連休とあって、行楽地は混雑した» — из-за майских праздников места отдыха были забиты. Причина — заметное разовое состояние.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / простая форма | N + とあって | 休日とあって |\n| な-прил. | Na + な + とあって | 静かなとあって |",
+          "examples": "```\n入場無料とあって、行列ができた。\nВход бесплатный — выстроилась очередь.\n```\n\n```\n人気歌手のコンサートとあって、チケットは瞬殺だった。\nКонцерт популярного певца — билеты разлетелись мгновенно.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Постоянные общие причины", "correct": "Причина — временное особое состояние, не бытовой факт", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Журналистский нарратив; в речи — ～ので／から."}]
+          },
+          "pro_tip": "Конструкция ставит условие под прожектор: очереди и толпы её обожают."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["とあれば"]],
+      "content": {
+        "English": {
+          "title": "～とあれば",
+          "short_description": "If it is (for the sake of) A — then gladly",
+          "explanation": "Plain form + とあれば: if A is the case, I will act — 「子供のためとあれば、喜んで手伝う」 — if it is for the children, I will gladly help. Conditional devotion.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / plain form | N + とあれば | 依頼とあれば |\n| Set opener | ～のためとあれば | ファンのためとあれば |",
+          "examples": "```\n必要とあれば、いつでも駆けつけます。\nIf needed, I will rush over any time.\n```\n\n```\n先生の頼みとあれば、断れない。\nIf the teacher asks, I cannot refuse.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Neutral if-then predictions", "correct": "Willingness or obligation flavors the conclusion", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Loyalty-speak; advertisements use 必要とあれば as a promise."}]
+          },
+          "pro_tip": "とあれば bows: the second clause is service offered on the condition named."
+        },
+        "Russian": {
+          "title": "～とあれば",
+          "short_description": "Если дело в A — то с радостью",
+          "explanation": "Простая форма + とあれば: раз на то пошло, готов действовать — 「子供のためとあれば、喜んで手伝う» — если это ради детей, с радостью помогу. Условная преданность.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / простая форма | N + とあれば | 依頼とあれば |\n| Классическое начало | ～のためとあれば | ファンのためとあれば |",
+          "examples": "```\n必要とあれば、いつでも駆けつけます。\nЕсли понадобится — примчусь в любой момент.\n```\n\n```\n先生の頼みとあれば、断れない。\nПросьбу учителя отклонить невозможно.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Нейтральные если-то прогнозы", "correct": "Вывод окрашен готовностью или обязанностью", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Язык преданности; реклама использует 必要とあれば как обещание."}]
+          },
+          "pro_tip": "とあれば кланяется: вторая часть — служба, предложенная на названном условии."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["とあっては"]],
+      "content": {
+        "English": {
+          "title": "～とあっては",
+          "short_description": "If A is at stake — must comply",
+          "explanation": "Noun + とあっては: facing a pressing condition, one acts — 「家族とあっては、休みも返上する」 — if family is at stake, I give up even days off. Obligation tightens the conditional.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + とあっては | 安全のためとあっては |",
+          "examples": "```\n社長の命令とあっては、断るわけにはいかない。\nBeing the president's order, one cannot refuse.\n```\n\n```\n患者のためとあっては、徹夜も厭わない。\nIf it is for the patients, I do not grudge all-nighters.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Optional outcomes", "correct": "The conclusion is duty — no real choice remains", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Devotion and duty prose; slightly stiffer than とあれば."}]
+          },
+          "pro_tip": "If the sentence ends in a bowed head, it was とあっては."
+        },
+        "Russian": {
+          "title": "～とあっては",
+          "short_description": "Если на кону A — приходится подчиниться",
+          "explanation": "Сущ. + とあっては: перед лицом насущного условия субъект действует — 「家族とあっては、休みも返上する» — когда речь о семье, отдашь даже выходные. Долг стягивает условие.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + とあっては | 安全のためとあっては |",
+          "examples": "```\n社長の命令とあっては、断るわけにはいかない。\nПриказ президента — отказаться нельзя.\n```\n\n```\n患者のためとあっては、徹夜も厭わない。\nРади пациентов и бессонные ночи не страшны.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Опциональные исходы", "correct": "Вывод — долг, реального выбора не остаётся", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Проза преданности и долга; чуть жёстче とあれば."}]
+          },
+          "pro_tip": "Если предложение кончается поклоном — это было とあっては."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ないまでも"]],
+      "content": {
+        "English": {
+          "title": "～ないまでも",
+          "short_description": "If not A, then at least less than A",
+          "explanation": "Negative + までも: falling short of a full ideal, settling above zero — 「全額でなくても、半額ないまでも助かる」 — not full, but even half helps. Graded concession.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Negative plain | Vない + までも | 行かないまでも |\n| Set | 毎日でなくても／ないまでも | 毎日は無理でも |",
+          "examples": "```\n一流でないまでも、人並みの演奏はしたい。\nIf not first-rate, I at least want average-level playing.\n```\n\n```\n全額は無理ないまでも、一部は返済したい。\nThe full sum is impossible, but I wish to repay at least part.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": " Positive ideals followed", "correct": "The clause after names the lesser acceptable outcome", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Formal negotiation and essays."}]
+          },
+          "pro_tip": "The pattern sets a ladder: top rung denied, middle rung accepted."
+        },
+        "Russian": {
+          "title": "～ないまでも",
+          "short_description": "Хоть и не A, но хотя бы чуть-чуть",
+          "explanation": "Отрицание + までも: недотянув до полного идеала, согласиться на часть — 「全額でなくても、半額ないまでも助かる» — не всё, но хотя бы половина уже помощь. Градуированная уступка.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простое отрицание | Vない + までも | 行かないまでも |\n| Устойчивое | 毎日でなくても～ないまでも | 毎日は無理でも |",
+          "examples": "```\n一流でないまでも、人並みの演奏はしたい。\nПусть не первого класса, но играть хотя бы на среднем уровне хочу.\n```\n\n```\n全額は無理ないまでも、一部は返済したい。\nВсю сумму не потяну, но хотя бы часть хочу вернуть.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "После идёт полный идеал", "correct": "Вторая часть называет меньший приемлемый итог", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Формальные переговоры и эссе."}]
+          },
+          "pro_tip": "Конструкция ставит лестницу: верхняя ступень закрыта, средняя принята."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ないものでもない"]],
+      "content": {
+        "English": {
+          "title": "～ないものでもない",
+          "short_description": "It is not that A is impossible (reluctant yes)",
+          "explanation": "Double negative softening: 「手伝えないものでもない」 — it is not that I cannot help. A grudging possibility — the door opens a crack.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Potential negative | Vられない + ものでもない | できないものでもない |\n| Negative adjective | Aくない + ものでもない | 悪くないものでもない |",
+          "examples": "```\n条件次第では、引き受けないものでもない。\nDepending on conditions, it is not out of the question to accept.\n```\n\n```\n行けないものでもないが、少し考えてみたい。\nIt is not that I cannot go — but let me think a little.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Enthusiastic agreement", "correct": "The tone is reluctant — read the room before deploying", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Negotiation Japanese: yes in a fog of no."}]
+          },
+          "pro_tip": "Count the negatives: two of them make a shy yes."
+        },
+        "Russian": {
+          "title": "～ないものでもない",
+          "short_description": "Не то чтобы A невозможно (нехотя «да»)",
+          "explanation": "Двойное отрицание со смягчением: 「手伝えないものでもない» — не то чтобы не могу помочь. Неохотная возможность — дверь приоткрывается на щель.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Отрицательный потенциал | Vられない + ものでもない | できないものでもない |\n| Отрицательное прил. | Aくない + ものでもない | 悪くないものでもない |",
+          "examples": "```\n条件次第では、引き受けないものでもない。\nВ зависимости от условий — взять можно, если честно.\n```\n\n```\n行けないものでもないが、少し考えてみたい。\nНе то чтобы не могу пойти — но дайте подумать.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Энтузиазм согласия", "correct": "Тон неохотный — прочтите обстановку", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Японский переговоров: «да» в тумане «нет»."}]
+          },
+          "pro_tip": "Считайте отрицания: два из них дают стеснительное «да»."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ないものだろうか"]],
+      "content": {
+        "English": {
+          "title": "～ないものだろうか",
+          "short_description": "Is there no way to A? (wishful musing)",
+          "explanation": "Negative + ものだろうか: yearning for an option — 「この悩みを解消する方法はないものだろうか」 — is there truly no way to resolve this worry? A soft wish wearing a question.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Existence negative | ～方法／道 + はない + ものだろうか | 方法はないものだろうか |",
+          "examples": "```\n残業を減らす方法はないものだろうか。\nIs there no way to cut the overtime?\n```\n\n```\nだれか、この箱を運んでくれないものだろうか。\nWill no one carry this box for me, I wonder.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Direct requests", "correct": "It muses aloud rather than asks — rhetorical longing", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Essay intros and soliloquy; ～ないかな is the casual cousin."}]
+          },
+          "pro_tip": "The pattern sighs upward: the speaker knows no answer and hopes the air provides one."
+        },
+        "Russian": {
+          "title": "～ないものだろうか",
+          "short_description": "Неужели нет способа A? (грёзы вслух)",
+          "explanation": "Отрицание + ものだろうか: тоска по варианту — 「この悩みを解消する方法はないものだろうか» — неужели нет способа снять эту тревогу? Мягкое желание в одежде вопроса.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Отрицание существования | ～方法／道 + はない + ものだろうか | 方法はないものだろうか |",
+          "examples": "```\n残業を減らす方法はないものだろうか。\nНеужели нельзя уменьшить переработки?\n```\n\n```\nだれか、この箱を運んでくれないものだろうか。\nХоть кто-нибудь не вынесет ли этот ящик за меня.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Прямые просьбы", "correct": "Это размышление вслух, риторическая тоска, не просьба", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Вступления эссе и монологи; разговорный родич — ～ないかな."}]
+          },
+          "pro_tip": "Конструкция вздыхает в потолок: говорящий знает, что ответа нет, и надеется на воздух."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["なくはない", "なくもない"]],
+      "content": {
+        "English": {
+          "title": "～なく（は／も）ない",
+          "short_description": "There is some A (guarded yes)",
+          "explanation": "Verb/noun negative + なくはない: 「興味はなくはない」 — I do have some interest. The hedged positive — litotes at work.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + は | N + はなくはない | 興味はなくはない |\n| Verb negative | Vない + ことはない | 行けないことはない |",
+          "examples": "```\n可能性はなくもないが、確率は低い。\nThe possibility is not nil — but the odds are low.\n```\n\n```\n食べられなくはないけど、あまり好きじゃない。\nIt is not that I cannot eat it — I just do not like it much.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Strong affirmation intended", "correct": "The double negative keeps the yes small — modesty is the point", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Everyday speech and interviews; ～ないことはない is fully interchangeable."}]
+          },
+          "pro_tip": "If ある would sound boastful, wrap it in なくはない."
+        },
+        "Russian": {
+          "title": "～なく（は／も）ない",
+          "short_description": "Какое-то A есть (осторожное «да»)",
+          "explanation": "Отрицание глагола/сущ. + なくはない: 「興味はなくはない» — интерес всё же имеется. Подстрахованное утверждение — литотес за работой.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + は | N + はなくはない | 興味はなくはない |\n| Отрицание глагола | Vない + ことはない | 行けないことはない |",
+          "examples": "```\n可能性はなくもないが、確率は低い。\nВозможность не нулевая — но вероятность низка.\n```\n\n```\n食べられなくはないけど、あまり好きじゃない。\nСъесть не то чтобы не могу — просто не очень люблю.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Нужно сильное утверждение", "correct": "Двойное отрицание держит «да» маленьким — в этом скромность", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Бытовая речь и интервью; ～ないことはない полностью взаимозаменяемо."}]
+          },
+          "pro_tip": "Если прямое ある звучало бы хвастливо — заверните его в なくはない."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["なくして"]],
+      "content": {
+        "English": {
+          "title": "～なくして（は）",
+          "short_description": "Without A, B cannot be",
+          "explanation": "Noun + なくして（は）: absolute prerequisite — 「信頼なくして、真の友情はない」 — without trust, no true friendship. Formal absolutes.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + なくして（は） | 努力なくしては |\n| Paired negative | N + なくして + ～ない | 資金なくして成功なし |",
+          "examples": "```\n愛なくして、人生は空虚だ。\nWithout love, life is hollow.\n```\n\n```\n忍耐なくして、成功は得られない。\nWithout patience, success cannot be won.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Everyday absences (財布なくして)", "correct": "It elevates — abstract pillars like trust, love, effort", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Speeches and mottos; ～なしには is the near-twin."}]
+          },
+          "pro_tip": "Motto grammar: engrave the noun, add なくして, finish with a negative."
+        },
+        "Russian": {
+          "title": "～なくして（は）",
+          "short_description": "Без A нет и B",
+          "explanation": "Сущ. + なくして（は）: абсолютная предпосылка — 「信頼なくして、真の友情はない» — без доверия нет настоящей дружбы. Формальные абсолюты.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + なくして（は） | 努力なくしては |\n| Парное отрицание | N + なくして + ～ない | 資金なくして成功なし |",
+          "examples": "```\n愛なくして、人生は空虚だ。\nБез любви жизнь пуста.\n```\n\n```\n忍耐なくして、成功は得られない。\nБез терпения успеха не добыть.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Бытовые отсутствия (財布なくして)", "correct": "Возвышает абстракции-столпы: доверие, любовь, усилие", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Речи и девизы; почти-близнец — ～なしには."}]
+          },
+          "pro_tip": "Грамматика девизов: высеките существительное, добавьте なくして, завершите отрицанием."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["なしに", "なしには"]],
+      "content": {
+        "English": {
+          "title": "～なしに（は）",
+          "short_description": "Without A (doing)",
+          "explanation": "Noun + なしに: absent accompaniment — 「断りなしに借りた」 — borrowed without asking. なしには＋negative adds impossibility: 「努力なしには上達しない」.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + なしに | 挨拶なしに |\n| Impossibility | N + なしには + ～ない | 練習なしには |",
+          "examples": "```\n許可なしに、勝手に出入りしないでください。\nPlease do not come and go at will without permission.\n```\n\n```\n失敗なしには、成長はない。\nWithout failure there is no growth.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Verb clauses directly (食べるなしに)", "correct": "Nouns only; verbs take ～ないで／ずに", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Notices and essays; ～なし covers without a trace of the noun."}]
+          },
+          "pro_tip": "Signs love なしに: every rule is a noun plus an absence."
+        },
+        "Russian": {
+          "title": "～なしに（は）",
+          "short_description": "Без A (пропуская)",
+          "explanation": "Сущ. + なしに: отсутствие сопровождения — 「断りなしに借りた» — взял, не спросив. なしには＋отрицание добавляет невозможность: 「努力なしには上達しない».",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + なしに | 挨拶なしに |\n| Невозможность | N + なしには + ～ない | 練習なしには |",
+          "examples": "```\n許可なしに、勝手に出入りしないでください。\nПожалуйста, не ходите туда-сюда без разрешения.\n```\n\n```\n失敗なしには、成長はない。\nБез неудач нет роста.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Глагольные обороты напрямую (食べるなしに)", "correct": "Только существительные; глаголы — ～ないで／ずに", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Объявления и эссе; ～なし означает «ни следа» существительного."}]
+          },
+          "pro_tip": "Таблички обожают なしに: каждое правило — существительное плюс отсутствие."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["には及ばない"]],
+      "content": {
+        "English": {
+          "title": "～には及ばない",
+          "short_description": "No need to A (reassurance)",
+          "explanation": "Dictionary form + には及ばない: formality of ～なくてもいい — 「謝るには及ばない」 — no need to apologize. Reassuring dismissal of an obligation.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Dictionary form | Vる + には及ばない | 遠慮するには及ばない |",
+          "examples": "```\nいちいち報告するには及ばない。\nThere is no need to report each little thing.\n```\n\n```\nお詫びには及びません。次に活かしてください。\nNo apology necessary — put it to use next time.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "するには及ばない", "correct": "しには及ばない or use ～には及ばない with other verbs", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Polite business speech; お～には及びません softens further."}]
+          },
+          "pro_tip": "A magnanimous wave of the hand in grammar form."
+        },
+        "Russian": {
+          "title": "～には及ばない",
+          "short_description": "Не нужно A (успокоение)",
+          "explanation": "Словарная форма + には及ばない: формальная версия ～なくてもいい — 「謝るには及ばない» — извиняться не нужно. Ободряющая отмена обязанности.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Словарная форма | Vる + には及ばない | 遠慮するには及ばない |",
+          "examples": "```\nいちいち報告するには及ばない。\nДокладывать о каждой мелочи нет необходимости.\n```\n\n```\nお詫びには及びません。次に活かしてください。\nИзвинений не требуется — учтите это в следующий раз.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "するには及ばない", "correct": "しには及ばない — либо берите другой глагол", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Вежливая деловая речь; お～には及びません смягчает ещё сильнее."}]
+          },
+          "pro_tip": "Великодушный взмах руки в грамматической форме."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["までだ", "までのことだ"]],
+      "content": {
+        "English": {
+          "title": "～までだ／～までのことだ",
+          "short_description": "That is all there is to it",
+          "explanation": "Plain form + までだ caps an intention or an account: 「断られるなら、諦めるまでだ」 — if refused, I simply give up. Also ～てみたまでだ — I merely tried. The sentence shrugs.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Plain clause | clause + までだ | 負けるまでだ |\n| Merely | Vて + みた + までだ | 聞いてみたまでだ |",
+          "examples": "```\n失敗したら、最初からやり直すまでだ。\nIf it fails, we simply start over.\n```\n\n```\n特別な意味はありません。聞いてみたまでです。\nNo special meaning — I merely asked.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Elaborate consequences", "correct": "The ending is minimal and stoic — no plan B beyond it", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Resolute or dismissive depending on tone; までのことだ is the same shrug, fuller."}]
+          },
+          "pro_tip": "The pattern is the end of the list: after までだ, there is nothing more to say."
+        },
+        "Russian": {
+          "title": "～までだ／～までのことだ",
+          "short_description": "Вот и всё, другого не дано",
+          "explanation": "Простая форма + までだ венчает намерение или рассказ: 「断られるなら、諦めるまでだ» — откажут — просто смирюсь. Также ～てみたまでだ — я лишь спросил. Предложение пожимает плечами.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простая часть | часть + までだ | 負けるまでだ |\n| Всего лишь | Vて + みた + までだ | 聞いてみたまでだ |",
+          "examples": "```\n失敗したら、最初からやり直すまでだ。\nНе выйдет — просто начнём заново.\n```\n\n```\n特別な意味はありません。聞いてみたまでです。\nНичего особенного — просто спросил.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Разветвлённые последствия", "correct": "Финал минимален и стоичен — плана Б за ним нет", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Решимость или пренебрежение — по интонации; までのことだ — то же пожатие, полнее."}]
+          },
+          "pro_tip": "Конструкция — конец списка: после までだ добавить нечего."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ものなら"]],
+      "content": {
+        "English": {
+          "title": "～ものなら",
+          "short_description": "If you (think you) can A — try; if only",
+          "explanation": "Volitional/potential + ものなら: dare framing — 「やれるものなら、やってみろ」 — if you can do it, try. Also wistful: 「戻れるものなら、あの日に戻りたい」 — if only I could return.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Potential | Vられる + ものなら | 治るものなら |\n| Volitional (warn) | Vよう + ものなら | 遅刻しようものなら |",
+          "examples": "```\n許されるものなら、もう一度やり直したい。\nIf I may be forgiven, I want to redo it once more.\n```\n\n```\nそんなことをしようものなら、大変なことになる。\nTry anything like that, and it will be a disaster.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Plain dictionary form + ものなら", "correct": "Potential (られる) for wishes, volitional (よう) for warnings", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "The ようものなら arm is a threat template: one misstep and…"}]
+          },
+          "pro_tip": "Two faces: longing (potential) and thunder (volitional) — pick the verb form accordingly."
+        },
+        "Russian": {
+          "title": "～ものなら",
+          "short_description": "Если сможешь A — попробуй; если бы только",
+          "explanation": "Потенциал/волитив + ものなら: рамка вызова — 「やれるものなら、やってみろ» — раз можешь, попробуй. Также тоска: 「戻れるものなら、あの日に戻りたい» — если бы можно было вернуться.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Потенциал | Vられる + ものなら | 治るものなら |\n| Волитив (угроза) | Vよう + ものなら | 遅刻しようものなら |",
+          "examples": "```\n許されるものなら、もう一度やり直したい。\nЕсли мне будет позволено — хочу начать заново.\n```\n\n```\nそんなことをしようものなら、大変なことになる。\nТолько попробуй такое — и будет катастрофа.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Словарная форма + ものなら", "correct": "Потенциал (られる) для желаний, волитив (よう) для предостережений", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Ветка ようものなら — шаблон угрозы: один неверный шаг и…"}]
+          },
+          "pro_tip": "Два лица: томление (потенциал) и гром (волитив) — выбирайте форму глагола соответственно."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ものを"]],
+      "content": {
+        "English": {
+          "title": "～ものを",
+          "short_description": "If only A had… (regretful reproach)",
+          "explanation": "Plain form + ものを closes a missed chance with a sigh: 「言えばいいものを、黙っていた」 — if only he had spoken, but he kept silent. Frustration at the road not taken.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Plain form (ideal) | clause + ものを + reality | 聞けばいいものを |\n| ば-form | Vば + いいものを | 聞けばいいものを |",
+          "examples": "```\n早く来ればいいものを、また遅れた。\nIf only he had come early — late again.\n```\n\n```\n素直に謝ればいいものを、意地を張った。\nA simple apology would have done — but he dug in his heels.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Positive outcomes realized", "correct": "The ば-clause names what SHOULD have happened; reality defied it", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Spoken complaint; のに dressed in disappointment."}]
+          },
+          "pro_tip": "ものを is のに with a longer sigh — the fork in the road taken wrong."
+        },
+        "Russian": {
+          "title": "～ものを",
+          "short_description": "Эх, надо было A (упрёк с сожалением)",
+          "explanation": "Простая форма + ものを закрывает упущенный шанс вздохом: 「言えばいいものを、黙っていた» — сказать бы — а он молчал. Раздражение от невыбранной дороги.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простая форма (идеал) | часть + ものを + реальность | 聞けばいいものを |\n| ば-форма | Vば + いいものを | 聞けばいいものを |",
+          "examples": "```\n早く来ればいいものを、また遅れた。\nПришёл бы пораньше — опять опоздал.\n```\n\n```\n素直に謝ればいいものを、意地を張った。\nИзвинился бы честно — нет, упёрся.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Свершившиеся позитивные исходы", "correct": "ば-часть называет то, что ДОЛЖНО было случиться; реальность её отвергла", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Разговорная жалоба; のに в одежде разочарования."}]
+          },
+          "pro_tip": "ものを — это のに с более долгим вздохом: развилка, где свернули не туда."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["くらいなら"]],
+      "content": {
+        "English": {
+          "title": "～くらいなら",
+          "short_description": "If it comes to A, rather B",
+          "explanation": "Plain form + くらいなら（ほうがましだ）: comparing a bad option with a worse one — 「脂身を食べるくらいなら、野菜だけにする」 — rather than fat, vegetables alone. Rankings of distaste.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Plain form | clause + くらいなら + better bad | 泣くくらいなら |\n| まし ending | ～ほうがましだ | 転職したほうがましだ |",
+          "examples": "```\n嘘をつくくらいなら、黙っていたほうがましだ。\nRather than lie, silence is the better evil.\n```\n\n```\n彼と組むくらいなら、一人でやる。\nIf it means teaming with him, I would rather work alone.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Both options attractive", "correct": "Both are bad — the pattern just ranks the lesser evil", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Spoken and written; ～よりましだ completes the comparison."}]
+          },
+          "pro_tip": "It is the grammar of choosing between two umbrellas in a hailstorm."
+        },
+        "Russian": {
+          "title": "～くらいなら",
+          "short_description": "Если уж A — лучше уж B",
+          "explanation": "Простая форма + くらいなら（ほうがましだ）: сравнение плохого с худшим — 「脂身を食べるくらいなら、野菜だけにする» — уж лучше одна зелень, чем сало. Ранжирование нелюбимого.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простая форма | часть + くらいなら + меньшее зло | 泣くくらいなら |\n| Финал まし | ～ほうがましだ | 転職したほうがましだ |",
+          "examples": "```\n嘘をつくくらいなら、黙っていたほうがましだ。\nУж лучше молчать, чем врать.\n```\n\n```\n彼と組むくらいなら、一人でやる。\nРаз уж работать с ним — лучше я один.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Оба варианта привлекательны", "correct": "Оба плохи — конструкция лишь выбирает меньшее зло", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Устно и письменно; ～よりましだ завершает сравнение."}]
+          },
+          "pro_tip": "Это грамматика выбора между двумя зонтиками в граде."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ことなしに"]],
+      "content": {
+        "English": {
+          "title": "～ことなしに",
+          "short_description": "Without doing A (formal)",
+          "explanation": "Dictionary form + ことなしに: ～ないで formal twin — 「努力することなしに、報いはない」 — no reward without effort. Written counterpart of ～ないで.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Dictionary form | Vる + ことなしに | 休むことなしに |",
+          "examples": "```\n練習することなしに、上達は望めない。\nWithout practice, improvement cannot be hoped for.\n```\n\n```\n彼は休むことなしに、働き続けた。\nHe kept working without taking a break.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Casual speech", "correct": "Formal written register; ～ないで in conversation", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Essays and formal argumentation."}]
+          },
+          "pro_tip": "ことなしに is ～ないで in a suit and tie."
+        },
+        "Russian": {
+          "title": "～ことなしに",
+          "short_description": "Не делая A (формально)",
+          "explanation": "Словарная форма + ことなしに: формальный двойник ～ないで — 「努力することなしに、報いはない» — без усилий нет и награды. Письменный родственник ～ないで.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Словарная форма | Vる + ことなしに | 休むことなしに |",
+          "examples": "```\n練習することなしに、上達は望めない。\nБез практики о прогрессе нечего и мечтать.\n```\n\n```\n彼は休むことなしに、働き続けた。\nОн работал не переставая, без передышки.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Бытовая речь", "correct": "Формальный письменный регистр; в разговоре — ～ないで", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Эссе и формальная аргументация."}]
+          },
+          "pro_tip": "ことなしに — это ～ないで в костюме с галстуком."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ともなく", "ともなしに"]],
+      "content": {
+        "English": {
+          "title": "～ともなく／～ともなしに",
+          "short_description": "Without intending to A (unfocused)",
+          "explanation": "Verb + ともなく repeats the verb vaguely: 「見るともなく見ていた」 — was looking without really looking. Also 誰ともなく／いつともなく — someone, sometime, unspecifiable.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Same verb × 2 | V + ともなく + V | 聞くともなく聞く |\n| Question words | 誰/いつ/どこ + ともなく | 誰ともなく |",
+          "examples": "```\n彼女は考えるともなく、窓の外を眺めていた。\nShe gazed out the window, thinking of nothing in particular.\n```\n\n```\n誰ともなく、拍手が起こった。\nApplause broke out — from no one in particular.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Focused deliberate actions", "correct": "The action is unfocused, half-absent — daydream mode", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Narration; ともなしに is the same haze with に."}]
+          },
+          "pro_tip": "The pattern mirrors the verb against itself and dims it — like eyes not really watching."
+        },
+        "Russian": {
+          "title": "～ともなく／～ともなしに",
+          "short_description": "Не особенно намереваясь A (рассеянно)",
+          "explanation": "Глагол + ともなく смутно повторяет его же: 「見るともなく見ていた» — смотрел, не глядя. Также 誰ともなく／いつともなく — кто-то, когда-то, неопределимо.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Тот же глагол × 2 | V + ともなく + V | 聞くともなく聞く |\n| Вопросительные | 誰/いつ/どこ + ともなく | 誰ともなく |",
+          "examples": "```\n彼女は考えるともなく、窓の外を眺めていた。\nОна глядела в окно, ни о чём не думая.\n```\n\n```\n誰ともなく、拍手が起こった。\nАплодисменты возникли — сами собой, неоткуда точного.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Сосредоточенные действия", "correct": "Действие рассеянное, полуотсутствующее — режим грёз", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Нарратив; ともなしに — та же дымка с に."}]
+          },
+          "pro_tip": "Конструкция отражает глагол в самого себя и приглушает — как глаза, которые «не смотрят»."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ことのないように"]],
+      "content": {
+        "English": {
+          "title": "～ことのないように",
+          "short_description": "So that A never happens (prevention)",
+          "explanation": "Plain negative-flavored clause + ことのないように: preventive care — 「忘れることのないように、手帳に書いた」 — wrote it down so as not to forget. Formal guardrail ～ないように.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Verb + ことのない | Vる + ことのないように | 遅れることのないように |",
+          "examples": "```\n事故が起きることのないよう、点検を徹底した。\nThorough inspections, so that no accident occurs.\n```\n\n```\n二度と同じ過ちを繰り返すことのないように。\nSo that the same mistake is never repeated.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Positive aims (win, succeed)", "correct": "It prevents negatives; ～ように (N4) covers positive aims", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Notices and safety prose; stiffer than ～ないように."}]
+          },
+          "pro_tip": "The pattern bolts the door before the burglar: pure prevention grammar."
+        },
+        "Russian": {
+          "title": "～ことのないように",
+          "short_description": "Чтобы A никогда не случилось (профилактика)",
+          "explanation": "Часть с негативным смыслом + ことのないように: превентивная забота — 「忘れることのないように、手帳に書いた» — записал в блокнот, чтобы не забыть. Формальный предохранитель ～ないように.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Глагол + ことのない | Vる + ことのないように | 遅れることのないように |",
+          "examples": "```\n事故が起きることのないよう、点検を徹底した。\nТщательные проверки — чтобы не случилось аварии.\n```\n\n```\n二度と同じ過ちを繰り返すことのないように。\nЧтобы та же ошибка больше никогда не повторилась.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Позитивные цели (выиграть, успеть)", "correct": "Предотвращает негатив; позитивные цели — ～ように (N4)", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Объявления и тексты о безопасности; жёстче ～ないように."}]
+          },
+          "pro_tip": "Конструкция запирает дверь до прихода вора: чистая грамматика профилактики."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["あっての"]],
+      "content": {
+        "English": {
+          "title": "～あっての",
+          "short_description": "A is what makes B possible",
+          "explanation": "Noun + あっての + noun: B exists only thanks to A — 「ファンあってのコンサートだ」 — a concert exists only because of fans. Gratitude logic between two nouns.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| N + あっての + N | N + あっての + N | 命あっての |",
+          "examples": "```\n健康あっての仕事だ。無理は禁物。\nWork exists because of health — no overdoing it.\n```\n\n```\nお客様あっての商売です。\nBusiness exists only because of its customers.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Ordering the nouns backwards", "correct": "The enabling noun comes first: 命あっての物種 — life first", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "命あっての物種 (life first, everything after) is the proverb to know."}]
+          },
+          "pro_tip": "The pattern thanks: first noun gets the bow, second exists on its account."
+        },
+        "Russian": {
+          "title": "～あっての",
+          "short_description": "Благодаря A существует B",
+          "explanation": "Сущ. + あっての + сущ.: B существует только благодаря A — 「ファンあってのコンサートだ» — концерт существует только благодаря фанатам. Логика благодарности между двумя существительными.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + あっての + сущ. | N + あっての + N | 命あっての |",
+          "examples": "```\n健康あっての仕事だ。無理は禁物。\nРабота есть лишь пока есть здоровье — не перегибайте.\n```\n\n```\nお客様あっての商売です。\nТорговля существует только благодаря клиентам.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Обратный порядок существительных", "correct": "Первым идёт дающее существительное: 命あっての物種 — сначала жизнь", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "命あっての物種 («жизнь прежде всего») — пословица на зубок."}]
+          },
+          "pro_tip": "Конструкция благодарит: первое существительное получает поклон, второе существует за его счёт."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["かたがた"]],
+      "content": {
+        "English": {
+          "title": "～かたがた",
+          "short_description": "Also to A (dual-purpose errand)",
+          "explanation": "Noun (action) + かたがた: one trip, two goals — 「お礼かたがた、お宅へ伺います」 — to give thanks and, while at it, visit. Formal errand-stacking.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Action noun | N + かたがた | ご挨拶かたがた |",
+          "examples": "```\n散歩かたがた、新しいパン屋を覗いた。\nOn my walk, I also peeked into the new bakery.\n```\n\n```\nお詫びかたがた、直接伺いました。\nTo apologize — and while there, in person.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Random activity pairs", "correct": "One purpose is primary; かたがた marks the secondary ride-along", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Letters and formal visits; がてら is the near-synonym."}]
+          },
+          "pro_tip": "One bow, two birds: the main noun bows, the second goal rides along."
+        },
+        "Russian": {
+          "title": "～かたがた",
+          "short_description": "Заодно и A (двойная цель)",
+          "explanation": "Сущ. действия + かたがた: одна поездка — две цели — 「お礼かたがた、お宅へ伺います» — выразить благодарность и заодно навестить. Формальное совмещение дел.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. действия | N + かたがた | ご挨拶かたがた |",
+          "examples": "```\n散歩かたがた、新しいパン屋を覗いた。\nНа прогулке заодно заглянул в новую булочную.\n```\n\n```\nお詫びかたがた、直接伺いました。\nИзвиниться — и заодно лично навестить.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Случайные пары занятий", "correct": "Одна цель главная; かたがた помечает попутную вторую", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Письма и формальные визиты; почти-синоним — がてら."}]
+          },
+          "pro_tip": "Один поклон — две птицы: главное существительное кланяется, вторая цель едет зайцем."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["がてら"]],
+      "content": {
+        "English": {
+          "title": "～がてら",
+          "short_description": "While A-ing, also B",
+          "explanation": "ます-stem / noun + がてら: combining errands — 「買い物がてら、銀行に寄った」 — shopping, with a bank stop folded in. Everyday twin of かたがた.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| ます-stem | V + がてら | 散歩がてら |\n| Action noun | N + がてら | 買い物がてら |",
+          "examples": "```\n通勤がてら、新しいカフェで朝ごはんを食べた。\nOn my commute, breakfast at the new cafe as well.\n```\n\n```\n花見がてら、公園の清掃ボランティアに参加した。\nCherry-blossom viewing, plus park cleanup volunteering.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Two heavyweight purposes", "correct": "がてら folds a light secondary into a main activity", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "がてらに adds に; かたがた is its formal cousin."}]
+          },
+          "pro_tip": "Think while you're at it — the phrase literally lives there."
+        },
+        "Russian": {
+          "title": "～がてら",
+          "short_description": "Занимаясь A, заодно B",
+          "explanation": "Основа ます / сущ. + がてら: совмещение дел — 「買い物がてら、銀行に寄った» — за покупками заодно завернул в банк. Бытовой близнец かたがた.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Основа ます | V + がてら | 散歩がてら |\n| Сущ. действия | N + がてら | 買い物がてら |",
+          "examples": "```\n通勤がてら、新しいカフェで朝ごはんを食べた。\nПо дороге на работу заодно позавтракал в новом кафе.\n```\n\n```\n花見がてら、公園の清掃ボランティアに参加した。\nХанами плюс волонтёрская уборка парка заодно.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Две тяжеловесные цели", "correct": "がてら встраивает лёгкую вторичную задачу в главную", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "Вариант がてらに с に; формальный родич — かたがた."}]
+          },
+          "pro_tip": "Думайте «заодно» — фраза буквально живёт там."
+        }
+      }
+    }
+  ]
+}

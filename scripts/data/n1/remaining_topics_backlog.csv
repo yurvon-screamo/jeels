@@ -1,0 +1,344 @@
+status,suggested_title,sources,raw_hanabira,raw_jkindrix,meaning_hint_UNTRUSTED,formation_hint,flags
+OK,あしからず,jk,,あしからず (sentence-final),please don't take it wrong / please excuse (refusal),"[refusal statement], あしからず.",
+OK,あっての,hb,Noun + あっての + Noun (A atteno B),,Expresses the idea 'nothing without'; something being indispensable for the existence of something else.,Noun1 + あっての + Noun2,
+OK,あろうことか,jk,,あろうことか (sentence-initial),unbelievably / of all things / to make matters worse,あろうことか + [sentence describing shocking event].,
+OK,あろうとも,jk,, あろうとも,no matter what / whatever happens,"V volitional + とも. Common: あろうとも, あるいは どうあろうとも.",family=うが/うと indifference pair
+OK,いかんせん,jk,,いかんせん (sentence-initial / mid-sentence),unfortunately / regrettably / the trouble is,"いかんせん, [sentence].",family=いかん family
+OK,いかんにかかわらず,jk,, いかんにかかわらず,regardless of / irrespective of (formal),Noun + (の) + いかんによらず / いかんを問わず / いかんにかかわらず.,family=いかん family
+OK,いかんによらず,jk,,Noun +  + いかんによらず ,regardless of / irrespective of (formal),Noun + (の) + いかんによらず / いかんを問わず / いかんにかかわらず.,family=いかん family
+OK,いかんによらずいかんを問わずいかんにかかわらず,jk,,Noun + (の) + いかんによらず / いかんを問わず / いかんにかかわらず,regardless of / irrespective of (formal),Noun + (の) + いかんによらず / いかんを問わず / いかんにかかわらず.,family=いかん family
+OK,いかんを問わず,jk,, いかんを問わず ,regardless of / irrespective of (formal),Noun + (の) + いかんによらず / いかんを問わず / いかんにかかわらず.,family=いかん family
+REVIEW,いっこうに～ない,jk,,いっこうに + V 〜ない,not at all / not in the slightest,いっこうに + V ない / adjective ない.,junk=N3 adverb (check level)
+OK,いつまで～のやら,hb,いつまで～のやら。。。 (itsumade ~ no yara),,Express uncertainty regarding duration; 'don't know when... will end'.,いつまで + Verb-てform + のやら,family=のやら family
+OK,いやしくも,jk,,いやしくも (sentence-initial),if at least / if one is truly / given that one is,いやしくも + noun / role + condition or expectation.,
+REVIEW,いわば,jk,,いわば (sentence-initial / mid-sentence),so to speak / as it were,"いわば, [sentence with metaphor or characterization].",junk=N2 adverb (check level)
+OK,うが～うが,hb,A うが B うが (A uga B uga),,"Expresses the idea of 'no matter how...or', 'even if...or'.",Verb-volitional form + うが + Verb-volition form + うが,family=うが/うと indifference pair
+OK,うと～うと,hb,A うと B うと (A uto B uto),,To show both conditions A and B are equivalent or indifferent; 'whether A or B'.,"い-adjective + うと, な-adjective + であろうと, Noun + であろうと",family=うが/うと indifference pair
+REVIEW,おおせる,jk,,Verb ます-stem + おおせる,succeed in completing / manage to do fully,V ます-stem + おおせる.,"junk=vocabulary compound verb, not grammar"
+OK,かたがた,hb+jk,Noun かたがた (Noun kata gata),V ます-stem / noun + かたがた,"Used when doing one thing while also doing another; 'while', 'and at the same time'.",Noun + かたがた,family=dual-purpose がてら/かたがた family
+OK,かたわら,hb,A かたわら B (A katawara B),,Expresses 'while also'; 'at the same time as'.,"Verb-dictionary form + かたわら, Noun + のかたわら",
+OK,かと思いきや,hb,～かと思いきや (〜ka to omoikiya),,"Expressing unexpected outcomes; 'just when I thought', 'but'.","Sentence + かと思いきや, (Noun/ な-Adjective + だ/ い-Adjective/ Verb (past form) + かと思いきや)",
+OK,からある,hb,Noun からある (〜kara aru),,"Expresses 'beginning from', 'from' or 'after'. Often used to indicate a high number or large scale.",Number + Counter + からある,family=数量+からある/からする (as much as)
+OK,からする,hb,Noun からする (Noun kara suru),,"Used to indicate that something is judged, estimated, or considered from a certain point or aspect.",Noun + からする,family=数量+からある/からする (as much as)
+REVIEW,からの,hb,Noun からの (~kara no),,Defines the starting point or the origin; 'from'.,Noun + からの,junk=ours N3 ～からの + Noun; dupe_ours=N3 ～からの + Noun
+OK,から言わせれば,hb,Noun から言わせれば (~kara iwasereba),,Express the perspective of noun; 'from ~ point of view',Noun + から言わせれば,
+REVIEW,から～に至るまで,hb,～から Noun に 至る まで (〜kara 〜ni itaru made),,"Expressing range from one thing to another; 'from...to', 'ranging from...to'.",Noun[始点] + から + Noun[終点] + に至るまで,junk=ours N2 ～から～に至るまで; dupe_ours=N2 ～から～に至るまで
+OK,かれ～かれ,hb,A かれ B かれ (A kare B kare),,Express either A or B or both; 'whether A or B',Noun + かれ + Noun + かれ,family=かれ…かれ pair
+OK,がてら,hb+jk,Noun がてら (Noun gatera),Verb ます-stem / noun + がてら,At the same time; on the occasion of; while; along with.,Noun + がてら,family=dual-purpose がてら/かたがた family
+OK,がゆえに,hb,～がゆえに (～ga yue ni),,"Expresses the reason or cause; 'because', 'due to', 'as a result of'.",Noun + がゆえに,family=ゆえ family
+OK,がゆえの,hb+jk,～がゆえの Noun (〜ga yue no Noun),Noun + ゆえの ,"Expresses the reason or cause for something; 'because of', 'due to'.",Noun / Verb-dictionary form + がゆえの + Noun,family=ゆえ family
+OK,が～なら、～も～だ,hb,"Noun1 が Noun1 なら、 Noun2 も Noun2 だ (A ga A nara, B mo B da)",,Indicates 'if Noun1 is the case then it is only natural that Noun2 is the case as well.',Noun1 + が + Repeat Noun1 + なら、 + Noun2 + も + Repeat Noun2 + だ,
+OK,が～られる,hb,～が Verb られる (〜ga Verb rareru),,"Expresses potential or ability to do something; 'can', 'able to'.",Verb-ます stem + られる,
+OK,きっての,jk,,Noun (group / category) + きっての,foremost / best in / most distinguished of,Noun (group / category) + きっての + noun (role / quality).,
+OK,きりがない,jk,,V-たら + きりがない,there's no end to / (if you list X) it would be endless,V-たら + きりがない (fixed conditional).,
+REVIEW,くて,jk,,i-adj 〜くて ,"if not X, what else / what else could it be but X",i-adj 〜くて / na-adj + で + なくてなんであろう / なんであろうか.,junk=fragment of なんであろう variant split
+OK,くて～でなんであろう,jk,,i-adj 〜くて / na-adj + で + なんであろう,"if not X, what else / what else could it be but X",i-adj 〜くて / na-adj + で + なくてなんであろう / なんであろうか.,
+OK,くもなんともない,jk,,i-adj 〜くもなんともない ,not even slightly / not at all,i-adj stem + くもなんともない; na-adj / noun + でもなんでもない.,
+OK,ぐるみ,hb+jk,Noun + ぐるみ (〜gurumi),Noun + ぐるみ,"This term is used to describe 'entirely', 'altogether', 'as a whole' or 'collectively'.",Noun + ぐるみ,
+OK,こそあれ,hb+jk,Noun こそあれ (~kosoare),Plain form / noun + こそあれ,Expresses the meaning 'even if'; 'no matter'.,Noun + こそあれ,family=こそすれ/こそあれ family
+OK,こそすれ,hb,Noun こそすれ (~koso sure),,"An emphatic expression for 'if anything', 'especially', and 'it is', which shows that other alternatives are hardly conceivable.",Noun + こそすれ,family=こそすれ/こそあれ family
+OK,こそ～が,hb,Noun こそ～が (~koso~ga),,"Used to emphasize that it is precisely because of something, that another statement is true.",Noun + こそ + Sentence + が,
+OK,こととて,hb,～こととて (〜koto tote),,"Used to express the reason or premise for a decision or judgement; 'since', 'because'.","Verb-casual + こととて, Noun + の + こととて",
+OK,こともあろうに,jk,,こともあろうに,of all things / unbelievably / of all places,こともあろうに + noun / main clause.,
+REVIEW,こなす,jk,,Verb ます-stem + こなす,handle skillfully / master / do expertly,V ます-stem + こなす.,"junk=vocabulary compound verb, not grammar"
+OK,この上ない,jk,,i-adj / na-adj + この上ない,utmost / supreme / nothing could be more,i-adj / na-adj + この上ない. For nouns: noun + この上ない.,
+OK,ごとき,jk,,Noun + ごとき (+ noun),"like (a) / such as (literary, often disparaging)",Noun + ごとき (+ noun).,family=ごとき/ごとく family
+OK,ごとく,hb,～ごとく (〜gotoku),,To seem like; as if; as though.,"Verb-て + ごとく,  Noun + の + ごとく",family=ごとき/ごとく family
+REVIEW,させられる,hb,Verb させられる (~saserareru),,Expresses 'being forced to do something' or 'being made to do something'.,Verb-casual(non-past)+させられる,"junk=causative-passive conjugation, N3 material"
+OK,さながら,jk,,Noun / plain form + さながら,just like / as if / veritable,Noun + さながら; plain form + さながらの + noun.,
+REVIEW,ざるを得ない,hb,Verb ざるを得ない (~ zaru wo enai),,"'Cannot but', 'have no choice but to', 'forced to'",Verb-dictionary form + ざるを得ない,junk=ours N2 ～ざるを得ない; dupe_ours=N2 ～ざるを得ない
+OK,しかるべき,jk,,V-て form + しかるべき,should be (fittingly) / ought to be,"V-て + しかるべき (+ だ, or as attributive before noun).",
+OK,じゃあるまいし,hb,Noun じゃあるまいし (~ja aru mai shi),,Expressing that something 'is not'; 'is not the case'.,Noun or Na-Adjective + じゃあるまいし,family=まい family
+OK,ずくめ,hb,Noun ずくめ (~zukume),,Denotes 'entirely' or 'nothing but'.,Noun + ずくめ,family=ずくめ/まみれ suffix pair
+OK,ずじまい,hb,Verb ずじまい (~zu jimai),,Expressing regret for not having done something; not being able to; not having the chance to.,Verb-ない form (remove ない） + ずじまい,family=まい family
+OK,ずとも,hb,Verb ずとも (〜zu tomo),,"This structure is used to mean 'Even without doing (an action), (an action) is still achievable'.",Verb-negative stem + ずとも,family=ず classical negative family
+OK,ずにすんだ,hb,～ずにすんだ (〜zuni sunda),,Expresses the idea of 'was able to do without'; 'managed to avoid'.,Verb-ず form + に + すんだ,family=ずにはすまない family
+OK,ずにはおかない,hb+jk,Verb ずにはおかない (~zuni wa okanai),V negative stem + ずにはおかない,"Expresses the idea of 'cannot help but...', 'cannot leave it as it is' or 'must do something'.",Verb-dictionary form + ずにはおかない,family=ずにはおかない family
+OK,ずにはすまない,hb+jk,Verb ずにはすまない (Verb zuni wa sumanai),V negative stem + ずにはすまない ,"'Cannot do without', 'have to', 'unavoidable'.",Verb-ないform(remove ない) + ずにはすまない,family=ずにはすまない family
+OK,ずもがな,jk,,V negative stem + ずもがな,unnecessary / better left unsaid,V ない-stem + ずもがな. Most common: 言わずもがな.,family=ず classical negative family
+REVIEW,そうにない,hb,Verb そうにない (Verb sou ni nai),,Expresses unlikelihood or that something is not likely to happen.,Verb-stem + そうにない,junk=ours N3 ～そうもない (sibling form)
+REVIEW,そうもない,hb,Verb そうもない (〜sou monai),,"Expresses the negative potential; 'it doesn't seem like', 'it's not likely'.",Verb-volitional form + そうもない,junk=ours N3 ～そうもない; dupe_ours=N3 ～そうもない
+REVIEW,そのもの,jk,,Noun + そのもの,(X) itself / the very essence of,Noun + そのもの.,junk=N2-ish emphasis noun (check ours/level)
+OK,そばから,hb,Verb そばから (〜soba kara),,"Expresses the notion that as soon as one action finishes, another begins.",Verb-ますstem + そばから,
+OK,たが最後,hb+jk,Verb たが最後 (〜ta ga saigo),V-たら / V dict + が最後,"Expression used to denote the idea that 'once something has occurred, it is final'; 'once', 'as soon as', 'the moment'.","Verb-casual, past (た form) + が最後",family=たが最後/たら最後
+OK,たことにしてください,hb,Verb たことにしてください (~ ta koto ni shite kudasai),,Asking someone to pretend or accept that something has already happened or taken a certain state.,"Verb(past, casual) + ことにしてください",
+REVIEW,ただでさえ,jk,,ただでさえ,even normally / already (in an unmodified state),ただでさえ + [sentence describing normal state] + 〜のに + [worsening factor].,junk=N2 adverb (check level)
+OK,たらきりがない,hb,Verb たら きりがない (Verb tara kiri ga nai),,"Represents an endless cycle of doing something; 'if one starts doing something, it will not stop'",Verb-た form + きりがない,
+OK,たら最後,hb,Verb たら最後 (〜tara saigo),,"Expresses that once a certain action happens, a situation changes irreversibly; 'once', 'after'.",Verb-た form + 最後,
+OK,たら～たで,hb,Verb たら Verb たで (~ tara ~ tade),,"Expresses the sequence of actions; 'after doing..., did...'.",Verb(たform) + ら + Verb(たform) + で,
+OK,たりとも,jk,,Number + counter + たりとも + negative,not even one / not even a single,Number + counter + たりとも + negative. Often 一 + counter + たりとも.,
+OK,たりとも～ない,hb,Noun たりとも～ない (~tari tomo ~nai),,"This expression shows the meaning of 'not even', 'not a single'.",Noun + たりとも + Negative Verb,
+OK,たりもしない,jk,,V た + り + もしない,doesn't even do / not even X,V た + り + もしない.,
+OK,たる,hb,Noun たる Noun (~taru~),,Expresses the idea of 'being in the condition or state of',Noun1 + たる + Noun2,family=たる family
+OK,たるゆえん,jk,,Noun + たるゆえん,the reason for being / what makes (X) an X,Noun (role / identity) + たるゆえん + predicate.,family=たる family
+OK,たる者,jk,,Noun + たる者,"as a (proper) X, one should / one who is X",Noun (role) + たる者 + normative predicate.,family=たる family
+OK,だけではすまない,hb,Noun だけではすまない (Noun dake dewa sumanai),,"Expresses 'not finish/end with just', 'cannot be settled only by'.",Noun + だけではすまない,family=ずにはすまない family
+OK,だの～だの,hb,A だの B だの (A dano B dano),,"Used to list examples; 'things like', 'and so on'.",Noun + だの Noun + だの,family=だの…だの listing
+OK,だろうとなかろうと,hb,～だろうとなかろうと (〜darou to nakarou to),,Expresses 'regardless of whether it is or isn't'.,Noun + だろうとなかろうと,family=うが/うと indifference pair
+REVIEW,つもりだ,hb,～つもりだ (〜tsumori da),,Expresses the speaker's intention or plan.,Verb-dictionary form + つもりだ,junk=ours N3/N4 つもり family covers it
+REVIEW,つもりで,hb,～つもりで (〜tsumori de),,"Expresses the speaker's intention or plan; 'with the intention of', 'planning to'.",Verb-dictionary form + つもりで,junk=ours N3/N4 つもり family covers it
+OK,つ～つ,hb,Verb つ Verb つ (Verb tsu Verb tsu),,Expresses a series of actions happening repeatedly one after another.,Verb-stem(masu-form) + つ  + same Verb-stem(masu-form) + つ,
+OK,てからというもの,hb,Verb てからというもの (Verb te kara to iu mono),,Expresses a change that has been consistent since a certain time or event.,Verb-てform + からというもの,
+OK,てこそ,hb,Verb てこそ (Verb te koso),,"Express the idea that 'only by doing something, something else can be achieved or realized.'",Verb-て form + こそ,
+REVIEW,ては,hb,Verb ては (～te wa),,"Expresses a repeated negative event; 'whenever', 'the more...the more'.",Verb-てform + は,"junk=basic repetition ては…ては, N4 material"
+OK,てまでも,hb,Verb てまでも (~ temademo),,Expresses the idea of 'even if it means....'; 'no matter what it takes',Verb-て form + までも,
+OK,てみせる,hb+jk,Verb てみせる (Verb te miseru),V-て form + みせる,"Expresses 'show by doing', 'demonstrate', 'prove by action'.",Verb-te form + みせる,
+OK,てやまない,hb+jk,Verb てやまない (Verb te yamanai),V-て form + やまない,"To express the idea of 'doing something incessantly', 'can't help but do'.",Verb-te form + やまない,
+OK,であったとしても,jk,,Plain form + であったとしても,even if it were / even assuming that (past hypothetical),Noun / na-adj + であったとしても; plain past (V-た) + としても.,
+OK,でありながら,jk,,Noun / na-adj + でありながら,while being / even though one is,Noun / na-adj root + でありながら.,
+OK,であれ～であれ,hb+jk,A であれ B であれ (A deare B deare),Noun + であれ + noun + であれ,Used to indicate that something applies to multiple situations; 'whether A or B'.,Noun A + であれ + Noun B + であれ,family=であれ…であれ
+OK,ですら,hb+jk,Noun ですら (~desura),Noun + ですら,"Express 'even', 'even if', or 'as much as'.",Noun + ですら,family=すら family
+OK,でなくてなんだろう,hb,Noun でなくてなんだろう (〜de nakute nandarou),,Expresses the speaker's strong belief that something is certainly the case.,Noun + でなくてなんだろう,
+OK,でなんであろう,jk,, na-adj + で + なんであろう,"if not X, what else / what else could it be but X",i-adj 〜くて / na-adj + で + なくてなんであろう / なんであろうか.,
+OK,ではあるまいか,jk,, ではあるまいか,I wonder if / isn't it possibly,Noun / na-adj + ではあるまいか; V plain + のではあるまいか.,family=まい family
+OK,ではあるまいし,hb,Noun ではあるまいし (~dewa aru maishi),,"Use this phrase to mean 'it's not as if', 'it's not that'.",Noun + ではあるまいし,family=まい family
+OK,ではまいか,jk,, noun + ではまいか ,I wonder if / isn't it possibly,Noun / na-adj + ではあるまいか; V plain + のではあるまいか.,family=まい family
+REVIEW,でもない,jk,,V ない-form + でもない,not that I don't / it's not impossible to,V ない-form + でもない.,junk=fragment of Vない+でもない family
+OK,でもなんでもない,jk,, na-adj + でもなんでもない,not even slightly / not at all,i-adj stem + くもなんともない; na-adj / noun + でもなんでもない.,
+OK,とあって,hb,～とあって (〜to atte),,Expresses a special situation or event due to certain circumstances.,Noun + とあって,
+OK,とあっては,jk,,Plain form / noun + とあっては,if it's (a case of) / given that it is,Noun + とあっては; plain-form clause + とあっては.,
+OK,とあれば,hb,～とあれば (〜to areba),,"Express a condition; 'if', 'when', 'since'.","Verb-casual + とあれば, い-Adjective + とあれば,な-Adjective + だとあれば, Noun + だとあれば",
+OK,といい～といい,hb,Noun といい Noun といい (〜toii〜toii),,Used to express 'both A and B'; 'whether it's A or B'; 'not to mention A and also B'.,Noun1 + といい + Noun2 + といい + Comment,family=といい…といい
+REVIEW,という,hb,Noun という Noun (~to iu~),,"Used to specify or define one noun with another; 'the noun called', 'the noun that is' or 'a certain'.",Noun1 という Noun2,junk=ours N3 basic (～という～); dupe_ours=N3 ～という～
+OK,というか～というか,hb,A というか B というか (A to iu ka B to iu ka),,"This phrase translates to 'rather than say A, it's more like B' or 'whether to call it A or B'.","Phrase A + というか, + Phrase B + というか",
+OK,というところだ,hb,Noun というところだ (Noun to iu tokoro da),,Means 'it's approximately...' or 'it's about...'. Used to show approximation or a general assessment.,Noun + というところだ,family=うが/うと indifference pair
+REVIEW,というもの,hb,Noun + というもの (~ to iu mono),,"Used to express 'every', 'all'. Concept of generic reference.",Noun + というもの,junk=keep? generic ～というもの N1-ish (check at write time)
+REVIEW,といえども,hb+jk,～といえども (〜to iedomo),Plain form + といえども,Even if it is said that; Even though; Although,"Noun + といえども, Verb-plain form + といえども",junk=ours N2 ～といえども; dupe_ours=N2 ～といえども
+OK,といったところだ,hb+jk,Noun といったところだ (Noun to itta tokoro da),Number / noun + といったところだ,"Expresses 'at most', 'as much as', 'limited to'.",Noun + といったところだ,
+OK,といったらありはしない,hb,～といったらありはしない (〜to ittara ari wa shinai),,"Express extreme exclamation; 'extremely', 'unbelievable', 'unsurpassed'.","Noun + といったらありはしない, な-Adjective + といったらありはしない",
+OK,といったらない,hb,～といったらない。 (〜to ittara nai),,Expresses the extreme of something; 'nothing can be more ... than this',"i-Adjective + といったらない, な-Adjective + だといったらない, Noun + だといったらない",
+OK,といわず～といわず,hb+jk,Noun といわず Noun といわず (A to iwazu B to iwazu),Noun + といわず + noun + といわず,Expresses an idea of 'both A and B' or 'be it A or B'; 'not only A but also B'.,Noun1 + といわず + Noun2 + といわず + (rest of the sentence),family=といわず…といわず
+OK,とおぼしい,jk,,Plain form + とおぼしい ,seems to be / presumed to be,Plain form / noun + とおぼしい; attributive: とおぼしき + noun.,
+OK,とおぼしき,jk,, とおぼしき,seems to be / presumed to be,Plain form / noun + とおぼしい; attributive: とおぼしき + noun.,
+OK,ときたら,hb,Noun + ときたら (〜tokitara),,"Expresses strong feelings about a matter; 'speaking of', 'when it comes to'.",Noun + ときたら,
+OK,ときている,hb,～ときている (〜to kite iru),,"Used to express that a situation is serious or extreme, often with a negative connotation.","Verb-casual, い-Adjective, な-Adjective +で + ときている, Noun + だ + ときている",
+OK,ところを,hb+jk,～ところを (〜tokoro wo),V plain / adj + ところを,Expresses the concept of 'despite' or 'even though'.,"Verb-てform + いる + ところを, Noun + の + ところを, い-Adjective + ところを, な-Adjective + な + ところを",
+REVIEW,とされている,jk,, とされている,is considered / is said to be,Plain-form clause / noun + とされる / とされている.,junk=N2 passive assessment (check level)
+REVIEW,とされる,hb+jk,～とされる (〜to sareru),Plain form + とされる ,"Indicates a general belief or widely accepted view; often translated as 'is considered', 'is seen as', 'is said to be'.","Verb-casual + とされる, い-Adjective + とされる, な-Adjective + だとされる, Noun + だとされる",junk=N2 passive assessment (check level)
+OK,としたところで,hb+jk,～としたところで (〜to shita tokoro de),Plain form + としたところで,Even if; even though; even assuming,"Verb-casual + としたところで, い-Adjective + としたところで,な-Adjective + だとしたところで, Noun + だとしたところで",
+REVIEW,とすると,hb,～とすると (〜to suru to),,"Expresses 'when', 'if', 'given that' in a speculative or hypothetical sense.","Verb-casual + とすると, い-Adjective + とすると,な-Adjective + だとすると, Noun + だとすると",junk=N3 conditional material
+REVIEW,とすれば,hb,～とすれば (～to sureba),,"Used to express 'if it were the case', 'if we assume'.","Verb-casual + とすれば, い-Adjective + とすれば, な-Adjective + だとすれば, Noun + だとすれば",junk=N3 conditional material
+REVIEW,となったら,hb,～となったら (〜to nattara),,"Used to express 'when', 'if it comes to', 'in the case of'.","Verb-casual + となったら, Noun + となったら",junk=N2 conditional (check level)
+REVIEW,となると,hb+jk,～となると (〜to naru to),Plain form + となると,"Used to highlight a certain circumstance or condition; 'when it comes to', 'if it becomes', 'in the case of'.","Verb-casual + となると, い-Adjective + となると,な-Adjective + だとなると, Noun + だとなると",junk=N2 conditional (check level)
+REVIEW,となれば,hb+jk,～となれば (〜to nareba),Plain form + となれば,Expresses the idea of 'if it comes to...; when we talk about...; in the case of...'.,"Verb-casual + となれば, い-Adjective + となれば,な-Adjective + だとなれば, Noun + だとなれば",junk=N2 conditional (check level)
+REVIEW,とのことだ,hb,～とのことだ (〜to no koto da),,"Expresses something that the speaker heard; 'I've heard that', 'I was told that'.",Simplified phrase + とのことだ,"junk=N3/N2 hearsay, below N1"
+REVIEW,とは,jk,,Plain form + とは,to think that / I didn't expect that / the fact that,Plain-form clause + とは.,dupe_ours=N2 ～とは
+REVIEW,とはいえ,hb,～とはいえ (～to wa ie),,Even though; although; but,"Noun + とはいえ, な-Adjective + だとはいえ, い-Adjective + とはいえ, Verb-casual + とはいえ",junk=N2 contrast (check level at write time)
+OK,とは比べものにならない,hb,Noun とは比べものにならない (~to wa kurabemono ni naranai),,"To indicate something is not comparable with; 'not comparable to', 'beyond comparison'.",Noun + とは比べものにならない,
+OK,とは裏腹に,jk,,Noun / plain form + とは裏腹に,contrary to / in contrast to (expectation vs reality),Noun / plain form + とは裏腹に.,
+OK,とみえて,hb,～とみえて (〜to miete),,It seems that; apparently,"Verb-casual + とみえて, い-Adjective + とみえて,な-Adjective + だとみえて, Noun + だとみえて",
+REVIEW,とみなす,jk,,Noun / plain form + とみなす,regard as / consider as / deem to be,Noun / plain form + とみなす (polite: とみなします); passive: とみなされる.,"junk=vocabulary verb, N3-ish (check level)"
+REVIEW,とみられる,hb,～とみられる (～to mirareru),,It is considered that; It is thought that; It is believed that,"Verb-casual+ とみられる, Noun + とみられる",junk=ours N2 ～とみられる; dupe_ours=N2 ～とみられる
+OK,とみると,hb,～とみると (〜to miru to),,"Expresses the concept of 'when one sees it as', 'viewed as', or 'considering'.","Verb-casual + とみると, い-Adjective + とみると, な-Adjective + だとみると, Noun + だとみると",
+OK,とも,jk,,V volitional + とも ,no matter what / whatever happens,"V volitional + とも. Common: あろうとも, あるいは どうあろうとも.",
+OK,ともあろう,hb+jk,Noun + ともあろう + Noun (~tomoarou~),Noun + ともあろう + noun,Used to point out unbecoming behavior of a person or thing with certain status,Noun + ともあろう,
+OK,ともあろうとも,jk,,V volitional + とも / あろうとも,no matter what / whatever happens,"V volitional + とも. Common: あろうとも, あるいは どうあろうとも.",family=うが/うと indifference pair
+OK,ともなると,hb,Noun ともなると (〜to mo naruto),,"'When it comes to..', 'In case of..', signifies change.",Noun + ともなると,
+OK,ともなれば,hb+jk,Noun ともなれば (〜to mo nareba),Noun / V plain + ともなれば,"Expresses the meaning of 'if it comes to', 'when', or 'once'.",Noun + ともなれば,
+OK,とも～とも,hb,A とも B とも (A tomo B tomo),,"Express two possibilities; 'either A or B', 'whether A or B'.",Noun + とも + Noun + とも,
+OK,とやら,jk,,Noun / plain form + とやら,some kind of / (I hear) something like,Noun + とやら; plain-form clause + とやら.,
+OK,と思いきや,jk,,Plain form + と思いきや,but contrary to expectation / I thought but,Plain-form clause + と思いきや.,
+OK,と相まって,hb+jk,Noun と相まって (~ to aimatte),Noun + と相まって,"Used to express 'in combination with', 'together with', 'along with'.",Noun + と相まって,
+OK,と言わんばかりに,hb,～と言わんばかりに (〜to iwan bakari ni),,Indicates an action or behavior that strongly implies a certain unspoken message or feeling.,"Verb-volitional + と言わんばかりに, い-Adjective + と言わんばかりに, な-Adjective + だと言わんばかりに, Noun + だと言わんばかりに",family=ん+classical aux family
+OK,と言わんばかりの,hb,～と言わんばかりの Noun (～to iwan bakari no Noun),,Expresses the concept of 'as if to say'; 'almost says'; 'suggests'.,Verb-plain form + と言わんばかりの Noun,family=ん+classical aux family
+REVIEW,と～を兼ねて,hb,Noun と Noun を兼ねて (Noun to Noun o kanete),,Used to express the idea of doing two things at once or serving two purposes.,Noun + と + Noun + を兼ねて,junk=兼ねて is N3/N2 material (check ours/level)
+OK,どんなに～うが,hb,どんなに～うが (donna ni ～ u ga),,"Expresses 'no matter how much...', 'even if...'.","どんなに + Verb-casual + うが, どんなに + い-Adjective + うが, どんなに + な-Adjective + だろうが",family=うが/うと indifference pair
+OK,ないではおかない,hb+jk,Verb ないではおかない (~ nai de wa okanai),V ない-form + ではおかない,Used to indicate that something definitely happens as a result or a consequence of a certain action.,Verb-ない form + ではおかない,family=ずにはおかない family
+OK,ないではすまない,hb+jk,Verb ないではすまない (Verb nai dewa sumanai), ないではすまない,"Express a condition that 'cannot end without doing', 'must do no matter what', or 'cannot help but do'.",Verb-negative form + ではすまない,family=ずにはすまない family
+OK,ないまでも,hb,Verb ないまでも (Verb nai made mo),,Even if not completely; at least,Verb-ない form + までも,
+OK,ないものだろうか,hb,Verb ないものだろうか (Verb nai mono darou ka),,"Expressing the desire or inquisition; 'Can't I/you/we', 'Shouldn't I/you/we'.",Verb-casual + ないものだろうか,
+OK,ないものでもない,hb,Verb ないものでもない (Verb nai mono demo nai),,Expresses the idea that 'it's not that I don't...'; 'it's not that there aren't...',Verb-negative form (ない form) + ものでもない,
+OK,ながらに,hb+jk,～ながらに (～nagara ni),Noun / V stem + ながらに(して),"Expresses the meaning 'while', 'as', or 'since'.","Noun + ながらに, な-Adjective (without 'na') + ながらに",
+REVIEW,ながらの,hb+jk,～ながらの Noun (〜nagara no Noun),Noun + ながらの + noun,This grammar point is used to indicate that two actions are happening simultaneously.,Verb-てform + ながらの + Noun,junk=distinct N1? ours N4 ～ながら base (check at write time)
+OK,ながらも,hb+jk,～ながらも (〜nagara mo),V ます-stem / i-adj / noun + ながらも,Despite doing something or 'even though'.,Verb-ながらも,
+OK,なくして,jk,,Noun + なくして(は),without / unable to X without,Noun + なくして(は) + negative / impossibility main clause.,
+OK,なくして～はない,hb,Noun なくして～はない (Noun nakushite ~ wa nai),,"Expresses the idea 'without ~, there can't be ~'; 'can't do ~ without first doing ~'.",Noun + なくして + Sentence ～はない,
+OK,なくはない,hb,～なくはない (〜naku wa nai),,"Used to express the idea that 'it's not that it's not', implying something is possible but not certain.","Verb-ないform + なくはない, い-Adjective－い ＋ くはない, な-Adjective + ではなくはない, Noun + ではなくはない",
+OK,なくもない,hb,～なくもない (〜naku mo nai),,"Express the possibility; 'not impossible', 'might as well'.","Verb-ないform + もない, い-Adjective-removeい + くもない, な-Adjective + でもない, Noun + でもない",
+OK,なしでは～ない,hb,Noun なしでは～ない (Noun nashi de wa ~nai),,"Expresses the necessity of something; 'cannot do without', 'not possible without'.",Noun + なしでは～ない,
+OK,なしに,jk,,Noun + なしに(は),without / unless,Noun + なしに(は).,
+OK,なしには～ない,hb,Noun なしには～ない (Noun nashi ni wa ~nai),,"It means 'without', 'cannot do without', 'not possible without'.",Noun + なしには + Verb-negative,
+OK,ならいざ知らず,hb+jk,Noun ならいざ知らず (~nara izashirazu),Noun / plain form + ならいざ知らず,"Expresses 'not to mention', 'let alone'.",Noun1 + ならいざ知らず + Noun2,
+OK,ならでは,hb+jk,Noun + ならでは (~nara de wa),Noun + ならでは(の),"Expresses 'only', 'characteristic of'.",Noun + ならでは,
+OK,ならまだしも,jk,,Noun / plain form + ならまだしも,"if it were at least X (that would be OK, but)",Noun + ならまだしも; plain-form clause + ならまだしも.,
+OK,なら～なりに,hb,～なら～なりに,,"This grammar point means 'if it is X, it is X in its own way', emphasizing the characteristics of X.",Noun + なら(そのN)なりに/Adjective + なら(その adj.)なりに,family=なり family
+REVIEW,なり,jk,,V + なり + noun,either X or Y / whether X or Y,Noun + なり + noun + なり; V dict-form + なり + V dict-form + なり.,family=なり family; junk=fragment of ～なり～なり / Vなり family
+OK,なりとも,hb+jk,Noun なりとも (~nari tomo),Noun + なりとも,"Indicates even a small amount or degree; 'even a little', 'at least'.",Noun + なりとも,family=なり family
+OK,なりに,jk,,Noun + なりに ,in one's own way / in the manner suited to,Noun + なりに (adverbial) / なりの + noun (attributive).,family=なり family
+OK,なりの,jk,, なりの,in one's own way / in the manner suited to,Noun + なりに (adverbial) / なりの + noun (attributive).,family=なり family
+OK,なり～なり,hb+jk,Noun なり Noun なり (A nari B nari),Noun/V + なり + noun/V + なり,"Indicates several alternatives; 'either...or', 'such as...'",Noun + なり + Noun + なり,family=なり family
+OK,にあって,jk,,Noun + にあって,in / at / during (formal literary),Noun + にあって.,
+OK,にあっては,hb,Noun にあっては (Noun ni atte ha),,Indicates a specific situation or environment in which something happens or is the case.,Noun + にあっては,
+REVIEW,にありがち,jk,,Noun + にありがち,common to / typical of (often with negative nuance),Noun + にありがち(な + noun / だ).,junk=vocabulary-ish (check level)
+OK,にあるまじき,hb,Noun にあるまじき Noun (Noun ni aru majiki Noun),,"Expresses the idea of 'unfitting', 'unbecoming' or 'inappropriate'.",Noun1 にあるまじき Noun2,
+OK,にして,hb,Noun にして (Noun ni shite),,"Expresses the idea 'even for', 'even though', or 'in spite of'.",Noun + にして,
+OK,にして初めて,hb+jk,Noun にして初めて (Noun nishite hajimete),Noun + にして初めて,Expresses 'only when/after... for the first time'.,Noun + にして初めて,
+OK,にしろ～にしろ,hb,A にしろ B にしろ (A nishiro B nishiro),,Whether it is A or B; Regardless of A or B,"Noun A + にしろ + Noun B + にしろ, Verb-casual A + にしろ + Verb-casual B + にしろ",family=にしろ/にせよ pair
+OK,にすら,hb,Noun にすら (〜ni sura),,"Expresses the concept of 'even'; 'even in', 'even as', 'even to'.",Noun + にすら,family=すら family
+OK,にせよ～にせよ,hb,A にせよ B にせよ (A ni seyo B ni seyo),,"Either A or B, Regardless of A or B.",Noun + にせよ Noun + にせよ,family=にしろ/にせよ pair
+OK,につけ～につけ,hb,A につけ B につけ （A ni tsuke B ni tsuke）,,"Used to express 'whether... or...', 'both... and...', 'in either case'.",Phrase A + につけ、Phrase B + につけ,family=につけ…につけ
+OK,になぞらえて,jk,,Noun + になぞらえて,likening to / comparing to (metaphorically),Noun + になぞらえて.,
+OK,には及ばない,hb+jk,～には及ばない (〜ni wa oyobanai),V dict / noun + には及ばない,Not necessary; Unworthy of,Verb-dictionary form + には及ばない,
+OK,にひきかえ～は,hb,Noun にひきかえ Noun は (~ni hikikae ~ wa),,"Represents 'in contrast to', 'as opposed to'.",Noun 1 + にひきかえ + Noun 2 + は,
+REVIEW,にまつわる,jk,,Noun + にまつわる,related to / concerning / surrounding,Noun + にまつわる + noun (attributive); noun + にまつわり (adverbial).,"junk=vocabulary verb, N2-ish (check level)"
+OK,にもほどがある,jk,,Noun / V plain + にもほどがある,there's a limit to / (X) goes too far,Noun + にもほどがある; plain-form clause + にもほどがある.,
+OK,にもまして,hb+jk,Noun にもまして (〜ni mo mashite),Noun + にもまして,This expresses 'Even more than; exceeding'.,Noun + にもまして,
+OK,によらず,hb,Noun によらず (～ni yorazu),,"Regardless of, irrespective of.",Noun + によらず,
+OK,に他ならない,jk,,Noun + に他ならない,is nothing but / is exactly / is none other than,Noun + に他ならない.,
+OK,に先駆けて,hb+jk,Noun に先駆けて (〜ni saki gakete),Noun + に先駆けて,"Meaning 'ahead of', 'before', or 'preceding in time'.",Noun + に先駆けて,
+OK,に則って,jk,,Noun + に則って ,"in accordance with / according to (rules, customs)",Noun + に則って / に則り.,
+OK,に則り,jk,, に則り,"in accordance with / according to (rules, customs)",Noun + に則って / に則り.,
+OK,に即した,hb+jk,Noun に即した Noun (A ni sokushita B), に即した,"Expresses the idea of 'in accordance with', 'based on'.",Noun1 + に即した + Noun2,
+OK,に即して,hb+jk,Noun に即して Verb (〜ni soku shite ~),Noun + に即して ,"The grammar point Noun に即して Verb is used to mean 'to act in accordance with', 'in line with' or 'based on'.",Noun + に即して + Verb,
+OK,に堪えない,hb+jk,～に堪えない (～ni taenai),Verb dict / noun + に堪えない,Used to express that something is unbearable or hard to stand.,"Verb-dictionary form + に堪えない, Noun + に堪えない",
+OK,に堪える,hb+jk,～に堪える (～ni taeru),Verb dict / noun + に堪える,"Signify 'cannot stand', 'can’t help but feel', 'cannot be overlooked'.","Verb-dictionary form + に堪える, Verb-nai form + に堪える, い-adjective + さ + に堪える, な-Adjective + さ + に堪える, Noun + の + に堪える",
+REVIEW,に定評がある,jk,,Noun + に定評がある,is well-known for / has a solid reputation for,Noun + に定評がある.,"junk=vocabulary collocation, not grammar"
+OK,に相違ない,jk,,Plain form + に相違ない,no doubt / certainly / I'm sure,V plain / i-adj + に相違ない; na-adj / noun + に相違ない.,
+OK,に耐える,hb,～に耐える (～ni taeru),,"To endure or withstand something; 'endure', 'withstand', 'tolerate'.",Noun + に耐える,
+OK,に至った,hb,～に至った (〜ni itatta),,"Expresses the outcome of a process or a series of events; 'reached the point', 'led to'.",Verb-てform + に至った,
+OK,に至っては,jk,,Noun + に至っては,when it comes to / as for (extreme case),Noun + に至っては.,
+REVIEW,に言わせれば,hb,Noun に言わせれば (Noun ni iwasereba),,"Expresses 'according to', 'if you ask', 'in the opinion of'.",Noun + に言わせれば,junk=ours N2 ～に言わせれば; dupe_ours=N2 ～に言わせれば
+OK,に越したことはない,hb,～に越したことはない (〜ni koshita koto wa nai),,Expresses the idea 'it is best to...' or 'nothing better than...'.,"Verb-てform + に越したことはない, い-Adjective + に越したことはない,な-Adjective + に越したことはない, Noun + に越したことはない",
+OK,に足りない,hb+jk,～足りない (～tarinai),Noun / V dict-form + に足りない,not worth / insufficient for / unworthy of,Noun / V dict-form + に足りない.,
+OK,に足る,hb+jk,～足る Noun (〜taru～),Verb dict-form / noun + に足る,worth / sufficient to / deserving of,V dict-form + に足る; noun + に足る. Attributive: 〜に足る + noun.,
+OK,に鑑みて,jk,,Noun + に鑑みて,in view of / considering,Noun + に鑑みて.,
+OK,に関わる,jk,,Noun + に関わる,involves / affects / concerns (seriously),Noun + に関わる; attributive 〜に関わる + noun.,
+OK,に限ったことではない,hb,Noun に限ったことではない (〜ni kagitta koto dewa nai),,"Indicates that something is not only limited to; 'not only', 'not just'.",Noun + に限ったことではない,
+OK,に限ったことでもない,hb,Noun に限ったことでもない (~ ni kagitta koto demo nai),,"'Not limited to'; 'not just', 'not exclusively'.",Noun + に限ったことでもない,
+REVIEW,に限る,hb,Noun に限る (~ni kagiru),,"Expresses the idea that 'nothing but', 'nothing is better than'.",Noun + に限る,junk=N3 preference (check level)
+OK,に難くない,hb+jk,～に難くない (～ni muzukunai),Noun / V dict + に難くない,Expresses the idea that something is not difficult; 'not difficult to ~',Verb-ない form (Remove ない) + に難くない,
+OK,に飽き足らず,jk,,Noun / plain form + に飽き足らず,not content with / not satisfied with (and seeking more),Noun / V plain + に飽き足らず.,
+OK,に～を重ねて,hb,Noun に Noun を重ねて (A ni B wo kasanete),,"This expression is used to describe repeated actions or states, 'one after another' or 'pile up'.",Noun に Noun を重ねて,
+OK,ぬいた,hb,Noun ぬいた Noun (A nuita B),,Expresses the idea of 'taking something out from something else'.,Noun1 + をぬいた + Noun2,
+OK,ぬいて,hb,Noun + ぬいて（~nuite),,This is a way to express 'minus' or 'except for' some specific noun.,Noun + ぬいて,
+REVIEW,ぬく,hb,～ぬく (~nuku),,Expresses the concept of doing something completely or thoroughly.,Verb-stem + ぬく,"junk=N2 やり抜く compound, check level"
+OK,のいかんだ,hb,Noun+のいかんだ (Noun no ikan da),,Depends on; up to,Noun + のいかんだ/Noun + のいかんでは,family=いかん family
+OK,のいかんでは,hb,Noun のいかんでは (Noun no ikan de wa),,It depends on the Noun,Noun + のいかんでは,family=いかん family
+OK,のいかんにかかわらず,hb,Noun のいかんにかかわらず (Noun no ikan ni kakawarazu),,"Regardless of, irrespective of.",Noun + のいかんにかかわらず,family=いかん family
+OK,のいかんによっては,hb,Noun のいかんによっては (Noun no ikan ni yotte wa),,Depending on the matter; depending on noun,Noun + のいかんによっては,family=いかん family
+OK,のいかんによらず,hb,Noun のいかんによらず (~ no ikan ni yorazu),,"Means 'regardless of', 'irrespective of', or 'no matter'",Noun + のいかんによらず,family=いかん family
+OK,のかたわら,jk,,V plain / noun + の + かたわら,while also / alongside (doing),V dict-form + かたわら; noun + の + かたわら.,
+OK,のことだから,hb,Noun のことだから (〜no koto dakara),,"Because it is about ~, considering it's ~",Noun + のことだから,
+OK,のことながら,jk,,Noun + の + こと + ながら,as usual / as expected / as one would expect,Noun + の + こと + ながら.,
+OK,のごとき,hb,Noun のごとき Noun (A no gotoki B),,Expresses 'like' or 'as if'; something/someone resembles much to something else,Noun1 + のごとき + Noun2,family=ごとき/ごとく family
+OK,のごとく,jk,,Plain form / noun + の + ごとく,just as / like / as if (literary),V plain + (が)ごとく; noun + の + ごとく. Attributive: ごとき + noun.,family=ごとき/ごとく family
+REVIEW,のない,hb,Verb の ない Noun (~ no nai ~),,Used to modify a noun with a negative verb form; 'Noun where verb does not happen'.,Verb in negative form + の + Noun,"junk=basic N4 attributive, not N1"
+OK,のは～ぐらいのものだ,hb,～のは Noun ぐらいのものだ (〜no wa 〜 gurai no mono da),,Expresses the idea that 'only/exclusively Noun' or 'nothing but Noun'.,"Verb-casual + のは Noun + ぐらいのものだ, い-Adjective + のは Noun + ぐらいのものだ,な-Adjective + のは Noun + ぐらいのものだ, Noun + のは Noun + ぐらいのものだ",
+OK,のみ,jk,,Noun / V plain + のみ,only / just (literary),Noun + のみ; V plain + のみ.,
+OK,のやら～のやら,hb,A のやら B のやら (A noyara B noyara),,Used when the speaker is confused or unsure about multiple things.,Noun 1 + のやら + Noun 2 + のやら,family=のやら family
+OK,のよしみで,jk,,Noun + のよしみで,for the sake of / by virtue of the connection,Noun + の + よしみで.,
+OK,の嫌いがある,hb,Noun の 嫌いがある (Noun no kirai ga aru),,Have a dislike for a particular Noun,Noun + の嫌いがある,
+OK,の手前,hb+jk,Noun の手前 (~no temae),V plain / noun + の + 手前,Expresses the idea of 'Before doing action; on the verge of'.,Noun + の手前,
+OK,の極み,hb+jk,Noun の極み (〜no kiwami),Noun + の極み,Used to express the extreme or utmost point of something.,Noun + の極み,
+OK,の至り,hb+jk,Noun の 至り (~no itari),Noun (emotion) + の至り,"Expresses the highest degree of something, 'the height of', 'the extreme of'.",Noun + の至り,
+OK,はいざ知らず,hb,Noun はいざ知らず (~ wa iza shirazu),,"Used to express that it's understood why 'A' would be the case but not 'B'. It's like saying 'Well, I can understand it for A, but for B...?'","Noun + はいざ知らず, Noun + だけど/しかし/とは言え",
+OK,はおろか～すら,hb,Noun は おろか～すら (Noun wa oroka ～sura),,"Expresses the meaning of 'not to mention ~, even ~'.","Noun1 はおろか, Noun2 すら/さえ",family=はおろか (すら/まで/も)
+OK,はおろか～まで,hb,Noun はおろか～まで (~wa oroka ~made),,Even; not to mention; let alone,Noun1 + はおろか + Noun2 + まで,family=はおろか (すら/まで/も)
+OK,はおろか～も,hb,Noun はおろか～も (Noun wa oroka ～ mo),,"'Not only...but also', 'not to mention', 'to say nothing of'",Noun + はおろか + Noun + も,family=はおろか (すら/まで/も)
+OK,はさておき,hb,Noun はさておき (~ wa sateoki),,"Means 'putting aside', 'aside from', 'notwithstanding'.",Noun + はさておき,
+OK,はどうであれ,hb,Noun + はどうであれ (~ wa dou de are),,"This phrase means 'regardless of' or 'no matter how…'. It is used to express the idea that 'whatever the state or condition of the noun, we should not care'.",Noun + はどうであれ,family=であれ…であれ
+OK,はばからない,jk,,V-て form + はばからない,does not hesitate to / declares openly,V-て + はばからない.,
+OK,ばきりがない,hb,Verb ば きり が ない (〜ba kiri ga nai),,"Used to indicate an absence of any limit or end, expressing 'if one starts to …, there will be no end to it'.",Verb-conditional form + ば + きりがない,
+OK,ば～ものを,hb,～ば～ものを (～ba～mono o),,"Expresses regret about a situation that did not happen; 'if only', 'it would be good if'.","Verb-casual, past + ば + Verb-casual, past + ものを, い-Adjective + ければ + い-Adjective + ものを, な-Adjective + であれば + な-Adjective + ものを, Noun + であれば + Noun + ものを",
+REVIEW,ひいては,jk,,ひいては (sentence-initial / mid-sentence),by extension / ultimately / eventually,[immediate statement]、ひいては [broader / longer-term consequence].,junk=N2 adverb (check level)
+OK,ひとたび,jk,,ひとたび + V + (ば / と / たら),once (X happens),ひとたび + V plain + ば / と / たら + main clause.,
+REVIEW,びた,hb,～びた Noun (～ bi ta ～),,Used to emphasise the objective or target of an action.,Verb-volitional + びた + Noun,"junk=unclear hanabira point, not standard N1"
+REVIEW,びる,hb,～びる (〜biru),,Express an action that one does repeatedly or habitually.,Verbs-masu-stem + びる,"junk=vocabulary suffix verb (寒びる), not grammar"
+REVIEW,ぶった,hb,～ぶった,,This structure is used to indicate something 'struck with' or 'hit by' the meaning of the noun.,"Noun + を + ぶった, Verb +て/で + ぶった","junk=vocabulary-ish, not grammar"
+REVIEW,ぶって,hb,～ぶって (〜butte),,Used to express the act of pretending or acting in a particular manner.,Verb-stem + ぶって,"junk=vocabulary-ish (偉ぶって), not grammar"
+REVIEW,ぶり,hb,～ぶり (〜buri),,Express the amount of time elapsed since doing something last.,Time expression + ぶり,"junk=N2 suffix (久しぶり/遠慮ぶり), check level"
+REVIEW,ぶる,hb,～ぶる (〜buru),,Used when someone is acting or pretending to be something they are not.,Noun + ぶる,"junk=vocabulary suffix verb (偉ぶる), not grammar"
+OK,べくして,jk,,Verb dict-form + べくして,inevitably / as one would expect / destined to,V dict-form + べくして + (usually the same verb in past). Common pattern: 〜べくして + 〜た.,family=べし family (classical)
+OK,ほかならぬ,jk,,Noun + ほかならぬ + noun,none other than / this very (special case),Noun + ほかならぬ + noun.,
+OK,ほどの,jk,,Noun / plain form + ほどの + noun,of such a degree / to the extent of (a),Noun / V plain + ほどの + noun.,
+OK,まじき,jk,,V dict-form + まじき + noun,unacceptable / unbecoming / should not,V dict-form + まじき + noun (role / position).,
+OK,までだ,hb+jk,～までだ (～made da),V dict-form + までだ ,"Expresses the limit or 'up to' something; 'it's only', 'as far as', 'up to'.","Verb-dictionary form or ない form + までだ, い-Adjective + までだ, Noun + までだ",family=まで family
+OK,までのことだ,jk,, までのことだ,(I'll) just / I'll simply X (if needed),V dict-form + までだ / までのことだ.,family=まで family
+OK,まみれ,hb,Noun まみれ (~mamire),,"Used to express a state in which something is entirely covered, smeared, or filled with something else.",Noun + まみれ,family=ずくめ/まみれ suffix pair
+OK,まんざら～でもない,jk,,まんざら + plain form + でもない,not entirely / not completely (negation hedged),まんざら + noun / adjective / V plain + でもない.,
+REVIEW,めかす,jk,,Noun + めかす,hint at / show a look of,Noun + めかす (conjugates as godan u-verb).,"junk=vocabulary verb, not grammar"
+OK,もさることながら,jk,,Noun + もさることながら,not to mention / while X is also (true),Noun + もさることながら.,
+OK,もさることながら～も,hb,Noun もさることながら Noun も (A mo saru koto nagara B mo),,"Meaning 'not only... but also'. Expresses that both Nouns are true or notable, but the second is particularly emphasized.",Noun1 + もさることながら + Noun2 + も,
+OK,もしないで,hb,Verb もしないで (~ mo shinai de),,Meaning: 'without even doing'.,Verb-dictionary form + もしないで,
+OK,もなんでもない,hb,～もなんでもない (〜mo nandemonai),,"Expression used to dismiss or negate something's importance or significance; 'it's nothing at all', 'it does not matter'.","Verb-dictionary form + もなんでもない, い-Adjective + もなんでもない,な-Adjective + なもなんでもない, Noun + もなんでもない",
+OK,ものとして,hb,～ものとして (～mono to shite),,Assuming/Under the assumption that/In the event.,"Verb-casual + ものとして, い-Adjective + ものとして, な-Adjective + なものとして, Noun + のものとして",
+OK,ものなら,jk,,Verb volitional + ものなら,if one were to X / if you dare to X,V volitional (よう / おう) + ものなら.,
+OK,ものを,jk,,Plain form + ものを,if only / you should have (regret),V plain / i-adj + ものを; na-adj + な + ものを; noun + の + ものを.,
+REVIEW,も兼ねて,hb,Noun も兼ねて (~mo kane te),,"Used to express 'as well as', 'also', 'at the same time'.",Noun + も兼ねて,junk=兼ねて is N3/N2 material (check ours/level)
+OK,も構わず,jk,,Noun / plain form + も構わず,without caring about / regardless of (formal),Noun / plain form + も構わず.,
+OK,も相まって,hb,Noun も相まって (~mo aimatte),,"Used to express that combined with something else, it caused a certain outcome",Noun + も相まって,
+OK,も～なら、～も～だ,hb,"Noun1 も Noun1 なら、Noun2 も Noun2 だ (A mo A nara, B mo B da)",,"The structure expresses 'if it is said that ~, then it can be said that ~' or '~ not only, but also ~'.",Noun1 + も + Noun1 + なら、Noun2 + も + Noun2 + だ,
+OK,やしない,hb,Verb やしない (~yashinai),,"Expresses the idea of 'not doing such things', 'no way', or strong denial.",Verb-dictionary form + やしない,
+REVIEW,よう,hb,Verb よう (~ you),,The means to do something or the way something is done.,Verb-て form + よう,junk=not a distinct N1 point (ように usage)
+OK,ようか～るまいか,hb,Verb ようか Verbる まいか (Verb you ka Verb ru mai ka),,Expresses hesitation or indecision between two actions; 'whether to' or 'should I or not'.,Verb-volitional + か + Verb-nonpast negative + か,family=まい family
+OK,ようがない,hb,Verb ようがない (〜yō ga nai),,No way to do something. Not possible.,Verb-volitional + ようがない,family=うが/うと indifference pair
+OK,ようが～るまいが,hb,Verb ようが Verb るまいが (Verb you ga Verb ru mai ga),,"Expresses the sense of 'whether...or', 'no matter whether... or not'.",Verb-volitional form + が + Verb-negative volitional form + が,family=まい family
+OK,ようと～るまいと,hb,Verb ようと Verbる まいと (Verb you to Verb ru mai to),,"This structure indicates that regardless if one does verb 1 or not (verb 2), the outcome remains the same.",Verb-volitional form + ようと + Verb-negative form + まいと,family=まい family
+REVIEW,ようにも,hb+jk,Verb ようにも (〜you ni mo),V volitional + にも + V potential negative,Used to express something that cannot be done even though one wants to.,Verb-volitional form + ようにも,junk=ours N2 ～（よ）うにも～ない
+REVIEW,ようにも～れない,hb,Verb ようにも Verb れない (〜you ni mo 〜renai),,Expresses the inability to do something even if one wants to,Verb-potential + ようにも + Verb-potential negative form,junk=ours N2 ～（よ）うにも～ない
+OK,ようもない,hb,Verb ようもない (~you mo nai),,Expresses that something is impossible to do.,Verb-potential form-(removeい)+う + もない,
+OK,をおいて,jk,,Noun + をおいて (+ negative),other than / except for (no one else but),"Noun + をおいて + negative main clause (ない, いない, etc.).",
+OK,をおいて他に～ない,hb,Noun を おいて他に Verb ない (〜wo oite hoka ni〜nai),,"This grammar point means 'apart from ~ there's nothing else', implying the Noun is the best or most suitable choice.",Noun + をおいて他に + Verb negative form,
+OK,をもって,hb+jk,Noun をもって (~wo motte),Noun + をもって,"Used to indicate means, methods, or time; 'with', 'by means of', 'at'.",Noun + をもって,
+OK,をものともせず,jk,,Noun + をものともせず(に),braving / undaunted by / in defiance of,Noun + をものともせず(に) + main clause (positive / determined action).,
+OK,をものともせずに,hb,Noun をものともせずに (Noun wo mono tomo sezu ni),,"Expresses the idea that 'despite something, action was carried out', simply translating to 'without being phased by something'.",Noun + をものともせずに,
+OK,をよそに,hb,Noun をよそに (~wo yoso ni),,Despite; Notwithstanding; Regardless of,Noun + をよそに,
+OK,を余儀なくされる,hb+jk,Noun を余儀なくされる (Noun wo yogi naku sareru),Noun + を余儀なくされる,"Expresses the idea of being forced into a certain situation, 'to be compelled', 'to be obliged'.",Noun + を + 余儀なくされる,
+REVIEW,を兼ねて,jk,,Noun + を兼ねて,serving (as both) / combined with,Noun + を兼ねて; attributive: 〜を兼ねた + noun.,junk=兼ねて is N3/N2 material (check ours/level)
+OK,を前にして,jk,,Noun + を前にして,in front of / facing / on the verge of,Noun + を前にして; attributive: 〜を前にした + noun.,
+OK,を前提として,hb,Noun を前提として (Noun wo zentei toshite),,"Use to express 'on the assumption of', 'based on'.",Noun + を前提として,
+OK,を前提にして,hb,Noun を前提にして (Noun wo zentei ni shite),,Assuming; presupposing; on the assumption of.,Noun + を前提にして,
+OK,を境にして,hb,Noun を境にして (Noun wo sakai ni shite),,Means 'as a turning point of'; 'since (time)'; 'from (time) on',Noun + を境に(して),
+OK,を尻目に,jk,,Noun + を尻目に,disregarding / paying no heed to,Noun + を尻目に.,
+OK,を引き合いに,jk,,Noun + を引き合いに (出して),citing as an example / drawing a comparison to,Noun + を引き合いに(出して).,
+REVIEW,を極める,jk,,Noun + を極める,reach the extreme of / master / be in the height of,Noun + を極める (conjugates as ichidan verb).,"junk=vocabulary verb, not grammar"
+OK,を機にして,hb,Noun を機にして (~wo ki ni shite),,"To take the opportunity to, taking the occasion to, on the occasion of.",Noun + を機にして,
+OK,を皮切りに,jk,,Noun + を皮切りに(して),starting with / beginning with,Noun + を皮切りに / を皮切りにして.,
+OK,を皮切りにして,hb,Noun を皮切りにして (Noun wo kawakiri ni shite),,"Used to express 'Starting with', 'Beginning with'",Noun + を皮切りに (して),
+OK,を目の当たりにする,jk,,Noun + を + 目の当たりにする,witness / see with one's own eyes,Noun + を + 目の当たりにする (conjugates as a suru-compound).,
+OK,を禁じ得ない,hb+jk,Noun を禁じ得ない (〜wo kinjienai),Noun (emotion) + を禁じ得ない,"'Cannot help but do', or 'inevitable'",Noun + を禁じ得ない,
+OK,を経て,hb,Noun を経て (〜wo hete),,Expresses the idea of 'through' or 'via'; going through some process or phase.,Noun + を経て,
+OK,を踏まえて,hb,Noun を踏まえて (〜wo fumaete),,Based on; taking into account; in light of,Noun + を踏まえて,
+OK,を限りに,hb+jk,Noun を限りに (Noun wo kagiri ni),Noun + を限りに,"Expresses the idea of 'as of', 'with' or 'from', indicating the end of something or a point of change.",Noun + を限りに,
+OK,を顧みず,jk,,Noun + を顧みず,without regard to / disregarding,Noun + を顧みず.,
+OK,んがため,jk,,V ない-stem + んがため(に),in order to / for the purpose of (literary),V ない-stem + んがため(に). Irregular: する → せんがため.,family=ん+classical aux family
+OK,んがために,hb,～んがために (〜n ga tame ni),,"Expresses the reason or purpose for doing something; 'for the sake of', 'in order to'.","Verb-ます stem + んがために, Noun + のんがために",family=ん+classical aux family
+OK,んとする,jk,,Verb volitional + んとする,about to / trying to / on the verge of (literary),V volitional (classical む/ん) + とする. For godan: 行かんとする. For ichidan: 食べんとする (or 食べようとする in modern form).,family=ん+classical aux family
+OK,んとばかりに,jk,,Verb volitional + ん + とばかりに,as if to say / as if about to,V volitional (classical ん) + とばかりに.,family=ん+classical aux family
+OK,んばかり,jk,,V ない-stem + んばかり(に),as if about to / looking as if,V ない-stem + んばかり(に) / んばかりだ.,family=ん+classical aux family
+OK,んばかりに,hb,～んばかりに (〜n bakari ni ～),,Expresses the idea of 'as if to say' or 'as though' something is the case.,"Verb-ます stem + んばかりに, Noun + ばかりに",family=ん+classical aux family
+OK,並み,hb,Noun 並み (~nami),,"Indicates 'like' or 'as' something or someone; 'equivalent to', 'around'.",Noun + 並み,
+OK,前提で,hb,Noun + 前提で（~zentei de),,"Expresses the condition or requirement for something to be established; 'on the assumption that', 'under the condition of'.",Noun + 前提で,
+OK,及ばずながら,jk,,及ばずながら,although my humble effort may fall short / to the best of my ability,及ばずながら + offer / action.,
+OK,差し支えない,hb,～差し支えない (〜sashi tsukaenai),,"Expresses the lack of a problem or obstacle; 'it's not a problem', 'it doesn't matter', 'there's no harm'.","Verb-てform + も差し支えない, Noun + が差し支えない",
+OK,当の,jk,,当の + noun,the very (person/thing) in question / the X in question,当の + noun.,
+OK,折に,hb+jk,～折に (〜ori ni),V plain / noun + の + 折(に),"Indicates the time when something happens; 'when', 'at the time of'.","Verb-dictionary form + 折に, Noun + の折に",
+OK,抜きで,jk,,Noun + 抜きで ,without (X) / leaving out,Noun + 抜きで / 抜きに / 抜きでは / 抜きにして.,
+OK,抜きでは,jk,, 抜きでは ,without (X) / leaving out,Noun + 抜きで / 抜きに / 抜きでは / 抜きにして.,
+OK,抜きで抜きでは抜きに,jk,,Noun + 抜きで / 抜きでは / 抜きに,without (X) / leaving out,Noun + 抜きで / 抜きに / 抜きでは / 抜きにして.,
+OK,抜きに,jk,, 抜きに,without (X) / leaving out,Noun + 抜きで / 抜きに / 抜きでは / 抜きにして.,
+OK,極まりない,hb,～極まりない (〜kiwamarinai),,"Express extreme state; 'extremely', 'utterly', 'to the utmost'.","Verb-ますstem + 極まりない, Noun + の極まりない",
+OK,極まる,hb,～極まる (〜kiwamaru),,"Expresses the idea 'to the utmost', or 'to the extreme'.","Verb-ますstem + 極まる/極まりない, い-Adjective remove い + 極まる/極まりない,な-Adjective + 極まる/極まりない, Noun + 極まる/極まりない",
+OK,限りだ,hb,～限りだ (〜kagiri da),,"Expresses an extreme state or condition; translated as 'to the utmost', 'extremely', 'as can be'.","Verb-casual, past + 限りだ, い-Adjective + 限りだ",
+OK,限りで,hb,Noun 限りで (~ kagiri de),,As long as; for the duration; while,Noun + 限りで,
+OK,～がままに,hb,Verbる がままに (〜ga mama ni),,"Expresses the idea of 'Just as...is/does'; 'while', 'as...follows'.",Verb-dictionary form + がままに,
+OK,～が早いか,hb+jk,Verbる が早いか (verb-ru ga hayai ka),V dict-form + が早いか,Express 'as soon as' or 'the moment when'.,Verb [ます stem] + が早いか,
+OK,～くらいなら,hb,Verbる くらいなら (〜ru kurai nara),,"Expresses preference to avoid something; 'rather than', 'if it comes to', 'if it's as...as.'",Verb-dictionary form + くらいなら,
+OK,～ことなしに,hb+jk,Verbる こと なし に (Verb-ru koto nashi ni),V dict-form + ことなしに,Used to express the meaning 'without doing'.,Verb-dictionary form + ことなしに,
+OK,～ことのないように,hb,Verbる ことのないように (Verb-ru koto no nai you ni),,"Expresses the desire to avoid or prevent a certain action; 'so as not to', 'to avoid'.",Verb-る + ことのないように,
+OK,～ときりがない,hb,Verbる ときりがない (verb-ru to kiri ga nai),,Used to indicate that something can go on endlessly or without limits,Verb-casual + ときりがない,
+OK,～ともなく,hb,Verbる ともなく Verb (Verb-ru tomonaku Verb),,"Used to express 'without a particular intention', 'unconsciously', 'before one knows'.",Verb-dictionary form + ともなく + Verb,
+OK,～ともなしに,hb,Verbる ともなしに Verb (Verb-ru tomonashi ni Verb),,This phrase is used to express doing something unintentionally or without conscious thought.,Verb-dictionary + ともなしに + Verb,
+REVIEW,～なり,hb,Verbる なり (Verb-ru nari),,Expresses the idea of 'as soon as; the moment'.,Verb-dictionary form + なり,family=なり family; junk=fragment of ～なり～なり / Vなり family
+OK,～にとどまらず～も,hb,Verbる にとどまらず～も (Verb-ru ni todomarazu ~ mo),,"Expresses the concept of not only doing verb but also something more; 'not limited to', 'not only... but also'.",Verb-dictionary form + にとどまらず + extra action or outcome,
+OK,～にはあたらない,hb,Verbる にはあたらない (Verb-ru ni wa ataranai),,"Used for saying 'it is not necessary to', 'there is no need to'.",Verbます-stem + にはあたらない,
+OK,～にも～れない,hb,Verbる にも Verb れない (Verbる にも Verb れない),,"Expresses the idea of 'even if I try or want to do something, I am still unable to do it'.",Verb-potential form + にも + Verb-negative form,
+OK,～べからざる,hb+jk,Verbる べからざる Noun (Verb-ru bekara zaru Noun), べからざる,"Used to express what should not be done; 'must not', 'should not'.",Verb-dictionary form + べからざる + noun,
+OK,～べからず,hb+jk,Verbる べからず (〜ru bekara zu),V dict-form + べからず ,Expresses the idea of 'must not do' or 'should not do'.,Verb-ru + べからず,family=べし family (classical)
+OK,～べく,hb,Verbる べく (Verb-ru beku),,"Expresses the meaning of 'in order to', 'for the purpose of'.",Verb-dictionary form + るべく,family=べし family (classical)
+OK,～べくもない,hb+jk,Verbる べくもない (Verb-ru beku mo nai),Verb dict-form + べくもない,Means 'it's impossible to...' or 'there's no way to...',Verb-dictionary form + べくもない,family=べし family (classical)
+REVIEW,～までもない,hb+jk,Verbる までもない (〜ru made mo nai),V dict-form + までもなく,It's not necessary to the extent of; no need to.,Verb-る + までもない,family=まで family; junk=ours N2 ～までもない (semantic); dupe_ours=N2 ～までもない
+OK,～ものとする,hb,Verbる ものとする (〜ru mono to suru),,Assuming or deciding something as...,Verb-dictionary form + ものとする,
+OK,～や否や,hb+jk,Verbる や否や (verb-ru ya ina ya), や否や,"Expresses the idea of 'as soon as', 'the moment'.",Verb-dictionary form + や否や,
+OK,～始末だ,hb,Verbる 始末だ (〜ru shimatsu da),,"Expresses the result or conclusion of an action, often with a negative or unfortunate outcome.",Verb-dictionary form + 始末だ,
+OK,～嫌いがある,hb,Verbる 嫌いがある (～ru kirai ga aru),,Tendency to do a negative action; have a habit of.,Verb-dictionary form + 嫌いがある,

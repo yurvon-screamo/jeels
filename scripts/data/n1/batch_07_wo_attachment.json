@@ -1,0 +1,618 @@
+{
+  "rules": [
+    {
+      "level": "N1",
+      "keywords": [["をおいて"]],
+      "content": {
+        "English": {
+          "title": "～をおいて",
+          "short_description": "Apart from A, there is no other",
+          "explanation": "Noun + をおいて（他に～ない） crowns the sole candidate: 「この役をおいて他にいない」 — no one but this one for the role. Exclusive superlative logic.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + をおいて + 他に～ない | 彼をおいて他にいない |",
+          "examples": "```\n新社長は、副社長をおいて他にふさわしい人はいない。\nFor the next president, no one fits but the vice-president.\n```\n\n```\nこの問題を解けるのは、君をおいていない。\nApart from you, no one can solve this problem.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Using it without the negative conclusion", "correct": "The frame demands 他に～ない — exclusivity closes the sentence", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Formal recommendations and award citations."}]
+          },
+          "pro_tip": "It is the aside-no-one-else pattern of endorsements: the plaque language."
+        },
+        "Russian": {
+          "title": "～をおいて",
+          "short_description": "Кроме A — других нет",
+          "explanation": "Сущ. + をおいて（他に～ない） венчает единственного кандидата: 「この役をおいて他にいない» — на эту роль кроме него никого. Логика исключительного суперлатива.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + をおいて + 他に～ない | 彼をおいて他にいない |",
+          "examples": "```\n新社長は、副社長をおいて他にふさわしい人はいない。\nНа пост нового президента, кроме вице-президента, нет подходящей фигуры.\n```\n\n```\nこの問題を解けるのは、君をおいていない。\nКроме тебя эту задачу не решит никто.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Без отрицательного заключения", "correct": "Рамке нужно 他に～ない — исключительность закрывает предложение", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Формальные рекомендации и наградные грамоты."}]
+          },
+          "pro_tip": "Это формула «никого, кроме…» из рекомендательных писем: язык таблички на доске."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["をものともせず"]],
+      "content": {
+        "English": {
+          "title": "～をものともせず",
+          "short_description": "Without flinching at A (bravery)",
+          "explanation": "Noun + をものともせず： facing danger and shrugging it off — 「猛吹雪をものともせず登頂した」 — summited despite the blizzard. Heroic disregard of an obstacle.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (hardship) | N + をものともせず（に） | 危険をものともせず |",
+          "examples": "```\n彼女は周囲の反対をものともせず、起業した。\nIgnoring all opposition around her, she started her company.\n```\n\n```\n救急隊は濃霧をものともせず出動した。\nThe paramedics rolled out, unbothered by the dense fog.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Trivial annoyances (渋滞をものともせず)", "correct": "Reserve it for genuinely formidable obstacles", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "News-hero register; をよそに is its cooler, more indifferent cousin."}]
+          },
+          "pro_tip": "If the sentence could carry a medal, をものともせず fits."
+        },
+        "Russian": {
+          "title": "～をものともせず",
+          "short_description": "Не дрогнув перед A (отвага)",
+          "explanation": "Сущ. + をものともせず: встретить опасность и пожать плечами — 「猛吹雪をものともせず登頂した» — взошёл, невзирая на буран. Героическое пренебрежение препятствием.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (беда) | N + をものともせず（に） | 危険をものともせず |",
+          "examples": "```\n彼女は周囲の反対をものともせず、起業した。\nНе считаясь с протестами окружения, она открыла своё дело.\n```\n\n```\n救急隊は濃霧をものともせず出動した。\nСкорая выехала, не смутившись густого тумана.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Мелочи (渋滞をものともせず)", "correct": "Только для по-настоящему грозных препятствий", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Регистр героических новостей; をよそに — более холодный, равнодушный родич."}]
+          },
+          "pro_tip": "Если предложение можно наградить медалью — をものともせず подходит."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["をよそに"]],
+      "content": {
+        "English": {
+          "title": "～をよそに",
+          "short_description": "Blithely ignoring A (criticism)",
+          "explanation": "Noun + をよそに: doing your thing regardless of what others feel — 「親の心配をよそに、彼は旅立った」 — off he went, his parents' worries aside. Colder than をものともせず: indifference, not bravery.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (others' concern) | N + をよそに | 批判をよそに |",
+          "examples": "```\n住民の反対をよそに、工場の建設が進められた。\nThe factory went ahead, residents' objections notwithstanding.\n```\n\n```\n忠告をよそに、彼は単独で山に入った。\nAdvice aside, he went into the mountains alone.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "をよそに with one's own hardships", "correct": "The ignored thing belongs to other people — worries, criticism, expectations", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Critical nuance: the pattern quietly blames the subject."}]
+          },
+          "pro_tip": "The subject turns their back — よそ literally means elsewhere."
+        },
+        "Russian": {
+          "title": "～をよそに",
+          "short_description": "Пренебрегая A (равнодушие)",
+          "explanation": "Сущ. + をよそに: делать своё, невзирая на чувства других — 「親の心配をよそに、彼は旅立った» — и уехал, оставив родительские тревоги за спиной. Холоднее をものともせず: безразличие, а не отвага.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (чужая тревога) | N + をよそに | 批判をよそに |",
+          "examples": "```\n住民の反対をよそに、工場の建設が進められた。\nВопреки протестам жителей строительство завода шло своим чередом.\n```\n\n```\n忠告をよそに、彼は単独で山に入った。\nМимо ушей пропустив советы, он один ушёл в горы.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "をよそに со своими трудностями", "correct": "Игнорируется нечто чужое — тревоги, критика, ожидания", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Критический оттенок: конструкция тихо винит подлежащее."}]
+          },
+          "pro_tip": "Субъект поворачивается спиной — よそ буквально значит «чужая сторона»."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を尻目に"]],
+      "content": {
+        "English": {
+          "title": "～を尻目に",
+          "short_description": "With a sideways glance at A (disdain)",
+          "explanation": "Noun + を尻目に: passing by with a scornful glance — 「警告を尻目に走り去った」 — raced off, glancing past the warning. More visual and disdainful than をよそに.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (ignored) | N + を尻目に | 合図を尻目に |",
+          "examples": "```\n彼は制止を尻目に、堂々と舞台に上がった。\nBrushing past the attempts to stop him, he strode onto the stage.\n```\n\n```\n渋滞を尻目に、バイクはすり抜けていった。\nSlipping past the jam with a sideways glance, the motorcycle weaved through.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Abstract unseen things (理論を尻目に)", "correct": "The image is visual passing-by — physical or strongly figurative scenes", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Narrative journalism; the glance carries the attitude."}]
+          },
+          "pro_tip": "尻目 is a sidelong look: the pattern needs something you can physically pass."
+        },
+        "Russian": {
+          "title": "～を尻目に",
+          "short_description": "Боком глянув на A (пренебрежение)",
+          "explanation": "Сущ. + を尻目に: пройти мимо с презрительным взглядом — 「警告を尻目に走り去った» — умчался, бросив на предупреждение косой взгляд. Нагляднее и надменнее をよそに.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (игнорируемое) | N + を尻目に | 合図を尻目に |",
+          "examples": "```\n彼は制止を尻目に、堂々と舞台に上がった。\nНе слушая попыток остановить, он величаво вышел на сцену.\n```\n\n```\n渋滞を尻目に、バイクはすり抜けていった。Мотоцикл, скользя мимо пробки, прорвался вперёд.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Абстрактные незримые вещи (理論を尻目に)", "correct": "Образ зримого прохода мимо — физические или ярко фигуральные сцены", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Нарративная журналистика; взгляд несёт отношение."}]
+          },
+          "pro_tip": "尻目 — косой взгляд: конструкции нужно нечто, мимо чего можно физически пройти."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を顧みず"]],
+      "content": {
+        "English": {
+          "title": "～を顧みず",
+          "short_description": "Not looking back at A (self-sacrifice)",
+          "explanation": "Noun + を顧みず: disregarding one's own safety or interests — 「自らの命を顧みず救助した」 — rescued without regard for his own life. The ignored thing is the subject's own.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (one's own stake) | N + を顧みず | 自身の安全を顧みず |",
+          "examples": "```\n彼は自分の健康を顧みず、働き続けた。\nHe kept working, giving no thought to his own health.\n```\n\n```\n利益を顧みず、町のために尽くした市長だった。\nA mayor who served the town without regard for profit.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を顧みず with others' opinions", "correct": "It ignores one's own stakes (life, health, gain); others' views take をよそに", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Eulogy and news-hero register."}]
+          },
+          "pro_tip": "顧みる means look back — the hero simply does not turn around."
+        },
+        "Russian": {
+          "title": "～を顧みず",
+          "short_description": "Не оглядываясь на A (самопожертвование)",
+          "explanation": "Сущ. + を顧みず: пренебрегая собственной безопасностью или выгодой — 「自らの命を顧みず救助した» — спасал, не щадя своей жизни. Игнорируется нечто своё.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (собственный интерес) | N + を顧みず | 自身の安全を顧みず |",
+          "examples": "```\n彼は自分の健康を顧みず、働き続けた。\nОн продолжал работать, не думая о своём здоровье.\n```\n\n```\n利益を顧みず、町のために尽くした市長だった。\nЭто был мэр, служивший городу без оглядки на выгоду.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を顧みず с чужим мнением", "correct": "Игнорируется своё (жизнь, здоровье, выгода); чужие взгляды — をよそに", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Регистр некрологов и героических новостей."}]
+          },
+          "pro_tip": "顧みる значит «оглянуться» — герой просто не оборачивается."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を前にして"]],
+      "content": {
+        "English": {
+          "title": "～を前にして",
+          "short_description": "Facing A (moment of confrontation)",
+          "explanation": "Noun + を前にして: standing before something momentous — 「手術を前にして、決心を新たにした」 — facing the surgery, resolved anew. Softer, more scenic than に直面して.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (event) | N + を前にして | 試合を前にして |",
+          "examples": "```\n大晦日を前にして、街は慌ただしくなった。\nWith New Year's Eve at hand, the town grew busy.\n```\n\n```\n引退試合を前にして、彼は静かに語り始めた。\nFacing his retirement match, he began to speak quietly.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を前にして for sudden accidents", "correct": "The event is anticipated — an awaited confrontation or milestone", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "を目前にして is a fully interchangeable variant."}]
+          },
+          "pro_tip": "The noun is on the horizon and the subject feels its gravity — that is を前にして."
+        },
+        "Russian": {
+          "title": "～を前にして",
+          "short_description": "Лицом к лицу с A (момент противостояния)",
+          "explanation": "Сущ. + を前にして: стоять перед чем-то важным — 「手術を前にして、決心を新たにした» — лицом к операции, он обновил решимость. Мягче и живописнее に直面して.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (событие) | N + を前にして | 試合を前にして |",
+          "examples": "```\n大晦日を前にして、街は慌ただしくなった。\nНакануне Нового года город пришёл в движение.\n```\n\n```\n引退試合を前にして、彼は静かに語り始めた。\nПеред прощальным матчем он тихо заговорил.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Внезапные происшествия", "correct": "Событие ожидаемо — предстоящая веха или противостояние", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "を目前にして — полностью взаимозаменяемый вариант."}]
+          },
+          "pro_tip": "Существительное на горизонте, и субъект ощущает его тяжесть, — это を前にして."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を限りに"]],
+      "content": {
+        "English": {
+          "title": "～を限りに",
+          "short_description": "As of A — it ends (temporal boundary)",
+          "explanation": "Time noun + を限りに closes an era: 「今日を限りにタバコをやめる」 — as of today, quitting smoking. The を限りに fence marks the final point.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Time noun | N + を限りに | 今月を限りに |\n| Set | 声を限りに (with all one's voice) | 声を限りに叫ぶ |",
+          "examples": "```\n今月を限りに、この番組は終了します。\nAs of this month, this program ends.\n```\n\n```\n彼は今日を限りに会社を去った。\nAs of today, he left the company.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Ongoing durations", "correct": "It fixes a cut-off — the thing stops there", "note": null},
+              {"wrong": "Mixing up with を限りとして", "correct": "限りとして is the same boundary idea in legal texts", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "声を限りに is the shout variant: at the very limit of one's voice."}]
+          },
+          "pro_tip": "Announcements love it: the schedule changes and を限りに draws the line."
+        },
+        "Russian": {
+          "title": "～を限りに",
+          "short_description": "С A это заканчивается (временная граница)",
+          "explanation": "Временное сущ. + を限りに закрывает эпоху: 「今日を限りにタバコをやめる» — с сегодняшнего дня бросаю курить. Забор を限りに отмечает последнюю точку.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Временное сущ. | N + を限りに | 今月を限りに |\n| Устойчивое | 声を限りに (изо всех сил голоса) | 声を限りに叫ぶ |",
+          "examples": "```\n今月を限りに、この番組は終了します。\nС этого месяца программа завершается.\n```\n\n```\n彼は今日を限りに会社を去った。\nС сегодняшнего дня он ушёл из компании.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Длящиеся периоды", "correct": "Фиксируется отсечка — дальше этого не продолжается", "note": null},
+              {"wrong": "Путать с を限りとして", "correct": "限りとして — та же граница в юридических текстах", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "声を限りに — вариант про крик: на пределе голоса."}]
+          },
+          "pro_tip": "Объявления его обожают: расписание меняется, и を限りに проводит черту."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["をもって"]],
+      "content": {
+        "English": {
+          "title": "～をもって",
+          "short_description": "With/by means of A (formal instrument)",
+          "explanation": "Noun + をもって: formal means or limit — 「身をもって体験した」 (with one's own body) and 「本日をもって閉店いたします」 (as of today). Instrument and boundary in one polite package.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Means | N + をもって + する | 熱意をもって |\n| Deadline | Time + をもって + 終わる | 三時をもって |",
+          "examples": "```\n誠意をもって対応いたします。\nWe will respond with sincerity.\n```\n\n```\n本日の営業は午後六時をもって終了いたします。\nToday's business closes at six o'clock.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Casual tools (ペンをもって書く)", "correct": "It dignifies abstract means — sincerity, experience, life — or marks deadlines", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Business letters and ceremonies; で is the everyday tool marker."}]
+          },
+          "pro_tip": "Two jobs, one form: with-what and as-of-when — context picks the meaning."
+        },
+        "Russian": {
+          "title": "～をもって",
+          "short_description": "Посредством / с момента A (формально)",
+          "explanation": "Сущ. + をもって: формальное средство или граница — 「身をもって体験した» (собственным телом) и 「本日をもって閉店いたします» (с сего дня). Инструмент и граница в одной вежливой упаковке.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Средство | N + をもって + する | 熱意をもって |\n| Срок | Время + をもって + 終わる | 三時をもって |",
+          "examples": "```\n誠意をもって対応いたします。\nОтвечаем с искренней готовностью.\n```\n\n```\n本日の営業は午後六時をもって終了いたします。\nСегодняшняя работа завершается в шесть часов.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Бытовые инструменты (ペンをもって書く)", "correct": "Обороняет абстрактные средства — искренность, опыт, жизнь — или отмечает сроки", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Деловые письма и церемонии; бытовой маркер инструмента — で."}]
+          },
+          "pro_tip": "Две работы одной формой: «чем» и «с какого момента» — контекст выбирает смысл."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を踏まえて"]],
+      "content": {
+        "English": {
+          "title": "～を踏まえて",
+          "short_description": "Based on / taking A into account",
+          "explanation": "Noun + を踏まえて builds on prior material: 「過去の反省を踏まえて新計画を立てた」 — new plan built on lessons of the past. Standard opener of policy prose.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (basis) | N + を踏まえて / を踏まえた + N | 事実を踏まえて |",
+          "examples": "```\n市場のデータを踏まえて、価格を見直した。\nWe revised prices based on market data.\n```\n\n```\n前回の失敗を踏まえた対策が功を奏した。\nCountermeasures built on last time's failure paid off.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "未来のことを踏まえて (future as basis)", "correct": "The basis is past or present material — experience, data, rules", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Meetings and documents; the closest spoken cousin is ～に基づいて."}]
+          },
+          "pro_tip": "踏まえる = to tread on: your argument stands on the noun."
+        },
+        "Russian": {
+          "title": "～を踏まえて",
+          "short_description": "Опираясь на A / учитывая A",
+          "explanation": "Сущ. + を踏まえて строит на предыдущем материале: 「過去の反省を踏まえて新計画を立てた» — новый план построен на уроках прошлого. Стандартное открытие деловой прозы.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (основа) | N + を踏まえて / を踏まえた + N | 事実を踏まえて |",
+          "examples": "```\n市場のデータを踏まえて、価格を見直した。\nЦены пересмотрели на основе рыночных данных.\n```\n\n```\n前回の失敗を踏まえた対策が功を奏した。\nМеры, построенные на прошлой ошибке, сработали.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Будущее как основа", "correct": "Основа — прошлый или настоящий материал: опыт, данные, правила", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Совещания и документы; ближайший разговорный родич — ～に基づいて."}]
+          },
+          "pro_tip": "踏まえる = «ступить»: ваша аргументация стоит на этом существительном."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を経て"]],
+      "content": {
+        "English": {
+          "title": "～を経て",
+          "short_description": "Through / via A (stages)",
+          "explanation": "Noun + を経て routes through stages: 「数年の修業を経て独立した」 — after years of training, went independent. Formal path marker for processes and careers.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Stage noun | N + を経て | 苦難を経て |\n| Route | 場所 + を経て | 大阪を経て東京へ |",
+          "examples": "```\n地元議員を経て、市長に当選した。\nElected mayor after serving as a local legislator.\n```\n\n```\n試練を経て、チームは結束を深めた。\nThrough trials, the team grew tighter.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Single instants", "correct": "を経て implies a meaningful stage, not a moment", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Biographies and formal histories; ～た後で is the plain version."}]
+          },
+          "pro_tip": "CV language: every を経て is one more line on the resume of fate."
+        },
+        "Russian": {
+          "title": "～を経て",
+          "short_description": "Через / после A (этапы)",
+          "explanation": "Сущ. + を経て прокладывает путь через этапы: 「数年の修業を経て独立した» — спустя годы ученичества открыл своё дело. Формальный маркер пути процессов и карьер.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. этапа | N + を経て | 苦難を経て |\n| Маршрут | Место + を経て | 大阪を経て東京へ |",
+          "examples": "```\n地元議員を経て、市長に当選した。\nПройдя путь местного депутата, избран мэром.\n```\n\n```\n試練を経て、チームは結束を深めた。\nЧерез испытания команда стала сплочённее.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Одиночные мгновения", "correct": "を経て подразумевает значимый этап, а не миг", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Биографии и официальные истории; простой вариант — ～た後で."}]
+          },
+          "pro_tip": "Язык резюме: каждое を経て — ещё одна строка в трудовой судьбы."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を境に"]],
+      "content": {
+        "English": {
+          "title": "～を境に",
+          "short_description": "Taking A as the turning point",
+          "explanation": "Event noun + を境に（して）: before/after watershed — 「結婚を境に、生活が変わった」 — marriage was the watershed. Unlike を機に, the change is sharp, not seized.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Event noun | N + を境に（して） | 引っ越しを境に |",
+          "examples": "```\nあの事件を境に、彼は人が変わったようだ。\nFrom that incident on, he seemed a different person.\n```\n\n```\n十八歳を境に、扱いが変わる。\nAt eighteen, the treatment changes.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Gradual trends", "correct": "を境に marks a visible before/after line", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "をきっかけに (N3) is any trigger; を境に is the border itself."}]
+          },
+          "pro_tip": "Draw the timeline: を境に is the vertical line in the middle."
+        },
+        "Russian": {
+          "title": "～を境に",
+          "short_description": "С A как с рубежа",
+          "explanation": "Сущ. события + を境に（して）: водораздел «до/после» — 「結婚を境に、生活が変わった» — брак стал рубежом. В отличие от を機に, перемена резкая, а не «взятая за повод».",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. события | N + を境に（して） | 引っ越しを境に |",
+          "examples": "```\nあの事件を境に、彼は人が変わったようだ。\nС того случая он словно стал другим человеком.\n```\n\n```\n十八歳を境に、扱いが変わる。\nС восемнадцати лет отношение меняется.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Плавные тренды", "correct": "を境に помечает видимую линию «до/после»", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "をきっかけに (N3) — любой триггер; を境に — сама граница."}]
+          },
+          "pro_tip": "Нарисуйте таймлайн: を境に — вертикальная черта посередине."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を機に"]],
+      "content": {
+        "English": {
+          "title": "～を機に",
+          "short_description": "Taking A as the opportunity",
+          "explanation": "Event noun + を機に（して）: using an occasion to start something — 「退職を機に、田舎へ移った」 — retirement as the springboard to the countryside. The subject seizes the moment.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Event noun | N + を機に（して） | 入学を機に |",
+          "examples": "```\n開店三十周年を機に、店内を改装した。\nMarking thirty years, the shop was renovated.\n```\n\n```\n誕生日を機に、日記をつけ始めた。\nUsing her birthday as the occasion, she started a diary.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を機に for unavoidable consequences", "correct": "The subject chooses to act on the occasion — agency is required", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "を契機に is the formal sibling beloved of press releases."}]
+          },
+          "pro_tip": "機 = opportunity: the event is a door and the subject walks through it."
+        },
+        "Russian": {
+          "title": "～を機に",
+          "short_description": "Взяв A за повод",
+          "explanation": "Сущ. события + を機に（して）: использовать случай, чтобы начать — 「退職を機に、田舎へ移った» — уход на пенсию как трамплин в деревню. Субъект ловит момент.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. события | N + を機に（して） | 入学を機に |",
+          "examples": "```\n開店三十周年を機に、店内を改装した。\nК тридцатилетию лавки зал отремонтировали.\n```\n\n```\n誕生日を機に、日記をつけ始めた。\nС днём рождения она завела дневник.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を機に для неотвратимых следствий", "correct": "Субъект сознательно действует по поводу — нужна субъектность", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "を契機に — формальный братец, любимец пресс-релизов."}]
+          },
+          "pro_tip": "機 = повод: событие — дверь, и субъект в неё входит."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を皮切りに"]],
+      "content": {
+        "English": {
+          "title": "～を皮切りに",
+          "short_description": "Starting with A (series begins)",
+          "explanation": "Noun + を皮切りに（して）: the first of a series — 「東京公演を皮切りに、全国ツアーが始まった」 — the Tokyo show kicked off the national tour. 皮切り is the first slice of the peel.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| First event | N + を皮切りに（して） | 名古屋を皮切りに |",
+          "examples": "```\n優勝を皮切りに、彼は記録を次々と更新した。\nStarting with the title, he broke records one after another.\n```\n\n```\n大阪での公演を皮切りに、全国を回る予定だ。\nFrom the Osaka show onward, a national tour is planned.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Single isolated events", "correct": "The pattern promises more to come — a series", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Press-release favorite: 公演／キャンペーン／店舗展開 + を皮切りに."}]
+          },
+          "pro_tip": "No series, no 皮切り — the peel implies the whole fruit follows."
+        },
+        "Russian": {
+          "title": "～を皮切りに",
+          "short_description": "Начиная с A (открывается серия)",
+          "explanation": "Сущ. + を皮切りに（して）: первое из серии — 「東京公演を皮切りに、全国ツアーが始まった» — токийское шоу открыло всенациональный тур. 皮切り — первый срез кожуры.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Первое событие | N + を皮切りに（して） | 名古屋を皮切りに |",
+          "examples": "```\n優勝を皮切りに、彼は記録を次々と更新した。\nНачав с титула, он рекорд за рекордом побивал.\n```\n\n```\n大阪での公演を皮切りに、全国を回る予定だ。\nСо спектакля в Осаке начнётся гастроль по всей стране.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Одиночные события", "correct": "Конструкция обещает продолжение — серию", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Любимец пресс-релизов: 公演／キャンペーン／店舗展開 + を皮切りに."}]
+          },
+          "pro_tip": "Нет серии — нет и 皮切り: кожура подразумевает весь плод следом."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を引き合いに"]],
+      "content": {
+        "English": {
+          "title": "～を引き合いに（出して）",
+          "short_description": "Citing A (as evidence/example)",
+          "explanation": "Noun + を引き合いに出して drags something out as a comparison: 「昔の失敗を引き合いに出されて、反論できなかった」 — they brought up my old failure; I could not answer. Quotation with an edge.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (cited) | N + を引き合いに出す / に出して | 実例を引き合いに |",
+          "examples": "```\n具体例を引き合いに出して、彼は主張を裏付けた。\nHe backed his claim by citing concrete examples.\n```\n\n```\nいつの失敗を引き合いに出すんだ。\nMust you dig up that old failure?\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Neutral quotation of opinions", "correct": "The citation is weaponized — comparison, often to corner someone", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Debate and quarrel register; として挙げる is neutral citing."}]
+          },
+          "pro_tip": "The noun gets pulled out like an exhibit in court — 引き合い is the pulling."
+        },
+        "Russian": {
+          "title": "～を引き合いに（出して）",
+          "short_description": "Поминая A (как довод/пример)",
+          "explanation": "Сущ. + を引き合いに出して вытаскивает что-то как сравнение: 「昔の失敗を引き合いに出されて、反論できなかった» — при мне помянули мой старый провал, и я не нашёлся. Цитирование с лезвием.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (цитируемое) | N + を引き合いに出す / に出して | 実例を引き合いに |",
+          "examples": "```\n具体例を引き合いに出して、彼は主張を裏付けた。\nОн подкрепил свою позицию конкретными примерами.\n```\n\n```\nいつの失敗を引き合いに出すんだ。\nОбязательно ворошить ту давнюю ошибку?\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Нейтральное цитирование мнений", "correct": "Цитата — оружие: сравнение, часто чтобы прижать собеседника", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Регистр дебатов и ссор; нейтральное цитирование — として挙げる."}]
+          },
+          "pro_tip": "Существительное достают, как вещдок в суде: 引き合い — это само вытаскивание."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を目の当たりに"]],
+      "content": {
+        "English": {
+          "title": "～を目の当たりにする",
+          "short_description": "Witness A with one's own eyes",
+          "explanation": "Noun + を目の当たりにする: witnessing directly — 「事故の瞬間を目の当たりにした」 — saw the accident unfold. Stronger than 見る: the scene imprints.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (scene) | N + を目の当たりにする | 変化を目の当たりに |",
+          "examples": "```\n町の再開発を目の当たりにして、驚いた。\nWitnessing the town's redevelopment, I was astonished.\n```\n\n```\n彼の成長ぶりを目の当たりにして、先生は喜んだ。\nSeeing his growth firsthand, the teacher rejoiced.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を目の当たりにする for hearsay", "correct": "Firsthand visual witnessing only", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Narrative and journalism; the passive を目の当たりにされる also occurs."}]
+          },
+          "pro_tip": "目の当たり = right before your eyes — no mediation, no hearsay."
+        },
+        "Russian": {
+          "title": "～を目の当たりにする",
+          "short_description": "Увидеть A своими глазами",
+          "explanation": "Сущ. + を目の当たりにする: наблюдать напрямую — 「事故の瞬間を目の当たりにした» — видел, как разворачивалась авария. Сильнее 見る: сцена впечатывается.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (сцена) | N + を目の当たりにする | 変化を目の当たりに |",
+          "examples": "```\n町の再開発を目の当たりにして、驚いた。\nУвидев воочию, как перестраивают город, я поразился.\n```\n\n```\n彼の成長ぶりを目の当たりにして、先生は喜んだ。\nВоочию наблюдая его рост, учитель радовался.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Слухи и пересказы", "correct": "Только непосредственное визуальное свидетельство", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Нарратив и журналистика; встречается и пассив を目の当たりにされる."}]
+          },
+          "pro_tip": "目の当たり = «прямо перед глазами» — без посредников и без пересказа."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を禁じ得ない"]],
+      "content": {
+        "English": {
+          "title": "～を禁じ得ない",
+          "short_description": "Cannot help but feel A (formal)",
+          "explanation": "Emotion noun + を禁じ得ない: 「驚きを禁じ得ない」 — astonishment cannot be suppressed. Formal 禁じ得ない = cannot forbid; the feeling escapes restraint.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Emotion noun | N + を禁じ得ない | 感慨を禁じ得ない |",
+          "examples": "```\n故郷の荒廃ぶりに、悲しみを禁じ得なかった。\nAt the sight of my hometown's decay, I could not hold back sorrow.\n```\n\n```\n無実の判決に、涙を禁じ得なかった。\nAt the innocent verdict, tears could not be held back.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Actions (食べるを禁じ得ない)", "correct": "Only nouns of emotion: 驚き、涙、同情、感慨", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Written commentary; speeches close on 感慨を禁じ得ません."}]
+          },
+          "pro_tip": "The fixed quartet — 驚き・涙・同情・感慨 — covers nearly every real use."
+        },
+        "Russian": {
+          "title": "～を禁じ得ない",
+          "short_description": "Не могу сдержать A (формально)",
+          "explanation": "Сущ. эмоции + を禁じ得ない: 「驚きを禁じ得ない» — изумление невозможно сдержать. Формальное 禁じ得ない = «не может быть запрещено»; чувство вырывается из-под контроля.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. эмоции | N + を禁じ得ない | 感慨を禁じ得ない |",
+          "examples": "```\n故郷の荒廃ぶりに、悲しみを禁じ得なかった。\nПри виде запустения родного города печаль было не сдержать.\n```\n\n```\n無実の判決に、涙を禁じ得なかった。\nОправдательный вердикт — и слёзы сдержать не удалось.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Действия (食べるを禁じ得ない)", "correct": "Только существительные чувств: 驚き、涙、同情、感慨", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Письменный комментарий; речи завершают фразой 感慨を禁じ得ません."}]
+          },
+          "pro_tip": "Зафиксированная четвёрка — 驚き・涙・同情・感慨 — закрывает почти всё реальное употребление."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["を余儀なくされる"]],
+      "content": {
+        "English": {
+          "title": "～を余儀なくされる",
+          "short_description": "Be forced into A (unwillingly)",
+          "explanation": "Noun (action) + を余儀なくされる: circumstances compel — 「台風で出発の延期を余儀なくされた」 — the typhoon forced postponement. Passive; the news-report passive of compulsion.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Action noun | N + を余儀なくされる | 閉鎖を余儀なくされる |\n| Causative twin | N + を余儀なくさせる | (forces someone) |",
+          "examples": "```\n不況で、工場の閉鎖を余儀なくされた。\nThe recession forced the plant's closure.\n```\n\n```\n大雨で、イベントの中止を余儀なくされました。\nThe heavy rain has forced cancellation of the event.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "を余儀なくされる for chosen actions", "correct": "The subject had no real choice — external force decides", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Official announcements; ざるを得なかった is the personal-scale cousin."}]
+          },
+          "pro_tip": "余儀ない = no other way: the announcement pattern for unavoidable bad news."
+        },
+        "Russian": {
+          "title": "～を余儀なくされる",
+          "short_description": "Вынужденно подвергнуться A",
+          "explanation": "Сущ. действия + を余儀なくされる: обстоятельства принуждают — 「台風で出発の延期を余儀なくされた» — тайфун вынудил отложить выезд. Пассив; газетный пассив принуждения.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. действия | N + を余儀なくされる | 閉鎖を余儀なくされる |\n| Каузативный двойник | N + を余儀なくさせる | (заставляет кого-то) |",
+          "examples": "```\n不況で、工場の閉鎖を余儀なくされた。\nИз-за спада завод был вынужденно закрыт.\n```\n\n```\n大雨で、イベントの中止を余儀なくされました。\nИз-за ливня мероприятие вынужденно отменено.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "О выбранных действиях", "correct": "У субъекта не было реального выбора — решает внешняя сила", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Официальные объявления; персональный родич — ざるを得なかった."}]
+          },
+          "pro_tip": "余儀ない = «иного не дано»: формула объявлений о неизбежных плохих новостях."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["構わず"]],
+      "content": {
+        "English": {
+          "title": "～も構わず",
+          "short_description": "Without minding A at all",
+          "explanation": "Noun + も／を + 構わず: barreling past concerns — 「人目も構わず泣き出した」 — burst into tears regardless of onlookers. Everyday cousin of をものともせず.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + も構わず | N + も構わず | 人目も構わず |\n| Clause variant | ～のかまわず | 濡れるのかまわず |",
+          "examples": "```\n彼は服が汚れるのも構わず、泥の中のボールを追った。\nNot minding his clothes, he chased the ball through the mud.\n```\n\n```\n母は身なりも構わず、子どもに駆け寄った。\nThe mother, unmindful of her appearance, ran to her child.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": " をものともせず interchange in formal writing", "correct": "構わず is neutral/spoken; ものともせず is heroic", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "人目も構わず (regardless of stares) is the signature phrase."}]
+          },
+          "pro_tip": "Wherever stares, dirt or noise would stop a polite person, 構わず lets the story continue."
+        },
+        "Russian": {
+          "title": "～も構わず",
+          "short_description": "Не считаясь вовсе с A",
+          "explanation": "Сущ. + も／を + 構わず: пролетая мимо условностей — 「人目も構わず泣き出した» — расплакался, не стесняясь посторонних. Бытовой родич をものともせず.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + も構わず | N + も構わず | 人目も構わず |\n| С частью | ～のかまわず | 濡れるのかまわず |",
+          "examples": "```\n彼は服が汚れるのも構わず、泥の中のボールを追った。\nНе думая об одежде, он гнал мяч по грязи.\n```\n\n```\n母は身なりも構わず、子どもに駆け寄った。\nМать, не думая о виде, бросилась к ребёнку.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Менять местами с をものともせず в формальных текстах", "correct": "構わず нейтрально/разговорно; ものともせず героично", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "人目も構わず («не стесняясь взглядов») — фирменная фраза."}]
+          },
+          "pro_tip": "Там, где взгляды, грязь или шум остановили бы воспитанного, 構わず позволяет истории продолжаться."
+        }
+      }
+    }
+  ]
+}
