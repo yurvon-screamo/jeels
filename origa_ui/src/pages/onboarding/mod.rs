@@ -282,7 +282,7 @@ pub fn Onboarding() -> impl IntoView {
     );
 
     let on_start_import =
-        create_on_start_import_callback(repository, state, current_user, is_importing, disposed);
+        create_on_start_import_callback(repository, state, is_importing, disposed);
 
     let can_proceed = Memo::new(move |_| state.get().can_proceed());
 

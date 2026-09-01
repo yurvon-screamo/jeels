@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { Given, When, Then } from "../fixtures";
 import { LoginPage } from "../../pages";
+import { wipeClientAuthState } from "../../helpers/auth";
 
 Given('пользователь вышел из аккаунта', async ({ page }) => {
     // The BDD fixture logs the user in and stores the TrailBase auth token in
@@ -9,27 +10,7 @@ Given('пользователь вышел из аккаунта', async ({ page
     // next load, keeping the user authenticated. Wipe ALL client-side state
     // (cookies, localStorage, sessionStorage, IndexedDB, cache storage) so
     // the app falls back to the public /login route.
-    await page.context().clearCookies();
-    await page.goto("/");
-    await page.evaluate(async () => {
-        try {
-            window.localStorage.clear();
-            window.sessionStorage.clear();
-            if (window.indexedDB && indexedDB.databases) {
-                const dbs = await indexedDB.databases();
-                for (const db of dbs) {
-                    if (db.name) indexedDB.deleteDatabase(db.name);
-                }
-              }
-            if (window.caches) {
-                const keys = await caches.keys();
-                for (const k of keys) await caches.delete(k);
-              }
-        } catch {
-            // ignore — some browsers block storage access in cross-origin iframes
-        }
-    });
-    await page.reload();
+    await wipeClientAuthState(page);
 });
 
 When('открывается страница входа', async ({ page }) => {

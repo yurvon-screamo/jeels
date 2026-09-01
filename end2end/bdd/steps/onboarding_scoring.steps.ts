@@ -1,8 +1,15 @@
 import { expect } from "@playwright/test";
-import { Given, When, Then } from "../fixtures";
+import { After, Given, When, Then } from "../fixtures";
 import { OnboardingPage } from "../../pages";
 import { completeOnboardingToScoring } from "../../helpers/onboarding";
 import { skipOnboarding } from "../../helpers/navigation";
+import {
+    generateRelayEmail,
+    setupTestUser,
+    uiLogin,
+    wipeClientAuthState,
+    type TestUserContext,
+} from "../../helpers/auth";
 
 // Module-scoped snapshot of the question text captured by the "Не знаю" step
 // so the "card not shown again" assertion can verify it differs from the
@@ -10,9 +17,51 @@ import { skipOnboarding } from "../../helpers/navigation";
 // runs scenarios sequentially within a file.
 let lastDontKnowQuestion: string | null = null;
 
+// Relay-Apple identities created by the relay-onboarding Given step. The BDD
+// `page` fixture logs in the DEFAULT testUser before any step runs, so the
+// relay scenario switches identity mid-test; these accounts belong to no
+// fixture and are cleaned up in the After hook (the e2e- prefix also makes
+// the orphan sweeper catch them, this is just prompt hygiene).
+const relayTestUsers: TestUserContext[] = [];
+
+After(async () => {
+    while (relayTestUsers.length > 0) {
+        const user = relayTestUsers.pop();
+        if (!user) break;
+        await user.cleanup().catch(() => {});
+    }
+});
+
 Given('новый пользователь дошёл до шага оценивания карточек', async ({ page }) => {
     const reached = await completeOnboardingToScoring(page);
     expect(reached).toBeTruthy();
+});
+
+Given(
+    'новый пользователь с релей-почтой Apple дошёл до шага оценивания карточек, введя ник {string}',
+    async ({ page }, displayName: string) => {
+        // Reproduces the Apple "Hide My Email" onboarding: the relay address
+        // seeds an EMPTY display name, so the name shown across the UI after
+        // onboarding is exactly what the user typed on the intro step.
+        await wipeClientAuthState(page);
+        const relayUser = await setupTestUser({ email: generateRelayEmail() });
+        relayTestUsers.push(relayUser);
+        await uiLogin(page, relayUser.email, relayUser.password);
+        const reached = await completeOnboardingToScoring(page, { displayName });
+        expect(reached).toBeTruthy();
+    },
+);
+
+Then('в приветствии на главной странице отображается ник {string}', async ({ page }, name: string) => {
+    await expect(page.getByTestId("home-welcome")).toContainText(name);
+});
+
+Then('поле ника в профиле заполнено {string}', async ({ page }, name: string) => {
+    await expect(page.getByTestId("profile-username-input")).toHaveValue(name);
+});
+
+Then('хлебные крошки профиля отображают {string}', async ({ page }, name: string) => {
+    await expect(page.getByTestId("profile-breadcrumbs-current")).toContainText(name);
 });
 
 Then('отображается вопрос карточки', async ({ page }) => {

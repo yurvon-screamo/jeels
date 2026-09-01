@@ -24,6 +24,19 @@ const AUTOSAVE_STATUS_DISPLAY_MS: u32 = 1500;
 pub fn ProfileContent() -> impl IntoView {
     let auth_store = use_context::<AuthStore>().expect("AuthStore not provided");
 
+    // This page renders the AuthStore snapshot, which was taken at login.
+    // Onboarding (intro name save, set imports) and other pages write the
+    // profile through the repository in the meantime — refresh on mount so
+    // the first visit after those writes shows the persisted record instead
+    // of the stale login-time one (empty display name → email fallbacks).
+    // A refresh failure is non-fatal: the page falls back to the snapshot.
+    let auth_store_for_refresh = auth_store.clone();
+    spawn_local(async move {
+        if let Err(e) = auth_store_for_refresh.refresh_user().await {
+            tracing::warn!("Profile: failed to refresh user on mount: {:?}", e);
+        }
+    });
+
     // Initial value of the editable input: empty for Apple relay profiles
     // that have no meaningful name yet (placeholder question shows instead).
     let stored_username = Memo::new(move |_| {
@@ -231,7 +244,7 @@ pub fn ProfileContent() -> impl IntoView {
             <div class="profile-breadcrumbs">
                 <span class="profile-breadcrumbs-label">{t!(i18n, home.profile)}</span>
                 <span class="profile-breadcrumbs-separator">"/"</span>
-                <span class="profile-breadcrumbs-current">{move || user_name.get()}</span>
+                <span class="profile-breadcrumbs-current" data-testid="profile-breadcrumbs-current">{move || user_name.get()}</span>
             </div>
 
             <div class="profile-grid">
