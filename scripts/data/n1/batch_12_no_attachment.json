@@ -1,0 +1,446 @@
+{
+  "rules": [
+    {
+      "level": "N1",
+      "keywords": [["に至っては"]],
+      "content": {
+        "English": {
+          "title": "～に至っては",
+          "short_description": "As for A — the extreme case",
+          "explanation": "Noun/verb + に至っては caps an escalation: 「部下、さらには上司に至っては無断で休んだ」 — subordinates, and the boss, of all people, skipped without leave. Also に至るまで = all the way to.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + に至っては | 子供に至っては |\n| Extent | N + に至るまで | 頂上に至るまで |",
+          "examples": "```\n彼の家は台所から風呂場に至るまで、本で埋まっている。\nHis house is buried in books from kitchen to bath.\n```\n\n```\n値上げは各社に及び、庶民の食卓に至っては打撃だ。\nThe hikes hit every firm — the family dinner table takes the worst of it.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Random topics", "correct": "に至っては crowns an escalation or extreme; に至るまで spans a range", "note": null}
+            ],
+            "notes": [{"tag": "other", "text": "至った (reached the point of) is the past-tense cousin: 争議に至った — it escalated to a dispute."}]
+          },
+          "pro_tip": "Two tools, one kanji: 至っては = the worst case; 至るまで = all the way."
+        },
+        "Russian": {
+          "title": "～に至っては",
+          "short_description": "Что до A — крайний случай",
+          "explanation": "Сущ./глагол + に至っては венчает эскалацию: 「部下、さらには上司に至っては無断で休んだ» — подчинённые, а дошли до того, что и начальник прогулял без спроса. Также に至るまで = вплоть до.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + に至っては | 子供に至っては |\n| Охват | N + に至るまで | 頂上に至るまで |",
+          "examples": "```\n彼の家は台所から風呂場に至るまで、本で埋まっている。\nЕго дом завален книгами от кухни до ванной.\n```\n\n```\n値上げは各社に及び、庶民の食卓に至っては打撃だ。\nПодорожания ударили по всем фирмам — а по семейному столу сильнее всего.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Случайные темы", "correct": "に至っては венчает эскалацию/крайность; に至るまで охватывает диапазон", "note": null}
+            ],
+            "notes": [{"tag": "other", "text": "Прошедший родич 至った («дошло до»): 争議に至った — дошло до спора."}]
+          },
+          "pro_tip": "Два инструмента, один иероглиф: 至っては = худший случай; 至るまで = «вплоть до»."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["にすら"]],
+      "content": {
+        "English": {
+          "title": "～にすら",
+          "short_description": "Even to A (directional even)",
+          "explanation": "Noun + にすら puts even on a direction or recipient: 「専門家にすら分からない」 — unclear even to experts. に/へ + すら instead of the plain が/を すら.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + に/へ | N + にすら / へすら | 親にすら |\n| Emphatic formal | N + にすらも | 夢にすらも |",
+          "examples": "```\nその技術は、開発者にすら完全には理解されていない。\nThat technology is not fully understood even by its developers.\n```\n\n```\n大都会へすら出たことのない祖母だった。\nA grandmother who had never been even to the big city.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "ですら as universal replacement", "correct": "Use にすら with direction/recipient nouns; ですら suits な-stems and predicates", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Written; slightly more pointed than にも."}]
+          },
+          "pro_tip": "Keep the particle honest: direction takes に, object takes を — each has its own すら."
+        },
+        "Russian": {
+          "title": "～にすら",
+          "short_description": "Даже для/к A (направленное «даже»)",
+          "explanation": "Сущ. + にすら ставит «даже» на направление или адресата: 「専門家にすら分からない» — непонятно даже экспертам. に/へ + すら вместо простого が/を + すら.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + に/へ | N + にすら / へすら | 親にすら |\n| Усиленно-формально | N + にすらも | 夢にすらも |",
+          "examples": "```\nその技術は、開発者にすら完全には理解されていない。\nЭту технологию до конца не понимают даже её создатели.\n```\n\n```\n大都会へすら出たことのない祖母だった。\nБабушка, которая не выбиралась даже в большой город.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "ですら как замена всему", "correct": "にすら — с направлениями/адресатами; ですら — с な-основами и предикатами", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Письменно; чуть острее にも."}]
+          },
+          "pro_tip": "Держите частицу честной: направление — に, объект — を; у каждой своё すら."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["かたわら"]],
+      "content": {
+        "English": {
+          "title": "～（の）かたわら",
+          "short_description": "While also doing A (two roles)",
+          "explanation": "Verb/Noun + かたわら balances two parallel activities: 「会社で働くかたわら、夜は小説を書く」 — working at a firm while writing novels at night. Long-term dual tracks, unlike ながら's momentary overlap.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Dictionary form | Vる + かたわら | 働くかたわら |\n| Noun + の | N + のかたわら | 本業のかたわら |",
+          "examples": "```\n彼は大学で教えるかたわら、翻訳もこなしている。\nHe teaches at a university while also handling translation work.\n```\n\n```\n母は家事のかたわら、地域の清掃活動に励んでいる。\nBesides housework, Mother is active in neighborhood cleanups.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Short simultaneous actions (食べるかたわら)", "correct": "かたわら spans long-term parallel roles — for a single moment use ながら", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Biographies and introductions; ～と同時に／～一方で are neutral cousins."}]
+          },
+          "pro_tip": "Think two jobs on one résumé — かたわら signs both lines."
+        },
+        "Russian": {
+          "title": "～（の）かたわら",
+          "short_description": "Параллельно с A (две роли)",
+          "explanation": "Глагол/сущ. + かたわら балансирует две параллельные деятельности: 「会社で働くかたわら、夜は小説を書く» — работает в фирме и по ночам пишет романы. Долгосрочные двойные треки, в отличие от мгновенного ながら.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Словарная форма | Vる + かたわら | 働くかたわら |\n| Сущ. + の | N + のかたわら | 本業のかたわら |",
+          "examples": "```\n彼は大学で教えるかたわら、翻訳もこなしている。\nОн преподаёт в университете и попутно тянет переводы.\n```\n\n```\n母は家事のかたわら、地域の清掃活動に励んでいる。\nПомимо домашних дел, мама активно участвует в уборке района.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Короткие одновременные действия (食べるかたわら)", "correct": "かたわら — о долгих параллельных ролях; на один миг берите ながら", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Биографии и представления; нейтральные родичи — ～と同時に／～一方で."}]
+          },
+          "pro_tip": "Две работы в одном резюме — かたわら подписывает обе строки."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["のことだから"]],
+      "content": {
+        "English": {
+          "title": "～のことだから",
+          "short_description": "Knowing A, surely B (person-based guess)",
+          "explanation": "Person + のことだから predicts from character: 「いくらなんでも、彼のことだから裏切らないよ」 — come on, knowing him, he won't betray us. Trust or dread, grounded in track record.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Person noun | Person + のことだから + guess | あの人のことだから |",
+          "examples": "```\n姉のことだから、もう準備は万端だろう。\nKnowing my sister, everything is already in order.\n```\n\n```\n彼のことだから、また遅刻に決まっている。\nKnowing him, he is bound to be late again.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Objects or events as subjects", "correct": "The noun must be a person (or personified) with known habits", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Everyday and warm; works both for faith and for resignation."}]
+          },
+          "pro_tip": "The pattern reads the person's file aloud and forecasts from it."
+        },
+        "Russian": {
+          "title": "～のことだから",
+          "short_description": "Зная A, наверняка B (прогноз по человеку)",
+          "explanation": "Человек + のことだから предсказывает по характеру: 「いくらなんでも、彼のことだから裏切らないよ» — да ладно, зная его, он не предаст. Доверие или опасение, основанные на послужном списке.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. человека | Человек + のことだから + прогноз | あの人のことだから |",
+          "examples": "```\n姉のことだから、もう準備は万端だろう。\nЗная сестру — у неё уже всё готово.\n```\n\n```\n彼のことだから、また遅刻に決まっている。\nЗная его — снова опоздает, это уж точно.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Предметы и события в роли субъекта", "correct": "Существительное — человек с известными привычками", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Бытово и тепло; годится и для веры, и для смирения."}]
+          },
+          "pro_tip": "Конструкция читает вслух досье человека и делает по нему прогноз."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["のことながら"]],
+      "content": {
+        "English": {
+          "title": "～のことながら",
+          "short_description": "A of course — but B as well (empathy)",
+          "explanation": "Noun + のことながら credits one party then widens: 「本人のことながら、家族も心配だろう」 — the person, yes — but the family must worry too. Soft two-sided concern.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + のことながら + other side | 選手のことながら |",
+          "examples": "```\n勝った選手のことながら、支えたコーチの努力も大きい。\nThe winning athlete, certainly — and the coach's effort behind it, just as much.\n```\n\n```\n患者のことながら、付き添いの家族の負担も重い。\nThe patient, of course — but the family attending them carries a heavy load too.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Contrast or blame", "correct": "のことながら adds a second deserving party — no opposition, just breadth", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Considerate written style; news commentary loves it."}]
+          },
+          "pro_tip": "It shines a second spotlight without dimming the first."
+        },
+        "Russian": {
+          "title": "～のことながら",
+          "short_description": "A, конечно, — но и B (двойное внимание)",
+          "explanation": "Сущ. + のことながら отмечает одну сторону и расширяет рамку: 「本人のことながら、家族も心配だろう» — сам человек, да; но и семье, наверное, тревожно. Мягкая двусторонняя забота.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + のことながら + вторая сторона | 選手のことながら |",
+          "examples": "```\n勝った選手のことながら、支えたコーチの努力も大きい。\nПобедивший спортсмен — да; но и труд тренера за его спиной не меньше.\n```\n\n```\n患者のことながら、付き添いの家族の負担も重い。\nПациент — само собой; но и родным при нём приходится тяжело.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Контраст или обвинение", "correct": "のことながら добавляет вторую достойную сторону — без противопоставления", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Заботливый письменный стиль; обожаем новостными комментариями."}]
+          },
+          "pro_tip": "Второй прожектор, не приглушая первый."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["のよしみ"]],
+      "content": {
+        "English": {
+          "title": "～のよしみで",
+          "short_description": "On the strength of our A (old bond)",
+          "explanation": "Noun (bond) + のよしみで cashes in a relationship: 「昔なじみのよしみで、安くしておくよ」 — old-friends rate, on me. Warm, slightly old-fashioned favor-seeking.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Bond noun | N + のよしみで | ご縁のよしみで |\n| Favor clause | ～のよしみだから | 同郷のよしみだから |",
+          "examples": "```\n同じ高校の出のよしみで、無理を聞いてもらった。\nFellow-alumnus goodwill got me the special favor.\n```\n\n```\nお三方のよしみを結んでいただき、ありがたい。\nDeeply grateful that you honored us with this bond.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Formal contracts", "correct": "よしみ trades on warmth, not obligation — keep it personal", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Friendly-formal letters and shop talk; a handshake in grammar form."}]
+          },
+          "pro_tip": "The noun is an old bridge; よしみで walks across it asking a favor."
+        },
+        "Russian": {
+          "title": "～のよしみで",
+          "short_description": "В память о нашей связи A (старое знакомство)",
+          "explanation": "Сущ. (связь) + のよしみで обналичивает отношения: 「昔なじみのよしみで、安くしておくよ» — по старой дружбе, со скидкой. Тёплая, чуть старомодная просьба об одолжении.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. связи | N + のよしみで | ご縁のよしみで |\n| Обоснование | ～のよしみだから | 同郷のよしみだから |",
+          "examples": "```\n同じ高校の出のよしみで、無理を聞いてもらった。\nПо-землячески, по-выпускницки выкрутил для меня невозможное.\n```\n\n```\nお三方のよしみを結んでいただき、ありがたい。\nБезмерно признателен за честь этого союза.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Формальные договоры", "correct": "よしみ торгует теплом, не обязанностью — держите личный тон", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Дружеско-официальные письма и лавочный трёп; рукопожатие в грамматической форме."}]
+          },
+          "pro_tip": "Существительное — старый мост; よしみで идёт по нему с просьбой."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["の嫌いがある"]],
+      "content": {
+        "English": {
+          "title": "～（の）嫌いがある",
+          "short_description": "Tends to A (habitual flaw)",
+          "explanation": "Verb/Noun + 嫌いがある points at a chronic tendency: 「彼は物事を深刻に考える嫌いがある」 — he has a habit of overthinking. Polite diagnosis of a flaw.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Dictionary form | Vる + 嫌いがある | 遠慮する嫌いがある |\n| Noun + の | N + の嫌いがある | 独りよがりの嫌いがある |",
+          "examples": "```\n私は疲れると、人に当たる嫌いがある。\nWhen tired, I tend to snap at people.\n```\n\n```\nこの料理は味が濃い目の嫌いがある。\nThis cuisine tends toward the salty side.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Positive tendencies", "correct": "嫌いがある flags a flaw; strengths take ～ところがある", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Written evaluation — essays, reviews, self-reflection."}]
+          },
+          "pro_tip": "It is the doctor's tone: a gentle cough before naming the vice."
+        },
+        "Russian": {
+          "title": "～（の）嫌いがある",
+          "short_description": "Имеет привычку A (хронический изъян)",
+          "explanation": "Глагол/сущ. + 嫌いがある указывает на хроническую склонность: 「彼は物事を深刻に考える嫌いがある» — у него привычка всё усложнять. Вежливая диагностика недостатка.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Словарная форма | Vる + 嫌いがある | 遠慮する嫌いがある |\n| Сущ. + の | N + の嫌いがある | 独りよがりの嫌いがある |",
+          "examples": "```\n私は疲れると、人に当たる嫌いがある。\nКогда устаю — имею привычку огрызаться.\n```\n\n```\nこの料理は味が濃い目の嫌いがある。\nУ этой кухни есть грех пересаливать.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Положительные склонности", "correct": "嫌いがある помечает изъян; достоинства — ～ところがある", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Письменная оценка — эссе, рецензии, самонаблюдение."}]
+          },
+          "pro_tip": "Тон врача: мягкое покашливание перед называнием порока."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["の手前"]],
+      "content": {
+        "English": {
+          "title": "～の手前",
+          "short_description": "What will A think — restrained by presence",
+          "explanation": "Noun + の手前 self-censors for an audience: 「子供の手前、喧嘩はできなかった」 — with the kids watching, no fighting. Also 自分の手前 = to save face.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Person noun | N + の手前 | 周囲の手前 |\n| Reflexive | 自分が言った手前 | 言った手前 |",
+          "examples": "```\n皆の手前、断るわけにはいかなかった。\nWith everyone watching, I could hardly refuse.\n```\n\n```\n昔は無理と言った手前、今更引き受けられない。\nHaving said it was impossible, I cannot take it back now.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Genuine moral restraint", "correct": "の手前 is about appearances — face, not ethics", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Everyday narrative; the social stage, not the conscience, does the policing."}]
+          },
+          "pro_tip": "Imagine the eyes of the noun — the pattern behaves because they are open."
+        },
+        "Russian": {
+          "title": "～の手前",
+          "short_description": "При A неловко — сдержан присутствием",
+          "explanation": "Сущ. + の手前 самоцензурируется перед аудиторией: 「子供の手前、喧嘩はできなかった» — при детях ссориться было нельзя. Также 自分の手前 = ради лица.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. человека | N + の手前 | 周囲の手前 |\n| Возвратное | 自分が言った手前 | 言った手前 |",
+          "examples": "```\n皆の手前、断るわけにはいかなかった。\nПри всех отказываться было неловко.\n```\n\n```\n昔は無理と言った手前、今更引き受けられない。\nСказал тогда «невозможно» — теперь не отвертишься.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Подлинная моральная сдержанность", "correct": "の手前 — про приличия: лицо, а не совесть", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Бытовой нарратив; полицию несёт социальная сцена, не совесть."}]
+          },
+          "pro_tip": "Представьте глаза этого существительного — конструкция ведёт себя прилично, пока они открыты."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["のみ"]],
+      "content": {
+        "English": {
+          "title": "～のみ",
+          "short_description": "Only A (formal written)",
+          "explanation": "Noun/verb + のみ is the formal written だけ: 「会員のみ入場可」 — members only. Often のみだ／のみで終わる／～のみならず (not only).",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / plain form | N + のみ | 発表のみ |\n| Not only | ～のみならず + も | 会長のみならず |\n| Set | 今あるもののみ / ただ～のみ | それのみ |",
+          "examples": "```\n本日は、関係者のみの会議を行います。\nToday's meeting is for related parties only.\n```\n\n```\n問題は国内のみならず、海外にも広がっている。\nThe problem spreads not only at home but abroad too.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Casual speech", "correct": "のみ is written/announced style; だけ in conversation", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Signs, regulations, reports; のみならず is the elevated だけでなく."}]
+          },
+          "pro_tip": "If a sign could carry it, のみ fits; if a chat could, switch to だけ."
+        },
+        "Russian": {
+          "title": "～のみ",
+          "short_description": "Только A (книжный стиль)",
+          "explanation": "Сущ./глагол + のみ — формальное письменное だけ: 「会員のみ入場可» — вход только для членов. Частые рамки: のみだ／のみで終わる／～のみならず («не только»).",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / простая форма | N + のみ | 発表のみ |\n| Не только | ～のみならず + も | 会長のみならず |\n| Устойчивые | ただ～のみ | それのみ |",
+          "examples": "```\n本日は、関係者のみの会議を行います。\nСегодня — совещание только для причастных.\n```\n\n```\n問題は国内のみならず、海外にも広がっている。\nПроблема расползается не только внутри страны, но и за рубеж.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Разговорная речь", "correct": "のみ — письменный/объявительный стиль; в беседе — だけ", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Таблички, регламенты, отчёты; のみならず — возвышенное だけでなく."}]
+          },
+          "pro_tip": "Если это уместно на табличке — のみ подходит; если в чате — берите だけ."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["のいかんによっては"]],
+      "content": {
+        "English": {
+          "title": "～のいかんによっては",
+          "short_description": "Depending on how A goes — might",
+          "explanation": "Noun + のいかんによっては opens a conditional branch: 「対応のいかんによっては、訴訟もあり得る」 — depending on the response, litigation is possible. Formal what-if; では = by the standard of.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun + の | N + のいかんによっては | 結果のいかんによっては |\n| By standard | N + のいかんでは | 判断のいかんでは |",
+          "examples": "```\n今後の成績のいかんによっては、代表から外れる。\nDepending on results ahead, he may drop off the squad.\n```\n\n```\n調査のいかんでは、裁判所の判断も変わるだろう。\nBy what the inquiry shows, even the court's ruling may shift.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Certain outcomes", "correct": "The branch stays hypothetical — によっては opens a possibility, not a verdict", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Bureaucratic prose; sibling of のいかんだ (decisive) — this one hedges."}]
+          },
+          "pro_tip": "It is the fork in a formal road: the sentence rides one branch, eyes on the other."
+        },
+        "Russian": {
+          "title": "～のいかんによっては",
+          "short_description": "В зависимости от того, как пойдёт A, — может",
+          "explanation": "Сущ. + のいかんによっては открывает условную ветку: 「対応のいかんによっては、訴訟もあり得る» — в зависимости от реакции возможен и суд. Формальное «если что»; では = по критерию.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. + の | N + のいかんによっては | 結果のいかんによっては |\n| По критерию | N + のいかんでは | 判断のいかんでは |",
+          "examples": "```\n今後の成績のいかんによっては、代表から外れる。\nСмотря по будущим результатам, может и вылететь из сборной.\n```\n\n```\n調査のいかんでは、裁判所の判断も変わるだろう。\nПо итогам проверки может измениться и решение суда.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Гарантированные исходы", "correct": "Ветка остаётся гипотетической — によっては открывает возможность, не вердикт", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Бюрократическая проза; родич のいかんだ решает — эта форма осторожничает."}]
+          },
+          "pro_tip": "Развилка на формальной дороге: предложение едет по одной ветке, глядя на другую."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["に～を重ねて"]],
+      "content": {
+        "English": {
+          "title": "～に～を重ねて",
+          "short_description": "Piling A on top of A (repeated effort)",
+          "explanation": "Same noun twice with 重ねて: 「努力に努力を重ねて、頂点に立った」 — effort piled on effort, then the summit. Repetition as achievement.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| N + に + same N + を重ねて | 練習に練習を重ねて | 練習に練習を重ねて |",
+          "examples": "```\n失敗に失敗を重ねて、ようやく完成した。\nFailure upon failure — and at last it was finished.\n```\n\n```\n工夫に工夫を重ねた結果が、この製品だ。\nRefinement upon refinement produced this product.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Different nouns", "correct": "The pattern repeats the same noun — echo is the point", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Inspirational register — speeches and features."}]
+          },
+          "pro_tip": "One word, many layers: the doubling does the dramatizing."
+        },
+        "Russian": {
+          "title": "～に～を重ねて",
+          "short_description": "Складывая A на A (повторённое усилие)",
+          "explanation": "Одно существительное дважды с 重ねて: 「努力に努力を重ねて、頂点に立った» — усилие на усилие — и вот вершина. Повторение как достижение.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| N + に + то же N + を重ねて | 練習に練習を重ねて | 練習に練習を重ねて |",
+          "examples": "```\n失敗に失敗を重ねて、ようやく完成した。\nПровал за провалом — и наконец готово.\n```\n\n```\n工夫に工夫を重ねた結果が、この製品だ。\nИтог доводки поверх доводки — вот этот продукт.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Разные существительные", "correct": "Повторяется одно и то же слово — эхо и есть суть", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Вдохновляющий регистр — речи и репортажи."}]
+          },
+          "pro_tip": "Одно слово, много слоёв: драматизирует само удвоение."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["折に"]],
+      "content": {
+        "English": {
+          "title": "～（の）折に",
+          "short_description": "On the occasion of A (letters)",
+          "explanation": "Noun/verb + 折に = a formal 「時」: 「お忙しい折に恐縮です」 — at such a busy time, my apologies. Letter Japanese for moments that matter; 折（おり） = a folding point in time.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Verb (plain) | Vる/Vた + 折に | お会いした折に |\n| Noun + の | N + の折に | 帰京の折に |",
+          "examples": "```\nお越しいただいた折に、直接ご説明いたします。\nWhen you come by, I will explain in person.\n```\n\n```\nご挨拶の折には、ぜひゆっくりお話ししましょう。\nWhen we meet to greet, let us talk at leisure.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Casual appointments", "correct": "折に elevates the moment; daily planning takes 時に", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Business letters and speeches; ～折にも is a common gentle follow-up."}]
+          },
+          "pro_tip": "The 折 folds time politely — use it where a letter would bow."
+        },
+        "Russian": {
+          "title": "～（の）折に",
+          "short_description": "По случаю A (письменный стиль)",
+          "explanation": "Глагол/сущ. + 折に = формальное 「時»: 「お忙しい折に恐縮です» — в такую занятую минуту, простите. Эпистолярный японский для значимых моментов; 折（おり） = сгиб времени.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Глагол (простая ф.) | Vる/Vた + 折に | お会いした折に |\n| Сущ. + の | N + の折に | 帰京の折に |",
+          "examples": "```\nお越しいただいた折に、直接ご説明いたします。\nКогда соблаговолите зайти — объясню лично.\n```\n\n```\nご挨拶の折には、ぜひゆっくりお話ししましょう。\nПри встрече непременно побеседуем не спеша.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Бытовые договорённости", "correct": "折に возвышает момент; для планов — 時に", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Деловые письма и речи; ～折にも — частое мягкое продолжение."}]
+          },
+          "pro_tip": "折 вежливо сгибает время — ставьте там, где письмо кланялось бы."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["当の"]],
+      "content": {
+        "English": {
+          "title": "当の～",
+          "short_description": "The very A in question",
+          "explanation": "当の + noun points at the subject under discussion: 「当の本人は、何も知らなかった」 — the very person concerned knew nothing. Slightly dry, slightly ironic emphasis.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Before noun | 当の + N | 当の被告人 |",
+          "examples": "```\n騒ぎになっている当の店は、今日も平常営業だ。\nThe very shop at the center of the fuss: business as usual today.\n```\n\n```\n当の本人が忘れているのだから、周囲が騒ぐこともない。\nThe person himself has forgotten — no reason for the rest of us to fuss.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Emphasizing just any noun", "correct": "当の flags the previously-discussed protagonist — anaphoric emphasis", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Written narration; often lands with an ironic thud."}]
+          },
+          "pro_tip": "It is the the-very of journalism: the star of the story, caught off-guard."
+        },
+        "Russian": {
+          "title": "当の～",
+          "short_description": "Тот самый A, о котором речь",
+          "explanation": "当の + существительное указывает на обсуждаемое лицо: 「当の本人は、何も知らなかった» — сам герой ситуации ничего не знал. Чуть суховато-ироничное усиление.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Перед сущ. | 当の + N | 当の被告人 |",
+          "examples": "```\n騒ぎになっている当の店は、今日も平常営業だ。\nТа самая лавка, вокруг которой сыр-бор: сегодня работает как ни в чём не бывало.\n```\n\n```\n当の本人が忘れているのだから、周囲が騒ぐこともない。\nСам герой всё забыл — чего шуметь остальным.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Усиливать любое существительное", "correct": "当の помечает ранее обсуждаемого протагониста — анафорическое усиление", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Письменный нарратив; часто приземляется с ироничным стуком."}]
+          },
+          "pro_tip": "Это «тот самый» из журналистики: герой истории, застигнутый врасплох."
+        }
+      }
+    }
+  ]
+}

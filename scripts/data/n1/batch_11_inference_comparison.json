@@ -1,0 +1,446 @@
+{
+  "rules": [
+    {
+      "level": "N1",
+      "keywords": [["かと思いきや", "と思いきや"]],
+      "content": {
+        "English": {
+          "title": "～（か）と思いきや",
+          "short_description": "Just when you think A — surprise, B",
+          "explanation": "Plain form + かと思いきや sets up an expectation and flips it: 「止まるかと思いきや、電車は過ぎ去った」 — you'd think it stops, but the train roared past. The grammar of the plot twist.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Plain form | clause + かと思いきや | 晴れるかと思いきや |",
+          "examples": "```\n彼は謝るかと思いきや、逆に怒り出した。\nJust when you expected an apology, he flared up instead.\n```\n\n```\n安いかと思いきや、実は高級品だった。\nLooks cheap — turns out it was a luxury item.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Fulfilled expectations after it", "correct": "The second clause must contradict the first — no twist, no 思いきや", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Narration and essays; ところが／のに are the plain cousins."}]
+          },
+          "pro_tip": "If the sentence could start with you'd think…, but — 思いきや fits."
+        },
+        "Russian": {
+          "title": "～（か）と思いきや",
+          "short_description": "Подумаешь, что A — а вдруг B",
+          "explanation": "Простая форма + かと思いきや задаёт ожидание и переворачивает его: 「止まるかと思いきや、電車は過ぎ去った» — кажется, сейчас остановится, а поезд пронёсся мимо. Грамматика сюжетного поворота.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простая форма | часть + かと思いきや | 晴れるかと思いきや |",
+          "examples": "```\n彼は謝るかと思いきや、逆に怒り出した。\nЖдёшь извинений — а он вдруг взъелся.\n```\n\n```\n安いかと思いきや、実は高級品だった。\nСмотрится дёшево — а оказался предмет роскоши.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Ожидание сбывается", "correct": "Вторая часть обязана противоречить первой — без поворота нет 思いきや", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Нарратив и эссе; простые родичи — ところが／のに."}]
+          },
+          "pro_tip": "Если фразу можно начать с «казалось бы…, а» — 思いきや подходит."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ときたら"]],
+      "content": {
+        "English": {
+          "title": "～ときたら",
+          "short_description": "Speaking of A (chronic complaint)",
+          "explanation": "Noun + ときたら drags a recurring offender onstage: 「うちの猫ときたら、夜中に走り回る」 — that cat of ours, racing around at night. Affectionate or exasperated topic-marking.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + ときたら + complaint | 最近の若い者ときたら |",
+          "examples": "```\n弟ときたら、約束を忘れて寝てしまった。\nMy brother, of course, forgot the promise and fell asleep.\n```\n\n```\nこのプリンターときたら、紙詰まりばかりする。\nThis printer jams at every turn.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Neutral topic introduction", "correct": "ときたら grumbles — the noun is a repeat offender", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Spoken; the cousin ったら tags the same noun mid-sentence."}]
+          },
+          "pro_tip": "It is the は of the eternally sighing speaker."
+        },
+        "Russian": {
+          "title": "～ときたら",
+          "short_description": "Ну этот наш A (хроническая жалоба)",
+          "explanation": "Сущ. + ときたら вытаскивает на сцену рецидивиста: 「うちの猫ときたら、夜中に走り回る» — этот наш кот, носится по ночам. Тема с нежностью или досадой.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + ときたら + жалоба | 最近の若い者ときたら |",
+          "examples": "```\n弟ときたら、約束を忘れて寝てしまった。\nБратец, разумеется, забыл уговор и уснул.\n```\n\n```\nこのプリンターときたら、紙詰まりばかりする。\nЭтот принтер только и делает, что зажёвывает бумагу.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Нейтральное представление темы", "correct": "ときたら ворчит — существительное-рецидивист", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Разговорный; двоюродный ったら помечает то же существительное внутри фразы."}]
+          },
+          "pro_tip": "Это は вечно вздыхающего говорящего."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ときている"]],
+      "content": {
+        "English": {
+          "title": "～ときている",
+          "short_description": "And on top of that, A (piling on)",
+          "explanation": "Clause + ときている stacks a final woe or wow: 「値段は高く、味はまずく、店員は無愛想ときている」 — pricey, bland, and the staff are surly on top of it. The last straw or the cherry on top.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Plain clause | clause + ときている | 雨が降り、風も強いときている |",
+          "examples": "```\n立地は悪いし、家賃は高いときている。\nBad location, and the rent is steep on top of it.\n```\n\n```\n実力はあり、人望も厚いときている。憎めない男だ。\nSkilled, and hugely trusted besides — impossible to dislike him.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Formal writing", "correct": "Colloquial pattern — essays should use 上に／おまけに", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Spoken storytelling; ends the list with a flourish."}]
+          },
+          "pro_tip": "It is the drumroll before the verdict — best item (or worst) comes last."
+        },
+        "Russian": {
+          "title": "～ときている",
+          "short_description": "И вдобавок ещё A (нагромождение)",
+          "explanation": "Часть + ときている наваливает последний пункт: 「値段は高く、味はまずく、店員は無愛想ときている» — дорого, невкусно, и персонал ещё и дерзит. Последняя капля или вишенка.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простая часть | часть + ときている | 雨が降り、風も強いときている |",
+          "examples": "```\n立地は悪いし、家賃は高いときている。\nМесто скверное, и аренда ещё кусается.\n```\n\n```\n実力はあり、人望も厚いときている。憎めない男だ。\nТалантлив, и уважением обласкан вдобавок — не дать не любить.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Формальные тексты", "correct": "Разговорный оборот — в эссе берите 上に／おまけに", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Устный сторителлинг; завершает список с грохотом."}]
+          },
+          "pro_tip": "Барабанная дробь перед вердиктом: лучший (или худший) пункт — последним."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["とみえて"]],
+      "content": {
+        "English": {
+          "title": "～とみえて",
+          "short_description": "Judging by the evidence — apparently A",
+          "explanation": "Plain form + とみえて infers a hidden cause: 「徹夜したとみえて、目が真っ赤だ」 — stayed up all night, apparently: the eyes are scarlet. Sherlock-grammar; the evidence follows.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Plain form | clause + とみえて + evidence | 忙しいとみえて |\n| Past | clause + た + とみえて | 雨が降ったとみえて |",
+          "examples": "```\n彼は相当急いだとみえて、靴を履き間違えている。\nHe must have rushed — his shoes don't match.\n```\n\n```\n誰か来たとみえて、玄関の靴が増えている。\nSomeone apparently visited — extra shoes at the door.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Stating visible facts", "correct": "The clause before is the invisible cause; after comes the clue", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Narration; とみると follows a visible trigger instead — different direction."}]
+          },
+          "pro_tip": "The pattern works backwards: effect first glance, cause supplied by とみえて."
+        },
+        "Russian": {
+          "title": "～とみえて",
+          "short_description": "По всему видно — похоже, A",
+          "explanation": "Простая форма + とみえて выводит скрытую причину: 「徹夜したとみえて、目が真っ赤だ» — похоже, не спал всю ночь: глаза красные. Грамматика Шерлока: улика идёт следом.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Простая форма | часть + とみえて + улика | 忙しいとみえて |\n| Прошедшее | часть + た + とみえて | 雨が降ったとみえて |",
+          "examples": "```\n彼は相当急いだとみえて、靴を履き間違えている。\nВидно, сильно торопился — туфли разные.\n```\n\n```\n誰か来たとみえて、玄関の靴が増えている。\nКто-то, похоже, приходил — у двери обуви больше.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Констатация видимых фактов", "correct": "До оборота — невидимая причина; после — улика", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Нарратив; とみると идёт от видимого триггера — направление другое."}]
+          },
+          "pro_tip": "Конструкция работает задом наперёд: эффект на виду, причину подставляет とみえて."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["とみると"]],
+      "content": {
+        "English": {
+          "title": "～とみると",
+          "short_description": "The moment A is seen — B follows",
+          "explanation": "Dictionary form + とみると reacts to a directly observed trigger: 「彼は私とみると、笑顔になった」 — the moment he spotted me, he smiled. The evidence leads; the inference follows.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Dictionary form | N + とみると | 客とみると |",
+          "examples": "```\n母は妹の成績とみると、顔を曇らせた。\nThe moment Mother saw the grades, her face clouded.\n```\n\n```\n店員は子供とみると、妙に丁寧になった。\nSpotting the child, the clerk turned oddly polite.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Mixing up with とみえて", "correct": "とみると = upon seeing (direct observation); とみえて = apparently (inference)", "note": null}
+            ],
+            "notes": [{"tag": "other", "text": "Contrast pair on exams: 目撃→とみると／推測→とみえて."}]
+          },
+          "pro_tip": "Eyes first, reaction second — that ordering is the pattern."
+        },
+        "Russian": {
+          "title": "～とみると",
+          "short_description": "Едва увидел A — сразу B",
+          "explanation": "Словарная форма + とみると реагирует на непосредственно увиденное: 「彼は私とみると、笑顔になった» — едва меня заметил, сразу заулыбался. Улика впереди, вывод следом.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Словарная форма | N + とみると | 客とみると |",
+          "examples": "```\n母は妹の成績とみると、顔を曇らせた。\nУвидела мать оценки сестры — и лицо потемнело.\n```\n\n```\n店員は子供とみると、妙に丁寧になった。\nЗавидев ребёнка, продавец подозрительно расплылся вежливостью.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Путать с とみえて", "correct": "とみると = увидев (прямое наблюдение); とみえて = похоже (вывод)", "note": null}
+            ],
+            "notes": [{"tag": "other", "text": "Экзаменационная пара: 目撃→とみると／推測→とみえて."}]
+          },
+          "pro_tip": "Сначала глаза, потом реакция — этот порядок и есть конструкция."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["比べものにならない"]],
+      "content": {
+        "English": {
+          "title": "～とは比べものにならない",
+          "short_description": "No comparison with A (A wins by far)",
+          "explanation": "Noun + とは比べものにならない declares a blowout: 「手作りとは比べものにならない」 — store-bought cannot hold a candle to handmade. One side is simply out of A's league.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (benchmark) | N + とは比べものにならない | 昔とは比べものにならない |",
+          "examples": "```\n今の設備は、十年前とは比べ物にならない。\nToday's equipment dwarfs what we had ten years ago.\n```\n\n```\n本物の味は、冷凍食品とは比べものにならない。\nThe real thing leaves frozen food far behind.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Close comparisons", "correct": "The gap must be canyon-sized — no わずかな違い here", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Commonly with 今/昔 and 本物/まがい物 frames."}]
+          },
+          "pro_tip": "Reserve it for knockout verdicts: the pattern is a verdict, not a scale."
+        },
+        "Russian": {
+          "title": "～とは比べものにならない",
+          "short_description": "Несравнимо с A (A вне конкуренции)",
+          "explanation": "Сущ. + とは比べものにならない объявляет разгром: 「手作りとは比べものにならない» — магазинному до ручной работы как до неба. Одна сторона просто не в лиге A.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (эталон) | N + とは比べものにならない | 昔とは比べものにならない |",
+          "examples": "```\n今の設備は、十年前とは比べ物にならない。\nНынешнее оборудование десятилетней давности и рядом не стояло.\n```\n\n```\n本物の味は、冷凍食品とは比べものにならない。\nВкус настоящего — заморозке не конкурент.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Близкие сравнения", "correct": "Разрыв должен быть каньонным — тут не о «небольшой разнице»", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Типовые рамки: 今/昔 и 本物/まがい物."}]
+          },
+          "pro_tip": "Берегите для нокаутов: это вердикт, а не весы."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["とは裏腹に"]],
+      "content": {
+        "English": {
+          "title": "～とは裏腹に",
+          "short_description": "Contrary to A — the opposite happened",
+          "explanation": "Noun (expectation/promise) + とは裏腹に: 「予報とは裏腹に、快晴になった」 — contrary to the forecast, brilliant sunshine. A stated expectation betrayed by reality.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun (expectation) | N + とは裏腹に | 期待とは裏腹に |",
+          "examples": "```\n宣伝とは裏腹に、商品は全く売れなかった。\nContrary to the hype, the product did not sell at all.\n```\n\n```\n静かになるという予告とは裏腹に、工事は夜中まで続いた。\nDespite promises of quiet, the construction ran past midnight.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Unstated expectations", "correct": "The noun must name the expectation that got betrayed", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Written commentary; 裏腹 = the inside of the back — the reverse side."}]
+          },
+          "pro_tip": "The noun is a promise or forecast; 裏腹に flips it face-down."
+        },
+        "Russian": {
+          "title": "～とは裏腹に",
+          "short_description": "Вопреки A — случилось обратное",
+          "explanation": "Сущ. (ожидание/обещание) + とは裏腹に: 「予報とは裏腹に、快晴になった» — вопреки прогнозу, выдалось солнце. Заявленное ожидание, преданное реальностью.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. (ожидание) | N + とは裏腹に | 期待とは裏腹に |",
+          "examples": "```\n宣伝とは裏腹に、商品は全く売れなかった。\nВопреки рекламе, товар не продавался вовсе.\n```\n\n```\n静かになるという予告とは裏腹に、工事は夜中まで続いた。\nНесмотря на обещания тишины, стройка длилась за полночь.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Невысказанные ожидания", "correct": "Существительное должно называть ожидание, которое предали", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Письменный комментарий; 裏腹 = изнанка — обратная сторона."}]
+          },
+          "pro_tip": "Существительное — обещание или прогноз; 裏腹に переворачивает его лицом вниз."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ところを"]],
+      "content": {
+        "English": {
+          "title": "～ところを",
+          "short_description": "Just as A (was happening) — interruption",
+          "explanation": "Verb + ところを catches an action mid-flight: 「お忙しいところを恐れ入ります」 — sorry to catch you while busy. Either a polite apology frame or a scene interruption.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| State + ところを | お＋adj + ところを | お忙しいところを |\n| Action caught | Vている + ところを | 泳いでいるところを |",
+          "examples": "```\nお休みのところを失礼いたします。\nForgive me for intruding on your rest.\n```\n\n```\n逃げようとするところを、警察に押さえられた。\nHe was pinned by the police just as he tried to flee.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Finished actions", "correct": "ところを catches the act in progress — unfinished", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Service Japanese staple: お忙しいところを／お休みのところを＋お詫び."}]
+          },
+          "pro_tip": "The phrase is a snapshot: someone walks into the frame mid-scene."
+        },
+        "Russian": {
+          "title": "～ところを",
+          "short_description": "Как раз в момент A (вторжение)",
+          "explanation": "Глагол + ところを застаёт действие в разгаре: 「お忙しいところを恐れ入ります» — простите, что тревожу вас в занятости. Либо вежливое извинение, либо перебитая сцена.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Состояние + ところを | お＋прил + ところを | お忙しいところを |\n| Застигнутое действие | Vている + ところを | 泳いでいるところを |",
+          "examples": "```\nお休みのところを失礼いたします。\nПростите, что отрываю от отдыха.\n```\n\n```\n逃げようとするところを、警察に押さえられた。\nЕго скрутили как раз в момент попытки к бегству.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Завершённые действия", "correct": "ところを ловит акт в процессе — незаконченным", "note": null}
+            ],
+            "notes": [{"tag": "collocation", "text": "Классика сервисного японского: お忙しいところを／お休みのところを＋извинение."}]
+          },
+          "pro_tip": "Фраза — стоп-кадр: кто-то входит в кадр посреди сцены."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["とやら"]],
+      "content": {
+        "English": {
+          "title": "～とやら",
+          "short_description": "The so-called A (doubtful name)",
+          "explanation": "After names and titles, とやら adds an air-quote: 「ダイエットとやらを始めた」 — started the so-called diet. Distance, irony, or honest uncertainty about the label.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / title | N + とやら | 新企画とやら |",
+          "examples": "```\n部長は会議とやらに出かけたまま、戻らない。\nThe director went to his \"meeting\" and never came back.\n```\n\n```\n彼は英語がペラペラだとやら言っているが…。\nHe claims his English is fluent, supposedly…\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Respectful quoting", "correct": "とやら is skeptical or hearsay-flavored — not neutral quoting like という", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Spoken; the eyebrow-raise of the quoting family."}]
+          },
+          "pro_tip": "Where English says so-called or quote-unquote, Japanese smirks with とやら."
+        },
+        "Russian": {
+          "title": "～とやら",
+          "short_description": "Так называемое A (сомнение в названии)",
+          "explanation": "После имён и титулов とやら вешает кавычки: 「ダイエットとやらを始めた» — начал свою «диету». Дистанция, ирония или честная неуверенность в ярлыке.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / титул | N + とやら | 新企画とやら |",
+          "examples": "```\n部長は会議とやらに出かけたまま、戻らない。\nДиректор ушёл на свои «совещания» — и как в воду канул.\n```\n\n```\n彼は英語がペラペラだとやら言っているが…。\nОн, мол, свободно говорит по-английски… ну-ну.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Уважительное цитирование", "correct": "とやら скептично или слухово — не нейтральное という", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Разговорный; поднятая бровь цитатного семейства."}]
+          },
+          "pro_tip": "Где по-русски «так называемый» или кавычки-усмешки — японский ухмыляется とやら."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["から言わせれば"]],
+      "content": {
+        "English": {
+          "title": "～から言わせれば",
+          "short_description": "If you ask A (perspective framing)",
+          "explanation": "Noun + から言わせれば（言うと） parades a viewpoint: 「素人から言わせれば、高すぎる」 — if you ask a layman: overpriced. The speaker steps into a role and speaks from it.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Role noun | N + から言わせれば | ファンから言わせれば |",
+          "examples": "```\n専門家から言わせれば、素人の考えに過ぎない。\nTo an expert, it is mere amateur thinking.\n```\n\n```\n親から言わせれば、いくつになっても子どもだ。\nAs parents see it, you are a child at any age.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Objective facts", "correct": "The frame announces a subjective standpoint — no claims of objectivity", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "から言えば／からすれば are interchangeable and slightly softer."}]
+          },
+          "pro_tip": "It is a costume change: put on the role named, then opine."
+        },
+        "Russian": {
+          "title": "～から言わせれば",
+          "short_description": "Если спросить A (рамка перспективы)",
+          "explanation": "Сущ. + から言わせれば（言うと）выпячивает точку зрения: 「素人から言わせれば、高すぎる» — если спросить дилетанта: дорого. Говорящий входит в роль и говорит от её лица.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. роли | N + から言わせれば | ファンから言わせれば |",
+          "examples": "```\n専門家から言わせれば、素人の考えに過ぎない。\nДля специалиста это мысли дилетанта.\n```\n\n```\n親から言わせれば、いくつになっても子どもだ。\nГлазами родителей — в любом возрасте ребёнок.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Объективные факты", "correct": "Рамка объявляет субъективную позицию — без претензии на объектность", "note": null}
+            ],
+            "notes": [{"tag": "variation", "text": "から言えば／からすれば взаимозаменяемы и чуть мягче."}]
+          },
+          "pro_tip": "Это смена костюма: наденьте названную роль — и высказывайтесь."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["ぐらいのものだ"]],
+      "content": {
+        "English": {
+          "title": "～のは～ぐらいのものだ",
+          "short_description": "About the only A is B (scarcity)",
+          "explanation": "Frame: Aのは Bぐらいのものだ — the only real instances of A amount to B: 「彼が静かなのは、寝ている時ぐらいのものだ」 — the only time he is quiet is while asleep. Affectionate or exasperated scarcity.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Aのは + Bぐらいのものだ | Aのは + B + ぐらいのものだ | 静かなのは寝ている時ぐらいのものだ |",
+          "examples": "```\n彼が家にいるのは、日曜日の午前ぐらいのものだ。\nHis being home amounts to Sunday mornings, at best.\n```\n\n```\n無料でもらえるのは、カレンダーぐらいのものだ。\nWhat you get free amounts to a calendar, if that.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Abundant cases", "correct": "The frame counts the exceptions — B must be rare", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Spoken commentary with a smile or a sigh."}]
+          },
+          "pro_tip": "English at best / if that captures the shrug of ぐらいのものだ."
+        },
+        "Russian": {
+          "title": "～のは～ぐらいのものだ",
+          "short_description": "Разве что только B и есть A (редкость)",
+          "explanation": "Рамка: Aのは Bぐらいのものだ — единственные реальные случаи A сводятся к B: 「彼が静かなのは、寝ている時ぐらいのものだ» — тихим он бывает разве что во сне. Нежная или досадливая редкость.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Aのは + Bぐらいのものだ | Aのは + B + ぐらいのものだ | 静かなのは寝ている時ぐらいのものだ |",
+          "examples": "```\n彼が家にいるのは、日曜日の午前ぐらいのものだ。\nДома он разве что по воскресным утрам — и то если повезёт.\n```\n\n```\n無料でもらえるのは、カレンダーぐらいのものだ。\nБесплатно дают разве что календарь — и на том спасибо.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Множественные случаи", "correct": "Рамка считает исключения — B обязано быть редким", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Разговорный комментарий с улыбкой или вздохом."}]
+          },
+          "pro_tip": "Русское «разве что» / «и то если» передаёт пожатие плеч ぐらいのものだ."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["でなくてなんだろう"]],
+      "content": {
+        "English": {
+          "title": "～でなくてなんだろう",
+          "short_description": "If this is not A, what is? (rhetorical)",
+          "explanation": "Noun + でなくてなんだろう seals a rhetorical identification: 「これが差別でなくてなんだろう」 — if this is not discrimination, what is? For な-adj stems the variant でなんであろう adds formality.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + でなくてなんだろう | 運命でなくてなんだろう |\n| Formal | N + でなんであろう | 奇跡でなんであろう |",
+          "examples": "```\nこの出会いは、運命でなくてなんだろう。\nIf this meeting is not fate, what is?\n```\n\n```\n三十年ぶりの再会を、奇跡でなくてなんだろう。\nA reunion after thirty years — a miracle, if anything.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Genuine questions", "correct": "The pattern is a confident verdict dressed as a question", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Emotional essays and speeches; pairs with これこそ for extra force."}]
+          },
+          "pro_tip": "The rhetorical what-is-it-then is the whole engine — answer it yourself with the noun."
+        },
+        "Russian": {
+          "title": "～でなくてなんだろう",
+          "short_description": "Если это не A, то что? (риторика)",
+          "explanation": "Сущ. + でなくてなんだろう запечатывает риторическое отождествление: 「これが差別でなくてなんだろう» — если это не дискриминация, то что? Для основ な-прилагательных формальный вариант — でなんであろう.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + でなくてなんだろう | 運命でなくてなんだろう |\n| Формально | N + でなんであろう | 奇跡でなんであろう |",
+          "examples": "```\nこの出会いは、運命でなくてなんだろう。\nЕсли эта встреча не судьба — тогда что?\n```\n\n```\n三十年ぶりの再会を、奇跡でなくてなんだろう。\nВстреча через тридцать лет — чудо, или как это назвать?\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Подлинные вопросы", "correct": "Конструкция — уверенный вердикт в одежде вопроса", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Эмоциональные эссе и речи; с これこそ — двойной напор."}]
+          },
+          "pro_tip": "Двигатель — риторическое «так что же это?»: ответьте на него сами существительным."
+        }
+      }
+    },
+    {
+      "level": "N1",
+      "keywords": [["なんでもない"]],
+      "content": {
+        "English": {
+          "title": "～（で）もなんでもない",
+          "short_description": "A is nothing of the kind",
+          "explanation": "Noun + もなんでもない flatly denies a label: 「ペンギンは鳥じゃない？鳥もなんでもない、立派な鳥だ」 — well, saying it is not a bird is simply wrong. Blunt correction of a category claim.",
+          "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun | N + もなんでもない | 神もなんでもない |\n| ではない強調 | N + じゃないもなんでもない | 怖くないもなんでもない |",
+          "examples": "```\nこれは冗談もなんでもない、深刻な問題だ。\nThis is no joke — it is a serious problem.\n```\n\n```\n彼の腕前は、素人もなんでもない。プロそのものだ。\nHis skill is beyond amateur anything — pure professional.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Mild disagreement", "correct": "The pattern rejects the label wholesale — total denial", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Emphatic spoken; often follows a quoted claim to strike it down."}]
+          },
+          "pro_tip": "It is the gavel bang on a mislabel: nothing of the sort."
+        },
+        "Russian": {
+          "title": "～（で）もなんでもない",
+          "short_description": "A — вовсе не то, что говорят",
+          "explanation": "Сущ. + もなんでもない начисто отвергает ярлык: «пингвин не птица? да это никакая не не-птица — самая настоящая птица». Резкая коррекция категориального утверждения.",
+          "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Существительное | N + もなんでもない | 神もなんでもない |\n| Усиление отрицания | N + じゃないもなんでもない | 怖くないもなんでもない |",
+          "examples": "```\nこれは冗談もなんでもない、深刻な問題だ。\nЭто никакая не шутка — серьёзная проблема.\n```\n\n```\n彼の腕前は、素人もなんでもない。プロそのものだ。\nЕго мастерство — не «любитель» никакой: чистый профессионал.\n```",
+          "nuances": {
+            "common_mistakes": [
+              {"wrong": "Мягкое несогласие", "correct": "Конструкция отметает ярлык целиком — тотальное отрицание", "note": null}
+            ],
+            "notes": [{"tag": "register", "text": "Эмфатично-разговорно; часто бьёт по цитируемому утверждению."}]
+          },
+          "pro_tip": "Удар молотка по неверному ярлыку: «ничего подобного»."
+        }
+      }
+    }
+  ]
+}
