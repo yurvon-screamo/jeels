@@ -44,18 +44,29 @@ type PresentationAnchor = NSObject;
 /// process — no objc2-dispatch dependency required.
 mod dispatch {
     use std::ffi::c_void;
+    use std::ptr::addr_of;
 
     use block2::RcBlock;
 
-    /// Opaque `dispatch_queue_t`. The ABI passes the queue object as a
-    /// single pointer; the main queue is a global singleton that needs no
-    /// retain/release.
-    #[repr(transparent)]
-    pub(crate) struct MainQueue(*mut c_void);
+    /// Opaque `dispatch_queue_t` — a dispatch queue object behind an
+    /// opaque C struct.
+    #[repr(C)]
+    struct DispatchQueue {
+        _private: [u8; 0],
+    }
 
     unsafe extern "C" {
-        fn dispatch_get_main_queue() -> MainQueue;
-        fn dispatch_async(queue: MainQueue, block: *mut c_void);
+        /// The global main queue. `dispatch_get_main_queue()` is a header
+        /// MACRO (`DISPATCH_GLOBAL_OBJECT` takes this global's address), so
+        /// there is NO exported function symbol of that name — declaring an
+        /// `extern "C" fn dispatch_get_main_queue` fails at link time with
+        /// "Undefined symbols: _dispatch_get_main_queue" (caught by the
+        /// darwin CI build). Link the global object itself instead.
+        #[link_name = "_dispatch_main_q"]
+        static MAIN_QUEUE: DispatchQueue;
+
+        /// `dispatch_async` is a real exported function.
+        fn dispatch_async(queue: &DispatchQueue, block: *mut c_void);
     }
 
     /// Runs `f` on the main dispatch queue.
@@ -64,14 +75,15 @@ mod dispatch {
         F: block2::IntoBlock<'static, (), ()>,
     {
         let block = RcBlock::new(f);
-        // SAFETY: both symbols resolve in libSystem; the main queue is the
-        // global main queue. `dispatch_async` copies (retains) the block
-        // before returning, so dropping our `RcBlock` afterwards only
-        // releases our reference — the queue keeps its own until the block
-        // has run, and the block then deallocates on the main thread.
+        // SAFETY: `&*addr_of!(MAIN_QUEUE)` reinterprets the global's
+        // address as a reference to the queue object, exactly what the C
+        // macro does. `dispatch_async` copies (retains) the block before
+        // returning, so dropping our `RcBlock` afterwards only releases
+        // our reference — the queue keeps its own until the block has run,
+        // and the block then deallocates on the main thread.
         unsafe {
             dispatch_async(
-                dispatch_get_main_queue(),
+                &*addr_of!(MAIN_QUEUE),
                 RcBlock::as_ptr(&block) as *mut c_void,
             );
         }
