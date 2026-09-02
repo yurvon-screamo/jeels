@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Accepted — redirect_uri contract updated by ADR-044 (Apple platforms now
+use the direct `origa://` scheme redirect; Android/Windows/Linux keep this
+ADR's desktop-callback flow)
 
 ## Date
 

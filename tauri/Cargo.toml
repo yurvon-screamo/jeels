@@ -79,10 +79,15 @@ tauri-plugin-haptics.workspace = true
 # Apple-only: ASWebAuthenticationSession plugin for OAuth. Wraps Apple's
 # native auth session API so the browser returns to the app after the OAuth
 # redirect — required by App Review Guideline 4 (default-browser login is
-# rejected for Mac App Store distribution). On iOS the tauri-plugin-deep-link
-# build.rs does NOT register CFBundleURLTypes for custom schemes, so the old
-# opener + desktop-callback.html flow cannot return from Safari; on macOS the
-# session intercepts the `origa://` callback itself.
+# rejected for Mac App Store distribution). The frontend sends
+# redirect_uri = origa://auth/callback (see native_oauth_redirect_uri) and
+# TrailBase answers the provider callback with a server-side 303 straight to
+# the scheme: the auth session only intercepts redirect-initiated
+# navigations, not JavaScript hops from an interstitial page (App Review
+# 2.1(a) of v0.7.3). On iOS the tauri-plugin-deep-link build.rs does NOT
+# register CFBundleURLTypes for custom schemes, so the old opener +
+# desktop-callback.html flow cannot return from Safari; on macOS the session
+# intercepts the `origa://` callback itself.
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
 tauri-plugin-aswebauth.workspace = true
 
