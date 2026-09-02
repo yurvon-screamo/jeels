@@ -10,13 +10,16 @@
 //!
 //! Threading: `ASWebAuthenticationSession` must be created and started on the
 //! main thread — `commands.rs` dispatches here through
-//! `AppHandle::run_on_main_thread` and awaits a oneshot channel. Apple
-//! invokes the completion handler on the main queue as well; the handler
-//! double-checks that and degrades to an error (never touching the
-//! main-thread-bound slot) if that assumption is ever violated.
+//! `AppHandle::run_on_main_thread` and awaits an mpsc channel. The
+//! completion handler, however, is NOT guaranteed to arrive on the main
+//! queue: macOS 26 has been observed invoking it on a background queue after
+//! a redirect-initiated interception, so the handler must be sound on any
+//! thread. It only performs thread-safe work: owned-string extraction from
+//! the immutable `NSURL`/`NSError` arguments, an mpsc send, and a
+//! main-queue dispatch hop that breaks the session ↔ block retain cycle so
+//! the ObjC dealloc cascade stays on the main thread.
 
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 use block2::RcBlock;
 use objc2::rc::{Retained, autoreleasepool};
@@ -36,12 +39,99 @@ use crate::commands::AuthResult;
 /// The crate keeps it as `NSObject`; we store an `NSWindow` in it.
 type PresentationAnchor = NSObject;
 
+/// Minimal libdispatch FFI. Routing the bundle drop onto the main queue
+/// needs only these two symbols, which libSystem provides in every macOS
+/// process — no objc2-dispatch dependency required.
+mod dispatch {
+    use std::ffi::c_void;
+
+    use block2::RcBlock;
+
+    /// Opaque `dispatch_queue_t`. The ABI passes the queue object as a
+    /// single pointer; the main queue is a global singleton that needs no
+    /// retain/release.
+    #[repr(transparent)]
+    pub(crate) struct MainQueue(*mut c_void);
+
+    unsafe extern "C" {
+        fn dispatch_get_main_queue() -> MainQueue;
+        fn dispatch_async(queue: MainQueue, block: *mut c_void);
+    }
+
+    /// Runs `f` on the main dispatch queue.
+    pub(crate) fn exec_on_main<F>(f: F)
+    where
+        F: block2::IntoBlock<'static, (), ()>,
+    {
+        let block = RcBlock::new(f);
+        // SAFETY: both symbols resolve in libSystem; the main queue is the
+        // global main queue. `dispatch_async` copies (retains) the block
+        // before returning, so dropping our `RcBlock` afterwards only
+        // releases our reference — the queue keeps its own until the block
+        // has run, and the block then deallocates on the main thread.
+        unsafe {
+            dispatch_async(
+                dispatch_get_main_queue(),
+                RcBlock::as_ptr(&block) as *mut c_void,
+            );
+        }
+    }
+}
+
 /// Session + provider kept alive by the completion block (see the slot
 /// comment in `start_session`).
 type SessionBundle = (
     Retained<ASWebAuthenticationSession>,
     Retained<AuthAnchorProvider>,
 );
+
+/// The slot is shared with the completion block, which macOS 26 may invoke
+/// on a background queue: `Arc` clones are thread-safe, and `Mutex` guards
+/// the single take.
+type SessionSlot = Arc<Mutex<Option<SendableBundle>>>;
+
+/// `Send` wrapper required to store [`SessionBundle`] in a [`SessionSlot`]:
+/// `Retained` handles are `!Send` because their classes may have
+/// main-thread-only methods.
+///
+/// # SAFETY
+/// `Send` only permits *storing and moving* the bundle alongside the
+/// completion block, which macOS 26 may invoke on a background queue. The
+/// final release — which runs `-dealloc` on the dropping thread — never
+/// happens off the main thread: `drop_slot_contents` is called exclusively
+/// from main-thread contexts (the start-failure path and the completion's
+/// main-queue dispatch hop). This matters because the bundle carries AppKit
+/// objects — the anchor provider's `NSWindow` ivar must deallocate on the
+/// main thread, and the `AnyThread` marker on `ASWebAuthenticationSession`
+/// is a silent `NSObject` default rather than a documented dealloc
+/// guarantee.
+struct SendableBundle(SessionBundle);
+unsafe impl Send for SendableBundle {}
+
+/// Stores the bundle into the slot, tolerating a poisoned mutex: the
+/// critical sections guarded by this lock are a plain assignment and a
+/// `take`, neither of which can panic, so a poisoned lock carries no
+/// broken invariant and the payload is still stored.
+fn fill_slot(slot: &SessionSlot, bundle: SendableBundle) {
+    *slot.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(bundle);
+}
+
+/// Takes the bundle out of the slot with the same poison tolerance as
+/// [`fill_slot`]: the payload is handed out exactly once.
+fn take_slot(slot: &SessionSlot) -> Option<SendableBundle> {
+    slot.lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .take()
+}
+
+/// Drops the bundle taken from the slot. Must only be called on the main
+/// thread (see `SendableBundle`): the retain cycle is broken here and the
+/// dealloc cascade runs inline.
+fn drop_slot_contents(slot: &SessionSlot) {
+    if let Some(SendableBundle(bundle)) = take_slot(slot) {
+        drop(bundle);
+    }
+}
 
 define_class!(
     // SAFETY:
@@ -138,37 +228,45 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     // (but before `start`) keeps the session and provider alive for as long
     // as the system holds the block; taking them at completion time breaks
     // the session ↔ block retain cycle so everything deallocates cleanly.
-    let bundle_slot: Rc<RefCell<Option<SessionBundle>>> = Rc::new(RefCell::new(None));
+    let bundle_slot: SessionSlot = Arc::new(Mutex::new(None));
 
     let tx_for_completion = tx.clone();
-    let bundle_for_completion = Rc::clone(&bundle_slot);
+    let bundle_for_completion = Arc::clone(&bundle_slot);
     let completion = RcBlock::new(move |callback_url: *mut NSURL, error: *mut NSError| {
-        // Apple invokes the handler on the main queue. The check below keeps
-        // the main-thread-only slot untouchable (and the process UB-free) if
-        // that ever changes: we degrade to an error instead.
-        let result = match MainThreadMarker::new() {
-            None => Err("authentication completed off the main thread".to_string()),
-            Some(_mtm) => autoreleasepool(|_pool| {
-                // Break the session ↔ block retain cycle now that the system
-                // is done with both.
-                drop(bundle_for_completion.borrow_mut().take());
-                if let Some(error) = as_ref(error) {
-                    return Err(describe_error(error));
-                }
-                let Some(callback_url) = as_ref(callback_url) else {
-                    return Err("completion returned neither URL nor error".to_string());
-                };
-                match callback_url.absoluteString() {
-                    Some(string) => Ok(AuthResult {
-                        url: string.to_string(),
-                    }),
-                    None => Err("callback URL has no absolute string".to_string()),
-                }
-            }),
-        };
+        // The pointer arguments are only valid for the duration of this
+        // call, so owned values are extracted first. `NSURL` and `NSError`
+        // are immutable: reading `absoluteString`/`localizedDescription`
+        // from any thread is safe (macOS 26 may invoke this handler off the
+        // main queue — observed on a redirect-initiated interception).
+        let result = autoreleasepool(|_pool| {
+            if let Some(error) = as_ref(error) {
+                return Err(describe_error(error));
+            }
+            let Some(callback_url) = as_ref(callback_url) else {
+                return Err("completion returned neither URL nor error".to_string());
+            };
+            match callback_url.absoluteString() {
+                Some(string) => Ok(AuthResult {
+                    url: string.to_string(),
+                }),
+                None => Err("callback URL has no absolute string".to_string()),
+            }
+        });
+
         // Blocks are `Fn` (callable repeatedly by contract), so clone the
         // sender per invocation instead of moving it out of the closure.
         let _ = tx_for_completion.clone().send(result);
+
+        // Break the session ↔ block retain cycle now that the system is
+        // done with both — on the main thread, because the final release
+        // runs `-dealloc` on the dropping thread and the bundle holds
+        // AppKit objects (see `SendableBundle`).
+        if MainThreadMarker::new().is_some() {
+            drop_slot_contents(&bundle_for_completion);
+        } else {
+            let slot_for_drop = Arc::clone(&bundle_for_completion);
+            dispatch::exec_on_main(move || drop_slot_contents(&slot_for_drop));
+        }
     });
 
     let session = unsafe {
@@ -194,14 +292,15 @@ pub(crate) fn start_session<R: tauri::Runtime>(
     // Share the user's existing Safari login between sessions (Apple default).
     unsafe { session.setPrefersEphemeralWebBrowserSession(false) };
 
-    *bundle_slot.borrow_mut() = Some((session.clone(), provider));
+    fill_slot(&bundle_slot, SendableBundle((session.clone(), provider)));
 
     // SAFETY: The session was created above; `start` has no additional safety
     // requirements beyond a valid receiver.
     if !unsafe { session.start() } {
         // No completion will fire — drop the bundle so the session and the
-        // system's copy of the block deallocate instead of leaking.
-        *bundle_slot.borrow_mut() = None;
+        // system's copy of the block deallocate instead of leaking. This
+        // runs on the main thread, so the dealloc is inline.
+        drop_slot_contents(&bundle_slot);
         tracing::warn!("[aswebauth] ASWebAuthenticationSession::start returned false");
         let _ = tx.send(Err("failed to start the authentication session".to_string()));
     }
@@ -238,5 +337,37 @@ mod tests {
     fn canceled_login_maps_to_cancelled_marker() {
         // CanceledLogin == 1 per ASWebAuthenticationSessionErrorCode.
         assert_eq!(ASWebAuthenticationSessionErrorCode::CanceledLogin.0, 1);
+    }
+
+    /// The wrapper exists precisely to cross the completion-handler thread
+    /// boundary: if a future edit removes the `unsafe impl`, this fails to
+    /// compile instead of failing at runtime with a poisoned slot.
+    #[test]
+    fn sendable_bundle_is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<SendableBundle>();
+    }
+
+    /// The slot hands its payload out exactly once and keeps working after
+    /// a poisoned critical section: `take_slot` is the only reader, so a
+    /// panic under the lock leaves no invariant to uphold.
+    #[test]
+    fn slot_take_is_once_and_poison_resistant() {
+        let slot: SessionSlot = Arc::new(Mutex::new(None));
+
+        // Empty slot stays empty on repeated takes.
+        assert!(take_slot(&slot).is_none());
+        assert!(take_slot(&slot).is_none());
+
+        // Poison the mutex by panicking while holding the lock.
+        let poisoned: SessionSlot = Arc::new(Mutex::new(None));
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _guard = poisoned.lock().unwrap();
+            panic!("intentional poisoning");
+        }));
+
+        // take_slot still recovers the (empty) payload instead of
+        // propagating the poison error.
+        assert!(take_slot(&poisoned).is_none());
     }
 }
