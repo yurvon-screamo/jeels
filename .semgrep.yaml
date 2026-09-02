@@ -1,0 +1,60 @@
+# Semgrep rules for the Origa workspace.
+#
+# qlty's semgrep plugin invokes `semgrep --config .semgrep.yaml`; without this
+# file every `qlty check` on Python targets fails with "unable to find a
+# config". Rules below are a compact high-signal set (security + correctness);
+# extend freely — see https://semgrep.dev/rule-directory.
+rules:
+  - id: python-ban-eval-exec
+    languages: [python]
+    message: "eval()/exec() executes arbitrary code — do not use in this codebase"
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: exec(...)
+    paths:
+      exclude:
+        - "**/tests/**"
+
+  - id: python-ban-bare-except
+    languages: [python]
+    message: "Bare `except:` swallows KeyboardInterrupt/SystemExit — catch specific exceptions"
+    severity: WARNING
+    pattern: "except: ..."
+
+  - id: python-subprocess-shell-true
+    languages: [python]
+    message: "subprocess with shell=True is an injection vector — pass an argv list instead"
+    severity: ERROR
+    pattern-either:
+      - pattern: subprocess.run(..., shell=True, ...)
+      - pattern: subprocess.call(..., shell=True, ...)
+      - pattern: subprocess.Popen(..., shell=True, ...)
+      - pattern: subprocess.check_output(..., shell=True, ...)
+
+  - id: python-hardcoded-secrets
+    languages: [python]
+    message: "Possible hardcoded credential in source — read secrets from env/profile instead"
+    severity: ERROR
+    pattern-either:
+      - pattern: $X = "...$PASSWORD..."
+      - pattern: $X = "...$SECRET..."
+      - pattern: $X = "...$API_KEY..."
+    metavariable-regex:
+      metavariable: $X
+      regex: (?i).*(password|secret|api_key|token).*
+
+  - id: python-requests-verify-false
+    languages: [python]
+    message: "verify=False disables TLS validation"
+    severity: ERROR
+    pattern: requests.$F(..., verify=False, ...)
+
+  - id: python-debug-breakpoint
+    languages: [python]
+    message: "Leftover breakpoint()/pdb call"
+    severity: WARNING
+    pattern-either:
+      - pattern: breakpoint()
+      - pattern: pdb.set_trace()

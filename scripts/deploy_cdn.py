@@ -201,7 +201,7 @@ def upload_versioned_files(
         _cdn_s3.upload_file(local_path, relative_path, cache_control, dry_run)
 
 
-def sync_directories(cdn_dir: Path, dry_run: bool) -> None:
+def sync_directories(cdn_dir: Path, dry_run: bool, ignore_mtime: bool = False) -> None:
     print("\nSyncing directories:")
     for dir_name in SYNC_DIRS:
         local_dir = cdn_dir / dir_name
@@ -213,7 +213,7 @@ def sync_directories(cdn_dir: Path, dry_run: bool) -> None:
         # all-content), so one Cache-Control per directory is correct.
         cache_control = _cdn_cache.cache_control_for(dir_name + "/")
         print(f"  {dir_name}/  [{cache_control}]")
-        _cdn_s3.sync_directory(local_dir, dir_name, cache_control, dry_run)
+        _cdn_s3.sync_directory(local_dir, dir_name, cache_control, dry_run, ignore_mtime)
 
 
 def upload_manifest(cdn_dir: Path, dry_run: bool) -> None:
@@ -334,6 +334,14 @@ def main() -> None:
         action="store_true",
         help="Also list unchanged files in the comparison step (default: quiet)",
     )
+    parser.add_argument(
+        "--ignore-mtime",
+        action="store_true",
+        help="Directory sync trusts matching byte sizes and skips the mtime "
+        "check. Use on machines that are not the deploy origin: a cdn/ "
+        "checkout copied after the last deploy has fresh mtimes everywhere, "
+        "and the mtime rule would re-upload the whole static tree.",
+    )
     args = parser.parse_args()
     dry_run = args.dry_run
 
@@ -431,7 +439,7 @@ def main() -> None:
 
     # Step 5: Sync directories
     print("\nStep 5: Syncing directories...")
-    sync_directories(cdn_dir, dry_run)
+    sync_directories(cdn_dir, dry_run, args.ignore_mtime)
 
     # Step 6: Upload manifest
     print("\nStep 6: Uploading manifest...")

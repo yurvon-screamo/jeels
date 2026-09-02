@@ -70,10 +70,13 @@ def run_aws_raw(args: list[str]) -> subprocess.CompletedProcess[str]:
     else:
         cmd = ["aws", *args]
     try:
+        # check=False by design: callers branch on `.returncode`
+        # (404 vs other failures) before reporting errors.
         return subprocess.run(
             cmd,
             capture_output=True,
             text=True,
+            check=False,
         )
     except FileNotFoundError:
         print("ERROR: 'aws' CLI not found.", file=sys.stderr)
@@ -506,7 +509,11 @@ def list_remote_objects(prefix: str) -> dict[str, RemoteObject]:
 
 
 def sync_directory(
-    local_dir: Path, prefix: str, cache_control: str, dry_run: bool
+    local_dir: Path,
+    prefix: str,
+    cache_control: str,
+    dry_run: bool,
+    ignore_mtime: bool = False,
 ) -> None:
     """Upload new/changed local files under ``local_dir`` to a bucket prefix.
 
@@ -514,6 +521,11 @@ def sync_directory(
     upload only objects that are absent remotely, differ in byte size, or whose
     local mtime is newer than the remote LastModified. Shows a progress bar
     (count/total + percentage) for each directory.
+
+    ``ignore_mtime`` drops the mtime comparison and trusts matching byte
+    sizes. Use it on machines that are not the deploy origin: a cdn/ checkout
+    copied *after* the last deploy has fresh mtimes for every file, and the
+    mtime rule would otherwise re-upload the entire static tree.
     """
     if dry_run:
         return
@@ -539,7 +551,10 @@ def sync_directory(
         if (
             info is not None
             and info.size == stat_result.st_size
-            and stat_result.st_mtime <= info.last_modified_epoch
+            and (
+                ignore_mtime
+                or stat_result.st_mtime <= info.last_modified_epoch
+            )
         ):
             skipped += 1
         else:
