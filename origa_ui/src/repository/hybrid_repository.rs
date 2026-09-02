@@ -3,15 +3,22 @@ use ulid::Ulid;
 use origa::{
     domain::{OrigaError, User},
     traits::UserRepository,
+    use_cases::SyncMeta,
 };
 
 use crate::repository::file_repository::FileSystemUserRepository;
-use crate::repository::trailbase_repository::TrailBaseUserRepository;
+use crate::repository::sync_meta_store::{IdbSyncMetaStore, SyncMetaStore};
+use crate::repository::trailbase_repository::{RemoteUserSource, TrailBaseUserRepository};
+
+#[cfg(test)]
+#[path = "hybrid_sync_tests.rs"]
+mod sync_tests;
 
 #[derive(Clone)]
 pub struct HybridUserRepository {
     local: FileSystemUserRepository,
     remote: TrailBaseUserRepository,
+    meta: IdbSyncMetaStore,
 }
 
 impl HybridUserRepository {
@@ -19,46 +26,23 @@ impl HybridUserRepository {
         Self {
             local: FileSystemUserRepository::new(),
             remote: TrailBaseUserRepository::new(),
+            meta: IdbSyncMetaStore,
         }
     }
 
     pub async fn merge_current_user(&self) -> Result<(), OrigaError> {
-        let remote_result = self.remote.find_current().await?;
-        let local_result = self.local.get_current_user().await?;
-
-        match (remote_result, local_result) {
-            (Some(remote_data), None) => {
-                tracing::info!("Creating local user from remote");
-                self.save_local_and_sync_remote(&remote_data.0).await?;
-            },
-            (None, Some(local_user)) => {
-                tracing::info!("Creating remote user from local");
-                self.remote.save(&local_user).await?;
-            },
-            (Some(remote_data), Some(mut local_user)) => {
-                local_user.merge(&remote_data.0);
-                self.save_local_and_sync_remote(&local_user).await?;
-            },
-            (None, None) => {
-                tracing::warn!("No user found locally or remotely");
-            },
-        }
-
-        Ok(())
+        sync_merge(&self.local, &self.remote, &self.meta).await
     }
 
-    async fn save_local_and_sync_remote(&self, user: &User) -> Result<(), OrigaError> {
-        self.local.save(user).await?;
-
-        let updated_user =
-            self.local
-                .get_current_user()
-                .await?
-                .ok_or_else(|| OrigaError::RepositoryError {
-                    reason: "User not found after local save".to_string(),
-                })?;
-        self.remote.save(&updated_user).await?;
-        Ok(())
+    /// Marks the local user record as mutated: the next sync must take the
+    /// full merge path. Called after every user-action write (`save`,
+    /// `save_sync`) — the store write is a tiny IndexedDB record, accepted
+    /// per ADR-045 (future work: co-locate it with the user write in one
+    /// transaction).
+    async fn mark_local_dirty(&self) {
+        if let Err(e) = mark_dirty(&self.meta).await {
+            tracing::warn!("Failed to persist sync dirty flag: {e:?}");
+        }
     }
 
     /// Delete the remote user record only. Unlike `delete`, this does NOT
@@ -75,8 +59,155 @@ impl HybridUserRepository {
         let id = user_id.ok_or_else(|| OrigaError::RepositoryError {
             reason: "Cannot delete account: no user is currently loaded".to_string(),
         })?;
+        // The sync meta belongs to the deleted account: reset it so a future
+        // login cannot inherit a stale skip fingerprint.
+        if let Err(e) = self.meta.store(&SyncMeta::unsynced()).await {
+            tracing::warn!("Failed to reset sync meta after account deletion: {e:?}");
+        }
         self.remote.delete(id).await
     }
+}
+
+/// Loads, dirties and persists the meta in one step. Returns the stored
+/// state so the caller can capture `dirty_epoch` **after** its own
+/// `mark_dirty` for the CAS check in `record_sync` (ADR-045).
+async fn mark_dirty(meta_store: &impl SyncMetaStore) -> Result<SyncMeta, OrigaError> {
+    let mut meta = meta_store.load().await?;
+    meta.mark_dirty();
+    meta_store.store(&meta).await?;
+    Ok(meta)
+}
+
+/// Cheap existence check for the local user record, used by the sync
+/// skip-path: the short-circuit must not fire when the local store is
+/// missing or corrupted, because the full path is what re-seeds it
+/// (ADR-045). Implemented via an IndexedDB key count — no user parsing.
+pub(crate) trait LocalUserPresence {
+    fn has_any_user(&self) -> impl Future<Output = Result<bool, OrigaError>>;
+}
+
+/// The sync orchestration core (ADR-045), generic over the repositories so
+/// it runs against in-memory spies in native tests.
+///
+/// Steady state (nothing changed since the last successful sync) costs one
+/// raw remote fetch plus a fingerprint comparison — the multi-megabyte
+/// inflate/parse/serialize cycle of a large knowledge set never runs. Any
+/// difference takes the full path: decode the remote row, merge into the
+/// local user, push, then record the **server-authoritative** fingerprint
+/// re-fetched after the push.
+pub(crate) async fn sync_merge(
+    local: &(impl UserRepository + LocalUserPresence),
+    remote: &impl RemoteUserSource,
+    meta_store: &impl SyncMetaStore,
+) -> Result<(), OrigaError> {
+    let raw = remote.find_current_raw().await?;
+
+    let Some(remote_row) = raw else {
+        // No remote record: seed the server from local (fresh install or a
+        // remote wiped elsewhere).
+        match local.get_current_user().await? {
+            Some(local_user) => {
+                tracing::info!("Creating remote user from local");
+                remote.create(&local_user).await?;
+                record_post_create_fingerprint(remote, meta_store).await?;
+            },
+            None => tracing::warn!("No user found locally or remotely"),
+        }
+        return Ok(());
+    };
+
+    // The skip requires a present local record: when the local store has
+    // no user key, the merge below is the recovery path that re-seeds it
+    // from the remote row, and skipping it would strand the user with a
+    // clean fingerprint and no local data (ADR-045). The probe is a keyed
+    // count — a corrupted-but-present record is NOT detected here (see the
+    // ADR threat model for the residual risk).
+    let meta = meta_store.load().await?;
+    let local_exists = local.has_any_user().await?;
+    if meta.should_skip(&remote_row.fingerprint) && local_exists {
+        tracing::debug!("Sync skipped: remote unchanged since last sync");
+        return Ok(());
+    }
+
+    let record_id = remote_row.record_id;
+    // Captured before `into_user` consumes the row: the restore branch
+    // below records the fetched fingerprint without a redundant push.
+    let remote_fingerprint = remote_row.fingerprint.clone();
+    let remote_user = remote_row.into_user()?;
+
+    match local.get_current_user().await? {
+        None => {
+            tracing::info!("Restoring local user from remote");
+            // The local content is seeded from the fetched row, so pushing
+            // it back would ship megabytes of identical data. Write the
+            // local record and record the fetched fingerprint directly;
+            // concurrent server writes surface as a fingerprint change on
+            // the next sync.
+            let meta = mark_dirty(meta_store).await?;
+            let observed_epoch = meta.dirty_epoch;
+            local.save(&remote_user).await?;
+            let mut meta = meta_store.load().await?;
+            meta.record_sync(remote_fingerprint, observed_epoch);
+            meta_store.store(&meta).await?;
+            Ok(())
+        },
+        Some(mut local_user) => {
+            tracing::info!("Merging remote into local user");
+            local_user.merge(&remote_user);
+            full_sync_cycle(local, remote, meta_store, local_user, record_id).await
+        },
+    }
+}
+
+/// The full path: mark dirty (crash-safety), write local, push remote, then
+/// record the server-authoritative fingerprint with the epoch captured
+/// after the own `mark_dirty` (concurrent mutations keep the flag set).
+async fn full_sync_cycle(
+    local: &impl UserRepository,
+    remote: &impl RemoteUserSource,
+    meta_store: &impl SyncMetaStore,
+    user: User,
+    record_id: i64,
+) -> Result<(), OrigaError> {
+    // Dirty BEFORE the local write: a crash between the local save and the
+    // remote push must leave the flag set so the next sync re-pushes.
+    let meta = mark_dirty(meta_store).await?;
+    let observed_epoch = meta.dirty_epoch;
+
+    local.save(&user).await?;
+    remote.save_with_record_id(record_id, &user).await?;
+
+    record_sync_fingerprint(remote, meta_store, observed_epoch).await
+}
+
+/// Re-fetches the raw row and records its fingerprint. The fingerprint is
+/// server-authoritative on purpose: deriving it from the request body would
+/// silently break skip matching whenever the server normalizes anything on
+/// storage.
+async fn record_sync_fingerprint(
+    remote: &impl RemoteUserSource,
+    meta_store: &impl SyncMetaStore,
+    observed_epoch: u64,
+) -> Result<(), OrigaError> {
+    let mut meta = meta_store.load().await?;
+    match remote.find_current_raw().await? {
+        Some(fresh) => {
+            meta.record_sync(fresh.fingerprint, observed_epoch);
+            meta_store.store(&meta).await?;
+        },
+        None => tracing::warn!("Remote row vanished after push; sync meta left dirty"),
+    }
+    Ok(())
+}
+
+/// Post-create variant: identical epoch semantics, but no local write —
+/// the local user already exists by construction.
+async fn record_post_create_fingerprint(
+    remote: &impl RemoteUserSource,
+    meta_store: &impl SyncMetaStore,
+) -> Result<(), OrigaError> {
+    let meta = mark_dirty(meta_store).await?;
+    record_sync_fingerprint(remote, meta_store, meta.dirty_epoch).await
 }
 
 impl UserRepository for HybridUserRepository {
@@ -94,6 +225,11 @@ impl UserRepository for HybridUserRepository {
     // correctly attributed to the right identity.
     async fn save(&self, user: &User) -> Result<(), OrigaError> {
         tracing::info!("save: Starting local save for user {}", user.id());
+        // Dirty BEFORE the local write — the same crash-safety invariant as
+        // the full sync cycle: a crash between the write and the flag must
+        // leave the flag set, otherwise the next sync silently skips and
+        // the written data is never pushed (ADR-045).
+        self.mark_local_dirty().await;
         self.local.save(user).await?;
         tracing::info!("save: Local save completed for user {}", user.id());
         Ok(())
@@ -111,6 +247,12 @@ impl UserRepository for HybridUserRepository {
     // record and the next device's login found nothing to merge against.
     async fn save_sync(&self, user: &User) -> Result<(), OrigaError> {
         tracing::info!("save_sync: Starting save for user {}", user.id());
+        // Dirty BEFORE the local write, and it stays set across the whole
+        // remote push: the push takes seconds for a large knowledge set
+        // (serialization + deflate + upload) — exactly the jetsam window
+        // this ADR exists for — and a crash there must not leave a clean
+        // meta that skips the next sync (ADR-045).
+        self.mark_local_dirty().await;
         self.local.save(user).await?;
         tracing::info!("save_sync: Local save completed for user {}", user.id());
 
@@ -124,6 +266,10 @@ impl UserRepository for HybridUserRepository {
         }
 
         tracing::info!("save_sync: Remote save completed for user {}", user.id());
+        // The push succeeded but its fingerprint is not recorded here: the
+        // next `merge_current_user` takes the full path (dirty) and records
+        // the server-authoritative fingerprint — one fewer raw fetch per
+        // checkpoint than recording inline (ADR-045).
         Ok(())
     }
 

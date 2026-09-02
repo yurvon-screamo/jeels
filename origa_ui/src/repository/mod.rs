@@ -3,18 +3,22 @@ pub mod cdn_provider;
 mod dictionary_cache;
 mod file_repository;
 mod hybrid_repository;
+#[cfg(all(test, target_arch = "wasm32"))]
+mod idb_sync_wasm_tests;
 mod knowledge_set_codec;
 pub(crate) mod legacy_migration;
 #[cfg(test)]
 pub(crate) mod session;
 #[cfg(not(test))]
 mod session;
+mod sync_meta_store;
 pub mod trailbase_auth;
 pub mod trailbase_client;
 pub(crate) mod trailbase_id;
 mod trailbase_records;
 mod trailbase_repository;
 pub mod trailbase_session;
+mod wire_fingerprint;
 
 pub use cdn_provider::cdn as cdn_provider;
 
