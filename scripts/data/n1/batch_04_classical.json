@@ -355,7 +355,7 @@
           "short_description": "Just like A (vivid simile)",
           "explanation": "An old adverb meaning just as if: 「さながら絵に描いたような夕焼け」 — a sunset just like a painting. Pairs with ～のようだ／～ごとく to sharpen the image.",
           "how_to_form": "| Position | Form | Example |\n|----------|------|---------|\n| Before simile | さながら + N + のようだ | さながら戦場のようだ |",
-          "examples": "```\n会場はさながらお祭りさわぎだった。\nThe venue was just like a festival.\n```\n\n```\nその光景はさながら地獄絵のごとくだった。\nThe scene was like a painting of hell itself.\n```",
+          "examples": "```\n会場はさながらお祭り騒ぎだった。\nThe venue was just like a festival.\n```\n\n```\nその光景はさながら地獄絵のごとくだった。\nThe scene was like a painting of hell itself.\n```",
           "nuances": {
             "common_mistakes": [
               {"wrong": "さながら alone without a simile ending", "correct": "It needs its partner: ～のようだ、～ごとし to complete the comparison", "note": null}
@@ -369,7 +369,7 @@
           "short_description": "Точно словно A (яркое сравнение)",
           "explanation": "Старинное наречие «точно словно»: 「さながら絵に描いたような夕焼け» — закат точь-в-точь как на картине. Работает в паре с ～のようだ／～ごとく, обостряя образ.",
           "how_to_form": "| Позиция | Форма | Пример |\n|----------|------|---------|\n| Перед сравнением | さながら + N + のようだ | さながら戦場のようだ |",
-          "examples": "```\n会場はさながらお祭りさわぎだった。\nЗал был точь-в-точь как народное гулянье.\n```\n\n```\nその光景はさながら地獄絵のごとくだった。\nЗрелище было словно с картины ада.\n```",
+          "examples": "```\n会場はさながらお祭り騒ぎだった。\nЗал был точь-в-точь как народное гулянье.\n```\n\n```\nその光景はさながら地獄絵のごとくだった。\nЗрелище было словно с картины ада.\n```",
           "nuances": {
             "common_mistakes": [
               {"wrong": "さながら без сравнения в конце", "correct": "Нужен партнёр: ～のようだ、～ごとし завершают сравнение", "note": null}

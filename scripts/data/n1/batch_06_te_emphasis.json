@@ -213,7 +213,7 @@
           "short_description": "Once A happens — that is it",
           "explanation": "Past た + が最後 locks in an irreversible result: 「彼に怒られたが最後、一日中落ち込む」 — once he scolds you, you sulk all day. The door slams; no return.",
           "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| た-form | Vた + が最後 / Vたら最後 | 始めたが最後 |\n| Set | これ最後 / ～たら最後だ | 食べたら最後 |",
-          "examples": "```\nこのゲーム、始めたら最後、朝までやめてしまわない。\nThis game — once you start, you cannot stop until morning.\n```\n\n```\n母に秘密がばれたが最後、全校に広まる。\nOnce mother learns a secret, it spreads to the whole school.\n```",
+          "examples": "```\nこのゲーム、始めたら最後、朝までやめられない。\nThis game — once you start, you cannot stop until morning.\n```\n\n```\n母に秘密がばれたが最後、全校に広まる。\nOnce mother learns a secret, it spreads to the whole school.\n```",
           "nuances": {
             "common_mistakes": [
               {"wrong": "Neutral past events", "correct": "The pattern demands a dramatic, unavoidable consequence", "note": null}
@@ -227,7 +227,7 @@
           "short_description": "Как только A случилось — всё",
           "explanation": "Прошедшее た + が最後 запирает необратимый результат: 「彼に怒られたが最後、一日中落ち込む» — стоит ему отчитать, и весь день подавлен. Дверь захлопнулась — возврата нет.",
           "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| た-форма | Vた + が最後 / Vたら最後 | 始めたが最後 |\n| Устойчивое | ～たら最後だ | 食べたら最後 |",
-          "examples": "```\nこのゲーム、始めたら最後、朝までやめてしまわない。\nЭта игра: начал — не остановишься до утра.\n```\n\n```\n母に秘密がばれたが最後、全校に広まる。\nРаз мама узнала секрет — узнает вся школа.\n```",
+          "examples": "```\nこのゲーム、始めたら最後、朝までやめられない。\nЭта игра: начал — не остановишься до утра.\n```\n\n```\n母に秘密がばれたが最後、全校に広まる。\nРаз мама узнала секрет — узнает вся школа.\n```",
           "nuances": {
             "common_mistakes": [
               {"wrong": "Нейтральные прошедшие события", "correct": "Нужен драматичный неизбежный итог", "note": null}

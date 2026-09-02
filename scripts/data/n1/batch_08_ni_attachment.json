@@ -2,7 +2,11 @@
   "rules": [
     {
       "level": "N1",
-      "keywords": [["にあって"]],
+      "keywords": [
+        [
+          "にあって"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にあって",
@@ -12,9 +16,18 @@
           "examples": "```\n彼は困難な状況にあって、なお笑顔を絶やさなかった。\nIn trying circumstances he never lost his smile.\n```\n\n```\n当時の社会にあって、女性の進学は珍しかった。\nIn the society of that time, women's higher education was rare.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Physical places (公園にあって)", "correct": "Abstract circumstances and eras, not locations", "note": null}
+              {
+                "wrong": "Physical places (公園にあって)",
+                "correct": "Abstract circumstances and eras, not locations",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Essays and biographies; では is the everyday version."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Essays and biographies; では is the everyday version."
+              }
+            ]
           },
           "pro_tip": "にあって sets a stage of circumstances — then the subject shines or struggles on it."
         },
@@ -26,9 +39,18 @@
           "examples": "```\n彼は困難な状況にあって、なお笑顔を絶やさなかった。\nВ тяжелейших обстоятельствах он не терял улыбки.\n```\n\n```\n当時の社会にあって、女性の進学は珍しかった。\nВ тогдашнем обществе высшее образование женщин было редкостью.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Физические места (公園にあって)", "correct": "Абстрактные обстоятельства и эпохи, не локации", "note": null}
+              {
+                "wrong": "Физические места (公園にあって)",
+                "correct": "Абстрактные обстоятельства и эпохи, не локации",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Эссе и биографии; бытовая версия — では."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Эссе и биографии; бытовая версия — では."
+              }
+            ]
           },
           "pro_tip": "にあって расставляет декорации обстоятельств — а субъект на них блистает или бьётся."
         }
@@ -36,7 +58,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["にあっては"]],
+      "keywords": [
+        [
+          "にあっては"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にあっては",
@@ -46,9 +72,18 @@
           "examples": "```\nこの職人にあっては、不可能という言葉がない。\nFor this artisan, the word impossible does not exist.\n```\n\n```\n母にあっては、家族の病気は見過ごせない。\nWith my mother, no family illness ever goes unnoticed.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Neutral topics", "correct": "The noun carries exceptional weight — mastery or absolute care", "note": null}
+              {
+                "wrong": "Neutral topics",
+                "correct": "The noun carries exceptional weight — mastery or absolute care",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "に至っては (up to the point of) shares the shape but reports an extreme case, often negative."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "に至っては (up to the point of) shares the shape but reports an extreme case, often negative."
+              }
+            ]
           },
           "pro_tip": "Use it as a pedestal: the noun stands on it, everyone else looks up."
         },
@@ -60,9 +95,18 @@
           "examples": "```\nこの職人にあっては、不可能という言葉がない。\nДля этого мастера слова «невозможно» не существует.\n```\n\n```\n母にあっては、家族の病気は見過ごせない。\nПри моей матери ни одна болезнь семьи не останется незамеченной.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Нейтральные темы", "correct": "Существительное несёт исключительный вес — мастерство или абсолютную заботу", "note": null}
+              {
+                "wrong": "Нейтральные темы",
+                "correct": "Существительное несёт исключительный вес — мастерство или абсолютную заботу",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "に至っては («вплоть до») похоже формой, но сообщает крайний случай, чаще негативный."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "に至っては («вплоть до») похоже формой, но сообщает крайний случай, чаще негативный."
+              }
+            ]
           },
           "pro_tip": "Используйте как пьедестал: существительное на нём, остальные смотрят снизу вверх."
         }
@@ -70,19 +114,32 @@
     },
     {
       "level": "N1",
-      "keywords": [["にして"]],
+      "keywords": [
+        [
+          "にして"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にして",
           "short_description": "At A (remarkable point); even A",
           "explanation": "Noun + にして marks a striking point or an even-case: 「四十にして初めて父の気持ちが分かった」 — at forty, finally understood my father. Also 「天才にして初めて…」 — even a genius only then….",
           "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Time/age noun | N + にして | 三十にして |\n| Even-case | N + にして + 初めて/ようやく | 天才にして初めて |",
-          "examples": "```\n彼は研究十年にして、ようやく成果を出した。\nOnly at ten years of research did he finally produce results.\n```\n\n```\nこの事故は、専門家にして予測不能だった。\nThis accident was unpredictable even for experts.\n```",
+          "examples": "```\n彼は十年の研究にして、ようやく成果を上げた。\nOnly at ten years of research did he finally produce results.\n```\n\n```\nこの事故は、専門家にして予測不能だった。\nThis accident was unpredictable even for experts.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Routine ages (二十歳にして大学生になった)", "correct": "The moment must be remarkable — a turning point or an even-so case", "note": null}
+              {
+                "wrong": "Routine ages (二十歳にして大学生になった)",
+                "correct": "The moment must be remarkable — a turning point or an even-so case",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Elevated written style; のにして shapes like 初めてにして are pure set drama."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Elevated written style; のにして shapes like 初めてにして are pure set drama."
+              }
+            ]
           },
           "pro_tip": "Two readings to check: at (a watershed) and even (a paragon) — both make the noun remarkable."
         },
@@ -91,12 +148,21 @@
           "short_description": "В A (примечательная точка); даже A",
           "explanation": "Сущ. + にして помечает поразительную точку или «даже-случай»: 「四十にして初めて父の気持ちが分かった» — в сорок впервые понял отца. Также 「天才にして初めて…» — даже гению лишь тогда…",
           "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Время/возраст | N + にして | 三十にして |\n| Даже-случай | N + にして + 初めて/ようやく | 天才にして初めて |",
-          "examples": "```\n彼は研究十年にして、ようやく成果を出した。\nЛишь на десятом году исследований он наконец получил результат.\n```\n\n```\nこの事故は、専門家にして予測不能だった。\nЭта авария была непредсказуема даже для экспертов.\n```",
+          "examples": "```\n彼は十年の研究にして、ようやく成果を上げた。\nЛишь на десятом году исследований он наконец получил результат.\n```\n\n```\nこの事故は、専門家にして予測不能だった。\nЭта авария была непредсказуема даже для экспертов.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Рутина (二十歳にして大学生になった)", "correct": "Момент должен быть замечательным — перелом или «даже так»", "note": null}
+              {
+                "wrong": "Рутина (二十歳にして大学生になった)",
+                "correct": "Момент должен быть замечательным — перелом или «даже так»",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Высокий письменный стиль; 初めてにして — чистая драматическая формула."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Высокий письменный стиль; 初めてにして — чистая драматическая формула."
+              }
+            ]
           },
           "pro_tip": "Два прочтения: «в (переломный момент)» и «даже (образец)» — оба делают существительное примечательным."
         }
@@ -104,7 +170,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["にして初めて"]],
+      "keywords": [
+        [
+          "にして初めて"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にして初めて",
@@ -114,9 +184,18 @@
           "examples": "```\n失敗にして初めて、自分の甘さを知った。\nOnly through failure did I learn my own softness.\n```\n\n```\n海外に住んで初めて、祖国の良さが分かった。\nOnly living abroad did I appreciate my homeland.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Instantly knowable facts", "correct": "The knowledge unlocks only through the experience named", "note": null}
+              {
+                "wrong": "Instantly knowable facts",
+                "correct": "The knowledge unlocks only through the experience named",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "The ～て初めて variant (N3) is the everyday sibling; にして初めて elevates it."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "The ～て初めて variant (N3) is the everyday sibling; にして初めて elevates it."
+              }
+            ]
           },
           "pro_tip": "The noun is a door: knowledge exists only on its other side."
         },
@@ -128,9 +207,18 @@
           "examples": "```\n失敗にして初めて、自分の甘さを知った。\nЛишь через провал я узнал собственную беспечность.\n```\n\n```\n海外に住んで初めて、祖国の良さが分かった。\nЛишь пожив за границей, оценил родину.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Мгновенно узнаваемые факты", "correct": "Знание отпирается только названным опытом", "note": null}
+              {
+                "wrong": "Мгновенно узнаваемые факты",
+                "correct": "Знание отпирается только названным опытом",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Разговорный брат ——て初めて (N3); にして初めて его возвышает."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Разговорный брат ——て初めて (N3); にして初めて его возвышает."
+              }
+            ]
           },
           "pro_tip": "Существительное — дверь: знание существует только по её другую сторону."
         }
@@ -138,7 +226,12 @@
     },
     {
       "level": "N1",
-      "keywords": [["ですら", "すら"]],
+      "keywords": [
+        [
+          "ですら",
+          "すら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～（で）すら",
@@ -148,9 +241,18 @@
           "examples": "```\n忙しくて、食事をする時間すらなかった。\nSo busy there was not even time to eat.\n```\n\n```\n彼は恩師の名前すら忘れてしまった。\nHe even forgot his mentor's name.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Mixing with も in the same slot", "correct": "すら replaces が／を — keep particles consistent", "note": null}
+              {
+                "wrong": "Mixing with も in the same slot",
+                "correct": "すら replaces が／を — keep particles consistent",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Written; さえ (N3) is the neutral everyday even."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Written; さえ (N3) is the neutral everyday even."
+              }
+            ]
           },
           "pro_tip": "If the sentence sighs even the bare minimum failed — that is すら's territory."
         },
@@ -162,9 +264,18 @@
           "examples": "```\n忙しくて、食事をする時間すらなかった。\nТак занят, что даже поесть времени не было.\n```\n\n```\n彼は恩師の名前すら忘れてしまった。\nОн даже имя своего наставника забыл.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Смешивать с も в одном слоте", "correct": "すら заменяет が／を — держите частицы согласованными", "note": null}
+              {
+                "wrong": "Смешивать с も в одном слоте",
+                "correct": "すら заменяет が／を — держите частицы согласованными",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Письменно; нейтральное бытовое «даже» — さえ (N3)."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Письменно; нейтральное бытовое «даже» — さえ (N3)."
+              }
+            ]
           },
           "pro_tip": "Если предложение вздыхает «даже минимум не удался» — это территория すら."
         }
@@ -172,7 +283,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["にもまして"]],
+      "keywords": [
+        [
+          "にもまして"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にもまして",
@@ -182,9 +297,18 @@
           "examples": "```\n今年の夏は、去年にもまして暑い。\nThis summer is even hotter than last year's.\n```\n\n```\n彼女はいつにもまして、輝いて見えた。\nShe looked more radiant than ever.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Plain comparisons of two different items", "correct": "The pattern compares against a past or usual state of the same thing", "note": null}
+              {
+                "wrong": "Plain comparisons of two different items",
+                "correct": "The pattern compares against a past or usual state of the same thing",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "いつにもまして is the set phrase to memorize first."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "いつにもまして is the set phrase to memorize first."
+              }
+            ]
           },
           "pro_tip": "Think than ever: the bar is the same thing's own history."
         },
@@ -196,9 +320,18 @@
           "examples": "```\n今年の夏は、去年にもまして暑い。\nЭтим летом жарче, чем прошлым.\n```\n\n```\n彼女はいつにもまして、輝いて見えた。\nОна выглядела ослепительнее, чем всегда.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Сравнение двух разных предметов", "correct": "Сравнение с прошлым или обычным состоянием того же предмета", "note": null}
+              {
+                "wrong": "Сравнение двух разных предметов",
+                "correct": "Сравнение с прошлым или обычным состоянием того же предмета",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "いつにもまして — фраза для заучивания номер один."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "いつにもまして — фраза для заучивания номер один."
+              }
+            ]
           },
           "pro_tip": "Думайте «чем когда-либо»: планка — собственная история того же предмета."
         }
@@ -206,7 +339,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["にひきかえ"]],
+      "keywords": [
+        [
+          "にひきかえ"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にひきかえ",
@@ -216,9 +353,18 @@
           "examples": "```\n去年の不調にひきかえ、今季は絶好調だ。\nIn sharp contrast to last year's slump, this season is on fire.\n```\n\n```\n姉が静かなのにひきかえ、妹はおしゃべりだ。\nWhere the elder sister is quiet, the younger is a chatterbox.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Neutral comparisons", "correct": "にひきかえ stresses a striking opposition — surprise is required", "note": null}
+              {
+                "wrong": "Neutral comparisons",
+                "correct": "にひきかえ stresses a striking opposition — surprise is required",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Commentary and essays; 反面 (N2) reports both sides without the drama."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Commentary and essays; 反面 (N2) reports both sides without the drama."
+              }
+            ]
           },
           "pro_tip": "The pattern is a split screen: left noun, right noun, audience gasps at the gap."
         },
@@ -230,9 +376,18 @@
           "examples": "```\n去年の不調にひきかえ、今季は絶好調だ。\nВ разительный контраст с прошлогодним спадом, этот сезон горит.\n```\n\n```\n姉が静かなのにひきかえ、妹はおしゃべりだ。\nСтаршая сестра тихоня — младшая трещит без умолку.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Нейтральные сравнения", "correct": "にひきかえ подчёркивает поразительную противоположность — нужно удивление", "note": null}
+              {
+                "wrong": "Нейтральные сравнения",
+                "correct": "にひきかえ подчёркивает поразительную противоположность — нужно удивление",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Комментарии и эссе; 反面 (N2) сообщает обе стороны без драмы."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Комментарии и эссе; 反面 (N2) сообщает обе стороны без драмы."
+              }
+            ]
           },
           "pro_tip": "Конструкция — split-screen: слева одно существительное, справа другое, зритель ахает от разрыва."
         }
@@ -240,7 +395,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に他ならない"]],
+      "keywords": [
+        [
+          "に他ならない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に他ならない",
@@ -250,9 +409,18 @@
           "examples": "```\nその成功は、努力の積み重ねに他ならない。\nThat success is nothing other than piled-up effort.\n```\n\n```\nこの規則は、利用者への配慮に他ならない。\nThis rule is nothing less than consideration for users.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Casual identification", "correct": "It is formal written insistence — です／だ suffice in speech", "note": null}
+              {
+                "wrong": "Casual identification",
+                "correct": "It is formal written insistence — です／だ suffice in speech",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Essays, explanations, official commentary."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Essays, explanations, official commentary."
+              }
+            ]
           },
           "pro_tip": "他ならない literally: not another — the definition closes all other doors."
         },
@@ -264,9 +432,18 @@
           "examples": "```\nその成功は、努力の積み重ねに他ならない。\nЭтот успех — не что иное, как накопленный труд.\n```\n\n```\nこの規則は、利用者への配慮に他ならない。\nЭто правило — не что иное, как забота о пользователях.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Бытовое отождествление", "correct": "Формальная письменная настойчивость; в речи хватает です／だ", "note": null}
+              {
+                "wrong": "Бытовое отождествление",
+                "correct": "Формальная письменная настойчивость; в речи хватает です／だ",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Эссе, разъяснения, официальные комментарии."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Эссе, разъяснения, официальные комментарии."
+              }
+            ]
           },
           "pro_tip": "他ならない буквально «не другое»: определение закрывает все прочие двери."
         }
@@ -274,7 +451,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に相違ない"]],
+      "keywords": [
+        [
+          "に相違ない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に相違ない",
@@ -284,9 +465,18 @@
           "examples": "```\nこの筆跡から見て、彼が書いたに相違ない。\nJudging by the handwriting, he certainly wrote it.\n```\n\n```\n記録が改ざんされたに相違ない。\nThe records must have been altered.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Spoken conversation", "correct": "Written/detective register; say に違いない in speech", "note": null}
+              {
+                "wrong": "Spoken conversation",
+                "correct": "Written/detective register; say に違いない in speech",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Reports and formal argumentation; same certainty, stiffer collar."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Reports and formal argumentation; same certainty, stiffer collar."
+              }
+            ]
           },
           "pro_tip": "Same logical engine as に違いない (N3) — this one wears the suit."
         },
@@ -298,9 +488,18 @@
           "examples": "```\nこの筆跡から見て、彼が書いたに相違ない。\nСудя по почерку, писал несомненно он.\n```\n\n```\n記録が改ざんされたに相違ない。\nЗаписи без сомнения были подделаны.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Устная беседа", "correct": "Письменный/детективный регистр; в речи — に違いない", "note": null}
+              {
+                "wrong": "Устная беседа",
+                "correct": "Письменный/детективный регистр; в речи — に違いない",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Отчёты и формальная аргументация; та же уверенность, жёсткий воротник."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Отчёты и формальная аргументация; та же уверенность, жёсткий воротник."
+              }
+            ]
           },
           "pro_tip": "Тот же логический мотор, что у に違いない (N3), — но в костюме."
         }
@@ -308,7 +507,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に先駆けて"]],
+      "keywords": [
+        [
+          "に先駆けて"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に先駆けて",
@@ -318,9 +521,18 @@
           "examples": "```\n公演に先駆けて、記者会見が開かれた。\nAhead of the performance, a press conference was held.\n```\n\n```\n姉に先駆けて、妹も大学に入学した。\nFollowing in her elder sister's pioneering footsteps, the younger sister also entered university.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "に先立って interchange nuance", "correct": "Both mean before, but 先駆けて adds pioneering/precedent flavor", "note": null}
+              {
+                "wrong": "に先立って interchange nuance",
+                "correct": "Both mean before, but 先駆けて adds pioneering/precedent flavor",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Product and event prose: 発売／開業／公演 + に先駆けて."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Product and event prose: 発売／開業／公演 + に先駆けて."
+              }
+            ]
           },
           "pro_tip": "The noun is the crowd; the subject walks in first."
         },
@@ -332,9 +544,18 @@
           "examples": "```\n公演に先駆けて、記者会見が開かれた。\nДо спектакля провели пресс-конференцию.\n```\n\n```\n姉に先駆けて、妹も大学に入学した。\nПо следам старшей сестры-пионера младшая тоже поступила в университет.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Полное отождествление с に先立って", "correct": "Оба — «до», но 先駆けて добавляет оттенок первопроходца/прецедента", "note": null}
+              {
+                "wrong": "Полное отождествление с に先立って",
+                "correct": "Оба — «до», но 先駆けて добавляет оттенок первопроходца/прецедента",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Продуктовая и событийная проза: 発売／開業／公演 + に先駆けて."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Продуктовая и событийная проза: 発売／開業／公演 + に先駆けて."
+              }
+            ]
           },
           "pro_tip": "Существительное — толпа; субъект входит первым."
         }
@@ -342,7 +563,12 @@
     },
     {
       "level": "N1",
-      "keywords": [["に堪える", "に堪えない"]],
+      "keywords": [
+        [
+          "に堪える",
+          "に堪えない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に堪えない／～に耐えない",
@@ -352,9 +578,18 @@
           "examples": "```\nその光景は、見るに堪えなかった。\nThe scene was unbearable to watch.\n```\n\n```\n彼の演奏は、聴くに耐えないひどさだった。\nHis playing was too terrible to listen to.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Physical endurance (暑さに堪えない)", "correct": "This pattern grades aesthetics/emotional tolerance; physical endurance uses に耐えられる", "note": null}
+              {
+                "wrong": "Physical endurance (暑さに堪えない)",
+                "correct": "This pattern grades aesthetics/emotional tolerance; physical endurance uses に耐えられる",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Criticism and reviews; 見るに堪えない is the stock phrase."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Criticism and reviews; 見るに堪えない is the stock phrase."
+              }
+            ]
           },
           "pro_tip": "Two sets: ～に堪えない (cannot bear — negative judgment) and ～に耐える (worth ~ing — rare positive)."
         },
@@ -366,9 +601,18 @@
           "examples": "```\nその光景は、見るに堪えなかった。\nЗрелище было невыносимо смотреть.\n```\n\n```\n彼の演奏は、聴くに耐えないひどさだった。\nЕго игра была настолько плоха, что слушать не было сил.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Физическая выносливость (暑さに堪えない)", "correct": "Конструкция оценивает эстетическую/эмоциональную выносимость; физика — に耐えられる", "note": null}
+              {
+                "wrong": "Физическая выносливость (暑さに堪えない)",
+                "correct": "Конструкция оценивает эстетическую/эмоциональную выносимость; физика — に耐えられる",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Критика и рецензии; 見るに堪えない — фирменная фраза."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Критика и рецензии; 見るに堪えない — фирменная фраза."
+              }
+            ]
           },
           "pro_tip": "Два комплекта: ～に堪えない (невыносимо — негатив) и ～に耐える (стоит ~ — редкий позитив)."
         }
@@ -376,7 +620,12 @@
     },
     {
       "level": "N1",
-      "keywords": [["に足る", "に足りない"]],
+      "keywords": [
+        [
+          "に足る",
+          "に足りない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に足る／～に足りない",
@@ -386,9 +635,18 @@
           "examples": "```\n彼は賞賛に足る業績を残した。\nHe left achievements worthy of praise.\n```\n\n```\nそんな小事は、恐れるに足りない。\nSuch a trifle is not worth fearing.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "に足る with nouns (愛に足る)", "correct": "Attach to verb stems: 信頼するに足る", "note": null}
+              {
+                "wrong": "に足る with nouns (愛に足る)",
+                "correct": "Attach to verb stems: 信頼するに足る",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Formal appraisal language — recommendations and critique."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Formal appraisal language — recommendations and critique."
+              }
+            ]
           },
           "pro_tip": "足る = to suffice: the action meets the bar, or does not."
         },
@@ -400,9 +658,18 @@
           "examples": "```\n彼は賞賛に足る業績を残した。\nОн оставил достижения, достойные похвалы.\n```\n\n```\nそんな小事は、恐れるに足りない。\nТакая мелочь страха не стоит.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "に足る с существительными (愛に足る)", "correct": "Только основы глаголов: 信頼するに足る", "note": null}
+              {
+                "wrong": "に足る с существительными (愛に足る)",
+                "correct": "Только основы глаголов: 信頼するに足る",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Формальный язык оценок — рекомендации и критика."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Формальный язык оценок — рекомендации и критика."
+              }
+            ]
           },
           "pro_tip": "足る = «достаточно»: действие дотягивается до планки — или нет."
         }
@@ -410,7 +677,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に難くない"]],
+      "keywords": [
+        [
+          "に難くない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に難くない",
@@ -420,9 +691,18 @@
           "examples": "```\n彼が怒った理由は、推測するに難くない。\nThe reason he got angry is not hard to guess.\n```\n\n```\n当時の苦労は、想像するに難くない。\nThe hardships of those days are easy enough to imagine.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Physical tasks (運転するに難くない)", "correct": "Mental acts only: imagine, understand, infer", "note": null}
+              {
+                "wrong": "Physical tasks (運転するに難くない)",
+                "correct": "Mental acts only: imagine, understand, infer",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Written argumentation; the reader is invited to agree."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Written argumentation; the reader is invited to agree."
+              }
+            ]
           },
           "pro_tip": "The pattern politely says you already know — imagination does the work."
         },
@@ -434,9 +714,18 @@
           "examples": "```\n彼が怒った理由は、推測するに難くない。\nПричину его гнева нетрудно угадать.\n```\n\n```\n当時の苦労は、想像するに難くない。\nТяготы тех лет представить себе нетрудно.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Физические задачи (運転するに難くない)", "correct": "Только умственные акты: представить, понять, вывести", "note": null}
+              {
+                "wrong": "Физические задачи (運転するに難くない)",
+                "correct": "Только умственные акты: представить, понять, вывести",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Письменная аргументация; читателя мягко приглашают согласиться."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Письменная аргументация; читателя мягко приглашают согласиться."
+              }
+            ]
           },
           "pro_tip": "Конструкция вежливо говорит: вы и так знаете — воображение сделает всё само."
         }
@@ -444,7 +733,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に鑑みて"]],
+      "keywords": [
+        [
+          "に鑑みて"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に鑑みて",
@@ -454,9 +747,18 @@
           "examples": "```\n売上の落ち込みに鑑みて、価格戦略を見直した。\nIn view of falling sales, we revisited pricing.\n```\n\n```\n健康への影響に鑑み、利用を制限した。\nConsidering the health impact, use was restricted.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Casual reasons", "correct": "It belongs to official deliberation; から／ので cover chat", "note": null}
+              {
+                "wrong": "Casual reasons",
+                "correct": "It belongs to official deliberation; から／ので cover chat",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Notices and reports; に鑑み without て is the compact variant."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Notices and reports; に鑑み without て is the compact variant."
+              }
+            ]
           },
           "pro_tip": "鑑みる = to hold up and look: the committee looks at the fact, then decides."
         },
@@ -468,9 +770,18 @@
           "examples": "```\n売上の落ち込みに鑑みて、価格戦略を見直した。\nВвиду падения продаж пересмотрели ценовую стратегию.\n```\n\n```\n健康への影響に鑑み、利用を制限した。\nПринимая во внимание влияние на здоровье, использование ограничили.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Бытовые причины", "correct": "Это территория официальных решений; в беседе — から／ので", "note": null}
+              {
+                "wrong": "Бытовые причины",
+                "correct": "Это территория официальных решений; в беседе — から／ので",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Объявления и отчёты; に鑑み без て — компактный вариант."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Объявления и отчёты; に鑑み без て — компактный вариант."
+              }
+            ]
           },
           "pro_tip": "鑑みる = «взглянуть, держа перед собой»: комитет смотрит на факт — и решает."
         }
@@ -478,7 +789,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に関わる"]],
+      "keywords": [
+        [
+          "に関わる"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に関わる",
@@ -488,9 +803,18 @@
           "examples": "```\nそれは会社の存続に関わる重大な決断だ。\nIt is a grave decision concerning the company's survival.\n```\n\n```\n人に関わる仕事には、責任が伴う。\nWork that touches people's lives carries responsibility.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Trivial topics (天気に関わる)", "correct": "The noun must carry stakes — life, honor, survival", "note": null}
+              {
+                "wrong": "Trivial topics (天気に関わる)",
+                "correct": "The noun must carry stakes — life, honor, survival",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Do not confuse with ～に関わらず (regardless of) — different suffix family."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Do not confuse with ～に関わらず (regardless of) — different suffix family."
+              }
+            ]
           },
           "pro_tip": "If the sentence loses nothing with について, it did not need に関わる."
         },
@@ -502,9 +826,18 @@
           "examples": "```\nそれは会社の存続に関わる重大な決断だ。\nЭто серьёзное решение, от которого зависит само существование компании.\n```\n\n```\n人に関わる仕事には、責任が伴う。\nРабота, связанная с людьми, несёт с собой ответственность.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Мелкие темы (天気に関わる)", "correct": "Существительное должно нести ставки: жизнь, честь, выживание", "note": null}
+              {
+                "wrong": "Мелкие темы (天気に関わる)",
+                "correct": "Существительное должно нести ставки: жизнь, честь, выживание",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Не путать с ～に関わらず («независимо от») — другое семейство суффиксов."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Не путать с ～に関わらず («независимо от») — другое семейство суффиксов."
+              }
+            ]
           },
           "pro_tip": "Если предложение ничего не теряет при замене на について — に関わる ему было не нужно."
         }
@@ -512,7 +845,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に越したことはない"]],
+      "keywords": [
+        [
+          "に越したことはない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に越したことはない",
@@ -522,9 +859,18 @@
           "examples": "```\n体は、鍛えておくに越したことはない。\nFor the body, there is nothing better than keeping it trained.\n```\n\n```\n現金は持たないに越したことはない、と言う人もいる。\nSome say carrying no cash is best of all.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Matters of taste", "correct": "It gives pragmatic counsel, not aesthetic preference", "note": null}
+              {
+                "wrong": "Matters of taste",
+                "correct": "It gives pragmatic counsel, not aesthetic preference",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Often closes advice: ～しておくに越したことはない."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Often closes advice: ～しておくに越したことはない."
+              }
+            ]
           },
           "pro_tip": "The phrase is a nod: yes, ideally — it concedes reality while recommending A."
         },
@@ -536,9 +882,18 @@
           "examples": "```\n体は、鍛えておくに越したことはない。\nДля тела лучше тренировок ничего не придумаешь.\n```\n\n```\n現金は持たないに越したことはない、と言う人もいる。\nЕсть и такие, кто говорит: лучше вовсе не носить наличные.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Вопросы вкуса", "correct": "Это прагматичный совет, не эстетическое предпочтение", "note": null}
+              {
+                "wrong": "Вопросы вкуса",
+                "correct": "Это прагматичный совет, не эстетическое предпочтение",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Часто завершает совет: ～しておくに越したことはない."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Часто завершает совет: ～しておくに越したことはない."
+              }
+            ]
           },
           "pro_tip": "Фраза — кивок: «да, в идеале»; она признаёт реальность, рекомендуя A."
         }
@@ -546,7 +901,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に限ったことではない"]],
+      "keywords": [
+        [
+          "に限ったことではない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に限ったことではない",
@@ -556,9 +915,18 @@
           "examples": "```\nこの問題は日本に限ったことではない。\nThis problem is not limited to Japan.\n```\n\n```\n寝坊は学生に限ったことではないだろう。\nOversleeping is hardly a students-only failing.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Praising generalizations", "correct": "It usually softens criticism or problematizes, not spreads fame", "note": null}
+              {
+                "wrong": "Praising generalizations",
+                "correct": "It usually softens criticism or problematizes, not spreads fame",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Spoken and written commentary; gentle whataboutism in frame."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Spoken and written commentary; gentle whataboutism in frame."
+              }
+            ]
           },
           "pro_tip": "The pattern widens the lens: one case becomes a class of cases."
         },
@@ -570,9 +938,18 @@
           "examples": "```\nこの問題は日本に限ったことではない。\nЭта проблема не ограничивается Японией.\n```\n\n```\n寝坊は学生に限ったことではないだろう。\nСонливость по утрам — вряд ли только студенческий грех.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Похвальные обобщения", "correct": "Обычно смягчает критику или проблематизирует, а не рассылает славу", "note": null}
+              {
+                "wrong": "Похвальные обобщения",
+                "correct": "Обычно смягчает критику или проблематизирует, а не рассылает славу",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Комментарии устные и письменные; мягкое вежливое «а другие чем лучше»."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Комментарии устные и письменные; мягкое вежливое «а другие чем лучше»."
+              }
+            ]
           },
           "pro_tip": "Конструкция расширяет кадр: один случай становится классом случаев."
         }
@@ -580,7 +957,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["に飽き足らず"]],
+      "keywords": [
+        [
+          "に飽き足らず"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に飽き足らず",
@@ -590,9 +971,18 @@
           "examples": "```\n彼は執筆に飽き足らず、講演も始めた。\nNot content with writing, he began lecturing too.\n```\n\n```\nその企業は国内市場に飽き足らず、世界へ打って出た。\nUnsatisfied with the domestic market, the company charged into the world.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Positive contentment", "correct": "The pattern needs the itch for more — restlessness", "note": null}
+              {
+                "wrong": "Positive contentment",
+                "correct": "The pattern needs the itch for more — restlessness",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Biographies and business chronicles."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Biographies and business chronicles."
+              }
+            ]
           },
           "pro_tip": "飽きる = to tire of: the subject tired of A before B ever began."
         },
@@ -604,9 +994,18 @@
           "examples": "```\n彼は執筆に飽き足らず、講演も始めた。\nНе удовольствовавшись писательством, он начал и читать лекции.\n```\n\n```\nその企業は国内市場に飽き足らず、世界へ打って出た。\nНе насытившись внутренним рынком, компания рванула на мировой.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Довольство", "correct": "Нужен зуд большего — беспокойство", "note": null}
+              {
+                "wrong": "Довольство",
+                "correct": "Нужен зуд большего — беспокойство",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Биографии и бизнес-хроники."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Биографии и бизнес-хроники."
+              }
+            ]
           },
           "pro_tip": "飽きる = «пресытиться»: субъект пресытился A ещё до того, как началось B."
         }

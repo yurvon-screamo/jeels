@@ -285,7 +285,7 @@
           "short_description": "As if meaning to A (mischief)",
           "explanation": "ない-stem + んとばかりに: behaving as though deliberately intending — 「逃げるんとばかりに窓から出た」 — went out the window as if meaning to escape. Implicates intent behind an action.",
           "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| ない-stem | V + んとばかりに | 言わんとばかりに |\n| ん + とばかり | 食べんとばかりに | 食べんとばかりに |",
-          "examples": "```\n彼は寝たふりをし、起きるんとばかりに背を向けた。\nHe feigned sleep, turning his back as if refusing to get up.\n```\n\n```\n今こそチャンスとばかりに、彼女は提案を切り出した。\nAs if thinking now is the chance, she launched her proposal.\n```",
+          "examples": "```\n彼は寝たふりをし、起きるまいとばかりに背を向けた。\nHe feigned sleep, turning his back as if refusing to get up.\n```\n\n```\n今こそチャンスとばかりに、彼女は提案を切り出した。\nAs if thinking now is the chance, she launched her proposal.\n```",
           "nuances": {
             "common_mistakes": [
               {"wrong": "Stated intentions", "correct": "とばかりに marks an unstated, read-between-the-lines intent", "note": null}
@@ -299,7 +299,7 @@
           "short_description": "Словно намереваясь A (умысел)",
           "explanation": "Основа без ない + んとばかりに: поведение «как будто нарочно» — 「逃げるんとばかりに窓から出た» — вылез в окно, явно намереваясь сбежать. Приписывает действию умысел.",
           "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Основа без ない | V + んとばかりに | 言わんとばかりに |\n| ん + とばかり | 食べんとばかりに | 食べんとばかりに |",
-          "examples": "```\n彼は寝たふりをし、起きるんとばかりに背を向けた。\nОн притворился спящим и отвернулся, точно отказываясь вставать.\n```\n\n```\n今こそチャンスとばかりに、彼女は提案を切り出した。\nРешив, что шанс именно сейчас, она выложила своё предложение.\n```",
+          "examples": "```\n彼は寝たふりをし、起きるまいとばかりに背を向けた。\nОн притворился спящим и отвернулся, точно отказываясь вставать.\n```\n\n```\n今こそチャンスとばかりに、彼女は提案を切り出した。\nРешив, что шанс именно сейчас, она выложила своё предложение.\n```",
           "nuances": {
             "common_mistakes": [
               {"wrong": "Заявленные намерения", "correct": "とばかりに помечает невысказанный, читаемый между строк умысел", "note": null}

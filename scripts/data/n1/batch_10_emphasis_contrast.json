@@ -2,7 +2,12 @@
   "rules": [
     {
       "level": "N1",
-      "keywords": [["あろうとも", "ようとも"]],
+      "keywords": [
+        [
+          "あろうとも",
+          "ようとも"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～（よ）うとも",
@@ -12,9 +17,18 @@
           "examples": "```\nたとえ失敗しようとも、挑戦したことには意味がある。\nEven if it fails, having tried means something.\n```\n\n```\n夜であろうとも早朝であろうとも、彼はすぐ返事をくれる。\nNight or early morning, he replies at once.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Dictionary form + とも (行くとも)", "correct": "Volitional required: 行こうとも", "note": null}
+              {
+                "wrong": "Dictionary form + とも (行くとも)",
+                "correct": "Volitional required: 行こうとも",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "ようが and ようと are interchangeable; ～うとも sounds the most resolute and written."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "ようが and ようと are interchangeable; ～うとも sounds the most resolute and written."
+              }
+            ]
           },
           "pro_tip": "The pattern is a raised shield: whatever comes, the second clause does not move."
         },
@@ -26,9 +40,18 @@
           "examples": "```\nたとえ失敗しようとも、挑戦したことには意味がある。\nДаже если не выйдет — сама попытка чего-то стоит.\n```\n\n```\n夜であろうとも早朝であろうとも、彼はすぐ返事をくれる。\nНочь или раннее утро — он отвечает мгновенно.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Словарная форма + とも (行くとも)", "correct": "Нужен волитив: 行こうとも", "note": null}
+              {
+                "wrong": "Словарная форма + とも (行くとも)",
+                "correct": "Нужен волитив: 行こうとも",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "ようが и ようと взаимозаменяемы; ～うとも звучит решительнее и книжнее."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "ようが и ようと взаимозаменяемы; ～うとも звучит решительнее и книжнее."
+              }
+            ]
           },
           "pro_tip": "Конструкция — поднятый щит: что бы ни шло, вторая часть не двигается."
         }
@@ -36,7 +59,12 @@
     },
     {
       "level": "N1",
-      "keywords": [["こそすれ", "こそあれ"]],
+      "keywords": [
+        [
+          "こそすれ",
+          "こそあれ"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～こそすれ／～こそあれ",
@@ -46,9 +74,18 @@
           "examples": "```\n彼の努力は称賛こそすれ、批判される筋合いはない。\nHis effort deserves praise if anything — no grounds for criticism.\n```\n\n```\n私の提案は賛成こそあれ、反対は一つもなかった。\nMy proposal met approval if anything — not a single objection.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using it without the contrasting second clause", "correct": "The pattern lives on the opposition: positiveこそすれ negative", "note": null}
+              {
+                "wrong": "Using it without the contrasting second clause",
+                "correct": "The pattern lives on the opposition: positiveこそすれ negative",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "すれ/あれ are classical imperatives of する/ある — the same family as であれ."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "すれ/あれ are classical imperatives of する/ある — the same family as であれ."
+              }
+            ]
           },
           "pro_tip": "Think if anything, certainly not: the noun sets the allowed direction."
         },
@@ -60,9 +97,18 @@
           "examples": "```\n彼の努力は称賛こそすれ、批判される筋合いはない。\nЕго усилия скорее достойны похвалы — критиковать не за что.\n```\n\n```\n私の提案は賛成こそあれ、反対は一つもなかった。\nМоё предложение встретило если не одобрение, то уж точно не возражения.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Без контрастной второй части", "correct": "Конструкция живёт на оппозиции: позитивこそすれ негатив", "note": null}
+              {
+                "wrong": "Без контрастной второй части",
+                "correct": "Конструкция живёт на оппозиции: позитивこそすれ негатив",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "すれ/あれ — классические императивы する/ある, та же семья, что であれ."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "すれ/あれ — классические императивы する/ある, та же семья, что であれ."
+              }
+            ]
           },
           "pro_tip": "Думайте «скорее уж уж точно не»: существительное задаёт допустимое направление."
         }
@@ -70,19 +116,32 @@
     },
     {
       "level": "N1",
-      "keywords": [["こそ～が"]],
+      "keywords": [
+        [
+          "こそ～が"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～こそ～が",
           "short_description": "A indeed, but (concede then qualify)",
           "explanation": "Noun + こそ + clause + が: concede one point, then qualify — 「努力こそしたが、結果は出なかった」 — effort, yes; results, no. こそ spotlights the concession.",
           "how_to_form": "| Element | Form | Example |\n|---------|------|---------|\n| Noun / stem | N + こそ + した/だ + が | 上手こそ上手だが |",
-          "examples": "```\n彼は頭がいいこそいいが、性格に難がある。\nClever, certainly — but the character has issues.\n```\n\n```\n行きたいこそ行きたいが、お金がない。\nWant to go? Certainly want to — but there is no money.\n```",
+          "examples": "```\n料理は上手こそ上手だが、プロほどではない。\nA good cook, certainly — but not professional grade.\n```\n\n```\n行きたいこそ行きたいが、お金がない。\nWant to go? Certainly want to — but there is no money.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using with full predicates unchanged", "correct": "Repeat the focused word before こそ and after: 行きたいこそ行きたいが", "note": null}
+              {
+                "wrong": "Using with full predicates unchanged",
+                "correct": "Repeat the focused word before こそ and after: 行きたいこそ行きたいが",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Spoken and lively; the echo structure is the charm."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Spoken and lively; the echo structure is the charm."
+              }
+            ]
           },
           "pro_tip": "The pattern nods before it shakes its head."
         },
@@ -91,12 +150,21 @@
           "short_description": "A — да, но (уступить и уточнить)",
           "explanation": "Сущ. + こそ + часть + が: уступить один пункт и уточнить — 「努力こそしたが、結果は出なかった» — старался, да; результата нет. こそ подсвечивает уступку.",
           "how_to_form": "| Элемент | Форма | Пример |\n|---------|------|---------|\n| Сущ. / основа | N + こそ + した/だ + が | 上手こそ上手だが |",
-          "examples": "```\n彼は頭がいいこそいいが、性格に難がある。\nУмён — куда деваться, но с характером беда.\n```\n\n```\n行きたいこそ行きたいが、お金がない。\nХочу — очень хочу, но денег нет.\n```",
+          "examples": "```\n料理は上手こそ上手だが、プロほどではない。\nГотовить умеет, да — но не до уровня профи.\n```\n\n```\n行きたいこそ行きたいが、お金がない。\nХочу — очень хочу, но денег нет.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Не повторять сфокусированное слово", "correct": "Повторите слово до и после こそ: 行きたいこそ行きたいが", "note": null}
+              {
+                "wrong": "Не повторять сфокусированное слово",
+                "correct": "Повторите слово до и после こそ: 行きたいこそ行きたいが",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Разговорно и живо; эхо-структура и есть шарм."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Разговорно и живо; эхо-структура и есть шарм."
+              }
+            ]
           },
           "pro_tip": "Конструкция кивает, прежде чем качнуть головой."
         }
@@ -104,7 +172,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["しかるべき"]],
+      "keywords": [
+        [
+          "しかるべき"
+        ]
+      ],
       "content": {
         "English": {
           "title": "しかるべき",
@@ -114,9 +186,18 @@
           "examples": "```\n違反者には、しかるべき罰が与えられる。\nViolators receive the due penalty.\n```\n\n```\nしかるべき筋に相談した方がいい。\nYou should consult the appropriate authorities.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Casual praise contexts", "correct": "It belongs to formal procedure and officialdom", "note": null}
+              {
+                "wrong": "Casual praise contexts",
+                "correct": "It belongs to formal procedure and officialdom",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Legal and bureaucratic register; 相応の is the neutral everyday cousin."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Legal and bureaucratic register; 相応の is the neutral everyday cousin."
+              }
+            ]
           },
           "pro_tip": "Where a form letter says appropriate measures, Japanese writes しかるべき措置."
         },
@@ -128,9 +209,18 @@
           "examples": "```\n違反者には、しかるべき罰が与えられる。\nНарушителям полагается заслуженное наказание.\n```\n\n```\nしかるべき筋に相談した方がいい。\nЛучше посоветоваться с надлежащими инстанциями.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Бытовые комплименты", "correct": "Территория формальных процедур и канцелярий", "note": null}
+              {
+                "wrong": "Бытовые комплименты",
+                "correct": "Территория формальных процедур и канцелярий",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Юридическо-бюрократический регистр; нейтральный бытовой родич — 相応の."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Юридическо-бюрократический регистр; нейтральный бытовой родич — 相応の."
+              }
+            ]
           },
           "pro_tip": "Где канцелярское письмо пишет «надлежащие меры», японский пишет しかるべき措置."
         }
@@ -138,7 +228,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["ともあろう"]],
+      "keywords": [
+        [
+          "ともあろう"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～ともあろう",
@@ -148,9 +242,18 @@
           "examples": "```\n警察官ともあろう者が、駐車違反をするとは。\nA police officer, of all people, parking illegally.\n```\n\n```\n大企業ともあろう会社が、こんな不便なサイトを放置している。\nA major company leaving such an inconvenient site unattended.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Praising contexts", "correct": "The frame always chides: high status, low behavior", "note": null}
+              {
+                "wrong": "Praising contexts",
+                "correct": "The frame always chides: high status, low behavior",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Criticism and lament; pair with とは endings for the full gasp."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Criticism and lament; pair with とは endings for the full gasp."
+              }
+            ]
           },
           "pro_tip": "English of all people nails it: status sets the bar the action then trips over."
         },
@@ -162,9 +265,18 @@
           "examples": "```\n警察官ともあろう者が、駐車違反をするとは。\nПолицейский — и вдруг нарушает парковку.\n```\n\n```\n大企業ともあろう会社が、こんな不便なサイトを放置している。\nБольшая компания — и держит такой неудобный сайт.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Похвальные контексты", "correct": "Рамка всегда попрекает: высокий статус, низкое поведение", "note": null}
+              {
+                "wrong": "Похвальные контексты",
+                "correct": "Рамка всегда попрекает: высокий статус, низкое поведение",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Критика и сетование; с финальным とは — полный ах."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Критика и сетование; с финальным とは — полный ах."
+              }
+            ]
           },
           "pro_tip": "Русское «и надо же было именно ему»: статус задаёт планку, о которую действие спотыкается."
         }
@@ -172,7 +284,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["ほどの"]],
+      "keywords": [
+        [
+          "ほどの"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～ほどの",
@@ -182,9 +298,18 @@
           "examples": "```\n手術ほどの怪我ではありません。\nIt is not an injury needing surgery.\n```\n\n```\n謝るほどのことじゃないよ。\nIt is not something that calls for an apology.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Positive superlatives", "correct": "In practice the phrase almost always negates the degree", "note": null}
+              {
+                "wrong": "Positive superlatives",
+                "correct": "In practice the phrase almost always negates the degree",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Set forms: 死ぬほどの～ではない、慌てるほどの～ではない、～ほどのことではない."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Set forms: 死ぬほどの～ではない、慌てるほどの～ではない、～ほどのことではない."
+              }
+            ]
           },
           "pro_tip": "The pattern calms storms: whatever it is, it is not THAT level of thing."
         },
@@ -196,9 +321,18 @@
           "examples": "```\n手術ほどの怪我ではありません。\nТравма не такая, чтобы нужна была операция.\n```\n\n```\n謝るほどのことじゃないよ。\nНе то случилось, чтобы извиняться.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Позитивные суперлативы", "correct": "На практике фраза почти всегда отрицает степень", "note": null}
+              {
+                "wrong": "Позитивные суперлативы",
+                "correct": "На практике фраза почти всегда отрицает степень",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Устоявшиеся формы: 死ぬほどの～ではない、慌てるほどの～ではない、～ほどのことではない."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Устоявшиеся формы: 死ぬほどの～ではない、慌てるほどの～ではない、～ほどのことではない."
+              }
+            ]
           },
           "pro_tip": "Конструкция успокаивает бурю: как бы ни было — не до ТАКОЙ степени."
         }
@@ -206,7 +340,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["まんざら"]],
+      "keywords": [
+        [
+          "まんざら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "まんざら～でもない",
@@ -216,9 +354,18 @@
           "examples": "```\n安物だが、まんざら悪くない味だ。\nCheap stuff, but the taste is not bad at all.\n```\n\n```\n彼の言い分も、まんざら間違いではない。\nHis argument is not entirely wrong either.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "まんざら without the negative", "correct": "まんざら needs ～ない／～でもない to complete the litotes", "note": null}
+              {
+                "wrong": "まんざら without the negative",
+                "correct": "まんざら needs ～ない／～でもない to complete the litotes",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Conversational; often with でもない — literally \"not entirely so\"."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Conversational; often with でもない — literally \"not entirely so\"."
+              }
+            ]
           },
           "pro_tip": "It is the compliment paid through the back door: not bad, actually."
         },
@@ -230,9 +377,18 @@
           "examples": "```\n安物だが、まんざら悪くない味だ。\nДешёвка, а вкус, оказывается, вполне ничего.\n```\n\n```\n彼の言い分も、まんざら間違いではない。\nИ его довод не то чтобы совсем неверен.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "まんざら без отрицания", "correct": "まんざら нужно ～ない／～でもない для завершения литотеса", "note": null}
+              {
+                "wrong": "まんざら без отрицания",
+                "correct": "まんざら нужно ～ない／～でもない для завершения литотеса",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Разговорный; часто с でもない — буквально «не то чтобы совсем так»."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Разговорный; часто с でもない — буквально «не то чтобы совсем так»."
+              }
+            ]
           },
           "pro_tip": "Это комплимент через чёрный ход: «а ведь неплохо»."
         }
@@ -240,7 +396,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["もさることながら"]],
+      "keywords": [
+        [
+          "もさることながら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～もさることながら",
@@ -250,9 +410,18 @@
           "examples": "```\n景色もさることながら、ここの料理が忘れられない。\nThe scenery is something — but the food is unforgettable.\n```\n\n```\n彼は歌もさることながら、トークが特に魅力的だ。\nHis singing is fine, but the banter is the real charm.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Putting the stronger item first", "correct": "First noun = acknowledged; second clause = the star", "note": null}
+              {
+                "wrong": "Putting the stronger item first",
+                "correct": "First noun = acknowledged; second clause = the star",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "Second clause often carries ～も／～は…が for the full build-up."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "Second clause often carries ～も／～は…が for the full build-up."
+              }
+            ]
           },
           "pro_tip": "The pattern opens with applause so the real praise lands louder."
         },
@@ -264,9 +433,18 @@
           "examples": "```\n景色もさることながら、ここの料理が忘れられない。\nВиды — да, но здешняя еда незабываема.\n```\n\n```\n彼は歌もさることながら、トークが特に魅力的だ。\nПоёт он хорошо, но разговаривать с ним — отдельное очарование.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Сильное ставится первым", "correct": "Первое сущ. — признанное; вторая часть — звезда", "note": null}
+              {
+                "wrong": "Сильное ставится первым",
+                "correct": "Первое сущ. — признанное; вторая часть — звезда",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "Вторая часть часто несёт ～も／～は…が для полного нагнетания."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "Вторая часть часто несёт ～も／～は…が для полного нагнетания."
+              }
+            ]
           },
           "pro_tip": "Конструкция начинает аплодисментами, чтобы главная похвала ударила громче."
         }
@@ -274,7 +452,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["と相まって"]],
+      "keywords": [
+        [
+          "と相まって"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～と相まって",
@@ -284,9 +466,18 @@
           "examples": "```\n実力と運とが相まって、優勝を果たした。\nSkill combined with luck carried them to the title.\n```\n\n```\nSNSの拡散力も相まって、一夜にして有名になった。\nAmplified by social media reach, they became famous overnight.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Competing forces", "correct": "The two factors must pull in the same direction", "note": null}
+              {
+                "wrong": "Competing forces",
+                "correct": "The two factors must pull in the same direction",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "相まって loves cause→highlighted-effect shapes: ～も相まって、～が…になった."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "相まって loves cause→highlighted-effect shapes: ～も相まって、～が…になった."
+              }
+            ]
           },
           "pro_tip": "Chemistry grammar: A plus B makes more than A plus B."
         },
@@ -298,9 +489,18 @@
           "examples": "```\n実力と運とが相まって、優勝を果たした。\nМастерство в сочетании с удачей привело их к титулу.\n```\n\n```\nSNSの拡散力も相まって、一夜にして有名になった。\nУсиленное охватом соцсетей — прославились за одну ночь.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Противоборствующие силы", "correct": "Оба фактора тянут в одну сторону", "note": null}
+              {
+                "wrong": "Противоборствующие силы",
+                "correct": "Оба фактора тянут в одну сторону",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "相まって любит схемы причина→выраженный эффект: ～も相まって、～が…になった."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "相まって любит схемы причина→выраженный эффект: ～も相まって、～が…になった."
+              }
+            ]
           },
           "pro_tip": "Грамматика химии: A плюс B даёт больше, чем A плюс B."
         }
@@ -308,7 +508,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["はおろか"]],
+      "keywords": [
+        [
+          "はおろか"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～はおろか",
@@ -318,9 +522,18 @@
           "examples": "```\n彼は漢字はおろか、ひらがなも書けない。\nKanji, let alone — he cannot even write hiragana.\n```\n\n```\n休日はおろか、平日すら満席だ。\nWeekends aside, even weekdays are fully booked.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Ordering the lesser item first", "correct": "Big thing はおろか, small thing さえ～ない — always descending", "note": null}
+              {
+                "wrong": "Ordering the lesser item first",
+                "correct": "Big thing はおろか, small thing さえ～ない — always descending",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Frequently works upward too (English aside): おろか～どころか is a close cousin; keep the negative tail."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Frequently works upward too (English aside): おろか～どころか is a close cousin; keep the negative tail."
+              }
+            ]
           },
           "pro_tip": "Let alone is the exact English twin — swap it in to check your word order."
         },
@@ -332,9 +545,18 @@
           "examples": "```\n彼は漢字はおろか、ひらがなも書けない。\nНе то что кандзи — даже хирагану не напишет.\n```\n\n```\n休日はおろか、平日すら満席だ。\nНе только выходные — даже в будни всё занято.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Меньший пункт первым", "correct": "Большее はおろか, меньшее さえ～ない — всегда по нисходящей", "note": null}
+              {
+                "wrong": "Меньший пункт первым",
+                "correct": "Большее はおろか, меньшее さえ～ない — всегда по нисходящей",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Близкий родич — ～どころか; хвост с отрицанием обязателен."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Близкий родич — ～どころか; хвост с отрицанием обязателен."
+              }
+            ]
           },
           "pro_tip": "Русское «не то что» ложится один в один — проверяйте им порядок слов."
         }
@@ -342,7 +564,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["はさておき"]],
+      "keywords": [
+        [
+          "はさておき"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～はさておき",
@@ -352,9 +578,18 @@
           "examples": "```\n賛否はさておき、まず事実を確認しよう。\nPros and cons aside, let us first check the facts.\n```\n\n```\n何はさておき、安全の確保が優先だ。\nBefore anything else, safety comes first.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Discarding the topic rudely", "correct": "はさておき defers politely — no judgment passed", "note": null}
+              {
+                "wrong": "Discarding the topic rudely",
+                "correct": "はさておき defers politely — no judgment passed",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "何はさておき (before anything) is the set superlative form."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "何はさておき (before anything) is the set superlative form."
+              }
+            ]
           },
           "pro_tip": "It is the clearing of the throat before the real sentence."
         },
@@ -366,9 +601,18 @@
           "examples": "```\n賛否はさておき、まず事実を確認しよう。\nСпоры отложим — сначала проверим факты.\n```\n\n```\n何はさておき、安全の確保が優先だ。\nПрежде всего — безопасность.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Грубо отбрасывать тему", "correct": "はさておき вежливо откладывает, не вынося суждения", "note": null}
+              {
+                "wrong": "Грубо отбрасывать тему",
+                "correct": "はさておき вежливо откладывает, не вынося суждения",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "何はさておき («прежде всего») — устойчивая суперлативная форма."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "何はさておき («прежде всего») — устойчивая суперлативная форма."
+              }
+            ]
           },
           "pro_tip": "Это прочистка горла перед настоящим предложением."
         }
@@ -376,7 +620,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["ほかならぬ"]],
+      "keywords": [
+        [
+          "ほかならぬ"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～ほかならぬ",
@@ -386,9 +634,18 @@
           "examples": "```\nこれはほかならぬ家族のための企画だ。\nThis project is for none other than family.\n```\n\n```\nほかならぬ本人の口から聞いたのだ。\nI heard it from none other than the person themselves.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "ほかならない before nouns", "correct": "ほかならない caps predicates; ほかならぬ dresses nouns", "note": null}
+              {
+                "wrong": "ほかならない before nouns",
+                "correct": "ほかならない caps predicates; ほかならぬ dresses nouns",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Warm formality — speeches and letters, not street chat."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Warm formality — speeches and letters, not street chat."
+              }
+            ]
           },
           "pro_tip": "The nu leans in close: this noun, of all nouns, is the one."
         },
@@ -400,9 +657,18 @@
           "examples": "```\nこれはほかならぬ家族のための企画だ。\nЭтот проект — ни для кого-то, а для семьи.\n```\n\n```\nほかならぬ本人の口から聞いたのだ。\nСлышал от самого человека, не с чужих слов.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "ほかならない перед существительными", "correct": "ほかならない венчает предикаты; ほかならぬ наряжает существительные", "note": null}
+              {
+                "wrong": "ほかならない перед существительными",
+                "correct": "ほかならない венчает предикаты; ほかならぬ наряжает существительные",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Тёплая формальность — речи и письма, не уличный трёп."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Тёплая формальность — речи и письма, не уличный трёп."
+              }
+            ]
           },
           "pro_tip": "ぬ наклоняется ближе: вот это существительное, из всех, — то самое."
         }
@@ -410,7 +676,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["ひとたび"]],
+      "keywords": [
+        [
+          "ひとたび"
+        ]
+      ],
       "content": {
         "English": {
           "title": "ひとたび～と",
@@ -420,9 +690,18 @@
           "examples": "```\nひとたび噂が広まると、止められない。\nOnce the rumor spreads, it cannot be stopped.\n```\n\n```\nひとたび信頼を失えば、取り返しがつかない。\nLose trust once, and it is beyond recovery.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Repeatable minor events", "correct": "ひとたび marks one-shot, consequential triggers", "note": null}
+              {
+                "wrong": "Repeatable minor events",
+                "correct": "ひとたび marks one-shot, consequential triggers",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Loves irreversible results: 止まらない、取り返しがつかない、手がつけられない."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Loves irreversible results: 止まらない、取り返しがつかない、手がつけられない."
+              }
+            ]
           },
           "pro_tip": "One spark, one wildfire — that ratio is ひとたび."
         },
@@ -434,9 +713,18 @@
           "examples": "```\nひとたび噂が広まると、止められない。\nРаз поползёт слух — уже не остановить.\n```\n\n```\nひとたび信頼を失えば、取り返しがつかない。\nПотеряешь доверие однажды — назад не вернёшь.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Повторяемые мелочи", "correct": "ひとたび помечает одноразовые значимые триггеры", "note": null}
+              {
+                "wrong": "Повторяемые мелочи",
+                "correct": "ひとたび помечает одноразовые значимые триггеры",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Любит необратимые итоги: 止まらない、取り返しがつかない、手がつけられない."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Любит необратимые итоги: 止まらない、取り返しがつかない、手がつけられない."
+              }
+            ]
           },
           "pro_tip": "Одна искра — один пожар: это соотношение и есть ひとたび."
         }
