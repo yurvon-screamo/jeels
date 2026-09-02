@@ -11,8 +11,9 @@
 
 #![cfg(all(target_arch = "wasm32", test))]
 
-use origa::domain::{NativeLanguage, SyncMeta, User};
+use origa::domain::{NativeLanguage, User};
 use origa::traits::UserRepository;
+use origa::use_cases::SyncMeta;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 
@@ -91,8 +92,7 @@ async fn sync_meta_key_stays_out_of_user_listings() {
     let current = repo.get_current_user().await.expect("get");
     assert!(current.is_some(), "a user must be listed beside sync_meta");
 
-    // The existence probe agrees.
-    use crate::repository::hybrid_repository::LocalUserPresence;
+    // The existence probe agrees (inherent method on the repository).
     assert!(repo.has_any_user().await.expect("has_any_user"));
 
     // And the meta survives alongside the user records.
