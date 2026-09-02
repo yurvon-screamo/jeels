@@ -2,7 +2,11 @@
   "rules": [
     {
       "level": "N1",
-      "keywords": [["あろうと", "なかろうと"]],
+      "keywords": [
+        [
+          "なかろうと"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～（で）あろうとなかろうと",
@@ -12,9 +16,18 @@
           "examples": "```\n雨であろうとなかろうと、マラソンは決行します。\nThe marathon will be held whether it rains or not.\n```\n\n```\n結果が良かろうとなかろうと、やり遂げることに意味がある。\nWhether the result is good or not, seeing it through is what counts.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using it in casual conversation", "correct": "It is written/formal; in speech use ～でも～でも or ～にしても", "note": null}
+              {
+                "wrong": "Using it in casual conversation",
+                "correct": "It is written/formal; in speech use ～でも～でも or ～にしても",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "なかろう is the classical volitional negative — the phrase carries a stubborn, resolute tone."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "なかろう is the classical volitional negative — the phrase carries a stubborn, resolute tone."
+              }
+            ]
           },
           "pro_tip": "The かろう form is the volitional of い-adjectives (多い → 多かろう) — a rare living relic of classical grammar."
         },
@@ -26,9 +39,18 @@
           "examples": "```\n雨であろうとなかろうと、マラソンは決行します。\nМарафон состоится, будет дождь или нет.\n```\n\n```\n結果が良かろうとなかろうと、やり遂げることに意味がある。\nХорош результат или нет — смысл в том, чтобы довести дело до конца.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Употреблять в разговорной речи", "correct": "Конструкция книжная; в речи — ～でも～でも или ～にしても", "note": null}
+              {
+                "wrong": "Употреблять в разговорной речи",
+                "correct": "Конструкция книжная; в речи — ～でも～でも или ～にしても",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "なかろう — классическое отрицание волитива; фраза звучит упорно и решительно."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "なかろう — классическое отрицание волитива; фраза звучит упорно и решительно."
+              }
+            ]
           },
           "pro_tip": "Форма かろう — волитив и-прилагательных (多い → 多かろう), редкий живой реликт классической грамматики."
         }
@@ -36,7 +58,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["うが", "うが～うが"]],
       "content": {
         "English": {
           "title": "～うが～うが",
@@ -46,10 +67,23 @@
           "examples": "```\n朝早く起きようが、昼まで寝ていようが、彼はいつも機嫌がいい。\nWhether he gets up at dawn or sleeps till noon, he is always in a good mood.\n```\n\n```\nみんなが賛成しようが反対しようが、計画は進めます。\nWhether everyone agrees or objects, we are going ahead with the plan.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Attaching うが to the ます-form (行きますうが)", "correct": "Use the volitional: 行こうが", "note": null},
-              {"wrong": "Using a single うが for a simple concession where ～ても fits", "correct": "One うが already means even if; the double pattern stresses indifference to alternatives", "note": null}
+              {
+                "wrong": "Attaching うが to the ます-form (行きますうが)",
+                "correct": "Use the volitional: 行こうが",
+                "note": null
+              },
+              {
+                "wrong": "Using a single うが for a simple concession where ～ても fits",
+                "correct": "One うが already means even if; the double pattern stresses indifference to alternatives",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "うが and うと are interchangeable here; うと sounds slightly more literary."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "うが and うと are interchangeable here; うと sounds slightly more literary."
+              }
+            ]
           },
           "pro_tip": "The まい negative (行くまい) inside this pattern is your clue that the sentence shrugs at both options."
         },
@@ -61,10 +95,23 @@
           "examples": "```\n朝早く起きようが、昼まで寝ていようが、彼はいつも機嫌がいい。\nВстанет он на рассвете или проспит до полудня — всегда в хорошем настроении.\n```\n\n```\nみんなが賛成しようが反対しようが、計画は進めます。\nВсе согласны или против — план продолжаем.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Присоединять うが к ます-форме (行きますうが)", "correct": "Только волитив: 行こうが", "note": null},
-              {"wrong": "Использовать одиночное うが там, где уместно простое ～ても", "correct": "Одиночное うが = «даже если»; двойная конструкция подчёркивает безразличие к альтернативам", "note": null}
+              {
+                "wrong": "Присоединять うが к ます-форме (行きますうが)",
+                "correct": "Только волитив: 行こうが",
+                "note": null
+              },
+              {
+                "wrong": "Использовать одиночное うが там, где уместно простое ～ても",
+                "correct": "Одиночное うが = «даже если»; двойная конструкция подчёркивает безразличие к альтернативам",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "うが и うと здесь взаимозаменяемы; うと звучит чуть книжнее."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "うが и うと здесь взаимозаменяемы; うと звучит чуть книжнее."
+              }
+            ]
           },
           "pro_tip": "Отрицание まい (行くまい) внутри конструкции — маркер того, что предложение «пожимает плечами» на оба варианта."
         }
@@ -72,7 +119,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["うと", "うと～うと"]],
       "content": {
         "English": {
           "title": "～うと～うと",
@@ -82,9 +128,18 @@
           "examples": "```\n雨が降ろうと晴れようと、私は毎日ジョギングをします。\nRain or shine, I jog every day.\n```\n\n```\n勝とうと負けようと、最後まで全力を出す。\nWin or lose, I give everything until the end.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Mixing が and と in one pair (降ろうが晴れようと)", "correct": "Keep the pair consistent: と＋と or が＋が", "note": null}
+              {
+                "wrong": "Mixing が and と in one pair (降ろうが晴れようと)",
+                "correct": "Keep the pair consistent: と＋と or が＋が",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "With nouns use であろうと; with い-adjectives the volitional is かろうと."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "With nouns use であろうと; with い-adjectives the volitional is かろうと."
+              }
+            ]
           },
           "pro_tip": "Remember the set phrase 雨が降ろうと槍が降ろうと (rain or spears) — the Japanese way to say absolutely nothing stops us."
         },
@@ -96,9 +151,18 @@
           "examples": "```\n雨が降ろうと晴れようと、私は毎日ジョギングをします。\nДождь или жара — я бегаю каждый день.\n```\n\n```\n勝とうと負けようと、最後まで全力を出す。\nПобеда или поражение — выкладываюсь до конца.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Смешивать が и と в одной паре (降ろうが晴れようと)", "correct": "Пара должна быть однородной: と＋と или が＋が", "note": null}
+              {
+                "wrong": "Смешивать が и と в одной паре (降ろうが晴れようと)",
+                "correct": "Пара должна быть однородной: と＋と или が＋が",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "С существительными — であろうと; волитив и-прилагательных — かろうと."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "С существительными — であろうと; волитив и-прилагательных — かろうと."
+              }
+            ]
           },
           "pro_tip": "Запомните устойчивое 雨が降ろうと槍が降ろうと («дождь или копья») — японский способ сказать «нас ничто не остановит»."
         }
@@ -106,7 +170,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["だろうと", "なかろうと"]],
+      "keywords": [
+        [
+          "なかろうと"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～だろうとなかろうと",
@@ -116,9 +184,18 @@
           "examples": "```\n本物だろうとなかろうと、彼には関係ないらしい。\nGenuine or not, he apparently does not care.\n```\n\n```\n天気よかろうとなかろうと、出かけるつもりだ。\nWeather fine or not, I intend to go out.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "だろうとなかろうと in everyday chat", "correct": "Use ～でも～なくても in speech", "note": null}
+              {
+                "wrong": "だろうとなかろうと in everyday chat",
+                "correct": "Use ～でも～なくても in speech",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "なかろうと = classical negative volitional; the whole pattern lives in journalism and formal writing."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "なかろうと = classical negative volitional; the whole pattern lives in journalism and formal writing."
+              }
+            ]
           },
           "pro_tip": "Pair it with a verb of stubborn action at the end — 買う、行く、やる — to complete the no-matter-what nuance."
         },
@@ -130,9 +207,18 @@
           "examples": "```\n本物だろうとなかろうと、彼には関係ないらしい。\nПодлинник или нет — ему, похоже, всё равно.\n```\n\n```\n天気よかろうとなかろうと、出かけるつもりだ。\nПогода хорошая или нет — я собираюсь выйти.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "だろうとなかろうと в бытовой беседе", "correct": "В речи — ～でも～なくても", "note": null}
+              {
+                "wrong": "だろうとなかろうと в бытовой беседе",
+                "correct": "В речи — ～でも～なくても",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "なかろうと — классическое отрицание волитива; вся конструкция живёт в журналистике и формальных текстах."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "なかろうと — классическое отрицание волитива; вся конструкция живёт в журналистике и формальных текстах."
+              }
+            ]
           },
           "pro_tip": "Ставьте в конец упрямый глагол действия — 買う、行く、やる — и оттенок «неважно что» завершён."
         }
@@ -140,7 +226,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["どんなに", "うが"]],
       "content": {
         "English": {
           "title": "どんなに～うが",
@@ -150,9 +235,18 @@
           "examples": "```\nどんなに頼もうが、彼は貸してくれないだろう。\nHowever much I beg, he probably will not lend it.\n```\n\n```\nどんなに難しかろうが、この問題は解いてみせる。\nHowever hard it is, I will solve this problem.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "どんなに説明するが (dictionary form)", "correct": "Volitional is required: 説明しようが", "note": null}
+              {
+                "wrong": "どんなに説明するが (dictionary form)",
+                "correct": "Volitional is required: 説明しようが",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "どんなに～ても is the neutral spoken equivalent; ～うが adds exasperation."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "どんなに～ても is the neutral spoken equivalent; ～うが adds exasperation."
+              }
+            ]
           },
           "pro_tip": "The emotional temperature rises with this pattern — reserve it for genuine no-use situations."
         },
@@ -164,9 +258,18 @@
           "examples": "```\nどんなに頼もうが、彼は貸してくれないだろう。\nСколько бы я ни просил, он, скорее всего, не даст.\n```\n\n```\nどんなに難しかろうが、この問題は解いてみせる。\nКак бы трудно ни было, я решу эту задачу.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "どんなに説明するが (словарная форма)", "correct": "Нужен волитив: 説明しようが", "note": null}
+              {
+                "wrong": "どんなに説明するが (словарная форма)",
+                "correct": "Нужен волитив: 説明しようが",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "Нейтральный разговорный аналог — どんなに～ても; ～うが добавляет раздражение."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "Нейтральный разговорный аналог — どんなに～ても; ～うが добавляет раздражение."
+              }
+            ]
           },
           "pro_tip": "Конструкция эмоционально горячая — приберегите её для действительно безнадёжных ситуаций."
         }
@@ -174,7 +277,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["であれ", "であれ～であれ"]],
       "content": {
         "English": {
           "title": "～であれ～であれ",
@@ -184,9 +286,18 @@
           "examples": "```\n雨であれ雪であれ、試合は中止にならない。\nRain or snow, the match will not be cancelled.\n```\n\n```\n何であれ、君の決めたことなら応援する。\nWhatever it is, if it is your decision, I support it.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "雨であれと雪であれ (inserting と)", "correct": "であれ directly follows each noun: 雨であれ雪であれ", "note": null}
+              {
+                "wrong": "雨であれと雪であれ (inserting と)",
+                "correct": "であれ directly follows each noun: 雨であれ雪であれ",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "であれ～であれ can also mean both A and B are examples of a larger set, not just two options."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "であれ～であれ can also mean both A and B are examples of a larger set, not just two options."
+              }
+            ]
           },
           "pro_tip": "Question words give the pattern sweep: 何であれ、誰であれ、どこであれ — anything, anyone, anywhere."
         },
@@ -198,9 +309,18 @@
           "examples": "```\n雨であれ雪であれ、試合は中止にならない。\nДождь или снег — матч не отменят.\n```\n\n```\n何であれ、君の決めたことなら応援する。\nЧто бы это ни было, если ты решил — я поддержу.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "雨であれと雪であれ (вставлять と)", "correct": "であれ идёт сразу после каждого существительного: 雨であれ雪であれ", "note": null}
+              {
+                "wrong": "雨であれと雪であれ (вставлять と)",
+                "correct": "であれ идёт сразу после каждого существительного: 雨であれ雪であれ",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "であれ～であれ может означать и «A и B как примеры большего множества», не только две опции."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "であれ～であれ может означать и «A и B как примеры большего множества», не только две опции."
+              }
+            ]
           },
           "pro_tip": "С вопросительными словами конструкция получает размах: 何であれ、誰であれ、どこであれ — что угодно, кто угодно, где угодно."
         }
@@ -208,7 +328,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["にしろ", "にしろ～にしろ"]],
       "content": {
         "English": {
           "title": "～にしろ～にしろ",
@@ -218,10 +337,23 @@
           "examples": "```\n賛成するにしろ反対するにしろ、理由を言いなさい。\nWhether you agree or object, state your reasons.\n```\n\n```\n電話にしろメールにしろ、何らかの返事が欲しい。\nPhone or email — I want some kind of reply.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using にしろ with the ます-form (行きますにしろ)", "correct": "Plain form only: 行くにしろ", "note": null},
-              {"wrong": "にしろ～にしろ for a single concession", "correct": "One にしろ already means even if; the double pattern weighs two options", "note": null}
+              {
+                "wrong": "Using にしろ with the ます-form (行きますにしろ)",
+                "correct": "Plain form only: 行くにしろ",
+                "note": null
+              },
+              {
+                "wrong": "にしろ～にしろ for a single concession",
+                "correct": "One にしろ already means even if; the double pattern weighs two options",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "にせよ～にせよ is a synonym a notch more literary; にしても～にしても is the everyday one."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "にせよ～にせよ is a synonym a notch more literary; にしても～にしても is the everyday one."
+              }
+            ]
           },
           "pro_tip": "Order the pair from smaller to larger (犬にしろ猫にしろ) — Japanese likes escalating alternatives."
         },
@@ -233,10 +365,23 @@
           "examples": "```\n賛成するにしろ反対するにしろ、理由を言いなさい。\nСогласен ты или против — назови причины.\n```\n\n```\n電話にしろメールにしろ、何らかの返事が欲しい。\nТелефон или почта — хочу хоть какой-то ответ.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "にしろ с ます-формой (行きますにしろ)", "correct": "Только простая форма: 行くにしろ", "note": null},
-              {"wrong": "にしろ～にしろ для одиночного уступления", "correct": "Одиночное にしろ = «даже если»; двойная конструкция сопоставляет две опции", "note": null}
+              {
+                "wrong": "にしろ с ます-формой (行きますにしろ)",
+                "correct": "Только простая форма: 行くにしろ",
+                "note": null
+              },
+              {
+                "wrong": "にしろ～にしろ для одиночного уступления",
+                "correct": "Одиночное にしろ = «даже если»; двойная конструкция сопоставляет две опции",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "Синоним にせよ～にせよ чуть книжнее; повседневный вариант — にしても～にしても."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "Синоним にせよ～にせよ чуть книжнее; повседневный вариант — にしても～にしても."
+              }
+            ]
           },
           "pro_tip": "Ставьте пару по возрастанию (犬にしろ猫にしろ) — японский любит нарастающие альтернативы."
         }
@@ -244,7 +389,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["にせよ", "にせよ～にせよ"]],
+      "keywords": [
+        [
+          "にせよ"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にせよ～にせよ",
@@ -254,9 +403,18 @@
           "examples": "```\n勝つにせよ負けるにせよ、ベストを尽くしたい。\nWin or lose, I want to do my best.\n```\n\n```\n大人にせよ子供にせよ、ルールは守らなければならない。\nAdult or child, the rules must be kept.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "にせよ after ます or て-forms", "correct": "Plain form + にせよ", "note": null}
+              {
+                "wrong": "にせよ after ます or て-forms",
+                "correct": "Plain form + にせよ",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "In speech にしろ sounds more natural; にせよ belongs to essays and formal speeches."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "In speech にしろ sounds more natural; にせよ belongs to essays and formal speeches."
+              }
+            ]
           },
           "pro_tip": "If you can swap in にしても and the sentence survives, your にせよ usage is correct."
         },
@@ -268,9 +426,18 @@
           "examples": "```\n勝つにせよ負けるにせよ、ベストを尽くしたい。\nПобеда или поражение — хочу выложиться по максимуму.\n```\n\n```\n大人にせよ子供にせよ、ルールは守らなければならない。\nВзрослый или ребёнок — правила надо соблюдать.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "にせよ после ます- или て-форм", "correct": "Простая форма + にせよ", "note": null}
+              {
+                "wrong": "にせよ после ます- или て-форм",
+                "correct": "Простая форма + にせよ",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "В речи естественнее にしろ; にせよ — для эссе и официальных речей."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "В речи естественнее にしろ; にせよ — для эссе и официальных речей."
+              }
+            ]
           },
           "pro_tip": "Если предложение выживает при замене на にしても — значит, にせよ использовано верно."
         }
@@ -278,7 +445,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["かれ", "かれ～かれ"]],
       "content": {
         "English": {
           "title": "～かれ～かれ",
@@ -288,9 +454,18 @@
           "examples": "```\n多かれ少なかれ、誰にでも癖はあるものだ。\nMore or less, everyone has their quirks.\n```\n\n```\n良かれ悪しかれ、結果は明日出る。\nFor better or worse, the result comes out tomorrow.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Coining new かれ pairs freely", "correct": "Stick to established pairs like 多かれ少なかれ; inventing ones sounds odd", "note": null}
+              {
+                "wrong": "Coining new かれ pairs freely",
+                "correct": "Stick to established pairs like 多かれ少なかれ; inventing ones sounds odd",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "This is classical imperative かれ (あれ系) — the same あれ as であれ."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "This is classical imperative かれ (あれ系) — the same あれ as であれ."
+              }
+            ]
           },
           "pro_tip": "Two phrases cover most real usage: 多かれ少なかれ and 良かれ悪しかれ — learn them as vocabulary."
         },
@@ -302,9 +477,18 @@
           "examples": "```\n多かれ少なかれ、誰にでも癖はあるものだ。\nБольше или меньше, но у каждого есть свои причуды.\n```\n\n```\n良かれ悪しかれ、結果は明日出る。\nХорошо это или плохо, результат выйдет завтра.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Свободно сочинять новые かれ-пары", "correct": "Держитесь устоявшихся пар вроде 多かれ少なかれ; самоделки звучат странно", "note": null}
+              {
+                "wrong": "Свободно сочинять новые かれ-пары",
+                "correct": "Держитесь устоявшихся пар вроде 多かれ少なかれ; самоделки звучат странно",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Это классический императив かれ (серия あれ) — тот же あれ, что в であれ."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Это классический императив かれ (серия あれ) — тот же あれ, что в であれ."
+              }
+            ]
           },
           "pro_tip": "Две фразы покрывают почти всё реальное употребление: 多かれ少なかれ и 良かれ悪しかれ — учите как лексику."
         }
@@ -312,7 +496,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["だの", "だの～だの"]],
       "content": {
         "English": {
           "title": "～だの～だの",
@@ -322,9 +505,18 @@
           "examples": "```\n彼は疲れただの腹が減っただの、文句ばかり言っている。\nTired, hungry — he does nothing but complain.\n```\n\n```\nテレビだのゲームだのに夢中で、勉強そっちのけだ。\nObsessed with TV and games, studying is completely neglected.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using だの for a neutral shopping-list", "correct": "だの tinges the list with irritation or scorn; use ～や～や for neutral lists", "note": null}
+              {
+                "wrong": "Using だの for a neutral shopping-list",
+                "correct": "だの tinges the list with irritation or scorn; use ～や～や for neutral lists",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Youth and casual writing; in formal prose ～たり～たり is the safe choice."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Youth and casual writing; in formal prose ～たり～たり is the safe choice."
+              }
+            ]
           },
           "pro_tip": "だの is the grammar of an exasperated sigh — if you are not sighing, pick another pattern."
         },
@@ -336,9 +528,18 @@
           "examples": "```\n彼は疲れただの腹が減っただの、文句ばかり言っている。\nУстал, голоден — он только и делает, что жалуется.\n```\n\n```\nテレビだのゲームだのに夢中で、勉強そっちのけだ。\nУвлёкся телевизором и играми — учёба заброшена полностью.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Использовать だの для нейтрального списка покупок", "correct": "だの окрашивает список раздражением; для нейтральных списков — ～や～や", "note": null}
+              {
+                "wrong": "Использовать だの для нейтрального списка покупок",
+                "correct": "だの окрашивает список раздражением; для нейтральных списков — ～や～や",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Молодёжная и разговорная письменная речь; в формальных текстах безопаснее ～たり～たり."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Молодёжная и разговорная письменная речь; в формальных текстах безопаснее ～たり～たり."
+              }
+            ]
           },
           "pro_tip": "だの — грамматика раздражённого вздоха: не вздыхаете — берите другую конструкцию."
         }
@@ -346,7 +547,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["といい", "といい～といい"]],
       "content": {
         "English": {
           "title": "～といい～といい",
@@ -356,10 +556,23 @@
           "examples": "```\n立地といい家賃といい、この部屋は条件がそろっている。\nLocation and rent — this apartment has it all.\n```\n\n```\n声といい歌唱力といい、彼女は生まれつきの歌手だ。\nVoice, singing ability — she is a born singer.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using two unrelated topics (犬といい学校といい)", "correct": "Both nouns must be aspects of the same thing being evaluated", "note": null},
-              {"wrong": "だの～だの as a synonym", "correct": "だの is dismissive; といい～といい is a positive or neutral evaluation frame", "note": null}
+              {
+                "wrong": "Using two unrelated topics (犬といい学校といい)",
+                "correct": "Both nouns must be aspects of the same thing being evaluated",
+                "note": null
+              },
+              {
+                "wrong": "だの～だの as a synonym",
+                "correct": "だの is dismissive; といい～といい is a positive or neutral evaluation frame",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Frequently ends in a summary adjective: 文句なし、完璧、最高."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Frequently ends in a summary adjective: 文句なし、完璧、最高."
+              }
+            ]
           },
           "pro_tip": "Think of といい…といい as by-the-way-of: judging one object through two of its qualities."
         },
@@ -371,10 +584,23 @@
           "examples": "```\n立地といい家賃といい、この部屋は条件がそろっている。\nИ расположение, и аренда — у этой квартиры всё сходится.\n```\n\n```\n声といい歌唱力といい、彼女は生まれつきの歌手だ。\nИ голос, и вокал — она прирождённая певица.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Брать несвязанные темы (犬といい学校といい)", "correct": "Оба существительных — аспекты одного оцениваемого предмета", "note": null},
-              {"wrong": "Считать синонимом だの～だの", "correct": "だの пренебрежительно; といい～といい — рамка позитивной или нейтральной оценки", "note": null}
+              {
+                "wrong": "Брать несвязанные темы (犬といい学校といい)",
+                "correct": "Оба существительных — аспекты одного оцениваемого предмета",
+                "note": null
+              },
+              {
+                "wrong": "Считать синонимом だの～だの",
+                "correct": "だの пренебрежительно; といい～といい — рамка позитивной или нейтральной оценки",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Часто завершается итоговым прилагательным: 文句なし、完璧、最高."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Часто завершается итоговым прилагательным: 文句なし、完璧、最高."
+              }
+            ]
           },
           "pro_tip": "Считайте といい…といい оборотом «если говорить о…»: оценка одного объекта через два его качества."
         }
@@ -382,7 +608,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["といわず", "といわず～といわず"]],
+      "keywords": [
+        [
+          "といわず"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～といわず～といわず",
@@ -392,9 +622,18 @@
           "examples": "```\n昼といわず夜といわず、工事の音がやまない。\nDay and night alike, the construction noise never stops.\n```\n\n```\n壁といわず天井といわず、落書きだらけだった。\nWalls and ceiling alike were covered in graffiti.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using it for two unrelated items", "correct": "The two nouns should be parts of one scene or set", "note": null}
+              {
+                "wrong": "Using it for two unrelated items",
+                "correct": "The two nouns should be parts of one scene or set",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Literary and emphatic; in casual speech ～も～も conveys the same idea."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Literary and emphatic; in casual speech ～も～も conveys the same idea."
+              }
+            ]
           },
           "pro_tip": "Picture a scene where no corner stays untouched — that image is exactly といわず…といわず."
         },
@@ -406,9 +645,18 @@
           "examples": "```\n昼といわず夜といわず、工事の音がやまない。\nДнём и ночью шум стройки не прекращается.\n```\n\n```\n壁といわず天井といわず、落書きだらけだった。\nИ стены, и потолок были исписаны граффити.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Употреблять с двумя несвязанными предметами", "correct": "Существительные должны быть частями одной сцены или множества", "note": null}
+              {
+                "wrong": "Употреблять с двумя несвязанными предметами",
+                "correct": "Существительные должны быть частями одной сцены или множества",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Книжно-эмфатично; в разговоре то же выражает ～も～も."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Книжно-эмфатично; в разговоре то же выражает ～も～も."
+              }
+            ]
           },
           "pro_tip": "Представьте сцену, где не остаётся нетронутого уголка, — этот образ и есть といわず…といわず."
         }
@@ -416,7 +664,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["につけ", "につけ～につけ"]],
       "content": {
         "English": {
           "title": "～につけ～につけ",
@@ -426,9 +673,18 @@
           "examples": "```\n嬉しいにつけ悲しいにつけ、彼女は日記に書くらしい。\nHappy or sad, she apparently writes it in her diary.\n```\n\n```\n何かにつけ、母の言葉が頭に浮かぶ。\nAt one thing or another, my mother's words come to mind.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Using non-emotional follow-ups (fast, cheap)", "correct": "The main clause should be a feeling or memory — the pattern is about involuntary reactions", "note": null}
+              {
+                "wrong": "Using non-emotional follow-ups (fast, cheap)",
+                "correct": "The main clause should be a feeling or memory — the pattern is about involuntary reactions",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "何かにつけ (at every opportunity) is the most common survival form — learn it first."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "何かにつけ (at every opportunity) is the most common survival form — learn it first."
+              }
+            ]
           },
           "pro_tip": "If the second clause describes an emotion you cannot help, につけ is at home."
         },
@@ -440,9 +696,18 @@
           "examples": "```\n嬉しいにつけ悲しいにつけ、彼女は日記に書くらしい。\nРадость или грусть — она, кажется, записывает всё в дневник.\n```\n\n```\n何かにつけ、母の言葉が頭に浮かぶ。\nТо и дело в голове всплывают мамины слова.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Нечувствительные продолжения (быстро, дёшево)", "correct": "Главная часть должна быть чувством или воспоминанием — конструкция о непроизвольных реакциях", "note": null}
+              {
+                "wrong": "Нечувствительные продолжения (быстро, дёшево)",
+                "correct": "Главная часть должна быть чувством или воспоминанием — конструкция о непроизвольных реакциях",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "何かにつけ («при каждом удобном случае») — самая ходовая форма, учите первой."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "何かにつけ («при каждом удобном случае») — самая ходовая форма, учите первой."
+              }
+            ]
           },
           "pro_tip": "Если вторая часть — эмоция, которой не удержать, につけ на своём месте."
         }
@@ -450,7 +715,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["とも", "とも～とも"]],
       "content": {
         "English": {
           "title": "～とも～とも",
@@ -460,9 +724,18 @@
           "examples": "```\n賛成とも反対とも、態度をはっきりさせろ。\nAgreement or objection — make your stance clear.\n```\n\n```\n夢とも現ともつかぬ不思議な一夜だった。\nAn uncanny night that could be dream or reality.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Modern casual contexts", "correct": "The frame is literary; everyday speech prefers ～でも～でも", "note": null}
+              {
+                "wrong": "Modern casual contexts",
+                "correct": "The frame is literary; everyday speech prefers ～でも～でも",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "とも here is the ancestor of the concession ～ても / volitional ～ようとも."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "とも here is the ancestor of the concession ～ても / volitional ～ようとも."
+              }
+            ]
           },
           "pro_tip": "Meet it in novels and sayings more than in conversation — recognize, do not force."
         },
@@ -474,9 +747,18 @@
           "examples": "```\n賛成とも反対とも、態度をはっきりさせろ。\nЗа или против — прояви позицию ясно.\n```\n\n```\n夢とも現ともつかぬ不思議な一夜だった。\nЗагадочная ночь — не поймёшь, сон или явь.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Современные разговорные контексты", "correct": "Рамка книжная; в быту — ～でも～でも", "note": null}
+              {
+                "wrong": "Современные разговорные контексты",
+                "correct": "Рамка книжная; в быту — ～でも～でも",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Это とも — предок уступительных ～ても и волитивных ～ようとも."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Это とも — предок уступительных ～ても и волитивных ～ようとも."
+              }
+            ]
           },
           "pro_tip": "Встречайте её в романах и пословицах: узнавать — да, форсировать — нет."
         }
@@ -484,7 +766,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["まいが", "ようと", "るまいと"]],
       "content": {
         "English": {
           "title": "～ようと～まいと",
@@ -494,9 +775,18 @@
           "examples": "```\n雨が降ろうと降るまいと、傘は持たない主義だ。\nRain or no rain, my policy is not to carry an umbrella.\n```\n\n```\n人がどう思おうと 思うまいと、自分の信じた道を行く。\nWhatever people may think or not think, I follow the path I believe in.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "まい after ます-forms (来ますまいと)", "correct": "Dictionary form + まい: 来るまいと", "note": null}
+              {
+                "wrong": "まい after ます-forms (来ますまいと)",
+                "correct": "Dictionary form + まい: 来るまいと",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "ようが～まいが is identical in meaning; the と version is slightly more written."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "ようが～まいが is identical in meaning; the と version is slightly more written."
+              }
+            ]
           },
           "pro_tip": "The English gloss never changes: whether or not. Fix that pair in memory and the pattern is free."
         },
@@ -508,9 +798,18 @@
           "examples": "```\n雨が降ろうと降るまいと、傘は持たない主義だ。\nДождь или нет — мой принцип не носить зонт.\n```\n\n```\n人がどう思おうと思うまいと、自分の信じた道を行く。\nЧто подумают люди или нет — иду своей дорогой.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "まい после ます-форм (来ますまいと)", "correct": "Словарная форма + まい: 来るまいと", "note": null}
+              {
+                "wrong": "まい после ます-форм (来ますまいと)",
+                "correct": "Словарная форма + まい: 来るまいと",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "ようが～まいが означает то же; вариант с と чуть книжнее."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "ようが～まいが означает то же; вариант с と чуть книжнее."
+              }
+            ]
           },
           "pro_tip": "Перевод неизменен: «независимо от того, …или нет». Закрепите пару — и конструкция ваша."
         }

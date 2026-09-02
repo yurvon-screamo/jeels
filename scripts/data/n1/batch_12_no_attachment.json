@@ -2,7 +2,11 @@
   "rules": [
     {
       "level": "N1",
-      "keywords": [["に至っては"]],
+      "keywords": [
+        [
+          "に至っては"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～に至っては",
@@ -12,9 +16,18 @@
           "examples": "```\n彼の家は台所から風呂場に至るまで、本で埋まっている。\nHis house is buried in books from kitchen to bath.\n```\n\n```\n値上げは各社に及び、庶民の食卓に至っては打撃だ。\nThe hikes hit every firm — the family dinner table takes the worst of it.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Random topics", "correct": "に至っては crowns an escalation or extreme; に至るまで spans a range", "note": null}
+              {
+                "wrong": "Random topics",
+                "correct": "に至っては crowns an escalation or extreme; に至るまで spans a range",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "至った (reached the point of) is the past-tense cousin: 争議に至った — it escalated to a dispute."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "至った (reached the point of) is the past-tense cousin: 争議に至った — it escalated to a dispute."
+              }
+            ]
           },
           "pro_tip": "Two tools, one kanji: 至っては = the worst case; 至るまで = all the way."
         },
@@ -26,9 +39,18 @@
           "examples": "```\n彼の家は台所から風呂場に至るまで、本で埋まっている。\nЕго дом завален книгами от кухни до ванной.\n```\n\n```\n値上げは各社に及び、庶民の食卓に至っては打撃だ。\nПодорожания ударили по всем фирмам — а по семейному столу сильнее всего.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Случайные темы", "correct": "に至っては венчает эскалацию/крайность; に至るまで охватывает диапазон", "note": null}
+              {
+                "wrong": "Случайные темы",
+                "correct": "に至っては венчает эскалацию/крайность; に至るまで охватывает диапазон",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "other", "text": "Прошедший родич 至った («дошло до»): 争議に至った — дошло до спора."}]
+            "notes": [
+              {
+                "tag": "other",
+                "text": "Прошедший родич 至った («дошло до»): 争議に至った — дошло до спора."
+              }
+            ]
           },
           "pro_tip": "Два инструмента, один иероглиф: 至っては = худший случай; 至るまで = «вплоть до»."
         }
@@ -36,7 +58,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["にすら"]],
+      "keywords": [
+        [
+          "にすら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～にすら",
@@ -46,9 +72,18 @@
           "examples": "```\nその技術は、開発者にすら完全には理解されていない。\nThat technology is not fully understood even by its developers.\n```\n\n```\n大都会へすら出たことのない祖母だった。\nA grandmother who had never been even to the big city.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "ですら as universal replacement", "correct": "Use にすら with direction/recipient nouns; ですら suits な-stems and predicates", "note": null}
+              {
+                "wrong": "ですら as universal replacement",
+                "correct": "Use にすら with direction/recipient nouns; ですら suits な-stems and predicates",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Written; slightly more pointed than にも."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Written; slightly more pointed than にも."
+              }
+            ]
           },
           "pro_tip": "Keep the particle honest: direction takes に, object takes を — each has its own すら."
         },
@@ -60,9 +95,18 @@
           "examples": "```\nその技術は、開発者にすら完全には理解されていない。\nЭту технологию до конца не понимают даже её создатели.\n```\n\n```\n大都会へすら出たことのない祖母だった。\nБабушка, которая не выбиралась даже в большой город.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "ですら как замена всему", "correct": "にすら — с направлениями/адресатами; ですら — с な-основами и предикатами", "note": null}
+              {
+                "wrong": "ですら как замена всему",
+                "correct": "にすら — с направлениями/адресатами; ですら — с な-основами и предикатами",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Письменно; чуть острее にも."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Письменно; чуть острее にも."
+              }
+            ]
           },
           "pro_tip": "Держите частицу честной: направление — に, объект — を; у каждой своё すら."
         }
@@ -70,7 +114,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["かたわら"]],
+      "keywords": [
+        [
+          "かたわら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～（の）かたわら",
@@ -80,9 +128,18 @@
           "examples": "```\n彼は大学で教えるかたわら、翻訳もこなしている。\nHe teaches at a university while also handling translation work.\n```\n\n```\n母は家事のかたわら、地域の清掃活動に励んでいる。\nBesides housework, Mother is active in neighborhood cleanups.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Short simultaneous actions (食べるかたわら)", "correct": "かたわら spans long-term parallel roles — for a single moment use ながら", "note": null}
+              {
+                "wrong": "Short simultaneous actions (食べるかたわら)",
+                "correct": "かたわら spans long-term parallel roles — for a single moment use ながら",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Biographies and introductions; ～と同時に／～一方で are neutral cousins."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Biographies and introductions; ～と同時に／～一方で are neutral cousins."
+              }
+            ]
           },
           "pro_tip": "Think two jobs on one résumé — かたわら signs both lines."
         },
@@ -94,9 +151,18 @@
           "examples": "```\n彼は大学で教えるかたわら、翻訳もこなしている。\nОн преподаёт в университете и попутно тянет переводы.\n```\n\n```\n母は家事のかたわら、地域の清掃活動に励んでいる。\nПомимо домашних дел, мама активно участвует в уборке района.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Короткие одновременные действия (食べるかたわら)", "correct": "かたわら — о долгих параллельных ролях; на один миг берите ながら", "note": null}
+              {
+                "wrong": "Короткие одновременные действия (食べるかたわら)",
+                "correct": "かたわら — о долгих параллельных ролях; на один миг берите ながら",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Биографии и представления; нейтральные родичи — ～と同時に／～一方で."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Биографии и представления; нейтральные родичи — ～と同時に／～一方で."
+              }
+            ]
           },
           "pro_tip": "Две работы в одном резюме — かたわら подписывает обе строки."
         }
@@ -104,7 +170,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["のことだから"]],
+      "keywords": [
+        [
+          "のことだから"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～のことだから",
@@ -114,9 +184,18 @@
           "examples": "```\n姉のことだから、もう準備は万端だろう。\nKnowing my sister, everything is already in order.\n```\n\n```\n彼のことだから、また遅刻に決まっている。\nKnowing him, he is bound to be late again.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Objects or events as subjects", "correct": "The noun must be a person (or personified) with known habits", "note": null}
+              {
+                "wrong": "Objects or events as subjects",
+                "correct": "The noun must be a person (or personified) with known habits",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Everyday and warm; works both for faith and for resignation."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Everyday and warm; works both for faith and for resignation."
+              }
+            ]
           },
           "pro_tip": "The pattern reads the person's file aloud and forecasts from it."
         },
@@ -128,9 +207,18 @@
           "examples": "```\n姉のことだから、もう準備は万端だろう。\nЗная сестру — у неё уже всё готово.\n```\n\n```\n彼のことだから、また遅刻に決まっている。\nЗная его — снова опоздает, это уж точно.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Предметы и события в роли субъекта", "correct": "Существительное — человек с известными привычками", "note": null}
+              {
+                "wrong": "Предметы и события в роли субъекта",
+                "correct": "Существительное — человек с известными привычками",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Бытово и тепло; годится и для веры, и для смирения."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Бытово и тепло; годится и для веры, и для смирения."
+              }
+            ]
           },
           "pro_tip": "Конструкция читает вслух досье человека и делает по нему прогноз."
         }
@@ -138,7 +226,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["のことながら"]],
+      "keywords": [
+        [
+          "のことながら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～のことながら",
@@ -148,9 +240,18 @@
           "examples": "```\n勝った選手のことながら、支えたコーチの努力も大きい。\nThe winning athlete, certainly — and the coach's effort behind it, just as much.\n```\n\n```\n患者のことながら、付き添いの家族の負担も重い。\nThe patient, of course — but the family attending them carries a heavy load too.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Contrast or blame", "correct": "のことながら adds a second deserving party — no opposition, just breadth", "note": null}
+              {
+                "wrong": "Contrast or blame",
+                "correct": "のことながら adds a second deserving party — no opposition, just breadth",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Considerate written style; news commentary loves it."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Considerate written style; news commentary loves it."
+              }
+            ]
           },
           "pro_tip": "It shines a second spotlight without dimming the first."
         },
@@ -162,9 +263,18 @@
           "examples": "```\n勝った選手のことながら、支えたコーチの努力も大きい。\nПобедивший спортсмен — да; но и труд тренера за его спиной не меньше.\n```\n\n```\n患者のことながら、付き添いの家族の負担も重い。\nПациент — само собой; но и родным при нём приходится тяжело.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Контраст или обвинение", "correct": "のことながら добавляет вторую достойную сторону — без противопоставления", "note": null}
+              {
+                "wrong": "Контраст или обвинение",
+                "correct": "のことながら добавляет вторую достойную сторону — без противопоставления",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Заботливый письменный стиль; обожаем новостными комментариями."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Заботливый письменный стиль; обожаем новостными комментариями."
+              }
+            ]
           },
           "pro_tip": "Второй прожектор, не приглушая первый."
         }
@@ -172,7 +282,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["のよしみ"]],
+      "keywords": [
+        [
+          "のよしみ"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～のよしみで",
@@ -182,9 +296,18 @@
           "examples": "```\n同じ高校の出のよしみで、無理を聞いてもらった。\nFellow-alumnus goodwill got me the special favor.\n```\n\n```\nお三方のよしみを結んでいただき、ありがたい。\nDeeply grateful that you honored us with this bond.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Formal contracts", "correct": "よしみ trades on warmth, not obligation — keep it personal", "note": null}
+              {
+                "wrong": "Formal contracts",
+                "correct": "よしみ trades on warmth, not obligation — keep it personal",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Friendly-formal letters and shop talk; a handshake in grammar form."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Friendly-formal letters and shop talk; a handshake in grammar form."
+              }
+            ]
           },
           "pro_tip": "The noun is an old bridge; よしみで walks across it asking a favor."
         },
@@ -196,9 +319,18 @@
           "examples": "```\n同じ高校の出のよしみで、無理を聞いてもらった。\nПо-землячески, по-выпускницки выкрутил для меня невозможное.\n```\n\n```\nお三方のよしみを結んでいただき、ありがたい。\nБезмерно признателен за честь этого союза.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Формальные договоры", "correct": "よしみ торгует теплом, не обязанностью — держите личный тон", "note": null}
+              {
+                "wrong": "Формальные договоры",
+                "correct": "よしみ торгует теплом, не обязанностью — держите личный тон",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Дружеско-официальные письма и лавочный трёп; рукопожатие в грамматической форме."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Дружеско-официальные письма и лавочный трёп; рукопожатие в грамматической форме."
+              }
+            ]
           },
           "pro_tip": "Существительное — старый мост; よしみで идёт по нему с просьбой."
         }
@@ -206,7 +338,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["の嫌いがある"]],
+      "keywords": [
+        [
+          "の嫌いがある"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～（の）嫌いがある",
@@ -216,9 +352,18 @@
           "examples": "```\n私は疲れると、人に当たる嫌いがある。\nWhen tired, I tend to snap at people.\n```\n\n```\nこの料理は味が濃い目の嫌いがある。\nThis cuisine tends toward the salty side.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Positive tendencies", "correct": "嫌いがある flags a flaw; strengths take ～ところがある", "note": null}
+              {
+                "wrong": "Positive tendencies",
+                "correct": "嫌いがある flags a flaw; strengths take ～ところがある",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Written evaluation — essays, reviews, self-reflection."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Written evaluation — essays, reviews, self-reflection."
+              }
+            ]
           },
           "pro_tip": "It is the doctor's tone: a gentle cough before naming the vice."
         },
@@ -230,9 +375,18 @@
           "examples": "```\n私は疲れると、人に当たる嫌いがある。\nКогда устаю — имею привычку огрызаться.\n```\n\n```\nこの料理は味が濃い目の嫌いがある。\nУ этой кухни есть грех пересаливать.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Положительные склонности", "correct": "嫌いがある помечает изъян; достоинства — ～ところがある", "note": null}
+              {
+                "wrong": "Положительные склонности",
+                "correct": "嫌いがある помечает изъян; достоинства — ～ところがある",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Письменная оценка — эссе, рецензии, самонаблюдение."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Письменная оценка — эссе, рецензии, самонаблюдение."
+              }
+            ]
           },
           "pro_tip": "Тон врача: мягкое покашливание перед называнием порока."
         }
@@ -240,7 +394,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["の手前"]],
+      "keywords": [
+        [
+          "の手前"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～の手前",
@@ -250,9 +408,18 @@
           "examples": "```\n皆の手前、断るわけにはいかなかった。\nWith everyone watching, I could hardly refuse.\n```\n\n```\n昔は無理と言った手前、今更引き受けられない。\nHaving said it was impossible, I cannot take it back now.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Genuine moral restraint", "correct": "の手前 is about appearances — face, not ethics", "note": null}
+              {
+                "wrong": "Genuine moral restraint",
+                "correct": "の手前 is about appearances — face, not ethics",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Everyday narrative; the social stage, not the conscience, does the policing."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Everyday narrative; the social stage, not the conscience, does the policing."
+              }
+            ]
           },
           "pro_tip": "Imagine the eyes of the noun — the pattern behaves because they are open."
         },
@@ -264,9 +431,18 @@
           "examples": "```\n皆の手前、断るわけにはいかなかった。\nПри всех отказываться было неловко.\n```\n\n```\n昔は無理と言った手前、今更引き受けられない。\nСказал тогда «невозможно» — теперь не отвертишься.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Подлинная моральная сдержанность", "correct": "の手前 — про приличия: лицо, а не совесть", "note": null}
+              {
+                "wrong": "Подлинная моральная сдержанность",
+                "correct": "の手前 — про приличия: лицо, а не совесть",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Бытовой нарратив; полицию несёт социальная сцена, не совесть."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Бытовой нарратив; полицию несёт социальная сцена, не совесть."
+              }
+            ]
           },
           "pro_tip": "Представьте глаза этого существительного — конструкция ведёт себя прилично, пока они открыты."
         }
@@ -274,7 +450,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["のみ"]],
       "content": {
         "English": {
           "title": "～のみ",
@@ -284,9 +459,18 @@
           "examples": "```\n本日は、関係者のみの会議を行います。\nToday's meeting is for related parties only.\n```\n\n```\n問題は国内のみならず、海外にも広がっている。\nThe problem spreads not only at home but abroad too.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Casual speech", "correct": "のみ is written/announced style; だけ in conversation", "note": null}
+              {
+                "wrong": "Casual speech",
+                "correct": "のみ is written/announced style; だけ in conversation",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Signs, regulations, reports; のみならず is the elevated だけでなく."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Signs, regulations, reports; のみならず is the elevated だけでなく."
+              }
+            ]
           },
           "pro_tip": "If a sign could carry it, のみ fits; if a chat could, switch to だけ."
         },
@@ -298,9 +482,18 @@
           "examples": "```\n本日は、関係者のみの会議を行います。\nСегодня — совещание только для причастных.\n```\n\n```\n問題は国内のみならず、海外にも広がっている。\nПроблема расползается не только внутри страны, но и за рубеж.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Разговорная речь", "correct": "のみ — письменный/объявительный стиль; в беседе — だけ", "note": null}
+              {
+                "wrong": "Разговорная речь",
+                "correct": "のみ — письменный/объявительный стиль; в беседе — だけ",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Таблички, регламенты, отчёты; のみならず — возвышенное だけでなく."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Таблички, регламенты, отчёты; のみならず — возвышенное だけでなく."
+              }
+            ]
           },
           "pro_tip": "Если это уместно на табличке — のみ подходит; если в чате — берите だけ."
         }
@@ -308,7 +501,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["のいかんによっては"]],
+      "keywords": [
+        [
+          "のいかんによっては"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～のいかんによっては",
@@ -318,9 +515,18 @@
           "examples": "```\n今後の成績のいかんによっては、代表から外れる。\nDepending on results ahead, he may drop off the squad.\n```\n\n```\n調査のいかんでは、裁判所の判断も変わるだろう。\nBy what the inquiry shows, even the court's ruling may shift.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Certain outcomes", "correct": "The branch stays hypothetical — によっては opens a possibility, not a verdict", "note": null}
+              {
+                "wrong": "Certain outcomes",
+                "correct": "The branch stays hypothetical — によっては opens a possibility, not a verdict",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Bureaucratic prose; sibling of のいかんだ (decisive) — this one hedges."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Bureaucratic prose; sibling of のいかんだ (decisive) — this one hedges."
+              }
+            ]
           },
           "pro_tip": "It is the fork in a formal road: the sentence rides one branch, eyes on the other."
         },
@@ -332,9 +538,18 @@
           "examples": "```\n今後の成績のいかんによっては、代表から外れる。\nСмотря по будущим результатам, может и вылететь из сборной.\n```\n\n```\n調査のいかんでは、裁判所の判断も変わるだろう。\nПо итогам проверки может измениться и решение суда.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Гарантированные исходы", "correct": "Ветка остаётся гипотетической — によっては открывает возможность, не вердикт", "note": null}
+              {
+                "wrong": "Гарантированные исходы",
+                "correct": "Ветка остаётся гипотетической — によっては открывает возможность, не вердикт",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Бюрократическая проза; родич のいかんだ решает — эта форма осторожничает."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Бюрократическая проза; родич のいかんだ решает — эта форма осторожничает."
+              }
+            ]
           },
           "pro_tip": "Развилка на формальной дороге: предложение едет по одной ветке, глядя на другую."
         }
@@ -342,7 +557,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["に～を重ねて"]],
       "content": {
         "English": {
           "title": "～に～を重ねて",
@@ -352,9 +566,18 @@
           "examples": "```\n失敗に失敗を重ねて、ようやく完成した。\nFailure upon failure — and at last it was finished.\n```\n\n```\n工夫に工夫を重ねた結果が、この製品だ。\nRefinement upon refinement produced this product.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Different nouns", "correct": "The pattern repeats the same noun — echo is the point", "note": null}
+              {
+                "wrong": "Different nouns",
+                "correct": "The pattern repeats the same noun — echo is the point",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Inspirational register — speeches and features."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Inspirational register — speeches and features."
+              }
+            ]
           },
           "pro_tip": "One word, many layers: the doubling does the dramatizing."
         },
@@ -366,9 +589,18 @@
           "examples": "```\n失敗に失敗を重ねて、ようやく完成した。\nПровал за провалом — и наконец готово.\n```\n\n```\n工夫に工夫を重ねた結果が、この製品だ。\nИтог доводки поверх доводки — вот этот продукт.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Разные существительные", "correct": "Повторяется одно и то же слово — эхо и есть суть", "note": null}
+              {
+                "wrong": "Разные существительные",
+                "correct": "Повторяется одно и то же слово — эхо и есть суть",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Вдохновляющий регистр — речи и репортажи."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Вдохновляющий регистр — речи и репортажи."
+              }
+            ]
           },
           "pro_tip": "Одно слово, много слоёв: драматизирует само удвоение."
         }
@@ -376,7 +608,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["折に"]],
+      "keywords": [
+        [
+          "折に"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～（の）折に",
@@ -386,9 +622,18 @@
           "examples": "```\nお越しいただいた折に、直接ご説明いたします。\nWhen you come by, I will explain in person.\n```\n\n```\nご挨拶の折には、ぜひゆっくりお話ししましょう。\nWhen we meet to greet, let us talk at leisure.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Casual appointments", "correct": "折に elevates the moment; daily planning takes 時に", "note": null}
+              {
+                "wrong": "Casual appointments",
+                "correct": "折に elevates the moment; daily planning takes 時に",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Business letters and speeches; ～折にも is a common gentle follow-up."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Business letters and speeches; ～折にも is a common gentle follow-up."
+              }
+            ]
           },
           "pro_tip": "The 折 folds time politely — use it where a letter would bow."
         },
@@ -400,9 +645,18 @@
           "examples": "```\nお越しいただいた折に、直接ご説明いたします。\nКогда соблаговолите зайти — объясню лично.\n```\n\n```\nご挨拶の折には、ぜひゆっくりお話ししましょう。\nПри встрече непременно побеседуем не спеша.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Бытовые договорённости", "correct": "折に возвышает момент; для планов — 時に", "note": null}
+              {
+                "wrong": "Бытовые договорённости",
+                "correct": "折に возвышает момент; для планов — 時に",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Деловые письма и речи; ～折にも — частое мягкое продолжение."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Деловые письма и речи; ～折にも — частое мягкое продолжение."
+              }
+            ]
           },
           "pro_tip": "折 вежливо сгибает время — ставьте там, где письмо кланялось бы."
         }
@@ -410,7 +664,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["当の"]],
       "content": {
         "English": {
           "title": "当の～",
@@ -420,9 +673,18 @@
           "examples": "```\n騒ぎになっている当の店は、今日も平常営業だ。\nThe very shop at the center of the fuss: business as usual today.\n```\n\n```\n当の本人が忘れているのだから、周囲が騒ぐこともない。\nThe person himself has forgotten — no reason for the rest of us to fuss.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Emphasizing just any noun", "correct": "当の flags the previously-discussed protagonist — anaphoric emphasis", "note": null}
+              {
+                "wrong": "Emphasizing just any noun",
+                "correct": "当の flags the previously-discussed protagonist — anaphoric emphasis",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Written narration; often lands with an ironic thud."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Written narration; often lands with an ironic thud."
+              }
+            ]
           },
           "pro_tip": "It is the the-very of journalism: the star of the story, caught off-guard."
         },
@@ -434,9 +696,18 @@
           "examples": "```\n騒ぎになっている当の店は、今日も平常営業だ。\nТа самая лавка, вокруг которой сыр-бор: сегодня работает как ни в чём не бывало.\n```\n\n```\n当の本人が忘れているのだから、周囲が騒ぐこともない。\nСам герой всё забыл — чего шуметь остальным.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Усиливать любое существительное", "correct": "当の помечает ранее обсуждаемого протагониста — анафорическое усиление", "note": null}
+              {
+                "wrong": "Усиливать любое существительное",
+                "correct": "当の помечает ранее обсуждаемого протагониста — анафорическое усиление",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Письменный нарратив; часто приземляется с ироничным стуком."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Письменный нарратив; часто приземляется с ироничным стуком."
+              }
+            ]
           },
           "pro_tip": "Это «тот самый» из журналистики: герой истории, застигнутый врасплох."
         }

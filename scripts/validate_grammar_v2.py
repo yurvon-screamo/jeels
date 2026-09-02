@@ -46,14 +46,12 @@ NUANCE_TAGS = {"register", "variation", "collocation", "formality", "other"}
 # Deliberately broad; arrows (U+2192 →) and CJK punctuation stay allowed.
 EMOJI_RE = re.compile(
     "["
-    "\U0001F000-\U0001FAFF"  # pictographic blocks (incl. supplemental symbols)
-    "\U00002600-\U000027BF"  # misc symbols + dingbats (⚠ ✅ ❌ ✳ …)
-    "\U00002B00-\U00002BFF"  # arrows/stars block (⭐ …)
-    "\U0001F1E6-\U0001F1FF"  # regional indicators
+    "\U0001F000-\U0001FAFF"  # pictographic blocks (incl. regional indicators, supplemental symbols)
+    "\U00002600-\U000027BF"  # misc symbols + dingbats (incl. check/cross marks and hearts)
+    "\U00002B00-\U00002BFF"  # arrows/stars block
     "\U0000FE00-\U0000FE0F"  # variation selectors
     "\U0000200D"             # ZWJ
     "\U000020E3"             # combining enclosing keycap
-    "\U00002705\U0000274C\U00002764"  # ✅ ❌ ❤
     "]"
 )
 

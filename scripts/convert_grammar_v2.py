@@ -29,14 +29,12 @@ DST = ROOT / "cdn" / "grammar" / "grammar_v2.json"
 
 EMOJI_RE = re.compile(
     "["
-    "\U0001F000-\U0001FAFF"
-    "\U00002600-\U000027BF"
-    "\U00002B00-\U00002BFF"
-    "\U0001F1E6-\U0001F1FF"
-    "\U0000FE00-\U0000FE0F"
-    "\U0000200D"
-    "\U000020E3"
-    "\U00002705\U0000274C\U00002764"
+    "\U0001F000-\U0001FAFF"  # pictographic blocks (incl. regional indicators, supplemental symbols)
+    "\U00002600-\U000027BF"  # misc symbols + dingbats (incl. check/cross marks and hearts)
+    "\U00002B00-\U00002BFF"  # arrows/stars block
+    "\U0000FE00-\U0000FE0F"  # variation selectors
+    "\U0000200D"             # ZWJ
+    "\U000020E3"             # combining enclosing keycap
     "]"
 )
 

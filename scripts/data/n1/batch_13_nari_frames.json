@@ -2,7 +2,12 @@
   "rules": [
     {
       "level": "N1",
-      "keywords": [["なりに", "なりの"]],
+      "keywords": [
+        [
+          "なりに",
+          "なりの"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～なりに／～なりの",
@@ -12,9 +17,18 @@
           "examples": "```\n彼は彼なりに準備してきたのだろう。\nHe prepared in his own way, presumably.\n```\n\n```\n予算が少なくても、それなりに楽しい旅行になった。\nEven on a small budget, the trip was enjoyable in its own right.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "High praise intended", "correct": "なりに caps the praise at own-scale — decent, not stellar", "note": null}
+              {
+                "wrong": "High praise intended",
+                "correct": "なりに caps the praise at own-scale — decent, not stellar",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "それなりに (reasonably so) and 自分なりに (in my own way) are the workhorses."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "それなりに (reasonably so) and 自分なりに (in my own way) are the workhorses."
+              }
+            ]
           },
           "pro_tip": "The pattern grades on the noun's own curve — no curve, no なりに."
         },
@@ -26,9 +40,18 @@
           "examples": "```\n彼は彼なりに準備してきたのだろう。\nГотовился он, надо думать, как умел.\n```\n\n```\n予算が少なくても、それなりに楽しい旅行になった。\nДаже при скромном бюджете поездка вышла славная по-своему.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Высокая похвала", "correct": "なりに ограничивает похвалу собственной меркой — хорошо, но не блеск", "note": null}
+              {
+                "wrong": "Высокая похвала",
+                "correct": "なりに ограничивает похвалу собственной меркой — хорошо, но не блеск",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Рабочие лошадки: それなりに и 自分なりに."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Рабочие лошадки: それなりに и 自分なりに."
+              }
+            ]
           },
           "pro_tip": "Конструкция оценивает по личной кривой самого существительного: нет кривой — нет なりに."
         }
@@ -36,7 +59,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["なり～なり"]],
       "content": {
         "English": {
           "title": "～なり～なり",
@@ -46,9 +68,18 @@
           "examples": "```\n困ったときは、父なり母なりに相談しなさい。\nWhen in trouble, talk to Dad or Mom.\n```\n\n```\n休憩中は、散歩するなり仮眠するなり好きにすればいい。\nOn break: walk or nap — as you like.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Exhaustive listings", "correct": "なり suggests samples — the list stays open", "note": null}
+              {
+                "wrong": "Exhaustive listings",
+                "correct": "なり suggests samples — the list stays open",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Everyday speech; でも／とか are neutral cousins."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Everyday speech; でも／とか are neutral cousins."
+              }
+            ]
           },
           "pro_tip": "The pattern opens a menu, not a rulebook."
         },
@@ -60,9 +91,18 @@
           "examples": "```\n困ったときは、父なり母なりに相談しなさい。\nПопадёшь в беду — посоветуйся с папой или мамой.\n```\n\n```\n休憩中は、散歩するなり仮眠するなり好きにすればいい。\nВ перерыве — гуляй или дреми, как хочешь.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Исчерпывающие списки", "correct": "なり предлагает образцы — список остаётся открытым", "note": null}
+              {
+                "wrong": "Исчерпывающие списки",
+                "correct": "なり предлагает образцы — список остаётся открытым",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Бытовая речь; нейтральные родичи — でも／とか."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Бытовая речь; нейтральные родичи — でも／とか."
+              }
+            ]
           },
           "pro_tip": "Конструкция открывает меню, а не свод правил."
         }
@@ -70,7 +110,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["なりとも"]],
+      "keywords": [
+        [
+          "なりとも"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～なりとも",
@@ -80,9 +124,18 @@
           "examples": "```\nお茶なりとも、飲んで休んでいってください。\nAt least have some tea and rest a while.\n```\n\n```\n感想なりとも聞かせてもらえますか。\nCould you share even a brief impression?\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Grand requests", "correct": "なりとも shrinks the ask — humility is built in", "note": null}
+              {
+                "wrong": "Grand requests",
+                "correct": "なりとも shrinks the ask — humility is built in",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Warm hospitality and polite requests."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Warm hospitality and polite requests."
+              }
+            ]
           },
           "pro_tip": "The pattern lowers the bar so the guest can step over it."
         },
@@ -94,9 +147,18 @@
           "examples": "```\nお茶なりとも、飲んで休んでいってください。\nХотя бы чаю выпейте и отдохните.\n```\n\n```\n感想なりとも聞かせてもらえますか。\nНе поделитесь ли хоть парой впечатлений?\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Грандиозные просьбы", "correct": "なりとも уменьшает просьбу — скромность встроена", "note": null}
+              {
+                "wrong": "Грандиозные просьбы",
+                "correct": "なりとも уменьшает просьбу — скромность встроена",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Тёплое гостеприимство и вежливые просьбы."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Тёплое гостеприимство и вежливые просьбы."
+              }
+            ]
           },
           "pro_tip": "Конструкция опускает планку, чтобы гость смог через неё переступить."
         }
@@ -104,7 +166,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["ならでは"]],
+      "keywords": [
+        [
+          "ならでは"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～ならではの",
@@ -114,9 +180,18 @@
           "examples": "```\n手作りならではの温かみがある。\nIt has a warmth only handmade things carry.\n```\n\n```\n熟練の職人ならではの技だ。\nA technique exclusive to a seasoned artisan.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Negative contexts", "correct": "ならでは is praise — flaws take ～特有の with a sigh", "note": null}
+              {
+                "wrong": "Negative contexts",
+                "correct": "ならでは is praise — flaws take ～特有の with a sigh",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Advertising staple: お店ならではの一品 — a dish only this shop makes."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Advertising staple: お店ならではの一品 — a dish only this shop makes."
+              }
+            ]
           },
           "pro_tip": "It is the stamp of origin: copyable nowhere, praised everywhere."
         },
@@ -128,9 +203,18 @@
           "examples": "```\n手作りならではの温かみがある。\nВ нём тепло, какое бывает только у вещей ручной работы.\n```\n\n```\n熟練の職人ならではの技だ。\nПриём, доступный только умудрённому мастеру.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Негативные контексты", "correct": "ならでは — похвала; недостатки берут ～特有の со вздохом", "note": null}
+              {
+                "wrong": "Негативные контексты",
+                "correct": "ならでは — похвала; недостатки берут ～特有の со вздохом",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Классика рекламы: お店ならではの一品 — блюдо, которое есть только здесь."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Классика рекламы: お店ならではの一品 — блюдо, которое есть только здесь."
+              }
+            ]
           },
           "pro_tip": "Это штамп происхождения: нигде не скопируешь, всюду хвалят."
         }
@@ -138,7 +222,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["ものとして"]],
+      "keywords": [
+        [
+          "ものとして"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～ものとして",
@@ -148,9 +236,18 @@
           "examples": "```\n今日の件は、なかったものとして扱いましょう。\nLet us treat today's matter as if it never happened.\n```\n\n```\n期限を過ぎた応募は、無効なものとみなします。\nEntries past the deadline are deemed invalid.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Personal feelings", "correct": "ものとして sets an official premise — hearts take ～と思って", "note": null}
+              {
+                "wrong": "Personal feelings",
+                "correct": "ものとして sets an official premise — hearts take ～と思って",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Rules and agreements; the contract voice of とする."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Rules and agreements; the contract voice of とする."
+              }
+            ]
           },
           "pro_tip": "Where a document writes deemed as, speech says ものとして."
         },
@@ -162,9 +259,18 @@
           "examples": "```\n今日の件は、なかったものとして扱いましょう。\nСегодняшний эпизод будем считать несуществовавшим.\n```\n\n```\n期限を過ぎた応募は、無効なものとみなします。\nПросроченные заявки считаются недействительными.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Личные чувства", "correct": "ものとして задаёт официальную посылку; чувства — ～と思って", "note": null}
+              {
+                "wrong": "Личные чувства",
+                "correct": "ものとして задаёт официальную посылку; чувства — ～と思って",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Правила и договоры; контрактный голос とする."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Правила и договоры; контрактный голос とする."
+              }
+            ]
           },
           "pro_tip": "Где документ пишет «считается как», речь говорит ものとして."
         }
@@ -172,7 +278,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["もしない"]],
       "content": {
         "English": {
           "title": "～もしない／～たりもしない",
@@ -182,9 +287,18 @@
           "examples": "```\n彼は顔も見せず、電話もしなかった。\nHe never showed his face — did not even call.\n```\n\n```\n労わりの言葉一つ、かけたりもしない。\nNot one word of care — nothing of the sort.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Neutral negatives", "correct": "もしない fumes — plain しない states", "note": null}
+              {
+                "wrong": "Neutral negatives",
+                "correct": "もしない fumes — plain しない states",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Spoken indignation; やしない is the rougher dialect twin."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Spoken indignation; やしない is the rougher dialect twin."
+              }
+            ]
           },
           "pro_tip": "The も is a slammed door: not even the bare minimum."
         },
@@ -196,9 +310,18 @@
           "examples": "```\n彼は顔も見せず、電話もしなかった。\nНе показался — даже не позвонил.\n```\n\n```\n労わりの言葉一つ、かけたりもしない。\nНи слова сочувствия — даже не попытался.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Нейтральные отрицания", "correct": "もしない дымится от возмущения; простое しない лишь констатирует", "note": null}
+              {
+                "wrong": "Нейтральные отрицания",
+                "correct": "もしない дымится от возмущения; простое しない лишь констатирует",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Разговорное негодование; やしない — грубый диалектный близнец."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Разговорное негодование; やしない — грубый диалектный близнец."
+              }
+            ]
           },
           "pro_tip": "も здесь — хлопнувшая дверь: даже минимума не было."
         }
@@ -206,7 +329,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["やしない"]],
+      "keywords": [
+        [
+          "やしない"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～やしない",
@@ -216,9 +343,18 @@
           "examples": "```\nこんな値段じゃ、誰も買いやしないさ。\nAt this price nobody is going to buy it, period.\n```\n\n```\n忙しくて、休んでもいられやしない。\nToo busy to even take a break.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Written prose", "correct": "やしない is spoken and rough; formal writing takes はしない", "note": null}
+              {
+                "wrong": "Written prose",
+                "correct": "やしない is spoken and rough; formal writing takes はしない",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Casual, often exasperated; gender-neutral but blue-collar in flavor."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Casual, often exasperated; gender-neutral but blue-collar in flavor."
+              }
+            ]
           },
           "pro_tip": "It is はしない with the collar loosened."
         },
@@ -230,9 +366,18 @@
           "examples": "```\nこんな値段じゃ、誰も買いやしないさ。\nЗа такую цену покупать никто не станет, и всё тут.\n```\n\n```\n忙しくて、休んでもいられやしない。\nЗанят так, что и передохнуть нельзя.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Письменная проза", "correct": "やしない разговорно-грубо; в формальных текстах — はしない", "note": null}
+              {
+                "wrong": "Письменная проза",
+                "correct": "やしない разговорно-грубо; в формальных текстах — はしない",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Небрежно, часто с досадой; рабоче-кительный привкус."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Небрежно, часто с досадой; рабоче-кительный привкус."
+              }
+            ]
           },
           "pro_tip": "Это はしない с расстёгнутым воротником."
         }
@@ -240,7 +385,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["を前提に"]],
+      "keywords": [
+        [
+          "を前提に"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～を前提に（して）／～前提で",
@@ -250,9 +399,18 @@
           "examples": "```\n彼は協力を前提に、話を進めてきた。\nHe proceeded on the premise of our cooperation.\n```\n\n```\n売上増を前提とした採用は、今年は控えた。\nHiring premised on revenue growth was shelved this year.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Established facts", "correct": "前提 marks an assumption; established grounds take に基づいて", "note": null}
+              {
+                "wrong": "Established facts",
+                "correct": "前提 marks an assumption; established grounds take に基づいて",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Business and planning prose; 前提で is the compact memo style."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Business and planning prose; 前提で is the compact memo style."
+              }
+            ]
           },
           "pro_tip": "Whatever follows を前提に is leaning on that noun — ask what breaks if the noun does."
         },
@@ -264,9 +422,18 @@
           "examples": "```\n彼は協力を前提に、話を進めてきた。\nОн вёл дело, исходя из нашего сотрудничества.\n```\n\n```\n売上増を前提とした採用は、今年は控えた。\nНайм под предпосылку роста выручки в этом году отложили.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Установленные факты", "correct": "前提 помечает допущение; устоявшуюся основу берёт に基づいて", "note": null}
+              {
+                "wrong": "Установленные факты",
+                "correct": "前提 помечает допущение; устоявшуюся основу берёт に基づいて",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Деловая проза планирования; 前提で — компактный стиль памяток."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Деловая проза планирования; 前提で — компактный стиль памяток."
+              }
+            ]
           },
           "pro_tip": "Всё, что после を前提に, опирается на это существительное — спросите, что сломается, если сломается оно."
         }
@@ -274,7 +441,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["抜きに"]],
       "content": {
         "English": {
           "title": "～抜きで（は）／～抜きに",
@@ -284,9 +450,18 @@
           "examples": "```\n形だけの議論は抜きにして、本質を話そう。\nSkip the formalities — let us talk substance.\n```\n\n```\n朝ごはん抜きでは、頭が回らない。\nWithout breakfast my brain will not start.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "なければ without nuance", "correct": "抜き implies the skipped thing is normally expected — formality, ritual, meal", "note": null}
+              {
+                "wrong": "なければ without nuance",
+                "correct": "抜き implies the skipped thing is normally expected — formality, ritual, meal",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Fixed openers: 冗談抜きで、挨拶抜きで始めましょう、説明は抜きにして."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Fixed openers: 冗談抜きで、挨拶抜きで始めましょう、説明は抜きにして."
+              }
+            ]
           },
           "pro_tip": "The pattern pulls the plug on ceremony — what remains is the naked point."
         },
@@ -298,9 +473,18 @@
           "examples": "```\n形だけの議論は抜きにして、本質を話そう。\nУберём пустые дебаты — поговорим о сути.\n```\n\n```\n朝ごはん抜きでは、頭が回らない。\nБез завтрака мозг не заводится.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Просто «если нет»", "correct": "抜き подразумевает, что пропускается обычно ожидаемое — ритуал, церемония, еда", "note": null}
+              {
+                "wrong": "Просто «если нет»",
+                "correct": "抜き подразумевает, что пропускается обычно ожидаемое — ритуал, церемония, еда",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Фирменные зачины: 冗談抜きで、挨拶抜きで始めましょう、説明は抜きにして."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Фирменные зачины: 冗談抜きで、挨拶抜きで始めましょう、説明は抜きにして."
+              }
+            ]
           },
           "pro_tip": "Конструкция выдёргивает вилку из церемонии — остаётся голая суть."
         }
@@ -308,7 +492,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["限りで"]],
+      "keywords": [
+        [
+          "限りで"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～限りで",
@@ -318,9 +506,18 @@
           "examples": "```\n今回限りで、許してあげましょう。\nForgive you this once — and only this once.\n```\n\n```\n私の知る限りでは、彼は独身のはずだ。\nAs far as I know, he should be single.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Uncapped durations", "correct": "限りで caps the span — after it, the rule changes", "note": null}
+              {
+                "wrong": "Uncapped durations",
+                "correct": "限りで caps the span — after it, the rule changes",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "～限りでは (as far as) rides on knowledge/調査: 調べた限りでは."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "～限りでは (as far as) rides on knowledge/調査: 調べた限りでは."
+              }
+            ]
           },
           "pro_tip": "Two safe slots: a time span (today only) or knowledge scope (as far as I know)."
         },
@@ -332,9 +529,18 @@
           "examples": "```\n今回限りで、許してあげましょう。\nПрощаю только на этот раз — и только этот.\n```\n\n```\n私の知る限りでは、彼は独身のはずだ。\nНасколько я знаю, он должен быть холост.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Бескрайние длительности", "correct": "限りで накрывает срок — после него правило меняется", "note": null}
+              {
+                "wrong": "Бескрайние длительности",
+                "correct": "限りで накрывает срок — после него правило меняется",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "variation", "text": "～限りでは («насколько») — про знание/проверку: 調べた限りでは."}]
+            "notes": [
+              {
+                "tag": "variation",
+                "text": "～限りでは («насколько») — про знание/проверку: 調べた限りでは."
+              }
+            ]
           },
           "pro_tip": "Два безопасных слота: срок («только сегодня») или предел знания («насколько мне известно»)."
         }
@@ -342,7 +548,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["たことにしてください"]],
       "content": {
         "English": {
           "title": "～たことにしてください",
@@ -352,9 +557,18 @@
           "examples": "```\n今日の話は、聞かなかったことにしてくれる？\nToday's talk — could you act as if you never heard it?\n```\n\n```\nAlready sent it — 送ったことにして、返事だけ書いておこう。\nLet us pretend it was sent, and just write the reply.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Actual record-keeping instructions", "correct": "The pattern openly builds a fiction — both sides know it", "note": null}
+              {
+                "wrong": "Actual record-keeping instructions",
+                "correct": "The pattern openly builds a fiction — both sides know it",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Everyday; the formal variant ～たものとして lives in documents."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Everyday; the formal variant ～たものとして lives in documents."
+              }
+            ]
           },
           "pro_tip": "It is a stage direction for real life: play along, please."
         },
@@ -366,17 +580,30 @@
           "examples": "```\n今日の話は、聞かなかったことにしてくれる？\nСегодняшний разговор — можешь сделать вид, что не слышал?\n```\n\n```\n送ったことにして、返事だけ書いておこう。\nСделаем вид, что отправили, и просто напишем ответ.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Реальные инструкции по учёту", "correct": "Конструкция открыто строит фикцию — обе стороны это знают", "note": null}
+              {
+                "wrong": "Реальные инструкции по учёту",
+                "correct": "Конструкция открыто строит фикцию — обе стороны это знают",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Бытовое; формальный вариант ～たものとして живёт в документах."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Бытовое; формальный вариант ～たものとして живёт в документах."
+              }
+            ]
           },
           "pro_tip": "Это ремарка для реальной жизни: подыгра́йте, пожалуйста."
         }
-      }
+      },
+      "keywords": [
+        [
+          "たことにしてください"
+        ]
+      ]
     },
     {
       "level": "N1",
-      "keywords": [["抜いて"]],
       "content": {
         "English": {
           "title": "～を抜いて／～抜いた",
@@ -386,9 +613,18 @@
           "examples": "```\n彼を抜いたチームなんて、考えられない。\nA team with him removed — unthinkable.\n```\n\n```\n税抜きでこの値段なら、安いと言える。\nAt this price excluding tax, it counts as cheap.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Abstract omissions (愛を抜いて)", "correct": "を抜いて pulls concrete members or cost items from a set", "note": null}
+              {
+                "wrong": "Abstract omissions (愛を抜いて)",
+                "correct": "を抜いて pulls concrete members or cost items from a set",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Price tags love it: 税抜き／送料抜き — tax/shipping excluded."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Price tags love it: 税抜き／送料抜き — tax/shipping excluded."
+              }
+            ]
           },
           "pro_tip": "Receipt grammar: every 抜き is a line item struck through."
         },
@@ -400,9 +636,18 @@
           "examples": "```\n彼を抜いたチームなんて、考えられない。\nКоманда без него — немыслимо.\n```\n\n```\n税抜きでこの値段なら、安いと言える。\nБез налога за такую цену — можно сказать, дёшево.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Абстрактные изъятия (愛を抜いて)", "correct": "を抜いて вынимает конкретных членов или статьи затрат", "note": null}
+              {
+                "wrong": "Абстрактные изъятия (愛を抜いて)",
+                "correct": "を抜いて вынимает конкретных членов или статьи затрат",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "collocation", "text": "Обожаемо ценниками: 税抜き／送料抜き — без налога/доставки."}]
+            "notes": [
+              {
+                "tag": "collocation",
+                "text": "Обожаемо ценниками: 税抜き／送料抜き — без налога/доставки."
+              }
+            ]
           },
           "pro_tip": "Грамматика чека: каждое 抜き — вычеркнутая строка."
         }
@@ -410,7 +655,11 @@
     },
     {
       "level": "N1",
-      "keywords": [["のやら"]],
+      "keywords": [
+        [
+          "のやら"
+        ]
+      ],
       "content": {
         "English": {
           "title": "～のやら～のやら",
@@ -420,9 +669,18 @@
           "examples": "```\n彼が何を考えているのやら、さっぱり分からない。\nWhat on earth he is thinking — no idea at all.\n```\n\n```\nこの雨はいつまで降るのやら。\nThis rain — until when, who knows.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Genuine questions to the listener", "correct": "のやら mutters at the heavens — rhetorical confusion", "note": null}
+              {
+                "wrong": "Genuine questions to the listener",
+                "correct": "のやら mutters at the heavens — rhetorical confusion",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Spoken soliloquy; ends the sentence in thin air."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Spoken soliloquy; ends the sentence in thin air."
+              }
+            ]
           },
           "pro_tip": "No answer is expected — the pattern is the sigh itself."
         },
@@ -434,9 +692,18 @@
           "examples": "```\n彼が何を考えているのやら、さっぱり分からない。\nЧто у него на уме — решительно непонятно.\n```\n\n```\nこの雨はいつまで降るのやら。\nЭтот дождь — до каких же пор он будет лить.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Подлинные вопросы собеседнику", "correct": "のやら бормочет в небо — риторическая растерянность", "note": null}
+              {
+                "wrong": "Подлинные вопросы собеседнику",
+                "correct": "のやら бормочет в небо — риторическая растерянность",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Разговорный монолог; предложение тает в воздухе."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Разговорный монолог; предложение тает в воздухе."
+              }
+            ]
           },
           "pro_tip": "Ответа не ждут — сама конструкция и есть вздох."
         }
@@ -444,7 +711,6 @@
     },
     {
       "level": "N1",
-      "keywords": [["が～なら、～も～だ"]],
       "content": {
         "English": {
           "title": "～も～なら、～も～だ",
@@ -454,9 +720,18 @@
           "examples": "```\nうちの猫も猫なら、犬も犬だ。どっちも暴れん坊だ。\nOur cat is something, and so is the dog — both little hurricanes.\n```\n\n```\n教師も教師なら、生徒も生徒だ。\nSome teacher, some students — a matched pair.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Complimenting one side", "correct": "The frame pegs both — usually teasing or critical", "note": null}
+              {
+                "wrong": "Complimenting one side",
+                "correct": "The frame pegs both — usually teasing or critical",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Spoken wit; the が-variant （～が～なら） tilts the blame toward the first noun."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Spoken wit; the が-variant （～が～なら） tilts the blame toward the first noun."
+              }
+            ]
           },
           "pro_tip": "It is a mirror held to two faces at once — both grimace equally."
         },
@@ -468,9 +743,18 @@
           "examples": "```\nうちの猫も猫なら、犬も犬だ。どっちも暴れん坊だ。\nКот у нас — да и пёс хорош. Оба — маленькие ураганы.\n```\n\n```\n教師も教師なら、生徒も生徒だ。\nУчитель — ну и ученики: пара друг другу.\n```",
           "nuances": {
             "common_mistakes": [
-              {"wrong": "Хвалить одну сторону", "correct": "Рамка клеймит обоих — обычно в шутку или с укором", "note": null}
+              {
+                "wrong": "Хвалить одну сторону",
+                "correct": "Рамка клеймит обоих — обычно в шутку или с укором",
+                "note": null
+              }
             ],
-            "notes": [{"tag": "register", "text": "Разговорный остроумный оборот; вариант с が наклоняет вину на первое существительное."}]
+            "notes": [
+              {
+                "tag": "register",
+                "text": "Разговорный остроумный оборот; вариант с が наклоняет вину на первое существительное."
+              }
+            ]
           },
           "pro_tip": "Зеркало, поднесённое к двум лицам разом — оба гримасничают одинаково."
         }
