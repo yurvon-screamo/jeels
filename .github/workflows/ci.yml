@@ -548,13 +548,18 @@ jobs:
             - name: Install TrailBase CLI
               if: steps.cache-trailbase.outputs.cache-hit != 'true' || steps.validate-trailbase.outputs.valid != 'true'
               run: |
-                  for i in 1 2 3 4 5; do
-                    tmp=$(mktemp) && curl -sSfL --retry 3 --retry-delay 10 -o "$tmp" \
-                      https://trailbase.io/install.sh && bash "$tmp" && break
-                    echo "Attempt $i failed, retrying in 15s..."
-                    rm -f "$tmp"
-                    sleep 15
-                  done
+                  # Pinned direct download. The trailbase.io installer resolves
+                  # "latest" via anonymous GitHub API calls, which get
+                  # rate-limited on shared runner IPs: it reports an empty
+                  # version and "Could not find any assets that fit your
+                  # system" on every retry. A direct release-asset URL needs
+                  # no API quota. Keep the version in sync with the cache key.
+                  curl -sSfL --retry 3 --retry-delay 10 -o /tmp/trailbase.zip \
+                    https://github.com/trailbaseio/trailbase/releases/download/v0.28.3/trailbase_v0.28.3_x86_64_linux.zip
+                  mkdir -p "$HOME/.local/bin"
+                  unzip -oq /tmp/trailbase.zip -d "$HOME/.local/bin" trail
+                  chmod +x "$HOME/.local/bin/trail"
+                  "$HOME/.local/bin/trail" --version
 
             - name: Verify TrailBase
               run: trail --version
