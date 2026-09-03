@@ -29,6 +29,7 @@ export const test = base.extend<
         acqKnownCard: { value: string | null };
         acqTargetCard: { value: string | null };
         loginGateRelease: { release: (() => Promise<void>) | null };
+        cdnRequestLog: string[];
     },
     object
 >({
@@ -87,6 +88,16 @@ export const test = base.extend<
     loginGateRelease: [
         async ({}, use) => {
             await use({ release: null });
+        },
+        { scope: "test" },
+    ],
+    // Request URLs observed during a clean-cache app start (the
+    // rkyv fast-path scenario): the When-step that drives the fresh
+    // browser context appends every network request here, the Then-step
+    // asserts the fallback sources were never fetched.
+    cdnRequestLog: [
+        async ({}, use) => {
+            await use([] as string[]);
         },
         { scope: "test" },
     ],

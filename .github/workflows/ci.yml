@@ -299,7 +299,7 @@ jobs:
             - name: Download CDN data
               uses: ./.github/actions/download-cdn
               with:
-                  cache-key: cdn-data-v13-${{ hashFiles('end2end/cdn-manifest.txt') }}
+                  cache-key: cdn-data-v14-${{ hashFiles('end2end/cdn-manifest.txt') }}
                   cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact
@@ -589,7 +589,7 @@ jobs:
                   case "${{ matrix.group }}" in
                     core)
                       npx playwright test --project=bdd --retries=1 \
-                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en)\.feature\.spec\.js"
+                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en|loading_rkyv)\.feature\.spec\.js"
                       ;;
                     words)
                       npx playwright test --project=bdd --retries=1 \

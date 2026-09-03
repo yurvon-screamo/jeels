@@ -2,9 +2,16 @@ use origa::domain::OrigaError;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
-/// Cache name for the raw (deflated) dictionary files (introduced when the
-/// app switched to raw lindera dictionary files instead of an rkyv blob).
-pub const DICTIONARY_FILES_CACHE_NAME: &str = "origa-dictionary-files-v1";
+/// Cache name for the raw (inflated) dictionary files.
+///
+/// v2 stores INFLATED bytes: a repeated start reads them and skips the
+/// 28→223 MB deflate decompression entirely. v1 stored deflated files and
+/// is deleted on migration (see `cleanup_legacy_dictionary_cache`); the
+/// name bump keeps a rolled-back client from inflating raw bytes.
+pub const DICTIONARY_FILES_CACHE_NAME: &str = "origa-dictionary-files-v2-raw";
+
+/// Retired v1 cache (deflated format) — dropped once v2 is populated.
+pub const LEGACY_DICTIONARY_FILES_CACHE_NAME: &str = "origa-dictionary-files-v1";
 
 /// Cache key prefix for each deflated dictionary file.
 pub const DICTIONARY_FILE_KEY_PREFIX: &str = "/__origa_dict_file__";
@@ -102,7 +109,7 @@ async fn cache_write(cache: &web_sys::Cache, key: &str, bytes: &[u8]) -> Result<
     Ok(())
 }
 
-/// Get all cached deflated dictionary files. Returns None if any file is
+/// Get all cached raw dictionary files. Returns None if any file is
 /// missing (partial caches are treated as a miss).
 pub async fn get_cached_dictionary_files() -> Option<Vec<(String, Vec<u8>)>> {
     let cache = open_cache(DICTIONARY_FILES_CACHE_NAME).await.ok()?;
@@ -122,16 +129,29 @@ pub async fn get_cached_dictionary_files() -> Option<Vec<(String, Vec<u8>)>> {
     Some(out)
 }
 
-/// Save deflated dictionary files to the Cache API.
-pub async fn save_dictionary_files_to_cache(files: &[(String, Vec<u8>)]) -> Result<(), OrigaError> {
-    let cache = open_cache(DICTIONARY_FILES_CACHE_NAME).await?;
-    for (path, bytes) in files {
-        let name = path.rsplit('/').next().unwrap_or(path);
-        let key = format!("{DICTIONARY_FILE_KEY_PREFIX}{name}");
-        cache_write(&cache, &key, bytes).await?;
+/// Delete the retired v1 (deflated) dictionary cache. Best-effort: a failure
+/// only leaves ~40 MB of stale data behind, the next start retries.
+pub async fn cleanup_legacy_dictionary_cache() {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let Some(caches) = window.caches().ok() else {
+        return;
+    };
+    match JsFuture::from(caches.delete(LEGACY_DICTIONARY_FILES_CACHE_NAME)).await {
+        Ok(_) => tracing::info!("Legacy v1 dictionary cache deleted"),
+        Err(e) => tracing::warn!("Failed to delete legacy v1 dictionary cache: {e:?}"),
     }
-    tracing::info!("Dictionary files cached: {}", files.len());
-    Ok(())
+}
+
+/// Save a single raw (inflated) dictionary file to the v2 Cache API.
+/// Single-file API on purpose: the per-file pipeline persists right after
+/// inflating without cloning the (up to 223 MB) buffer.
+pub async fn save_dictionary_file_to_cache(path: &str, bytes: &[u8]) -> Result<(), OrigaError> {
+    let cache = open_cache(DICTIONARY_FILES_CACHE_NAME).await?;
+    let name = path.rsplit('/').next().unwrap_or(path);
+    let key = format!("{DICTIONARY_FILE_KEY_PREFIX}{name}");
+    cache_write(&cache, &key, bytes).await
 }
 
 /// Get cached VocabularyDatabase as raw rkyv bytes.

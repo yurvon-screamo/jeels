@@ -87,6 +87,7 @@ end2end-dir = "end2end"
 [dev-dependencies]
 rstest.workspace = true
 wasm-bindgen-test.workspace = true
+tokio = { workspace = true, features = ["rt", "macros"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]

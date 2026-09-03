@@ -1,4 +1,7 @@
-use std::{collections::HashMap, sync::OnceLock};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::OnceLock,
+};
 
 use serde::Deserialize;
 
@@ -166,6 +169,35 @@ pub struct VocabularyDatabase {
     vocabulary_map: HashMap<String, VocabularyInfo>,
 }
 
+/// Deterministic serialization form of [`VocabularyDatabase`] for CDN blobs.
+///
+/// The inner `HashMap` iterates in a per-process random order, so serializing
+/// the database directly would produce a byte-different blob on every build
+/// run and invalidate every client cache after each deploy. `BTreeMap`
+/// serialization is ordered, keeping the blob hash stable for unchanged
+/// sources.
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+pub struct VocabularyBlob {
+    entries: BTreeMap<String, VocabularyInfo>,
+}
+
+impl VocabularyDatabase {
+    /// Deterministic CDN-blob form of this database.
+    pub fn to_cdn_blob(&self) -> VocabularyBlob {
+        VocabularyBlob {
+            entries: self.vocabulary_map.clone().into_iter().collect(),
+        }
+    }
+}
+
+impl VocabularyBlob {
+    pub fn into_database(self) -> VocabularyDatabase {
+        VocabularyDatabase {
+            vocabulary_map: self.entries.into_iter().collect(),
+        }
+    }
+}
+
 #[derive(Clone, Deserialize)]
 pub struct VocabularyChunkData {
     pub chunk_01: String,
@@ -183,11 +215,46 @@ pub struct VocabularyChunkData {
 
 pub fn init_vocabulary(data: VocabularyChunkData) -> Result<(), OrigaError> {
     let db = VocabularyDatabase::from_chunks(data)?;
+    set_vocabulary_database(db)
+}
+
+/// Install an already-built database into the global slot. Used by the CDN
+/// blob builder (via `from_chunks`) and by loader wrappers after rkyv
+/// deserialization. Fails if another database is already installed.
+pub fn set_vocabulary_database(db: VocabularyDatabase) -> Result<(), OrigaError> {
     VOCABULARY_DICTIONARY
         .set(db)
         .map_err(|_| OrigaError::VocabularyParseError {
             reason: "Failed to set vocabulary dictionary".to_string(),
         })
+}
+
+/// Build a database from chunk JSONs without installing it into the global
+/// slot. Used by the CDN blob builder and by loader tests.
+pub fn build_vocabulary_database_from_chunks(
+    data: VocabularyChunkData,
+) -> Result<VocabularyDatabase, OrigaError> {
+    VocabularyDatabase::from_chunks(data)
+}
+
+/// Serialize a CDN-blob form of an already-built database (deterministic).
+pub fn serialize_vocabulary_blob_to_rkyv(db: &VocabularyDatabase) -> Result<Vec<u8>, OrigaError> {
+    rkyv::to_bytes::<rkyv::rancor::Error>(&db.to_cdn_blob())
+        .map(|bytes| bytes.to_vec())
+        .map_err(|e| OrigaError::VocabularyParseError {
+            reason: format!("Failed to serialize vocabulary blob: {}", e),
+        })
+}
+
+/// Deserialize a CDN-blob payload into a database (fast path, no JSON).
+pub fn vocabulary_database_from_blob_rkyv(
+    payload: &[u8],
+) -> Result<VocabularyDatabase, OrigaError> {
+    let blob: VocabularyBlob = rkyv::from_bytes::<VocabularyBlob, rkyv::rancor::Error>(payload)
+        .map_err(|e| OrigaError::VocabularyParseError {
+            reason: format!("Failed to deserialize vocabulary blob: {}", e),
+        })?;
+    Ok(blob.into_database())
 }
 
 /// Serialize the in-memory VocabularyDatabase to rkyv bytes for Cache API
@@ -670,6 +737,43 @@ mod tests {
         assert_eq!(en, vec!["cat"]);
         let desc = restored.get_description("猫", &NativeLanguage::Russian);
         assert_eq!(desc, Some("домашнее животное".to_string()));
+    }
+
+    #[test]
+    fn cdn_blob_round_trip_preserves_translations() {
+        // Arrange
+        let data = empty_chunk_data_with(&make_structured_chunk_json());
+        let db = build_vocabulary_database_from_chunks(data).unwrap();
+
+        // Act
+        let payload = serialize_vocabulary_blob_to_rkyv(&db).unwrap();
+        let restored = vocabulary_database_from_blob_rkyv(&payload).unwrap();
+
+        // Assert
+        let ru = restored
+            .get_translations("猫", &NativeLanguage::Russian)
+            .unwrap();
+        assert_eq!(ru, vec!["кошка", "кот"]);
+        let en = restored
+            .get_translations("猫", &NativeLanguage::English)
+            .unwrap();
+        assert_eq!(en, vec!["cat"]);
+    }
+
+    #[test]
+    fn cdn_blob_serialization_is_deterministic_across_builds() {
+        // Arrange: two independently built databases from the same chunks
+        let json = make_structured_chunk_json();
+        let first = build_vocabulary_database_from_chunks(empty_chunk_data_with(&json)).unwrap();
+        let second = build_vocabulary_database_from_chunks(empty_chunk_data_with(&json)).unwrap();
+
+        // Act
+        let first_payload = serialize_vocabulary_blob_to_rkyv(&first).unwrap();
+        let second_payload = serialize_vocabulary_blob_to_rkyv(&second).unwrap();
+
+        // Assert: byte-identical blobs keep the manifest hash stable across
+        // deploys with unchanged sources (no mass client re-download).
+        assert_eq!(first_payload, second_payload);
     }
 
     #[test]

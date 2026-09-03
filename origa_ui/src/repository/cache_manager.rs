@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::sync::OnceLock;
 
+use origa::dictionary::cdn_blob::{GuardExpectation, guard_expectation};
 use origa::domain::OrigaError;
 use serde::{Deserialize, Serialize};
 
@@ -22,6 +24,37 @@ pub struct CacheManifest {
     pub files: HashMap<String, String>,
 }
 
+/// The remote manifest fetched by the last `check_and_invalidate` run.
+/// Kept process-globally so CDN-blob loaders can verify their blob's
+/// `manifest_guard` against the manifest hashes without a second download.
+/// Native builds never populate it (manifest check is a no-op there).
+static REMOTE_MANIFEST: OnceLock<CacheManifest> = OnceLock::new();
+
+/// Guard expectation for a CDN blob whose sources live at `paths`.
+///
+/// `Unavailable` when no manifest was fetched (offline / failed fetch): the
+/// blob is trusted at the same level as any other cache entry. When the
+/// manifest exists but any source path is absent, the result is a mismatch
+/// (conservative fallback).
+pub fn guard_expectation_for(paths: &[&str]) -> GuardExpectation {
+    guard_expectation_from_manifest(REMOTE_MANIFEST.get(), paths)
+}
+
+/// Pure form of [`guard_expectation_for`] — testable without a fetched
+/// manifest.
+pub fn guard_expectation_from_manifest(
+    manifest: Option<&CacheManifest>,
+    paths: &[&str],
+) -> GuardExpectation {
+    let hashes_by_path = manifest.map(|m| {
+        paths
+            .iter()
+            .map(|p| m.files.get(*p).cloned())
+            .collect::<Vec<_>>()
+    });
+    guard_expectation(hashes_by_path.as_deref())
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub async fn check_and_invalidate() -> Result<(), OrigaError> {
     Ok(())
@@ -36,6 +69,8 @@ pub async fn check_and_invalidate() -> Result<(), OrigaError> {
             return Ok(());
         },
     };
+
+    let _ = REMOTE_MANIFEST.set(remote.clone());
 
     let cache = open_cdn_cache().await?;
 
@@ -419,5 +454,47 @@ mod tests {
 
         let stale = find_stale_entries(&local, &remote);
         assert!(stale.is_empty());
+    }
+
+    fn manifest_with(hashes: &[(&str, &str)]) -> CacheManifest {
+        CacheManifest {
+            version: 1,
+            files: hashes
+                .iter()
+                .map(|(path, hash)| (path.to_string(), hash.to_string()))
+                .collect(),
+        }
+    }
+
+    #[test]
+    fn guard_expectation_is_unavailable_without_fetched_manifest() {
+        let expectation = guard_expectation_from_manifest(None, &["dictionaries/x.txt"]);
+
+        assert_eq!(expectation, GuardExpectation::Unavailable);
+    }
+
+    #[test]
+    fn guard_expectation_derives_from_all_manifest_hashes() {
+        let manifest = manifest_with(&[("dictionaries/x.txt", "aa"), ("dictionary/y.json", "bb")]);
+        let expected = origa::dictionary::cdn_blob::manifest_guard_from_hex_hashes(&["aa", "bb"]);
+
+        let expectation = guard_expectation_from_manifest(
+            Some(&manifest),
+            &["dictionaries/x.txt", "dictionary/y.json"],
+        );
+
+        assert_eq!(expectation, GuardExpectation::Expect(expected));
+    }
+
+    #[test]
+    fn guard_expectation_is_mismatch_when_a_source_path_is_missing() {
+        let manifest = manifest_with(&[("dictionaries/x.txt", "aa")]);
+
+        let expectation = guard_expectation_from_manifest(
+            Some(&manifest),
+            &["dictionaries/x.txt", "dictionary/missing.json"],
+        );
+
+        assert_eq!(expectation, GuardExpectation::Mismatch);
     }
 }
