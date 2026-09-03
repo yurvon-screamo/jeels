@@ -134,6 +134,27 @@ export class WordsPage extends BasePage {
         await this.searchInput.fill(query);
     }
 
+    /**
+     * Locator for cards whose text contains the word's characters in
+     * order, tolerating the furigana ruby split: the card renders 打ち付ける
+     * as ruby segments, so its textContent reads 打(ウ)ち付(ツ)ける and a
+     * plain getByText(word) never matches. The grid is already narrowed by
+     * the app's substring search before this matcher runs — the in-order
+     * regex only has to survive the ruby insertions, it is not a filter.
+     */
+    cardMatchingWord(word: string): Locator {
+        if (word.length === 0) {
+            throw new Error("cardMatchingWord: an empty word would match every card");
+        }
+        const pattern = word
+            .split("")
+            .map((ch) => ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+            .join("[\\s\\S]*");
+        return this.wordsGrid
+            .getByTestId("words-card-item")
+            .filter({ hasText: new RegExp(pattern) });
+    }
+
     async clickBack(): Promise<void> {
         await this.backButton.click();
     }

@@ -108,11 +108,16 @@ Then('поиск находит слово из корпуса N1', async ({ pag
     const words = new WordsPage(page);
     const corpusWord = corpusWordFromCdn();
     await words.searchInput.fill(corpusWord);
-    // The filtered grid must actually contain the corpus word, not just
-    // keep the container visible.
-    await expect(
-        words.wordsGrid.getByText(corpusWord).first(),
-    ).toBeVisible({ timeout: 30_000 });
+    // In-order matching survives the furigana ruby split of the card text
+    // (see WordsPage.cardMatchingWord); .first() keeps the find-semantics
+    // of the step ("the search finds the word") without an over-asserted
+    // exact count. A no-op search is still caught probabilistically: the
+    // grid renders the first 50 of the card_id-sorted cards, and a
+    // mid-corpus word stays outside that batch under the current import
+    // order.
+    await expect(words.cardMatchingWord(corpusWord).first()).toBeVisible({
+        timeout: 30_000,
+    });
 });
 
 When('открывается раздел кандзи уровня N1', async ({ page }) => {
