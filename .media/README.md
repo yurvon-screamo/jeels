@@ -51,24 +51,6 @@ Feature graphics (PNG 1024×500, требование Play): `banners/feature_gr
 - `banners/{en,ru}.all_in_one.png`, `banners/{en,ru}.your_content.png` — широкие баннеры (~1800×870, у каждого файла размер чуть отличается), исходники лендинг-коллажей
 - `banners/cleaned_logo.png` — лого на чистом фоне (1024×1024)
 
-### promo/ — нейро-сгенерированные промо-сеты
-
-Сгенерированы через grok CLI (`image_gen`/`image_edit`), 2026-09, промпт-конвенция и клиент — см. wiki `experience/cli/grok-cli-image-generation.md` и `~/bin/grok-ask.py`.
-
-| Каталог | Назначение | Язык | Состав |
-| --- | --- | --- | --- |
-| `promo/mobile-{ru,en}/` | RuStore, Reddit, X — 9:16 баннеры | RU / EN | 01-main, 02-phrases, 03-grammar, 04-kanji, 05-sets, 06-hero; `rustore/` — @1080x1920 |
-| `promo/ph-{en,ru}/` | Product Hunt gallery + универсальная презентация | EN / RU | 01-hero, 02-home, 03-kanji, 04-grammar, 05-phrases, 06-privacy; `producthunt/` — @1270x760 |
-| `promo/apple-iphone-{en,ru}/` | App Store iPhone (нативный ~9:19.5) | EN / RU | 01-main, 02-phrases, 03-grammar, 04-kanji, 05-sets; `appstore/` — @1320x2868 |
-| `promo/apple-ipad-{en,ru}/` | App Store iPad | EN / RU | 01-main, 02-phrases, 03-grammar; `appstore/` — @2064x2752 (3:4 cover-crop) |
-| `promo/apple-macos-{en,ru}/` | Mac App Store | EN / RU | 01-home, 02-lesson, 03-reading; `appstore/` — @1280x800 |
-| `promo/social/` | X/Reddit: 16:9 баннеры и 1:1 посты | EN / RU | `16x9-{en,ru}`, `1x1-{en,ru}`; `x-twitter/` — @1200x675, @1080x1080 |
-| `promo/store-assets/` | Иконки площадок | — | `icon-rustore-512.png`, `icon-producthunt-240.png` (из `origa_ui/public/logo.png`) |
-
-Подкаталоги `appstore/`, `producthunt/`, `rustore/`, `x-twitter/` — производные под точные требования площадок (cover-crop/ресайз Lanczos из оригиналов выше). Оригиналы не удалять — источник производных.
-
-Правила серии: единый стиль-бриф (крем-бумага #F7F2E7, тетрадная сетка, тёмно-зелёный сэриф, сакура); юзернейм на скринах заменён на `tanaka`; UI в EN-версиях нейро-переведён. QA: 3 раунда — большие тексты вычитать перед использованием, мелкий кегль может содержать артефакты. Известные анти-паттерны генерации (не повторять): упоминание «App Store» в промпте рисует страницу стора внутри UI; два референса конфликтуют; letter-by-letter спеллинги не работают.
-
 ## Конвенции
 
 1. Новые десктоп-скрины: `.media/screenshots/{platform}/{lang}/{screen}.png`, platform — `macos|windows|linux`, lang — `en|ru`, screen — snake_case, один экран — один файл.
