@@ -1,4 +1,6 @@
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::JsValue;
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen_futures::JsFuture;
 
 /// Yields execution to the browser, allowing it to process UI events
@@ -7,6 +9,10 @@ use wasm_bindgen_futures::JsFuture;
 /// In WASM, async functions run on a single thread (cooperative multitasking).
 /// Without explicit yields, CPU-bound operations block the main thread,
 /// preventing the browser from rendering UI updates.
+///
+/// Native builds (loader tests) resolve immediately: there is no event loop
+/// to yield to outside the browser.
+#[cfg(target_arch = "wasm32")]
 pub async fn yield_to_browser() {
     let promise = js_sys::Promise::new(&mut |resolve, _| {
         if let Some(window) = web_sys::window() {
@@ -20,3 +26,6 @@ pub async fn yield_to_browser() {
 
     JsFuture::from(promise).await.ok();
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+pub async fn yield_to_browser() {}
