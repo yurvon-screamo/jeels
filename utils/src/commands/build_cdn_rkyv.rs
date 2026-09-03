@@ -89,6 +89,17 @@ fn build_furigana(cdn_dir: &Path) -> Result<bool, String> {
     let source = read(cdn_dir, FURIGANA_SOURCE)?;
     let source_hex = sha256_hex(&source);
 
+    // Freshness check BEFORE the expensive parse+serialize: a fresh blob
+    // costs one file read, not a full 12 MB text re-parse.
+    if blob_is_fresh(
+        read(cdn_dir, FURIGANA_BLOB).ok().as_deref(),
+        SCHEMA_VERSION,
+        &sha256_raw(&source),
+    ) {
+        tracing::info!("{} is fresh, skipping regeneration", FURIGANA_BLOB);
+        return Ok(false);
+    }
+
     let text = String::from_utf8(source.clone())
         .map_err(|e| format!("{FURIGANA_SOURCE} is not valid UTF-8: {e}"))?;
     let dict = build_furigana_dict_from_text(&text)
@@ -108,6 +119,17 @@ fn build_vocabulary(cdn_dir: &Path) -> Result<bool, String> {
         let bytes = read(cdn_dir, &path)?;
         concatenated.extend_from_slice(&bytes);
         chunks.push((path, bytes));
+    }
+
+    // Freshness check BEFORE the expensive JSON parse + rkyv serialize:
+    // chunk reads are cheap, the parse is not.
+    if blob_is_fresh(
+        read(cdn_dir, VOCABULARY_BLOB).ok().as_deref(),
+        SCHEMA_VERSION,
+        &sha256_raw(&concatenated),
+    ) {
+        tracing::info!("{} is fresh, skipping regeneration", VOCABULARY_BLOB);
+        return Ok(false);
     }
 
     let chunk_data = assemble_chunk_data(&chunks)?;

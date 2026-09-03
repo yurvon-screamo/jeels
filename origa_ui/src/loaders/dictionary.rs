@@ -6,18 +6,18 @@ use origa::domain::{
 
 use crate::repository::{
     DICTIONARY_FILE_NAMES, cdn_provider, cleanup_legacy_dictionary_cache,
-    get_cached_dictionary_files, save_dictionary_files_to_cache,
+    get_cached_dictionary_files, save_dictionary_file_to_cache,
 };
 use crate::utils::{now_ms, yield_to_browser};
 use origa::traits::CdnProvider;
 
-/// The eight raw lindera dictionary files (deflate-compressed on the CDN,
-/// inflated once and cached raw). lindera walks the trie in place, so no
-/// pre-built rkyv blob is needed — the raw files ARE the runtime structure.
-/// Ordered so the largest file (dict.words, 28 MB deflated → 223 MB raw)
-/// is processed FIRST, while every other file is still compressed: peak heap
-/// stays lower than the reverse order.
-const DICTIONARY_FILES: &[&str] = &[
+/// Processing order of the fetch→inflate→persist pipeline: the eight
+/// lindera files deflated on the CDN (words first — the largest single
+/// inflate, cheapest while every other file is still compressed), then
+/// `metadata.json` which is stored uncompressed. lindera walks the trie in
+/// place, so no pre-built rkyv blob is needed — the raw files ARE the
+/// runtime structure.
+const PIPELINE_ORDER: &[&str] = &[
     "dict.words",
     "matrix.mtx",
     "dict.trie",
@@ -26,7 +26,9 @@ const DICTIONARY_FILES: &[&str] = &[
     "dict.wordsidx",
     "unk.bin",
     "char_def.bin",
+    "metadata.json",
 ];
+const METADATA_FILE: &str = "metadata.json";
 
 /// Full CDN path of a file inside the versioned SudachiDict directory
 /// (e.g. `dict.words` → `dictionaries/sudachidict-20260723/dict.words`).
@@ -34,22 +36,19 @@ pub fn dict_path(file: &str) -> String {
     format!("dictionaries/{SUDACHIDICT_DIR}/{file}")
 }
 
-/// A cached set of files is usable only when every expected file name is
-/// present exactly once. Partial sets are treated as a miss.
+/// A cached set of files is usable when every expected file name is
+/// present. Callers pass map keys, which are unique by construction —
+/// duplicate detection is not part of this contract.
 pub fn dictionary_file_set_is_complete(names: &[&str]) -> bool {
-    let mut seen = std::collections::HashSet::new();
-    for expected in DICTIONARY_FILE_NAMES {
-        if !names.contains(expected) || !seen.insert(*expected) {
-            return false;
-        }
-    }
-    true
+    DICTIONARY_FILE_NAMES
+        .iter()
+        .all(|expected| names.contains(expected))
 }
 
 /// Only the eight lindera files are deflate-compressed on the CDN;
 /// metadata.json is stored uncompressed.
 fn is_inflatable(file_name: &str) -> bool {
-    DICTIONARY_FILES.contains(&file_name)
+    file_name != METADATA_FILE
 }
 
 /// Load the SudachiDict tokenizer dictionary.
@@ -87,15 +86,17 @@ pub async fn load_dictionary() -> Result<(), OrigaError> {
     Ok(())
 }
 
-/// Fetch deflated files from the CDN one at a time, inflate them and persist
-/// the raw bytes to the v2 cache immediately. The retired v1 cache is
-/// deleted only after the full v2 set is stored, so an offline user never
-/// loses a working dictionary to a half-finished migration.
+/// Fetch deflated files from the CDN one at a time (words first), inflate
+/// them and persist the raw bytes to the v2 cache right away — no buffer
+/// clones: the single-file cache API borrows the bytes and only the Cache
+/// API's own JS-side copy coexists with the raw Vec. The retired v1 cache
+/// is deleted only after the full v2 set is stored, so an offline user
+/// never loses a working dictionary to a half-finished migration.
 async fn fetch_inflate_and_cache_raw() -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
     let provider = cdn_provider();
 
-    let mut raw_files: Vec<(String, Vec<u8>)> = Vec::with_capacity(DICTIONARY_FILE_NAMES.len());
-    for file in DICTIONARY_FILE_NAMES {
+    let mut raw_files: Vec<(String, Vec<u8>)> = Vec::with_capacity(PIPELINE_ORDER.len());
+    for file in PIPELINE_ORDER {
         let path = dict_path(file);
         let compressed = provider.fetch_bytes(&path).await?;
         let raw = if is_inflatable(file) {
@@ -104,7 +105,7 @@ async fn fetch_inflate_and_cache_raw() -> Result<Vec<(String, Vec<u8>)>, OrigaEr
             compressed
         };
         yield_to_browser().await;
-        save_dictionary_files_to_cache(std::slice::from_ref(&(path.clone(), raw.clone()))).await?;
+        save_dictionary_file_to_cache(&path, &raw).await?;
         tracing::debug!("📖 Cached raw {path} ({} bytes)", raw.len());
         raw_files.push((path, raw));
     }
@@ -177,13 +178,6 @@ mod tests {
         complete_set().into_iter().filter(|n| *n != name).collect()
     }
 
-    fn set_with_duplicated_word() -> Vec<&'static str> {
-        let mut names = complete_set();
-        names.pop();
-        names.push("dict.words");
-        names
-    }
-
     fn set_with_extra_file() -> Vec<&'static str> {
         let mut names = complete_set();
         names.push("unexpected.bin");
@@ -194,7 +188,6 @@ mod tests {
     #[case::complete_set(complete_set(), true)]
     #[case::missing_words(set_without("dict.words"), false)]
     #[case::missing_metadata(set_without("metadata.json"), false)]
-    #[case::duplicated_word(set_with_duplicated_word(), false)]
     #[case::extra_file_alongside_complete_set(set_with_extra_file(), true)]
     fn file_set_completeness_classifies_cached_names(
         #[case] names: Vec<&str>,

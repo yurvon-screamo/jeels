@@ -11,6 +11,11 @@
 //! fixed path order with no separators. A client that has fetched the remote
 //! manifest can recompute the guard from manifest entries alone (no source
 //! download) and detect a blob that is stale relative to its sources.
+//!
+//! Design decision: validation errors use a local `BlobFormatError` enum
+//! instead of joining the crate-wide `OrigaError`. A rejected blob is never
+//! a user-facing failure — loaders map it to their fallback path — so it
+//! must not grow domain variants. Keep this contract local to blob plumbing.
 
 use sha2::{Digest, Sha256};
 

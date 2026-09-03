@@ -54,6 +54,11 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
         return Ok(());
     }
 
+    // Known coverage gap (accepted at review): the fallback chain below —
+    // client rkyv cache → JSON chunks → client re-serialization — lives in
+    // this wrapper because the Cache API layer is not natively testable; it
+    // is behaviour-covered by e2e only. The CDN-rkyv core above carries the
+    // native mock tests.
     // Fast path: try loading from rkyv cache (pre-parsed VocabularyDatabase).
     match get_cached_vocabulary_rkyv().await {
         Ok(Some(bytes)) => {

@@ -281,9 +281,14 @@ def rkyv_blob_freshness_problems(cdn_dir: Path) -> list[str]:
 
         hasher = hashlib.sha256()
         for source_path in source_paths:
-            hasher.update((cdn_dir / source_path).read_bytes())
-        if hasher.digest() != header_source_sha:
-            problems.append(f"{blob_path}: stale relative to {source_paths}")
+            source_file = cdn_dir / source_path
+            if not source_file.is_file():
+                problems.append(f"{blob_path}: source {source_path} not found")
+                break
+            hasher.update(source_file.read_bytes())
+        else:
+            if hasher.digest() != header_source_sha:
+                problems.append(f"{blob_path}: stale relative to {source_paths}")
     return problems
 
 

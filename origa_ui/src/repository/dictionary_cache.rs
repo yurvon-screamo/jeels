@@ -144,16 +144,14 @@ pub async fn cleanup_legacy_dictionary_cache() {
     }
 }
 
-/// Save deflated dictionary files to the Cache API.
-pub async fn save_dictionary_files_to_cache(files: &[(String, Vec<u8>)]) -> Result<(), OrigaError> {
+/// Save a single raw (inflated) dictionary file to the v2 Cache API.
+/// Single-file API on purpose: the per-file pipeline persists right after
+/// inflating without cloning the (up to 223 MB) buffer.
+pub async fn save_dictionary_file_to_cache(path: &str, bytes: &[u8]) -> Result<(), OrigaError> {
     let cache = open_cache(DICTIONARY_FILES_CACHE_NAME).await?;
-    for (path, bytes) in files {
-        let name = path.rsplit('/').next().unwrap_or(path);
-        let key = format!("{DICTIONARY_FILE_KEY_PREFIX}{name}");
-        cache_write(&cache, &key, bytes).await?;
-    }
-    tracing::info!("Dictionary files cached: {}", files.len());
-    Ok(())
+    let name = path.rsplit('/').next().unwrap_or(path);
+    let key = format!("{DICTIONARY_FILE_KEY_PREFIX}{name}");
+    cache_write(&cache, &key, bytes).await
 }
 
 /// Get cached VocabularyDatabase as raw rkyv bytes.

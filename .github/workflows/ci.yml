@@ -589,7 +589,7 @@ jobs:
                   case "${{ matrix.group }}" in
                     core)
                       npx playwright test --project=bdd --retries=1 \
-                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en)\.feature\.spec\.js"
+                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en|loading_rkyv)\.feature\.spec\.js"
                       ;;
                     words)
                       npx playwright test --project=bdd --retries=1 \

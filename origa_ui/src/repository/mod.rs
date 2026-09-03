@@ -24,7 +24,7 @@ pub use cdn_provider::cdn as cdn_provider;
 
 pub use dictionary_cache::{
     DICTIONARY_FILE_NAMES, cleanup_legacy_dictionary_cache, get_cached_dictionary_files,
-    get_cached_vocabulary_rkyv, save_dictionary_files_to_cache, save_vocabulary_to_cache_rkyv,
+    get_cached_vocabulary_rkyv, save_dictionary_file_to_cache, save_vocabulary_to_cache_rkyv,
 };
 pub use hybrid_repository::HybridUserRepository;
 pub use session::{

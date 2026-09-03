@@ -132,7 +132,7 @@ def download_remote_manifest(dry_run: bool) -> dict[str, object] | None:
 
 def _aws_cli_available() -> bool:
     """True when the pwsh+aws CLI pair this script shells out to exists."""
-    return shutil.which("pwsh") is not None
+    return shutil.which("pwsh") is not None and shutil.which("aws") is not None
 
 
 def is_safe_key(key: str) -> bool:
