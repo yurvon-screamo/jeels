@@ -153,12 +153,25 @@ pub(crate) async fn sync_merge(
             // local record and record the fetched fingerprint directly;
             // concurrent server writes surface as a fingerprint change on
             // the next sync.
-            let meta = mark_dirty(meta_store).await?;
+            //
+            // Ordering (#492): the small sync-meta write goes FIRST, the
+            // multi-MB user row SECOND. Both records share the `users`
+            // object store, and IndexedDB serializes write transactions on
+            // a store — a small write queued AFTER a huge structural-clone
+            // put was observed to starve indefinitely (the merge never
+            // resolved, the restore window never closed). Crash-safety is
+            // unchanged: if the process dies between the two writes, the
+            // recorded fingerprint is already settled but `local_exists`
+            // is still false, and the skip-path's local-existence conjunct
+            // routes the next sync back into this restore branch (ADR-045).
+            let mut meta = mark_dirty(meta_store).await?;
             let observed_epoch = meta.dirty_epoch;
-            local.save(&remote_user).await?;
-            let mut meta = meta_store.load().await?;
+            tracing::info!("Restore: settling sync meta before the heavy user write");
             meta.record_sync(remote_fingerprint, observed_epoch);
             meta_store.store(&meta).await?;
+            tracing::info!("Restore: sync meta stored, saving local user…");
+            local.save(&remote_user).await?;
+            tracing::info!("Restore: complete");
             Ok(())
         },
         Some(mut local_user) => {
