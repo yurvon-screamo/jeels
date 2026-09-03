@@ -146,26 +146,27 @@ Then('карточка кандзи открывается', async ({ page }) =>
     await expect(page).toHaveURL(/\/kanji\/.+/, { timeout: 30_000 });
 });
 
-When('открывается раздел грамматики уровня N1', async ({ page }) => {
+When('открывается раздел грамматики уровня N2', async ({ page }) => {
     const grammar = new GrammarPage(page);
     await grammar.goto();
     await expect(grammar.grammarPage).toBeVisible();
-    // The MAIN page filter (card_list_view), NOT the drawer's LevelSelector:
-    // grammar-level-* only exists inside the add-grammar drawer (same trap
-    // as the kanji step before run 33773341404).
-    await grammar.selectJlptFilter("N1");
+    // N2, not N1: the production grammar content (grammar.json) ships 515
+    // rules covering N5–N2 and ZERO N1 rules — N1 grammar only exists in
+    // the not-yet-merged grammar_v2.json (205 rules). Switch this back to
+    // N1 when that content lands.
+    await grammar.selectJlptFilter("N2");
 });
 
-Then('список правил грамматики уровня N1 отображается', async ({ page }) => {
+Then('список правил грамматики уровня N2 отображается', async ({ page }) => {
     const grammar = new GrammarPage(page);
-    // N1 ships 141+ hand-authored rules — the list must render a real
-    // subset of them (progressive render: wait for the first item, then
-    // require a meaningful subset).
+    // N2 ships 123 rules — the list must render a real subset of them
+    // (progressive render: wait for the first item, then require a
+    // meaningful subset).
     await expect(grammar.firstRuleCard).toBeVisible({ timeout: 60_000 });
     const ruleCount = await page.getByTestId("grammar-card-item").count();
     expect(
         ruleCount,
-        `N1 grammar list must render at least 10 rules, got ${ruleCount}`,
+        `N2 grammar list must render at least 10 rules, got ${ruleCount}`,
     ).toBeGreaterThanOrEqual(10);
 });
 
