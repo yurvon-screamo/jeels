@@ -286,3 +286,18 @@ def test_parse_rkyv_header_rejects_short_blob(tmp_path: Path):
 def test_rkyv_blobs_are_registered_as_versioned_files():
     for blob_path in RKYV_BLOB_SOURCES:
         assert blob_path in VERSIONED_FILES, f"{blob_path} must be deployed"
+
+
+def test_missing_source_file_is_reported(tmp_path: Path):
+    # Arrange: blobs are fresh, but a source chunk is gone
+    _sources_with_content(tmp_path, FURIGANA_CONTENT, CHUNK_CONTENT)
+    _write_fresh_blobs(tmp_path)
+    (tmp_path / "dictionary/chunk_05.json").unlink()
+
+    # Act
+    problems = rkyv_blob_freshness_problems(tmp_path)
+
+    # Assert
+    assert problems == [
+        "dictionary/vocabulary.rkyv: source dictionary/chunk_05.json not found"
+    ]
