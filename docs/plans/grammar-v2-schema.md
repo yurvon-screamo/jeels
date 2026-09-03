@@ -4,17 +4,17 @@ Status: active (schema v2). Supersedes `cdn/grammar/grammar.json` (v1, frozen).
 
 ## File layout
 
-- `cdn/grammar/grammar_v2.json` — the live corpus (schema v2). `cdn/` is
-  gitignored; the file is deployed via `scripts/deploy_cdn.py` (release-updated
-  cache policy, `max-age=300, must-revalidate`).
+- `cdn/grammar/grammar_v2.json` — the live corpus (schema v2) and the single
+  source of truth. `cdn/` is gitignored; the file is deployed via
+  `scripts/deploy_cdn.py` (release-updated cache policy,
+  `max-age=300, must-revalidate`). Edit it directly, then validate.
 - `cdn/grammar/grammar.json` — legacy v1, frozen since v2 went live. Kept for
   old clients until sunset (see GitHub issue linked in the v2 PR).
-- `scripts/data/n1/*.json` — hand-authored N1 batches (source of truth for
-  review; merged by `scripts/merge_n1_grammar.py`).
-- `scripts/data/n1/remaining_topics_backlog.csv` — curated N1 topics not yet
-  written (with dedup/junk flags from topic curation).
-- `scripts/data/n1/source_*.csv|json` — upstream topic-list sources (provenance
-  snapshots, see Attribution).
+
+The authoring scaffolding (v1→v2 converter, one-off content passes, N1 batch
+files and the batch merger) lived under `scripts/` during the v2 build-out and
+was removed once the corpus was finalized — the merged corpus above supersedes
+it. History: the v2 PR and its predecessors in this repository.
 
 ## Schema (v2)
 
@@ -66,28 +66,25 @@ empty optional fields tracked for content passes.
 
 | Step | Tool |
 |------|------|
+| Edit content | `cdn/grammar/grammar_v2.json` directly (keep `rule_id`s stable — SRS cards reference them) |
 | Validate | `python scripts/validate_grammar_v2.py [path]` |
-| Convert v1 → v2 (done once) | `python scripts/convert_grammar_v2.py` |
-| Content passes (done) | `scripts/fix_grammar_cn_chars.py`, `scripts/fill_hollow_grammar_rules.py` |
-| Author N1 batches | hand-written files in `scripts/data/n1/batch_*.json` |
-| Merge batches | `python scripts/merge_n1_grammar.py [--dry-run]` — assigns ULIDs, resolves `related_titles` to rule_ids, transactional |
 | Deploy | `python scripts/deploy_cdn.py` |
 
-Batch authoring notes: a batch rule carries `level: "N1"`, both languages,
-and may use `"related_titles": [["～ざるを得ない", "pair", "note..."]]` which the
-merger resolves against the merged corpus. The merge aborts without writing on
-any validation error.
+Historical steps (v1→v2 conversion, CN-char and hollow-rule passes, N1 batch
+authoring and merging) are complete and their one-off tooling was removed.
 
 ## Current state
 
 - 515 legacy rules (N5–N2) converted from v1, then cleaned (CN-char fixes,
   hollow rules filled, format anomalies normalized).
-- 141 N1 rules across 9 thematic batches (writer/reviewer pass done in-session;
-  every batch survived the strict validator — zero emoji, zero CN chars,
-  fenced examples, resolved references).
-- Remaining N1 topics: see `remaining_topics_backlog.csv` (status `OK` rows
-  not yet covered by a batch; ~144 topics after family merges). Continue by
-  adding `batch_10_*.json` files in the same format.
+- 205 N1 rules (14 thematic batches, writer + reviewer passes done; every rule
+  survived the strict validator — zero emoji, zero CN chars, fenced examples,
+  resolved references). All curated N1 topics are covered: as rules or as
+  explicit variation notes on related rules; three topics were junk-skipped
+  during curation.
+- Phrase index re-enriched against v2 (`utils enrich-phrases-with-grammar`):
+  grammar links precomputed per phrase; N1 keywords were audited so that only
+  unambiguous compound forms participate in detection.
 
 ## Attribution
 
@@ -95,9 +92,10 @@ N1 topic lists were curated from two open sources (topics only — no prose was
 copied; all explanations/examples are original):
 
 - hanabira.org grammar lists — CC license, attribution requested:
-  <https://hanabira.org> (source snapshot: `source_hanabira_n1.csv`).
-- jkindrix/japanese-language-data grammar points — CC BY-SA 4.0
-  (source snapshot: `source_jkindrix_grammar.json`).
+  <https://hanabira.org>.
+- jkindrix/japanese-language-data grammar points — CC BY-SA 4.0:
+  <https://github.com/jkindrix/japanese-language-data>.
 
 Grammar point names are facts; the CC attribution above is honored as good
-practice for the curation effort.
+practice for the curation effort. The source snapshots kept during curation
+were removed along with the authoring scaffolding.
