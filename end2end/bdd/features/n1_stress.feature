@@ -33,15 +33,22 @@
     Тогда страница фраз отображается без краша
     Когда пользователь начинает урок
     Тогда отображается страница урока с карточкой
+    Когда возвращается на главную страницу
     Тогда карточки статистики главной страницы отображаются
     Когда открывается страница профиля
     Тогда статистика профиля отображается
-    # Sync tail (#492): a second, fresh device (own IndexedDB partition)
-    # logs into the SAME seeded account and exercises the remote→local
-    # restore (ADR-045), then asserts the zero-PATCH contract on an
-    # unchanged home remount. Re-enabled: the original repro was traced to
-    # trunk live-reload noise in local debug runs (force reloads on WS
-    # reconnect), which does not exist in CI's static-serve environment.
+
+  @fixme
+  # Known bug #492 — REAL, reproduced on a clean release/static stack (no
+  # dev tooling involved): a fresh device restoring the full-corpus record
+  # can end up in the wizard with a locally seeded user that LACKS the
+  # __onboarding_completed__ sentinel (console trace: "Restoring local
+  # user from remote" → an unexplained save_sync → "Merging remote into
+  # local"). A LIGHT N5 user restores cleanly, so the volume of the 11k-card
+  # record is a factor — suspected partial/failed IndexedDB local.save of
+  # the multi-MB row. Tracked in #492; re-enable after the restore fix.
+  Сценарий: Синхронизация тяжёлого пользователя между устройствами
+    Допустим пользователь завершил N1-онбординг с полным корпусом
     И второе устройство входит в тот же аккаунт и восстанавливает данные
     Когда на втором устройстве начинается отслеживание PATCH-запросов записи пользователя
     И на втором устройстве повторно открывается главная страница

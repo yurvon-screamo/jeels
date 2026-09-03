@@ -34,6 +34,16 @@ impl HybridUserRepository {
         sync_merge(&self.local, &self.remote, &self.meta).await
     }
 
+    /// Definitive remote-miss probe: does the server hold a user record for
+    /// the signed-in session RIGHT NOW? Used by the login profile bootstrap
+    /// to discriminate "genuinely first login" from "the merge returned
+    /// without seeding the local store while the remote record is alive" —
+    /// minting a fresh empty profile in the latter case shadows the
+    /// canonical record on every device that logs in afterwards (#492).
+    pub async fn has_remote_record(&self) -> Result<bool, OrigaError> {
+        Ok(self.remote.find_current_raw().await?.is_some())
+    }
+
     /// Marks the local user record as mutated: the next sync must take the
     /// full merge path. Called after every user-action write (`save`,
     /// `save_sync`) — the store write is a tiny IndexedDB record, accepted
