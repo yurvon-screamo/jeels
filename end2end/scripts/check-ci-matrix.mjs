@@ -49,7 +49,8 @@ const KNOWN_FIXME = new Set([
     // устройствами»: a fresh device with a synced, fully onboarded user
     // can land back in the onboarding wizard (routing race around the
     // ADR-045 restore window; reproduced in a debug build — see
-    // scripts/diag-n1-sentinel.ts). Re-enable once the routing is fixed.
+    // scripts/diag-n1-sentinel.ts). Tracked in #492 — re-enable once the
+    // routing is fixed.
     "n1_stress.feature|Синхронизация тяжёлого пользователя между устройствами",
 ]);
 

@@ -35,6 +35,10 @@
     Тогда отображается страница урока с карточкой
 
   @fixme
+  # Known bug #492 (routing race around the ADR-045 restore window): a
+  # fresh device with a synced, fully onboarded user can land back in the
+  # onboarding wizard instead of home. Diagnostic:
+  # scripts/diag-n1-sentinel.ts. Re-enable after the routing fix.
   Сценарий: Синхронизация тяжёлого пользователя между устройствами
     Допустим пользователь завершил N1-онбординг с полным корпусом
     И второе устройство входит в тот же аккаунт и восстанавливает данные
