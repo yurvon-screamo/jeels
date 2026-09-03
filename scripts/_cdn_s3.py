@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import mimetypes
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -85,31 +86,53 @@ def download_remote_manifest(dry_run: bool) -> dict[str, object] | None:
             print("  [DRY-RUN] would download remote manifest")
             return None
 
-        result = run_aws_raw(
-            [
-                "s3",
-                "cp",
-                s3_uri("manifest.json"),
-                str(tmp_path),
-                "--profile",
-                S3_PROFILE,
-                "--endpoint-url",
-                S3_ENDPOINT,
-            ]
-        )
+        if _aws_cli_available():
+            result = run_aws_raw(
+                [
+                    "s3",
+                    "cp",
+                    s3_uri("manifest.json"),
+                    str(tmp_path),
+                    "--profile",
+                    S3_PROFILE,
+                    "--endpoint-url",
+                    S3_ENDPOINT,
+                ]
+            )
 
-        if result.returncode != 0:
-            if "404" in result.stderr or "NoSuchKey" in result.stderr:
-                print("  Remote manifest not found (first deployment)")
-                return None
-            print("ERROR: failed to download remote manifest", file=sys.stderr)
-            print(result.stderr, file=sys.stderr)
-            sys.exit(1)
+            if result.returncode != 0:
+                if "404" in result.stderr or "NoSuchKey" in result.stderr:
+                    print("  Remote manifest not found (first deployment)")
+                    return None
+                print("ERROR: failed to download remote manifest", file=sys.stderr)
+                print(result.stderr, file=sys.stderr)
+                sys.exit(1)
+        else:
+            # Linux operators have no pwsh/aws CLI pair — fall back to the
+            # same boto3 transport the upload path already uses.
+            import botocore.exceptions
+
+            try:
+                response = _s3_upload_client().get_object(
+                    Bucket=S3_BUCKET, Key="manifest.json"
+                )
+                tmp_path.write_bytes(response["Body"].read())
+            except botocore.exceptions.ClientError as e:
+                if e.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
+                    print("  Remote manifest not found (first deployment)")
+                    return None
+                print(f"ERROR: failed to download remote manifest: {e}", file=sys.stderr)
+                sys.exit(1)
 
         content = tmp_path.read_text(encoding="utf-8")
         return json.loads(content)
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+def _aws_cli_available() -> bool:
+    """True when the pwsh+aws CLI pair this script shells out to exists."""
+    return shutil.which("pwsh") is not None
 
 
 def is_safe_key(key: str) -> bool:

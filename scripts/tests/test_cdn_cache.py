@@ -130,6 +130,26 @@ def test_phrases_subtree_is_split_by_policy():
     assert cache_control_for("phrases/phrase_index.json") == RELEASE_UPDATED
 
 
+# ---------------------------------------------------------------------------
+# rkyv blob exceptions: regenerated with their sources, must revalidate
+# (the dictionaries/ directory default is immutable — the PR #182 lesson)
+# ---------------------------------------------------------------------------
+
+
+def test_furigana_rkyv_blob_is_release_updated_despite_dictionaries_prefix():
+    assert cache_control_for("dictionaries/JmdictFurigana.rkyv") == RELEASE_UPDATED
+
+
+def test_vocabulary_rkyv_blob_is_release_updated():
+    assert (
+        cache_control_for("dictionary/vocabulary.rkyv") == RELEASE_UPDATED
+    )
+
+
+def test_sudachidict_files_under_dictionaries_stay_immutable():
+    assert cache_control_for("dictionaries/sudachidict-20260723/dict.words") == IMMUTABLE
+
+
 def test_dictionary_singular_vs_dictionaries_plural_differ():
     # "dictionary/" = app content (release-updated); "dictionaries/" = the
     # compiled lindera system dictionary (immutable). Easy to confuse.
