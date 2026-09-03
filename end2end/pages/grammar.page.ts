@@ -125,6 +125,18 @@ export class GrammarPage extends BasePage {
         await expect(ruleItem.or(emptyMsg)).toBeVisible({ timeout: 10_000 });
     }
 
+    /**
+     * JLPT filter button on the MAIN /grammar page (card_list_view renders
+     * `grammar-filter-jlpt-<level>`). Not to be confused with selectLevel —
+     * that one drives the LevelSelector inside the add-grammar DRAWER and
+     * waits for drawer items, so it hangs forever on the main page.
+     */
+    async selectJlptFilter(level: GrammarLevel): Promise<void> {
+        await this.page
+            .getByTestId(`grammar-filter-jlpt-${level.toLowerCase()}`)
+            .click({ timeout: 30_000 });
+    }
+
     async selectRule(title: string): Promise<void> {
         const rule = this.drawer.getByTestId("grammar-drawer-item").filter({ hasText: title });
         await expect(rule.first()).toBeVisible({ timeout: 5000 });

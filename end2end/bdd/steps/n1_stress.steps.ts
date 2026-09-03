@@ -150,7 +150,10 @@ When('открывается раздел грамматики уровня N1',
     const grammar = new GrammarPage(page);
     await grammar.goto();
     await expect(grammar.grammarPage).toBeVisible();
-    await grammar.selectLevel("N1");
+    // The MAIN page filter (card_list_view), NOT the drawer's LevelSelector:
+    // grammar-level-* only exists inside the add-grammar drawer (same trap
+    // as the kanji step before run 33773341404).
+    await grammar.selectJlptFilter("N1");
 });
 
 Then('список правил грамматики уровня N1 отображается', async ({ page }) => {
