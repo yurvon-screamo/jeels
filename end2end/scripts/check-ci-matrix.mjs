@@ -44,7 +44,7 @@ const fail = (message) => violations.push(message);
 // mechanism silently rots). Adding a new @fixme requires an explicit entry
 // here; removing a fixme requires removing its entry — the guard fails
 // loudly either way. Keep entries coupled to their tracking issues.
-const KNOWN_FIXME = new Set<string>([]);
+const KNOWN_FIXME = new Set([]);
 
 // ---------------------------------------------------------------------------
 // 1. Fresh bddgen output (guards against stale .features-gen)
