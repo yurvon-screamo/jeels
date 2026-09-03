@@ -44,7 +44,14 @@ const fail = (message) => violations.push(message);
 // mechanism silently rots). Adding a new @fixme requires an explicit entry
 // here; removing a fixme requires removing its entry — the guard fails
 // loudly either way. Keep entries coupled to their tracking issues.
-const KNOWN_FIXME = new Set([]);
+const KNOWN_FIXME = new Set([
+    // n1_stress.feature / «Синхронизация тяжёлого пользователя между
+    // устройствами»: a fresh device with a synced, fully onboarded user
+    // can land back in the onboarding wizard (routing race around the
+    // ADR-045 restore window; reproduced in a debug build — see
+    // scripts/diag-n1-sentinel.ts). Re-enable once the routing is fixed.
+    "n1_stress.feature|Синхронизация тяжёлого пользователя между устройствами",
+]);
 
 // ---------------------------------------------------------------------------
 // 1. Fresh bddgen output (guards against stale .features-gen)

@@ -18,8 +18,7 @@ export class WordsPage extends BasePage {
     readonly searchInput: Locator;
 
     // Content
-    readonly wordsGrid: Locator;    readonly firstWordCard: Locator;
-
+    readonly wordsGrid: Locator;
     readonly emptyState: Locator;
 
     // Add-words drawer
@@ -79,7 +78,6 @@ export class WordsPage extends BasePage {
         this.searchInput = page.getByTestId("words-search-input");
 
         // Content
-        this.firstWordCard = page.getByTestId("words-card-item").first();
         this.wordsGrid = page.getByTestId("words-grid");
         this.emptyState = page.getByTestId("words-empty-state");
 
