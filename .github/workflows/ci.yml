@@ -299,7 +299,7 @@ jobs:
             - name: Download CDN data
               uses: ./.github/actions/download-cdn
               with:
-                  cache-key: cdn-data-v13-${{ hashFiles('end2end/cdn-manifest.txt') }}
+                  cache-key: cdn-data-v14-${{ hashFiles('end2end/cdn-manifest.txt') }}
                   cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact

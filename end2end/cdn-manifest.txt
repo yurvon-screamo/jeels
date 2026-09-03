@@ -1,3 +1,4 @@
+dictionaries/JmdictFurigana.rkyv
 dictionaries/JmdictFurigana.txt
 dictionaries/sudachidict-20260723/char_def.bin
 dictionaries/sudachidict-20260723/dict.trie
@@ -22,6 +23,7 @@ dictionary/chunk_11.json
 dictionary/kanji.json
 dictionary/kanji_audit_report.json
 dictionary/radicals.json
+dictionary/vocabulary.rkyv
 fonts/cormorant-garamond-188e64d1.woff2
 fonts/cormorant-garamond-italic-14f7fef8.woff2
 fonts/ibm-plex-mono-300-ed5e311f.woff2
