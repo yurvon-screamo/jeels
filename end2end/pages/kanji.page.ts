@@ -12,7 +12,8 @@ export class KanjiPage extends BasePage {
     readonly backBtn: Locator;
     readonly addBtn: Locator;
     readonly searchInput: Locator;
-    readonly kanjiGrid: Locator;
+    readonly kanjiGrid: Locator;    readonly firstKanjiCard: Locator;
+
     readonly emptyState: Locator;
 
     readonly drawer: Locator;
@@ -39,6 +40,7 @@ export class KanjiPage extends BasePage {
         this.backBtn = page.getByTestId("kanji-back-btn");
         this.addBtn = page.getByTestId("kanji-add-btn");
         this.searchInput = page.getByTestId("kanji-search-input");
+        this.firstKanjiCard = page.getByTestId("kanji-card-item").first();
         this.kanjiGrid = page.getByTestId("kanji-grid");
         this.emptyState = page.getByTestId("kanji-empty-state");
 

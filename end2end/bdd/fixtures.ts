@@ -1,3 +1,4 @@
+import { type Page } from "@playwright/test";
 import { test as base, createBdd } from "playwright-bdd";
 import { setupTestUser, uiLogin, type TestUserContext } from "../helpers/auth";
 
@@ -30,6 +31,8 @@ export const test = base.extend<
         acqTargetCard: { value: string | null };
         loginGateRelease: { release: (() => Promise<void>) | null };
         cdnRequestLog: string[];
+        apiRequestLog: string[];
+        secondDevicePage: Page;
     },
     object
 >({
@@ -98,6 +101,33 @@ export const test = base.extend<
     cdnRequestLog: [
         async ({}, use) => {
             await use([] as string[]);
+        },
+        { scope: "test" },
+    ],
+    // URLs of PATCH requests against the user record, observed by the
+    // stress scenarios to assert the sync short-circuit (ADR-045): the
+    // When-step attaches a request listener AFTER the measurement window
+    // is defined, the Then-step counts entries.
+    apiRequestLog: [
+        async ({}, use) => {
+            await use([] as string[]);
+        },
+        { scope: "test" },
+    ],
+    // A second, independent browser context logged into the SAME test
+    // account — an honest "new device": its IndexedDB partition is empty,
+    // so the first login there exercises the remote→local restore path
+    // (ADR-045) rather than the logout dance (whose remote-survival is an
+    // accident of operation ordering, not a contract). The context stays
+    // open for the whole test; later steps navigate its page.
+    secondDevicePage: [
+        async ({ browser, testUser }, use) => {
+            const context = await browser.newContext();
+            const page = await context.newPage();
+            await page.setViewportSize({ width: 1280, height: 720 });
+            await uiLogin(page, testUser.email, testUser.password);
+            await use(page);
+            await context.close();
         },
         { scope: "test" },
     ],

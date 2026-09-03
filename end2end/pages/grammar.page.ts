@@ -11,7 +11,8 @@ export class GrammarPage extends BasePage {
     readonly backBtn: Locator;
     readonly addBtn: Locator;
     readonly searchInput: Locator;
-    readonly grammarGrid: Locator;
+    readonly grammarGrid: Locator;    readonly firstRuleCard: Locator;
+
     readonly emptyState: Locator;
 
     readonly drawer: Locator;
@@ -54,6 +55,7 @@ export class GrammarPage extends BasePage {
         this.backBtn = page.getByTestId("grammar-back-btn");
         this.addBtn = page.getByTestId("grammar-add-btn");
         this.searchInput = page.getByTestId("grammar-search-input");
+        this.firstRuleCard = page.getByTestId("grammar-card-item").first();
         this.grammarGrid = page.getByTestId("grammar-grid");
         this.emptyState = page.getByTestId("grammar-empty-state");
 

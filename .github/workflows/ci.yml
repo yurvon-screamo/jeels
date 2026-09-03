@@ -504,6 +504,7 @@ jobs:
                     - grammar-kanji
                     - profile-sync
                     - onboarding-lesson
+                    - stress
         env:
             ORIGA_CDN_BASE_URL: http://localhost:8080
             TRAILBASE_URL: http://localhost:4000
@@ -606,6 +607,14 @@ jobs:
                     onboarding-lesson)
                       npx playwright test --project=bdd --retries=1 \
                         --grep "features/(onboarding|onboarding_scoring|lesson|lesson_empty_state|phrases_onboarding)\.feature\.spec\.js"
+                      ;;
+                    stress)
+                      # Full-corpus N1 scenarios: each seeds ~11k cards
+                      # through the real onboarding import, so the group
+                      # runs serially (--workers=1) to avoid two concurrent
+                      # heavy WASM imports fighting for the 2-core runner.
+                      npx playwright test --project=bdd --retries=1 --workers=1 \
+                        --grep "features/n1_stress\.feature\.spec\.js"
                       ;;
                   esac
 
