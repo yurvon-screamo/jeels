@@ -53,7 +53,7 @@ Feature graphics (PNG 1024×500, требование Play): `banners/feature_gr
 
 ### promo/ — нейро-сгенерированные промо-сеты
 
-Сгенерированы через grok CLI (`image_gen`/`image_edit`) на модели `grok-imagine-image-quality` (override: env `GROK_IMAGE_GEN_MODEL_OVERRIDE`/`GROK_IMAGE_EDIT_MODEL_OVERRIDE` или `[features] image_*_model_override` в `~/.grok/config.toml`; дефолтная быстрая модель заметно смазывает мелкий UI-текст), 2026-09, промпт-конвенция и клиент — см. wiki `experience/cli/grok-cli-image-generation.md` и `~/bin/grok-ask.py`.
+Сгенерированы через grok CLI (`image_gen`/`image_edit`), 2026-09, промпт-конвенция и клиент — см. wiki `experience/cli/grok-cli-image-generation.md` и `~/bin/grok-ask.py`.
 
 | Каталог | Назначение | Язык | Состав |
 | --- | --- | --- | --- |
