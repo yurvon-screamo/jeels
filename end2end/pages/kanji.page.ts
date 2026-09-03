@@ -92,6 +92,18 @@ export class KanjiPage extends BasePage {
         await expect(kanjiItem.or(emptyMsg)).toBeVisible({ timeout: 10_000 });
     }
 
+    /**
+     * JLPT filter button on the MAIN /kanji page (card_list_view renders
+     * `kanji-filter-jlpt-<level>`). Not to be confused with selectLevel —
+     * that one drives the LevelSelector inside the add-kanji DRAWER and
+     * waits for drawer items, so it hangs forever on the main page.
+     */
+    async selectJlptFilter(level: KanjiLevel): Promise<void> {
+        await this.page
+            .getByTestId(`kanji-filter-jlpt-${level.toLowerCase()}`)
+            .click({ timeout: 30_000 });
+    }
+
     async selectKanji(kanji: string): Promise<void> {
         const item = this.drawer.getByTestId("kanji-drawer-item").filter({ hasText: kanji });
         await expect(item).toBeVisible({ timeout: 5000 });

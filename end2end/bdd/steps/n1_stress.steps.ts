@@ -19,15 +19,15 @@ import { WordsPage } from "../../pages/words.page";
  * project's 180s default. Set at the first Given of every scenario via
  * this helper instead of per-step arithmetic.
  */
-// CI (release artifact) measurements: the seed alone runs ~10 minutes
-// (13:23-13:44 in run 33759073453), so a seed-only scenario fits the old
-// 600s budget only marginally — and the seed + nine section visits of the
-// library scenario exceed it outright (it timed out at the kanji step in
-// run 33759073453 even though every step itself passed). 900s covers the
-// slowest scenario with headroom; a local DEBUG wasm build is still slower
-// and is not expected to fit — verify targeted steps locally, full runs
-// belong to CI.
-const STRESS_TEST_TIMEOUT_MS = 900_000;
+// CI (release artifact) measurements: dictionary load + full-corpus seed +
+// the whole scenario run in ~2-3 minutes (run 33768068984: cold boot to the
+// kanji phase in ~75s). The earlier "seed takes ~10 minutes" reading was an
+// artifact: the kanji step used to await a drawer-only testid on the main
+// page and simply burned the whole budget waiting for it. 600s is a 3x
+// headroom for runner variance; a local DEBUG wasm build is slower and is
+// not expected to fit — verify targeted steps locally, full runs belong
+// to CI.
+const STRESS_TEST_TIMEOUT_MS = 600_000;
 
 function applyStressTimeout(): void {
     test.setTimeout(STRESS_TEST_TIMEOUT_MS);
@@ -130,7 +130,9 @@ When('открывается раздел кандзи уровня N1', async (
     const kanji = new KanjiPage(page);
     await kanji.goto();
     await expect(kanji.kanjiPage).toBeVisible();
-    await kanji.selectLevel("N1");
+    // The MAIN page filter (card_list_view), NOT the drawer's LevelSelector:
+    // kanji-level-* only exists inside the add-kanji drawer.
+    await kanji.selectJlptFilter("N1");
 });
 
 Then('сетка кандзи отображается', async ({ page }) => {
