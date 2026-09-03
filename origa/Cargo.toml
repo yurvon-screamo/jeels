@@ -12,6 +12,7 @@ readme.workspace = true
 # System
 tempfile.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
 rand.workspace = true
 thiserror.workspace = true
 
