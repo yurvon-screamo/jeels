@@ -122,9 +122,22 @@ export const test = base.extend<
     // open for the whole test; later steps navigate its page.
     secondDevicePage: [
         async ({ browser, testUser }, use) => {
-            const context = await browser.newContext();
+            // The restore of a large corpus (remote → local, ADR-045) takes
+            // minutes in a debug wasm build; the login on this device
+            // covers that restore — the project default 60s aborts it.
+            test.setTimeout(420_000);
+
+            const context = await browser.newContext({
+                baseURL: "http://localhost:1420",
+                locale: "ru-RU",
+            });
             const page = await context.newPage();
             await page.setViewportSize({ width: 1280, height: 720 });
+            await context.addInitScript(() => {
+                if (window.location.origin === "http://localhost:1420") {
+                    window.localStorage.setItem("origa_resource_download_consented", "true");
+                }
+            });
             await uiLogin(page, testUser.email, testUser.password);
             await use(page);
             await context.close();

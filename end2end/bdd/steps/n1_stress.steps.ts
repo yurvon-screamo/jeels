@@ -108,15 +108,11 @@ Then('поиск находит слово из корпуса N1', async ({ pag
     const words = new WordsPage(page);
     const corpusWord = corpusWordFromCdn();
     await words.searchInput.fill(corpusWord);
-    await expect(words.wordsGrid).toBeVisible({ timeout: 30_000 });
-});
-
-Then('карточка слова из корпуса открывается', async ({ page }) => {
-    const words = new WordsPage(page);
-    await words.firstWordCard.click({ timeout: 30_000 });
-    // The word detail surface renders without hanging under the full
-    // corpus — presence of the page container is the assertion.
-    await expect(words.wordsPage).toBeVisible();
+    // The filtered grid must actually contain the corpus word, not just
+    // keep the container visible.
+    await expect(
+        words.wordsGrid.getByText(corpusWord).first(),
+    ).toBeVisible({ timeout: 30_000 });
 });
 
 When('открывается раздел кандзи уровня N1', async ({ page }) => {
@@ -144,16 +140,17 @@ When('открывается раздел грамматики уровня N1',
     await grammar.selectLevel("N1");
 });
 
-Then('список правил грамматики отображается', async ({ page }) => {
+Then('список правил грамматики уровня N1 отображается', async ({ page }) => {
     const grammar = new GrammarPage(page);
-    await expect(grammar.grammarGrid).toBeVisible({ timeout: 60_000 });
-});
-
-Then('правило грамматики открывается', async ({ page }) => {
-    const grammar = new GrammarPage(page);
-    await grammar.firstRuleCard.click({ timeout: 30_000 });
-    // The rule detail view replaces the list — the page stays alive.
-    await expect(grammar.grammarPage).toBeVisible();
+    // N1 ships 141+ hand-authored rules — the list must render a real
+    // subset of them (progressive render: wait for the first item, then
+    // require a meaningful subset).
+    await expect(grammar.firstRuleCard).toBeVisible({ timeout: 60_000 });
+    const ruleCount = await page.getByTestId("grammar-card-item").count();
+    expect(
+        ruleCount,
+        `N1 grammar list must render at least 10 rules, got ${ruleCount}`,
+    ).toBeGreaterThanOrEqual(10);
 });
 
 When('открывается раздел наборов', async ({ page }) => {
@@ -165,12 +162,10 @@ When('открывается раздел наборов', async ({ page }) => {
 Then('все JLPT-наборы отображаются импортированными', async ({ page }) => {
     const sets = new SetsPage(page);
     // Per-item testids are generic (`sets-card-item`); the corpus-imported
-    // state is asserted through count: the five cumulative JLPT sets must
-    // all be listed.
-    const items = page.getByTestId("sets-card-item");
-    await expect(items.first()).toBeVisible({ timeout: 30_000 });
-    const count = await items.count();
-    expect(count, "all five JLPT sets must be listed").toBeGreaterThanOrEqual(5);
+    // state is asserted through visibility: the five cumulative JLPT sets
+    // must all be listed (progressive render — wait for the fifth).
+    await expect(sets.setItemItems.first()).toBeVisible({ timeout: 30_000 });
+    await expect(sets.setItemItems.nth(4)).toBeVisible({ timeout: 30_000 });
 });
 
 When('открывается раздел фраз', async ({ page }) => {
@@ -207,20 +202,37 @@ When('на втором устройстве начинается отслежи
     secondDevicePage,
     apiRequestLog,
 }) => {
-    // Measurement window opens only now — every legitimate PATCH of the
-    // first restore (and of the home mount right after it) happened
-    // before this point and must not pollute the count.
+    // The measurement window opens only after the network goes quiet: the
+    // first post-restore home mount runs its own sync (a late legitimate
+    // PATCH is possible if the seed left the meta dirty), and that cycle
+    // must complete BEFORE the window opens — otherwise a red here would
+    // blame the skip path for seed-state noise (ADR-045).
+    const hasDomainUserActivity = async (): Promise<boolean> => {
+        const pending = apiRequestLog.length;
+        await secondDevicePage.waitForTimeout(10_000);
+        return apiRequestLog.length > pending;
+    };
+
+    // Every domain_user request (GET and PATCH alike) participates in the
+    // quiet detection; the final assertion filters PATCH entries only.
     secondDevicePage.on("request", (request) => {
-        if (
-            request.method() === "PATCH" &&
-            request.url().includes("/api/records/v1/domain_user")
-        ) {
-            apiRequestLog.push(request.url());
+        if (request.url().includes("/api/records/v1/domain_user")) {
+            apiRequestLog.push(`${request.method()} ${request.url()}`);
         }
     });
+
+    for (let round = 0; round < 30; round++) {
+        if (!(await hasDomainUserActivity())) {
+            break;
+        }
+    }
+    apiRequestLog.length = 0;
 });
 
-When('на втором устройстве повторно открывается главная страница', async ({ secondDevicePage }) => {
+When('на втором устройстве повторно открывается главная страница', async ({
+    secondDevicePage,
+    apiRequestLog,
+}) => {
     // SPA navigation: the home effects remount and run_sync fires. The
     // sync GET is awaited BEFORE any assertion runs — otherwise a "no
     // PATCH" assertion would be green even if sync never executed.
@@ -234,12 +246,25 @@ When('на втором устройстве повторно открывает
     await home.goto();
     await syncGet;
     await expect(secondDevicePage.getByTestId("home-page")).toBeVisible({ timeout: 60_000 });
+
+    // The negative assertion needs the post-GET settle too: a broken skip
+    // path decodes 11k cards and PATCHes seconds AFTER the GET response.
+    // Quiet-window: 15s without new domain_user requests.
+    let quiet = false;
+    for (let round = 0; round < 12 && !quiet; round++) {
+        const before = apiRequestLog.length;
+        await secondDevicePage.waitForTimeout(5_000);
+        quiet = apiRequestLog.length === before;
+    }
 });
 
 Then('запись пользователя не изменяется PATCH-запросом', async ({ apiRequestLog }) => {
+    // The log holds every domain_user request (GET and PATCH); the
+    // contract counts only mutations.
+    const patches = apiRequestLog.filter((entry) => entry.startsWith("PATCH "));
     expect(
-        apiRequestLog,
-        `expected zero user-record PATCHes after an unchanged home remount; got: ${apiRequestLog.join(", ")}`,
+        patches,
+        `expected zero user-record PATCHes after an unchanged home remount; got: ${patches.join(", ")}`,
     ).toHaveLength(0);
 });
 
