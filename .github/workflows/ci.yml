@@ -549,8 +549,14 @@ jobs:
 
             # Fail fast (minutes, not half an hour): the android-cfg code the
             # host clippy never sees is checked here before the APK build.
+            # cc-rs (ring) needs the NDK toolchain explicitly — the tauri CLI
+            # injects CC/AR only for its own `cargo tauri android build`.
             - name: Check Android target compiles
-              run: cargo check -p origa-app --lib --target x86_64-linux-android
+              run: |
+                  TOOLCHAIN="${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+                  export CC_x86_64_linux_android="$TOOLCHAIN/x86_64-linux-android24-clang"
+                  export AR_x86_64_linux_android="$TOOLCHAIN/llvm-ar"
+                  cargo check -p origa-app --lib --target x86_64-linux-android
 
             - name: Install Tauri CLI (npm)
               working-directory: tauri
