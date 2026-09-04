@@ -30,6 +30,8 @@ PANIC_TEXT='android context was not initialized'
 
 fail() {
     echo "::error::android-smoke: $1" >&2
+    echo "--- emulator.log tail ---" >&2
+    tail -n 40 "${EMU_LOG:-/tmp/emulator.log}" >&2 2>/dev/null || true
     echo "--- logcat tail ---" >&2
     $ADB logcat -d 2>/dev/null | tail -n 200 >&2 || true
     exit 1
@@ -44,8 +46,14 @@ pid_of() {
 
 [ -f "$APK" ] || fail "APK not found: $APK"
 
-echo "android-smoke: waiting for device + boot completion"
-$ADB wait-for-device
+echo "android-smoke: waiting for device attachment + boot completion"
+# Bounded replacement for `adb wait-for-device` (which hangs forever when
+# the emulator process died before registering a transport).
+deadline=$(( $(date +%s) + BOOT_TIMEOUT_S ))
+until $ADB devices | awk 'NR>1 && $2=="device"' | grep -q .; do
+    [ "$(date +%s)" -lt "$deadline" ] || fail "no device attached within ${BOOT_TIMEOUT_S}s (emulator may have crashed - see emulator.log above)"
+    sleep 2
+done
 deadline=$(( $(date +%s) + BOOT_TIMEOUT_S ))
 until [ "$($ADB shell getprop sys.boot_completed 2>/dev/null | tr -d '[:space:]\r')" = "1" ]; do
     [ "$(date +%s)" -lt "$deadline" ] || fail "emulator did not finish booting in ${BOOT_TIMEOUT_S}s"

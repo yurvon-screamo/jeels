@@ -530,6 +530,10 @@ jobs:
                       echo "::error::/dev/kvm not available on this runner"
                       exit 1
                   fi
+                  if [ ! -w /dev/kvm ]; then
+                      sudo chmod a+rw /dev/kvm
+                  fi
+                  [ -w /dev/kvm ] || { echo "::error::/dev/kvm not writable"; exit 1; }
 
             # Boot the emulator IN PARALLEL with the toolchain/APK build:
             # boot takes minutes and does not compete for the CPU meaningfully,
@@ -539,9 +543,16 @@ jobs:
               run: |
                   echo "no" | avdmanager create avd -n smoke \
                       -k "system-images;android-34;google_apis;x86_64" -d pixel --force
+                  # -accel on: die loudly instead of silently falling back to
+                  # pure-software emulation (30+ min boots).
                   nohup emulator -avd smoke -no-window -no-audio -no-boot-anim \
-                      -gpu swiftshader_indirect -no-snapshot > /tmp/emulator.log 2>&1 &
-                  echo "emulator launching in background (log: /tmp/emulator.log)"
+                      -gpu swiftshader_indirect -no-snapshot -accel on \
+                      > /tmp/emulator.log 2>&1 &
+                  # Surface early crashes (KVM permission, bad options) right
+                  # in the job log instead of a silent wait-for-device hang.
+                  sleep 15
+                  echo "--- emulator.log (first 15s) ---"
+                  tail -n 30 /tmp/emulator.log || true
 
             - name: Cache Gradle
               uses: actions/cache@v6
