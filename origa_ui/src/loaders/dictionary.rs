@@ -108,10 +108,9 @@ impl RawFileSink for CacheApiSink {
 /// own JS-side copy coexists with the raw Vec. Cache persistence is
 /// best-effort: a sink failure is logged and the load continues, because
 /// the v2 raw cache (~344 MB, single 223 MB entries) can exceed the Cache
-/// API quota on quota-tight WebViews (iOS/macOS WKWebView) — a refused
-/// cache write must never take the tokenizer down (v0.7.5 semantics; the
-/// fatal `?` silently killed furigana and phrase tokenization in
-/// v0.7.6-rc1).
+/// API quota on quota-tight WebViews — a refused cache write must never
+/// take the tokenizer down. Fetch and inflate failures stay fatal: they
+/// mean "no data", not "cache did not persist".
 async fn fetch_inflate_and_persist_via<P: CdnProvider, S: RawFileSink>(
     provider: &P,
     sink: &S,
@@ -283,6 +282,25 @@ mod tests {
         }
     }
 
+    /// CdnProvider mock that cannot fetch anything — an offline CDN.
+    struct OfflineCdn;
+
+    impl CdnProvider for OfflineCdn {
+        fn fetch_text(&self, path: &str) -> impl Future<Output = Result<String, OrigaError>> {
+            std::future::ready(Err(OrigaError::NetworkError {
+                url: path.to_string(),
+                reason: "offline".to_string(),
+            }))
+        }
+
+        fn fetch_bytes(&self, path: &str) -> impl Future<Output = Result<Vec<u8>, OrigaError>> {
+            std::future::ready(Err(OrigaError::NetworkError {
+                url: path.to_string(),
+                reason: "offline".to_string(),
+            }))
+        }
+    }
+
     /// Sink whose every write is rejected, mirroring an exhausted Cache API
     /// quota (`QuotaExceededError` on put — the v0.7.6-rc1 regression
     /// trigger on quota-tight WebViews).
@@ -343,5 +361,26 @@ mod tests {
         // Assert: best-effort must not degrade into never-persisting.
         assert_eq!(files.len(), PIPELINE_ORDER.len());
         assert_eq!(sink.persisted.borrow().len(), PIPELINE_ORDER.len());
+    }
+
+    #[tokio::test]
+    async fn fetch_failure_stays_fatal_for_the_pipeline() {
+        // Arrange: a healthy sink cannot compensate for missing data.
+        let sink = RecordingSink {
+            persisted: std::cell::RefCell::new(Vec::new()),
+        };
+
+        // Act
+        let files = fetch_inflate_and_persist_via(&OfflineCdn, &sink).await;
+
+        // Assert: "no data" is fatal — only cache persistence is best-effort.
+        assert!(
+            files.is_err(),
+            "a fetch failure must stay fatal (best-effort covers writes only)"
+        );
+        assert!(
+            sink.persisted.borrow().is_empty(),
+            "nothing may be persisted when no file was fetched"
+        );
     }
 }
