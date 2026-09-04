@@ -113,7 +113,7 @@ http-body-util = "0.1"
 js-sys = "0.3"
 codee = { version = "0.3", features = ["json_serde"] }
 console_error_panic_hook = "0.1"
-gloo-storage = "0.3"
+gloo-storage = "0.4"
 gloo-net = { version = "0.6", default-features = false, features = [
     "http",
     "json",
