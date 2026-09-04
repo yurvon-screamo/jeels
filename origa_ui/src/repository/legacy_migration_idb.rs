@@ -30,9 +30,9 @@ pub(super) async fn read_row(store: &ObjectStore, id: Ulid) -> Result<Option<Use
     };
 
     match crate::repository::file_repository::user_from_stored_value(&value) {
-        Some(user) => Ok(Some(user)),
-        None => {
-            tracing::warn!("Skipping corrupted user entry for {id}");
+        Ok(user) => Ok(Some(user)),
+        Err(reason) => {
+            tracing::warn!("Skipping corrupted user entry for {id}: {reason}");
             Ok(None)
         },
     }

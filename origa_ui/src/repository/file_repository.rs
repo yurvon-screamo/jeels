@@ -21,10 +21,11 @@ pub(crate) fn user_key(user_id: Ulid) -> String {
 /// object made every `put` clone a multi-megabyte object graph for a
 /// full-corpus user, and that clone path stalled the request completion on
 /// real hardware — the restore window never closed. A string clones as a
-/// plain byte copy. JSON specifically because `User` contains a
-/// `#[serde(flatten)]` field, which binary self-describing-less formats
-/// (bincode/postcard) cannot encode (unknown-length maps); JSON is also
-/// the wire format the record already uses server-side (`user_to_json`).
+/// plain byte copy. JSON specifically (not bincode/postcard): the user
+/// hierarchy transitively contains a `#[serde(flatten)]` field
+/// (`KnowledgeSet.stats`), which binary formats cannot encode
+/// (unknown-length maps); JSON is also the wire format the record already
+/// uses server-side (`user_to_json`).
 pub(crate) fn user_to_stored_value(user: &User) -> Result<JsValue, OrigaError> {
     let json = serde_json::to_string(user).map_err(|e| {
         let reason = format!("User JSON encode failed: {e}");
@@ -37,13 +38,17 @@ pub(crate) fn user_to_stored_value(user: &User) -> Result<JsValue, OrigaError> {
 /// Decodes a stored value back into a user. Accepts both formats:
 /// the current JSON string and the legacy structured-clone JS object
 /// written before the switch — records upgrade transparently on the next
-/// save. Returns `None` on a corrupted value; callers treat that as a
-/// missing record (the recovery path is a full remote restore).
-pub(crate) fn user_from_stored_value(value: &JsValue) -> Option<User> {
+/// save. `Err` carries the decode reason (bad JSON vs schema mismatch) so
+/// callers can log WHY a record was treated as corrupted — the restore
+/// path is exactly where that detail mattered during the #492
+/// investigation.
+pub(crate) fn user_from_stored_value(value: &JsValue) -> Result<User, String> {
     if let Some(json) = value.as_string() {
-        return serde_json::from_str(&json).ok();
+        return serde_json::from_str(&json)
+            .map_err(|e| format!("JSON string record failed to decode: {e}"));
     }
-    serde_wasm_bindgen::from_value(value.clone()).ok()
+    serde_wasm_bindgen::from_value(value.clone())
+        .map_err(|e| format!("legacy object record failed to decode: {e}"))
 }
 
 /// Key range covering every `user:*` record and nothing else: the store
@@ -182,9 +187,9 @@ impl FileSystemUserRepository {
         let mut users = vec![];
         for value in all_values {
             match user_from_stored_value(&value) {
-                Some(user) => users.push(user),
-                None => {
-                    tracing::warn!("Skipping corrupted user entry in IndexedDB");
+                Ok(user) => users.push(user),
+                Err(reason) => {
+                    tracing::warn!("Skipping corrupted user entry in IndexedDB: {reason}");
                 },
             }
         }

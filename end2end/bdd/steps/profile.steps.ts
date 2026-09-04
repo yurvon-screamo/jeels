@@ -108,8 +108,10 @@ When('подтверждает удаление', async ({ page }) => {
     // The reload below used to fire immediately after the click — killing
     // the still-in-flight delete (remote DELETE → local cleanup) mid-flow.
     // The session then survived the reload and the profile re-rendered
-    // instead of the login page. Wait for the server-side DELETE to
-    // complete first; the local cleanup finishes before its toast.
+    // instead of the login page. Wait for the server-side DELETE first,
+    // then give the local auth-state cleanup a chance to unmount the
+    // profile on its own; the reload stays as belt-and-suspenders for the
+    // route re-evaluation (an inline login already visible survives it).
     const serverDelete = page.waitForResponse(
         (response) =>
             response.url().includes("/api/records/v1/domain_user") &&
@@ -118,9 +120,13 @@ When('подтверждает удаление', async ({ page }) => {
     );
     await page.getByTestId("profile-confirm-delete-btn").click();
     await serverDelete;
-    // delete_account() clears local auth state. ProtectedRoute should redirect
-    // unauthenticated users to /login on the next route evaluation; reload
-    // forces that evaluation without faking the navigation ourselves.
+    await page
+        .getByTestId("login-page")
+        .waitFor({ state: "visible", timeout: 15_000 })
+        .catch(() => {
+            // Cleanup did not unmount the profile in time — the reload
+            // forces the route re-evaluation as before.
+        });
     await page.reload();
 });
 

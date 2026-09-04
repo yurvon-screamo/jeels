@@ -130,7 +130,7 @@ async fn user_records_store_json_string_and_read_legacy_objects() {
     use crate::repository::file_repository::{STORE_NAME, open_database, user_key};
 
     let string_user = User::new(
-        "codec-binary@origa.local".to_string(),
+        "codec-string@origa.local".to_string(),
         NativeLanguage::Russian,
         None,
     );

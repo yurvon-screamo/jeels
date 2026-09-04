@@ -61,7 +61,6 @@ async function blockTrunkReload(context: import("@playwright/test").BrowserConte
             Object.defineProperty(window.Location.prototype, "reload", {
                 configurable: true,
                 value: () => {
-                    // eslint-disable-next-line no-console
                     console.log("[diag] trunk live-reload blocked");
                 },
             });
@@ -71,7 +70,8 @@ async function blockTrunkReload(context: import("@playwright/test").BrowserConte
     });
 }
 
-async function main(): Promise<void> {    const userCtx = await setupTestUser();
+async function main(): Promise<void> {
+    const userCtx = await setupTestUser();
     console.log(`[diag] test user: ${userCtx.email}`);
 
     const browser = await chromium.launch();

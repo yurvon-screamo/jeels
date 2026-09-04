@@ -165,6 +165,11 @@ export async function uiLogin(
 			// Waiting for the URL alone fails the second case — seen on the
 			// full-corpus restore (#492), where the app settles on "/" with
 			// Home mounted.
+			// NOTE on the detach branch: it returns as soon as the form
+			// unmounts — which may be a loading overlay while a heavy
+			// restore is still in flight. Callers must assert their own
+			// post-login marker (home/onboarding content) rather than assume
+			// the login has fully completed.
 			await Promise.race([
 				page.waitForURL(/\/(home|onboarding)/, { timeout: 60_000 }),
 				page
