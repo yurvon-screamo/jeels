@@ -79,19 +79,26 @@ tauri-plugin-haptics.workspace = true
 # Apple-only: ASWebAuthenticationSession plugin for OAuth. Wraps Apple's
 # native auth session API so the browser returns to the app after the OAuth
 # redirect — required by App Review Guideline 4 (default-browser login is
-# rejected for Mac App Store distribution). On iOS the tauri-plugin-deep-link
-# build.rs does NOT register CFBundleURLTypes for custom schemes, so the old
-# opener + desktop-callback.html flow cannot return from Safari; on macOS the
-# session intercepts the `origa://` callback itself.
+# rejected for Mac App Store distribution). The frontend sends
+# redirect_uri = origa://auth/callback (see native_oauth_redirect_uri) and
+# TrailBase answers the provider callback with a server-side 303 straight to
+# the scheme: the auth session only intercepts redirect-initiated
+# navigations, not JavaScript hops from an interstitial page (App Review
+# 2.1(a) of v0.7.3). On iOS the tauri-plugin-deep-link build.rs does NOT
+# register CFBundleURLTypes for custom schemes, so the old opener +
+# desktop-callback.html flow cannot return from Safari; on macOS the session
+# intercepts the `origa://` callback itself.
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
 tauri-plugin-aswebauth.workspace = true
 
-# Android-only: rustls-platform-verifier JNI initialization.
-# reqwest (Sentry transport, lindera build) pulls in rustls-platform-verifier
-# on non-WASM targets. On Android it must be initialized with a JNI context
-# before any TLS handshake, or the process aborts. jni crate is needed to
-# obtain JNIEnv from the JavaVM. ndk-context provides the JavaVM/Activity
-# pointers (initialized by tao before main()).
+# Android-only: rustls-platform-verifier JNI initialization + our own
+# ndk-context publication. Since Tauri 2.11 (tao 0.35) nothing publishes the
+# JavaVM/Application into `ndk-context` (tao dropped the dependency), so
+# tauri/src/android_context.rs owns that invariant: JNI_OnLoad captures the
+# JavaVM, the Application context is resolved via
+# ActivityThread.currentApplication(), both are published for every reader
+# (the verifier init below, tauri-plugin-tts). The jni crate is needed for
+# the JNI calls themselves.
 # Pinned to 0.21: rustls-platform-verifier 0.6 takes jni 0.21 types in
 # android::init_with_env; a direct 0.22 dep (dependabot #455) breaks the
 # Android build with mismatched JNIEnv/JObject types.

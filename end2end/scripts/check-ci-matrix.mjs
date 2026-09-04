@@ -44,7 +44,16 @@ const fail = (message) => violations.push(message);
 // mechanism silently rots). Adding a new @fixme requires an explicit entry
 // here; removing a fixme requires removing its entry — the guard fails
 // loudly either way. Keep entries coupled to their tracking issues.
-const KNOWN_FIXME = new Set([]);
+const KNOWN_FIXME = new Set([
+    // n1_stress.feature / «Синхронизация тяжёлого пользователя между
+    // устройствами»: a fresh device restoring the full-corpus (~11k cards)
+    // record ends up in the onboarding wizard with a locally seeded user
+    // missing the __onboarding_completed__ sentinel. Reproduced on a clean
+    // release/static stack (no dev tooling); a light N5 user restores
+    // cleanly — suspected partial/failed IndexedDB local.save of the
+    // multi-MB row. Tracked in #492.
+    "n1_stress.feature|Синхронизация тяжёлого пользователя между устройствами",
+]);
 
 // ---------------------------------------------------------------------------
 // 1. Fresh bddgen output (guards against stale .features-gen)

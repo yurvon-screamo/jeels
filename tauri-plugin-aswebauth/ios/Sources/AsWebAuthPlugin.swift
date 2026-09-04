@@ -5,8 +5,10 @@
 //
 // Replaces the tauri-plugin-opener + desktop-callback.html + custom-scheme
 // flow on iOS. ASWebAuthenticationSession opens Safari in a dedicated auth
-// context, intercepts the `origa://` callback directly, and returns the
-// callback URL via the completion handler — no CFBundleURLTypes needed.
+// context, intercepts the server-side 303 to `origa://auth/callback`
+// (redirect-initiated navigation — JavaScript hops from an interstitial page
+// are NOT intercepted), and returns the callback URL via the completion
+// handler — no CFBundleURLTypes needed.
 //
 // `prefersEphemeralWebBrowserSession` is intentionally `false`: Google OAuth
 // rejects ephemeral (incognito-like) browser sessions, blocking login.

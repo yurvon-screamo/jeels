@@ -29,6 +29,58 @@ pub async fn get_or_create_profile(
     match auth_store.repository().get_current_user().await {
         Ok(Some(user)) => Ok(user),
         Ok(None) => {
+            // The merge returned without seeding the local store. Before
+            // minting a brand-new profile, PROVE the remote miss: a live
+            // remote record here means the restore path failed to seed
+            // locally (issue #492) — creating an empty user would shadow
+            // the canonical record on the server via save_sync below.
+            if auth_store
+                .repository()
+                .has_remote_record()
+                .await
+                .map_err(|e| {
+                    i18n.get_keys_untracked()
+                        .login()
+                        .sync_profile_error()
+                        .inner()
+                        .replace("{}", &e.to_string())
+                })?
+            {
+                tracing::warn!(
+                    "Profile bootstrap: merge left no local user while the \
+                     remote record exists — retrying the restore instead of \
+                     creating an empty profile (#492)"
+                );
+                auth_store
+                    .repository()
+                    .merge_current_user()
+                    .await
+                    .map_err(|e| {
+                        i18n.get_keys_untracked()
+                            .login()
+                            .sync_profile_error()
+                            .inner()
+                            .replace("{}", &e.to_string())
+                    })?;
+                return auth_store
+                    .repository()
+                    .get_current_user()
+                    .await
+                    .map_err(|e| {
+                        i18n.get_keys_untracked()
+                            .login()
+                            .load_profile_error()
+                            .inner()
+                            .replace("{}", &e.to_string())
+                    })?
+                    .ok_or_else(|| {
+                        "Restore did not seed the local profile after a retry \
+                         despite a live remote record — refusing to create an \
+                         empty profile that would shadow it (#492)"
+                            .to_string()
+                    });
+            }
+
             let new_user = create_new_user_from_session(email, i18n)?;
 
             // First-time profile creation is an explicit sync checkpoint: the

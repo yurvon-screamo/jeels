@@ -1,16 +1,37 @@
+use origa::dictionary::cdn_blob::{guard_matches, split_blob};
 use origa::dictionary::grammar::{GrammarData, init_grammar, is_grammar_loaded};
 use origa::dictionary::kanji::{KanjiData, init_kanji, is_kanji_loaded};
 use origa::dictionary::radical::{RadicalData, init_radicals, is_radicals_loaded};
 use origa::dictionary::vocabulary::{
-    VocabularyChunkData, init_vocabulary, init_vocabulary_from_rkyv, is_vocabulary_loaded,
-    serialize_vocabulary_to_rkyv,
+    VocabularyChunkData, VocabularyDatabase, init_vocabulary, init_vocabulary_from_rkyv,
+    is_vocabulary_loaded, serialize_vocabulary_to_rkyv, set_vocabulary_database,
+    vocabulary_database_from_blob_rkyv,
 };
 use origa::domain::OrigaError;
 use origa::traits::CdnProvider;
 
+use crate::repository::cache_manager::guard_expectation_for;
 use crate::repository::cdn_provider;
 use crate::repository::{get_cached_vocabulary_rkyv, save_vocabulary_to_cache_rkyv};
 use crate::utils::{now_ms, yield_to_browser};
+
+/// CDN path of the pre-built deterministic vocabulary blob.
+const VOCABULARY_BLOB_PATH: &str = "dictionary/vocabulary.rkyv";
+
+/// Chunk paths feeding the blob — used for the manifest guard expectation.
+const VOCABULARY_CHUNK_PATHS: [&str; 11] = [
+    "dictionary/chunk_01.json",
+    "dictionary/chunk_02.json",
+    "dictionary/chunk_03.json",
+    "dictionary/chunk_04.json",
+    "dictionary/chunk_05.json",
+    "dictionary/chunk_06.json",
+    "dictionary/chunk_07.json",
+    "dictionary/chunk_08.json",
+    "dictionary/chunk_09.json",
+    "dictionary/chunk_10.json",
+    "dictionary/chunk_11.json",
+];
 
 pub async fn load_vocabulary() -> Result<(), OrigaError> {
     if is_vocabulary_loaded() {
@@ -21,6 +42,23 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
     let start = now_ms();
     tracing::info!("📖 Loading vocabulary...");
 
+    // Fastest path: pre-built rkyv blob from the CDN (cache-first). Skips
+    // both the JSON parsing of ~35 MB of chunks and the client-side
+    // re-serialization into the local rkyv cache.
+    if let Some(database) = load_vocabulary_from_cdn_blob(cdn_provider()).await? {
+        set_vocabulary_database(database)?;
+        tracing::info!(
+            "📖 Vocabulary loaded from CDN rkyv blob ({:.2}s)",
+            (now_ms() - start) / 1000.0
+        );
+        return Ok(());
+    }
+
+    // Known coverage gap (accepted at review): the fallback chain below —
+    // client rkyv cache → JSON chunks → client re-serialization — lives in
+    // this wrapper because the Cache API layer is not natively testable; it
+    // is behaviour-covered by e2e only. The CDN-rkyv core above carries the
+    // native mock tests.
     // Fast path: try loading from rkyv cache (pre-parsed VocabularyDatabase).
     match get_cached_vocabulary_rkyv().await {
         Ok(Some(bytes)) => {
@@ -118,6 +156,43 @@ pub async fn load_vocabulary() -> Result<(), OrigaError> {
     Ok(())
 }
 
+/// CDN-rkyv fast path core. `Ok(None)` means "no usable blob — use the
+/// fallback chain" (fetch error, invalid header, guard mismatch or payload
+/// failure are all non-fatal: the original sources remain loadable).
+async fn load_vocabulary_from_cdn_blob<P: CdnProvider>(
+    provider: &P,
+) -> Result<Option<VocabularyDatabase>, OrigaError> {
+    let blob = match provider.fetch_bytes(VOCABULARY_BLOB_PATH).await {
+        Ok(blob) => blob,
+        Err(e) => {
+            tracing::warn!("📖 Vocabulary rkyv blob unavailable ({e:?}), using fallback chain");
+            return Ok(None);
+        },
+    };
+
+    let (header, payload) = match split_blob(&blob) {
+        Ok(split) => split,
+        Err(e) => {
+            tracing::warn!("📖 Vocabulary blob header invalid: {e}");
+            return Ok(None);
+        },
+    };
+
+    let expectation = guard_expectation_for(&VOCABULARY_CHUNK_PATHS);
+    if !guard_matches(&header, &expectation) {
+        tracing::warn!("📖 Vocabulary blob stale relative to manifest, using fallback chain");
+        return Ok(None);
+    }
+
+    match vocabulary_database_from_blob_rkyv(payload) {
+        Ok(database) => Ok(Some(database)),
+        Err(e) => {
+            tracing::warn!("📖 Vocabulary blob payload failed to deserialize: {e:?}");
+            Ok(None)
+        },
+    }
+}
+
 pub async fn load_kanji() -> Result<(), OrigaError> {
     if is_kanji_loaded() {
         tracing::debug!("📖 Kanji already loaded");
@@ -178,4 +253,172 @@ pub async fn load_radicals() -> Result<(), OrigaError> {
 
     tracing::info!("📖 Radicals loaded ({:.2}s)", (now_ms() - start) / 1000.0);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::cell::RefCell;
+    use std::future::Future;
+
+    use origa::dictionary::cdn_blob::{
+        BlobHeader, SCHEMA_VERSION, build_blob, manifest_guard_from_hex_hashes, sha256_bytes,
+    };
+    use origa::dictionary::vocabulary::{
+        build_vocabulary_database_from_chunks, serialize_vocabulary_blob_to_rkyv,
+    };
+
+    use super::*;
+
+    fn chunk_json() -> String {
+        r#"{"猫": {"russian_translation": "кот", "english_translation": "cat"}}"#.to_string()
+    }
+
+    fn chunk_data() -> VocabularyChunkData {
+        VocabularyChunkData {
+            chunk_01: chunk_json(),
+            chunk_02: "{}".to_string(),
+            chunk_03: "{}".to_string(),
+            chunk_04: "{}".to_string(),
+            chunk_05: "{}".to_string(),
+            chunk_06: "{}".to_string(),
+            chunk_07: "{}".to_string(),
+            chunk_08: "{}".to_string(),
+            chunk_09: "{}".to_string(),
+            chunk_10: "{}".to_string(),
+            chunk_11: "{}".to_string(),
+        }
+    }
+
+    /// Recording mock over the external CDN boundary: canned bytes per path
+    /// plus a log of every requested path (asserts the fast path never
+    /// touches the JSON chunks).
+    struct MockCdn {
+        blob: Option<Vec<u8>>,
+        requested: RefCell<Vec<String>>,
+    }
+
+    impl MockCdn {
+        fn with_blob(blob: Option<Vec<u8>>) -> Self {
+            Self {
+                blob,
+                requested: RefCell::new(Vec::new()),
+            }
+        }
+
+        fn requested_paths(&self) -> Vec<String> {
+            self.requested.borrow().clone()
+        }
+    }
+
+    impl CdnProvider for MockCdn {
+        fn fetch_text(&self, path: &str) -> impl Future<Output = Result<String, OrigaError>> {
+            self.requested.borrow_mut().push(path.to_string());
+            std::future::ready(Err(OrigaError::NetworkError {
+                url: path.to_string(),
+                reason: "text fetch is not stubbed in blob tests".to_string(),
+            }))
+        }
+
+        fn fetch_bytes(&self, path: &str) -> impl Future<Output = Result<Vec<u8>, OrigaError>> {
+            self.requested.borrow_mut().push(path.to_string());
+            let result = match (path, &self.blob) {
+                (VOCABULARY_BLOB_PATH, Some(bytes)) => Ok(bytes.clone()),
+                _ => Err(OrigaError::NetworkError {
+                    url: path.to_string(),
+                    reason: "not stubbed".to_string(),
+                }),
+            };
+            std::future::ready(result)
+        }
+    }
+
+    fn valid_blob() -> Vec<u8> {
+        let database = build_vocabulary_database_from_chunks(chunk_data()).unwrap();
+        let payload = serialize_vocabulary_blob_to_rkyv(&database).unwrap();
+
+        let chunk_bytes = chunk_json().into_bytes();
+        let hex_hashes: Vec<String> = std::iter::repeat_n(
+            {
+                let digest = sha256_bytes(&chunk_bytes);
+                digest
+                    .iter()
+                    .map(|b| format!("{b:02x}"))
+                    .collect::<String>()
+            },
+            VOCABULARY_CHUNK_PATHS.len(),
+        )
+        .collect();
+        let hex_refs: Vec<&str> = hex_hashes.iter().map(String::as_str).collect();
+
+        let header = BlobHeader {
+            schema_version: SCHEMA_VERSION,
+            source_sha256: sha256_bytes(b"concatenated chunks"),
+            manifest_guard: manifest_guard_from_hex_hashes(&hex_refs),
+        };
+        build_blob(&header, &payload)
+    }
+
+    #[tokio::test]
+    async fn valid_blob_loads_database_without_fetching_chunks() {
+        // Arrange
+        let provider = MockCdn::with_blob(Some(valid_blob()));
+
+        // Act
+        let database = load_vocabulary_from_cdn_blob(&provider)
+            .await
+            .unwrap()
+            .expect("valid blob must load");
+
+        // Assert
+        assert_eq!(
+            database.get_translations("猫", &origa::domain::NativeLanguage::Russian),
+            Some(vec!["кот".to_string()])
+        );
+        let chunk_requested = provider
+            .requested_paths()
+            .iter()
+            .any(|path| path.starts_with("dictionary/chunk_"));
+        assert!(!chunk_requested, "fast path must not fetch JSON chunks");
+    }
+
+    #[tokio::test]
+    async fn missing_blob_yields_none_for_the_fallback_chain() {
+        // Arrange
+        let provider = MockCdn::with_blob(None);
+
+        // Act
+        let database = load_vocabulary_from_cdn_blob(&provider).await.unwrap();
+
+        // Assert
+        assert!(database.is_none());
+    }
+
+    #[tokio::test]
+    async fn corrupted_header_yields_none_for_the_fallback_chain() {
+        // Arrange
+        let mut blob = valid_blob();
+        blob[0] = b'X';
+        let provider = MockCdn::with_blob(Some(blob));
+
+        // Act
+        let database = load_vocabulary_from_cdn_blob(&provider).await.unwrap();
+
+        // Assert
+        assert!(database.is_none());
+    }
+
+    #[tokio::test]
+    async fn future_schema_version_yields_none_for_the_fallback_chain() {
+        // Arrange
+        let mut blob = valid_blob();
+        let version = SCHEMA_VERSION + 1;
+        blob[4..8].copy_from_slice(&version.to_le_bytes());
+        let provider = MockCdn::with_blob(Some(blob));
+
+        // Act
+        let database = load_vocabulary_from_cdn_blob(&provider).await.unwrap();
+
+        // Assert
+        assert!(database.is_none());
+    }
 }

@@ -53,7 +53,8 @@ export class OnboardingPage extends BasePage {
     readonly appsSubtitle: Locator;
 
     // Summary step
-    readonly summaryTitle: Locator;
+    readonly summaryTitle: Locator;    readonly summaryStats: Locator;
+
     readonly summarySubtitle: Locator;
 
     // Scoring step
@@ -123,6 +124,7 @@ export class OnboardingPage extends BasePage {
         this.appsSubtitle = page.getByTestId("apps-subtitle");
 
         // Summary step
+        this.summaryStats = page.getByTestId("summary-step-stats");
         this.summaryTitle = page.getByTestId("summary-title");
         this.summarySubtitle = page.getByTestId("summary-subtitle");
 
@@ -161,6 +163,11 @@ export class OnboardingPage extends BasePage {
     async toggleSet(setId: string): Promise<void> {
         const setCheckbox = this.page.getByTestId(`summary-step-set-${setId}-checkbox`);
         await setCheckbox.click();
+    }
+
+    /** Locator for a summary set checkbox — for checked-state assertions. */
+    setCheckboxLocator(setId: string): Locator {
+        return this.page.getByTestId(`summary-step-set-${setId}-checkbox`);
     }
 
     async isAppSelected(appId: string): Promise<boolean> {

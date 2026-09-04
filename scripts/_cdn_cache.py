@@ -71,6 +71,16 @@ _NO_CACHE_RULES: Final[frozenset[str]] = frozenset(
     {"manifest.json"}
 )
 
+# Exact paths exempted from an enclosing IMMUTABLE directory rule. The
+# furigana rkyv blob is regenerated together with its source text whenever
+# content or schema changes, so it must never sit behind a year-long
+# immutable edge cache (the PR #182 poisoning precedent).
+_IMMUTABLE_EXCEPTIONS: Final[frozenset[str]] = frozenset(
+    {
+        "dictionaries/JmdictFurigana.rkyv",
+    }
+)
+
 
 def _matches(path: str, rules: frozenset[str]) -> bool:
     for rule in rules:
@@ -85,6 +95,8 @@ def _matches(path: str, rules: frozenset[str]) -> bool:
 def cache_control_for(path: str) -> str:
     if _matches(path, _NO_CACHE_RULES):
         return NO_CACHE
+    if path in _IMMUTABLE_EXCEPTIONS:
+        return RELEASE_UPDATED
     if _matches(path, _IMMUTABLE_RULES):
         return IMMUTABLE
     if _matches(path, _RELEASE_UPDATED_RULES):

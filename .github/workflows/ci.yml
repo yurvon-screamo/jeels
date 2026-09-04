@@ -119,6 +119,11 @@ jobs:
               steps.components.outputs.core == 'true' ||
               steps.components.outputs.tauri == 'true' ||
               steps.components.outputs.ci == 'true' }}
+            run_android_smoke: >-
+              ${{ github.event_name != 'pull_request' ||
+              steps.components.outputs.core == 'true' ||
+              steps.components.outputs.tauri == 'true' ||
+              steps.components.outputs.ci == 'true' }}
             run_docker_landing: >-
               ${{ github.event_name != 'pull_request' ||
               steps.components.outputs.core == 'true' ||
@@ -299,7 +304,7 @@ jobs:
             - name: Download CDN data
               uses: ./.github/actions/download-cdn
               with:
-                  cache-key: cdn-data-v13-${{ hashFiles('end2end/cdn-manifest.txt') }}
+                  cache-key: cdn-data-v14-${{ hashFiles('end2end/cdn-manifest.txt') }}
                   cdn-base-url: ${{ vars.ORIGA_CDN_BASE_URL }}
 
             - name: Upload CDN artifact
@@ -455,6 +460,182 @@ jobs:
                   path: origa_ui/dist/
                   retention-days: 1
 
+    # Runs the Android app on an emulator — the only CI net for the class of
+    # startup bugs that compile fine and build fine but crash on launch
+    # (born from the tao 0.35 ndk-context break, ADR-044). Builds a debug
+    # APK for the SAME ABI as the emulator (x86_64); production release
+    # builds stay aarch64 via _build-tauri.yml. The WASM frontend is built
+    # in-job (self-contained: no artifact cascades, no skip-legal traps).
+    android-smoke:
+        name: Android Smoke (emulator)
+        permissions:
+            contents: read
+        needs: [changes, cdn-download]
+        if: needs.changes.outputs.run_android_smoke == 'true'
+        runs-on: ubuntu-24.04
+        timeout-minutes: 45
+        env:
+            ORIGA_CDN_BASE_URL: ${{ vars.ORIGA_CDN_BASE_URL }}
+            # NDK r26 exact version — single source of truth, same as
+            # _build-tauri.yml build-android.
+            NDK_VERSION: '26.1.10909125'
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            # Android target: only protobuf-compiler is required from the
+            # system (the heavy webkit/speechd set is for desktop targets;
+            # see lint/e2e-build if an android build ever needs more).
+            - name: Cache APT packages
+              uses: awalsh128/cache-apt-pkgs-action@v1.6.3
+              with:
+                  packages: protobuf-compiler
+                  version: 1.0
+
+            - name: Setup Rust
+              uses: ./.github/actions/setup-rust
+              with:
+                  targets: wasm32-unknown-unknown,x86_64-linux-android
+                  shared-key: origa-android-smoke-v1
+                  save-if: false
+
+            - name: Setup Java
+              uses: actions/setup-java@v6
+              with:
+                  distribution: temurin
+                  java-version: 21
+
+            - name: Setup Android SDK + NDK + emulator
+              uses: android-actions/setup-android@v4
+              with:
+                  packages: 'tools platform-tools ndk;${{ env.NDK_VERSION }} emulator system-images;android-34;google_apis;x86_64'
+
+            - name: Configure NDK environment
+              # setup-android@v4 exports ANDROID_SDK_ROOT/ANDROID_HOME but NOT
+              # NDK_HOME/ANDROID_NDK_ROOT (see _build-tauri.yml for the full
+              # rationale).
+              run: |
+                  NDK_PATH="${ANDROID_SDK_ROOT}/ndk/${{ env.NDK_VERSION }}"
+                  if [ ! -d "$NDK_PATH" ]; then
+                      echo "::error::NDK directory not found at: $NDK_PATH"
+                      ls -1 "${ANDROID_SDK_ROOT}/ndk/" 2>/dev/null || true
+                      exit 1
+                  fi
+                  echo "NDK_HOME=$NDK_PATH" >> "$GITHUB_ENV"
+                  echo "ANDROID_NDK_ROOT=$NDK_PATH" >> "$GITHUB_ENV"
+
+            - name: Verify KVM availability
+              run: |
+                  if [ ! -e /dev/kvm ]; then
+                      echo "::error::/dev/kvm not available on this runner"
+                      exit 1
+                  fi
+                  if [ ! -w /dev/kvm ]; then
+                      sudo chmod a+rw /dev/kvm
+                  fi
+                  [ -w /dev/kvm ] || { echo "::error::/dev/kvm not writable"; exit 1; }
+
+            # Boot the emulator IN PARALLEL with the toolchain/APK build:
+            # boot takes minutes and does not compete for the CPU meaningfully,
+            # so starting it here hides the wait (the smoke script polls
+            # sys.boot_completed itself).
+            - name: Start emulator
+              run: |
+                  # Pin the AVD home for BOTH tools: cmdline-tools may resolve
+                  # the Android user home through XDG_CONFIG_HOME (writing to
+                  # ~/.config/.android/avd) while the emulator binary only
+                  # searches $ANDROID_AVD_HOME, $ANDROID_SDK_HOME/avd and
+                  # $HOME/.android/avd — the mismatch made `create avd` a
+                  # silent no-op the emulator could never see.
+                  export ANDROID_AVD_HOME="$HOME/.android/avd"
+                  mkdir -p "$ANDROID_AVD_HOME"
+                  echo "no" | avdmanager create avd -n smoke \
+                      -k "system-images;android-34;google_apis;x86_64" -d pixel --force
+                  if [ ! -f "$ANDROID_AVD_HOME/smoke.ini" ]; then
+                      echo "::error::AVD 'smoke' was not created at $ANDROID_AVD_HOME"
+                      ls -la "$ANDROID_AVD_HOME"
+                      "${ANDROID_SDK_ROOT}/emulator/emulator" -list-avds 2>/dev/null || true
+                      exit 1
+                  fi
+                  EMU="${ANDROID_SDK_ROOT}/emulator/emulator"
+                  if [ ! -x "$EMU" ]; then
+                      echo "::error::emulator binary not found at $EMU"
+                      ls -1 "${ANDROID_SDK_ROOT}/emulator" 2>/dev/null || true
+                      exit 1
+                  fi
+                  # -accel on: die loudly instead of silently falling back to
+                  # pure-software emulation (30+ min boots).
+                  nohup "$EMU" -avd smoke -no-window -no-audio -no-boot-anim \
+                      -gpu swiftshader_indirect -no-snapshot -accel on \
+                      > /tmp/emulator.log 2>&1 &
+                  # Surface early crashes (KVM permission, bad options) right
+                  # in the job log instead of a silent wait-for-device hang.
+                  sleep 15
+                  echo "--- emulator.log (first 15s) ---"
+                  tail -n 30 /tmp/emulator.log || true
+
+            - name: Cache Gradle
+              uses: actions/cache@v6
+              with:
+                  path: |
+                      ~/.gradle/caches
+                      ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*',
+                      '**/gradle-wrapper.properties') }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-
+
+            - name: Setup frontend tools
+              uses: ./.github/actions/setup-frontend
+
+            - name: Add cargo bin to PATH
+              run: echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+            - name: Download CDN artifact
+              uses: actions/download-artifact@v8
+              with:
+                  name: cdn-data
+                  path: cdn/
+
+            # Fail fast (minutes, not half an hour): the android-cfg code the
+            # host clippy never sees is checked here before the APK build.
+            # cc-rs (ring) needs the NDK toolchain explicitly — the tauri CLI
+            # injects CC/AR only for its own `cargo tauri android build`.
+            - name: Check Android target compiles
+              run: |
+                  TOOLCHAIN="${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+                  export CC_x86_64_linux_android="$TOOLCHAIN/x86_64-linux-android24-clang"
+                  export AR_x86_64_linux_android="$TOOLCHAIN/llvm-ar"
+                  cargo check -p origa-app --lib --target x86_64-linux-android
+
+            - name: Install Tauri CLI (npm)
+              working-directory: tauri
+              run: npm install
+
+            - name: Build landing CSS
+              working-directory: origa_landing
+              run: npm ci && npm run build:css
+
+            # --release on purpose: the debug WASM bundle (~300 MB) OOM-kills
+            # the Android WebView heap (tauri-apps/tauri#13554) and would
+            # turn this job false-red on fixed code. Same profile as
+            # e2e-build / production artifact.
+            - name: Build WASM frontend
+              run: cd origa_ui && trunk build --release
+
+            - name: Build debug APK (x86_64)
+              working-directory: tauri
+              # Explicit --apk: pin the output flavor instead of relying on
+              # the CLI default (which may build apk+aab — double the time).
+              # --target takes the short ABI name for android (not the rust
+              # triple — `x86_64-linux-android` is rejected by the CLI).
+              run: cargo tauri android build --debug --target x86_64 --apk
+
+            - name: Run smoke test
+              run: |
+                  apk="$(find tauri/gen/android/app/build/outputs/apk -name '*.apk' -type f | head -1)"
+                  tauri/scripts/android_smoke.sh "$apk"
+
     # Fails fast when a BDD scenario is silently excluded from the matrix
     # (dead) or runs in several groups (duplicated). Born from a real hole:
     # the old `Фразы$` grep anchor excluded the whole phrases.feature while
@@ -504,6 +685,7 @@ jobs:
                     - grammar-kanji
                     - profile-sync
                     - onboarding-lesson
+                    - stress
         env:
             ORIGA_CDN_BASE_URL: http://localhost:8080
             TRAILBASE_URL: http://localhost:4000
@@ -594,7 +776,7 @@ jobs:
                   case "${{ matrix.group }}" in
                     core)
                       npx playwright test --project=bdd --retries=1 \
-                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en)\.feature\.spec\.js"
+                        --grep "features/(smoke|session|navigation|home|failure_paths|i18n_en|loading_rkyv)\.feature\.spec\.js"
                       ;;
                     words)
                       npx playwright test --project=bdd --retries=1 \
@@ -611,6 +793,14 @@ jobs:
                     onboarding-lesson)
                       npx playwright test --project=bdd --retries=1 \
                         --grep "features/(onboarding|onboarding_scoring|lesson|lesson_empty_state|phrases_onboarding)\.feature\.spec\.js"
+                      ;;
+                    stress)
+                      # Full-corpus N1 scenarios: each seeds ~11k cards
+                      # through the real onboarding import, so the group
+                      # runs serially (--workers=1) to avoid two concurrent
+                      # heavy WASM imports fighting for the 2-core runner.
+                      npx playwright test --project=bdd --retries=1 --workers=1 \
+                        --grep "features/n1_stress\.feature\.spec\.js"
                       ;;
                   esac
 
@@ -806,6 +996,7 @@ jobs:
                 e2e-matrix-guard,
                 e2e,
                 e2e-report,
+                android-smoke,
                 build-tauri,
                 build-macos,
                 docker-build-landing,
@@ -847,6 +1038,7 @@ jobs:
                   gate "e2e-matrix-guard" "${{ needs.e2e-matrix-guard.result }}" "${{ needs.changes.outputs.run_e2e_matrix_guard }}"
                   gate "e2e" "${{ needs.e2e.result }}" "${{ needs.changes.outputs.run_e2e }}"
                   gate "e2e-report" "${{ needs.e2e-report.result }}" "${{ needs.changes.outputs.run_e2e }}"
+                  gate "android-smoke" "${{ needs.android-smoke.result }}" "${{ needs.changes.outputs.run_android_smoke }}"
                   gate "build-tauri" "${{ needs.build-tauri.result }}" "${{ needs.changes.outputs.run_build_tauri }}"
                   gate "build-macos" "${{ needs.build-macos.result }}" "${{ needs.changes.outputs.run_build_macos }}"
                   gate "docker-build-landing" "${{ needs.docker-build-landing.result }}" "${{ needs.changes.outputs.run_docker_landing }}"

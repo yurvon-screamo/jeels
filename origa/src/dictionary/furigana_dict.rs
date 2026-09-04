@@ -3,20 +3,21 @@ use std::sync::OnceLock;
 
 use crate::domain::OrigaError;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 pub struct ReadingSpan {
     pub start_index: usize,
     pub end_index: usize,
     pub text: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 pub struct FuriganaEntry {
     pub text: String,
     pub reading: String,
     pub reading_spans: Vec<ReadingSpan>,
 }
 
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 pub struct FuriganaDictionary {
     entries: BTreeMap<String, Vec<FuriganaEntry>>,
 }
@@ -25,6 +26,40 @@ static FURIGANA_DICT: OnceLock<FuriganaDictionary> = OnceLock::new();
 
 pub fn is_furigana_dict_loaded() -> bool {
     FURIGANA_DICT.get().is_some()
+}
+
+/// Build the dictionary from JmdictFurigana text without installing it into
+/// the global slot. Used by the CDN blob builder and by loader tests.
+pub fn build_furigana_dict_from_text(content: &str) -> Result<FuriganaDictionary, OrigaError> {
+    FuriganaDictionary::from_text(content)
+}
+
+/// Install an already-built dictionary (e.g. deserialized from a CDN blob)
+/// into the global slot. Fails if another dictionary is already installed.
+pub fn set_furigana_dict(dict: FuriganaDictionary) -> Result<(), OrigaError> {
+    FURIGANA_DICT
+        .set(dict)
+        .map_err(|_| OrigaError::FuriganaError {
+            reason: "Furigana dictionary already loaded".to_string(),
+        })
+}
+
+/// Serialize a built dictionary to rkyv bytes (payload of a CDN blob).
+pub fn serialize_furigana_dict_to_rkyv(dict: &FuriganaDictionary) -> Result<Vec<u8>, OrigaError> {
+    rkyv::to_bytes::<rkyv::rancor::Error>(dict)
+        .map(|bytes| bytes.to_vec())
+        .map_err(|e| OrigaError::FuriganaError {
+            reason: format!("failed to serialize furigana dictionary: {e}"),
+        })
+}
+
+/// Deserialize a dictionary from rkyv payload bytes (CDN blob payload).
+pub fn furigana_dict_from_rkyv(payload: &[u8]) -> Result<FuriganaDictionary, OrigaError> {
+    rkyv::from_bytes::<FuriganaDictionary, rkyv::rancor::Error>(payload).map_err(|e| {
+        OrigaError::FuriganaError {
+            reason: format!("failed to deserialize furigana dictionary: {e}"),
+        }
+    })
 }
 
 pub fn init_furigana_dict(content: &str) -> Result<(), OrigaError> {
@@ -221,6 +256,22 @@ mod tests {
         let content = "食べる|たべる|0:た";
         let dict = FuriganaDictionary::from_text(content).unwrap();
         assert!(dict.lookup_prefixed("飲").is_empty());
+    }
+
+    #[test]
+    fn rkyv_payload_round_trip_preserves_lookups() {
+        // Arrange
+        let content = "大人|おとな|0-1:おとな\n大人|だいじん|0-1:だいじん\n指|ゆび|0:ゆび";
+        let dict = build_furigana_dict_from_text(content).unwrap();
+
+        // Act
+        let payload = serialize_furigana_dict_to_rkyv(&dict).unwrap();
+        let restored = furigana_dict_from_rkyv(&payload).unwrap();
+
+        // Assert
+        assert_eq!(restored.lookup_word("大人").len(), 2);
+        assert_eq!(restored.lookup_word("指").len(), 1);
+        assert_eq!(restored.lookup_prefixed("大").len(), 2);
     }
 
     #[test]

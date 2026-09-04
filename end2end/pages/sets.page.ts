@@ -13,6 +13,7 @@ export class SetsPage extends BasePage {
 
     // Search
     readonly searchInput: Locator;
+    readonly setItemItems: Locator;
 
     // Level filters
     readonly levelAll: Locator;
@@ -56,6 +57,7 @@ export class SetsPage extends BasePage {
 
         // Search
         this.searchInput = page.getByTestId("sets-search-input");
+        this.setItemItems = page.getByTestId("sets-card-item");
 
         // Level filters
         this.levelAll = page.getByTestId("sets-level-all");

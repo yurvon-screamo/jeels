@@ -11,7 +11,8 @@ export class GrammarPage extends BasePage {
     readonly backBtn: Locator;
     readonly addBtn: Locator;
     readonly searchInput: Locator;
-    readonly grammarGrid: Locator;
+    readonly grammarGrid: Locator;    readonly firstRuleCard: Locator;
+
     readonly emptyState: Locator;
 
     readonly drawer: Locator;
@@ -54,6 +55,7 @@ export class GrammarPage extends BasePage {
         this.backBtn = page.getByTestId("grammar-back-btn");
         this.addBtn = page.getByTestId("grammar-add-btn");
         this.searchInput = page.getByTestId("grammar-search-input");
+        this.firstRuleCard = page.getByTestId("grammar-card-item").first();
         this.grammarGrid = page.getByTestId("grammar-grid");
         this.emptyState = page.getByTestId("grammar-empty-state");
 
@@ -121,6 +123,18 @@ export class GrammarPage extends BasePage {
         const ruleItem = this.drawer.getByTestId("grammar-drawer-item").first();
         const emptyMsg = this.drawer.getByTestId("grammar-drawer-empty");
         await expect(ruleItem.or(emptyMsg)).toBeVisible({ timeout: 10_000 });
+    }
+
+    /**
+     * JLPT filter button on the MAIN /grammar page (card_list_view renders
+     * `grammar-filter-jlpt-<level>`). Not to be confused with selectLevel —
+     * that one drives the LevelSelector inside the add-grammar DRAWER and
+     * waits for drawer items, so it hangs forever on the main page.
+     */
+    async selectJlptFilter(level: GrammarLevel): Promise<void> {
+        await this.page
+            .getByTestId(`grammar-filter-jlpt-${level.toLowerCase()}`)
+            .click({ timeout: 30_000 });
     }
 
     async selectRule(title: string): Promise<void> {

@@ -1,3 +1,4 @@
+pub mod cdn_blob;
 pub mod furigana_dict;
 pub mod grammar;
 pub mod kanji;

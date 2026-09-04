@@ -63,6 +63,7 @@ pub fn HomeContent(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
                     if disposed.is_disposed() {
                         return;
                     }
+                    let progress_before_recalc = user.jlpt_progress().clone();
                     recalculate_user_jlpt_progress(&mut user);
                     user_name.set(display_name_for(user.username(), user.email()));
 
@@ -85,7 +86,15 @@ pub fn HomeContent(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
 
                     is_loading.set(false);
 
-                    persist_user(repo.clone(), user.clone());
+                    // Persist only when the recalc actually changed the
+                    // progress: an unconditional save marks the sync state
+                    // dirty on every home mount and defeats the sync
+                    // short-circuit (ADR-045). The check runs BEFORE any
+                    // clone — a by-value `persist_user` would otherwise
+                    // deep-copy the multi-megabyte user for nothing.
+                    if user.jlpt_progress() != &progress_before_recalc {
+                        persist_user(repo.clone(), user);
+                    }
                 },
                 Ok(None) => {
                     if disposed.is_disposed() {
@@ -126,6 +135,10 @@ pub fn HomeContent(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
                     if disposed.is_disposed() {
                         return;
                     }
+                    // Same conditional-persist contract as the init effect:
+                    // only write (and deep-copy the user) when the recalc
+                    // changed the progress (ADR-045).
+                    let progress_before_recalc = user.jlpt_progress().clone();
                     recalculate_user_jlpt_progress(&mut user);
                     let ks = user.knowledge_set();
                     jlpt_progress.set(user.jlpt_progress().clone());
@@ -145,7 +158,9 @@ pub fn HomeContent(#[prop(optional, into)] test_id: Signal<String>) -> impl Into
                     show_sync_success_toast(toasts, i18n);
                     set_last_sync_time(js_sys::Date::now() as u64 / 1000);
 
-                    persist_user(save_repo, user.clone());
+                    if user.jlpt_progress() != &progress_before_recalc {
+                        persist_user(save_repo, user);
+                    }
                 },
                 Ok(None) => {
                     if disposed.is_disposed() {

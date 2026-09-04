@@ -12,7 +12,8 @@ export class KanjiPage extends BasePage {
     readonly backBtn: Locator;
     readonly addBtn: Locator;
     readonly searchInput: Locator;
-    readonly kanjiGrid: Locator;
+    readonly kanjiGrid: Locator;    readonly firstKanjiCard: Locator;
+
     readonly emptyState: Locator;
 
     readonly drawer: Locator;
@@ -39,6 +40,7 @@ export class KanjiPage extends BasePage {
         this.backBtn = page.getByTestId("kanji-back-btn");
         this.addBtn = page.getByTestId("kanji-add-btn");
         this.searchInput = page.getByTestId("kanji-search-input");
+        this.firstKanjiCard = page.getByTestId("kanji-card-item").first();
         this.kanjiGrid = page.getByTestId("kanji-grid");
         this.emptyState = page.getByTestId("kanji-empty-state");
 
@@ -88,6 +90,18 @@ export class KanjiPage extends BasePage {
         const kanjiItem = this.drawer.getByTestId("kanji-drawer-item").first();
         const emptyMsg = this.drawer.getByTestId("kanji-drawer-empty");
         await expect(kanjiItem.or(emptyMsg)).toBeVisible({ timeout: 10_000 });
+    }
+
+    /**
+     * JLPT filter button on the MAIN /kanji page (card_list_view renders
+     * `kanji-filter-jlpt-<level>`). Not to be confused with selectLevel —
+     * that one drives the LevelSelector inside the add-kanji DRAWER and
+     * waits for drawer items, so it hangs forever on the main page.
+     */
+    async selectJlptFilter(level: KanjiLevel): Promise<void> {
+        await this.page
+            .getByTestId(`kanji-filter-jlpt-${level.toLowerCase()}`)
+            .click({ timeout: 30_000 });
     }
 
     async selectKanji(kanji: string): Promise<void> {

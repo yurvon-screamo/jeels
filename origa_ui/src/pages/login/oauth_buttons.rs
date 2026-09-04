@@ -235,6 +235,33 @@ fn open_url_external(url: &str, debug_sink: Option<OAuthDebugSink>) {
     }
 }
 
+/// Chooses the OAuth `redirect_uri` for native (Tauri) builds.
+///
+/// Apple platforms (macOS/iOS) get the private-use URI scheme (RFC 8252):
+/// TrailBase answers the provider callback with a server-side 303 straight
+/// to `origa://auth/callback?code=...`, which `ASWebAuthenticationSession`
+/// intercepts reliably. On macOS the auth session only intercepts
+/// redirect-initiated navigations — a JavaScript hop from an interstitial
+/// page is silently dropped (App Review 2.1(a) rejection of v0.7.3: the
+/// reviewer stalled on `desktop-callback.html` four times in a row).
+///
+/// Other native platforms (Android/Windows/Linux) keep the
+/// `desktop-callback.html` interstitial: default browsers cannot be trusted
+/// to follow custom-scheme redirects on their own (Chromium blocks scheme
+/// navigations without a fresh user gesture), so the page's manual fallback
+/// button is the guaranteed delivery path.
+fn native_oauth_redirect_uri(on_apple: bool) -> String {
+    if on_apple {
+        "origa://auth/callback".to_string()
+    } else {
+        format!(
+            "{}{}",
+            trailbase_url(),
+            "/public/auth/desktop-callback.html"
+        )
+    }
+}
+
 async fn open_oauth_url(
     provider: OAuthProvider,
     debug_sink: Option<OAuthDebugSink>,
@@ -244,20 +271,17 @@ async fn open_oauth_url(
     use crate::repository::TrailBaseClient;
     use crate::repository::trailbase_auth::{generate_pkce_challenge, generate_pkce_verifier};
 
-    // Reuse the canonical backend host (`https://app.origa.uwuwu.net` in
-    // production) instead of `ORIGA_PUBLIC_BASE_URL`, which has been empty
-    // since commit eeee03ad (mobile OIDC redirect refactor) and produced a
-    // relative `redirect_uri` that TrailBase could not redirect to.
+    // Native builds pick the platform-appropriate target (see
+    // `native_oauth_redirect_uri`); the web app returns to same-origin
+    // `/login`. `ORIGA_PUBLIC_BASE_URL` has been empty since commit eeee03ad
+    // (mobile OIDC redirect refactor) and produced a relative `redirect_uri`
+    // that TrailBase could not redirect to.
     let redirect_uri = if tauri::is_tauri() {
-        format!(
-            "{}{}",
-            trailbase_url(),
-            "/public/auth/desktop-callback.html"
-        )
+        native_oauth_redirect_uri(tauri::is_apple())
     } else {
         let window = web_sys::window().expect("window not available");
         let base_url = window.location().origin().unwrap_or_default();
-        format!("{}/login", base_url)
+        format!("{base_url}/login")
     };
 
     let verifier = generate_pkce_verifier();
@@ -268,12 +292,13 @@ async fn open_oauth_url(
         provider.as_str()
     );
 
-    // Persist the PKCE verifier BEFORE opening the external browser.
-    // On Android, the OS may kill the app process while the user is in the
-    // external browser, so localStorage (which is unreliable under process
-    // kills) is insufficient — we must fsync to the native store first.
-    // The await ensures the IPC write + Store::save() completes before we
-    // leave the app.
+    // Persist the PKCE verifier BEFORE leaving the app for the auth page
+    // (external browser or ASWebAuthenticationSession sheet). On Android,
+    // the OS may kill the app process while the user is in the external
+    // browser, so localStorage (which is unreliable under process kills) is
+    // insufficient — we must fsync to the native store first. The await
+    // ensures the IPC write + Store::save() completes before we leave the
+    // app.
     if let Err(e) = set_pkce_verifier_async(&verifier).await {
         report_debug!(debug_sink, "pkce verifier persist failed: {e}");
     }
@@ -284,16 +309,16 @@ async fn open_oauth_url(
 
     // Apple platforms (iOS + macOS), inside the Tauri WebView only:
     // ASWebAuthenticationSession opens the OAuth page in a dedicated auth
-    // context and intercepts the `origa://` callback directly — the callback
-    // URL is returned via the Tauri command's Promise, bypassing the
-    // deep-link listener entirely. App Review rejects default-browser
-    // sign-in on the Mac App Store (Guideline 4), so the packaged app must
-    // never take the opener path. The `is_tauri()` conjunct keeps plain
-    // browser sessions on macOS on the web redirect flow, where no Tauri
-    // invoke exists.
+    // context and intercepts the server-side 303 to `origa://auth/callback`
+    // (see `native_oauth_redirect_uri`) — the callback URL is returned via
+    // the Tauri command's Promise, bypassing the deep-link listener
+    // entirely. App Review rejects default-browser sign-in on the Mac App
+    // Store (Guideline 4), so the packaged app must never take the opener
+    // path. The `is_tauri()` conjunct keeps plain browser sessions on macOS
+    // on the web redirect flow, where no Tauri invoke exists.
     //
     // Other platforms (Android, Windows, Linux, web): opener + deep-link
-    // listener flow.
+    // listener flow via the `desktop-callback.html` interstitial.
     if tauri::is_tauri() && tauri::is_apple() {
         auth_store.oauth_error.set(None);
         auth_store.is_oauth_loading.set(true);
@@ -396,6 +421,40 @@ async fn start_aswebauth(url: &str, callback_scheme: &str) -> Result<String, Str
         .ok()
         .and_then(|v| v.as_string())
         .ok_or("missing 'url' field in start_auth response".to_string())
+}
+
+#[cfg(test)]
+mod redirect_uri_tests {
+    use super::*;
+
+    /// Apple platforms must use the private-use scheme: ASWebAuthenticationSession
+    /// only intercepts redirect-initiated navigations, so the auth session has to
+    /// be pointed straight at `origa://` (App Review 2.1(a), v0.7.3).
+    #[test]
+    fn native_redirect_uri_on_apple_uses_private_use_scheme() {
+        assert_eq!(
+            native_oauth_redirect_uri(true),
+            "origa://auth/callback",
+            "Apple platforms must redirect straight to the custom scheme"
+        );
+    }
+
+    /// Non-Apple native platforms must stay byte-identical to the legacy
+    /// desktop-callback value: released Android/Windows/Linux builds depend on
+    /// this exact URI being accepted server-side, and Chromium needs the
+    /// interstitial page for its fallback button (scheme navigations without a
+    /// fresh user gesture are blocked).
+    #[test]
+    fn native_redirect_uri_off_apple_is_byte_identical_to_legacy() {
+        assert_eq!(
+            native_oauth_redirect_uri(false),
+            format!(
+                "{}{}",
+                trailbase_url(),
+                "/public/auth/desktop-callback.html"
+            )
+        );
+    }
 }
 
 #[component]

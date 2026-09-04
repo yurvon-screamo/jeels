@@ -312,4 +312,15 @@ pub enum Commands {
         #[arg(long)]
         dictionary_dir: Option<PathBuf>,
     },
+
+    /// Build pre-parsed rkyv blobs (furigana, vocabulary) for CDN deploy.
+    ///
+    /// Regenerates blobs whose sources changed (skip when the existing blob
+    /// header is fresh). Blobs are deterministic: identical sources produce
+    /// identical bytes, keeping the CDN manifest hash stable.
+    BuildCdnRkyv {
+        /// CDN root directory (defaults to <repo>/cdn next to the crate).
+        #[arg(long, default_value = None)]
+        cdn_dir: Option<PathBuf>,
+    },
 }

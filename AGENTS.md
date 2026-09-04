@@ -52,6 +52,14 @@ $env:TRUNK_BUILD_CARGO_PROFILE = "wasm-dev"
 cd tauri && cargo tauri android dev
 ```
 
+**JNI-контекст (ADR-044):** с Tauri 2.11 (tao 0.35) никто не публикует
+JavaVM/Application в `ndk-context` — инвариант принадлежит
+`tauri/src/android_context.rs` (публикация в `JNI_OnLoad`, Application через
+`ActivityThread.currentApplication()`). Не читайте `ndk_context` до
+`ensure_initialized()`, не добавляйте второй паблишер (ndk-context паникует
+на re-publish). Smoke-тест запуска: `tauri/scripts/android_smoke.sh
+<apk>` (используется CI-джобой `android-smoke`, маркеры успеха — в logcat).
+
 ### Переменные окружения (compile-time, `build.rs`)
 
 Обязательные: `ORIGA_CDN_BASE_URL`; для сборки `origa_landing` (clippy/test) — также `ORIGA_APP_BASE_URL` (или пара `ORIGA_BASE_URI` + `ORIGA_APP_URI_PREFIX`), без неё `origa_landing/build.rs` паникует.
@@ -90,7 +98,7 @@ cargo fmt --check && cargo fmt
 ## Ключевые зависимости
 
 `rs-fsrs` (FSRS), `ort` + NDLOCR-Lite (OCR), `ort` + `rustfft` (Whisper STT),
-`lindera 5` + SudachiDict (токенизация; сборка: `scripts/build_sudachidict.py`), `serde`/`bincode`/`rkyv` (сериализация),
+`lindera 6` + SudachiDict (токенизация; сборка: `scripts/build_sudachidict.py`), `serde`/`bincode`/`rkyv` (сериализация),
 `rusqlite` (БД), Leptos 0.8 + `leptos_router`/`leptos-use`/`leptos_i18n` (frontend),
 `sha2`/`hmac` (TrailBase auth), `tracing`/`tracing-wasm` (логирование).
 Плагины: opener, tts, deep-link (`origa://`), single-instance, updater, process.
@@ -113,6 +121,13 @@ immutable уместен только для truly-static файлов. `grammar
 python scripts/deploy_cdn.py            # генерация манифеста + инкрементальный деплой (по политике)
 python scripts/deploy_cdn.py --dry-run  # показать что будет залито + Cache-Control каждого файла
 ```
+
+**Pre-parsed rkyv-блобы** (`dictionaries/JmdictFurigana.rkyv`, `dictionary/vocabulary.rkyv`): клиенты грузят
+готовые rkyv-блобы вместо парсинга текста/JSON на каждом старте. `deploy_cdn.py` Step 0.5 автоматически
+перегенерирует их (`cargo run -p utils -- build-cdn-rkyv`, skip при свежем header) и fail-loud ассертит
+freshness против исходников. Порядок при релизе: **деплой CDN до мержа/релиза приложения** (e2e CI качает
+блобы с прода через `end2end/cdn-manifest.txt`; fallback-цепочки толерантны к окну несогласованности в обе
+стороны). Ручная правка словарей — как раньше в `cdn/` исходниках; блобы перегенерятся при следующем деплое.
 
 Манифест (`manifest.json`) содержит SHA256 хеши версионных файлов и позволяет клиенту обнаруживать обновления. Деплоится с `Cache-Control: no-cache`.
 
