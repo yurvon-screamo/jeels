@@ -1,0 +1,25 @@
+; Aeza zone dump — uwuwu.net (domain ID 2776)
+; Source: Aeza API v2 GET /api/v2/domains/2776/records, full re-dump 2026-09-03 ~15:37 UTC
+; (13 records; supersedes the ~15:09 partial dump — the earlier file was amended by hand
+;  after the origa A→CNAME swap at 15:29, this one is a clean point-in-time snapshot).
+; Context: NS delegation returned Cloudflare → Aeza (a/b.aeza-dns.net) at 2026-09-03 15:03:35 UTC
+; (RDAP last-changed) after RU TSPU blocked Cloudflare NS reachability since 2026-08-26.
+; Mail records (MX/SPF/apple-domain, ids 58710-58713) restored from DoH cache of the former
+; CF zone — they existed ONLY there (added after 2026-06-28), Aeza DB never had them.
+; origa: A-record 69.46.46.46 (id 52694, ADR-007 workaround) deleted 15:29, replaced by
+; native CNAME (id 58715) per user request — AAAA SERVFAIL regression accepted, see ADR-046.
+; NOTE: cdn.origa CNAME is legacy from ADR-037 (orphaned user-Tigris bucket, awaiting cleanup).
+
+id=10453 TXT    _railway-verify.origa        "railway-verify=84343282d94e247b3f50fd414f78ce3d3a6fe1da4a8d4efb886543539575de5a" ttl=300
+id=10455 TXT    _railway-verify.s3.origa     "railway-verify=6fd8268110336b172171e5bead945782f9e9eaac165b88f1091d730d8053d4cb" ttl=300
+id=10456 CNAME  app.origa                    9fmm6y4e.up.railway.app  ttl=300
+id=10457 TXT    _railway-verify.app.origa    "railway-verify=2e3aa92460f8b63574ab28b0cb9302b3c6e070229bee6bc9024a8d4efb886543539575de5a" ttl=300
+id=10458 CNAME  pass                         vcce37wa.up.railway.app  ttl=300
+id=10459 TXT    _railway-verify.pass         "railway-verify=0568c9a326fbea6ee4c477b569e9850dbaed4c68edf8fe92eb2792f288914140" ttl=300
+id=56282 CNAME  s3.origa                     sltxm1ip.up.railway.app  ttl=300
+id=56590 CNAME  cdn.origa                    origa-cdn.t3.tigrisbucket.io ttl=300   ; legacy ADR-037, orphaned
+id=58710 MX     @                            10 mx01.mail.icloud.com  ttl=3600       ; restored 2026-09-03
+id=58711 MX     @                            10 mx02.mail.icloud.com  ttl=3600       ; restored 2026-09-03
+id=58712 TXT    @                            "v=spf1 include:icloud.com ~all" ttl=3600    ; restored 2026-09-03
+id=58713 TXT    @                            "apple-domain=2vGZgoNZvCpgTZXh" ttl=3600    ; restored 2026-09-03
+id=58715 CNAME  origa                        c2qj368z.up.railway.app  ttl=300        ; swap A→CNAME 2026-09-03 15:29 (ADR-046 step 5)
