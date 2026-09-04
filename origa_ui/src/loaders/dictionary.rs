@@ -86,15 +86,36 @@ pub async fn load_dictionary() -> Result<(), OrigaError> {
     Ok(())
 }
 
-/// Fetch deflated files from the CDN one at a time (words first), inflate
-/// them and persist the raw bytes to the v2 cache right away — no buffer
-/// clones: the single-file cache API borrows the bytes and only the Cache
-/// API's own JS-side copy coexists with the raw Vec. The retired v1 cache
-/// is deleted only after the full v2 set is stored, so an offline user
-/// never loses a working dictionary to a half-finished migration.
-async fn fetch_inflate_and_cache_raw() -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
-    let provider = cdn_provider();
+/// Persistence sink for the fetch→inflate→persist pipeline. Production
+/// writes each raw file into the Cache API; tests inject failures to pin
+/// the best-effort contract (a cache failure must never kill the load).
+trait RawFileSink {
+    async fn persist(&self, path: &str, raw: &[u8]) -> Result<(), OrigaError>;
+}
 
+/// Production sink: the v2 raw Cache API entry for one dictionary file.
+struct CacheApiSink;
+
+impl RawFileSink for CacheApiSink {
+    async fn persist(&self, path: &str, raw: &[u8]) -> Result<(), OrigaError> {
+        save_dictionary_file_to_cache(path, raw).await
+    }
+}
+
+/// Fetch deflated files from the CDN one at a time (words first), inflate
+/// them and hand each raw file to the sink right away — no buffer clones:
+/// the single-file cache API borrows the bytes and only the Cache API's
+/// own JS-side copy coexists with the raw Vec. Cache persistence is
+/// best-effort: a sink failure is logged and the load continues, because
+/// the v2 raw cache (~344 MB, single 223 MB entries) can exceed the Cache
+/// API quota on quota-tight WebViews (iOS/macOS WKWebView) — a refused
+/// cache write must never take the tokenizer down (v0.7.5 semantics; the
+/// fatal `?` silently killed furigana and phrase tokenization in
+/// v0.7.6-rc1).
+async fn fetch_inflate_and_persist_via<P: CdnProvider, S: RawFileSink>(
+    provider: &P,
+    sink: &S,
+) -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
     let mut raw_files: Vec<(String, Vec<u8>)> = Vec::with_capacity(PIPELINE_ORDER.len());
     for file in PIPELINE_ORDER {
         let path = dict_path(file);
@@ -105,13 +126,25 @@ async fn fetch_inflate_and_cache_raw() -> Result<Vec<(String, Vec<u8>)>, OrigaEr
             compressed
         };
         yield_to_browser().await;
-        save_dictionary_file_to_cache(&path, &raw).await?;
-        tracing::debug!("📖 Cached raw {path} ({} bytes)", raw.len());
+        if let Err(e) = sink.persist(&path, &raw).await {
+            tracing::warn!("Failed to cache raw dictionary file {path}: {e:?}");
+        } else {
+            tracing::debug!("📖 Cached raw {path} ({} bytes)", raw.len());
+        }
         raw_files.push((path, raw));
     }
 
-    cleanup_legacy_dictionary_cache().await;
     Ok(raw_files)
+}
+
+async fn fetch_inflate_and_cache_raw() -> Result<Vec<(String, Vec<u8>)>, OrigaError> {
+    let files = fetch_inflate_and_persist_via(cdn_provider(), &CacheApiSink).await?;
+    // The retired v1 cache is deleted only after the full v2 set is stored,
+    // so an offline user never loses a working dictionary to a half-finished
+    // migration. Wasm-only side effect — kept out of the hermetic pipeline
+    // core above (native tests exercise the core without a window).
+    cleanup_legacy_dictionary_cache().await;
+    Ok(files)
 }
 
 /// Group raw file bytes under their bare names (dropping the versioned
@@ -214,5 +247,101 @@ mod tests {
         let raw = inflate(&compressed).unwrap();
 
         assert_eq!(raw, b"payload for the tokenizer");
+    }
+
+    fn deflate(payload: &[u8]) -> Vec<u8> {
+        use std::io::Write;
+        let mut encoder =
+            flate2::write::DeflateEncoder::new(Vec::new(), flate2::Compression::default());
+        encoder.write_all(payload).unwrap();
+        encoder.finish().unwrap()
+    }
+
+    /// CdnProvider mock over the external CDN boundary: serves a tiny valid
+    /// payload for every pipeline path (deflated for the eight lindera
+    /// files, raw JSON for metadata.json) and fails for anything else.
+    struct TinyDictCdn;
+
+    impl CdnProvider for TinyDictCdn {
+        fn fetch_text(&self, path: &str) -> impl Future<Output = Result<String, OrigaError>> {
+            std::future::ready(Err(OrigaError::NetworkError {
+                url: path.to_string(),
+                reason: "text fetch is not stubbed in pipeline tests".to_string(),
+            }))
+        }
+
+        fn fetch_bytes(&self, path: &str) -> impl Future<Output = Result<Vec<u8>, OrigaError>> {
+            let result = match PIPELINE_ORDER.iter().find(|f| dict_path(f) == path) {
+                Some(file) if !is_inflatable(file) => Ok(br#"{"name":"sudachidict"}"#.to_vec()),
+                Some(_) => Ok(deflate(b"tiny-raw-payload")),
+                None => Err(OrigaError::NetworkError {
+                    url: path.to_string(),
+                    reason: "not stubbed".to_string(),
+                }),
+            };
+            std::future::ready(result)
+        }
+    }
+
+    /// Sink whose every write is rejected, mirroring an exhausted Cache API
+    /// quota (`QuotaExceededError` on put — the v0.7.6-rc1 regression
+    /// trigger on quota-tight WebViews).
+    struct QuotaExhaustedSink;
+
+    impl RawFileSink for QuotaExhaustedSink {
+        async fn persist(&self, path: &str, _raw: &[u8]) -> Result<(), OrigaError> {
+            Err(OrigaError::RepositoryError {
+                reason: format!("Cache put failed for {path}: simulated QuotaExceededError"),
+            })
+        }
+    }
+
+    struct RecordingSink {
+        persisted: std::cell::RefCell<Vec<String>>,
+    }
+
+    impl RawFileSink for RecordingSink {
+        async fn persist(&self, path: &str, _raw: &[u8]) -> Result<(), OrigaError> {
+            self.persisted.borrow_mut().push(path.to_string());
+            Ok(())
+        }
+    }
+
+    #[tokio::test]
+    async fn quota_exhausted_cache_write_does_not_kill_the_dictionary_load() {
+        // Arrange
+        let provider = TinyDictCdn;
+        let sink = QuotaExhaustedSink;
+
+        // Act
+        let files = fetch_inflate_and_persist_via(&provider, &sink).await;
+
+        // Assert
+        let files = files
+            .expect("a cache-write failure must not kill the dictionary load (v0.7.5 semantics)");
+        assert_eq!(files.len(), PIPELINE_ORDER.len());
+        for (path, raw) in &files {
+            let bare_name = path.rsplit('/').next().unwrap_or(path);
+            if is_inflatable(bare_name) {
+                assert_eq!(raw, b"tiny-raw-payload", "{path} must be inflated");
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn successful_pipeline_persists_every_file() {
+        // Arrange
+        let sink = RecordingSink {
+            persisted: std::cell::RefCell::new(Vec::new()),
+        };
+
+        // Act
+        let files = fetch_inflate_and_persist_via(&TinyDictCdn, &sink)
+            .await
+            .expect("the tiny pipeline must load");
+
+        // Assert: best-effort must not degrade into never-persisting.
+        assert_eq!(files.len(), PIPELINE_ORDER.len());
+        assert_eq!(sink.persisted.borrow().len(), PIPELINE_ORDER.len());
     }
 }
