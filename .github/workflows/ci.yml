@@ -577,7 +577,9 @@ jobs:
               working-directory: tauri
               # Explicit --apk: pin the output flavor instead of relying on
               # the CLI default (which may build apk+aab — double the time).
-              run: cargo tauri android build --debug --target x86_64-linux-android --apk
+              # --target takes the short ABI name for android (not the rust
+              # triple — `x86_64-linux-android` is rejected by the CLI).
+              run: cargo tauri android build --debug --target x86_64 --apk
 
             - name: Verify KVM availability
               run: |
