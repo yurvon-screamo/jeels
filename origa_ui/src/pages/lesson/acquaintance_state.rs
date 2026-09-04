@@ -329,6 +329,7 @@ mod advance_presentation_tests {
         state.stage = AcquaintanceStage::Completed;
         state.slide_index = 1;
         state.hand_finishing = true;
+        state.skipped_ids.insert(Ulid::new());
 
         // Act: reload пишет новую руку в тот же state
         let fresh = state_with_hand(1).hand.take().expect("hand built");
