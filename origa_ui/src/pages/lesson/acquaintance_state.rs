@@ -30,6 +30,12 @@ pub struct AcquaintanceState {
     pub hand: Option<AcquaintanceHand>,
     pub slide_index: usize,
     pub skipped_ids: HashSet<Ulid>,
+    /// Рука закрывается: персистенция идёт, экран завершения ещё не
+    /// смонтирован (stage станет Completed после коммита записи — защита
+    /// бага #462). UI в этом окне замораживает отвеченную карту и прячет
+    /// кнопки: без флага после финального ответа пере-показывался вопрос
+    /// «лишней картой», которую затем резко перекрывал экран завершения.
+    pub hand_finishing: bool,
 }
 
 /// Автозвук слова (механизм урока, lesson_card.rs): звучит, когда TTS
@@ -170,6 +176,11 @@ impl AcquaintanceContext {
     /// когда тест/пользователь перезагружал страницу сразу после
     /// завершения руки — fire-and-forget `spawn_local` не успевал).
     pub fn complete_hand(&self) {
+        // Флаг финиша — синхронно, до персистенции: UI сразу замораживает
+        // отвеченную карту и прячет кнопки (см. hand_finishing), не дожидаясь
+        // коммита записи и монтирования экрана завершения.
+        self.state.update(|state| state.hand_finishing = true);
+
         let ids = self.state.with(|state| {
             state
                 .hand
@@ -280,6 +291,7 @@ mod advance_presentation_tests {
             hand: Some(hand),
             slide_index: 0,
             skipped_ids: HashSet::new(),
+            hand_finishing: false,
         }
     }
 
@@ -309,6 +321,7 @@ mod advance_presentation_tests {
             hand: Some(hand),
             slide_index: 0,
             skipped_ids: HashSet::from([b]),
+            hand_finishing: false,
         };
 
         // Act / Assert: первый advance перепрыгивает b и показывает c

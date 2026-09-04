@@ -175,37 +175,6 @@ pub fn speak_word(word: &str, rate: f32) {
     schedule_word_audio_play::<fn()>(word, rate, None);
 }
 
-/// Автозвук показа: звучит НЕМЕДЛЕННО — закэшированное CDN-аудио или
-/// TTS; сетевой prefetch не блокирует старт (первый показ слова раньше
-/// ждал round-trip CDN — заметная задержка после отрисовки карточки).
-/// Параллельно кэш греется фоном, чтобы кнопка повтора уже играла
-/// CDN-аудио.
-pub fn speak_word_immediate(word: &str, rate: f32) {
-    if word.is_empty() {
-        return;
-    }
-    let Some(path) = lookup_audio_path(word) else {
-        speak_word(word, rate);
-        return;
-    };
-    if crate::repository::cdn_provider::get_cached_blob_url(&path).is_some() {
-        // Кэш горячий: CDN-аудио стартует мгновенно.
-        speak_word(word, rate);
-        return;
-    }
-    // Холодный кэш: TTS сейчас, prefetch — фоном для следующих разов.
-    let path_owned = path.to_string();
-    let word_owned = word.to_string();
-    spawn_local(async move {
-        if let Err(e) = crate::repository::cdn_provider::prefetch_blob_url(&path_owned).await {
-            tracing::debug!(word = %word_owned, error = ?e, "background audio warmup failed");
-        }
-    });
-    stop_current_audio();
-    let reading = extract_japanese_text(&get_reading_from_text(word));
-    let _ = speak_tts_text(&reading, rate);
-}
-
 pub fn speak_word_with_callback<F>(word: &str, rate: f32, on_end: F)
 where
     F: FnMut() + 'static,
