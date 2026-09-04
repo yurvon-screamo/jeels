@@ -397,7 +397,7 @@ mod tests {
 
     mod generate_grammar_practice_questions {
         use super::*;
-        use crate::dictionary::grammar::{FormatAction, GrammarRule, GrammarRuleContent};
+        use crate::dictionary::grammar::{FormatAction, GrammarRule, GrammarRuleContent, Nuances};
         use crate::domain::knowledge::VocabularyCard;
         use crate::domain::memory::MemoryState;
         use crate::domain::value_objects::{NativeLanguage, Question};
@@ -417,9 +417,9 @@ mod tests {
                         "Explanation".to_string(),
                         "How to form".to_string(),
                         "Examples".to_string(),
-                        "Nuances".to_string(),
+                        Nuances::default(),
                         "Pro tip".to_string(),
-                        None,
+                        Vec::new(),
                     ),
                 )]),
                 Some(HashMap::from([(
@@ -459,9 +459,9 @@ mod tests {
                         "Explanation".to_string(),
                         "How to form".to_string(),
                         "Examples".to_string(),
-                        "Nuances".to_string(),
+                        Nuances::default(),
                         "Pro tip".to_string(),
-                        None,
+                        Vec::new(),
                     ),
                 )]),
                 None,

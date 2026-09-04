@@ -32,6 +32,7 @@ fonts/ibm-plex-mono-400-italic-517950ef.woff2
 fonts/ibm-plex-mono-500-da5700a8.woff2
 fonts/noto-sans-jp-400-a1fd00ef.woff2
 grammar/grammar.json
+grammar/grammar_v2.json
 manifest.json
 ndlocr/deim.onnx
 ndlocr/parseq-100.onnx

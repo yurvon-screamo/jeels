@@ -10,7 +10,7 @@
 
 Spaced repetition algorithms (FSRS), built-in OCR, text and audio recognition â€” AI processing runs locally on your device. An internet connection is needed only for the first sign-in and the initial content download.
 
-![Origa main dashboard](.media/en.hero.png)
+![Origa main dashboard](origa_landing/public/images/en.hero.png)
 
 ---
 
@@ -24,7 +24,7 @@ Spaced repetition algorithms (FSRS), built-in OCR, text and audio recognition â€
 * **Learn in your language** â€” interface and dictionaries in Russian and English (more languages planned).
 * **JLPT analytics** â€” track your current level and forecast your progress.
 
-![Origa overview](.media/en.all_in_one.png)
+![Origa overview](origa_landing/public/images/en.all_in_one.png)
 
 ---
 
@@ -59,7 +59,7 @@ Spaced repetition algorithms (FSRS), built-in OCR, text and audio recognition â€
 * Listening and speech comprehension practice.
 * Immersion in conversational and everyday Japanese.
 
-![Origa learning interface](.media/en.learn.png)
+![Origa learning interface](origa_landing/public/images/en.learn.png)
 
 ---
 

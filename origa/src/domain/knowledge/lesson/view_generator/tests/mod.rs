@@ -57,12 +57,7 @@ pub(crate) fn create_knowledge_set_with_vocab(words: &[&str]) -> KnowledgeSet {
 }
 
 pub(super) fn answer_text(card: &Card, lang: NativeLanguage) -> String {
-    use crate::domain::CardAnswer;
-    match card
-        .answer(&lang)
+    card.answer(&lang)
         .expect("translation must exist for fixture")
-    {
-        CardAnswer::Vocabulary { translations, .. } => translations.join(", "),
-        CardAnswer::Text(s) => s,
-    }
+        .text_projection()
 }

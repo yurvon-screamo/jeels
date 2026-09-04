@@ -6,6 +6,8 @@ use std::collections::HashSet;
 use ulid::Ulid;
 
 use super::lesson_state::LessonContext;
+use crate::pages::grammar::grammar_warnings::GrammarWarnings;
+use crate::pages::grammar::nuances_section::NuancesSection;
 
 #[component]
 pub fn GrammarDetailsExpand(
@@ -67,34 +69,48 @@ pub fn GrammarDetailsExpand(
                         Some(r) => {
                             let lang = native_lang.get();
                             let content = r.content(&lang);
-                            let kanji = known_kanji_stored.get_value();
 
                             view! {
                                 <div class="mt-3 space-y-3 text-left">
-                                    <GrammarSection
-                                        title=explanation_title.get()
-                                        content=content.explanation().to_string()
-                                        known_kanji=kanji.clone()
-                                    />
+                                    <div class="space-y-2">
+                                        <GrammarSection
+                                            title=explanation_title.get()
+                                            content=content.explanation().to_string()
+                                            known_kanji=known_kanji_stored.get_value()
+                                        />
+                                        <Show when=move || !content.warnings().is_empty()>
+                                            <GrammarWarnings
+                                                warnings=content.warnings().to_vec()
+                                                known_kanji=known_kanji_stored.get_value()
+                                                test_id=Signal::derive(|| "grammar-expand-warnings".to_string())
+                                            />
+                                        </Show>
+                                    </div>
                                     <GrammarSection
                                         title=how_to_form_title.get()
                                         content=content.how_to_form().to_string()
-                                        known_kanji=kanji.clone()
+                                        known_kanji=known_kanji_stored.get_value()
                                     />
                                     <GrammarSection
                                         title=examples_title.get()
                                         content=content.examples().to_string()
-                                        known_kanji=kanji.clone()
+                                        known_kanji=known_kanji_stored.get_value()
                                     />
-                                    <GrammarSection
-                                        title=nuances_title.get()
-                                        content=content.nuances().to_string()
-                                        known_kanji=kanji.clone()
-                                    />
+                                    <div>
+                                        <div class="font-mono text-xs text-[var(--fg-muted)] mb-2">
+                                            {nuances_title.get()}
+                                        </div>
+                                        <NuancesSection
+                                            common_mistakes=content.nuances().common_mistakes().to_vec()
+                                            notes=content.nuances().notes().to_vec()
+                                            known_kanji=known_kanji_stored.get_value()
+                                            test_id=Signal::derive(|| "grammar-expand-nuances".to_string())
+                                        />
+                                    </div>
                                     <GrammarSection
                                         title=pro_tip_title.get()
                                         content=content.pro_tip().to_string()
-                                        known_kanji=kanji
+                                        known_kanji=known_kanji_stored.get_value()
                                     />
                                 </div>
                             }

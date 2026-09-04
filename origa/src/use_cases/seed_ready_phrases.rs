@@ -346,10 +346,10 @@ mod tests {
                 .expect("Failed to get parent directory")
                 .join("cdn")
                 .join("grammar")
-                .join("grammar.json");
+                .join("grammar_v2.json");
 
             let grammar_json =
-                std::fs::read_to_string(&grammar_path).expect("Failed to read grammar.json");
+                std::fs::read_to_string(&grammar_path).expect("Failed to read grammar_v2.json");
 
             let grammar_data = GrammarData { grammar_json };
             init_grammar(grammar_data).expect("Failed to init grammar rules");

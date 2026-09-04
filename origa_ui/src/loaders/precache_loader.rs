@@ -50,7 +50,7 @@ pub fn get_base_bundle_resources() -> Vec<String> {
         "dictionary/radicals.json".to_string(),
     ]);
 
-    resources.push("grammar/grammar.json".to_string());
+    resources.push("grammar/grammar_v2.json".to_string());
     resources.push("phrases/phrase_index.json".to_string());
 
     // Phrase data bundles (4 files replace 198 individual chunks).
@@ -248,7 +248,7 @@ mod tests {
         assert!(resources.contains(&"dictionaries/JmdictFurigana.txt".to_string()));
         assert!(resources.contains(&"dictionary/kanji.json".to_string()));
         assert!(resources.contains(&"dictionary/radicals.json".to_string()));
-        assert!(resources.contains(&"grammar/grammar.json".to_string()));
+        assert!(resources.contains(&"grammar/grammar_v2.json".to_string()));
         assert!(resources.contains(&"phrases/phrase_index.json".to_string()));
         assert!(resources.contains(&"pitch/index.json".to_string()));
         assert!(resources.contains(&"well_known_set/jlpt_n5.json".to_string()));

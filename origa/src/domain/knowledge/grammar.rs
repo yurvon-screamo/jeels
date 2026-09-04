@@ -1,4 +1,4 @@
-use crate::dictionary::grammar::get_rule_by_id;
+use crate::dictionary::grammar::{RelatedPattern, get_rule_by_id};
 use crate::domain::OrigaError;
 use crate::domain::{
     tokenizer::PartOfSpeech,
@@ -67,16 +67,29 @@ impl GrammarRuleCard {
     }
 
     pub fn nuances(&self, lang: &NativeLanguage) -> Result<CardAnswer, OrigaError> {
-        get_content!(self, lang, nuances, CardAnswer::text)
+        let rule = get_rule_by_id(&self.rule_id).ok_or(OrigaError::GrammarRuleNotFound {
+            rule_id: self.rule_id,
+        })?;
+
+        let nuances = rule.content(lang).nuances();
+        if nuances.is_empty() {
+            return Err(OrigaError::GrammarContentNotFound {
+                rule_id: self.rule_id,
+                lang: *lang,
+            });
+        }
+
+        CardAnswer::grammar_nuances(nuances.common_mistakes().to_vec(), nuances.notes().to_vec())
     }
 
     pub fn pro_tip(&self, lang: &NativeLanguage) -> Result<CardAnswer, OrigaError> {
         get_content!(self, lang, pro_tip, CardAnswer::text)
     }
 
-    pub fn related_patterns(&self, lang: &NativeLanguage) -> Option<&str> {
-        let rule = get_rule_by_id(&self.rule_id)?;
-        rule.content(lang).related_patterns()
+    pub fn related_patterns(&self, lang: &NativeLanguage) -> &[RelatedPattern] {
+        get_rule_by_id(&self.rule_id)
+            .map(|rule| rule.content(lang).related_patterns())
+            .unwrap_or(&[])
     }
 
     pub fn apply_to(&self) -> Vec<PartOfSpeech> {
@@ -117,8 +130,8 @@ mod tests {
 
     static INIT: Once = Once::new();
 
-    // Single source of truth for the test grammar.json location:
-    // <workspace_root>/cdn/grammar/grammar.json
+    // Single source of truth for the test grammar corpus location:
+    // <workspace_root>/cdn/grammar/grammar_v2.json (schema v2)
     fn grammar_json_path() -> Option<std::path::PathBuf> {
         let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").ok()?;
         Some(
@@ -126,7 +139,7 @@ mod tests {
                 .parent()?
                 .join("cdn")
                 .join("grammar")
-                .join("grammar.json"),
+                .join("grammar_v2.json"),
         )
     }
 

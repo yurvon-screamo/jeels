@@ -7,8 +7,7 @@ use origa::domain::{Card, CardAnswer, NativeLanguage};
 /// text for Text, or an empty string on error.
 pub fn format_answer_text(card: &Card, lang: &NativeLanguage) -> String {
     match card.answer(lang) {
-        Ok(CardAnswer::Vocabulary { translations, .. }) => translations.join(", "),
-        Ok(CardAnswer::Text(s)) => s,
+        Ok(answer) => answer.text_projection(),
         Err(_) => String::new(),
     }
 }
@@ -23,7 +22,7 @@ pub fn format_answer_parts(card: &Card, lang: &NativeLanguage) -> (Vec<String>, 
             translations,
             description,
         }) => (translations, description),
-        Ok(CardAnswer::Text(s)) => (vec![s], None),
+        Ok(other) => (vec![other.text_projection()], None),
         Err(_) => (vec![], None),
     }
 }

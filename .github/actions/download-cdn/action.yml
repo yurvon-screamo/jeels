@@ -41,7 +41,7 @@ runs:
 
         STALE=0
         # Check SHA256 of critical versioned files against fresh manifest
-        for f in "grammar/grammar.json"; do
+        for f in "grammar/grammar.json" "grammar/grammar_v2.json"; do
           if [ ! -s "cdn/$f" ]; then
             echo "MISSING: cdn/$f"
             STALE=$((STALE + 1))
@@ -119,7 +119,7 @@ runs:
 
         # Verify SHA256 of versioned files against manifest.json
         if [ -s "cdn/manifest.json" ]; then
-          for f in "grammar/grammar.json"; do
+          for f in "grammar/grammar.json" "grammar/grammar_v2.json"; do
             if [ ! -s "cdn/$f" ]; then
               echo "ERROR: cdn/$f is missing or empty!"
               ERRORS=$((ERRORS + 1))

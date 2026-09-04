@@ -78,12 +78,7 @@ fn apply_grammar_mutated_uses_english_description_for_english_locale() {
 }
 
 fn short_description_text(card: &GrammarRuleCard, lang: NativeLanguage) -> String {
-    use crate::domain::CardAnswer;
-    match card
-        .short_description(&lang)
+    card.short_description(&lang)
         .expect("grammar rule must have a short description for fixture")
-    {
-        CardAnswer::Text(s) => s,
-        CardAnswer::Vocabulary { translations, .. } => translations.join(", "),
-    }
+        .text_projection()
 }

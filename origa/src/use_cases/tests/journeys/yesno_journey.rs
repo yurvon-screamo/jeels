@@ -11,10 +11,7 @@ use crate::use_cases::tests::fixtures::InMemoryUserRepository;
 use crate::use_cases::{RateCardUseCase, SelectCardsToLessonUseCase};
 
 fn answer_display_text(answer: &CardAnswer) -> String {
-    match answer {
-        CardAnswer::Vocabulary { translations, .. } => translations.join(", "),
-        CardAnswer::Text(s) => s.clone(),
-    }
+    answer.text_projection()
 }
 
 fn create_user_with_real_vocab_cards(words: &[&str]) -> User {

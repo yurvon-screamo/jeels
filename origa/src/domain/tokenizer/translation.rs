@@ -755,7 +755,7 @@ mod integration_tests {
             .unwrap()
             .join("cdn")
             .join("grammar")
-            .join("grammar.json");
+            .join("grammar_v2.json");
 
         let grammar_json = std::fs::read_to_string(grammar_path).unwrap();
         // Same OnceLock race tolerance as ensure_vocabulary_dictionary.

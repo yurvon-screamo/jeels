@@ -17,7 +17,6 @@ pub(crate) fn build_acquaintance_slides(
 
     let answer_text = |answer: origa::domain::CardAnswer| -> String {
         match answer {
-            origa::domain::CardAnswer::Text(text) => text,
             origa::domain::CardAnswer::Vocabulary {
                 mut translations,
                 description,
@@ -27,6 +26,9 @@ pub(crate) fn build_acquaintance_slides(
                 }
                 translations.join(", ")
             },
+            // Text and structured GrammarNuances share the compact
+            // text projection on the acquaintance slides.
+            other => other.text_projection(),
         }
     };
 

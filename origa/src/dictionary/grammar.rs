@@ -85,6 +85,132 @@ pub struct GrammarRule {
     keywords: Vec<Vec<String>>,
 }
 
+/// A single wrong-usage / correct-usage pair from the structured
+/// `nuances` section (schema v2).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CommonMistake {
+    wrong: String,
+    correct: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    note: Option<String>,
+}
+
+impl CommonMistake {
+    pub fn wrong(&self) -> &str {
+        &self.wrong
+    }
+
+    pub fn correct(&self) -> &str {
+        &self.correct
+    }
+
+    pub fn note(&self) -> Option<&str> {
+        self.note.as_deref()
+    }
+
+    #[cfg(test)]
+    pub fn for_test(wrong: &str, correct: &str) -> Self {
+        Self {
+            wrong: wrong.to_string(),
+            correct: correct.to_string(),
+            note: None,
+        }
+    }
+}
+
+/// Semantic class of a free-form nuance note (schema v2).
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum NuanceTag {
+    Register,
+    Variation,
+    Collocation,
+    Formality,
+    Other,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NuanceNote {
+    tag: NuanceTag,
+    text: String,
+}
+
+impl NuanceNote {
+    pub fn tag(&self) -> NuanceTag {
+        self.tag
+    }
+
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    #[cfg(test)]
+    pub fn for_test(tag: NuanceTag, text: &str) -> Self {
+        Self {
+            tag,
+            text: text.to_string(),
+        }
+    }
+}
+
+/// Structured replacement for the legacy raw-markdown `nuances` blob.
+/// Emoji markers are forbidden in the data — presentation is the UI's job.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Nuances {
+    #[serde(default)]
+    common_mistakes: Vec<CommonMistake>,
+    #[serde(default)]
+    notes: Vec<NuanceNote>,
+}
+
+impl Nuances {
+    pub fn common_mistakes(&self) -> &[CommonMistake] {
+        &self.common_mistakes
+    }
+
+    pub fn notes(&self) -> &[NuanceNote] {
+        &self.notes
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.common_mistakes.is_empty() && self.notes.is_empty()
+    }
+}
+
+/// How a related grammar pattern relates to the current rule (schema v2).
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum RelatedPatternRelation {
+    Pair,
+    Contrast,
+    Derived,
+}
+
+/// Reference to another grammar rule, stored by stable `rule_id` so the
+/// link survives title edits (schema v2).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RelatedPattern {
+    rule_id: Ulid,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    relation: Option<RelatedPatternRelation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    note: Option<String>,
+}
+
+impl RelatedPattern {
+    pub fn rule_id(&self) -> &Ulid {
+        &self.rule_id
+    }
+
+    pub fn relation(&self) -> Option<RelatedPatternRelation> {
+        self.relation
+    }
+
+    pub fn note(&self) -> Option<&str> {
+        self.note.as_deref()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GrammarRuleContent {
     title: String,
@@ -92,10 +218,12 @@ pub struct GrammarRuleContent {
     explanation: String,
     how_to_form: String,
     examples: String,
-    nuances: String,
+    nuances: Nuances,
     pro_tip: String,
-    #[serde(default)]
-    related_patterns: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    warnings: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    related_patterns: Vec<RelatedPattern>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -386,9 +514,9 @@ impl GrammarRuleContent {
         explanation: String,
         how_to_form: String,
         examples: String,
-        nuances: String,
+        nuances: Nuances,
         pro_tip: String,
-        related_patterns: Option<String>,
+        related_patterns: Vec<RelatedPattern>,
     ) -> Self {
         Self {
             title,
@@ -398,6 +526,7 @@ impl GrammarRuleContent {
             examples,
             nuances,
             pro_tip,
+            warnings: Vec::new(),
             related_patterns,
         }
     }
@@ -414,6 +543,10 @@ impl GrammarRuleContent {
         &self.explanation
     }
 
+    pub fn warnings(&self) -> &[String] {
+        &self.warnings
+    }
+
     pub fn how_to_form(&self) -> &str {
         &self.how_to_form
     }
@@ -422,7 +555,7 @@ impl GrammarRuleContent {
         &self.examples
     }
 
-    pub fn nuances(&self) -> &str {
+    pub fn nuances(&self) -> &Nuances {
         &self.nuances
     }
 
@@ -430,8 +563,8 @@ impl GrammarRuleContent {
         &self.pro_tip
     }
 
-    pub fn related_patterns(&self) -> Option<&str> {
-        self.related_patterns.as_deref()
+    pub fn related_patterns(&self) -> &[RelatedPattern] {
+        &self.related_patterns
     }
 }
 
@@ -442,6 +575,107 @@ mod tests {
     #[test]
     fn grammar_rules_should_not_be_loaded_before_init() {
         assert!(!is_grammar_loaded());
+    }
+}
+
+#[cfg(test)]
+mod tests_nuances_v2 {
+    use super::*;
+
+    #[test]
+    fn nuances_deser_reads_schema_v2_object() {
+        // Arrange
+        let json = r#"{
+            "common_mistakes": [
+                {"wrong": "Using を", "correct": "Use が", "note": "subject marker"}
+            ],
+            "notes": [
+                {"tag": "variation", "text": "In casual speech です becomes だ"}
+            ]
+        }"#;
+
+        // Act
+        let nuances: Nuances = serde_json::from_str(json).expect("valid v2 nuances");
+
+        // Assert
+        assert_eq!(nuances.common_mistakes().len(), 1);
+        assert_eq!(nuances.common_mistakes()[0].wrong(), "Using を");
+        assert_eq!(nuances.common_mistakes()[0].note(), Some("subject marker"));
+        assert_eq!(nuances.notes().len(), 1);
+        assert_eq!(nuances.notes()[0].tag(), NuanceTag::Variation);
+        assert!(!nuances.is_empty());
+    }
+
+    #[test]
+    fn nuances_deser_defaults_missing_lists_to_empty() {
+        // Arrange
+        let json = r#"{}"#;
+
+        // Act
+        let nuances: Nuances = serde_json::from_str(json).expect("empty v2 nuances");
+
+        // Assert
+        assert!(nuances.common_mistakes().is_empty());
+        assert!(nuances.notes().is_empty());
+        assert!(nuances.is_empty());
+    }
+
+    #[test]
+    fn related_patterns_deser_reads_rule_id_reference() {
+        // Arrange
+        let json = r#"[{"rule_id": "01G000000000000000G0000000", "relation": "pair", "note": "directional pair"}]"#;
+
+        // Act
+        let related: Vec<RelatedPattern> =
+            serde_json::from_str(json).expect("valid related_patterns");
+
+        // Assert
+        assert_eq!(related.len(), 1);
+        assert_eq!(
+            related[0].rule_id().to_string(),
+            "01G000000000000000G0000000"
+        );
+        assert_eq!(related[0].relation(), Some(RelatedPatternRelation::Pair));
+        assert_eq!(related[0].note(), Some("directional pair"));
+    }
+
+    #[test]
+    fn grammar_rule_content_v2_serde_roundtrip_preserves_structure() {
+        // Arrange
+        let content = GrammarRuleContent::new(
+            "～は～です".to_string(),
+            "Basic topic-predicate pattern".to_string(),
+            "Explanation".to_string(),
+            "| table |".to_string(),
+            "```\n私は学生です。\n```".to_string(),
+            Nuances {
+                common_mistakes: vec![CommonMistake {
+                    wrong: "wrong".to_string(),
+                    correct: "correct".to_string(),
+                    note: None,
+                }],
+                notes: vec![NuanceNote {
+                    tag: NuanceTag::Register,
+                    text: "casual register note".to_string(),
+                }],
+            },
+            "Pro tip".to_string(),
+            vec![RelatedPattern {
+                rule_id: Ulid::nil(),
+                relation: None,
+                note: None,
+            }],
+        );
+
+        // Act
+        let json = serde_json::to_string(&content).expect("serialize v2 content");
+        let back: GrammarRuleContent = serde_json::from_str(&json).expect("deserialize v2 content");
+
+        // Assert
+        assert_eq!(back.title(), content.title());
+        assert_eq!(back.nuances(), content.nuances());
+        assert_eq!(back.related_patterns(), content.related_patterns());
+        assert!(back.warnings().is_empty());
     }
 }
 

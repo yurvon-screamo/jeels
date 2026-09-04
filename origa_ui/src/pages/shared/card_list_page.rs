@@ -206,6 +206,7 @@ where
                                     .is_some_and(|d| d.to_lowercase().contains(&query))
                         },
                         Some(CardAnswer::Text(s)) => s.to_lowercase().contains(&query),
+                        Some(CardAnswer::GrammarNuances { .. }) => false,
                         None => false,
                     };
 

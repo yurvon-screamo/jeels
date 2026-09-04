@@ -4,6 +4,8 @@
 target
 .fastembed_cache
 data
+# Grammar N1 authoring batches are reviewable sources, not artifacts
+!scripts/data/
 
 # Node
 package-lock.json
