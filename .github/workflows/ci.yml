@@ -541,10 +541,22 @@ jobs:
             # sys.boot_completed itself).
             - name: Start emulator
               run: |
+                  # Pin the AVD home for BOTH tools: cmdline-tools may resolve
+                  # the Android user home through XDG_CONFIG_HOME (writing to
+                  # ~/.config/.android/avd) while the emulator binary only
+                  # searches $ANDROID_AVD_HOME, $ANDROID_SDK_HOME/avd and
+                  # $HOME/.android/avd — the mismatch made `create avd` a
+                  # silent no-op the emulator could never see.
+                  export ANDROID_AVD_HOME="$HOME/.android/avd"
+                  mkdir -p "$ANDROID_AVD_HOME"
                   echo "no" | avdmanager create avd -n smoke \
                       -k "system-images;android-34;google_apis;x86_64" -d pixel --force
-                  # setup-android installs the emulator package but does NOT
-                  # put its directory on PATH (adb is on it, emulator is not).
+                  if [ ! -f "$ANDROID_AVD_HOME/smoke.ini" ]; then
+                      echo "::error::AVD 'smoke' was not created at $ANDROID_AVD_HOME"
+                      ls -la "$ANDROID_AVD_HOME"
+                      "${ANDROID_SDK_ROOT}/emulator/emulator" -list-avds 2>/dev/null || true
+                      exit 1
+                  fi
                   EMU="${ANDROID_SDK_ROOT}/emulator/emulator"
                   if [ ! -x "$EMU" ]; then
                       echo "::error::emulator binary not found at $EMU"
