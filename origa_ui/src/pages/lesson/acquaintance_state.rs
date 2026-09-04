@@ -68,6 +68,19 @@ pub fn audio_button_visible(
 }
 
 impl AcquaintanceState {
+    /// Ре-инициализация под новую руку: reload урока переиспользует тот же
+    /// state (компонент не размонтируется), поэтому сбрасывать надо КАЖДОЕ
+    /// поле потока. Несброшенный `hand_finishing` прошлой руки ослеплял
+    /// вторую руку сессии — кнопки показа/тренировки и клавиатура
+    /// гейтились навсегда (ревью PR #498).
+    pub fn start_new_hand(&mut self, hand: AcquaintanceHand) {
+        self.stage = AcquaintanceStage::Presentation;
+        self.hand = Some(hand);
+        self.slide_index = 0;
+        self.skipped_ids.clear();
+        self.hand_finishing = false;
+    }
+
     /// Переходит к следующей непомеченной «Уже знаю» карте.
     /// Возвращает `true`, если показ исчерпан (пора в следующую стадию).
     pub fn advance_presentation(&mut self) -> bool {
@@ -304,6 +317,31 @@ mod advance_presentation_tests {
         assert!(!state.advance_presentation());
         assert_eq!(state.slide_index, 1);
         assert!(state.advance_presentation(), "показ исчерпан");
+    }
+
+    /// Reload урока переиспользует тот же state: несброшенное окно финиша
+    /// прошлой руки ослепляло вторую руку сессии (кнопки/клавиатура
+    /// гейтились навсегда) — ревью PR #498.
+    #[test]
+    fn start_new_hand_resets_finishing_window_and_stream_fields() {
+        // Arrange: state закрытой руки — финиш, продвинутый показ, метки
+        let mut state = state_with_hand(2);
+        state.stage = AcquaintanceStage::Completed;
+        state.slide_index = 1;
+        state.hand_finishing = true;
+
+        // Act: reload пишет новую руку в тот же state
+        let fresh = state_with_hand(1).hand.take().expect("hand built");
+        state.start_new_hand(fresh);
+
+        // Assert
+        assert_eq!(state.stage, AcquaintanceStage::Presentation);
+        assert_eq!(state.slide_index, 0);
+        assert!(
+            !state.hand_finishing,
+            "окно финиша прошлой руки снято — кнопки новой руки работают"
+        );
+        assert!(state.skipped_ids.is_empty());
     }
 
     #[test]

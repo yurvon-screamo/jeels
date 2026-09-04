@@ -253,12 +253,7 @@ pub fn LessonContent() -> impl IntoView {
                             native_language.get_untracked(),
                             &i18n,
                         );
-                        acq_state_signal.update(|state| {
-                            state.stage = AcquaintanceStage::Presentation;
-                            state.hand = Some(hand);
-                            state.slide_index = 0;
-                            state.skipped_ids.clear();
-                        });
+                        acq_state_signal.update(|state| state.start_new_hand(hand));
                         acq_slides_signal.set(slides);
                     }
                 }

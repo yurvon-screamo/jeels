@@ -876,11 +876,13 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
     });
 
     view! {
-        <div
-            class="mt-4 flex items-center justify-between gap-3"
-            data-testid="acquaintance-action-bar"
-        >
-            <Show when=move || !hand_finishing.get()>
+        // Контейнер гейтится целиком: в окне финиша внизу слайда не должна
+        // висеть пустая полоса с отступом (ревью PR #498).
+        <Show when=move || !hand_finishing.get()>
+            <div
+                class="mt-4 flex items-center justify-between gap-3"
+                data-testid="acquaintance-action-bar"
+            >
                 <Button
                     variant=Signal::derive(|| ButtonVariant::Ghost)
                     on_click=Callback::new(move |_| confirm_open.set(true))
@@ -888,9 +890,7 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                 >
                     {t!(i18n, acquaintance.already_know)}
                 </Button>
-            </Show>
 
-            <Show when=move || !hand_finishing.get()>
                 <Button
                     variant=Signal::derive(|| ButtonVariant::Filled)
                     on_click=Callback::new(move |_| advance.run(()))
@@ -901,8 +901,8 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
                         {t!(i18n, lesson.space_key)}
                     </span>
                 </Button>
-            </Show>
-        </div>
+            </div>
+        </Show>
 
         <ConfirmModal
             test_id=Signal::derive(|| "acquaintance-know-confirm".to_string())
