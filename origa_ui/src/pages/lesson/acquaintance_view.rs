@@ -11,12 +11,11 @@ use super::keyboard_handler::is_typing_target;
 use super::training_view::TrainingBody;
 use crate::i18n::*;
 use crate::ui_components::{
-    Button, ButtonVariant, Card, ConfirmModal, FuriganaText, KanjiAnimation, MarkdownText,
-    MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word, speak_word_immediate,
+    AudioButtons, Button, ButtonVariant, Card, ConfirmModal, FuriganaText, KanjiAnimation,
+    MarkdownText, MarkdownVariant, ReadingItem, Tag, is_speech_supported, speak_word,
 };
 use leptos::prelude::*;
 use leptos::task::spawn_local;
-use leptos_icons::Icon;
 use leptos_use::use_event_listener;
 use origa::domain::{AcquaintanceSubphase, NativeLanguage};
 use origa::traits::UserRepository;
@@ -136,6 +135,41 @@ pub fn AcquaintanceView() -> impl IntoView {
             .and_then(|slide| slide.pos_label().map(str::to_string))
     });
 
+    // Слово текущей карты: в показе — слайд по индексу, в тренировке —
+    // карта из сигнала контекста.
+    let current_word = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        let state = ctx.state.get();
+        let card_id = match state.stage {
+            AcquaintanceStage::Presentation => ctx
+                .slides
+                .get()
+                .get(state.slide_index)
+                .map(|slide| slide.card_id()),
+            _ => ctx.current_card.get(),
+        };
+        card_id.and_then(|id| {
+            ctx.slides
+                .get()
+                .iter()
+                .find(|slide| slide.card_id() == id)
+                .and_then(|slide| slide.word().map(str::to_string))
+        })
+    });
+
+    // Кнопка озвучки видна, когда японская сторона слова на экране
+    // (Reverse-фронт прячет её — кнопка не подсказывает ответ).
+    let audio_visible = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        let state = ctx.state.get();
+        audio_button_visible(
+            state.stage,
+            state.hand.as_ref().and_then(|hand| hand.subphase()),
+            ctx.showing_answer.get(),
+            current_word.get().is_some(),
+        )
+    });
+
     view! {
         <div data-testid="acquaintance-view" class="relative px-0.5 sm:px-1 py-1 sm:py-2 flex flex-col grow">
             <Show when=move || {
@@ -173,6 +207,29 @@ pub fn AcquaintanceView() -> impl IntoView {
                         </Tag>
                     </Show>
                 </div>
+
+                // Кнопка озвучки — правый край ряда тегов, как в обычном
+                // уроке (LessonCardTags: ml-auto). Замыкание по слову:
+                // AudioButtons берёт текст при монтировании, смена слова
+                // пересоздаёт кнопку (паттерн lesson_card_header).
+                {move || {
+                    current_word
+                        .get()
+                        .filter(|_| audio_visible.get())
+                        .map(|word| {
+                            view! {
+                                <div class="ml-auto shrink-0">
+                                    <AudioButtons
+                                        text=word
+                                        audio_path=None
+                                        test_id=Signal::derive(|| {
+                                            "acquaintance-audio-btn".to_string()
+                                        })
+                                    />
+                                </div>
+                            }
+                        })
+                }}
             </div>
             </Show>
 
@@ -180,8 +237,11 @@ pub fn AcquaintanceView() -> impl IntoView {
                 let ctx = ctx_stored.get_value();
                 ctx.state.get().stage == AcquaintanceStage::Completed
             }>
+                // anima-page-fade: экран завершения появляется мягким
+                // входом, а не мгновенной заменой тренировочной карты
+                // (юзер-репорт о резком появлении окна).
                 <Card
-                    class=Signal::derive(|| "p-6 mb-4".to_string())
+                    class=Signal::derive(|| "p-6 mb-4 anima-page-fade".to_string())
                     test_id=Signal::derive(|| "acquaintance-completed-card".to_string())
                 >
                     <TransitionScreen ctx=ctx_stored.get_value() />
@@ -220,10 +280,11 @@ pub fn AcquaintanceView() -> impl IntoView {
     }
 }
 
-/// Полоса руки и кнопка озвучки в общем хедере урока: во время знакомства
-/// LessonProgress скрыт, его место занимает полоса руки — прогресс не
-/// съедает полезную высоту карточки (перенос из шапки знакомства).
-/// Кнопка озвучки — справа от полосы, как в шапке руки ранее.
+/// Полоса руки в общем хедере урока: во время знакомства LessonProgress
+/// скрыт, его место занимает полоса руки — прогресс не съедает полезную
+/// высоту карточки. Кнопка озвучки живёт НЕ здесь, а в ряду тегов
+/// AcquaintanceView: появляясь рядом с полосой, она меняла ширину
+/// контейнера и полоса прыгала между картами (баг-репорт).
 #[component]
 pub(crate) fn AcquaintanceHeaderStrip() -> impl IntoView {
     let i18n = use_i18n();
@@ -304,59 +365,8 @@ pub(crate) fn AcquaintanceHeaderStrip() -> impl IntoView {
         }
     });
 
-    // Слово текущей карты: в показе — слайд по индексу, в тренировке —
-    // карта из сигнала контекста.
-    let current_word = Signal::derive(move || {
-        let ctx = ctx_stored.get_value();
-        let state = ctx.state.get();
-        let card_id = match state.stage {
-            AcquaintanceStage::Presentation => ctx
-                .slides
-                .get()
-                .get(state.slide_index)
-                .map(|slide| slide.card_id()),
-            _ => ctx.current_card.get(),
-        };
-        card_id.and_then(|id| {
-            ctx.slides
-                .get()
-                .iter()
-                .find(|slide| slide.card_id() == id)
-                .and_then(|slide| slide.word().map(str::to_string))
-        })
-    });
-
-    // Кнопка озвучки: видна, когда японская сторона слова на экране
-    // (Reverse-фронт прячет её — кнопка не подсказывает ответ).
-    let audio_visible = Signal::derive(move || {
-        let ctx = ctx_stored.get_value();
-        let state = ctx.state.get();
-        audio_button_visible(
-            state.stage,
-            state.hand.as_ref().and_then(|hand| hand.subphase()),
-            ctx.showing_answer.get(),
-            current_word.get().is_some(),
-        )
-    });
-    let speak_current_word = Callback::new(move |_: ()| {
-        if let Some(word) = current_word.get() {
-            speak_word(&word, 1.0);
-        }
-    });
-
     view! {
-        <div class="flex items-center justify-end gap-2 min-w-0">
-            <HandProgressStrip total progress label=strip_label />
-            <Show when=move || audio_visible.get()>
-                <button
-                    data-testid="acquaintance-audio-btn"
-                    class="text-[var(--fg-muted)] hover:text-[var(--fg-black)] transition-colors cursor-pointer shrink-0"
-                    on:click=move |_| speak_current_word.run(())
-                >
-                    <Icon icon=icondata::LuPlay width="16" height="16" />
-                </button>
-            </Show>
-        </div>
+        <HandProgressStrip total progress label=strip_label />
     }
 }
 
@@ -430,6 +440,9 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
     // звучит один раз — новой картой; retired карта не переигрывается
     // (баг-репорт: дубль звука после «Уже знаю»). Пересоздание слайдов
     // без смены карты (полный rebuild slides.set) тоже молчит.
+    // Тот же канал, что и автозвук обычного урока (speak_word): сначала
+    // CDN pitch-аудио файла, TTS — только fallback (юзер-репорт: в
+    // знакомстве звучал TTS вместо аудиофайла).
     let is_muted =
         use_context::<super::lesson_state::LessonContext>().map(|lesson_ctx| lesson_ctx.is_muted);
     let autoplay_card_id = Memo::new(move |_| {
@@ -456,7 +469,7 @@ fn PresentationBody(ctx: AcquaintanceContext) -> impl IntoView {
             .find(|slide| slide.card_id() == card_id)
             .and_then(|slide| slide.word().map(str::to_string));
         if let Some(word) = word {
-            speak_word_immediate(&word, 1.0);
+            speak_word(&word, 1.0);
         }
     });
 
@@ -840,11 +853,22 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
 
     // Space = «Дальше» в показе (спека §8.3).
     let kb_ctx = StoredValue::new(ctx.clone());
+    // Окно финиша (все карты выведены, рука закрывается): кнопки показа
+    // скрыты, Space не листает — иначе advance при пустой активной руке
+    // уводил бы в пустую тренировку поверх ждущего экрана завершения.
+    let hand_finishing = Signal::derive(move || {
+        let ctx = kb_ctx.get_value();
+        ctx.state.with(|state| state.hand_finishing)
+    });
     let _ = use_event_listener(document(), leptos::ev::keydown, move |ev| {
         if is_typing_target(ev.target().as_ref()) {
             return;
         }
-        let stage = kb_ctx.get_value().state.get().stage;
+        let ctx = kb_ctx.get_value();
+        if ctx.state.with_untracked(|state| state.hand_finishing) {
+            return;
+        }
+        let stage = ctx.state.get().stage;
         if resolve_key_action(stage, false, &ev.key()) == Some(AcquaintanceKeyAction::Advance) {
             ev.prevent_default();
             advance.run(());
@@ -856,24 +880,28 @@ fn ActionBar(ctx: AcquaintanceContext) -> impl IntoView {
             class="mt-4 flex items-center justify-between gap-3"
             data-testid="acquaintance-action-bar"
         >
-            <Button
-                variant=Signal::derive(|| ButtonVariant::Ghost)
-                on_click=Callback::new(move |_| confirm_open.set(true))
-                test_id=Signal::derive(|| "acquaintance-know-btn".to_string())
-            >
-                {t!(i18n, acquaintance.already_know)}
-            </Button>
+            <Show when=move || !hand_finishing.get()>
+                <Button
+                    variant=Signal::derive(|| ButtonVariant::Ghost)
+                    on_click=Callback::new(move |_| confirm_open.set(true))
+                    test_id=Signal::derive(|| "acquaintance-know-btn".to_string())
+                >
+                    {t!(i18n, acquaintance.already_know)}
+                </Button>
+            </Show>
 
-            <Button
-                variant=Signal::derive(|| ButtonVariant::Filled)
-                on_click=Callback::new(move |_| advance.run(()))
-                test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
-            >
-                <span>{t!(i18n, lesson.next)}</span>
-                <span class="kbd-hint text-[var(--fg-light)]">
-                    {t!(i18n, lesson.space_key)}
-                </span>
-            </Button>
+            <Show when=move || !hand_finishing.get()>
+                <Button
+                    variant=Signal::derive(|| ButtonVariant::Filled)
+                    on_click=Callback::new(move |_| advance.run(()))
+                    test_id=Signal::derive(|| "acquaintance-next-btn".to_string())
+                >
+                    <span>{t!(i18n, lesson.next)}</span>
+                    <span class="kbd-hint text-[var(--fg-light)]">
+                        {t!(i18n, lesson.space_key)}
+                    </span>
+                </Button>
+            </Show>
         </div>
 
         <ConfirmModal

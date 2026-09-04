@@ -48,9 +48,18 @@ export async function runAcquaintancePresentation(page: Page): Promise<void> {
 /// (ре-рендер после do_rate смонтировал фронт следующей карты): если
 /// клик проиграл гонку WASM ре-рендеру, панель остаётся видимой и
 /// попытка повторяется.
+/// Финальный ответ — особый случай: карточка замораживается с открытым
+/// ответом (кнопки рейтинга скрыты окном финиша), и флоу завершает
+/// экран «Знакомство завершено»/завершения урока — повторные клики
+/// по замороженной карте не нужны.
 async function answerTrainingRating(page: Page, button: string): Promise<boolean> {
 	const answer = page.getByTestId("acquaintance-training-answer");
+	const rating = page.getByTestId(button);
+	const finals = page
+		.getByTestId("acquaintance-completed")
+		.or(page.getByTestId("lesson-complete-screen"));
 	for (let attempt = 0; attempt < 8; attempt++) {
+		if (await finals.isVisible().catch(() => false)) return true;
 		const answerVisible = await answer
 			.waitFor({ state: "visible", timeout: 700 })
 			.then(() => true)
@@ -62,15 +71,32 @@ async function answerTrainingRating(page: Page, button: string): Promise<boolean
 				.catch(() => null);
 			continue;
 		}
-		await page
-			.getByTestId(button)
-			.click({ timeout: 1500 })
-			.catch(() => null);
-		const hidden = await answer
+		// Ответ открыт. Рейтинга нет — окно финиша руки: ждём финальный
+		// экран (карточка заморожена, кликать больше нечего).
+		const ratingVisible = await rating
+			.waitFor({ state: "visible", timeout: 700 })
+			.then(() => true)
+			.catch(() => false);
+		if (!ratingVisible) {
+			if (
+				await finals
+					.waitFor({ state: "visible", timeout: 2500 })
+					.then(() => true)
+					.catch(() => false)
+			) {
+				return true;
+			}
+			continue;
+		}
+		await rating.click({ timeout: 1500 }).catch(() => null);
+		const recorded = await answer
 			.waitFor({ state: "hidden", timeout: 2500 })
 			.then(() => true)
 			.catch(() => false);
-		if (hidden) return true;
+		if (recorded) return true;
+		// Ответ не скрылся: либо гонка ре-рендера (повторим на следующей
+		// итерации), либо финальный ответ — следующий проход увидит
+		// финальный экран или скрытый рейтинг.
 	}
 	return false;
 }

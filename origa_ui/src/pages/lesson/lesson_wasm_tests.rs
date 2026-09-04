@@ -1185,6 +1185,242 @@ mod acquaintance_training {
         }
     }
 
+    /// Внедряет настоящую таблицу стилей приложения в страницу теста:
+    /// wasm-тесты бегут в bare-HTML без dist-CSS, а computed-стили
+    /// (`.front-dimmed` + `:has(.kanji-popup)`) браузер считает только по
+    /// загруженному CSS. `@tailwind`-директивы браузер пропускает как
+    /// неизвестные at-правила — остальной CSS применяется.
+    fn inject_app_stylesheet() {
+        let doc = document();
+        let head = doc.head().expect("test page has a <head>");
+        if head
+            .query_selector("style[data-app-css]")
+            .expect("querySelector on <head>")
+            .is_some()
+        {
+            return;
+        }
+        let style = doc.create_element("style").expect("<style> creates");
+        style.set_attribute("data-app-css", "").expect("attr sets");
+        style.set_text_content(Some(include_str!("../../../input.css")));
+        head.append_child(&style).expect("<style> appends");
+    }
+
+    fn computed_opacity(el: &web_sys::Element) -> String {
+        web_sys::window()
+            .expect("window in browser test")
+            .get_computed_style(el)
+            .expect("getComputedStyle resolves")
+            .expect("element has a computed style")
+            .get_property_value("opacity")
+            .expect("opacity is a string")
+    }
+    /// Тултип кандзи на приглушённом вопросе (сторона ответа) обязан быть
+    /// непрозрачным: opacity обёртки снимается, пока тултип открыт
+    /// (`.front-dimmed:has(.kanji-popup)`). Регресс — возврат к голому
+    /// `opacity-60` на обёртке: тогда каскад приглушал и тултип.
+    #[wasm_bindgen_test]
+    async fn answered_front_dim_lifts_while_kanji_tooltip_open() {
+        // Arrange: настоящий CSS + мини-кандзи-словарь для тултипа
+        inject_app_stylesheet();
+        origa::dictionary::kanji::init_kanji(origa::dictionary::kanji::KanjiData {
+            kanji_json: r#"{"kanji":[{"kanji":"私","jlpt":"N5","used_in":100,"description_ru":["я, личное местоимение"],"description_en":[],"radicals":["禾"],"popular_words":[],"on_readings":["シ"],"kun_readings":["わた"]}]}"#.to_string(),
+        })
+        .expect("mini kanji dict");
+
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![(
+                    card_id,
+                    origa::domain::CardType::Vocabulary,
+                )])
+                .unwrap(),
+            )
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "私".to_string(),
+            pos_label: None,
+            translations: vec!["я".to_string()],
+        }]);
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <TrainingBody ctx=c2.clone() /> }.into_any()
+        });
+        tick().await;
+
+        // Act: раскрыть ответ — фронт приглушён.
+        wrapper
+            .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap()
+            .click();
+        tick().await;
+
+        let front_wrap = wrapper
+            .query_selector(".front-dimmed")
+            .expect("querySelector works")
+            .expect("после раскрытия фронт приглушён классом front-dimmed");
+        assert_eq!(
+            computed_opacity(&front_wrap),
+            "0.6",
+            "вопрос на стороне ответа приглушён"
+        );
+
+        // Открыть тултип кандзи кликом — приглушение снимается.
+        wrapper
+            .query_selector("[data-testid=\"acquaintance-training-front\"] .kanji-char-hover")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap()
+            .click();
+        tick().await;
+
+        assert!(
+            wrapper.query_selector(".kanji-popup").unwrap().is_some(),
+            "клик по кандзи открывает тултип"
+        );
+        assert_eq!(
+            computed_opacity(&front_wrap),
+            "1",
+            "открытый тултип снимает приглушение обёртки — сам тултип непрозрачен"
+        );
+
+        // Закрыть тултип повторным кликом — приглушение возвращается.
+        wrapper
+            .query_selector("[data-testid=\"acquaintance-training-front\"] .kanji-char-hover")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::HtmlElement>()
+            .unwrap()
+            .click();
+        tick().await;
+
+        assert!(
+            wrapper.query_selector(".kanji-popup").unwrap().is_none(),
+            "повторный клик закрывает тултип"
+        );
+        assert_eq!(
+            computed_opacity(&front_wrap),
+            "0.6",
+            "закрытый тултип возвращает приглушение вопроса"
+        );
+    }
+
+    /// Финальный ответ тренировки (HandCompleted) замораживает отвеченную
+    /// карту до монтирования экрана завершения: ответ остаётся на экране
+    /// (без «лишнего вопроса»), кнопки рейтинга/раскрытия скрыты — окно
+    /// финиша закрывается только экраном «Знакомство завершено».
+    /// Одновременно guards от remount-регрессий: обновление состояния
+    /// финиша не должно перемонтировать дерево тренировки.
+    #[wasm_bindgen_test]
+    async fn final_answer_freezes_answered_card_until_completion_screen() {
+        // Arrange: рука из одного кандзи (критерий — 3 «помню»)
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![(
+                    card_id,
+                    origa::domain::CardType::Kanji,
+                )])
+                .unwrap(),
+            )
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Kanji {
+            card_id,
+            kanji: "明".to_string(),
+            name: "свет".to_string(),
+            radicals: None,
+            example_words: None,
+            on_readings: None,
+            kun_readings: None,
+        }]);
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
+        });
+        tick().await;
+
+        // Act: три «помню» — третья закрывает руку (HandCompleted).
+        for _ in 0..3 {
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-rating-remember\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+        }
+
+        // Assert: окно финиша — отвеченная карта заморожена, лишнего
+        // вопроса нет, кнопки скрыты.
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-training-answer\"]")
+                .unwrap()
+                .is_some(),
+            "финальный ответ остаётся на экране — «лишнего вопроса» нет"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-rating-remember\"]")
+                .unwrap()
+                .is_none(),
+            "кнопки рейтинга скрыты в окне финиша"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+                .unwrap()
+                .is_none(),
+            "кнопка раскрытия скрыта в окне финиша"
+        );
+
+        // Персистенция (IDB-макротаск) завершает руку — экран завершения
+        // сменяет замороженную карту (фикс #462: сейв до Completed).
+        let mut persisted = false;
+        for _ in 0..100 {
+            if ctx.state.get_untracked().stage == AcquaintanceStage::Completed {
+                persisted = true;
+                break;
+            }
+            tick().await;
+            gloo_timers::future::TimeoutFuture::new(10).await;
+        }
+        assert!(
+            persisted,
+            "persistence poll exhausted (~1s): stage never reached Completed"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-completed\"]")
+                .unwrap()
+                .is_some(),
+            "экран «Знакомство завершено» сменил замороженную карту"
+        );
+    }
+
     #[wasm_bindgen_test]
     async fn training_answer_keeps_the_question_visible() {
         // Arrange: тренировка одного слова
@@ -1940,7 +2176,65 @@ mod acquaintance_presentation {
     }
 
     #[wasm_bindgen_test]
-    async fn header_shows_audio_button_and_pos_tag_for_word_slide() {
+    async fn header_strip_has_no_audio_button_only_progress_strip() {
+        // Arrange: слайд слова — кнопка озвучки существует, но живёт в
+        // ряду тегов карточки, а не в стрипе хедера (баг-репорт: кнопка
+        // у полосы меняла её ширину — полоса прыгала между картами).
+        let ctx = acq_context(AcquaintanceStage::Presentation);
+        let card_id = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(hand_of(card_id, origa::domain::CardType::Vocabulary))
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id,
+            word: "読む".to_string(),
+            pos_label: None,
+            translations: vec!["читать".to_string()],
+        }]);
+
+        // Act
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! {
+                <div>
+                    <div data-testid="test-acq-header-strip"><AcquaintanceHeaderStrip /></div>
+                    <AcquaintanceView />
+                </div>
+            }
+            .into_any()
+        });
+        tick().await;
+
+        // Assert: кнопка есть, но НЕ в стрипе хедера — стрип содержит
+        // только полосу руки.
+        let strip = wrapper
+            .query_selector("[data-testid=\"test-acq-header-strip\"]")
+            .unwrap()
+            .unwrap();
+        assert!(
+            strip
+                .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
+                .unwrap()
+                .is_none(),
+            "в стрипе хедера только полоса — кнопка озвучки там не живёт"
+        );
+        let view_root = wrapper
+            .query_selector("[data-testid=\"acquaintance-view\"]")
+            .unwrap()
+            .unwrap();
+        assert!(
+            view_root
+                .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
+                .unwrap()
+                .is_some(),
+            "кнопка озвучки в ряду тегов карточки"
+        );
+    }
+
+    #[wasm_bindgen_test]
+    async fn tags_row_shows_audio_button_and_pos_tag_for_word_slide() {
         // Arrange: слайд слова с частью речи
         let ctx = acq_context(AcquaintanceStage::Presentation);
         let card_id = Ulid::new();
@@ -1963,13 +2257,13 @@ mod acquaintance_presentation {
         });
         tick().await;
 
-        // Assert: кнопка озвучки в шапке (рядом с полосой) и POS-тег
+        // Assert: кнопка озвучки в ряду тегов карточки и POS-тег
         assert!(
             wrapper
                 .query_selector("[data-testid=\"acquaintance-audio-btn\"]")
                 .unwrap()
                 .is_some(),
-            "кнопка озвучки слова в шапке"
+            "кнопка озвучки слова в ряду тегов"
         );
         let pos_tag = wrapper
             .query_selector("[data-testid=\"acquaintance-pos-tag\"]")
@@ -1987,7 +2281,7 @@ mod acquaintance_presentation {
     }
 
     #[wasm_bindgen_test]
-    async fn header_audio_button_hidden_on_kanji_slide() {
+    async fn tags_row_audio_button_hidden_on_kanji_slide() {
         // Arrange
         let ctx = acq_context(AcquaintanceStage::Presentation);
         let card_id = Ulid::new();

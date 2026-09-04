@@ -1920,6 +1920,20 @@ rt {
     color: var(--fg-muted);
 }
 
+/* === Acquaintance Training Front Dim === */
+/* Приглушение вопроса тренировки знакомства на стороне ответа.
+   Раньше был tailwind opacity-60: opacity обёртки каскадировала во все
+   DOM-потомки, включая тултип кандзи (.kanji-popup), и делала его
+   полупрозрачным (баг-репорт). Пока тултип открыт — приглушение
+   обёртки снимается. */
+.front-dimmed {
+    opacity: 0.6;
+}
+
+.front-dimmed:has(.kanji-popup) {
+    opacity: 1;
+}
+
 /* === Translator Text === */
 .translator-text {
     display: inline;

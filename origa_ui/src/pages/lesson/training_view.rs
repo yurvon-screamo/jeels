@@ -9,7 +9,7 @@ use super::keyboard_handler::is_typing_target;
 use crate::i18n::*;
 use crate::ui_components::{
     Button, ButtonVariant, FuriganaText, MarkdownText, MarkdownVariant, ReadingGroup,
-    is_speech_supported, speak_word, speak_word_immediate,
+    is_speech_supported, speak_word,
 };
 use leptos::prelude::*;
 use leptos_use::use_event_listener;
@@ -17,19 +17,27 @@ use origa::domain::{AcquaintanceSubphase, AnswerOutcome, NativeLanguage};
 use ulid::Ulid;
 
 /// Раскрытие ответа: и кнопка, и Space ведут себя одинаково.
+/// Окно финиша руки (hand_finishing) игнорируется: карта уже отвечена,
+/// повторное раскрытие невозможно.
 fn do_reveal(
     ctx_stored: &StoredValue<AcquaintanceContext>,
     current_id: &Memo<Ulid>,
     showing_answer: &RwSignal<bool>,
 ) {
+    let ctx = ctx_stored.get_value();
+    if ctx.state.with_untracked(|state| state.hand_finishing) {
+        return;
+    }
     showing_answer.set(true);
     let card_id = current_id.get_untracked();
     if !card_id.is_nil() {
-        speak_reverse_answer(&ctx_stored.get_value(), card_id);
+        speak_reverse_answer(&ctx, card_id);
     }
 }
 
 /// Запись ответа: и кнопки [1]/[2], и клавиши 1/2 ведут себя одинаково.
+/// Окно финиша руки (hand_finishing) игнорируется — защита от двойного
+/// клика/клавиши до монтирования экрана завершения.
 fn do_rate(
     ctx_stored: &StoredValue<AcquaintanceContext>,
     current_id: &Memo<Ulid>,
@@ -38,23 +46,20 @@ fn do_rate(
     training_order: &RwSignal<Vec<Ulid>>,
     remembered: bool,
 ) {
-    let outcome = record_on_hand(
-        &ctx_stored.get_value(),
-        current_id.get_untracked(),
-        remembered,
-    );
+    let ctx = ctx_stored.get_value();
+    if ctx.state.with_untracked(|state| state.hand_finishing) {
+        return;
+    }
+    let outcome = record_on_hand(&ctx, current_id.get_untracked(), remembered);
     finish_answer(
-        &ctx_stored.get_value(),
+        &ctx,
         showing_answer,
         rotation_index,
         training_order,
         outcome,
     );
     // Шапке нужен тип новой текущей карты (тег типа).
-    ctx_stored
-        .get_value()
-        .current_card
-        .set(current_id.get_untracked().non_nil());
+    ctx.current_card.set(current_id.get_untracked().non_nil());
 }
 
 /// Fisher–Yates поверх xorshift64; источник энтропии — случайные биты
@@ -123,6 +128,9 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
     // молчит при перезапусках рендер-замыкания с той же картой (запись
     // ответа, пересборка slides), звучит только новой карте. Reverse
     // озвучивается при раскрытии ответа (speak_reverse_answer).
+    // Тот же канал, что и автозвук обычного урока (speak_word): сначала
+    // CDN pitch-аудио файла, TTS — только fallback (юзер-репорт: в
+    // знакомстве звучал TTS вместо аудиофайла).
     let is_muted =
         use_context::<super::lesson_state::LessonContext>().map(|lesson_ctx| lesson_ctx.is_muted);
     let autoplay_ctx = ctx_stored;
@@ -153,7 +161,7 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
             .find(|slide| slide.card_id() == card_id)
             .and_then(|slide| slide.word().map(str::to_string));
         if let Some(word) = word {
-            speak_word_immediate(&word, 1.0);
+            speak_word(&word, 1.0);
         }
     });
 
@@ -164,7 +172,8 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
         .current_card
         .set(current_id.get_untracked().non_nil());
 
-    // Клавиатура: те же хендлы, что у кнопок (спека §8.3).
+    // Клавиатура: те же хендлы, что у кнопок (спека §8.3). Гейты окна
+    // финиша — внутри do_reveal/do_rate.
     let handle_keydown = {
         let c = ctx_stored;
         create_acquaintance_keyboard_handler(
@@ -197,6 +206,12 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
         handle_keydown(ev);
     });
 
+    // Окно финиша: кнопки ухода со слайда скрыты, пока рука закрывается.
+    let hand_finishing = Signal::derive(move || {
+        let ctx = ctx_stored.get_value();
+        ctx.state.with(|state| state.hand_finishing)
+    });
+
     view! {
         <div
             class="flex flex-col grow"
@@ -221,10 +236,13 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                     // Вопрос остаётся на стороне ответа — уменьшенным и
                     // приглушённым сверху, под ним divider и ответ
                     // (паттерн обычного урока, lesson_card_answer).
+                    // Приглушение — семантический класс front-dimmed, не
+                    // tailwind opacity-60: голая opacity каскадировала в
+                    // тултип кандзи и делала его полупрозрачным.
                     view! {
                         <div
                             class=move || if showing_answer.get() {
-                                "pt-1 pb-2 opacity-60 scale-90 origin-top"
+                                "pt-1 pb-2 scale-90 origin-top front-dimmed"
                             } else {
                                 ""
                             }
@@ -250,7 +268,7 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                     .into_any()
                 }}
             </div>
-            <Show when=move || !showing_answer.get() fallback=move || ()>
+            <Show when=move || !showing_answer.get() && !hand_finishing.get() fallback=move || ()>
                 <div class="flex justify-center">
                     <Button
                         variant=Signal::derive(|| ButtonVariant::Filled)
@@ -264,7 +282,7 @@ pub fn TrainingBody(ctx: AcquaintanceContext) -> impl IntoView {
                     </Button>
                 </div>
             </Show>
-            <Show when=move || showing_answer.get() fallback=move || ()>
+            <Show when=move || showing_answer.get() && !hand_finishing.get() fallback=move || ()>
                 <div class="mt-4 grid grid-cols-2 gap-3">
                     <Button
                         variant=Signal::derive(|| ButtonVariant::Default)
@@ -400,12 +418,17 @@ fn finish_answer(
     training_order: &RwSignal<Vec<Ulid>>,
     outcome: AnswerOutcome,
 ) {
-    showing_answer.set(false);
-
+    // Финальный ответ: рука закрывается. Отвеченная карта ОСТАЁТСЯ на
+    // экране (showing_answer не сбрасывается) — без этого фронт того же
+    // слова пере-показывался «лишним вопросом», пока идёт запись и до
+    // монтирования экрана завершения (юзер-репорт о резком переходе).
+    // Кнопки и клавиатура гасятся флагом hand_finishing.
     if matches!(outcome, AnswerOutcome::HandCompleted) {
         ctx.complete_hand();
         return;
     }
+
+    showing_answer.set(false);
 
     let prev_last = training_order.get_untracked().last().copied();
     let mut action = AfterAnswerAction::NextCard { reshuffled: false };

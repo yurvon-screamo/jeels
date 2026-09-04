@@ -96,11 +96,7 @@ fn duolingo_content_levels() -> Option<Vec<(String, String)>> {
         let mut files: Vec<_> = fs::read_dir(&subdir)
             .unwrap_or_else(|e| panic!("failed to read {}: {e}", subdir.display()))
             .filter_map(|e| e.ok())
-            .filter(|e| {
-                e.path()
-                    .extension()
-                    .is_some_and(|ext| ext == "json")
-            })
+            .filter(|e| e.path().extension().is_some_and(|ext| ext == "json"))
             .map(|e| e.path())
             .collect();
         files.sort();
@@ -147,7 +143,9 @@ fn duolingo_sets_match_content_level_and_are_complete() {
     let mut problems: Vec<String> = Vec::new();
     for (set_id, content_level) in &content {
         let Some(meta) = by_id.get(set_id.as_str()) else {
-            problems.push(format!("[{set_id}] content file missing from meta (build.rs skip?)"));
+            problems.push(format!(
+                "[{set_id}] content file missing from meta (build.rs skip?)"
+            ));
             continue;
         };
         if !VALID_LEVELS.contains(&content_level.as_str()) {
