@@ -136,7 +136,10 @@ export async function uiLogin(
 			// waiting for the inputs.
 			const passwordToggle = page.getByTestId("login-password-toggle");
 			await passwordToggle.waitFor({ state: "visible", timeout: 60_000 });
-			await passwordToggle.click();
+			// Explicit action timeouts: Playwright's default actionTimeout is
+			// 0 (unbounded) — a stability-blocked click would hang the whole
+			// test budget instead of feeding the retry loop below.
+			await passwordToggle.click({ timeout: 30_000 });
 
 			await page
 				.locator('input[type="email"], input[data-testid="email-input"]')
@@ -152,9 +155,22 @@ export async function uiLogin(
 			);
 			await page.click(
 				'button[type="submit"], button[data-testid="login-submit"]',
+				{ timeout: 30_000 },
 			);
 
-			await page.waitForURL(/\/(home|onboarding)/, { timeout: 60_000 });
+			// Two equally valid post-login outcomes:
+			//  - the URL moves to /home or /onboarding (navigated flows);
+			//  - the URL stays on "/" (the root route renders Home) and the
+			//    login form unmounts as ProtectedRoute switches to content.
+			// Waiting for the URL alone fails the second case — seen on the
+			// full-corpus restore (#492), where the app settles on "/" with
+			// Home mounted.
+			await Promise.race([
+				page.waitForURL(/\/(home|onboarding)/, { timeout: 60_000 }),
+				page
+					.getByTestId("login-password-toggle")
+					.waitFor({ state: "detached", timeout: 60_000 }),
+			]);
 			return;
 		} catch (e) {
 			if (attempt === maxRetries) {
