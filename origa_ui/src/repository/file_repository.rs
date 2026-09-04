@@ -16,6 +16,41 @@ pub(crate) fn user_key(user_id: Ulid) -> String {
     format!("user:{}", user_id)
 }
 
+/// Encodes a user into the value stored in IndexedDB: a JSON **string**.
+/// A flat string is deliberate (#492): the previous structured-clone JS
+/// object made every `put` clone a multi-megabyte object graph for a
+/// full-corpus user, and that clone path stalled the request completion on
+/// real hardware — the restore window never closed. A string clones as a
+/// plain byte copy. JSON specifically (not bincode/postcard): the user
+/// hierarchy transitively contains a `#[serde(flatten)]` field
+/// (`KnowledgeSet.stats`), which binary formats cannot encode
+/// (unknown-length maps); JSON is also the wire format the record already
+/// uses server-side (`user_to_json`).
+pub(crate) fn user_to_stored_value(user: &User) -> Result<JsValue, OrigaError> {
+    let json = serde_json::to_string(user).map_err(|e| {
+        let reason = format!("User JSON encode failed: {e}");
+        tracing::error!("{reason}");
+        OrigaError::RepositoryError { reason }
+    })?;
+    Ok(JsValue::from_str(&json))
+}
+
+/// Decodes a stored value back into a user. Accepts both formats:
+/// the current JSON string and the legacy structured-clone JS object
+/// written before the switch — records upgrade transparently on the next
+/// save. `Err` carries the decode reason (bad JSON vs schema mismatch) so
+/// callers can log WHY a record was treated as corrupted — the restore
+/// path is exactly where that detail mattered during the #492
+/// investigation.
+pub(crate) fn user_from_stored_value(value: &JsValue) -> Result<User, String> {
+    if let Some(json) = value.as_string() {
+        return serde_json::from_str(&json)
+            .map_err(|e| format!("JSON string record failed to decode: {e}"));
+    }
+    serde_wasm_bindgen::from_value(value.clone())
+        .map_err(|e| format!("legacy object record failed to decode: {e}"))
+}
+
 /// Key range covering every `user:*` record and nothing else: the store
 /// also holds non-user records (the `sync_meta` key, see
 /// `sync_meta_store`), so listings and existence probes must be bounded or
@@ -151,10 +186,10 @@ impl FileSystemUserRepository {
 
         let mut users = vec![];
         for value in all_values {
-            match serde_wasm_bindgen::from_value::<User>(value) {
+            match user_from_stored_value(&value) {
                 Ok(user) => users.push(user),
-                Err(e) => {
-                    tracing::warn!("Skipping corrupted user entry in IndexedDB: {:?}", e);
+                Err(reason) => {
+                    tracing::warn!("Skipping corrupted user entry in IndexedDB: {reason}");
                 },
             }
         }
@@ -200,11 +235,7 @@ impl UserRepository for FileSystemUserRepository {
         })?;
 
         let key = user_key(user.id());
-        let value = serde_wasm_bindgen::to_value(&user).map_err(|e| {
-            let reason = format!("Failed to serialize user: {:?}", e);
-            tracing::error!("{}", reason);
-            OrigaError::RepositoryError { reason }
-        })?;
+        let value = user_to_stored_value(user)?;
 
         let request = store
             .put(&value, Some(&JsValue::from_str(&key)))

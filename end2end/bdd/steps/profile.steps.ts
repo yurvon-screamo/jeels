@@ -68,7 +68,9 @@ Then('происходит переход на страницу входа', asy
     // the Login view inline (it does not change the URL). Assert on the
     // login form being visible — if clear_auth_state didn't run, the user
     // would still see the profile content and this Then would fail.
-    await expect(page.getByTestId("login-page")).toBeVisible({ timeout: 15_000 });
+    // 45s: the reload right before this step pays a full cold WASM boot,
+    // which does not fit 15s on a loaded CI runner with parallel e2e jobs.
+    await expect(page.getByTestId("login-page")).toBeVisible({ timeout: 45_000 });
     await expect(page.getByTestId("email-input").or(page.getByTestId("login-password-toggle"))).toBeVisible({ timeout: 5_000 });
 });
 
@@ -103,10 +105,28 @@ When('нажимает кнопку удаления аккаунта', async ({
 });
 
 When('подтверждает удаление', async ({ page }) => {
+    // The reload below used to fire immediately after the click — killing
+    // the still-in-flight delete (remote DELETE → local cleanup) mid-flow.
+    // The session then survived the reload and the profile re-rendered
+    // instead of the login page. Wait for the server-side DELETE first,
+    // then give the local auth-state cleanup a chance to unmount the
+    // profile on its own; the reload stays as belt-and-suspenders for the
+    // route re-evaluation (an inline login already visible survives it).
+    const serverDelete = page.waitForResponse(
+        (response) =>
+            response.url().includes("/api/records/v1/domain_user") &&
+            response.request().method() === "DELETE",
+        { timeout: 30_000 },
+    );
     await page.getByTestId("profile-confirm-delete-btn").click();
-    // delete_account() clears local auth state. ProtectedRoute should redirect
-    // unauthenticated users to /login on the next route evaluation; reload
-    // forces that evaluation without faking the navigation ourselves.
+    await serverDelete;
+    await page
+        .getByTestId("login-page")
+        .waitFor({ state: "visible", timeout: 15_000 })
+        .catch(() => {
+            // Cleanup did not unmount the profile in time — the reload
+            // forces the route re-evaluation as before.
+        });
     await page.reload();
 });
 

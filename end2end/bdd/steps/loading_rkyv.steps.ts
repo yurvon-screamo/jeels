@@ -24,6 +24,15 @@ Given('приложение загрузилось с чистым кэшем', 
 
         await uiLogin(page, testUser.email, testUser.password);
 
+        // uiLogin's race may return as soon as the login form unmounts —
+        // the login flow (and thus the dictionary bootstrap behind
+        // ProtectedRoute) can still be in flight. Wait for the terminal
+        // navigation first (fresh user → /onboarding, restored → /home),
+        // then for the loading overlay to run its full course: this is
+        // what actually issues the rkyv requests this scenario asserts on.
+        await page
+            .waitForURL(/\/(home|onboarding)/, { timeout: 90_000 })
+            .catch(() => tracing_note_stuck_url(page));
         await page
             .getByTestId("app-loading-overlay")
             .waitFor({ state: "detached", timeout: 180_000 });
@@ -31,6 +40,11 @@ Given('приложение загрузилось с чистым кэшем', 
         await context.close();
     }
 });
+
+/** Best-effort diagnostics when the terminal navigation never happened. */
+function tracing_note_stuck_url(page: import("@playwright/test").Page): void {
+    console.warn(`[loading_rkyv] terminal navigation timeout; url=${page.url()}`);
+}
 
 Then('словари загружены через rkyv-блобы', async ({ cdnRequestLog }) => {
     const fallbackRequests = cdnRequestLog.filter(

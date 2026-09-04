@@ -29,10 +29,10 @@ pub(super) async fn read_row(store: &ObjectStore, id: Ulid) -> Result<Option<Use
         return Ok(None);
     };
 
-    match serde_wasm_bindgen::from_value::<User>(value) {
+    match crate::repository::file_repository::user_from_stored_value(&value) {
         Ok(user) => Ok(Some(user)),
-        Err(e) => {
-            tracing::warn!("Skipping corrupted user entry for {id}: {e:?}");
+        Err(reason) => {
+            tracing::warn!("Skipping corrupted user entry for {id}: {reason}");
             Ok(None)
         },
     }
@@ -57,7 +57,7 @@ pub(super) async fn write_row(
     user: &User,
     id: Ulid,
 ) -> Result<(), OrigaError> {
-    let value = serde_wasm_bindgen::to_value(user)
+    let value = crate::repository::file_repository::user_to_stored_value(user)
         .map_err(|e| migration_err("Migration serialize failed", e))?;
     let key = JsValue::from_str(&user_key(id));
     store

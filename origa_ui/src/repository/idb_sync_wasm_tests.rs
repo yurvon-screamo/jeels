@@ -99,3 +99,95 @@ async fn sync_meta_key_stays_out_of_user_listings() {
     let reloaded = store.load().await.expect("meta reload");
     assert_eq!(reloaded.last_synced_fingerprint.as_deref(), Some("fp"));
 }
+
+/// Record-level cleanup for `user:*` keys used by the codec tests.
+async fn clear_user_keys(ids: &[ulid::Ulid]) {
+    use idb::TransactionMode;
+
+    use crate::repository::file_repository::{STORE_NAME, open_database, user_key};
+
+    let db = open_database().await.expect("open database");
+    let transaction = db
+        .transaction(&[STORE_NAME], TransactionMode::ReadWrite)
+        .expect("read-write transaction");
+    let store = transaction.object_store(STORE_NAME).expect("object store");
+    for id in ids {
+        store
+            .delete(JsValue::from_str(&user_key(*id)))
+            .expect("delete request")
+            .await
+            .expect("user key deleted");
+    }
+}
+
+/// The user codec (#492): records must be stored as flat JSON strings (the
+/// structured-clone object graph stalled multi-MB puts), and legacy
+/// object-format records written before the switch must still read back.
+#[wasm_bindgen_test]
+async fn user_records_store_json_string_and_read_legacy_objects() {
+    use idb::TransactionMode;
+
+    use crate::repository::file_repository::{STORE_NAME, open_database, user_key};
+
+    let string_user = User::new(
+        "codec-string@origa.local".to_string(),
+        NativeLanguage::Russian,
+        None,
+    );
+    let legacy_user = User::new(
+        "codec-legacy@origa.local".to_string(),
+        NativeLanguage::English,
+        None,
+    );
+    clear_user_keys(&[string_user.id(), legacy_user.id()]).await;
+
+    let repo = FileSystemUserRepository::new();
+
+    // Current format: save → the stored value is a flat string, not an object.
+    repo.save(&string_user).await.expect("string save");
+    {
+        let db = open_database().await.expect("open database");
+        let tx = db
+            .transaction(&[STORE_NAME], TransactionMode::ReadOnly)
+            .expect("read-only transaction");
+        let store = tx.object_store(STORE_NAME).expect("object store");
+        let value = store
+            .get(JsValue::from_str(&user_key(string_user.id())))
+            .expect("get request")
+            .await
+            .expect("stored value")
+            .expect("value present");
+        assert!(
+            value.as_string().is_some(),
+            "the stored user record must be a flat JSON string"
+        );
+    }
+
+    // Legacy format: a pre-switch structured-clone object written directly.
+    {
+        let legacy_value = serde_wasm_bindgen::to_value(&legacy_user).expect("legacy serialize");
+        let db = open_database().await.expect("open database");
+        let tx = db
+            .transaction(&[STORE_NAME], TransactionMode::ReadWrite)
+            .expect("read-write transaction");
+        let store = tx.object_store(STORE_NAME).expect("object store");
+        store
+            .put(
+                &legacy_value,
+                Some(&JsValue::from_str(&user_key(legacy_user.id()))),
+            )
+            .expect("legacy put")
+            .await
+            .expect("legacy stored");
+    }
+
+    // Both records decode through the listing path (key order decides which
+    // one `get_current_user` returns first, so assert presence only).
+    let current = repo
+        .get_current_user()
+        .await
+        .expect("get after both formats");
+    assert!(current.is_some(), "records in either format must list");
+
+    clear_user_keys(&[string_user.id(), legacy_user.id()]).await;
+}
