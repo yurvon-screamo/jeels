@@ -73,7 +73,14 @@ cd tauri && cargo tauri dev
 - `ORIGA_APP_URI_PREFIX` — app subdomain prefix (e.g. `app` → `app.origa.uwuwu.net`)
 - Landing = base domain (no prefix)
 
+**DNS-зона `uwuwu.net`** (ADR-046, 2026-09-03): регистратор OnlineNIC (истекает 2026-11-23),
+NS = `a`/`b.aeza-dns.net` (Aeza, API v2 `X-API-Key`, domain ID 2776 — доступы в uwuwu access).
+Cloudflare NS запрещены для этой зоны: ТСПУ из РФ не достаёт до авторитативных NS Cloudflare
+(инцидент 08–09.2026) — не делегировать зону на CF без отдельного ADR. Zone-dump и runbook:
+`docs/backups/uwuwu.net.aeza.2026-09-03.zone`, `docs/runbooks/return-to-aeza-ns-2026-09.md`.
+
 **Local dev:** `$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"` (production CDN endpoint — read-only, safe to use directly; cache policy is tiered, see CDN / S3 below)
+**Browserslist warning:** local trunk builds of `origa_ui` print `caniuse-lite is outdated` — harmless, the data is frozen inside trunk's standalone tailwindcss binary; `npx update-browserslist-db` is a no-op here. Fix and details: `origa_ui/AGENTS.md` → Development.
 **Landing dev:** `$env:ORIGA_CDN_BASE_URL = "https://s3.origa.uwuwu.net"; $env:ORIGA_APP_BASE_URL = "https://app.origa.uwuwu.net"` (`ORIGA_LANDING_BASE_URL` необязателен — дефолт `https://origa.uwuwu.net`)
 
 ## Команды

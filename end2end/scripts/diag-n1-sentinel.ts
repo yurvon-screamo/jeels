@@ -48,25 +48,57 @@ async function fetchRemoteRecord(email: string): Promise<RemoteRecord> {
     };
 }
 
-async function main(): Promise<void> {
-    const userCtx = await setupTestUser();
+/**
+ * Neutralizes the trunk live-reload script (baked into the served
+ * index.html): on any WS reconnect it force-calls `window.location.reload()`,
+ * which aborts the WASM load, interrupts Playwright gotos and restarts the
+ * restore mid-flight — pure dev-tooling noise masking the behaviour under
+ * test. Blocking just the reload method keeps everything else untouched.
+ */
+async function blockTrunkReload(context: import("@playwright/test").BrowserContext): Promise<void> {
+    await context.addInitScript(() => {
+        try {
+            Object.defineProperty(window.Location.prototype, "reload", {
+                configurable: true,
+                value: () => {
+                    // eslint-disable-next-line no-console
+                    console.log("[diag] trunk live-reload blocked");
+                },
+            });
+        } catch {
+            /* prototype not patchable — proceed without the guard */
+        }
+    });
+}
+
+async function main(): Promise<void> {    const userCtx = await setupTestUser();
     console.log(`[diag] test user: ${userCtx.email}`);
 
     const browser = await chromium.launch();
     const context = await browser.newContext({ baseURL: APP_BASE, locale: "ru-RU" });
     const page = await context.newPage();
     await page.setViewportSize({ width: 1280, height: 720 });
+    // Device-1 listeners: login flakes must leave a trace (url, console).
+    page.on("pageerror", (err) => console.log(`[dev1 pageerror] ${String(err).slice(0, 300)}`));
+    page.on("framenavigated", (frame) => {
+        if (frame === page.mainFrame()) console.log(`[dev1 navigated] ${frame.url()}`);
+    });
     await context.addInitScript(() => {
         if (window.location.origin === "http://localhost:1420") {
             window.localStorage.setItem("origa_resource_download_consented", "true");
         }
     });
+    // NEUTRALIZE the trunk live-reload script (baked into the served
+    // index.html): on any WS reconnect it force-reloads the page, which
+    // aborts the WASM load, interrupts Playwright gotos and restarts the
+    // restore mid-flight — pure dev-tooling noise masking the behaviour
+    // under test. Strip the script from the HTML via a route interceptor.
+    await blockTrunkReload(context);
 
     await uiLogin(page, userCtx.email, userCtx.password);
     await completeN1StressSeed(page);
     console.log("[diag] seed complete, waiting 5s for trailing writes…");
     await page.waitForTimeout(5_000);
-
     const before = await fetchRemoteRecord(userCtx.email);
     console.log("[diag] remote AFTER seed:", JSON.stringify(before, null, 2));
 
@@ -79,11 +111,23 @@ async function main(): Promise<void> {
     const context2 = await browser.newContext({ baseURL: APP_BASE, locale: "ru-RU" });
     const page2 = await context2.newPage();
     await page2.setViewportSize({ width: 1280, height: 720 });
+    // Diagnostic listeners: the goto interruption cause must be visible.
+    page2.on("console", (msg) => {
+        if (msg.type() === "error" || msg.type() === "warning") {
+            console.log(`[dev2 console.${msg.type()}] ${msg.text().slice(0, 300)}`);
+        }
+    });
+    page2.on("pageerror", (err) => console.log(`[dev2 pageerror] ${String(err).slice(0, 300)}`));
+    page2.on("framenavigated", (frame) => {
+        if (frame === page2.mainFrame()) console.log(`[dev2 navigated] ${frame.url()}`);
+    });
     await context2.addInitScript(() => {
         if (window.location.origin === "http://localhost:1420") {
             window.localStorage.setItem("origa_resource_download_consented", "true");
         }
     });
+    // Neutralize the trunk live-reload script — see device 1 comment.
+    await blockTrunkReload(context2);
 
     // uiLogin already retries internally, but its plain goto can race the
     // app's own redirects on this slow-restore device ("navigation
@@ -96,7 +140,7 @@ async function main(): Promise<void> {
             loggedIn = true;
         } catch (e) {
             console.log(
-                `[diag] device2 uiLogin attempt ${attempt} failed: ${String(e).slice(0, 140)}`,
+                `[diag] device2 uiLogin attempt ${attempt} failed: ${String(e).slice(0, 600)}`,
             );
             await page2.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
         }

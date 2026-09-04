@@ -144,6 +144,65 @@ cd tauri && cargo tauri dev          # full app (recommended)
 cd origa_ui && trunk serve           # frontend only
 ```
 
+### `trunk serve` mutates `dist/` — rebuild before serving it statically
+
+`trunk serve` rewrites `dist/index.html` **on disk** with its live-reload
+bridge (a WS script to `.well-known/trunk/ws` whose reconnect handler calls
+`window.location.reload()`). `trunk build` does NOT embed it. Consequences:
+
+- A `dist/` that was ever served from is poisoned: `npx serve dist -s` (the
+  CI topology) will serve the reload bridge, and on any WS reconnect it
+  force-reloads the page — aborting WASM loads, interrupting Playwright
+  gotos and restarting long restores mid-flight. This exact noise masked
+  itself as an app bug during the N1-stress investigation (#492).
+- Before any static serving of `dist/` (local e2e against a release build,
+  artifact inspection), run a fresh `trunk build --release` — the rebuild
+  overwrites the poisoned `index.html`.
+
+### Browserslist warning (`caniuse-lite is outdated`)
+
+Trunk compiles `input.css` with a standalone `tailwindcss` binary it downloads
+itself into `~/.cache/trunk/tailwindcss-3.3.5/` (default version hardcoded in
+trunk 0.21.14). The binary embeds browserslist + caniuse-lite frozen at its
+build time (Oct 2023); browserslist prints
+
+```text
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest ...
+```
+
+whenever the newest browser release in the embedded DB is ≥ 6 months old.
+
+`npx update-browserslist-db@latest` is a no-op here: it updates `node_modules`,
+which this crate does not have — the data lives inside the ELF binary. Pinning
+`[tools] tailwindcss = "3.4.17"` in Trunk.toml does not help either (verified:
+the 3.4.17 standalone embeds equally old data; the v3 line gets no new
+releases). Silence it with the documented browserslist flag — a runtime env
+variable read by the tailwindcss CLI, not a build.rs variable:
+
+```bash
+export BROWSERSLIST_IGNORE_OLD_DATA=1    # ~/.bashrc (WSL)
+```
+
+```powershell
+$env:BROWSERSLIST_IGNORE_OLD_DATA = "1"  # $PROFILE (Windows)
+```
+
+The flag only disables the warning; the generated CSS is byte-identical.
+
+Notes:
+
+- Version drift: in the Docker image trunk prefers the system
+  `npm i -g tailwindcss@3.4.17` (PATH wins over the hardcoded version), and
+  the npm package has no browserslist in its deps — no warning there. Do not
+  install tailwindcss globally outside Docker: PATH precedence silently
+  switches the compiler used by local builds.
+- CI steps `Build WASM` (ci.yml) and `Build frontend` (tauri.yml) still print
+  the warning; env is not added because `.github/workflows/` changes require
+  explicit approval (root AGENTS.md). When approved: per-step env, or a single
+  point in `.github/actions/setup-frontend/action.yml`. Does not affect the
+  path-filter/gate invariants.
+
 ## Testing
 
 ```powershell
