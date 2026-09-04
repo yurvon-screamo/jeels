@@ -1,4 +1,9 @@
 mod auth_store;
+// Android JNI context ownership: since Tauri 2.11 (tao 0.35) nothing
+// publishes the JavaVM/Application into `ndk-context`, so this module owns
+// the invariant (JNI_OnLoad capture + publication). See ADR-044.
+#[cfg(target_os = "android")]
+mod android_context;
 // device-ai native file-based speech recognition. macOS-only — the device-ai
 // Rust backend is compiled in only on macOS/iOS/Android (see tauri/Cargo.toml)
 // and the speech-recognize backend is implemented for macOS. The
@@ -62,11 +67,15 @@ pub fn run() {
     // transport) must be initialized with a JNI context before any TLS
     // handshake. Without this, the first HTTPS request panics with
     // "Expect rustls-platform-verifier to be initialized" and aborts the
-    // process. We dispatch to the Android event loop to obtain the JNI
-    // env + Activity context, blocking until init completes.
-    //
-    // This must happen BEFORE `init_sentry()`, because the Sentry transport
-    // creates a reqwest client that performs the first TLS handshake.
+    // process. The JavaVM/Application are published into `ndk-context` by
+    // `JNI_OnLoad` at library load (see `android_context`, ADR-044) — this
+    // call is defense-in-depth for paths where publication has not happened
+    // yet, and the verifier init below reads from that publication.
+    #[cfg(target_os = "android")]
+    android_context::ensure_initialized();
+
+    // Must happen BEFORE `init_sentry()`: the Sentry transport creates a
+    // reqwest client that performs the first TLS handshake.
     #[cfg(target_os = "android")]
     init_platform_verifier_android();
 
@@ -313,55 +322,57 @@ fn init_sentry() -> Option<sentry::ClientInitGuard> {
     Some(guard)
 }
 
-/// Initialize `rustls-platform-verifier` with the Android JVM/Activity context.
+/// Initialize `rustls-platform-verifier` with the Android Application context.
 ///
 /// On Android, reqwest (used by the Sentry transport) uses
 /// `rustls-platform-verifier` for TLS certificate validation. The verifier
 /// panics ("Expect rustls-platform-verifier to be initialized") unless
-/// `init_with_env` has been called with a JNI `JNIEnv` and Activity context.
+/// `init_with_env` has been called with a JNI `JNIEnv` and Application
+/// context.
 ///
-/// We obtain the JavaVM and Activity context via `ndk_context`, which tao
-/// initializes before `main()` is called (see tao's `ndk_glue::create`).
-/// This avoids the deadlock risk of `wry::dispatch` (which posts to the
-/// event loop on the same thread that `run()` blocks).
+/// The JavaVM and Application context come from our own publication in
+/// `android_context` (ADR-044) — `ndk_context::android_context()` is NOT
+/// used here: since Tauri 2.11 (tao 0.35) nothing populates that global and
+/// reading it aborts the process.
 ///
 /// This must happen BEFORE `init_sentry()`, because the Sentry transport
 /// creates a reqwest client that performs the first TLS handshake.
 #[cfg(target_os = "android")]
 fn init_platform_verifier_android() {
     use jni::JNIEnv;
-    use jni::objects::JObject;
 
-    let ctx = ndk_context::android_context();
-
-    // Safety: ndk_context stores a valid JavaVM pointer initialized by tao.
-    let vm = match unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) } {
-        Ok(vm) => vm,
-        Err(e) => {
-            tracing::error!("[rustls] failed to get JavaVM: {e:?}");
-            return;
-        },
+    let Some(vm) = android_context::java_vm() else {
+        tracing::error!("[rustls] no JavaVM published, skipping platform-verifier init");
+        android_context::logcat_info("[rustls] init skipped: no JavaVM");
+        return;
+    };
+    let Some(context) = android_context::app_context() else {
+        tracing::error!("[rustls] no Application context published, skipping verifier init");
+        android_context::logcat_info("[rustls] init skipped: no Application context");
+        return;
     };
 
     // Attach the current thread to the JVM. The returned guard detaches
-    // automatically when dropped, but we only need the env for the init call.
-    let mut env = match vm.attach_current_thread() {
-        Ok(env) => env,
+    // automatically when dropped; only the init call needs the env.
+    let mut attached = match vm.attach_current_thread() {
+        Ok(attached) => attached,
         Err(e) => {
             tracing::error!("[rustls] failed to attach thread to JVM: {e:?}");
             return;
         },
     };
+    let env = &mut *attached;
 
-    // Safety: ndk_context stores a valid Android Context (Activity) jobject.
-    let context = unsafe { JObject::from_raw(ctx.context() as jni::sys::jobject) };
-
-    match rustls_platform_verifier::android::init_with_env(&mut env, context) {
+    match rustls_platform_verifier::android::init_with_env(env, context) {
         Ok(()) => {
+            // Both channels on purpose: tracing feeds Sentry in production
+            // (ADR-036), logcat is the CI smoke-test marker (ADR-044).
             tracing::info!("[rustls] platform-verifier initialized for Android");
+            android_context::logcat_info("[rustls] platform-verifier initialized for Android");
         },
         Err(e) => {
             tracing::error!("[rustls] platform-verifier init failed: {e:?}");
+            android_context::logcat_info("[rustls] init failed");
         },
     }
 }
