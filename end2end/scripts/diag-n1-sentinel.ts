@@ -92,7 +92,8 @@ async function main(): Promise<void> {
     // index.html): on any WS reconnect it force-reloads the page, which
     // aborts the WASM load, interrupts Playwright gotos and restarts the
     // restore mid-flight — pure dev-tooling noise masking the behaviour
-    // under test. Strip the script from the HTML via a route interceptor.
+    // under test. Blocked by patching Location.prototype.reload — see
+    // blockTrunkReload below.
     await blockTrunkReload(context);
 
     await uiLogin(page, userCtx.email, userCtx.password);
