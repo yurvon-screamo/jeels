@@ -364,7 +364,7 @@ def _force_all_deploy(dry_run: bool) -> None:
     print(f"  {len(VERSIONED_FILES)} versioned files done", flush=True)
 
     # Step 3: Sync directories (no remote listing — upload everything)
-    print(f"\nStep 3: Sync directories...", flush=True)
+    print("\nStep 3: Sync directories...", flush=True)
     for dir_name in SYNC_DIRS:
         local_dir = cdn_dir / dir_name
         if not local_dir.is_dir():
