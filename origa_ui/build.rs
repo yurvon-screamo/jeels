@@ -210,31 +210,6 @@ fn load_json(path: &Path) -> WellKnownSet {
         .unwrap_or_else(|_| panic!("Failed to parse JSON from {}", path.display()))
 }
 
-fn section_number_from_title(title: &str) -> Option<u32> {
-    let mut iter = title.split_whitespace();
-    while let Some(word) = iter.next() {
-        let lower = word.to_lowercase();
-        if lower == "section" || lower == "модуль" {
-            if let Some(num_word) = iter.next() {
-                if let Ok(num) = num_word.parse::<u32>() {
-                    return Some(num);
-                }
-            }
-        }
-    }
-    None
-}
-
-fn duolingo_level_from_title(title_en: &str, title_ru: &str) -> Option<&'static str> {
-    let blob = format!("{title_en} {title_ru}");
-    match section_number_from_title(&blob)? {
-        1 | 2 => Some("N5"),
-        3 | 4 => Some("N4"),
-        5 | 6 => Some("N3"),
-        _ => None,
-    }
-}
-
 fn generate_well_known_meta() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let base_dir = Path::new(&manifest_dir)
@@ -611,25 +586,21 @@ fn generate_well_known_meta() {
 
                 let mut data = load_json(&path);
 
-                let title_en = data
-                    .content
-                    .English
-                    .as_ref()
-                    .map(|e| e.title.as_str())
-                    .unwrap_or("");
-                let title_ru = data
-                    .content
-                    .Russian
-                    .as_ref()
-                    .map(|r| r.title.as_str())
-                    .unwrap_or("");
-
-                let Some(level) = duolingo_level_from_title(title_en, title_ru) else {
+                // Level comes from the content file's own `level` field
+                // (corpus ground truth: Section/Модуль 1-3 → N5, 4 → N4,
+                // 5-6 → N3). Title parsing was removed: RU-series English
+                // titles carry both tokens ("Module 5 Section 16"), so the
+                // heuristic read the sub-unit number — 55 sets were dropped
+                // and 66 tagged with their unit's level instead of their
+                // module's.
+                let level = data.level.trim().to_string();
+                if !matches!(level.as_str(), "N5" | "N4" | "N3") {
                     eprintln!(
-                        "cargo:warning=Skipping duolingo set: no Section/Модуль in title for duolingo/{parent_name}/{stem}"
+                        "cargo:warning=Skipping duolingo set: invalid level {:?} for duolingo/{parent_name}/{stem}",
+                        level
                     );
                     continue;
-                };
+                }
 
                 let set_id = format!("duolingo_{}_{}", parent_name, stem);
                 let set_type = if stem.contains("_en_") {
@@ -638,7 +609,7 @@ fn generate_well_known_meta() {
                     "DuolingoRu"
                 };
 
-                meta_list.push(extract_meta(&mut data, &set_id, set_type, level));
+                meta_list.push(extract_meta(&mut data, &set_id, set_type, &level));
             }
         }
     }

@@ -1,19 +1,32 @@
-//! Well-known sets JLPT level audit (#178 S-3).
+//! Well-known sets JLPT level audit (#178 S-3, hardened for the 2026-09
+//! level-distribution fix).
 //!
-//! Guards against the blanket N5 tag previously applied to every Duolingo and
-//! Spy x Family set regardless of actual content difficulty. The Duolingo
-//! Section number encoded in each title (1-6) maps deterministically to a JLPT
-//! level (Section 1-2 → N5, 3-4 → N4, 5-6 → N3); Spy x Family content files
-//! all carry `level: "N3"` in their own metadata.
+//! The Duolingo level source of truth is the `level` field carried by every
+//! content file under `cdn/well_known_set/duolingo/` (corpus ground truth:
+//! Section/Модуль 1-3 → N5, 4 → N4, 5-6 → N3). `origa_ui/build.rs` copies it
+//! verbatim into `well_known_sets_meta.json`.
 //!
-//! The `cdn/` directory is gitignored. On a fresh clone without the meta file
-//! the tests **gracefully skip** (pass with a stderr note) rather than panic,
-//! so `cargo test --workspace` stays green in CI environments that do not
-//! have the CDN artifacts. Once the store is present (local dev, release CI
-//! after `scripts/deploy_cdn.py` has been run with the S-3 fixes), the audit
-//! runs for real.
+//! The earlier heuristic parsed the Section number from the set title. It
+//! misread RU-series English titles ("Module 5 Section 16": the parser took
+//! the unit number), which silently dropped 55 sets and mistagged 66 others
+//! with the level of their sub-unit instead of their module. This audit now
+//! guards both invariants directly:
 //!
-//! Run: `cargo test -p origa --test well_known_sets_audit`.
+//! - completeness: every Duolingo content file is present in the meta;
+//! - fidelity: the meta level equals the content file's own `level` field
+//!   and is one of N5/N4/N3.
+//!
+//! Spy x Family content files all carry `level: "N3"` in their own metadata.
+//!
+//! The `cdn/` directory is gitignored. On a fresh clone without the content
+//! files the tests **gracefully skip** (pass with a stderr note) rather than
+//! panic, so `cargo test --workspace` stays green in CI environments that do
+//! not have the CDN artifacts. CI seeds `cdn/` from production S3 and
+//! `cargo build -p origa_ui` regenerates the meta deterministically from the
+//! seeded content before the audit runs.
+//!
+//! Run: `cargo test -p origa --test well_known_sets_audit`
+//! (after `cargo build -p origa_ui` to regenerate a fresh local meta).
 
 use std::fs;
 use std::path::PathBuf;
@@ -34,8 +47,6 @@ struct SetMeta {
     id: String,
     set_type: String,
     level: String,
-    title_en: Option<String>,
-    title_ru: Option<String>,
 }
 
 fn load_meta() -> Option<Vec<SetMeta>> {
@@ -56,72 +67,111 @@ fn load_meta() -> Option<Vec<SetMeta>> {
     Some(parsed)
 }
 
-fn section_from_title(title: &str) -> Option<u32> {
-    let mut iter = title.split_whitespace();
-    while let Some(word) = iter.next() {
-        let lower = word.to_lowercase();
-        if lower == "section" || lower == "модуль" {
-            if let Some(num_word) = iter.next() {
-                if let Ok(num) = num_word.parse::<u32>() {
-                    return Some(num);
-                }
-            }
+/// Every Duolingo content file on disk, mirroring the `duolingo_<dir>_<stem>`
+/// id scheme that `origa_ui/build.rs` generates. Returns `None` when the
+/// content directory is absent (fresh clone without CDN seeding).
+fn duolingo_content_levels() -> Option<Vec<(String, String)>> {
+    let root = cdn_dir().join("well_known_set").join("duolingo");
+    if !root.exists() {
+        eprintln!(
+            "[skip] well_known_sets_audit: {} is absent (cdn/ gitignored on fresh clones)",
+            root.display()
+        );
+        return None;
+    }
+    let mut records = Vec::new();
+    let mut subdirs: Vec<_> = fs::read_dir(&root)
+        .unwrap_or_else(|e| panic!("failed to read {}: {e}", root.display()))
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().map(|t| t.is_dir()).unwrap_or(false))
+        .map(|e| e.path())
+        .collect();
+    subdirs.sort();
+    for subdir in subdirs {
+        let parent_name = subdir
+            .file_name()
+            .expect("subdir has a file name")
+            .to_string_lossy()
+            .to_string();
+        let mut files: Vec<_> = fs::read_dir(&subdir)
+            .unwrap_or_else(|e| panic!("failed to read {}: {e}", subdir.display()))
+            .filter_map(|e| e.ok())
+            .filter(|e| {
+                e.path()
+                    .extension()
+                    .is_some_and(|ext| ext == "json")
+            })
+            .map(|e| e.path())
+            .collect();
+        files.sort();
+        for path in files {
+            let stem = path
+                .file_stem()
+                .expect("json file has a stem")
+                .to_string_lossy()
+                .to_string();
+            let set_id = format!("duolingo_{}_{}", parent_name, stem);
+            let raw = fs::read_to_string(&path)
+                .unwrap_or_else(|e| panic!("failed to read {}: {e}", path.display()));
+            let parsed: serde_json::Value = serde_json::from_str(&raw)
+                .unwrap_or_else(|e| panic!("failed to parse {}: {e}", path.display()));
+            let level = parsed
+                .get("level")
+                .and_then(|v| v.as_str())
+                .unwrap_or_default()
+                .to_string();
+            records.push((set_id, level));
         }
     }
-    None
+    Some(records)
 }
 
-fn expected_duolingo_level(title: &str) -> Option<&'static str> {
-    match section_from_title(title)? {
-        1 | 2 => Some("N5"),
-        3 | 4 => Some("N4"),
-        5 | 6 => Some("N3"),
-        _ => None,
-    }
-}
+const VALID_LEVELS: [&str; 3] = ["N5", "N4", "N3"];
 
 #[test]
-fn duolingo_sets_match_section_to_level_mapping() {
-    let Some(records) = load_meta() else {
+fn duolingo_sets_match_content_level_and_are_complete() {
+    let (Some(records), Some(content)) = (load_meta(), duolingo_content_levels()) else {
         return;
     };
-    let mut problems: Vec<String> = Vec::new();
-    let mut checked = 0u32;
+    let by_id: std::collections::HashMap<&str, &SetMeta> = records
+        .iter()
+        .filter(|r| r.set_type == "DuolingoEn" || r.set_type == "DuolingoRu")
+        .map(|r| (r.id.as_str(), r))
+        .collect();
 
-    for record in records.iter() {
-        if record.set_type != "DuolingoEn" && record.set_type != "DuolingoRu" {
-            continue;
-        }
-        let title_blob = format!(
-            "{} {}",
-            record.title_en.as_deref().unwrap_or(""),
-            record.title_ru.as_deref().unwrap_or("")
-        );
-        let Some(expected) = expected_duolingo_level(&title_blob) else {
-            problems.push(format!(
-                "[{}] Duolingo set with no Section/Модуль in title: {:?}",
-                record.id, title_blob
-            ));
+    assert!(
+        !by_id.is_empty(),
+        "no Duolingo sets in well_known_sets_meta.json — fixture path or set_type values drifted"
+    );
+
+    let mut problems: Vec<String> = Vec::new();
+    for (set_id, content_level) in &content {
+        let Some(meta) = by_id.get(set_id.as_str()) else {
+            problems.push(format!("[{set_id}] content file missing from meta (build.rs skip?)"));
             continue;
         };
-        checked += 1;
-        if record.level != expected {
+        if !VALID_LEVELS.contains(&content_level.as_str()) {
             problems.push(format!(
-                "[{}] level={:?} but title section implies {:?}: {:?}",
-                record.id, record.level, expected, title_blob
+                "[{set_id}] content level {content_level:?} is not one of {VALID_LEVELS:?}"
+            ));
+        }
+        if meta.level != *content_level {
+            problems.push(format!(
+                "[{set_id}] meta level {:?} != content level {content_level:?}",
+                meta.level
             ));
         }
     }
 
     assert!(
-        !problems.is_empty() || checked > 0,
-        "audit did not check any Duolingo sets — fixture path or set_type values drifted"
+        !problems.is_empty() || !content.is_empty(),
+        "audit checked no Duolingo content files — fixture path drifted"
     );
     assert!(
         problems.is_empty(),
-        "Duolingo level audit failed ({} problems out of {} checked):\n{}",
+        "Duolingo level audit failed ({} problems out of {} content files):\n{}",
         problems.len(),
-        checked,
+        content.len(),
         problems.join("\n")
     );
 }
