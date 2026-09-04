@@ -543,9 +543,17 @@ jobs:
               run: |
                   echo "no" | avdmanager create avd -n smoke \
                       -k "system-images;android-34;google_apis;x86_64" -d pixel --force
+                  # setup-android installs the emulator package but does NOT
+                  # put its directory on PATH (adb is on it, emulator is not).
+                  EMU="${ANDROID_SDK_ROOT}/emulator/emulator"
+                  if [ ! -x "$EMU" ]; then
+                      echo "::error::emulator binary not found at $EMU"
+                      ls -1 "${ANDROID_SDK_ROOT}/emulator" 2>/dev/null || true
+                      exit 1
+                  fi
                   # -accel on: die loudly instead of silently falling back to
                   # pure-software emulation (30+ min boots).
-                  nohup emulator -avd smoke -no-window -no-audio -no-boot-anim \
+                  nohup "$EMU" -avd smoke -no-window -no-audio -no-boot-anim \
                       -gpu swiftshader_indirect -no-snapshot -accel on \
                       > /tmp/emulator.log 2>&1 &
                   # Surface early crashes (KVM permission, bad options) right
