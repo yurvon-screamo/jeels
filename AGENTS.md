@@ -52,6 +52,14 @@ $env:TRUNK_BUILD_CARGO_PROFILE = "wasm-dev"
 cd tauri && cargo tauri android dev
 ```
 
+**JNI-контекст (ADR-044):** с Tauri 2.11 (tao 0.35) никто не публикует
+JavaVM/Application в `ndk-context` — инвариант принадлежит
+`tauri/src/android_context.rs` (публикация в `JNI_OnLoad`, Application через
+`ActivityThread.currentApplication()`). Не читайте `ndk_context` до
+`ensure_initialized()`, не добавляйте второй паблишер (ndk-context паникует
+на re-publish). Smoke-тест запуска: `tauri/scripts/android_smoke.sh
+<apk>` (используется CI-джобой `android-smoke`, маркеры успеха — в logcat).
+
 ### Переменные окружения (compile-time, `build.rs`)
 
 Обязательные: `ORIGA_CDN_BASE_URL`; для сборки `origa_landing` (clippy/test) — также `ORIGA_APP_BASE_URL` (или пара `ORIGA_BASE_URI` + `ORIGA_APP_URI_PREFIX`), без неё `origa_landing/build.rs` паникует.
