@@ -115,6 +115,7 @@ fn duolingo_content_levels() -> Option<Vec<(String, String)>> {
                 .get("level")
                 .and_then(|v| v.as_str())
                 .unwrap_or_default()
+                .trim()
                 .to_string();
             records.push((set_id, level));
         }
@@ -141,6 +142,8 @@ fn duolingo_sets_match_content_level_and_are_complete() {
     );
 
     let mut problems: Vec<String> = Vec::new();
+    let content_ids: std::collections::HashSet<&str> =
+        content.iter().map(|(set_id, _)| set_id.as_str()).collect();
     for (set_id, content_level) in &content {
         let Some(meta) = by_id.get(set_id.as_str()) else {
             problems.push(format!(
@@ -157,6 +160,17 @@ fn duolingo_sets_match_content_level_and_are_complete() {
             problems.push(format!(
                 "[{set_id}] meta level {:?} != content level {content_level:?}",
                 meta.level
+            ));
+        }
+    }
+
+    // Обратная полнота: каждая duolingo-запись meta соответствует
+    // контент-файлу — стейл-записи (сет удалён из корпуса) не должны
+    // переживать регенерацию.
+    for meta_id in by_id.keys() {
+        if !content_ids.contains(meta_id) {
+            problems.push(format!(
+                "[{meta_id}] meta entry has no duolingo content file (stale record?)"
             ));
         }
     }

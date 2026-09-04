@@ -1421,6 +1421,121 @@ mod acquaintance_training {
         );
     }
 
+    /// Reload урока переиспользует тот же AcquaintanceState (content.rs):
+    /// после Completed окно финиша обязано сниматься — вторая рука сессии
+    /// работает (кнопки показа на месте). Регресс — несброшенный
+    /// hand_finishing ослеплял новую руку (ревью PR #498).
+    #[wasm_bindgen_test]
+    async fn state_reuse_after_completion_recovers_buttons_for_next_hand() {
+        // Arrange: рука №1 — кандзи, критерий 3 «помню»
+        let ctx = acq_context(AcquaintanceStage::Training);
+        let first_card = Ulid::new();
+        ctx.state.update(|state| {
+            state.hand = Some(
+                origa::domain::AcquaintanceHand::new(vec![(
+                    first_card,
+                    origa::domain::CardType::Kanji,
+                )])
+                .unwrap(),
+            )
+        });
+        ctx.slides.set(vec![AcquaintanceSlideData::Kanji {
+            card_id: first_card,
+            kanji: "明".to_string(),
+            name: "свет".to_string(),
+            radicals: None,
+            example_words: None,
+            on_readings: None,
+            kun_readings: None,
+        }]);
+
+        let wrapper = create_wrapper();
+        let c2 = ctx.clone();
+        mount_with_i18n(&wrapper, move || {
+            provide_context(c2.clone());
+            view! { <div><AcquaintanceHeaderStrip /><AcquaintanceView /></div> }.into_any()
+        });
+        tick().await;
+
+        for _ in 0..3 {
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-reveal-btn\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-rating-remember\"]")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<web_sys::HtmlElement>()
+                .unwrap()
+                .click();
+            tick().await;
+        }
+        let mut persisted = false;
+        for _ in 0..100 {
+            if ctx.state.get_untracked().stage == AcquaintanceStage::Completed {
+                persisted = true;
+                break;
+            }
+            tick().await;
+            gloo_timers::future::TimeoutFuture::new(10).await;
+        }
+        assert!(persisted, "рука №1 закрылась");
+        assert!(
+            ctx.state.get_untracked().hand_finishing,
+            "после закрытия руки №1 окно финиша активно"
+        );
+
+        // Act: reload урока — новая рука пишется в тот же state тем же
+        // путём, что и content.rs (start_new_hand).
+        let second_card = Ulid::new();
+        let second_hand = origa::domain::AcquaintanceHand::new(vec![(
+            second_card,
+            origa::domain::CardType::Vocabulary,
+        )])
+        .unwrap();
+        ctx.slides.set(vec![AcquaintanceSlideData::Vocabulary {
+            card_id: second_card,
+            word: "私".to_string(),
+            pos_label: None,
+            translations: vec!["я".to_string()],
+        }]);
+        ctx.state.update(|state| state.start_new_hand(second_hand));
+        tick().await;
+
+        // Assert: префаза руки №2 жива — бар и кнопки показа на месте.
+        assert_eq!(
+            ctx.state.get_untracked().stage,
+            AcquaintanceStage::Presentation,
+            "рука №2 начинается с показа"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-action-bar\"]")
+                .unwrap()
+                .is_some(),
+            "бар действий руки №2 смонтирован (пустой полосы нет)"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-next-btn\"]")
+                .unwrap()
+                .is_some(),
+            "«Дальше» руки №2 доступна — окно финиша снято"
+        );
+        assert!(
+            wrapper
+                .query_selector("[data-testid=\"acquaintance-know-btn\"]")
+                .unwrap()
+                .is_some(),
+            "«Уже знаю» руки №2 доступна"
+        );
+    }
+
     #[wasm_bindgen_test]
     async fn training_answer_keeps_the_question_visible() {
         // Arrange: тренировка одного слова
