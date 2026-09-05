@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Accepted. Note (2026-09-05): `MigrateKanjiCompanionsUseCase` (one of the
+three motivating paths below) has been removed with the startup companion
+migration — see the note in ADR-002.
 
 ## Date
 

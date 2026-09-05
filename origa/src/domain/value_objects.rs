@@ -276,8 +276,8 @@ impl From<NativeLanguage> for i32 {
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum DailyLoad {
     Minimal,
-    Light,
     #[default]
+    Light,
     Medium,
     Hard,
     Heavy,
@@ -285,14 +285,17 @@ pub enum DailyLoad {
 }
 
 impl DailyLoad {
+    /// Значения кратны размеру руки знакомства (HAND_MAX_SIZE = 7,
+    /// docs/acquaintance-mode.md): темп задаёт число полных рук
+    /// в день (1–6), поэтому хвостовых «обрубков» лимита не возникает.
     pub fn new_cards_per_day(&self) -> usize {
         match self {
-            DailyLoad::Minimal => 3,
-            DailyLoad::Light => 6,
-            DailyLoad::Medium => 9,
-            DailyLoad::Hard => 15,
-            DailyLoad::Heavy => 21,
-            DailyLoad::Maximum => 30,
+            DailyLoad::Minimal => 7,
+            DailyLoad::Light => 14,
+            DailyLoad::Medium => 21,
+            DailyLoad::Hard => 28,
+            DailyLoad::Heavy => 35,
+            DailyLoad::Maximum => 42,
         }
     }
 
@@ -317,7 +320,7 @@ impl From<i32> for DailyLoad {
             3 => DailyLoad::Hard,
             4 => DailyLoad::Heavy,
             5 => DailyLoad::Maximum,
-            _ => DailyLoad::Medium,
+            _ => DailyLoad::Light,
         }
     }
 }
@@ -841,18 +844,19 @@ mod tests_daily_load {
     use rstest::rstest;
 
     #[test]
-    fn default_is_medium() {
-        assert_eq!(DailyLoad::default(), DailyLoad::Medium);
+    fn default_is_light() {
+        // Дефолтный темп = 14 карт (2 полных руки знакомства)
+        assert_eq!(DailyLoad::default(), DailyLoad::Light);
     }
 
     #[test]
     fn new_cards_per_day_values() {
-        assert_eq!(DailyLoad::Minimal.new_cards_per_day(), 3);
-        assert_eq!(DailyLoad::Light.new_cards_per_day(), 6);
-        assert_eq!(DailyLoad::Medium.new_cards_per_day(), 9);
-        assert_eq!(DailyLoad::Hard.new_cards_per_day(), 15);
-        assert_eq!(DailyLoad::Heavy.new_cards_per_day(), 21);
-        assert_eq!(DailyLoad::Maximum.new_cards_per_day(), 30);
+        assert_eq!(DailyLoad::Minimal.new_cards_per_day(), 7);
+        assert_eq!(DailyLoad::Light.new_cards_per_day(), 14);
+        assert_eq!(DailyLoad::Medium.new_cards_per_day(), 21);
+        assert_eq!(DailyLoad::Hard.new_cards_per_day(), 28);
+        assert_eq!(DailyLoad::Heavy.new_cards_per_day(), 35);
+        assert_eq!(DailyLoad::Maximum.new_cards_per_day(), 42);
     }
 
     #[test]
@@ -864,17 +868,17 @@ mod tests_daily_load {
     }
 
     #[test]
-    fn from_i32_unknown_falls_back_to_medium() {
-        assert_eq!(DailyLoad::from(999), DailyLoad::Medium);
+    fn from_i32_unknown_falls_back_to_light() {
+        assert_eq!(DailyLoad::from(999), DailyLoad::Light);
     }
 
     #[rstest]
-    #[case::minimal(DailyLoad::Minimal, 3, 6)]
-    #[case::light(DailyLoad::Light, 6, 12)]
-    #[case::medium(DailyLoad::Medium, 9, 18)]
-    #[case::hard(DailyLoad::Hard, 15, 30)]
-    #[case::heavy(DailyLoad::Heavy, 21, 42)]
-    #[case::maximum(DailyLoad::Maximum, 30, 60)]
+    #[case::minimal(DailyLoad::Minimal, 7, 14)]
+    #[case::light(DailyLoad::Light, 14, 28)]
+    #[case::medium(DailyLoad::Medium, 21, 42)]
+    #[case::hard(DailyLoad::Hard, 28, 56)]
+    #[case::heavy(DailyLoad::Heavy, 35, 70)]
+    #[case::maximum(DailyLoad::Maximum, 42, 84)]
     fn daily_budget_from_load_phrases_double_new_cards(
         #[case] load: DailyLoad,
         #[case] expected_cards: usize,

@@ -2,7 +2,12 @@
 
 ## Status
 
-Accepted
+Accepted. Note (2026-09-05): the startup reconciliation migration
+(`MigrateKanjiCompanionsUseCase`) described below has been removed — all
+decks are migrated. Companion creation now happens at kanji-add time
+(onboarding sets / manual add / sets page); the removed-words guard moved
+into `KnowledgeSet::create_companion_vocab_cards` (see
+`docs/acquaintance-mode.md`).
 
 ## Date
 

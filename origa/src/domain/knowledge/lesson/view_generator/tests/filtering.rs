@@ -180,6 +180,54 @@ mod reversed_view_filtering {
             "in_progress card should get Reversed or GrammarMutated views, got {reversed} reversed, {grammar_mutated} grammar_mutated, {normal} normal"
         );
     }
+
+    #[test]
+    fn review_vocab_never_mutates_by_new_grammar_rule() {
+        init_real_dictionaries();
+
+        // Arrange: единственная применимая грамматика — глагольное
+        // правило, ещё НОВОЕ (не прошедшее руку знакомства)
+        let mut ks = KnowledgeSet::new();
+        for word in DISTRACTOR_WORDS {
+            ks.create_card(create_vocab_card(word)).unwrap();
+        }
+        let rule_id = ulid::Ulid::from_string("01G00000000000000024000000").expect("valid ULID");
+        let grammar_sc = ks.create_card(create_grammar_card(rule_id)).unwrap();
+        assert!(grammar_sc.is_new(), "fixture: правило должно быть новым");
+
+        // Ревью-слово 食べる (глагол): правило применимо к его POS —
+        // без фильтра мутация брала бы новое правило
+        let vocab = VocabularyCard::from_known_word("食べる", &NativeLanguage::Russian)
+            .expect("fixture: 食べる есть в словаре");
+        let mut study_card = StudyCard::new(Card::Vocabulary(vocab));
+        study_card.apply_review(
+            MemoryState::new(
+                Stability::new(5.0).unwrap(),
+                Difficulty::new(3.0).unwrap(),
+                Utc::now(),
+            ),
+            Rating::Good,
+        );
+
+        // Act
+        let (_reversed, grammar_mutated, _normal) = count_view_types(&study_card, &ks);
+
+        // Assert: новое правило не участвует в мутациях — слово не
+        // уводится из «новых» рейтингом мутированной карты
+        assert_eq!(
+            grammar_mutated, 0,
+            "новая грамматика не должна попадать в known_grammars"
+        );
+
+        // Позитивный контроль: то же правило после изучения — мутация
+        // работает (фикстура остаётся осмысленной при дрейфе словаря)
+        ks.mark_card_as_known(*grammar_sc.card_id()).unwrap();
+        let (_reversed, grammar_mutated_known, _normal) = count_view_types(&study_card, &ks);
+        assert!(
+            grammar_mutated_known > 0,
+            "изученное правило должно давать GrammarMutated для ревью-глагола"
+        );
+    }
 }
 
 mod reversed_view_easy_reviews {

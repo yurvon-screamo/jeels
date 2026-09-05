@@ -22,35 +22,44 @@ pub fn create_on_quiz_toggle(lesson_state: RwSignal<LessonState>) -> Callback<us
 mod tests {
     use super::*;
 
+    // Сигналы и колбэки живут в реактивном рантайме: без изолированного
+    // Owner они попадают в глобальный, общий для параллельных потоков
+    // тестов — под нагрузкой полного воркспейса это даёт load-флейк.
+    // Паттерн как у соседних on_*-тестов (on_dont_know, on_quiz_select).
     #[test]
     fn quiz_toggle_adds_then_removes_option() {
-        let state = RwSignal::new(LessonState::default());
-        let toggle = create_on_quiz_toggle(state);
+        let (after_first, after_second) = Owner::new().with(|| {
+            let state = RwSignal::new(LessonState::default());
+            let toggle = create_on_quiz_toggle(state);
 
-        toggle.run(1);
-        assert!(
-            state.get().selected_quiz_options.contains(&1),
-            "first toggle selects the option"
-        );
+            toggle.run(1);
+            let after_first = state.get().selected_quiz_options.contains(&1);
 
-        toggle.run(1);
-        assert!(
-            !state.get().selected_quiz_options.contains(&1),
-            "second toggle deselects the option"
-        );
+            toggle.run(1);
+            let after_second = state.get().selected_quiz_options.contains(&1);
+
+            (after_first, after_second)
+        });
+
+        assert!(after_first, "first toggle selects the option");
+        assert!(!after_second, "second toggle deselects the option");
     }
 
     #[test]
     fn quiz_toggle_ignored_while_showing_answer() {
-        let state = RwSignal::new(LessonState {
-            showing_answer: true,
-            ..LessonState::default()
-        });
-        let toggle = create_on_quiz_toggle(state);
+        let contains = Owner::new().with(|| {
+            let state = RwSignal::new(LessonState {
+                showing_answer: true,
+                ..LessonState::default()
+            });
+            let toggle = create_on_quiz_toggle(state);
 
-        toggle.run(2);
+            toggle.run(2);
+            state.get().selected_quiz_options.contains(&2)
+        });
+
         assert!(
-            !state.get().selected_quiz_options.contains(&2),
+            !contains,
             "toggles must be ignored after the answer is shown"
         );
     }

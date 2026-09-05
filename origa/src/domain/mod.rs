@@ -46,7 +46,7 @@ pub use knowledge::{
     QuizCard, QuizMode, QuizOption, StudyCard, VocabularyCard, YesNoCard, diagnose_empty_lesson,
     estimate_completion_date,
 };
-pub(crate) use knowledge::{distribute_new_cards, jlpt_sort_key};
+pub(crate) use knowledge::{MAX_COMPANION_WORDS, distribute_new_cards, jlpt_sort_key};
 
 /// Re-exported so the UI can stay layering-clean: presentation code reaches
 /// the rare-reading threshold through the domain, not by reaching into the

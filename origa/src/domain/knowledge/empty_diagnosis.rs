@@ -130,12 +130,12 @@ mod tests {
     #[test]
     fn spent_limit_with_remaining_new_cards_flags_daily_limit() {
         let mut ks = KnowledgeSet::new();
-        for word in ["a", "b", "c", "d"] {
+        for word in ["a", "b", "c", "d", "e", "f", "g", "h"] {
             add_vocab(&mut ks, word);
         }
-        // Minimal = 3/day: study three of the four new cards.
-        rate_all_new_as_good(&mut ks, 3);
-        assert_eq!(ks.new_cards_studied_today(), 3);
+        // Minimal = 7/day: study seven of the eight new cards.
+        rate_all_new_as_good(&mut ks, 7);
+        assert_eq!(ks.new_cards_studied_today(), 7);
 
         let diagnosis = diagnose_empty_lesson(&ks, DailyLoad::Minimal);
 

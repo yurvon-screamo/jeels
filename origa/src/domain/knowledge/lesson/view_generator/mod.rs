@@ -48,9 +48,14 @@ pub struct LessonViewGenerator<'a> {
 impl<'a> LessonViewGenerator<'a> {
     pub fn new(knowledge_set: &'a KnowledgeSet, native_language: NativeLanguage) -> Self {
         let cards_by_type = knowledge_set.build_cards_by_type();
+        // Мутации идут только по ранее изученным правилам: новая
+        // грамматика ещё не прошла руку знакомства — её слайд юзер
+        // не видел, и рейтинг мутированного слова не должен уводить её
+        // из «новых» в обход знакомства.
         let known_grammars: Vec<_> = knowledge_set
             .study_cards()
             .values()
+            .filter(|study_card| !study_card.memory().is_new())
             .filter_map(|x| match x.card() {
                 Card::Grammar(grammar_rule_card) => Some(grammar_rule_card.clone()),
                 _ => None,

@@ -424,7 +424,10 @@ def main():
         f.write(report_json)
     print(f"Report saved to: {REPORT_PATH}")
 
-    # Save removed popular words for migration
+    # Save removed popular words for the companion creation guard
+    # (KnowledgeSet::create_companion_vocab_cards reads the Rust constant
+    # origa/src/dictionary/removed_popular_words.rs — sync it manually
+    # after an audit run; see the constant's MAINTENANCE note).
     removed_words = sorted(set(
         w for ch in changes_by_kanji.values() for w in ch["words_removed"]
     ))

@@ -1482,6 +1482,35 @@ mod companion_vocab_cards {
     }
 
     #[test]
+    fn create_companion_vocab_cards_skips_audit_removed_words() {
+        init_real_dictionaries();
+
+        // Фикстура: единственное популярное слово кандзи 拷 — 拷問 —
+        // входит в removal-список аудита словаря
+        let kanji_info = crate::dictionary::kanji::get_kanji_info("拷").unwrap();
+        assert!(
+            kanji_info
+                .popular_words()
+                .iter()
+                .take(3)
+                .any(|word| word.as_str() == "拷問"),
+            "fixture: 拷問 должно быть в топ-популярных словах 拷"
+        );
+        assert!(super::super::is_removed_companion_word("拷問"));
+
+        let mut knowledge_set = KnowledgeSet::new();
+
+        // Act
+        let created = knowledge_set.create_companion_vocab_cards("拷", &NativeLanguage::Russian);
+
+        // Assert: removed-слово не создаётся ни в одном пайплайне
+        assert!(
+            created.is_empty(),
+            "единственное популярное слово 拷 — removal-слово 拷問, компаньоны не создаются"
+        );
+    }
+
+    #[test]
     fn create_companion_vocab_cards_skips_duplicates() {
         init_real_dictionaries();
 
