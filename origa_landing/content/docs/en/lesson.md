@@ -31,7 +31,7 @@ A new card does not appear in the lesson mixed in with reviews. It first goes th
 
 ### Presentation
 
-The day's new cards are gathered into a small group. You go through them one by one: a word with furigana, translation, and audio; a kanji with meanings and readings; grammar with examples. Nothing to recall yet. Hovering a kanji inside a word opens a brief description of the character.
+The day's new cards are gathered into a small group. The group always takes its full size — seven cards — while the queue of new cards lasts; it only shrinks when the queue runs out. You go through the cards one by one: a word with furigana, translation, and audio; a kanji with meanings and readings; grammar with examples. Nothing to recall yet. Hovering a kanji inside a word opens a brief description of the character.
 
 Each card has two actions: **Next** (space) and **Already know**. "Already know" marks the card as known — it goes straight into regular reviews, and its slot in the group is taken by the next card from the queue; if the queue is empty, the group simply gets smaller. The daily quota of new cards is not spent.
 
@@ -47,7 +47,7 @@ Training writes nothing to the schedule: FSRS starts counting intervals when a c
 
 ## Pace and lesson size
 
-The number of new cards per day is set by the pace in your profile settings — six values from 3 to 30. A lesson is built from the day's new cards and the reviews that have come due.
+The number of new cards per day is set by the pace in your profile settings — six paces, from one group of new cards per day up to an intense volume (new cards are dealt in full groups of seven). A lesson is built from the day's new cards and the reviews that have come due.
 
 **Lessons ran out and you are ready to keep going.** That means the daily quota of new cards is spent and no reviews are due. Origa says "No cards to study" — this is not an error or an account limit: tomorrow FSRS will schedule new reviews, and lessons will appear again. If the volume is not enough — raise the pace in your profile or add a set of the next level (see "JLPT progress").
 

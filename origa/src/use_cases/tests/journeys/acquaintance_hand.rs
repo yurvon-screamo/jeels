@@ -98,8 +98,8 @@ async fn select_returns_none_when_pool_is_empty() {
 }
 
 #[tokio::test]
-async fn select_caps_hand_size_at_max_and_daily_limit() {
-    // Arrange: 20 новых слов при дефолтном лимите (Medium = 9)
+async fn select_takes_full_hand_up_to_max_size() {
+    // Arrange: 20 новых слов при дефолтном лимите (Light = 14)
     let repo = InMemoryUserRepository::with_user(user_with_new_vocab_cards(20));
     let select = SelectAcquaintanceHandUseCase::new(&repo);
     let jlpt_content = crate::domain::JlptContent::new();
@@ -107,12 +107,53 @@ async fn select_caps_hand_size_at_max_and_daily_limit() {
     // Act
     let hand = select.execute(&jlpt_content).await.unwrap().unwrap();
 
-    // Assert: рука не больше максимума и не больше дневного лимита
+    // Assert: рука всегда полного размера (до HAND_MAX_SIZE), пока
+    // в пуле есть карты
     assert_eq!(
         hand.len(),
         7,
-        "20 кандидатов при лимите 9 дают руку ровно из HAND_MAX_SIZE карт"
+        "20 кандидатов в пуле дают руку ровно из HAND_MAX_SIZE карт"
     );
+}
+
+/// Рука всегда полная: малый остаток дневного лимита не
+/// урезает размер руки — лимит кратен HAND_MAX_SIZE и гейтит только
+/// открытие руки. После закрытия такой руки лимит исчерпан — второй
+/// руки в этот день нет.
+#[tokio::test]
+async fn small_daily_remainder_still_takes_full_hand_then_stops() {
+    // Arrange: дефолтный лимит Light = 14; 12 карт уже изучено сегодня
+    // (штатный инкремент лимита — рейтинг новых карт), 9 остались новыми
+    let mut user = user_with_new_vocab_cards(21);
+    let studied_ids: Vec<Ulid> = user
+        .knowledge_set()
+        .study_cards()
+        .keys()
+        .copied()
+        .take(12)
+        .collect();
+    for card_id in studied_ids {
+        user.rate_card(card_id, Rating::Good, RateMode::StandardLesson)
+            .unwrap();
+    }
+    assert_eq!(user.knowledge_set().new_cards_studied_today(), 12);
+    let repo = InMemoryUserRepository::with_user(user);
+    let select = SelectAcquaintanceHandUseCase::new(&repo);
+    let jlpt_content = crate::domain::JlptContent::new();
+
+    // Act: рука — полная, из 7 карт, несмотря на остаток лимита 2
+    let first_hand = select.execute(&jlpt_content).await.unwrap().unwrap();
+    assert_eq!(first_hand.len(), 7, "остаток лимита не режет размер руки");
+
+    // Закрываем руку: сидирование + списание лимита одной операцией
+    CompleteAcquaintanceHandUseCase::new(&repo)
+        .execute(first_hand)
+        .await
+        .unwrap();
+
+    // Assert: лимит исчерпан (12 + 7 ≥ 14) — второй руки нет
+    let second_hand = select.execute(&jlpt_content).await.unwrap();
+    assert_eq!(second_hand, None, "после исчерпания лимита рук нет");
 }
 
 #[tokio::test]

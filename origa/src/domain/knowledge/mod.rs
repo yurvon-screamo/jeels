@@ -132,6 +132,14 @@ impl Default for KnowledgeSet {
     }
 }
 
+/// Guard словарного аудита: слово, удалённое из популярных списков
+/// (`removed_popular_words.rs`), компаньоном не создаётся ни в одном
+/// пайплайне (онбординг, ручное добавление кандзи, sets). Заменяет guard
+/// удалённой стартовой миграции.
+pub(crate) fn is_removed_companion_word(word: &str) -> bool {
+    crate::dictionary::removed_popular_words::REMOVED_POPULAR_WORDS.contains(&word)
+}
+
 impl KnowledgeSet {
     pub fn new() -> Self {
         Self {
@@ -471,6 +479,16 @@ impl KnowledgeSet {
 
         let mut created = Vec::new();
         for word in kanji_info.popular_words().iter().take(MAX_COMPANION_WORDS) {
+            // Guard: removed-слова аудита словаря компаньонами
+            // не создаются ни в одном пайплайне.
+            if is_removed_companion_word(word) {
+                tracing::debug!(
+                    kanji = %kanji_char,
+                    word = %word,
+                    "Companion word is in the audit removal list, skipping"
+                );
+                continue;
+            }
             if self.deleted_companion_words.contains(word.as_str()) {
                 tracing::debug!(
                     kanji = %kanji_char,

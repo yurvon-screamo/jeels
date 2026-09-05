@@ -33,22 +33,11 @@ In Anki you pick from four buttons after each answer: "again", "hard", "good", "
 
 ## Why there is a daily limit on new cards
 
-30 new cards today is not 30 cards today. It is about a hundred more reviews over the next two weeks, which FSRS will schedule out of those new cards. The new-card limit keeps the daily review volume within the range you actually do, rather than accumulate debt. An overloaded deck comes back as an avalanche: cards shown "on credit" return more often, and the volume grows faster than you can keep up. Hence the paces: you can change them, but each next pace has its own price in minutes per day.
+A large batch of new cards today is not just those cards. It is many more reviews over the next two weeks, which FSRS will schedule out of those new cards. The new-card limit keeps the daily review volume within the range you actually do, rather than accumulate debt. An overloaded deck comes back as an avalanche: cards shown "on credit" return more often, and the volume grows faster than you can keep up. Hence the paces: you can change them, but each next pace has its own price in minutes per day.
 
 ## Paces and lesson size
 
-The number of new cards per day is set by the pace in your profile settings. Six paces:
-
-| Pace | New cards per day |
-| --- | --- |
-| Minimal | 3 |
-| Light | 6 |
-| Balanced | 9 |
-| Hard | 15 |
-| Maximum | 21 |
-| Insane | 30 |
-
-Note: "Maximum" is not the last pace — above it there is "Insane".
+The number of new cards per day is set by the pace in your profile settings. Six paces — from one small group of new cards per day to an intense volume; new cards are dealt in full groups of seven (the acquaintance group, see [how lessons work](/docs/lesson)), so every pace is a whole number of groups per day.
 
 A lesson is built from the day's new cards and the cards whose review has come due — up to 22 cards. When both new cards and due reviews are exhausted, Origa says "No cards to study" — that is not an error and not an account limit: tomorrow FSRS will schedule new reviews, and lessons will appear again.
 
