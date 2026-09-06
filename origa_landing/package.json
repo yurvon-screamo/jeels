@@ -6,6 +6,6 @@
     "watch:css": "tailwindcss --input style/landing.css --output style/landing.processed.css --watch"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^4.3.3"
   }
 }
